@@ -3,14 +3,18 @@
         xmlns:h="http://java.sun.com/jsf/html"
         xmlns:jsf="http://java.sun.com/jsf/core"
         xmlns:ws="http://xmlns.idega.com/com.idega.workspace"
+        xmlns:wf="http://xmlns.idega.com/com.idega.webface"
         xmlns:article="http://xmlns.idega.com/com.idega.block.article"
+        xmlns:co="http://xmlns.idega.com/com.idega.content"
 version="1.2">
 
-<jsf:view>
-        <ws:page>
-                <h:form>
-                        <article:listarticlesblock id="list_articles_block"/>
-                </h:form>
-        </ws:page>
-</jsf:view>
+	<jsf:view>
+		<ws:page>
+			<h:form>
+				<wf:wfblock id="article_list_block" title="Article List">
+					<co:ContentItemListViewer id="article_list" beanIdentifier="articleItemListBean" resourcePath="/files/cms/article" detailsViewerPath="/workspace/content/article/list/preview" />
+				</wf:wfblock>
+			</h:form>
+		</ws:page>
+	</jsf:view>
 </jsp:root>
