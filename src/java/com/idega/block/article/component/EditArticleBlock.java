@@ -1,5 +1,5 @@
 /*
- * $Id: EditArticleBlock.java,v 1.28 2005/03/09 11:45:35 joakim Exp $
+ * $Id: EditArticleBlock.java,v 1.29 2005/03/09 18:52:28 joakim Exp $
  *
  * Copyright (C) 2004 Idega. All Rights Reserved.
  *
@@ -56,10 +56,10 @@ import com.idega.webface.WFUtil;
 import com.idega.webface.htmlarea.HTMLArea;
 
 /**
- * Last modified: $Date: 2005/03/09 11:45:35 $ by $Author: joakim $
+ * Last modified: $Date: 2005/03/09 18:52:28 $ by $Author: joakim $
  *
  * @author Joakim
- * @version $Revision: 1.28 $
+ * @version $Revision: 1.29 $
  */
 public class EditArticleBlock extends IWBaseComponent implements ManagedContentBeans, ActionListener, ValueChangeListener {
 	public final static String EDIT_ARTICLE_BLOCK_ID = "edit_articles_block";
@@ -634,6 +634,15 @@ public class EditArticleBlock extends IWBaseComponent implements ManagedContentB
 				WFUtil.invoke(ARTICLE_ITEM_BEAN_ID,"load",resourcePath,String.class);
 			}
 		}
+//		if(((Boolean)WFUtil.invoke(ARTICLE_ITEM_BEAN_ID,"getLanguageChange")).booleanValue()) {
+		String languageChange=(String)WFUtil.invoke(ARTICLE_ITEM_BEAN_ID,"getLanguageChange");
+		if(languageChange!=null) {
+			String articlePath = (String)WFUtil.invoke(ARTICLE_ITEM_BEAN_ID, "getArticlePath");
+			if(null!=articlePath && articlePath.length()>0) {
+				boolean result = ((Boolean)WFUtil.invoke(ARTICLE_ITEM_BEAN_ID, "load",articlePath+"/"+languageChange+ArticleItemBean.ARTICLE_SUFFIX)).booleanValue();
+			}
+			WFUtil.invoke(ARTICLE_ITEM_BEAN_ID, "setLanguageChange","");
+		}
 	}
 
 	/* (non-Javadoc)
@@ -651,7 +660,9 @@ public class EditArticleBlock extends IWBaseComponent implements ManagedContentB
 		System.out.println("Article path"+articlePath);
 		boolean result = ((Boolean)WFUtil.invoke(ARTICLE_ITEM_BEAN_ID, "load",articlePath+"/"+arg0.getNewValue()+ArticleItemBean.ARTICLE_SUFFIX)).booleanValue();
 		System.out.println("loading other language "+result);
-		if(!result) {
+		if(result) {
+			WFUtil.invoke(ARTICLE_ITEM_BEAN_ID, "setLanguageChange",arg0.getNewValue().toString());
+		}else {
 			result = ((Boolean)WFUtil.invoke(ARTICLE_ITEM_BEAN_ID, "load",articlePath+"/"+language+ArticleItemBean.ARTICLE_SUFFIX)).booleanValue();
 			System.out.println("loading other language "+result);
 		}

@@ -1,5 +1,5 @@
 /*
- * $Id: ArticleItemBean.java,v 1.38 2005/03/09 14:32:12 eiki Exp $
+ * $Id: ArticleItemBean.java,v 1.39 2005/03/09 18:52:28 joakim Exp $
  *
  * Copyright (C) 2004 Idega. All Rights Reserved.
  *
@@ -51,10 +51,10 @@ import com.idega.xmlns.block.article.document.ArticleDocument;
 /**
  * Bean for idegaWeb article content items.   
  * <p>
- * Last modified: $Date: 2005/03/09 14:32:12 $ by $Author: eiki $
+ * Last modified: $Date: 2005/03/09 18:52:28 $ by $Author: joakim $
  *
  * @author Anders Lindman
- * @version $Revision: 1.38 $
+ * @version $Revision: 1.39 $
  */
 
 public class ArticleItemBean extends ContentItemBean implements Serializable, ContentItem {
@@ -80,6 +80,7 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 	public final static String FIELDNAME_FILENAME = "filename";
 	public final static String FIELDNAME_FOLDER_LOCATION = "folder_location"; // ../cms/article/YYYY/MM/
 	public final static String FIELDNAME_CONTENT_LANGUAGE = "content_language";
+	public final static String FIELDNAME_LANGUAGE_CHANGE = "language_change";
 	
 	public final static String ARTICLE_FILENAME_SCOPE = "article";
 	public final static String ARTICLE_SUFFIX = ".xml";
@@ -185,8 +186,9 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 	}
 	
 	public String getContentLanguage() { return (String)getValue(FIELDNAME_CONTENT_LANGUAGE); }
+	public String getLanguageChange() { return (String)getValue(FIELDNAME_LANGUAGE_CHANGE); }
 
-	public void setHeadline(String s) { setValue(FIELDNAME_HEADLINE, s); } 
+	public void setHeadline(String s) { setValue(FIELDNAME_HEADLINE, s); }
 	public void setHeadline(Object o) { setValue(FIELDNAME_HEADLINE, o.toString()); } 
 	public void setTeaser(String s) { setValue(FIELDNAME_TEASER, s); } 
 	public void setBody(String body) {
@@ -216,6 +218,7 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 	public void setFilename(String l) { setValue(FIELDNAME_FILENAME, l); }
 //	public void setFolderLocation(String l) { setValue(FIELDNAME_FOLDER_LOCATION, l); }
 	public void setContentLanguage(String s) { setValue(FIELDNAME_CONTENT_LANGUAGE, s); }
+	public void setLanguageChange(String s) { setValue(FIELDNAME_LANGUAGE_CHANGE, s); }
 
 	public boolean isUpdated() { return _isUpdated; }
 	public void setUpdated(boolean b) { _isUpdated = b; }
@@ -514,32 +517,6 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 		}
 	}
 
-	/**
-	 * Loads all xml files in the given folder
-	 * @deprecated use load() instead
-	 * @param folder
-	 * @return List containing ArticleItemBean
-	 * @throws XmlException
-	 * @throws IOException
-	 */
-	public void loadOld(WebdavExtendedResource webdavResource) throws XmlException, IOException {
-	
-		ArticleDocument articleDoc;
-		
-		articleDoc = ArticleDocument.Factory.parse(webdavResource.getMethodDataAsString());
-		
-	    ArticleDocument.Article article =  articleDoc.getArticle();
-	    setHeadline(article.getHeadline());
-	    setBody(article.getBody());
-	    setTeaser(article.getTeaser());
-	    setAuthor(article.getAuthor());
-	    setSource(article.getSource());
-	    setComment(article.getComment());
-//		String folder = webdavResource.getParentPath();
-//	    setFolderLocation(folder);
-	    
-	}
-	
 	/**
 	 * Loads an xml file specified by the webdav resource
 	 * The beans atributes are then set according to the information in the XML file
