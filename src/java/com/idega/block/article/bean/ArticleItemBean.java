@@ -1,5 +1,5 @@
 /*
- * $Id: ArticleItemBean.java,v 1.22 2005/02/18 11:25:49 joakim Exp $
+ * $Id: ArticleItemBean.java,v 1.23 2005/02/18 13:28:30 joakim Exp $
  *
  * Copyright (C) 2004 Idega. All Rights Reserved.
  *
@@ -42,10 +42,10 @@ import com.idega.xmlns.block.article.document.ArticleDocument;
 /**
  * Bean for idegaWeb article content items.   
  * <p>
- * Last modified: $Date: 2005/02/18 11:25:49 $ by $Author: joakim $
+ * Last modified: $Date: 2005/02/18 13:28:30 $ by $Author: joakim $
  *
  * @author Anders Lindman
- * @version $Revision: 1.22 $
+ * @version $Revision: 1.23 $
  */
 
 public class ArticleItemBean extends ContentItemBean implements Serializable, ContentItem {
@@ -471,18 +471,38 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 		}
 		XMLElement rootElement = bodyDoc.getRootElement();
 
-		setHeadline(rootElement.getChild(FIELDNAME_HEADLINE,idegans).getText());
-		setTeaser(rootElement.getChild(FIELDNAME_TEASER,idegans).getText());
-		setAuthor(rootElement.getChild(FIELDNAME_AUTHOR,idegans).getText());
+		try {
+			setHeadline(rootElement.getChild(FIELDNAME_HEADLINE,idegans).getText());
+		}catch(Exception e) {		//Nullpointer could occur if field isn't used
+			e.printStackTrace();
+			setHeadline("");
+		}
+		try {
+			setTeaser(rootElement.getChild(FIELDNAME_TEASER,idegans).getText());
+		}catch(Exception e) {		//Nullpointer could occur if field isn't used
+			e.printStackTrace();
+			setTeaser("");
+		}
+		try {
+			setAuthor(rootElement.getChild(FIELDNAME_AUTHOR,idegans).getText());
+		}catch(Exception e) {		//Nullpointer could occur if field isn't used
+			e.printStackTrace();
+			setAuthor("");
+		}
 
 		//Parse out the body
-		XMLNamespace htmlNamespace = new XMLNamespace("http://www.w3.org/1999/xhtml");
-		XMLElement bodyElement = rootElement.getChild(FIELDNAME_BODY,idegans);
-		XMLElement htmlElement = bodyElement.getChild("html",htmlNamespace);
-		XMLElement htmlBodyElement = htmlElement.getChild("body",htmlNamespace);
-		String bodyValue = new XMLOutput().outputString(htmlBodyElement);
-//		System.out.println("htmlBody value= "+bodyValue);
-		setBody(bodyValue);
+		try {
+			XMLNamespace htmlNamespace = new XMLNamespace("http://www.w3.org/1999/xhtml");
+			XMLElement bodyElement = rootElement.getChild(FIELDNAME_BODY,idegans);
+			XMLElement htmlElement = bodyElement.getChild("html",htmlNamespace);
+			XMLElement htmlBodyElement = htmlElement.getChild("body",htmlNamespace);
+			String bodyValue = new XMLOutput().outputString(htmlBodyElement);
+//			System.out.println("htmlBody value= "+bodyValue);
+			setBody(bodyValue);
+		}catch(Exception e) {		//Nullpointer could occur if field isn't used
+			e.printStackTrace();
+			setBody("");
+		}
 		
 		setComment(rootElement.getChild(FIELDNAME_ARTICLE_COMMENT,idegans).getText());
 
