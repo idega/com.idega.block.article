@@ -1,5 +1,5 @@
 /*
- * $Id: ArticleItemBean.java,v 1.25 2005/02/23 11:35:21 joakim Exp $
+ * $Id: ArticleItemBean.java,v 1.26 2005/02/23 17:15:40 joakim Exp $
  *
  * Copyright (C) 2004 Idega. All Rights Reserved.
  *
@@ -43,10 +43,10 @@ import com.idega.xmlns.block.article.document.ArticleDocument;
 /**
  * Bean for idegaWeb article content items.   
  * <p>
- * Last modified: $Date: 2005/02/23 11:35:21 $ by $Author: joakim $
+ * Last modified: $Date: 2005/02/23 17:15:40 $ by $Author: joakim $
  *
  * @author Anders Lindman
- * @version $Revision: 1.25 $
+ * @version $Revision: 1.26 $
  */
 
 public class ArticleItemBean extends ContentItemBean implements Serializable, ContentItem {
@@ -72,6 +72,10 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 	public final static String FIELDNAME_IMAGES = "images";
 	public final static String FIELDNAME_FILENAME = "filename";
 	public final static String FIELDNAME_FOLDER_LOCATION = "folder_location";
+
+	public final static String FIELDNAME_CONTENT_LANGUAGE = "content_language";
+	public String getContentLanguage() { return (String)getValue(FIELDNAME_CONTENT_LANGUAGE); }
+	public void setContentLanguage(String s) { setValue(FIELDNAME_CONTENT_LANGUAGE, s); }
 	
 	public final static String ARTICLE_FILENAME_SCOPE = "article";
 	
@@ -360,12 +364,7 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 //		if(null==filename || filename.length()==0) {
 //			filename = "empty";
 //		}
-/*	    
-	    File path = new File(getFolder());
-	    if(!path.exists()) {
-	    	path.mkdirs();
-	    }
-*/
+
 		try {
 			IWUserContext iwuc = IWContext.getInstance();
 			IWApplicationContext iwac = iwuc.getApplicationContext();
@@ -376,9 +375,7 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 			WebdavRootResource rootResource = session.getWebdavRootResource();
 			String uri = service.getWebdavServerURI();
 			String folderLoaction = getFolderLocation();
-//			String filePath = service.getWebdavServerURI()+getFolderLocation();
-//			boolean success = rootResource.mkcolMethod(filePath);
-//			createPath(getFolderLocation());
+
 			IWSlideService slideService = (IWSlideService)IBOLookup.getServiceInstance(iwac,IWSlideService.class);
 			String path = getArticlePath(service);
 			File file = new File(path);
@@ -389,58 +386,17 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 			System.out.println("Folder location = "+folderLoaction);
 			
 			String article = getAsXML();
-//			System.out.println("success "+success);
-//			success = 
-//			String filename = createFileName(service);
-			System.out.println("Stored language "+getLanguage());
 			
 			rootResource.putMethod(session.getURI(path),article);
+			rootResource.close();
 			try {
-				load(getArticlePath(service));
+				load(path);
 			}
 			catch (Exception e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 
-//			System.out.println("success "+success);
-//			String webdavServletURL = getWebdavServletURL(iwuc)+"/"+getFolder();
-//			System.out.println("webdavServletURL = "+webdavServletURL);
-//			System.out.println("webdavServerURL = "+service.getWebdavServerURL());
-//			WebdavResource webdavResource = session.getWebdavResource(session.getWebdavServerURL().toString());
-//			WebdavResource webdavResource = session.getWebdavResource("http://localhost:8080/servlet/webdav");
-//			WebdavResource webdavResource = new WebdavResource("http://localhost:8080/servlet/webdav/");
-			
-//			WebdavFile webdavFile = session.getWebdavFile();
-//			WebdavFile path = new WebdavFile(webdavFile, getFolder());
-//			path.mkdirs();
-
-//			webdavResource = session.getWebdavResource(getWebdavServletURL(iwuc)+getFolder()+"/"+filename+ARTICLE_SUFFIX);
-//			WebdavResource webdavResource = session.getWebdavResource("http://localhost:8080/servlet/webdav/"+filename+ARTICLE_SUFFIX);
-
-//			IWSlideService iwss = new IWSlideService();
-//			HttpURL root = new HttpURL("http://localhost:8080/servlet/webdav/files/");
-//			WebdavResource webdavResource = new WebdavResource("http://localhost:8080/servlet/webdav/files/"+filename+ARTICLE_SUFFIX);
-//			WebdavFile webdavFile = session.getWebdavFile();
-//			webdavResource.putMethod(new File(filename+ARTICLE_SUFFIX));
-
-			/*
-			HttpURL root = new HttpURL("http://localhost:8080/servlet/webdav/files/"+filename+ARTICLE_SUFFIX);
-			root.setUserinfo("root","root");
-			WebdavFile webdavFile = new WebdavFile(webdavResource.getHttpURL());
-	    	webdavResource.close();
-			*/
-//			HttpURL root = new HttpURL("http://localhost:8080/servlet/webdav/files/"+filename+ARTICLE_SUFFIX, "root", "root");
-//			root.setUserinfo("root","root");
-			
-//			WebdavFile webdavFile = new WebdavFile("http://localhost:8080/servlet/webdav/files/"+filename+ARTICLE_SUFFIX, "root", "root");
-//			webdavFile.createNewFile();
-//			if(!webdavFile.exists()) {
-//			}
-			
-//			articleDoc.save(new File(getFolder()+"/"+filename+ARTICLE_SUFFIX));
-//	    	articleDoc.save(webdavFile);
-//	    	webdavFile.close();
 		}
 		catch (IOException e1) {
 			storeOk = false;
