@@ -1,5 +1,5 @@
 /*
- * $Id: ArticleBlock.java,v 1.8 2004/11/17 18:18:07 joakim Exp $
+ * $Id: ArticleBlock.java,v 1.9 2004/11/18 10:39:28 tryggvil Exp $
  *
  * Copyright (C) 2004 Idega. All Rights Reserved.
  *
@@ -49,10 +49,10 @@ import com.idega.webface.test.bean.ManagedContentBeans;
 /**
  * Block for editing an article.   
  * <p>
- * Last modified: $Date: 2004/11/17 18:18:07 $ by $Author: joakim $
+ * Last modified: $Date: 2004/11/18 10:39:28 $ by $Author: tryggvil $
  *
  * @author Anders Lindman
- * @version $Revision: 1.8 $
+ * @version $Revision: 1.9 $
  */
 public class ArticleBlock extends WFBlock implements ActionListener, ManagedContentBeans {
 
@@ -702,8 +702,13 @@ public class ArticleBlock extends WFBlock implements ActionListener, ManagedCont
 	private void setUserMessage(String ref) {
 		String bref = WFPage.CONTENT_BUNDLE + ".";
 		HtmlOutputText t = (HtmlOutputText) findComponent(USER_MESSAGE_ID);
-		t.setValueBinding("value", WFUtil.createValueBinding("#{" + bref + ref + "}"));
-		setMessageMode();
+		if(t!=null){
+			t.setValueBinding("value", WFUtil.createValueBinding("#{" + bref + ref + "}"));
+			setMessageMode();
+		}
+		else{
+			System.out.println("AtricleBlock: t==null: Message out: "+bref + ref);
+		}
 	}
 	
 	/**
