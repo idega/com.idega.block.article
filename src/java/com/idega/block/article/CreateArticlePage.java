@@ -1,5 +1,5 @@
 /*
- * $Id: CreateArticlePage.java,v 1.3 2004/12/03 14:43:31 joakim Exp $
+ * $Id: CreateArticlePage.java,v 1.4 2004/12/21 15:43:17 joakim Exp $
  *
  * Copyright (C) 2004 Idega. All Rights Reserved.
  *
@@ -10,7 +10,7 @@
 package com.idega.block.article;
 
 import javax.faces.component.UIComponent;
-import com.idega.block.article.component.ArticleBlock;
+import com.idega.block.article.component.EditArticleBlock;
 import com.idega.webface.WFPage;
 import com.idega.webface.WFUtil;
 
@@ -18,10 +18,10 @@ import com.idega.webface.WFUtil;
 /**
  * Created article test/demo page. 
  * <p>
- * Last modified: $Date: 2004/12/03 14:43:31 $ by $Author: joakim $
+ * Last modified: $Date: 2004/12/21 15:43:17 $ by $Author: joakim $
  *
  * @author Anders Lindman
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
 public class CreateArticlePage extends CMSPage {
 	
@@ -52,12 +52,8 @@ public class CreateArticlePage extends CMSPage {
 	 */
 	protected UIComponent getEditPerspective() {
 		String bref = WFPage.CONTENT_BUNDLE + ".";
-		//HtmlPanelGrid ap = WFPanelUtil.getApplicationPanel();
-		//ap.getChildren().add(getFunctionBlock());
-		ArticleBlock ab = new ArticleBlock(bref + "create_article");
+		EditArticleBlock ab = new EditArticleBlock();
 		ab.setId("article_block");
-		//ap.getChildren().add(ab);
-		//return ap;
 		return ab;
 	}
 }
