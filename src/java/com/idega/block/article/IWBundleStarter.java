@@ -1,5 +1,5 @@
 /*
- * $Id: IWBundleStarter.java,v 1.3 2004/12/30 02:57:49 eiki Exp $
+ * $Id: IWBundleStarter.java,v 1.4 2005/02/18 13:34:31 joakim Exp $
  * Created on 2.11.2004
  *
  * Copyright (C) 2004 Idega Software hf. All Rights Reserved.
@@ -19,10 +19,10 @@ import com.idega.idegaweb.IWBundleStartable;
 
 /**
  * 
- *  Last modified: $Date: 2004/12/30 02:57:49 $ by $Author: eiki $
+ *  Last modified: $Date: 2005/02/18 13:34:31 $ by $Author: joakim $
  * 
  * @author <a href="mailto:tryggvil@idega.com">Tryggvi Larusson</a>
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
 public class IWBundleStarter implements IWBundleStartable {
 	private static final String STYLE_SHEET_URL = "/style/article.css";
@@ -32,7 +32,6 @@ public class IWBundleStarter implements IWBundleStartable {
 	 * 
 	 */
 	public IWBundleStarter() {
-		// TODO Auto-generated constructor stub
 	}
 
 	/* (non-Javadoc)
@@ -48,37 +47,25 @@ public class IWBundleStarter implements IWBundleStartable {
 	 * @see com.idega.idegaweb.IWBundleStartable#stop(com.idega.idegaweb.IWBundle)
 	 */
 	public void stop(IWBundle starterBundle) {
-		// TODO Auto-generated method stub	
 	}
 	
 	public void addArticleViews(IWBundle bundle){
-
 		ContentViewManager cViewManager = ContentViewManager.getInstance(bundle.getApplication());
 		ViewNode contentNode = cViewManager.getContentNode();
 		
 		DefaultViewNode articleNode = new DefaultViewNode("article",contentNode);
 		articleNode.setJspUri(bundle.getJSPURI("articles.jsp"));
 		DefaultViewNode createNewArticleNode = new DefaultViewNode("create",articleNode);
-		//createNewArticleNode.setJspUri("/idegaweb/bundles/com.idega.webface.bundle/jsp/createarticle.jsp");
 		String jspUri = bundle.getJSPURI("createarticle.jsp");
 		createNewArticleNode.setJspUri(jspUri);
 		
-		DefaultViewNode previewArticlesNode = new DefaultViewNode("preview",articleNode);
-		//previewArticlesNode.setJspUri("/idegaweb/bundles/com.idega.webface.bundle/jsp/previewarticle.jsp");
-		previewArticlesNode.setJspUri(bundle.getJSPURI("previewarticle.jsp"));
-		//DefaultViewNode listArticlesNode = new ApplicationViewNode("listarticles",articleNode);
+//		DefaultViewNode previewArticlesNode = new DefaultViewNode("preview",articleNode);
+//		previewArticlesNode.setJspUri(bundle.getJSPURI("previewarticle.jsp"));
 		
 		DefaultViewNode listArticlesNode = new DefaultViewNode("list",articleNode);
-		//previewArticlesNode.setJspUri("/idegaweb/bundles/com.idega.webface.bundle/jsp/previewarticle.jsp");
 		listArticlesNode.setJspUri(bundle.getJSPURI("listarticles.jsp"));
-		//DefaultViewNode listArticlesNode = new ApplicationViewNode("listarticles",articleNode);		
 
 		DefaultViewNode searchArticlesNode = new DefaultViewNode("search",articleNode);
-		//previewArticlesNode.setJspUri("/idegaweb/bundles/com.idega.webface.bundle/jsp/previewarticle.jsp");
 		searchArticlesNode.setJspUri(bundle.getJSPURI("searcharticle.jsp"));
-		//DefaultViewNode listArticlesNode = new ApplicationViewNode("listarticles",articleNode);		
-				
-		
-
 	}
 }
