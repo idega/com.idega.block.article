@@ -1,5 +1,5 @@
 /*
- * $Id: ArticleItemBean.java,v 1.11 2005/01/04 15:18:18 joakim Exp $
+ * $Id: ArticleItemBean.java,v 1.12 2005/01/13 14:02:04 joakim Exp $
  *
  * Copyright (C) 2004 Idega. All Rights Reserved.
  *
@@ -28,14 +28,15 @@ import com.idega.slide.util.WebdavRootResource;
 import com.idega.webface.test.bean.ContentItemBean;
 import com.idega.webface.test.bean.ContentItemField;
 import com.idega.webface.test.bean.ContentItemFieldBean;
+import com.idega.xmlns.block.article.document.ArticleDocument;
 
 /**
  * Bean for idegaWeb article content items.   
  * <p>
- * Last modified: $Date: 2005/01/04 15:18:18 $ by $Author: joakim $
+ * Last modified: $Date: 2005/01/13 14:02:04 $ by $Author: joakim $
  *
  * @author Anders Lindman
- * @version $Revision: 1.11 $
+ * @version $Revision: 1.12 $
  */
 
 public class ArticleItemBean extends ContentItemBean implements Serializable {
@@ -201,7 +202,7 @@ public class ArticleItemBean extends ContentItemBean implements Serializable {
 		boolean storeOk = true;
 		clearErrorKeys();
 
-	    ArticleDocument articleDoc = ArticleDocument.Factory.newInstance();
+		ArticleDocument articleDoc = ArticleDocument.Factory.newInstance();
 	    
 	    ArticleDocument.Article article =  articleDoc.addNewArticle();
 	    
