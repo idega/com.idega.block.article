@@ -1,5 +1,5 @@
 /*
- * $Id: ArticleItemView.java,v 1.10 2005/01/18 14:31:42 joakim Exp $
+ * $Id: ArticleItemView.java,v 1.11 2005/01/31 17:02:56 joakim Exp $
  *
  * Copyright (C) 2004 Idega. All Rights Reserved.
  *
@@ -16,6 +16,7 @@ import javax.faces.context.FacesContext;
 import javax.faces.event.AbortProcessingException;
 import javax.faces.event.ActionEvent;
 import javax.faces.event.ActionListener;
+import com.idega.content.presentation.WebDAVMetadata;
 import com.idega.presentation.IWBaseComponent;
 import com.idega.webface.WFComponentSelector;
 import com.idega.webface.WFContainer;
@@ -25,12 +26,12 @@ import com.idega.webface.WFUtil;
 import com.idega.webface.test.bean.ManagedContentBeans;
 
 /**
- * Last modified: $Date: 2005/01/18 14:31:42 $ by $Author: joakim $
+ * Last modified: $Date: 2005/01/31 17:02:56 $ by $Author: joakim $
  *
  * Displays the article item
  *
  * @author Joakim
- * @version $Revision: 1.10 $
+ * @version $Revision: 1.11 $
  */
 public class ArticleItemView extends IWBaseComponent implements ManagedContentBeans, ActionListener{
 	public final static String EDIT_ARTICLE_BLOCK_ID = "edit_articles_block";
@@ -47,6 +48,19 @@ public class ArticleItemView extends IWBaseComponent implements ManagedContentBe
 
 	protected void initializeContent() {
 		add(getPreviewPanel());
+		add(getMetadataPanel());
+	}
+
+	/*
+	 * returns the metadata UI component
+	 */
+	private UIComponent getMetadataPanel() {
+		String path = (String)WFUtil.invoke(ARTICLE_ITEM_BEAN_ID, "getMainCategory");
+		String fileName = (String)WFUtil.invoke(ARTICLE_ITEM_BEAN_ID, "getHeadline");
+//		System.out.println("path = "+path+"/"+fileName+".xml");
+
+		WebDAVMetadata metadataUI = new WebDAVMetadata(path+"/"+fileName+".xml");
+		return metadataUI;
 	}
 
 	/*
