@@ -1,5 +1,5 @@
 /*
- * $Id: ListArticlesBlock.java,v 1.2 2004/11/09 11:18:14 joakim Exp $
+ * $Id: ListArticlesBlock.java,v 1.3 2004/11/10 17:23:07 joakim Exp $
  *
  * Copyright (C) 2004 Idega. All Rights Reserved.
  *
@@ -12,12 +12,9 @@ package com.idega.block.article.component;
 import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
-import java.util.Date;
 import javax.faces.component.UIComponent;
 import javax.faces.component.html.HtmlInputText;
 import javax.faces.component.html.HtmlPanelGrid;
-//import javax.faces.component.html.HtmlSelectOneMenu;
-import javax.faces.convert.IntegerConverter;
 import javax.faces.event.ActionEvent;
 import javax.faces.event.ActionListener;
 import org.apache.xmlbeans.XmlException;
@@ -33,16 +30,15 @@ import com.idega.webface.WFPlainOutputText;
 import com.idega.webface.WFUtil;
 import com.idega.webface.convert.WFDateConverter;
 import com.idega.webface.test.bean.ContentItemCase;
-import com.idega.webface.test.bean.ContentItemCaseBean;
 import com.idega.webface.test.bean.ManagedContentBeans;
 
 /**
  * Block for listing articles.   
  * <p>
- * Last modified: $Date: 2004/11/09 11:18:14 $ by $Author: joakim $
+ * Last modified: $Date: 2004/11/10 17:23:07 $ by $Author: joakim $
  *
  * @author Anders Lindman
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 public class ListArticlesBlock extends WFBlock implements ManagedContentBeans, ActionListener, Serializable {
 
@@ -221,20 +217,7 @@ public class ListArticlesBlock extends WFBlock implements ManagedContentBeans, A
 			WFUtil.invoke(ARTICLE_ITEM_BEAN_ID, "setMainCategoryId", new Integer(3));
 			WFUtil.invoke(ARTICLE_ITEM_BEAN_ID, "setLocaleId", "sv");
 
-			//And one more time since it won't work after just setting the params once!!!
-//			WFUtil.invoke(ARTICLE_ITEM_BEAN_ID, "setLocaleId", "en");
-//			WFUtil.invoke(ARTICLE_ITEM_BEAN_ID, "setHeadline", notNull(articleItem.getHeadline())+" (id = " + id + ")");
-//			WFUtil.invoke(ARTICLE_ITEM_BEAN_ID, "setTeaser", notNull(articleItem.getTeaser()));
-//			WFUtil.invoke(ARTICLE_ITEM_BEAN_ID, "setBody", notNull(articleItem.getBody()));
-//			WFUtil.invoke(ARTICLE_ITEM_BEAN_ID, "setAuthor", notNull(articleItem.getAuthor()));
-//			WFUtil.invoke(ARTICLE_ITEM_BEAN_ID, "setComment", notNull(articleItem.getComment()));
-//			WFUtil.invoke(ARTICLE_ITEM_BEAN_ID, "setDescription", notNull(articleItem.getDescription()));
-//			WFUtil.invoke(ARTICLE_ITEM_BEAN_ID, "setStatus", 
-////					articleItem.getStatus()
-//					ContentItemCase.STATUS_PUBLISHED
-//					);
-//			WFUtil.invoke(ARTICLE_ITEM_BEAN_ID, "setMainCategoryId", new Integer(3));
-//			WFUtil.invoke(ARTICLE_ITEM_BEAN_ID, "setLocaleId", "sv");
+			//And one more time since it won't work after just setting the params once...
 			
 			WFUtil.invoke(ARTICLE_ITEM_BEAN_ID, "setHeadline", notNull(articleItem.getHeadline())+" (id = " + id + ")");
 			WFUtil.invoke(ARTICLE_ITEM_BEAN_ID, "setTeaser", notNull(articleItem.getTeaser()));

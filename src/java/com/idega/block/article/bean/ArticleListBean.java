@@ -1,5 +1,5 @@
 /*
- * $Id: ArticleListBean.java,v 1.2 2004/11/09 11:18:14 joakim Exp $
+ * $Id: ArticleListBean.java,v 1.3 2004/11/10 17:23:07 joakim Exp $
  *
  * Copyright (C) 2004 Idega. All Rights Reserved.
  *
@@ -30,10 +30,10 @@ import com.idega.webface.model.WFDataModel;
 /**
  * Bean for article list rows.   
  * <p>
- * Last modified: $Date: 2004/11/09 11:18:14 $ by $Author: joakim $
+ * Last modified: $Date: 2004/11/10 17:23:07 $ by $Author: joakim $
  *
  * @author Anders Lindman
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 
 public class ArticleListBean implements WFListBean, Serializable {
@@ -49,57 +49,13 @@ public class ArticleListBean implements WFListBean, Serializable {
 	private String _author = null;
 	private String _status = null;
 	private String _testStyle = null;
-	
+
 	private String[] testColumnHeaders = { 
 			WFPage.CONTENT_BUNDLE + ".headline", 
 			WFPage.CONTENT_BUNDLE + ".published",
 			WFPage.CONTENT_BUNDLE + ".author",
 			WFPage.CONTENT_BUNDLE + ".status" 
 	};				
-	
-	private String[] testHeadlines = {
-		"Electronic Reykjavik built with IdegaWeb eGov",
-		"Idega represented in the Baltic",
-		"Idega and Agura IT at the Markus Evans eGovernment Europe 2004...",
-		"Täby Municipality in Sweden now using IdegaWeb eGOV",
-		"Code name : Check & Peng",
-		"Conference sucess 'Electric Community - Here and now !'",
-		"Vinbud.is (idegaWeb) voted best corporate website 2003 in Iceland",
-		"The new Landsteinar-Strengur website implemented in IdegaWeb"
-	};
-	
-	private String[] testPublished = {
-		"4/20/04 3:04 PM",
-		"4/20/04 3:00 PM",
-		"4/14/04 2:48 PM",
-		"4/14/04 2:32 PM",
-		"4/14/04 12:17 PM",
-		"12/5/03 3:02 PM",
-		"10/30/03 3:10 PM",
-		"10/27/03"				
-	};
-	
-	private String[] testAuthors = {
-		"Anderson",
-		"Isildur",
-		"Rappson",
-		"Trappson",
-		"Snap",
-		"Rappson",
-		"Anderson",
-		"Trapp"
-	};
-	
-	private String[] testStatus = {
-		"Published",
-		"Published",
-		"Published",
-		"Published",
-		"Published",
-		"Expired", // red text
-		"Published",
-		"Published"
-	};
 
 	/**
 	 * Default constructor.
@@ -164,12 +120,7 @@ public class ArticleListBean implements WFListBean, Serializable {
 			int maxRow = Math.min(start.intValue() + nrOfRows,availableRows);
 			
 			for (int i = start.intValue(); i < maxRow; i++) {
-//				ArticleListBean a = new ArticleListBean(String.valueOf(i), testHeadlines[i], testPublished[i], testAuthors[i], testStatus[i]);
 				ArticleListBean a = new ArticleListBean(String.valueOf(i), articleItemBean[i].getHeadline(), articleItemBean[i].getItemType(), articleItemBean[i].getAuthor(), articleItemBean[i].getStatus());
-//				if (i == 5) {
-					// set test style red
-//					a.setTestStyle("color:red");
-//				}
 				_dataModel.set(a, i);
 			}
 		}
@@ -183,11 +134,16 @@ public class ArticleListBean implements WFListBean, Serializable {
 		}
 		_dataModel.setRowCount(availableRows);
 	}
-	
+
+	/**
+	 * Loads all xml files in the given folder
+	 * @param folder
+	 * @return List containing ArticleItemBean
+	 * @throws XmlException
+	 * @throws IOException
+	 */
 	public static List loadAllArticlesInFolder(File folder) throws XmlException, IOException{
 		List list = new ArrayList();
-		
-//		File root = new File("/Test/article/");
 		
 		File[] articleFile = folder.listFiles();
 		

@@ -1,5 +1,5 @@
 /*
- * $Id: ArticleBlock.java,v 1.3 2004/11/09 11:18:14 joakim Exp $
+ * $Id: ArticleBlock.java,v 1.4 2004/11/10 17:23:07 joakim Exp $
  *
  * Copyright (C) 2004 Idega. All Rights Reserved.
  *
@@ -12,7 +12,6 @@ package com.idega.block.article.component;
 import java.io.IOException;
 import java.util.Iterator;
 import java.util.List;
-
 import javax.faces.component.UIColumn;
 import javax.faces.component.UIComponent;
 import javax.faces.component.html.HtmlCommandButton;
@@ -25,12 +24,10 @@ import javax.faces.component.html.HtmlOutputLink;
 import javax.faces.component.html.HtmlOutputText;
 import javax.faces.component.html.HtmlPanelGrid;
 import javax.faces.component.html.HtmlSelectManyListbox;
-import javax.faces.component.html.HtmlSelectOneMenu;
 import javax.faces.context.FacesContext;
 import javax.faces.convert.IntegerConverter;
 import javax.faces.event.ActionEvent;
 import javax.faces.event.ActionListener;
-
 import com.idega.webface.WFBlock;
 import com.idega.webface.WFComponentSelector;
 import com.idega.webface.WFContainer;
@@ -44,6 +41,7 @@ import com.idega.webface.WFTabbedPane;
 import com.idega.webface.WFUtil;
 import com.idega.webface.convert.WFCommaSeparatedListConverter;
 import com.idega.webface.event.WFTabListener;
+import com.idega.webface.htmlarea.HTMLArea;
 import com.idega.webface.test.bean.CaseListBean;
 import com.idega.webface.test.bean.ContentItemCase;
 import com.idega.webface.test.bean.ManagedContentBeans;
@@ -51,10 +49,10 @@ import com.idega.webface.test.bean.ManagedContentBeans;
 /**
  * Block for editing an article.   
  * <p>
- * Last modified: $Date: 2004/11/09 11:18:14 $ by $Author: joakim $
+ * Last modified: $Date: 2004/11/10 17:23:07 $ by $Author: joakim $
  *
  * @author Anders Lindman
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
 public class ArticleBlock extends WFBlock implements ActionListener, ManagedContentBeans {
 
@@ -189,7 +187,17 @@ public class ArticleBlock extends WFBlock implements ActionListener, ManagedCont
 		p.getChildren().add(authorInput);		
 		p.getChildren().add(WFUtil.group(WFUtil.getTextVB(bref + "body"), WFUtil.getText(":")));		
 		p.getChildren().add(WFUtil.group(WFUtil.getTextVB(bref + "images"), WFUtil.getText(":")));		
-		HtmlInputTextarea bodyArea = WFUtil.getTextArea(BODY_ID, ref + "body", "460px", "400px");
+//		HtmlInputTextarea bodyArea = WFUtil.getHtmlAreaTextArea(BODY_ID, ref + "body", "460px", "400px");
+		
+		HTMLArea bodyArea = WFUtil.getHtmlAreaTextArea(BODY_ID, ref + "body", "100%", "400px");
+		bodyArea.addPlugin(HTMLArea.PLUGIN_TABLE_OPERATIONS);
+		bodyArea.addPlugin(HTMLArea.PLUGIN_DYNAMIC_CSS, "3");
+		bodyArea.addPlugin(HTMLArea.PLUGIN_CSS, "3");
+		bodyArea.addPlugin(HTMLArea.PLUGIN_CONTEXT_MENU);
+		bodyArea.addPlugin(HTMLArea.PLUGIN_LIST_TYPE);
+		bodyArea.addPlugin(HTMLArea.PLUGIN_CHARACTER_MAP);
+		bodyArea.setAllowFontSelection(false);
+		
 		HtmlCommandButton editButton = WFUtil.getButtonVB(EDIT_HTML_ID, bref + "edit");
 		editButton.setOnclick("wurl='htmlarea/webface/htmledit.jsp?" + PREVIEW_ARTICLE_ITEM_ID + 
 					"='+this.tabindex;window.open(wurl,'Edit','height=450,width=600,resizable=yes,status=no,toolbar=no,menubar=no,location=no,scrollbars=no');return false;");

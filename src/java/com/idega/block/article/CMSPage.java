@@ -1,5 +1,5 @@
 /*
- * $Id: CMSPage.java,v 1.3 2004/11/01 19:04:37 tryggvil Exp $
+ * $Id: CMSPage.java,v 1.4 2004/11/10 17:23:06 joakim Exp $
  *
  * Copyright (C) 2004 Idega. All Rights Reserved.
  *
@@ -39,10 +39,10 @@ import com.idega.webface.test.bean.ManagedContentBeans;
 /**
  * Content management system test/demo page. 
  * <p>
- * Last modified: $Date: 2004/11/01 19:04:37 $ by $Author: tryggvil $
+ * Last modified: $Date: 2004/11/10 17:23:06 $ by $Author: joakim $
  *
  * @author Anders Lindman
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
 public class CMSPage extends WFPage implements  ManagedContentBeans, WFTabListener, ActionListener, Serializable {
 	
@@ -293,8 +293,6 @@ public class CMSPage extends WFPage implements  ManagedContentBeans, WFTabListen
 		}
 	}
 	
-	
-	
 	/* (non-Javadoc)
 	 * @see javax.faces.component.StateHolder#restoreState(javax.faces.context.FacesContext, java.lang.Object)
 	 */
@@ -305,6 +303,7 @@ public class CMSPage extends WFPage implements  ManagedContentBeans, WFTabListen
 		this.isInitalized=bIsInitalized.booleanValue();
 		//super.restoreState(ctx,state);
 	}
+
 	/* (non-Javadoc)
 	 * @see javax.faces.component.StateHolder#saveState(javax.faces.context.FacesContext)
 	 */
