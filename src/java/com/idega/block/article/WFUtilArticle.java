@@ -1,8 +1,11 @@
 /*
- * Created on Dec 16, 2004
+ * $Id: WFUtilArticle.java,v 1.2 2004/12/17 14:40:29 joakim Exp $
  *
- * TODO To change the template for this generated file go to
- * Window - Preferences - Java - Code Style - Code Templates
+ * Copyright (C) 2004 Idega. All Rights Reserved.
+ *
+ * This software is the proprietary information of Idega.
+ * Use is subject to license terms.
+ *
  */
 package com.idega.block.article;
 
@@ -13,18 +16,26 @@ import com.idega.webface.WFUtil;
 
 
 /**
- * @author Joakim
+ * Util class to set the bundle for the localization 
+ * <p>
+ * Last modified: $Date: 2004/12/17 14:40:29 $ by $Author: joakim $
  *
- * TODO To change the template for this generated type comment go to
- * Window - Preferences - Java - Code Style - Code Templates
+ * @author Joakim Johnson
+ * @version $Revision: 1.2 $
  */
 public class WFUtilArticle extends WFUtil{
 	private final static String BUNDLE = "com.idega.block.article";
 
+	/**
+	 * Returns a localized HtmlOutputText as a header
+	 */
 	public static HtmlOutputText getHeaderTextVB(String localizationKey) {
 		return getHeaderTextVB(BUNDLE, localizationKey);
 	}
 
+	/**
+	 * Returns a localized HtmlOutputText
+	 */
 	public static HtmlOutputText getTextVB(String localizationKey) {
 		return getTextVB(BUNDLE, localizationKey);
 	}
@@ -36,6 +47,9 @@ public class WFUtilArticle extends WFUtil{
 		return getListTextVB(BUNDLE, localizationKey);
 	}
 
+	/**
+	 * Returns a localized HtmlCommand Button
+	 */
 	public static HtmlCommandButton getButtonVB(String id, String localizationKey) {
 		return getButtonVB(id, BUNDLE, localizationKey);
 	}
