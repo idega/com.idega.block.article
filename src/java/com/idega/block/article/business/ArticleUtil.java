@@ -1,5 +1,5 @@
 /*
- * $Id: ArticleUtil.java,v 1.2 2005/02/18 15:54:39 joakim Exp $
+ * $Id: ArticleUtil.java,v 1.3 2005/02/18 15:55:52 joakim Exp $
  * Created on 7.2.2005
  *
  * Copyright (C) 2005 Idega Software hf. All Rights Reserved.
@@ -15,10 +15,10 @@ import com.idega.util.IWTimestamp;
 
 /**
  * 
- *  Last modified: $Date: 2005/02/18 15:54:39 $ by $Author: joakim $
+ *  Last modified: $Date: 2005/02/18 15:55:52 $ by $Author: joakim $
  * 
  * @author <a href="mailto:gummi@idega.com">Gudmundur Agust Saemundsson</a>
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 public class ArticleUtil extends ContentUtil{
 	
@@ -36,6 +36,9 @@ public class ArticleUtil extends ContentUtil{
 		return ContentUtil.getContentRootPath()+ARTICLE_CONTENT_PATH;
 	}
 
+	/**
+	 * @return the path where a new article by default should be created
+	 */
 	public static String getArticleYearMonthPath() {
 		IWTimestamp now = new IWTimestamp();
 		String folderString = ArticleUtil.getArticleRootPath()+"/"+now.getYear()+"/"+now.getDateString("MM");
