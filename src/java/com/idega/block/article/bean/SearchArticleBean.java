@@ -1,5 +1,5 @@
 /*
- * $Id: SearchArticleBean.java,v 1.8 2005/03/05 17:21:48 gummi Exp $
+ * $Id: SearchArticleBean.java,v 1.9 2005/03/08 14:45:42 laddi Exp $
  *
  * Copyright (C) 2004 Idega. All Rights Reserved.
  *
@@ -20,12 +20,9 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import javax.faces.component.UIColumn;
 import javax.faces.component.UIComponent;
-import javax.faces.component.html.HtmlCommandLink;
 import javax.faces.component.html.HtmlOutputText;
 import javax.faces.event.ActionListener;
-import javax.faces.model.DataModel;
 import org.apache.webdav.lib.search.CompareOperator;
 import org.apache.webdav.lib.search.SearchException;
 import org.apache.webdav.lib.search.SearchExpression;
@@ -36,7 +33,6 @@ import com.idega.block.article.business.ArticleUtil;
 import com.idega.business.IBOLookup;
 import com.idega.content.bean.ContentItemBeanComparator;
 import com.idega.content.business.ContentSearch;
-import com.idega.content.presentation.ContentBlock;
 import com.idega.core.search.business.Search;
 import com.idega.core.search.business.SearchQuery;
 import com.idega.core.search.business.SearchResult;
@@ -45,7 +41,6 @@ import com.idega.presentation.IWContext;
 import com.idega.slide.business.IWSlideSession;
 import com.idega.slide.util.IWSlideConstants;
 import com.idega.util.IWTimestamp;
-import com.idega.webface.WFUtil;
 import com.idega.webface.bean.AbstractWFEditableListManagedBean;
 import com.idega.webface.bean.WFEditableListDataBean;
 import com.idega.webface.bean.WFListBean;
@@ -54,10 +49,10 @@ import com.idega.webface.model.WFDataModel;
 /**
  * Bean for searching articles.   
  * <p>
- * Last modified: $Date: 2005/03/05 17:21:48 $ by $Author: gummi $
+ * Last modified: $Date: 2005/03/08 14:45:42 $ by $Author: laddi $
  *
  * @author Anders Lindman
- * @version $Revision: 1.8 $
+ * @version $Revision: 1.9 $
  */
 
 public class SearchArticleBean extends AbstractWFEditableListManagedBean implements WFListBean, Serializable {
