@@ -1,5 +1,5 @@
 /*
- * $Id: ArticleItemBean.java,v 1.19 2005/02/14 15:13:19 gummi Exp $
+ * $Id: ArticleItemBean.java,v 1.20 2005/02/15 17:07:33 joakim Exp $
  *
  * Copyright (C) 2004 Idega. All Rights Reserved.
  *
@@ -9,17 +9,20 @@
  */
 package com.idega.block.article.bean;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import org.apache.xmlbeans.XmlException;
+import org.w3c.tidy.Tidy;
 import com.idega.business.IBOLookup;
+import com.idega.content.bean.ContentItem;
 import com.idega.content.bean.ContentItemBean;
 import com.idega.content.bean.ContentItemField;
 import com.idega.content.bean.ContentItemFieldBean;
-import com.idega.content.bean.ContentItem;
 import com.idega.data.IDOStoreException;
 import com.idega.idegaweb.IWApplicationContext;
 import com.idega.idegaweb.IWUserContext;
@@ -29,15 +32,21 @@ import com.idega.slide.business.IWSlideSession;
 import com.idega.slide.util.WebdavExtendedResource;
 import com.idega.slide.util.WebdavRootResource;
 import com.idega.util.IWTimestamp;
+import com.idega.xml.XMLDocument;
+import com.idega.xml.XMLElement;
+import com.idega.xml.XMLException;
+import com.idega.xml.XMLNamespace;
+import com.idega.xml.XMLOutput;
+import com.idega.xml.XMLParser;
 import com.idega.xmlns.block.article.document.ArticleDocument;
 
 /**
  * Bean for idegaWeb article content items.   
  * <p>
- * Last modified: $Date: 2005/02/14 15:13:19 $ by $Author: gummi $
+ * Last modified: $Date: 2005/02/15 17:07:33 $ by $Author: joakim $
  *
  * @author Anders Lindman
- * @version $Revision: 1.19 $
+ * @version $Revision: 1.20 $
  */
 
 public class ArticleItemBean extends ContentItemBean implements Serializable, ContentItem {
@@ -58,6 +67,8 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 	public final static String FIELDNAME_BODY = "body";
 	public final static String FIELDNAME_SOURCE = "source";
 	public final static String FIELDNAME_COMMENT = "comment";
+	//Note "comment" seems to be a reserved attribute in DAV so use "article_comment" for that!!!
+	public final static String FIELDNAME_ARTICLE_COMMENT = "article_comment";
 	public final static String FIELDNAME_IMAGES = "images";
 	public final static String FIELDNAME_FOLDER_LOCATION = "folder_location";
 	
@@ -65,6 +76,7 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 	
 	private final static String[] ATTRIBUTE_ARRAY = new String[] {FIELDNAME_AUTHOR,FIELDNAME_CREATION_DATE,FIELDNAME_HEADLINE,FIELDNAME_TEASER,FIELDNAME_BODY};
 
+	XMLNamespace idegans = new XMLNamespace("http://xmlns.idega.com/block/article/document");
 	
 	/**
 	 * Default constructor.
@@ -89,7 +101,25 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 	public void setHeadline(String s) { setValue(FIELDNAME_HEADLINE, s); } 
 	public void setHeadline(Object o) { setValue(FIELDNAME_HEADLINE, o.toString()); } 
 	public void setTeaser(String s) { setValue(FIELDNAME_TEASER, s); } 
-	public void setBody(String s) { setValue(FIELDNAME_BODY, s); } 
+	public void setBody(String articleIn) {
+		if (null != articleIn) {
+			System.out.println("ArticleIn = "+articleIn);
+			//Use JTidy to clean up the html
+			Tidy tidy = new Tidy();
+			tidy.setXHTML(true);
+			tidy.setXmlOut(true);
+			ByteArrayInputStream bais = new ByteArrayInputStream(articleIn.getBytes());
+			ByteArrayOutputStream baos = new ByteArrayOutputStream();
+			tidy.parse(bais, baos);
+			String articleOut = baos.toString();
+			System.out.println("ArticleOut = "+articleOut);
+			setValue(FIELDNAME_BODY, articleOut);
+//			setValue(FIELDNAME_BODY, articleIn);
+		}
+		else {
+			setValue(FIELDNAME_BODY, null);
+		}
+	} 
 	public void setAuthor(String s) { setValue(FIELDNAME_AUTHOR, s); } 
 	public void setSource(String s) { setValue(FIELDNAME_SOURCE, s); }
 	public void setComment(String s) { setValue(FIELDNAME_COMMENT, s); }
@@ -105,6 +135,15 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 	 */
 	public void clear() {
 		super.clear();
+
+		setHeadline(null);
+		setTeaser(null);
+		setBody(null);
+		setAuthor(null);
+		setSource(null);
+		setComment(null);
+		setImages(null);
+		setFolderLocation(null);
 		_isUpdated = false;
 	}
 	
@@ -186,6 +225,77 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 		return name.toString();
 	}
 	
+	public String getAsXML() throws IOException {
+
+//		SAXBuilder builder = new SAXBuilder();
+//		Document bodyDoc = null;
+		XMLParser builder = new XMLParser();
+		XMLDocument bodyDoc = null;
+		try {
+			bodyDoc = builder.parse(new ByteArrayInputStream(getBody().getBytes()));
+		} catch (XMLException e) {
+			e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+		}
+//		Element bodyElement = bodyDoc.getRootElement();
+		XMLElement bodyElement = bodyDoc.getRootElement();
+//		bodyDoc.removeContent(bodyElement);
+
+		
+		
+//		Namespace idegans = Namespace.getNamespace("http://xmlns.idega.com/block/article/document");
+//		XMLNamespace idegans = new XMLNamespace("http://xmlns.idega.com/block/article/document");
+		XMLElement root = new XMLElement("article",idegans);
+		XMLElement headline = new XMLElement(FIELDNAME_HEADLINE,idegans).setText(getHeadline());
+		XMLElement teaser = new XMLElement(FIELDNAME_TEASER,idegans).setText(getTeaser());
+		XMLElement author = new XMLElement(FIELDNAME_AUTHOR,idegans).setText(getAuthor());
+		XMLElement articleComment = new XMLElement("article_comment",idegans).setText(getComment());
+
+//		XMLElement body = new XMLElement("body",idegans).setText(getBody());
+		XMLElement body = new XMLElement(FIELDNAME_BODY,idegans).addContent(bodyElement);
+
+		
+		
+		
+		root.addContent(headline);
+		root.addContent(teaser);
+		root.addContent(body);
+		root.addContent(author);
+		root.addContent(articleComment);
+//		Document doc = new Document(root);
+		XMLDocument doc = new XMLDocument(root);
+//		XMLOutputter outputter = new XMLOutputter();
+		XMLOutput outputter = new XMLOutput();
+//		StringWriter writer = new StringWriter();
+//		try {
+//			outputter.output(doc,System.out);
+
+//			System.out.println("Article XML = "+writer.toString());
+//			outputter.output(doc,System.out);
+//		} catch (IOException e) {
+//			e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+//		}
+		return outputter.outputString(doc);
+//		return writer.toString();
+	}
+	
+	public String getAsXMLFromXMLBeans() {
+		ArticleDocument articleDoc = ArticleDocument.Factory.newInstance();
+	    
+	    ArticleDocument.Article article =  articleDoc.addNewArticle();
+	    
+		article.setHeadline(getHeadline());
+		article.setBody(getBody());
+		article.setTeaser(getTeaser());
+		article.setAuthor(getAuthor());
+		article.setSource(getSource());
+		article.setComment(getComment());
+//	    article.setImage(getImages());
+//	    article.setAttachment(getAttachments());
+//	    article.setRelatedItems(getRelatedContentItems());
+		
+		return articleDoc.toString();
+	}
+	
 	/**
 	 * This is a temporary holder for the Slide implementation
 	 * This should be replace as soon as Slide is working
@@ -195,10 +305,6 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 		boolean storeOk = true;
 		clearErrorKeys();
 
-		ArticleDocument articleDoc = ArticleDocument.Factory.newInstance();
-	    
-	    ArticleDocument.Article article =  articleDoc.addNewArticle();
-	    
 		if (getHeadline().trim().equals("")) {
 			addErrorKey(KEY_ERROR_HEADLINE_EMPTY);
 			storeOk = false;
@@ -215,15 +321,6 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 //			}
 //		}
 		
-		article.setHeadline(getHeadline());
-		article.setBody(getBody());
-		article.setTeaser(getTeaser());
-		article.setAuthor(getAuthor());
-		article.setSource(getSource());
-		article.setComment(getComment());
-//	    article.setImage(getImages());
-//	    article.setAttachment(getAttachments());
-//	    article.setRelatedItems(getRelatedContentItems());
 //Need to create	    article.setCategory(getCategory());
 
 		
@@ -257,12 +354,12 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 			System.out.println("URI = "+uri);
 			System.out.println("Folder location = "+folderLoaction);
 			
+			String article = getAsXML();
 //			System.out.println("success "+success);
 //			success = 
-			
 			String filename = createFileName(service);
 			
-			rootResource.putMethod(session.getURI(getArticlePath(filename)),articleDoc.toString());
+			rootResource.putMethod(session.getURI(getArticlePath(filename)),article);
 			try {
 				load(getArticlePath(filename));
 			}
@@ -333,7 +430,7 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 	 * @throws XmlException
 	 * @throws IOException
 	 */
-	public void load(WebdavExtendedResource webdavResource) throws XmlException, IOException {
+	public void loadOld(WebdavExtendedResource webdavResource) throws XmlException, IOException {
 	
 		ArticleDocument articleDoc;
 		
@@ -349,6 +446,39 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 		String folder = webdavResource.getParentPath();
 	    setFolderLocation(folder);
 	    
+	}
+	
+	public void load(WebdavExtendedResource webdavResource) throws IOException {
+		XMLParser builder = new XMLParser();
+		XMLDocument bodyDoc = null;
+		try {
+			bodyDoc = builder.parse(new ByteArrayInputStream(webdavResource.getMethodDataAsString().getBytes()));
+		} catch (XMLException e) {
+			e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+		}
+//		Element bodyElement = bodyDoc.getRootElement();
+		XMLElement bodyElement = bodyDoc.getRootElement();
+//		List list = bodyElement.getChildren();
+//		System.out.println("List size= "+list.size());
+//		for(int i=0;i<list.size();i++) {
+//			System.out.println("list object "+i+" "+list.get(i));
+//			XMLElement el = (XMLElement) list.get(i);
+//			System.out.println("Text "+el.getText());
+//			try {
+//			System.out.println("Text "+bodyElement.getChild(FIELDNAME_HEADLINE));
+//			}catch(Exception e) {
+//				e.printStackTrace();
+//			}
+//		}
+		setHeadline(bodyElement.getChild(FIELDNAME_HEADLINE,idegans).getText());
+		setTeaser(bodyElement.getChild(FIELDNAME_TEASER,idegans).getText());
+		setAuthor(bodyElement.getChild(FIELDNAME_AUTHOR,idegans).getText());
+		setBody(bodyElement.getChild(FIELDNAME_BODY,idegans).getText());
+		setComment(bodyElement.getChild(FIELDNAME_ARTICLE_COMMENT,idegans).getText());
+
+		String folder = webdavResource.getParentPath();
+	    setFolderLocation(folder);
+//		setFolderLocation(bodyElement.getChild(FIELDNAME_FOLDER_LOCATION,idegans).getText());
 	}
 	
 	public void loadOld(File file) throws XmlException, IOException{
