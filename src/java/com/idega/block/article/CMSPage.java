@@ -1,5 +1,5 @@
 /*
- * $Id: CMSPage.java,v 1.1 2004/10/26 12:45:00 joakim Exp $
+ * $Id: CMSPage.java,v 1.2 2004/10/27 13:10:22 joakim Exp $
  *
  * Copyright (C) 2004 Idega. All Rights Reserved.
  *
@@ -15,6 +15,7 @@ import javax.faces.component.UICommand;
 import javax.faces.component.UIComponent;
 import javax.faces.component.html.HtmlCommandButton;
 import javax.faces.component.html.HtmlInputSecret;
+import javax.faces.component.html.HtmlOutputText;
 import javax.faces.component.html.HtmlPanelGrid;
 import javax.faces.context.FacesContext;
 import javax.faces.event.ActionEvent;
@@ -39,10 +40,10 @@ import com.idega.webface.test.bean.ManagedContentBeans;
 /**
  * Content management system test/demo page. 
  * <p>
- * Last modified: $Date: 2004/10/26 12:45:00 $ by $Author: joakim $
+ * Last modified: $Date: 2004/10/27 13:10:22 $ by $Author: joakim $
  *
  * @author Anders Lindman
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public class CMSPage extends WFPage implements  ManagedContentBeans, WFTabListener, ActionListener, Serializable {
 	
@@ -185,19 +186,29 @@ public class CMSPage extends WFPage implements  ManagedContentBeans, WFTabListen
 	 * Returns the function block containing a view menu.
 	 */
 	protected UIComponent getFunctionBlock() {
+
 		String bref = WFPage.CONTENT_BUNDLE + ".";
 		WFBlock b = new WFBlock(bref + "functions");
 		b.getTitlebar().setValueRefTitle(true);
 
 		WFViewMenu vm = new WFViewMenu();
 		b = WFUtil.setBlockStyle(b, vm);
+		b.setId(bref+"function_block");
 		vm.addButtonVB("content_home", bref + "content_home", "/cmspage.jsf");
-		vm.addButtonVB("create_article", bref + "create_article", "/createarticle.jsf");
-		vm.addButtonVB("list_articles", bref + "list_articles", "/listarticles.jsf");
-		vm.addButtonVB("search_articles", bref + "search_articles", "/searcharticle.jsf");
-		vm.addButtonVB("users_groups", bref + "users_and_groups", "UserApplication.jsf");
-		vm.addButtonVB("create_page", bref + "create_page", "CreatePage.jsf");
-		vm.addButtonVB("configure", bref + "configure", "Configure.jsf");
+		
+		String createArticleURL = "/idegaweb/bundles/com.idega.block.article.bundle/jsp/createarticle.jsf";
+		String listArticlesURL = "/idegaweb/bundles/com.idega.block.article.bundle/jsp/listarticles.jsf";
+		String searchArticleURL = "/idegaweb/bundles/com.idega.block.article.bundle/jsp/searcharticle.jsf";
+		String userApplicationURL = "/idegaweb/bundles/com.idega.block.article.bundle/jsp/UserApplication.jsf";
+		String createPageURL = "/idegaweb/bundles/com.idega.block.article.bundle/jsp/CreatePage.jsf";
+		String configureURL = "/idegaweb/bundles/com.idega.block.article.bundle/jsp/Configure.jsf";
+		
+		vm.addButtonVB("create_article", bref + "create_article", createArticleURL);
+		vm.addButtonVB("list_articles", bref + "list_articles", listArticlesURL);
+		vm.addButtonVB("search_articles", bref + "search_articles", searchArticleURL);
+		vm.addButtonVB("users_groups", bref + "users_and_groups", userApplicationURL);
+		vm.addButtonVB("create_page", bref + "create_page", createPageURL);
+		vm.addButtonVB("configure", bref + "configure", configureURL);
 		b.add(vm);
 		return b;
 	}
@@ -282,6 +293,9 @@ public class CMSPage extends WFPage implements  ManagedContentBeans, WFTabListen
 			articleVersionBlock.setRendered(false);			
 		}
 	}
+	
+	
+	
 	/* (non-Javadoc)
 	 * @see javax.faces.component.StateHolder#restoreState(javax.faces.context.FacesContext, java.lang.Object)
 	 */
@@ -290,6 +304,7 @@ public class CMSPage extends WFPage implements  ManagedContentBeans, WFTabListen
 		super.restoreState(ctx, values[0]);
 		Boolean bIsInitalized = (Boolean) values[1];
 		this.isInitalized=bIsInitalized.booleanValue();
+		//super.restoreState(ctx,state);
 	}
 	/* (non-Javadoc)
 	 * @see javax.faces.component.StateHolder#saveState(javax.faces.context.FacesContext)
@@ -299,5 +314,6 @@ public class CMSPage extends WFPage implements  ManagedContentBeans, WFTabListen
 		values[0] = super.saveState(ctx);
 		values[1] = Boolean.valueOf(this.isInitalized);
 		return values;
+		//return super.saveState(ctx);
 	}
 }
