@@ -5,8 +5,6 @@
   </classpathentry>
   <classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER">
   </classpathentry>
-  <classpathentry kind="var" path="MAVEN_REPO/article/jars/article-1.0.jar">
-  </classpathentry>
   <classpathentry kind="var" path="MAVEN_REPO/xmlbeans/jars/xbean-1.0.3.jar">
   </classpathentry>
   <classpathentry kind="src" path="/com.idega.core">
@@ -17,9 +15,13 @@
   </classpathentry>
   <classpathentry kind="src" path="/com.idega.slide">
   </classpathentry>
-  <classpathentry kind="var" path="MAVEN_REPO/slide/jars/jakarta-slide-webdavlib-2.1.jar">
+  <classpathentry kind="var" path="MAVEN_REPO/slide/jars/jakarta-slide-webdavlib-2.2pre2.jar">
   </classpathentry>
   <classpathentry kind="var" path="MAVEN_REPO/commons-httpclient/jars/commons-httpclient-2.0.jar">
+  </classpathentry>
+  <classpathentry kind="var" path="MAVEN_REPO/xmlbeans/jars/xbean_xpath-1.0.3.jar">
+  </classpathentry>
+  <classpathentry kind="var" path="MAVEN_REPO/jaxen/jars/jaxen-1.1-beta-4.jar">
   </classpathentry>
   <classpathentry kind="var" path="MAVEN_REPO/jdom/jars/jdom-1.0.jar">
   </classpathentry>
