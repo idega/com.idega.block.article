@@ -1,5 +1,5 @@
 /*
- * $Id: EditArticleBlock.java,v 1.5 2004/12/17 14:22:54 joakim Exp $
+ * $Id: EditArticleBlock.java,v 1.6 2004/12/21 15:36:04 joakim Exp $
  *
  * Copyright (C) 2004 Idega. All Rights Reserved.
  *
@@ -26,6 +26,7 @@ import javax.faces.convert.IntegerConverter;
 import javax.faces.event.ActionEvent;
 import javax.faces.event.ActionListener;
 import com.idega.block.article.WFUtilArticle;
+import com.idega.block.article.component.reference.FileUploadForm;
 import com.idega.presentation.IWBaseComponent;
 import com.idega.webface.WFComponentSelector;
 import com.idega.webface.WFContainer;
@@ -42,10 +43,10 @@ import com.idega.webface.test.bean.ContentItemCase;
 import com.idega.webface.test.bean.ManagedContentBeans;
 
 /**
- * Last modified: $Date: 2004/12/17 14:22:54 $ by $Author: joakim $
+ * Last modified: $Date: 2004/12/21 15:36:04 $ by $Author: joakim $
  *
  * @author Joakim
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
  */
 public class EditArticleBlock extends IWBaseComponent implements ManagedContentBeans, ActionListener {
 	public final static String EDIT_ARTICLE_BLOCK_ID = "edit_articles_block";
@@ -144,7 +145,7 @@ public class EditArticleBlock extends IWBaseComponent implements ManagedContentB
 		
 		mainContainer.add(em);
 
-		HtmlPanelGrid p = WFPanelUtil.getFormPanel(2);
+		HtmlPanelGrid p = WFPanelUtil.getPlainFormPanel(2);
 		p.getChildren().add(WFUtil.group(WFUtilArticle.getTextVB("headline"), WFUtil.getText(":")));
 //		p.getChildren().add(WFUtil.group(WFUtil.getTextVB(bref + "language"), WFUtil.getText(":")));
 		HtmlInputText headlineInput = WFUtil.getInputText(HEADLINE_ID, ref + "headline");		
@@ -174,18 +175,19 @@ public class EditArticleBlock extends IWBaseComponent implements ManagedContentB
 		editButton.setOnclick("wurl='htmlarea/webface/htmledit.jsp?" + PREVIEW_ARTICLE_ITEM_ID + 
 					"='+this.tabindex;window.open(wurl,'Edit','height=450,width=600,resizable=yes,status=no,toolbar=no,menubar=no,location=no,scrollbars=no');return false;");
 		p.getChildren().add(WFUtil.group(WFUtil.group(bodyArea, WFUtil.getBreak()), editButton));
-//		WFContainer imageContainer = new WFContainer();
-//		imageContainer.add(WFUtil.getButtonVB(ADD_IMAGE_ID, bref + "add_image", this));
-//		imageContainer.add(WFUtil.getBreak());
-//		imageContainer.add(getImageList());
-//		p.getChildren().add(imageContainer);
-//		p.getChildren().add(WFUtil.group(WFUtil.getTextVB(bref + "source"), WFUtil.getText(":")));		
-//		p.getChildren().add(WFUtil.group(WFUtil.getTextVB(bref + "main_category"), WFUtil.getText(":")));		
-//		HtmlInputTextarea sourceArea = WFUtil.getTextArea(SOURCE_ID, ref + "source", "440px", "30px");
-//		p.getChildren().add(sourceArea);		
-		//HtmlSelectOneMenu mainCategoryMenu = WFUtil.getSelectOneMenu(MAIN_CATEGORY_ID, ref + "categories", ref + "mainCategoryId");
-		//p.getChildren().add(mainCategoryMenu);		
-
+/*
+		WFContainer imageContainer = new WFContainer();
+		imageContainer.add(WFUtil.getButtonVB(ADD_IMAGE_ID, bref + "add_image", this));
+		imageContainer.add(WFUtil.getBreak());
+		imageContainer.add(getImageList());
+		p.getChildren().add(imageContainer);
+		p.getChildren().add(WFUtil.group(WFUtil.getTextVB(bref + "source"), WFUtil.getText(":")));		
+		p.getChildren().add(WFUtil.group(WFUtil.getTextVB(bref + "main_category"), WFUtil.getText(":")));		
+		HtmlInputTextarea sourceArea = WFUtil.getTextArea(SOURCE_ID, ref + "source", "440px", "30px");
+		p.getChildren().add(sourceArea);		
+		HtmlSelectOneMenu mainCategoryMenu = WFUtil.getSelectOneMenu(MAIN_CATEGORY_ID, ref + "categories", ref + "mainCategoryId");
+		p.getChildren().add(mainCategoryMenu);		
+*/
 		mainContainer.add(p);
 		mainContainer.add(WFUtil.getBreak());
 		
@@ -193,7 +195,6 @@ public class EditArticleBlock extends IWBaseComponent implements ManagedContentB
 /*
 		p.getChildren().add(WFUtil.group(WFUtil.getHeaderTextVB(bref + "created"), 
 				WFUtil.getTextVB(ref + "creationDate")
-//				WFUtil.getText(": 4/20/04 3:04 PM")
 				));
 */
 		p.getChildren().add(WFUtil.getText(" "));
@@ -203,18 +204,17 @@ public class EditArticleBlock extends IWBaseComponent implements ManagedContentB
 		p.getChildren().add(WFUtil.getText(" "));
 		p.getChildren().add(WFUtil.group(WFUtilArticle.getHeaderTextVB("current_version"), 
 				WFUtil.getTextVB(ref + "versionId")
-//				WFUtil.getText(": 1.5")
 				));
 		
 		mainContainer.add(p);
 		mainContainer.add(WFUtil.getBreak());
 		
-		p = WFPanelUtil.getFormPanel(2);		
+		p = WFPanelUtil.getFormPanel(2);
 		p.getChildren().add(WFUtil.group(WFUtilArticle.getTextVB("comment"), WFUtil.getText(":")));
-//		p.getChildren().add(WFUtil.group(WFUtil.getTextVB(bref + "attachments"), WFUtil.getText(":")));		
-		HtmlInputTextarea commentArea = WFUtil.getTextArea(COMMENT_ID, ref + "comment", "400px", "60px");		
+//		p.getChildren().add(WFUtil.group(WFUtil.getTextVB(bref + "attachments"), WFUtil.getText(":")));	
+		HtmlInputTextarea commentArea = WFUtil.getTextArea(COMMENT_ID, ref + "comment", "400px", "60px");
 		p.getChildren().add(commentArea);
-//		WFContainer attachmentContainer = new WFContainer();		
+//		WFContainer attachmentContainer = new WFContainer();
 //		attachmentContainer.add(WFUtil.getButtonVB(ADD_ATTACHMENT_ID, bref + "add_attachment", this));
 //		attachmentContainer.add(WFUtil.getBreak());
 //		attachmentContainer.add(getAttachmentList());
