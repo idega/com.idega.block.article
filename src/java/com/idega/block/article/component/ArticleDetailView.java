@@ -46,7 +46,7 @@ public class ArticleDetailView extends IWBaseComponent implements ManagedContent
 		p.getChildren().add(g);
 		p.getChildren().add(WFUtil.getText(" "));
 		g = WFUtil.group(WFUtil.getHeaderTextVB(bref + "created"), WFUtil.getHeaderText(": "));
-		g.getChildren().add(WFUtil.getText("4/20/04 3:04 PM"));
+		g.getChildren().add(WFUtil.getTextVB(ref + "creationDate"));
 		p.getChildren().add(g);
 		p.getChildren().add(WFUtil.getText(" "));
 		g = WFUtil.group(WFUtil.getHeaderTextVB(bref + "status"), WFUtil.getHeaderText(": "));
@@ -60,7 +60,8 @@ public class ArticleDetailView extends IWBaseComponent implements ManagedContent
 		p.getChildren().add(g);
 		p.getChildren().add(WFUtil.getText(" "));
 		g = WFUtil.group(WFUtil.getHeaderTextVB(bref + "current_version"), WFUtil.getHeaderText(": "));
-		g.getChildren().add(WFUtil.getText("1.5"));
+		g.getChildren().add(WFUtil.getTextVB(ref + "versionId"));
+//		g.getChildren().add(WFUtil.getText("1.5"));
 		p.getChildren().add(g);
 		p.getChildren().add(WFUtil.getText(" "));
 		g = WFUtil.group(WFUtil.getHeaderTextVB(bref + "comment"), WFUtil.getHeaderText(": "));
