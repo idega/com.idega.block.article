@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema targetNamespace="http://idega.com/block/article/bean"
+	xmlns:xs="http://www.w3.org/2001/XMLSchema"
+	elementFormDefault="qualified">
+  <xs:element name="article">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="headline" type="xs:string"/>
+        <xs:element name="teaser" type="xs:string"/>
+        <xs:element name="body" type="xs:string"/>
+        <xs:element name="author" type="xs:string"/>
+        <xs:element name="source" type="xs:string"/>
+        <xs:element name="comment" type="xs:string"/>
+        <xs:element name="image" type="xs:string"/>
+        <xs:element name="attachment" type="xs:string"/>
+        <xs:element name="related_items" type="xs:string"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+</xs:schema>
