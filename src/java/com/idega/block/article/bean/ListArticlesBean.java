@@ -1,5 +1,5 @@
 /*
- * $Id: ListArticlesBean.java,v 1.7 2005/01/04 15:18:18 joakim Exp $
+ * $Id: ListArticlesBean.java,v 1.8 2005/01/10 10:18:58 joakim Exp $
  *
  * Copyright (C) 2004 Idega. All Rights Reserved.
  *
@@ -28,10 +28,10 @@ import com.idega.webface.model.WFDataModel;
 /**
  * Bean for listing articles.   
  * <p>
- * Last modified: $Date: 2005/01/04 15:18:18 $ by $Author: joakim $
+ * Last modified: $Date: 2005/01/10 10:18:58 $ by $Author: joakim $
  *
  * @author Anders Lindman
- * @version $Revision: 1.7 $
+ * @version $Revision: 1.8 $
  */
 
 public class ListArticlesBean implements WFListBean, Serializable {
@@ -134,7 +134,7 @@ public class ListArticlesBean implements WFListBean, Serializable {
 		}
 		try {
 //			ArticleItemBean[] articleItemBean = (ArticleItemBean[]) ArticleListBean.loadAllArticlesInFolder("/files/content").toArray(new ArticleItemBean[0]);
-			ArticleItemBean[] articleItemBean = (ArticleItemBean[]) ArticleListBean.loadAllArticlesInFolder(ContentUtil.CONTENT_PATH).toArray(new ArticleItemBean[0]);
+			ArticleItemBean[] articleItemBean = (ArticleItemBean[]) ArticleListBean.loadAllArticlesInFolder(ContentUtil.ARTICLE_PATH).toArray(new ArticleItemBean[0]);
 			int availableRows = articleItemBean.length;
 			
 			int nrOfRows = rows.intValue();

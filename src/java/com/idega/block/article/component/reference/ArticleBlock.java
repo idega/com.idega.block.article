@@ -1,5 +1,5 @@
 /*
- * $Id: ArticleBlock.java,v 1.3 2005/01/10 10:02:10 gimmi Exp $
+ * $Id: ArticleBlock.java,v 1.4 2005/01/10 10:21:44 joakim Exp $
  *
  * Copyright (C) 2004 Idega. All Rights Reserved.
  *
@@ -53,10 +53,10 @@ import com.idega.webface.test.bean.ManagedContentBeans;
 /**
  * Block for editing an article.   
  * <p>
- * Last modified: $Date: 2005/01/10 10:02:10 $ by $Author: gimmi $
+ * Last modified: $Date: 2005/01/10 10:21:44 $ by $Author: joakim $
  *
  * @author Anders Lindman
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
 public class ArticleBlock extends WFBlock implements ActionListener, ManagedContentBeans {
 
@@ -286,7 +286,7 @@ public class ArticleBlock extends WFBlock implements ActionListener, ManagedCont
 		p.getChildren().add(WFUtil.group(WFUtil.getTextVB(bref + "category"), WFUtil.getText(":")));
 		HtmlInputText categoryInput = WFUtil.getInputText(MAIN_CATEGORY_ID, ref + "mainCategory");
 		if(null==categoryInput.getValue() || "".equals(categoryInput.getValue())) {
-			categoryInput.setValue(ContentUtil.CONTENT_PATH);
+			categoryInput.setValue(ContentUtil.ARTICLE_PATH);
 		}
 		categoryInput.setSize(40);
 		p.getChildren().add(categoryInput);		

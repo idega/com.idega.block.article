@@ -1,5 +1,5 @@
 /*
- * $Id: SearchArticleBean.java,v 1.3 2005/01/04 15:18:18 joakim Exp $
+ * $Id: SearchArticleBean.java,v 1.4 2005/01/10 10:19:23 joakim Exp $
  *
  * Copyright (C) 2004 Idega. All Rights Reserved.
  *
@@ -28,10 +28,10 @@ import com.idega.webface.model.WFDataModel;
 /**
  * Bean for searching articles.   
  * <p>
- * Last modified: $Date: 2005/01/04 15:18:18 $ by $Author: joakim $
+ * Last modified: $Date: 2005/01/10 10:19:23 $ by $Author: joakim $
  *
  * @author Anders Lindman
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
 
 public class SearchArticleBean implements WFListBean, Serializable {
@@ -197,7 +197,7 @@ public class SearchArticleBean implements WFListBean, Serializable {
 		}
 		ArticleItemBean[] articleItemBean;
 		try {
-			articleItemBean = (ArticleItemBean[]) ArticleListBean.loadAllArticlesInFolder(ContentUtil.CONTENT_PATH).toArray(new ArticleItemBean[0]);
+			articleItemBean = (ArticleItemBean[]) ArticleListBean.loadAllArticlesInFolder(ContentUtil.ARTICLE_PATH).toArray(new ArticleItemBean[0]);
 			int availableRows = articleItemBean.length;
 
 			int nrOfRows = rows.intValue();
