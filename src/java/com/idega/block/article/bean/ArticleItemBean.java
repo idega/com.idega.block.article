@@ -1,5 +1,5 @@
 /*
- * $Id: ArticleItemBean.java,v 1.29 2005/03/01 11:22:31 gummi Exp $
+ * $Id: ArticleItemBean.java,v 1.30 2005/03/02 15:03:19 joakim Exp $
  *
  * Copyright (C) 2004 Idega. All Rights Reserved.
  *
@@ -11,7 +11,6 @@ package com.idega.block.article.bean;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -50,10 +49,10 @@ import com.idega.xmlns.block.article.document.ArticleDocument;
 /**
  * Bean for idegaWeb article content items.   
  * <p>
- * Last modified: $Date: 2005/03/01 11:22:31 $ by $Author: gummi $
+ * Last modified: $Date: 2005/03/02 15:03:19 $ by $Author: joakim $
  *
  * @author Anders Lindman
- * @version $Revision: 1.29 $
+ * @version $Revision: 1.30 $
  */
 
 public class ArticleItemBean extends ContentItemBean implements Serializable, ContentItem {
@@ -86,7 +85,7 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 	
 	private final static String[] ATTRIBUTE_ARRAY = new String[] {FIELDNAME_AUTHOR,FIELDNAME_CREATION_DATE,FIELDNAME_HEADLINE,FIELDNAME_TEASER,FIELDNAME_BODY};
 
-	XMLNamespace idegans = new XMLNamespace("http://xmlns.idega.com/block/article/document");
+	XMLNamespace idegans = new XMLNamespace("http://xmlns.idega.com/block/article/xml");
 	
 	/**
 	 * Default constructor.
@@ -370,7 +369,7 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 				filePath += "/"+getArticleName();
 			}else {	//Create new file(name)
 				filePath = getArticlePath(service);
-				parentPath = new File(filePath).getParent();
+				parentPath = ContentUtil.getParentPath(filePath);
 			}
 //			File file = new File(path);
 			
@@ -438,7 +437,7 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 	 * Loads an xml file specified by the webdav resource
 	 * The beans atributes are then set according to the information in the XML file
 	 */
-	public void load(WebdavExtendedResource webdavResource) throws IOException {
+	public boolean load(WebdavExtendedResource webdavResource) throws IOException {
 		XMLParser builder = new XMLParser();
 		XMLDocument bodyDoc = null;
 		try {
@@ -519,7 +518,9 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 			Logger log = Logger.getLogger(this.getClass().toString());
 			log.warning("Article xml file was not found");
 			setRendered(false);
+			return false;
 		}
+		return true;
 //	    setFilename();
 //		setFolderLocation(bodyElement.getChild(FIELDNAME_FOLDER_LOCATION,idegans).getText());
 	}
