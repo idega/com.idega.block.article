@@ -1,5 +1,5 @@
 /*
- * $Id: EditArticleBlock.java,v 1.24 2005/03/07 15:29:55 joakim Exp $
+ * $Id: EditArticleBlock.java,v 1.25 2005/03/07 16:11:33 gummi Exp $
  *
  * Copyright (C) 2004 Idega. All Rights Reserved.
  *
@@ -56,10 +56,10 @@ import com.idega.webface.WFUtil;
 import com.idega.webface.htmlarea.HTMLArea;
 
 /**
- * Last modified: $Date: 2005/03/07 15:29:55 $ by $Author: joakim $
+ * Last modified: $Date: 2005/03/07 16:11:33 $ by $Author: gummi $
  *
  * @author Joakim
- * @version $Revision: 1.24 $
+ * @version $Revision: 1.25 $
  */
 public class EditArticleBlock extends IWBaseComponent implements ManagedContentBeans, ActionListener, ValueChangeListener {
 	public final static String EDIT_ARTICLE_BLOCK_ID = "edit_articles_block";
@@ -254,7 +254,7 @@ public class EditArticleBlock extends IWBaseComponent implements ManagedContentB
 		p.getChildren().add(WFUtil.group(localizer.getTextVB("status"), WFUtil.getText(":")));
 		p.getChildren().add(WFUtil.getTextVB(ref + "status"));
 		p.getChildren().add(WFUtil.group(localizer.getTextVB("current_version"), WFUtil.getText(":")));
-		p.getChildren().add(WFUtil.getTextVB(ref + "versionId"));
+		p.getChildren().add(WFUtil.getTextVB(ref + "versionName"));
 //		p.getChildren().add(WFUtil.getText(" "));
 //		p.getChildren().add(WFUtil.group(localizer.getHeaderTextVB("current_version"), 
 //				WFUtil.getTextVB(ref + "versionId")
