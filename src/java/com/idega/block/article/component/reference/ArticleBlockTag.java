@@ -1,5 +1,5 @@
 /*
- * $Id: ArticleBlockTag.java,v 1.1 2004/10/26 12:45:00 joakim Exp $
+ * $Id: ArticleBlockTag.java,v 1.1 2004/12/21 15:47:12 joakim Exp $
  *
  * Copyright (C) 2004 Idega. All Rights Reserved.
  *
@@ -7,14 +7,14 @@
  * Use is subject to license terms.
  *
  */
-package com.idega.block.article.component;
+package com.idega.block.article.component.reference;
 
 import javax.faces.webapp.UIComponentTag;
 
 /**
  * JSP tag for content system test/demo page. 
  * <p>
- * Last modified: $Date: 2004/10/26 12:45:00 $ by $Author: joakim $
+ * Last modified: $Date: 2004/12/21 15:47:12 $ by $Author: joakim $
  *
  * @author Anders Lindman
  * @version $Revision: 1.1 $

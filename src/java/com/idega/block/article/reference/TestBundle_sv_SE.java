@@ -1,4 +1,4 @@
-package com.idega.block.article;
+package com.idega.block.article.reference;
 
 import java.util.ListResourceBundle;
 

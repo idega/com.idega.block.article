@@ -1,5 +1,5 @@
 /*
- * $Id: ArticleBlock.java,v 1.11 2004/12/03 14:43:31 joakim Exp $
+ * $Id: ArticleBlock.java,v 1.1 2004/12/21 15:47:12 joakim Exp $
  *
  * Copyright (C) 2004 Idega. All Rights Reserved.
  *
@@ -7,7 +7,7 @@
  * Use is subject to license terms.
  *
  */
-package com.idega.block.article.component;
+package com.idega.block.article.component.reference;
 
 import java.io.IOException;
 import java.util.Iterator;
@@ -29,6 +29,7 @@ import javax.faces.convert.IntegerConverter;
 import javax.faces.event.ActionEvent;
 import javax.faces.event.ActionListener;
 import com.idega.block.article.PreviewArticlePage;
+import com.idega.block.article.component.ListArticlesBlock;
 import com.idega.webface.WFBlock;
 import com.idega.webface.WFComponentSelector;
 import com.idega.webface.WFContainer;
@@ -39,6 +40,7 @@ import com.idega.webface.WFPage;
 import com.idega.webface.WFPanelUtil;
 import com.idega.webface.WFPlainOutputText;
 import com.idega.webface.WFTabbedPane;
+import com.idega.webface.WFToolbar;
 import com.idega.webface.WFUtil;
 import com.idega.webface.convert.WFCommaSeparatedListConverter;
 import com.idega.webface.event.WFTabListener;
@@ -50,10 +52,10 @@ import com.idega.webface.test.bean.ManagedContentBeans;
 /**
  * Block for editing an article.   
  * <p>
- * Last modified: $Date: 2004/12/03 14:43:31 $ by $Author: joakim $
+ * Last modified: $Date: 2004/12/21 15:47:12 $ by $Author: joakim $
  *
  * @author Anders Lindman
- * @version $Revision: 1.11 $
+ * @version $Revision: 1.1 $
  */
 public class ArticleBlock extends WFBlock implements ActionListener, ManagedContentBeans {
 
@@ -128,6 +130,13 @@ public class ArticleBlock extends WFBlock implements ActionListener, ManagedCont
 	}
 	
 	/**
+	 * Constructs an ArticleBlock with the specified title key and taskbar listener. 
+	 */
+	public ArticleBlock(String titleKey) {
+		this(titleKey, null);
+	}
+	
+	/**
 	 * Constructs an ArticleBlock with the specified title key. 
 	 */
 	public ArticleBlock(String titleKey, WFTabListener taskbarListener) {
@@ -145,7 +154,7 @@ public class ArticleBlock extends WFBlock implements ActionListener, ManagedCont
 		tb.addTabVB(TASK_ID_PREVIEW, bref + "details", getPreviewContainer());
 		tb.addTabVB(TASK_ID_LIST, bref + "list", new ListArticlesBlock());
 		tb.addTabVB(TASK_ID_DETAILS, bref + "preview", new PreviewArticlePage());
-//		tb.addButtonVB(TASK_ID_MESSAGES, bref + "messages", getMessageContainer());
+		tb.addTabVB(TASK_ID_MESSAGES, bref + "messages", getMessageContainer());
 		tb.setSelectedMenuItemId(TASK_ID_EDIT);
 		if (taskbarListener != null) {
 			tb.addTabListener(taskbarListener);
@@ -159,11 +168,8 @@ public class ArticleBlock extends WFBlock implements ActionListener, ManagedCont
 //		mainArea.add(getEditContainer());
 	}
 	
-	/**
-	 * Constructs an ArticleBlock with the specified title key and taskbar listener. 
-	 */
-	public ArticleBlock(String titleKey) {
-		this(titleKey, null);
+	public WFToolbar getToolbar() {
+		return null;
 	}
 	
 	/*

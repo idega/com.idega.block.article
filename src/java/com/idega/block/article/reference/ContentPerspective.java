@@ -6,12 +6,12 @@
  * This software is the proprietary information of Idega hf.
  * Use is subject to license terms.
  */
-package com.idega.block.article;
+package com.idega.block.article.reference;
 
 import javax.faces.component.UIComponent;
 import javax.faces.event.ActionEvent;
 import com.idega.block.article.bean.ArticleListBean;
-import com.idega.block.article.component.ArticleBlock;
+import com.idega.block.article.component.reference.ArticleBlock;
 import com.idega.webface.WFBlock;
 import com.idega.webface.WFContainer;
 import com.idega.webface.WFList;
