@@ -1,0 +1,14 @@
+
+/*** General HTML definitions ***/
+
+/*** idegaWeb WebFace CSS classes ***/
+
+.article_headline {
+	font-family: Verdana, Arial, Helvetica, sans-serif;
+	font-size: 12px;
+	font-weight: bold;
+	background-color: #ECE9D8;
+	/*background-color: #EEEEEE;*/
+	margin: 0px;
+}
+
