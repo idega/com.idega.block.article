@@ -1,5 +1,5 @@
 /*
- * $Id: ArticleItemBean.java,v 1.33 2005/03/05 21:33:21 gummi Exp $
+ * $Id: ArticleItemBean.java,v 1.34 2005/03/06 17:28:23 gummi Exp $
  *
  * Copyright (C) 2004 Idega. All Rights Reserved.
  *
@@ -52,10 +52,10 @@ import com.idega.xmlns.block.article.document.ArticleDocument;
 /**
  * Bean for idegaWeb article content items.   
  * <p>
- * Last modified: $Date: 2005/03/05 21:33:21 $ by $Author: gummi $
+ * Last modified: $Date: 2005/03/06 17:28:23 $ by $Author: gummi $
  *
  * @author Anders Lindman
- * @version $Revision: 1.33 $
+ * @version $Revision: 1.34 $
  */
 
 public class ArticleItemBean extends ContentItemBean implements Serializable, ContentItem {
@@ -441,8 +441,14 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 			rootResource.proppatchMethod(articleFolderPath,new PropertyName("IW:",CONTENT_TYPE),"LocalizedFile",true);
 			
 			String article = getAsXML();
-			System.out.println(article);
-			rootResource.putMethod(session.getURI(filePath),article);
+//			System.out.println(article);
+			
+			//Conflict fix: uri for creating but path for updating
+			if(session.getExistence(filePath)){
+				rootResource.putMethod(filePath,article);
+			} else {
+				rootResource.putMethod(session.getURI(filePath),article);
+			}
 			rootResource.proppatchMethod(filePath,new PropertyName("IW:",CONTENT_TYPE),ARTICLE_FILENAME_SCOPE,true);
 			rootResource.close();
 			try {
