@@ -22,16 +22,6 @@
 	</tag>
 
 	<tag>
-		<name>article_item_view</name>
-		<tag-class>com.idega.block.article.taglib.ArticleItemViewTag</tag-class>
-		<attribute>
-			<name>id</name>
-			<required>false</required>
-			<rtexprvalue>false</rtexprvalue>
-		</attribute>
-	</tag>
-
-	<tag>
 		<name>cms_page</name>
 		<tag-class>com.idega.block.article.taglib.CMSPageTag</tag-class>
 		<attribute>
@@ -86,6 +76,26 @@
 		<tag-class>com.idega.block.article.component.reference.ArticleBlockTag</tag-class>
 		<attribute>
 			<name>id</name>
+			<required>false</required>
+			<rtexprvalue>false</rtexprvalue>
+		</attribute>
+	</tag>
+	
+	<tag>
+		<name>ArticleItemViewer</name>
+		<tag-class>com.idega.block.article.component.ArticleItemViewerTag</tag-class>
+		<attribute>
+			<name>id</name>
+			<required>false</required>
+			<rtexprvalue>false</rtexprvalue>
+		</attribute>
+		<attribute>
+			<name>renderDetailsCommand</name>
+			<required>false</required>
+			<rtexprvalue>false</rtexprvalue>
+		</attribute>
+		<attribute>
+			<name>showRequestedItem</name>
 			<required>false</required>
 			<rtexprvalue>false</rtexprvalue>
 		</attribute>

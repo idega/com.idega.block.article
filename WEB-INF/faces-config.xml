@@ -23,7 +23,7 @@
 
 	<component>
 		<component-type>ArticleItemView</component-type>
-		<component-class>com.idega.block.article.component.ArticleItemView</component-class>
+		<component-class>com.idega.block.article.component.ArticleItemViewer</component-class>
 	</component>
 	
 	<component>
