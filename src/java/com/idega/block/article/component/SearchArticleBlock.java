@@ -1,5 +1,5 @@
 /*
- * $Id: SearchArticleBlock.java,v 1.4 2005/02/07 10:59:53 gummi Exp $
+ * $Id: SearchArticleBlock.java,v 1.5 2005/03/05 16:27:29 eiki Exp $
  *
  * Copyright (C) 2004 Idega. All Rights Reserved.
  *
@@ -29,18 +29,20 @@ import com.idega.webface.convert.WFDateConverter;
 /**
  * Block for searching articles.   
  * <p>
- * Last modified: $Date: 2005/02/07 10:59:53 $ by $Author: gummi $
+ * Last modified: $Date: 2005/03/05 16:27:29 $ by $Author: eiki $
  *
  * @author Anders Lindman
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  */
 public class SearchArticleBlock extends WFBlock implements ManagedContentBeans, ActionListener, Serializable {
+
+	private static final long serialVersionUID = 3256441400122814775L;
 
 	public final static String SEARCH_ARTICLE_BLOCK_ID = "search_article_block";
 
 	
 	private final static String P = "search_article_block_"; // Id prefix
-	
+	 
 	private final static String SEARCH_TEXT_ID = P + "search_text";
 	private final static String SEARCH_AUTHOR_ID = P + "search_author";
 	private final static String SEARCH_CATEGORY_ID = P + "search_category";
@@ -55,24 +57,40 @@ public class SearchArticleBlock extends WFBlock implements ManagedContentBeans, 
 	 * Default contructor.
 	 */
 	public SearchArticleBlock() {
+		setId(SEARCH_ARTICLE_BLOCK_ID);
+		WFUtil.invoke(SEARCH_ARTICLE_BEAN_ID, "setArticleLinkListener", this, ActionListener.class);
 	}
 	
 	/**
 	 * Constructs an ArticleBlock with the specified title key. 
 	 */
-	public SearchArticleBlock(String titleKey) {
-		super(titleKey);
-		setId(SEARCH_ARTICLE_BLOCK_ID);
-		
-		WFUtil.invoke(SEARCH_ARTICLE_BEAN_ID, "setArticleLinkListener", this, ActionListener.class);
-
-		add(new ArticleBar());
+//	public SearchArticleBlock(String titleKey) {
+//		super(titleKey);
+//		setId(SEARCH_ARTICLE_BLOCK_ID);
+//		
+//		WFUtil.invoke(SEARCH_ARTICLE_BEAN_ID, "setArticleLinkListener", this, ActionListener.class);
+//
+//	//	add(new ArticleBar());
+//		add(getSearchPanel());
+//		add(WFUtil.getBreak());
+//		add(getSearchResultList());
+//		add(WFUtil.getBreak());
+//	}
+	
+	
+	
+	
+	
+	/* (non-Javadoc)
+	 * @see com.idega.presentation.IWBaseComponent#initializeContent()
+	 */
+	protected void initializeContent() {
 		add(getSearchPanel());
 		add(WFUtil.getBreak());
 		add(getSearchResultList());
 		add(WFUtil.getBreak());
 	}
-	
+
 	/*
 	 * Creates a search form panel.
 	 */
