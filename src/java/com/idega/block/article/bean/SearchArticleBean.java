@@ -1,5 +1,5 @@
 /*
- * $Id: SearchArticleBean.java,v 1.7 2005/02/14 15:16:34 gummi Exp $
+ * $Id: SearchArticleBean.java,v 1.8 2005/03/05 17:21:48 gummi Exp $
  *
  * Copyright (C) 2004 Idega. All Rights Reserved.
  *
@@ -11,32 +11,61 @@ package com.idega.block.article.bean;
 
 import java.io.IOException;
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.Date;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import javax.faces.component.UIColumn;
+import javax.faces.component.UIComponent;
 import javax.faces.component.html.HtmlCommandLink;
 import javax.faces.component.html.HtmlOutputText;
 import javax.faces.event.ActionListener;
 import javax.faces.model.DataModel;
+import org.apache.webdav.lib.search.CompareOperator;
+import org.apache.webdav.lib.search.SearchException;
+import org.apache.webdav.lib.search.SearchExpression;
+import org.apache.webdav.lib.search.SearchRequest;
+import org.apache.webdav.lib.search.SearchScope;
 import org.apache.xmlbeans.XmlException;
 import com.idega.block.article.business.ArticleUtil;
+import com.idega.business.IBOLookup;
+import com.idega.content.bean.ContentItemBeanComparator;
+import com.idega.content.business.ContentSearch;
+import com.idega.content.presentation.ContentBlock;
+import com.idega.core.search.business.Search;
+import com.idega.core.search.business.SearchQuery;
+import com.idega.core.search.business.SearchResult;
+import com.idega.core.search.data.AdvancedSearchQuery;
+import com.idega.presentation.IWContext;
+import com.idega.slide.business.IWSlideSession;
+import com.idega.slide.util.IWSlideConstants;
+import com.idega.util.IWTimestamp;
 import com.idega.webface.WFUtil;
+import com.idega.webface.bean.AbstractWFEditableListManagedBean;
+import com.idega.webface.bean.WFEditableListDataBean;
 import com.idega.webface.bean.WFListBean;
 import com.idega.webface.model.WFDataModel;
 
 /**
  * Bean for searching articles.   
  * <p>
- * Last modified: $Date: 2005/02/14 15:16:34 $ by $Author: gummi $
+ * Last modified: $Date: 2005/03/05 17:21:48 $ by $Author: gummi $
  *
  * @author Anders Lindman
- * @version $Revision: 1.7 $
+ * @version $Revision: 1.8 $
  */
 
-public class SearchArticleBean implements WFListBean, Serializable {
+public class SearchArticleBean extends AbstractWFEditableListManagedBean implements WFListBean, Serializable {
 	
 	public final static String ARTICLE_ID = "article_id";
+	
+	protected String[] localizationKey = new String[] { "Headline", "Published", "Author", "Status" };
+
 	
 	private WFDataModel _dataModel = null;
 	private ActionListener _articleLinkListener = null;
@@ -57,51 +86,7 @@ public class SearchArticleBean implements WFListBean, Serializable {
 	private Map _allCategories = null;
 	
 	private String[] testColumnHeaders = { "Headline", "Published", "Author", "Status" };				
-/*
-	private String[] testHeadlines = {
-		"Electronic Reykjavik built with IdegaWeb eGov",
-		"Idega represented in the Baltic",
-		"Idega and Agura IT at the Markus Evans eGovernment Europe 2004...",
-		"Täby Municipality in Sweden now using IdegaWeb eGOV",
-		"Code name : Check & Peng",
-		"Conference sucess 'Electric Community - Here and now !'",
-		"Vinbud.is (idegaWeb) voted best corporate website 2003 in Iceland",
-		"The new Landsteinar-Strengur website implemented in IdegaWeb"
-	};
-	
-	private String[] testPublished = {
-		"4/20/04 3:04 PM",
-		"4/20/04 3:00 PM",
-		"4/14/04 2:48 PM",
-		"4/14/04 2:32 PM",
-		"4/14/04 12:17 PM",
-		"12/5/03 3:02 PM",
-		"10/30/03 3:10 PM",
-		"10/27/03"				
-	};
-	
-	private String[] testAuthors = {
-		"Anderson",
-		"Isildur",
-		"Rappson",
-		"Trappson",
-		"Snap",
-		"Rappson",
-		"Anderson",
-		"Trapp"
-	};
-	
-	private String[] testStatus = {
-		"Published",
-		"Published",
-		"Published",
-		"Published",
-		"Published",
-		"Expired", // red text
-		"Published",
-		"Published"
-	};
-*/
+
 	/**
 	 * Default constructor.
 	 */
@@ -174,43 +159,111 @@ public class SearchArticleBean implements WFListBean, Serializable {
 		return _allCategories;
 	}
 
-	/**
-	 * @see com.idega.webface.bean.WFListBean#getDataModel() 
-	 */
-	public DataModel getDataModel() {
-		return _dataModel;
-	}
+//	/**
+//	 * @see com.idega.webface.bean.WFListBean#getDataModel() 
+//	 */
+//	public DataModel getDataModel() {
+//		return _dataModel;
+//	}
+//	
+//	/**
+//	 * @see com.idega.webface.bean.WFListBean#setDataModel() 
+//	 */
+//	public void setDataModel(DataModel dataModel) {
+//		_dataModel = (WFDataModel) dataModel;
+//	}
+//	
+//	/**
+//	 * @see com.idega.webface.bean.WFListBean#updateDataModel() 
+//	 */
+//	public void updateDataModel(Integer start, Integer rows) {
+//		if (_dataModel == null) {
+//			_dataModel = new WFDataModel();
+//		}
+//		ArticleItemBean[] articleItemBean;
+//		try {
+//			articleItemBean = (ArticleItemBean[]) ArticleListBean.loadAllArticlesInFolder(ArticleUtil.getArticleRootPath()).toArray(new ArticleItemBean[0]);
+//			int availableRows = articleItemBean.length;
+//
+//			int nrOfRows = rows.intValue();
+//			if (nrOfRows == 0) {
+//				nrOfRows = availableRows;
+//			}
+//			int maxRow = Math.min(start.intValue() + nrOfRows,availableRows);
+//			for (int i = start.intValue(); i < maxRow; i++) {
+//				String id = articleItemBean[i].getFolderLocation()+"/"+articleItemBean[i].getHeadline()+ArticleItemBean.ARTICLE_SUFFIX;
+//				ArticleListBean bean = new ArticleListBean(id, articleItemBean[i].getHeadline(), "", articleItemBean[i].getAuthor(), articleItemBean[i].getStatus());
+//				_dataModel.set(bean, i);
+//			}
+//			_dataModel.setRowCount(availableRows);
+//		}
+//		catch (XmlException e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		}
+//		catch (IOException e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		}
+//	}
 	
-	/**
-	 * @see com.idega.webface.bean.WFListBean#setDataModel() 
-	 */
-	public void setDataModel(DataModel dataModel) {
-		_dataModel = (WFDataModel) dataModel;
-	}
-	
-	/**
-	 * @see com.idega.webface.bean.WFListBean#updateDataModel() 
-	 */
-	public void updateDataModel(Integer start, Integer rows) {
-		if (_dataModel == null) {
-			_dataModel = new WFDataModel();
-		}
-		ArticleItemBean[] articleItemBean;
-		try {
-			articleItemBean = (ArticleItemBean[]) ArticleListBean.loadAllArticlesInFolder(ArticleUtil.getArticleRootPath()).toArray(new ArticleItemBean[0]);
-			int availableRows = articleItemBean.length;
 
-			int nrOfRows = rows.intValue();
-			if (nrOfRows == 0) {
-				nrOfRows = availableRows;
-			}
-			int maxRow = Math.min(start.intValue() + nrOfRows,availableRows);
-			for (int i = start.intValue(); i < maxRow; i++) {
-				String id = articleItemBean[i].getFolderLocation()+"/"+articleItemBean[i].getHeadline()+ArticleItemBean.ARTICLE_SUFFIX;
-				ArticleListBean bean = new ArticleListBean(id, articleItemBean[i].getHeadline(), "", articleItemBean[i].getAuthor(), articleItemBean[i].getStatus());
-				_dataModel.set(bean, i);
-			}
-			_dataModel.setRowCount(availableRows);
+	
+	/**
+	 * Generates a search result from the current bean search values. 
+	 */
+	public void search() {
+//		ArticleListBean a = new ArticleListBean("100", "Search result", "...", "...", "...");
+//		_dataModel.set(a, _dataModel.getRowCount());
+//		_dataModel.setRowCount(_dataModel.getRowCount() + 1);		
+	}
+
+	/* (non-Javadoc)
+	 * @see com.idega.webface.bean.AbstractWFEditableListManagedBean#getData()
+	 */
+	public WFEditableListDataBean[] getData() {
+		List beans = getContentItems();
+		if(beans!=null){
+			return (ArticleSearchResultBean[])beans.toArray(new ArticleSearchResultBean[beans.size()]);
+		} else {
+			return new ArticleSearchResultBean[0];
+		}
+	}
+
+	/* (non-Javadoc)
+	 * @see com.idega.webface.bean.AbstractWFEditableListManagedBean#getNumberOfColumns()
+	 */
+	public int getNumberOfColumns() {
+		return 4;
+	}
+
+	/* (non-Javadoc)
+	 * @see com.idega.webface.bean.AbstractWFEditableListManagedBean#getUIComponent(java.lang.String, int)
+	 */
+	public UIComponent getUIComponent(String var, int columnIndex) {
+		HtmlOutputText t = new HtmlOutputText();
+		t.setStyleClass("wf_listtext");
+		return t;
+	}
+
+	/* (non-Javadoc)
+	 * @see com.idega.webface.bean.AbstractWFEditableListManagedBean#getHeader(int)
+	 */
+	public UIComponent getHeader(int columnIndex) {
+		return ArticleUtil.getBundle().getLocalizedText(localizationKey[columnIndex]);
+	}
+	
+	
+	/* (non-Javadoc)
+	 * @see com.idega.content.bean.ContentListViewerManagedBean#getContentItems()
+	 */
+	public List getContentItems() {
+		try {
+			List l = loadAllArticlesInFolder(ArticleUtil.getArticleRootPath());
+			ContentItemBeanComparator c = new ContentItemBeanComparator();
+			c.setReverseOrder(true);
+			Collections.sort(l,c);
+			return l;
 		}
 		catch (XmlException e) {
 			// TODO Auto-generated catch block
@@ -220,47 +273,119 @@ public class SearchArticleBean implements WFListBean, Serializable {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+		return new ArrayList();
 	}
 	
+	
+	
 	/**
-	 * @see com.idega.webface.bean.WFListBean#createColumns() 
+	 * Loads all xml files in the given folder
+	 * @param folder
+	 * @return List containing ArticleItemBean
+	 * @throws XmlException
+	 * @throws IOException
 	 */
-	public UIColumn[] createColumns(String var) {
-		int cols = testColumnHeaders.length;
-		UIColumn[] columns = new UIColumn[cols];
-
-		for (int i = 0; i < cols; i++) {
-			UIColumn c = new UIColumn();
-			c.setHeader(WFUtil.getText(testColumnHeaders[i]));
-			columns[i] = c;
+	public List loadAllArticlesInFolder(String folder) throws XmlException, IOException{
+		List list = new ArrayList();		
+		
+		IWContext iwc = IWContext.getInstance();
+		
+		SearchQuery query = new AdvancedSearchQuery();
+		
+		List categories = null;
+		
+		IWTimestamp oldest = null;
+		int numberOfDaysDisplayed = -1;
+		if(numberOfDaysDisplayed > 0){
+			oldest = IWTimestamp.RightNow();
+			oldest.addDays(-numberOfDaysDisplayed);
 		}
 		
-		String styleAttr =  var + ".testStyle";
-		HtmlCommandLink l = WFUtil.getListLinkVB(var + ".headline");
-		l.setId(ARTICLE_ID);
-		WFUtil.setValueBinding(l, "style", styleAttr);
-		l.addActionListener(_articleLinkListener);
-		WFUtil.addParameterVB(l, "id", var + ".id");
-		columns[0].getChildren().add(l);
-		HtmlOutputText t = WFUtil.getListTextVB(var + ".published");
-		WFUtil.setValueBinding(t, "style", styleAttr);
-		columns[1].getChildren().add(t);
-		t = WFUtil.getListTextVB(var + ".author");
-		WFUtil.setValueBinding(t, "style", styleAttr);
-		columns[2].getChildren().add(t);
-		t = WFUtil.getListTextVB(var + ".status");
-		WFUtil.setValueBinding(t, "style", styleAttr);
-		columns[3].getChildren().add(t);		
 		
-		return columns;
+		try {
+			String scope = folder;
+			IWSlideSession session = (IWSlideSession)IBOLookup.getSessionInstance(iwc,IWSlideSession.class);
+			if(scope != null){
+				if(scope.startsWith(session.getWebdavServerURI())){
+					scope = scope.substring(session.getWebdavServerURI().length());
+				}
+				if(scope.startsWith("/")){
+					scope = scope.substring(1);
+				}
+			}
+			ContentSearch searchBusiness = new ContentSearch(iwc.getIWMainApplication());
+			Search search = searchBusiness.createSearch(getSearchRequest(scope, iwc.getCurrentLocale(), oldest,categories));
+			Collection results = search.getSearchResults();
+			
+			if(results!=null){				
+				for (Iterator iter = results.iterator(); iter.hasNext();) {
+					SearchResult result = (SearchResult) iter.next();
+					try {
+						System.out.println("Attempting to load "+result.getSearchResultURI());
+						ArticleItemBean article = new ArticleSearchResultBean();
+						article.load(result.getSearchResultURI());
+						list.add(article);
+					}catch(Exception e) {
+						e.printStackTrace();
+					}
+				}
+			}
+		}
+		catch (SearchException e1) {
+			e1.printStackTrace();
+		}
+		
+
+		return list;
 	}
-	
+
 	/**
-	 * Generates a search result from the current bean search values. 
+	 * @param folder
+	 * @param localeString
+	 * @param oldest
+	 * @param categoryList
+	 * @throws SearchException
 	 */
-	public void search() {
-		ArticleListBean a = new ArticleListBean("100", "Search result", "...", "...", "...");
-		_dataModel.set(a, _dataModel.getRowCount());
-		_dataModel.setRowCount(_dataModel.getRowCount() + 1);		
+	public SearchRequest getSearchRequest(String scope, Locale locale, IWTimestamp oldest, List categoryList) throws SearchException {
+		SearchRequest s = new SearchRequest();
+		s.addSelection(IWSlideConstants.PROPERTY_CREATION_DATE);
+		s.addSelection(IWSlideConstants.PROPERTY_CATEGORY);
+		s.addScope(new SearchScope(scope));
+		SearchExpression expression = null;
+		
+		
+		String localeString = ""; //((locale!=null)?locale.getLanguage():"");
+		SearchExpression namePatternExpression = s.compare(CompareOperator.LIKE, IWSlideConstants.PROPERTY_DISPLAY_NAME,"%"+localeString+".article");;
+		expression = namePatternExpression;
+		
+		SearchExpression creationDateExpression = null;		
+		if(oldest != null){
+			creationDateExpression = s.compare(CompareOperator.GTE, IWSlideConstants.PROPERTY_CREATION_DATE,oldest.getDate());
+			expression = s.and(expression,creationDateExpression);
+		}
+		
+		List categoryExpressions = new ArrayList();
+		if(categoryList != null){
+			for (Iterator iter = categoryList.iterator(); iter.hasNext();) {
+				String categoryName = (String) iter.next();
+				categoryExpressions.add(s.compare(CompareOperator.LIKE,IWSlideConstants.PROPERTY_CATEGORY,"%"+categoryName+"%"));
+			}
+			Iterator expr = categoryExpressions.iterator();
+			if(expr.hasNext()){
+				SearchExpression categoryExpression = (SearchExpression)expr.next();
+				while(expr.hasNext()){
+					categoryExpression = s.or(categoryExpression,(SearchExpression)expr.next());
+				}
+				expression = s.and(expression,categoryExpression);
+			}
+		}
+		
+		
+		
+		s.setWhereExpression(expression);
+		System.out.println("------------------------");
+		System.out.println(s.asString());
+		System.out.println("------------------------");
+		return s;
 	}
 }
