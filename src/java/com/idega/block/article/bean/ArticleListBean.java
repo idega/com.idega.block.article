@@ -1,5 +1,5 @@
 /*
- * $Id: ArticleListBean.java,v 1.7 2004/12/14 11:59:29 gummi Exp $
+ * $Id: ArticleListBean.java,v 1.8 2004/12/14 14:59:12 joakim Exp $
  *
  * Copyright (C) 2004 Idega. All Rights Reserved.
  *
@@ -18,8 +18,6 @@ import javax.faces.component.html.HtmlCommandLink;
 import javax.faces.component.html.HtmlOutputText;
 import javax.faces.event.ActionListener;
 import javax.faces.model.DataModel;
-import org.apache.commons.httpclient.HttpURL;
-import org.apache.webdav.lib.WebdavResource;
 import org.apache.xmlbeans.XmlException;
 import com.idega.business.IBOLookup;
 import com.idega.idegaweb.IWApplicationContext;
@@ -36,10 +34,10 @@ import com.idega.webface.model.WFDataModel;
 /**
  * Bean for article list rows.   
  * <p>
- * Last modified: $Date: 2004/12/14 11:59:29 $ by $Author: gummi $
+ * Last modified: $Date: 2004/12/14 14:59:12 $ by $Author: joakim $
  *
  * @author Anders Lindman
- * @version $Revision: 1.7 $
+ * @version $Revision: 1.8 $
  */
 
 public class ArticleListBean implements WFListBean, Serializable {
