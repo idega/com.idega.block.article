@@ -4,7 +4,7 @@
   <extend>${base.project.dir}/block-dependencies.xml</extend>
   <name>idegaWeb Article</name>
   <artifactId>com.idega.block.article</artifactId>
-  <currentVersion>0.2.0</currentVersion>
+  <currentVersion>0.3.0-SNAPSHOT</currentVersion>
   <inceptionYear>2003</inceptionYear>
   <shortDescription>Articles</shortDescription>
   <description>idegaWeb article is a component for content management of articles</description>
@@ -43,8 +43,8 @@
     <dependency>
       <groupId>bundles</groupId>
       <artifactId>com.idega.core</artifactId>
-      <version>3.0.0</version>
-      <!--version>SNAPSHOT</version-->
+      <!--version>3.0.0</version-->
+      <version>SNAPSHOT</version>
       <type>jar</type>
       <url>http://www.idega.com/</url>
       <properties>
@@ -54,8 +54,8 @@
     <dependency>
       <groupId>bundles</groupId>
       <artifactId>com.idega.webface</artifactId>
-      <version>0.9.0</version>
-      <!--version>SNAPSHOT</version-->
+      <!--version>0.9.0</version-->
+      <version>SNAPSHOT</version>
       <type>jar</type>
       <url>http://www.idega.com/</url>
       <properties>
@@ -65,8 +65,8 @@
     <dependency>
       <groupId>bundles</groupId>
       <artifactId>com.idega.content</artifactId>
-      <version>0.6.0</version>
-      <!--version>SNAPSHOT</version-->
+      <!--version>0.6.0</version-->
+      <version>SNAPSHOT</version>
       <type>jar</type>
       <url>http://www.idega.com/</url>
       <properties>
@@ -76,8 +76,8 @@
     <dependency>
       <groupId>bundles</groupId>
       <artifactId>com.idega.slide</artifactId>
-      <version>0.4.0</version>
-      <!--version>SNAPSHOT</version-->
+      <!--version>0.4.0</version-->
+      <version>SNAPSHOT</version>
       <type>jar</type>
       <url>http://www.idega.com/</url>
       <properties>
