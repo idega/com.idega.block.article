@@ -1,5 +1,5 @@
 /*
- * $Id: CMSPage.java,v 1.8 2004/11/17 14:39:37 joakim Exp $
+ * $Id: CMSPage.java,v 1.9 2004/12/21 15:39:35 joakim Exp $
  *
  * Copyright (C) 2004 Idega. All Rights Reserved.
  *
@@ -11,22 +11,17 @@ package com.idega.block.article;
 
 import java.io.IOException;
 import java.io.Serializable;
-import javax.faces.component.UICommand;
 import javax.faces.component.UIComponent;
-import javax.faces.component.html.HtmlCommandButton;
-import javax.faces.component.html.HtmlPanelGrid;
 import javax.faces.context.FacesContext;
 import javax.faces.event.ActionEvent;
 import javax.faces.event.ActionListener;
 import org.apache.xmlbeans.XmlException;
 import com.idega.block.article.bean.ArticleItemBean;
-import com.idega.block.article.component.ArticleBlock;
 import com.idega.block.article.component.ArticleVersionBlock;
+import com.idega.block.article.component.EditArticleBlock;
 import com.idega.webface.WFBlock;
-import com.idega.webface.WFContainer;
 import com.idega.webface.WFList;
 import com.idega.webface.WFPage;
-import com.idega.webface.WFPanelUtil;
 import com.idega.webface.WFTab;
 import com.idega.webface.WFTabbedPane;
 import com.idega.webface.WFUtil;
@@ -39,10 +34,10 @@ import com.idega.webface.test.bean.ManagedContentBeans;
 /**
  * Content management system test/demo page. 
  * <p>
- * Last modified: $Date: 2004/11/17 14:39:37 $ by $Author: joakim $
+ * Last modified: $Date: 2004/12/21 15:39:35 $ by $Author: joakim $
  *
  * @author Anders Lindman
- * @version $Revision: 1.8 $
+ * @version $Revision: 1.9 $
  */
 public class CMSPage extends WFPage implements  ManagedContentBeans, WFTabListener, ActionListener, Serializable {
 	
@@ -129,6 +124,7 @@ public class CMSPage extends WFPage implements  ManagedContentBeans, WFTabListen
 	/**
 	 * Returns the main task bar selector. 
 	 */
+	/*
 	protected UIComponent getMainTaskbar() {
 		String bref = WFPage.CONTENT_BUNDLE + ".";
 		WFTabbedPane tb = new WFTabbedPane();
@@ -152,10 +148,11 @@ public class CMSPage extends WFPage implements  ManagedContentBeans, WFTabListen
 		
 		return tb;
 	}
-	
+	*/
 	/**
 	 * Returns the content admin perspective.
 	 */
+	/*
 	protected UIComponent getContentPerspective() {
 		HtmlPanelGrid p = WFPanelUtil.getApplicationPanel();
 		p.getChildren().add(getFunctionBlock());		
@@ -165,10 +162,11 @@ public class CMSPage extends WFPage implements  ManagedContentBeans, WFTabListen
 		p.getChildren().add(c);
 		return p;
 	}
-	
+	*/
 	/**
 	 * Returns the content edit perspective.
 	 */
+	/*
 	protected UIComponent getEditPerspective() {
 		String bref = WFPage.CONTENT_BUNDLE + ".";
 		HtmlPanelGrid ap = WFPanelUtil.getApplicationPanel();
@@ -183,7 +181,7 @@ public class CMSPage extends WFPage implements  ManagedContentBeans, WFTabListen
 		ap.getChildren().add(c);
 		return ap;
 	}
-	
+	*/
 	/**
 	 * Returns the function block containing a view menu.
 	 */
@@ -246,16 +244,16 @@ public class CMSPage extends WFPage implements  ManagedContentBeans, WFTabListen
 	 */
 	public void processAction(ActionEvent event) {
 		UIComponent link = event.getComponent();
-		ArticleBlock ab = null;
+//		EditArticleBlock ab = null;
 		
 		String id = WFUtil.getParameter(link, "id");
 		UIComponent component = link.getParent().getParent().getParent().findComponent(MAIN_TASKBAR_ID);
-		if(component instanceof WFTabbedPane){
-			WFTabbedPane tb = (WFTabbedPane) component;
-			tb.setSelectedMenuItemId(TASK_ID_EDIT);
-			ab = (ArticleBlock) tb.findComponent(ArticleBlock.ARTICLE_BLOCK_ID);
-			ab.setEditMode();
-		}
+//		if(component instanceof WFTabbedPane){
+//			WFTabbedPane tb = (WFTabbedPane) component;
+//			tb.setSelectedMenuItemId(TASK_ID_EDIT);
+//			ab = (EditArticleBlock) tb.findComponent(EditArticleBlock.ARTICLE_BLOCK_ID);
+//			ab.setEditMode();
+//		}
 
 		ArticleItemBean articleItem = new ArticleItemBean();
 		try {
@@ -296,10 +294,10 @@ public class CMSPage extends WFPage implements  ManagedContentBeans, WFTabListen
 			e.printStackTrace();
 		}
 
-		
-		if(ab!=null){
-			ab.updateEditButtons();
-		}
+//		
+//		if(ab!=null){
+//			ab.updateEditButtons();
+//		}
 	}
 	
 	private String notNull(String str) {
@@ -315,8 +313,9 @@ public class CMSPage extends WFPage implements  ManagedContentBeans, WFTabListen
 	public void setEditMode() {
 		WFTabbedPane tb = (WFTabbedPane) findComponent(MAIN_TASKBAR_ID);
 		tb.setSelectedMenuItemId(TASK_ID_EDIT);
-		ArticleBlock ab = (ArticleBlock) tb.findComponent(ArticleBlock.ARTICLE_BLOCK_ID);
-		ab.setEditMode();		
+		EditArticleBlock ab = (EditArticleBlock) tb.findComponent(EditArticleBlock.EDIT_ARTICLE_BLOCK_ID);
+		//TODO (JJ) what is this... should not be needed.
+//		ab.setEditMode();		
 	}
 	
 	/**
@@ -326,7 +325,8 @@ public class CMSPage extends WFPage implements  ManagedContentBeans, WFTabListen
 	public void tabPressed(WFTabEvent e) {
 		WFTabbedPane t = e.getTaskbar();
 		UIComponent articleVersionBlock = t.findComponent(ArticleVersionBlock.ARTICLE_VERSION_BLOCK_ID);
-		if (t.getSelectedMenuItemId().equals(ArticleBlock.TASK_ID_PREVIEW)) {
+//		TODO (JJ) what is this... should not be needed.
+		if (t.getSelectedMenuItemId().equals(EditArticleBlock.TASK_ID_PREVIEW)) {
 			articleVersionBlock.setRendered(true);
 		} else {
 			articleVersionBlock.setRendered(false);			
