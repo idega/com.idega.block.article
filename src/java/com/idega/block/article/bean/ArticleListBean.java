@@ -1,5 +1,5 @@
 /*
- * $Id: ArticleListBean.java,v 1.6 2004/12/14 11:40:17 gummi Exp $
+ * $Id: ArticleListBean.java,v 1.7 2004/12/14 11:59:29 gummi Exp $
  *
  * Copyright (C) 2004 Idega. All Rights Reserved.
  *
@@ -27,7 +27,7 @@ import com.idega.idegaweb.IWUserContext;
 import com.idega.presentation.IWContext;
 import com.idega.slide.business.IWSlideService;
 import com.idega.slide.business.IWSlideSession;
-import com.idega.slide.utils.WebdavRootResource;
+import com.idega.slide.util.WebdavRootResource;
 import com.idega.webface.WFPage;
 import com.idega.webface.WFUtil;
 import com.idega.webface.bean.WFListBean;
@@ -36,10 +36,10 @@ import com.idega.webface.model.WFDataModel;
 /**
  * Bean for article list rows.   
  * <p>
- * Last modified: $Date: 2004/12/14 11:40:17 $ by $Author: gummi $
+ * Last modified: $Date: 2004/12/14 11:59:29 $ by $Author: gummi $
  *
  * @author Anders Lindman
- * @version $Revision: 1.6 $
+ * @version $Revision: 1.7 $
  */
 
 public class ArticleListBean implements WFListBean, Serializable {

@@ -1,5 +1,5 @@
 /*
- * $Id: ArticleItemBean.java,v 1.9 2004/12/14 11:40:17 gummi Exp $
+ * $Id: ArticleItemBean.java,v 1.10 2004/12/14 11:59:29 gummi Exp $
  *
  * Copyright (C) 2004 Idega. All Rights Reserved.
  *
@@ -24,7 +24,7 @@ import com.idega.idegaweb.IWUserContext;
 import com.idega.presentation.IWContext;
 import com.idega.slide.business.IWSlideService;
 import com.idega.slide.business.IWSlideSession;
-import com.idega.slide.utils.WebdavRootResource;
+import com.idega.slide.util.WebdavRootResource;
 import com.idega.webface.test.bean.ContentItemBean;
 import com.idega.webface.test.bean.ContentItemField;
 import com.idega.webface.test.bean.ContentItemFieldBean;
@@ -32,10 +32,10 @@ import com.idega.webface.test.bean.ContentItemFieldBean;
 /**
  * Bean for idegaWeb article content items.   
  * <p>
- * Last modified: $Date: 2004/12/14 11:40:17 $ by $Author: gummi $
+ * Last modified: $Date: 2004/12/14 11:59:29 $ by $Author: gummi $
  *
  * @author Anders Lindman
- * @version $Revision: 1.9 $
+ * @version $Revision: 1.10 $
  */
 
 public class ArticleItemBean extends ContentItemBean implements Serializable {
