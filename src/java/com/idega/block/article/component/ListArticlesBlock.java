@@ -1,5 +1,5 @@
 /*
- * $Id: ListArticlesBlock.java,v 1.4 2004/11/17 14:40:55 joakim Exp $
+ * $Id: ListArticlesBlock.java,v 1.5 2004/11/26 10:27:53 joakim Exp $
  *
  * Copyright (C) 2004 Idega. All Rights Reserved.
  *
@@ -34,10 +34,10 @@ import com.idega.webface.test.bean.ManagedContentBeans;
 /**
  * Block for listing articles.   
  * <p>
- * Last modified: $Date: 2004/11/17 14:40:55 $ by $Author: joakim $
+ * Last modified: $Date: 2004/11/26 10:27:53 $ by $Author: joakim $
  *
  * @author Anders Lindman
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  */
 public class ListArticlesBlock extends WFBlock implements ManagedContentBeans, ActionListener, Serializable {
 
@@ -197,12 +197,11 @@ public class ListArticlesBlock extends WFBlock implements ManagedContentBeans, A
 		
 		ArticleItemBean articleItem = new ArticleItemBean();
 		try {
-//			articleItem.load("/files/content/"+id+".xml");
 			articleItem.load(id);
 			WFUtil.invoke(ARTICLE_ITEM_BEAN_ID, "clear");
 
 			WFUtil.invoke(ARTICLE_ITEM_BEAN_ID, "setLocaleId", "en");
-			WFUtil.invoke(ARTICLE_ITEM_BEAN_ID, "setHeadline", notNull(articleItem.getHeadline())+" (id = " + id + ")");
+			WFUtil.invoke(ARTICLE_ITEM_BEAN_ID, "setHeadline", notNull(articleItem.getHeadline()));
 			WFUtil.invoke(ARTICLE_ITEM_BEAN_ID, "setTeaser", notNull(articleItem.getTeaser()));
 			WFUtil.invoke(ARTICLE_ITEM_BEAN_ID, "setBody", notNull(articleItem.getBody()));
 			WFUtil.invoke(ARTICLE_ITEM_BEAN_ID, "setAuthor", notNull(articleItem.getAuthor()));

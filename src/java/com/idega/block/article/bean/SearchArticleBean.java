@@ -1,5 +1,5 @@
 /*
- * $Id: SearchArticleBean.java,v 1.1 2004/10/26 12:45:00 joakim Exp $
+ * $Id: SearchArticleBean.java,v 1.2 2004/11/26 10:27:53 joakim Exp $
  *
  * Copyright (C) 2004 Idega. All Rights Reserved.
  *
@@ -9,17 +9,17 @@
  */
 package com.idega.block.article.bean;
 
+import java.io.IOException;
 import java.io.Serializable;
 import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.Map;
-
 import javax.faces.component.UIColumn;
 import javax.faces.component.html.HtmlCommandLink;
 import javax.faces.component.html.HtmlOutputText;
 import javax.faces.event.ActionListener;
 import javax.faces.model.DataModel;
-
+import org.apache.xmlbeans.XmlException;
 import com.idega.webface.WFUtil;
 import com.idega.webface.bean.WFListBean;
 import com.idega.webface.model.WFDataModel;
@@ -27,10 +27,10 @@ import com.idega.webface.model.WFDataModel;
 /**
  * Bean for searching articles.   
  * <p>
- * Last modified: $Date: 2004/10/26 12:45:00 $ by $Author: joakim $
+ * Last modified: $Date: 2004/11/26 10:27:53 $ by $Author: joakim $
  *
  * @author Anders Lindman
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 
 public class SearchArticleBean implements WFListBean, Serializable {
@@ -56,7 +56,7 @@ public class SearchArticleBean implements WFListBean, Serializable {
 	private Map _allCategories = null;
 	
 	private String[] testColumnHeaders = { "Headline", "Published", "Author", "Status" };				
-	
+/*
 	private String[] testHeadlines = {
 		"Electronic Reykjavik built with IdegaWeb eGov",
 		"Idega represented in the Baltic",
@@ -100,7 +100,7 @@ public class SearchArticleBean implements WFListBean, Serializable {
 		"Published",
 		"Published"
 	};
-
+*/
 	/**
 	 * Default constructor.
 	 */
@@ -172,7 +172,7 @@ public class SearchArticleBean implements WFListBean, Serializable {
 		}
 		return _allCategories;
 	}
-	
+
 	/**
 	 * @see com.idega.webface.bean.WFListBean#getDataModel() 
 	 */
@@ -194,24 +194,31 @@ public class SearchArticleBean implements WFListBean, Serializable {
 		if (_dataModel == null) {
 			_dataModel = new WFDataModel();
 		}
-		int availableRows = testHeadlines.length;
-		int nrOfRows = rows.intValue();
-		if (nrOfRows == 0) {
-			nrOfRows = availableRows;
-		}
-		int maxRow = start.intValue() + nrOfRows;
-		if (maxRow > availableRows) {
-			maxRow = availableRows;
-		}
-		for (int i = start.intValue(); i < maxRow; i++) {
-			ArticleListBean a = new ArticleListBean(String.valueOf(i), testHeadlines[i], testPublished[i], testAuthors[i], testStatus[i]);
-			if (i == 5) {
-				// set test style red
-				a.setTestStyle("color:red");
+		ArticleItemBean[] articleItemBean;
+		try {
+			articleItemBean = (ArticleItemBean[]) ArticleListBean.loadAllArticlesInFolder("/files/content").toArray(new ArticleItemBean[0]);
+			int availableRows = articleItemBean.length;
+
+			int nrOfRows = rows.intValue();
+			if (nrOfRows == 0) {
+				nrOfRows = availableRows;
 			}
-			_dataModel.set(a, i);
+			int maxRow = Math.min(start.intValue() + nrOfRows,availableRows);
+			for (int i = start.intValue(); i < maxRow; i++) {
+				String id = articleItemBean[i].getMainCategory()+"/"+articleItemBean[i].getHeadline()+".xml";
+				ArticleListBean bean = new ArticleListBean(id, articleItemBean[i].getHeadline(), "", articleItemBean[i].getAuthor(), articleItemBean[i].getStatus());
+				_dataModel.set(bean, i);
+			}
+			_dataModel.setRowCount(availableRows);
 		}
-		_dataModel.setRowCount(availableRows);
+		catch (XmlException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 	
 	/**

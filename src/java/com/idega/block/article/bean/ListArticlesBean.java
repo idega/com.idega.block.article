@@ -1,5 +1,5 @@
 /*
- * $Id: ListArticlesBean.java,v 1.4 2004/11/23 13:12:59 joakim Exp $
+ * $Id: ListArticlesBean.java,v 1.5 2004/11/26 10:27:53 joakim Exp $
  *
  * Copyright (C) 2004 Idega. All Rights Reserved.
  *
@@ -27,10 +27,10 @@ import com.idega.webface.model.WFDataModel;
 /**
  * Bean for listing articles.   
  * <p>
- * Last modified: $Date: 2004/11/23 13:12:59 $ by $Author: joakim $
+ * Last modified: $Date: 2004/11/26 10:27:53 $ by $Author: joakim $
  *
  * @author Anders Lindman
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  */
 
 public class ListArticlesBean implements WFListBean, Serializable {
@@ -131,7 +131,7 @@ public class ListArticlesBean implements WFListBean, Serializable {
 		}
 		return _allCategories;
 	}
-	
+
 	/**
 	 * @see com.idega.webface.bean.WFListBean#getDataModel() 
 	 */

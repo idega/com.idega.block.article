@@ -1,5 +1,5 @@
 /*
- * $Id: SearchArticleBlock.java,v 1.1 2004/10/26 12:45:00 joakim Exp $
+ * $Id: SearchArticleBlock.java,v 1.2 2004/11/26 10:27:53 joakim Exp $
  *
  * Copyright (C) 2004 Idega. All Rights Reserved.
  *
@@ -30,10 +30,10 @@ import com.idega.webface.test.bean.*;
 /**
  * Block for searching articles.   
  * <p>
- * Last modified: $Date: 2004/10/26 12:45:00 $ by $Author: joakim $
+ * Last modified: $Date: 2004/11/26 10:27:53 $ by $Author: joakim $
  *
  * @author Anders Lindman
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public class SearchArticleBlock extends WFBlock implements ManagedContentBeans, ActionListener, Serializable {
 
@@ -67,6 +67,7 @@ public class SearchArticleBlock extends WFBlock implements ManagedContentBeans, 
 		
 		WFUtil.invoke(SEARCH_ARTICLE_BEAN_ID, "setArticleLinkListener", this, ActionListener.class);
 
+		add(new ArticleBar());
 		add(getSearchPanel());
 		add(WFUtil.getBreak());
 		add(getSearchResultList());

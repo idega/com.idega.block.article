@@ -1,5 +1,5 @@
 /*
- * $Id: ArticleBlock.java,v 1.9 2004/11/18 10:39:28 tryggvil Exp $
+ * $Id: ArticleBlock.java,v 1.10 2004/11/26 10:27:53 joakim Exp $
  *
  * Copyright (C) 2004 Idega. All Rights Reserved.
  *
@@ -28,6 +28,7 @@ import javax.faces.context.FacesContext;
 import javax.faces.convert.IntegerConverter;
 import javax.faces.event.ActionEvent;
 import javax.faces.event.ActionListener;
+import com.idega.block.article.PreviewArticlePage;
 import com.idega.webface.WFBlock;
 import com.idega.webface.WFComponentSelector;
 import com.idega.webface.WFContainer;
@@ -49,10 +50,10 @@ import com.idega.webface.test.bean.ManagedContentBeans;
 /**
  * Block for editing an article.   
  * <p>
- * Last modified: $Date: 2004/11/18 10:39:28 $ by $Author: tryggvil $
+ * Last modified: $Date: 2004/11/26 10:27:53 $ by $Author: joakim $
  *
  * @author Anders Lindman
- * @version $Revision: 1.9 $
+ * @version $Revision: 1.10 $
  */
 public class ArticleBlock extends WFBlock implements ActionListener, ManagedContentBeans {
 
@@ -62,6 +63,8 @@ public class ArticleBlock extends WFBlock implements ActionListener, ManagedCont
 	
 	public final static String TASK_ID_EDIT = P + "t_edit";
 	public final static String TASK_ID_PREVIEW = P + "t_preview";
+	public final static String TASK_ID_LIST = P + "t_list";
+	public final static String TASK_ID_DETAILS = P + "t_details";
 	public final static String TASK_ID_MESSAGES = P + "t_messages";
 	
 	private final static String HEADLINE_ID = P + "headline";
@@ -135,23 +138,25 @@ public class ArticleBlock extends WFBlock implements ActionListener, ManagedCont
 		
 		String bref = WFPage.CONTENT_BUNDLE + ".";
 		
-		//WFTabbedPane tb = new WFTabbedPane();
-		//tb.setId(TASKBAR_ID);
-		//add(tb);
-		//tb.addTabVB(TASK_ID_EDIT, bref + "edit", getEditContainer());
-		//tb.addTabVB(TASK_ID_PREVIEW, bref + "preview", getPreviewContainer());
+		WFTabbedPane tb = new WFTabbedPane();
+		tb.setId(TASKBAR_ID);
+		add(tb);
+		tb.addTabVB(TASK_ID_EDIT, bref + "edit", getEditContainer());
+		tb.addTabVB(TASK_ID_PREVIEW, bref + "preview", getPreviewContainer());
+		tb.addTabVB(TASK_ID_LIST, bref + "list", new ListArticlesBlock(bref + "list_articles"));
+		tb.addTabVB(TASK_ID_DETAILS, bref + "details", new PreviewArticlePage());
 //		tb.addButtonVB(TASK_ID_MESSAGES, bref + "messages", getMessageContainer());
-		//tb.setSelectedMenuItemId(TASK_ID_EDIT);
-		//if (taskbarListener != null) {
-		//	tb.addTabListener(taskbarListener);
-		//}
+		tb.setSelectedMenuItemId(TASK_ID_EDIT);
+		if (taskbarListener != null) {
+			tb.addTabListener(taskbarListener);
+		}
 		
 		WFContainer mainArea = new WFContainer();
 		mainArea.setStyleClass("wf_blockmainarea");
 		//add(getEditContainer());
 	
-		add(mainArea);
-		mainArea.add(getEditContainer());
+//		add(mainArea);
+//		mainArea.add(getEditContainer());
 	}
 	
 	/**
