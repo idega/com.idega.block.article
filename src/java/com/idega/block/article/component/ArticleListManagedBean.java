@@ -1,5 +1,5 @@
 /*
- * $Id: ArticleListManagedBean.java,v 1.3 2005/02/21 16:16:19 gummi Exp $
+ * $Id: ArticleListManagedBean.java,v 1.4 2005/02/22 15:11:32 gummi Exp $
  * Created on 27.1.2005
  *
  * Copyright (C) 2005 Idega Software hf. All Rights Reserved.
@@ -43,16 +43,17 @@ import com.idega.util.IWTimestamp;
 
 /**
  * 
- *  Last modified: $Date: 2005/02/21 16:16:19 $ by $Author: gummi $
+ *  Last modified: $Date: 2005/02/22 15:11:32 $ by $Author: gummi $
  * 
  * @author <a href="mailto:gummi@idega.com">Gudmundur Agust Saemundsson</a>
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
 public class ArticleListManagedBean implements ContentListViewerManagedBean {
 
 	private String resourcePath=null;
 
 	private int numberOfDaysDisplayed = 30;
+	private List categories = null;
 
 	private String LOCALIZEDKEY_MORE = "itemviewer.more";
 
@@ -125,7 +126,7 @@ public class ArticleListManagedBean implements ContentListViewerManagedBean {
 				}
 			}
 			ContentSearch searchBusiness = new ContentSearch(iwc.getIWMainApplication());
-			Search search = searchBusiness.createSearch(getSearchRequest(scope, iwc.getCurrentLocale(), oldest));
+			Search search = searchBusiness.createSearch(getSearchRequest(scope, iwc.getCurrentLocale(), oldest,categories));
 			Collection results = search.getSearchResults();
 			
 			if(results!=null){				
@@ -179,22 +180,44 @@ public class ArticleListManagedBean implements ContentListViewerManagedBean {
 	 * @param folder
 	 * @param localeString
 	 * @param oldest
+	 * @param categoryList
 	 * @throws SearchException
 	 */
-	public SearchRequest getSearchRequest(String scope, Locale locale, IWTimestamp oldest) throws SearchException {
+	public SearchRequest getSearchRequest(String scope, Locale locale, IWTimestamp oldest, List categoryList) throws SearchException {
 		SearchRequest s = new SearchRequest();
 		s.addSelection(IWSlideConstants.PROPERTY_CREATION_DATE);
+		s.addSelection(IWSlideConstants.PROPERTY_CATEGORY);
 		s.addScope(new SearchScope(scope));
 		SearchExpression expression = null;
 		
-		String localeString = ""; //((locale!=null)?locale.getLanguage():"");
 		
+		String localeString = ""; //((locale!=null)?locale.getLanguage():"");
+		SearchExpression namePatternExpression = s.compare(CompareOperator.LIKE, IWSlideConstants.PROPERTY_DISPLAY_NAME,"%"+localeString+".article");;
+		expression = namePatternExpression;
+		
+		SearchExpression creationDateExpression = null;		
 		if(oldest != null){
-			expression = s.and( s.compare(CompareOperator.LIKE, IWSlideConstants.PROPERTY_DISPLAY_NAME,"%"+localeString+".article"),s.compare(CompareOperator.GTE, IWSlideConstants.PROPERTY_CREATION_DATE,oldest.getDate()));
-		} else {
-			expression = s.compare(CompareOperator.LIKE, IWSlideConstants.PROPERTY_DISPLAY_NAME,"%"+localeString+".article");
+			creationDateExpression = s.compare(CompareOperator.GTE, IWSlideConstants.PROPERTY_CREATION_DATE,oldest.getDate());
+			expression = s.and(expression,creationDateExpression);
 		}
-		//add other properties
+		
+		List categoryExpressions = new ArrayList();
+		if(categoryList != null){
+			for (Iterator iter = categoryList.iterator(); iter.hasNext();) {
+				String categoryName = (String) iter.next();
+				categoryExpressions.add(s.compare(CompareOperator.PROPERTY_CONTAINS,IWSlideConstants.PROPERTY_CATEGORY,categoryName));
+			}
+			Iterator expr = categoryExpressions.iterator();
+			if(expr.hasNext()){
+				SearchExpression categoryExpression = (SearchExpression)expr.next();
+				while(expr.hasNext()){
+					categoryExpression = s.or(categoryExpression,(SearchExpression)expr.next());
+				}
+				expression = s.and(expression,categoryExpression);
+			}
+		}
+		
+		
 		
 		s.setWhereExpression(expression);
 		System.out.println("------------------------");
@@ -250,4 +273,16 @@ public class ArticleListManagedBean implements ContentListViewerManagedBean {
 		detailsViewerPath = path;
 	}
 	
+	/**
+	 * @return Returns the categories.
+	 */
+	public List getCategories() {
+		return categories;
+	}
+	/**
+	 * @param categories The categories to set.
+	 */
+	public void setCategories(List categories) {
+		this.categories = categories;
+	}
 }
