@@ -1,5 +1,5 @@
 /*
- * $Id: ArticleItemBean.java,v 1.26 2005/02/23 17:15:40 joakim Exp $
+ * $Id: ArticleItemBean.java,v 1.27 2005/02/23 18:47:36 gummi Exp $
  *
  * Copyright (C) 2004 Idega. All Rights Reserved.
  *
@@ -15,8 +15,12 @@ import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Enumeration;
 import java.util.List;
+import java.util.Locale;
 import java.util.logging.Logger;
+import org.apache.webdav.lib.WebdavResource;
+import org.apache.webdav.lib.WebdavResources;
 import org.apache.xmlbeans.XmlException;
 import org.w3c.tidy.Tidy;
 import com.idega.business.IBOLookup;
@@ -43,10 +47,10 @@ import com.idega.xmlns.block.article.document.ArticleDocument;
 /**
  * Bean for idegaWeb article content items.   
  * <p>
- * Last modified: $Date: 2005/02/23 17:15:40 $ by $Author: joakim $
+ * Last modified: $Date: 2005/02/23 18:47:36 $ by $Author: gummi $
  *
  * @author Anders Lindman
- * @version $Revision: 1.26 $
+ * @version $Revision: 1.27 $
  */
 
 public class ArticleItemBean extends ContentItemBean implements Serializable, ContentItem {
@@ -74,8 +78,6 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 	public final static String FIELDNAME_FOLDER_LOCATION = "folder_location";
 
 	public final static String FIELDNAME_CONTENT_LANGUAGE = "content_language";
-	public String getContentLanguage() { return (String)getValue(FIELDNAME_CONTENT_LANGUAGE); }
-	public void setContentLanguage(String s) { setValue(FIELDNAME_CONTENT_LANGUAGE, s); }
 	
 	public final static String ARTICLE_FILENAME_SCOPE = "article";
 	
@@ -103,6 +105,7 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 	public List getImages() { return getItemFields(FIELDNAME_IMAGES); }
 	public String getFilename() { return (String)getValue(FIELDNAME_FILENAME); }
 	public String getFolderLocation() { return (String)getValue(FIELDNAME_FOLDER_LOCATION); }
+	public String getContentLanguage() { return (String)getValue(FIELDNAME_CONTENT_LANGUAGE); }
 
 	public void setHeadline(String s) { setValue(FIELDNAME_HEADLINE, s); } 
 	public void setHeadline(Object o) { setValue(FIELDNAME_HEADLINE, o.toString()); } 
@@ -132,6 +135,7 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 	public void setImages(List l) { setItemFields(FIELDNAME_IMAGES, l); }
 	public void setFilename(String l) { setValue(FIELDNAME_FILENAME, l); }
 	public void setFolderLocation(String l) { setValue(FIELDNAME_FOLDER_LOCATION, l); }
+	public void setContentLanguage(String s) { setValue(FIELDNAME_CONTENT_LANGUAGE, s); }
 
 	public boolean isUpdated() { return _isUpdated; }
 	public void setUpdated(boolean b) { _isUpdated = b; }
@@ -238,9 +242,12 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 		path.append(service.createUniqueFileName(ARTICLE_FILENAME_SCOPE));
 		path.append(ENDFOLDER_SUFFIX);
 		path.append("/");
-		path.append(iwuc.getCurrentLocale().getLanguage());
-		path.append(ARTICLE_SUFFIX);
+		path.append(getArticleName(iwuc.getCurrentLocale()));
 		return path.toString();
+	}
+	
+	protected String getArticleName(Locale locale){
+		return locale.getLanguage()+ARTICLE_SUFFIX;
 	}
 /*
 	private String createFileName(IWSlideService service) {
@@ -448,54 +455,83 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 		XMLParser builder = new XMLParser();
 		XMLDocument bodyDoc = null;
 		try {
-			bodyDoc = builder.parse(new ByteArrayInputStream(webdavResource.getMethodDataAsString().getBytes()));
+			WebdavResource theArticle = null;
+			if(webdavResource.isCollection()){
+				IWContext iwc = IWContext.getInstance();
+				
+				String articleName = getArticleName(iwc.getCurrentLocale());
+				WebdavResources resources = webdavResource.getChildResources();
+				String userLanguageArticleName = getArticleName(iwc.getCurrentLocale());
+				String systemLanguageArticleName = getArticleName(iwc.getIWMainApplication().getDefaultLocale());
+				if(resources.isThereResourceName(userLanguageArticleName)){ //the language that the user has selected
+					theArticle = resources.getResource(userLanguageArticleName);
+				} else if(resources.isThereResourceName(systemLanguageArticleName)){ //the language that is default for the system
+					theArticle = resources.getResource(systemLanguageArticleName);
+				} else {  // take the first language
+					Enumeration en = resources.getResources();
+					if(en.hasMoreElements()){
+						theArticle = (WebdavResource)en.nextElement();
+					}
+				}
+			} else {
+				theArticle = webdavResource;
+			}
+			if(theArticle!=null){
+				bodyDoc = builder.parse(new ByteArrayInputStream(theArticle.getMethodDataAsString().getBytes()));
+			}
 		} catch (XMLException e) {
 			e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
 		}
-		XMLElement rootElement = bodyDoc.getRootElement();
-
-		try {
-			setHeadline(rootElement.getChild(FIELDNAME_HEADLINE,idegans).getText());
-		}catch(Exception e) {		//Nullpointer could occur if field isn't used
-			e.printStackTrace();
-			setHeadline("");
-		}
-		try {
-			setTeaser(rootElement.getChild(FIELDNAME_TEASER,idegans).getText());
-		}catch(Exception e) {		//Nullpointer could occur if field isn't used
-			e.printStackTrace();
-			setTeaser("");
-		}
-		try {
-			setAuthor(rootElement.getChild(FIELDNAME_AUTHOR,idegans).getText());
-		}catch(Exception e) {		//Nullpointer could occur if field isn't used
-			e.printStackTrace();
-			setAuthor("");
-		}
-
-		//Parse out the body
-		try {
-			XMLNamespace htmlNamespace = new XMLNamespace("http://www.w3.org/1999/xhtml");
-			XMLElement bodyElement = rootElement.getChild(FIELDNAME_BODY,idegans);
-			XMLElement htmlElement = bodyElement.getChild("html",htmlNamespace);
-			XMLElement htmlBodyElement = htmlElement.getChild("body",htmlNamespace);
-			String bodyValue = new XMLOutput().outputString(htmlBodyElement);
-//			System.out.println("htmlBody value= "+bodyValue);
-			setBody(bodyValue);
-		}catch(Exception e) {		//Nullpointer could occur if field isn't used
-//			e.printStackTrace();
+		if(bodyDoc!=null){
+			XMLElement rootElement = bodyDoc.getRootElement();
+	
+			try {
+				setHeadline(rootElement.getChild(FIELDNAME_HEADLINE,idegans).getText());
+			}catch(Exception e) {		//Nullpointer could occur if field isn't used
+				e.printStackTrace();
+				setHeadline("");
+			}
+			try {
+				setTeaser(rootElement.getChild(FIELDNAME_TEASER,idegans).getText());
+			}catch(Exception e) {		//Nullpointer could occur if field isn't used
+				e.printStackTrace();
+				setTeaser("");
+			}
+			try {
+				setAuthor(rootElement.getChild(FIELDNAME_AUTHOR,idegans).getText());
+			}catch(Exception e) {		//Nullpointer could occur if field isn't used
+				e.printStackTrace();
+				setAuthor("");
+			}
+	
+			//Parse out the body
+			try {
+				XMLNamespace htmlNamespace = new XMLNamespace("http://www.w3.org/1999/xhtml");
+				XMLElement bodyElement = rootElement.getChild(FIELDNAME_BODY,idegans);
+				XMLElement htmlElement = bodyElement.getChild("html",htmlNamespace);
+				XMLElement htmlBodyElement = htmlElement.getChild("body",htmlNamespace);
+				String bodyValue = new XMLOutput().outputString(htmlBodyElement);
+	//			System.out.println("htmlBody value= "+bodyValue);
+				setBody(bodyValue);
+			}catch(Exception e) {		//Nullpointer could occur if field isn't used
+	//			e.printStackTrace();
+				Logger log = Logger.getLogger(this.getClass().toString());
+				log.warning("Body of article is empty");
+				setBody("");
+			}
+			
+			try {
+				setComment(rootElement.getChild(FIELDNAME_ARTICLE_COMMENT,idegans).getText());
+			}catch(Exception e) {		//Nullpointer could occur if field isn't used
+				e.printStackTrace();
+				setComment("");
+			}
+			
+		} else {
+			//article not found
 			Logger log = Logger.getLogger(this.getClass().toString());
-			log.warning("Body of article is empty");
-			setBody("");
+			log.warning("Article xml file was not found");
 		}
-		
-		try {
-			setComment(rootElement.getChild(FIELDNAME_ARTICLE_COMMENT,idegans).getText());
-		}catch(Exception e) {		//Nullpointer could occur if field isn't used
-			e.printStackTrace();
-			setComment("");
-		}
-
 		String folder = webdavResource.getParentPath();
 	    setFolderLocation(folder);
 //	    setFilename();
