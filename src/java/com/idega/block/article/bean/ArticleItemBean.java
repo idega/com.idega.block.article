@@ -1,5 +1,5 @@
 /*
- * $Id: ArticleItemBean.java,v 1.35 2005/03/07 15:27:52 joakim Exp $
+ * $Id: ArticleItemBean.java,v 1.36 2005/03/08 17:23:55 joakim Exp $
  *
  * Copyright (C) 2004 Idega. All Rights Reserved.
  *
@@ -51,10 +51,10 @@ import com.idega.xmlns.block.article.document.ArticleDocument;
 /**
  * Bean for idegaWeb article content items.   
  * <p>
- * Last modified: $Date: 2005/03/07 15:27:52 $ by $Author: joakim $
+ * Last modified: $Date: 2005/03/08 17:23:55 $ by $Author: joakim $
  *
  * @author Anders Lindman
- * @version $Revision: 1.35 $
+ * @version $Revision: 1.36 $
  */
 
 public class ArticleItemBean extends ContentItemBean implements Serializable, ContentItem {
@@ -432,8 +432,15 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 
 			IWSlideService slideService = (IWSlideService)IBOLookup.getServiceInstance(iwac,IWSlideService.class);
 			
-			String filePath=getArticleResourcePath();
-			String articleFolderPath = getArticlePath();
+			//Setting the path for creating new file/creating localized version/updating existing file
+			String filePath=getResourcePath();
+			String articleFolderPath=getArticlePath();
+			if(articleFolderPath!=null) {
+				filePath=articleFolderPath+"/"+getArticleName();
+			}else {
+				filePath=getArticleResourcePath();
+				articleFolderPath = getArticlePath();
+			}
 	
 			slideService.createAllFoldersInPath(articleFolderPath);
 
@@ -443,10 +450,18 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 //			System.out.println(article);
 			
 			//Conflict fix: uri for creating but path for updating
+			//Note! This is a patch to what seems to be a bug in WebDav
+			//Apparently in verion below works in some cases and the other in other cases.
+			//Seems to be connected to creating files in folders created in same tomcat session or similar
+			//not quite clear...
 			if(session.getExistence(filePath)){
-				rootResource.putMethod(filePath,article);
+				if(!rootResource.putMethod(filePath,article)) {
+					rootResource.putMethod(session.getURI(filePath),article);
+				}
 			} else {
-				rootResource.putMethod(session.getURI(filePath),article);
+				if(!rootResource.putMethod(session.getURI(filePath),article)) {
+					rootResource.putMethod(filePath,article);
+				}
 			}
 			rootResource.proppatchMethod(filePath,new PropertyName("IW:",CONTENT_TYPE),ARTICLE_FILENAME_SCOPE,true);
 			rootResource.close();
