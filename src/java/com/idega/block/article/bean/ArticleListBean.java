@@ -1,5 +1,5 @@
 /*
- * $Id: ArticleListBean.java,v 1.4 2004/11/16 00:03:17 tryggvil Exp $
+ * $Id: ArticleListBean.java,v 1.5 2004/11/17 14:39:37 joakim Exp $
  *
  * Copyright (C) 2004 Idega. All Rights Reserved.
  *
@@ -9,19 +9,24 @@
  */
 package com.idega.block.article.bean;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
-
 import javax.faces.component.UIColumn;
 import javax.faces.component.html.HtmlCommandLink;
 import javax.faces.component.html.HtmlOutputText;
 import javax.faces.event.ActionListener;
 import javax.faces.model.DataModel;
+import org.apache.commons.httpclient.HttpURL;
+import org.apache.webdav.lib.WebdavResource;
 import org.apache.xmlbeans.XmlException;
-
+import com.idega.business.IBOLookup;
+import com.idega.idegaweb.IWApplicationContext;
+import com.idega.idegaweb.IWUserContext;
+import com.idega.presentation.IWContext;
+import com.idega.slide.business.IWSlideService;
+import com.idega.slide.business.IWSlideSession;
 import com.idega.webface.WFPage;
 import com.idega.webface.WFUtil;
 import com.idega.webface.bean.WFListBean;
@@ -30,10 +35,10 @@ import com.idega.webface.model.WFDataModel;
 /**
  * Bean for article list rows.   
  * <p>
- * Last modified: $Date: 2004/11/16 00:03:17 $ by $Author: tryggvil $
+ * Last modified: $Date: 2004/11/17 14:39:37 $ by $Author: joakim $
  *
  * @author Anders Lindman
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  */
 
 public class ArticleListBean implements WFListBean, Serializable {
@@ -109,7 +114,8 @@ public class ArticleListBean implements WFListBean, Serializable {
 
 		ArticleItemBean[] articleItemBean;
 		try {
-			articleItemBean = (ArticleItemBean[])loadAllArticlesInFolder(new File("/Test/article/")).toArray(new ArticleItemBean[0]);
+			//TODO (JJ) Have to make the user select what folder to look at instead of the hardcoded folder selection
+			articleItemBean = (ArticleItemBean[])loadAllArticlesInFolder("/files/content").toArray(new ArticleItemBean[0]);
 			availableRows = articleItemBean.length;
 			
 			int nrOfRows = rows.intValue();
@@ -120,7 +126,7 @@ public class ArticleListBean implements WFListBean, Serializable {
 			int maxRow = Math.min(start.intValue() + nrOfRows,availableRows);
 			
 			for (int i = start.intValue(); i < maxRow; i++) {
-				ArticleListBean a = new ArticleListBean(String.valueOf(i), articleItemBean[i].getHeadline(), articleItemBean[i].getItemType(), articleItemBean[i].getAuthor(), articleItemBean[i].getStatus());
+				ArticleListBean a = new ArticleListBean(articleItemBean[i].getMainCategory()+"/"+articleItemBean[i].getHeadline()+".xml", articleItemBean[i].getHeadline(), articleItemBean[i].getItemType(), articleItemBean[i].getAuthor(), articleItemBean[i].getStatus());
 				_dataModel.set(a, i);
 			}
 		}
@@ -142,18 +148,30 @@ public class ArticleListBean implements WFListBean, Serializable {
 	 * @throws XmlException
 	 * @throws IOException
 	 */
-	public static List loadAllArticlesInFolder(File folder) throws XmlException, IOException{
+	public static List loadAllArticlesInFolder(String folder) throws XmlException, IOException{
 		List list = new ArrayList();
 		
-		File[] articleFile = folder.listFiles();
+//		File[] articleFile = folder.listFiles();
 		
-		if(articleFile!=null){
-			for(int i=0;i<articleFile.length;i++){
-				System.out.println("Attempting to load "+articleFile[i].toString());
-				ArticleItemBean article = new ArticleItemBean();
-				article.load(articleFile[i]);
-				list.add(article);
-			}
+		IWUserContext iwuc = IWContext.getInstance();
+		IWApplicationContext iwac = iwuc.getApplicationContext();
+		
+		IWSlideSession session = (IWSlideSession)IBOLookup.getSessionInstance(iwuc,IWSlideSession.class);
+		IWSlideService service = (IWSlideService)IBOLookup.getServiceInstance(iwac,IWSlideService.class);
+		
+		HttpURL root = new HttpURL(service.getWebdavServerURL()+folder);
+		root.setUserinfo("root","root");
+		WebdavResource webdavResource = new WebdavResource(root);
+		
+		String[] file = webdavResource.list();
+	
+		for(int i=0;i<file.length;i++){
+//			System.out.println("Attempting to load "+articleFile[i].toString());
+			System.out.println("Attempting to load "+file[i].toString());
+			ArticleItemBean article = new ArticleItemBean();
+//			article.load(articleFile[i].toString());
+			article.load(folder+"/"+file[i]);
+			list.add(article);
 		}
 		
 		return list;

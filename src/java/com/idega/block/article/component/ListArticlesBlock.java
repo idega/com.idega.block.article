@@ -1,5 +1,5 @@
 /*
- * $Id: ListArticlesBlock.java,v 1.3 2004/11/10 17:23:07 joakim Exp $
+ * $Id: ListArticlesBlock.java,v 1.4 2004/11/17 14:40:55 joakim Exp $
  *
  * Copyright (C) 2004 Idega. All Rights Reserved.
  *
@@ -9,7 +9,6 @@
  */
 package com.idega.block.article.component;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
 import javax.faces.component.UIComponent;
@@ -35,10 +34,10 @@ import com.idega.webface.test.bean.ManagedContentBeans;
 /**
  * Block for listing articles.   
  * <p>
- * Last modified: $Date: 2004/11/10 17:23:07 $ by $Author: joakim $
+ * Last modified: $Date: 2004/11/17 14:40:55 $ by $Author: joakim $
  *
  * @author Anders Lindman
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
 public class ListArticlesBlock extends WFBlock implements ManagedContentBeans, ActionListener, Serializable {
 
@@ -198,11 +197,10 @@ public class ListArticlesBlock extends WFBlock implements ManagedContentBeans, A
 		
 		ArticleItemBean articleItem = new ArticleItemBean();
 		try {
-			articleItem.load(new File("/Test/article/"+id+".xml"));
+//			articleItem.load("/files/content/"+id+".xml");
+			articleItem.load(id);
 			WFUtil.invoke(ARTICLE_ITEM_BEAN_ID, "clear");
-//			ContentItemCase caze = new ContentItemCaseBean();
-//			caze.setPublishedFromDate(new Date());
-//			WFUtil.invoke(ARTICLE_ITEM_BEAN_ID, "setCase", caze);
+
 			WFUtil.invoke(ARTICLE_ITEM_BEAN_ID, "setLocaleId", "en");
 			WFUtil.invoke(ARTICLE_ITEM_BEAN_ID, "setHeadline", notNull(articleItem.getHeadline())+" (id = " + id + ")");
 			WFUtil.invoke(ARTICLE_ITEM_BEAN_ID, "setTeaser", notNull(articleItem.getTeaser()));
@@ -215,17 +213,17 @@ public class ListArticlesBlock extends WFBlock implements ManagedContentBeans, A
 					ContentItemCase.STATUS_PUBLISHED
 					);
 			WFUtil.invoke(ARTICLE_ITEM_BEAN_ID, "setMainCategoryId", new Integer(3));
+			WFUtil.invoke(ARTICLE_ITEM_BEAN_ID, "setMainCategory", notNull(articleItem.getMainCategory()));
+			
 			WFUtil.invoke(ARTICLE_ITEM_BEAN_ID, "setLocaleId", "sv");
 
 			//And one more time since it won't work after just setting the params once...
 			
-			WFUtil.invoke(ARTICLE_ITEM_BEAN_ID, "setHeadline", notNull(articleItem.getHeadline())+" (id = " + id + ")");
+			WFUtil.invoke(ARTICLE_ITEM_BEAN_ID, "setHeadline", notNull(articleItem.getHeadline()));
 			WFUtil.invoke(ARTICLE_ITEM_BEAN_ID, "setTeaser", notNull(articleItem.getTeaser()));
 			WFUtil.invoke(ARTICLE_ITEM_BEAN_ID, "setBody", notNull(articleItem.getBody()));
-
-//			WFUtil.invoke(ARTICLE_ITEM_BEAN_ID, "setHeadline", "Electronic Rykjavik klar");
-//			WFUtil.invoke(ARTICLE_ITEM_BEAN_ID, "setBody", "Den första 24-timmarsmyndigheten för Reykjaviks kommun igång.");
-//			WFUtil.invoke(ARTICLE_ITEM_BEAN_ID, "setLocaleId", "en");
+			WFUtil.invoke(ARTICLE_ITEM_BEAN_ID, "setAuthor", notNull(articleItem.getAuthor()));
+			WFUtil.invoke(ARTICLE_ITEM_BEAN_ID, "setMainCategory", notNull(articleItem.getMainCategory()));
 
 			WFComponentSelector cs = (WFComponentSelector) event.getComponent().getParent().getParent().getParent().findComponent(DISPLAY_SELECTOR_ID);
 			cs.setSelectedId(LIST_PANEL_ID, false);

@@ -1,5 +1,5 @@
 /*
- * $Id: ArticleBlock.java,v 1.6 2004/11/16 00:49:29 tryggvil Exp $
+ * $Id: ArticleBlock.java,v 1.7 2004/11/17 14:39:37 joakim Exp $
  *
  * Copyright (C) 2004 Idega. All Rights Reserved.
  *
@@ -24,7 +24,6 @@ import javax.faces.component.html.HtmlOutputLink;
 import javax.faces.component.html.HtmlOutputText;
 import javax.faces.component.html.HtmlPanelGrid;
 import javax.faces.component.html.HtmlSelectManyListbox;
-import javax.faces.component.html.HtmlSelectOneMenu;
 import javax.faces.context.FacesContext;
 import javax.faces.convert.IntegerConverter;
 import javax.faces.event.ActionEvent;
@@ -50,10 +49,10 @@ import com.idega.webface.test.bean.ManagedContentBeans;
 /**
  * Block for editing an article.   
  * <p>
- * Last modified: $Date: 2004/11/16 00:49:29 $ by $Author: tryggvil $
+ * Last modified: $Date: 2004/11/17 14:39:37 $ by $Author: joakim $
  *
  * @author Anders Lindman
- * @version $Revision: 1.6 $
+ * @version $Revision: 1.7 $
  */
 public class ArticleBlock extends WFBlock implements ActionListener, ManagedContentBeans {
 
@@ -113,6 +112,11 @@ public class ArticleBlock extends WFBlock implements ActionListener, ManagedCont
 	private final static String ADD_CATEGORIES_ID = P + "add_categories";
 	private final static String SUB_CATEGORIES_ID = P + "sub_categories";
 	private final static String CATEGORY_BACK_ID = P + "category_back";
+
+	//TODO (JJ) change back to the longer path when we have created a function that creates 
+	//several subdirectories in one go. (/files is created automatically).
+//	private static final String ROOT_CATEGORY = "/files/content/articles";
+	private static final String ROOT_CATEGORY = "/files/content";
 	
 	/**
 	 * Default contructor.
@@ -177,24 +181,24 @@ public class ArticleBlock extends WFBlock implements ActionListener, ManagedCont
 		
 		mainContainer.add(em);
 
-		HtmlPanelGrid p = WFPanelUtil.getFormPanel(2);		
-		p.getChildren().add(WFUtil.group(WFUtil.getTextVB(bref + "headline"), WFUtil.getText(":")));		
-		p.getChildren().add(WFUtil.group(WFUtil.getTextVB(bref + "language"), WFUtil.getText(":")));		
+		HtmlPanelGrid p = WFPanelUtil.getFormPanel(2);
+		p.getChildren().add(WFUtil.group(WFUtil.getTextVB(bref + "headline"), WFUtil.getText(":")));
+//		p.getChildren().add(WFUtil.group(WFUtil.getTextVB(bref + "language"), WFUtil.getText(":")));
 		HtmlInputText headlineInput = WFUtil.getInputText(HEADLINE_ID, ref + "headline");		
 		headlineInput.setSize(40);
 		p.getChildren().add(headlineInput);		
-		HtmlSelectOneMenu localeMenu = WFUtil.getSelectOneMenu(LOCALE_ID, ref + "allLocales", ref + "pendingLocaleId");
-		localeMenu.setOnchange("document.forms[0].submit();");
-		p.getChildren().add(localeMenu);		
-		p.getChildren().add(WFUtil.group(WFUtil.getTextVB(bref + "teaser"), WFUtil.getText(":")));		
-		p.getChildren().add(WFUtil.group(WFUtil.getTextVB(bref + "author"), WFUtil.getText(":")));		
+		//HtmlSelectOneMenu localeMenu = WFUtil.getSelectOneMenu(LOCALE_ID, ref + "allLocales", ref + "pendingLocaleId");
+		//localeMenu.setOnchange("document.forms[0].submit();");
+		//p.getChildren().add(localeMenu);		
+		p.getChildren().add(WFUtil.group(WFUtil.getTextVB(bref + "teaser"), WFUtil.getText(":")));
 		HtmlInputTextarea teaserArea = WFUtil.getTextArea(TEASER_ID, ref + "teaser", "440px", "30px");
-		p.getChildren().add(teaserArea);		
+		p.getChildren().add(teaserArea);
+		p.getChildren().add(WFUtil.group(WFUtil.getTextVB(bref + "author"), WFUtil.getText(":")));
 		HtmlInputText authorInput = WFUtil.getInputText(AUTHOR_ID, ref + "author");
 		authorInput.setSize(22);
 		p.getChildren().add(authorInput);		
 		p.getChildren().add(WFUtil.group(WFUtil.getTextVB(bref + "body"), WFUtil.getText(":")));		
-		p.getChildren().add(WFUtil.group(WFUtil.getTextVB(bref + "images"), WFUtil.getText(":")));		
+//		p.getChildren().add(WFUtil.group(WFUtil.getTextVB(bref + "images"), WFUtil.getText(":")));		
 //		HtmlInputTextarea bodyArea = WFUtil.getHtmlAreaTextArea(BODY_ID, ref + "body", "460px", "400px");
 		
 		HTMLArea bodyArea = WFUtil.getHtmlAreaTextArea(BODY_ID, ref + "body", "100%", "400px");
@@ -206,22 +210,21 @@ public class ArticleBlock extends WFBlock implements ActionListener, ManagedCont
 		bodyArea.addPlugin(HTMLArea.PLUGIN_CHARACTER_MAP);
 		bodyArea.setAllowFontSelection(false);
 		
-		//HtmlCommandButton editButton = WFUtil.getButtonVB(EDIT_HTML_ID, bref + "edit");
-		//editButton.setOnclick("wurl='htmlarea/webface/htmledit.jsp?" + PREVIEW_ARTICLE_ITEM_ID + 
-		//			"='+this.tabindex;window.open(wurl,'Edit','height=450,width=600,resizable=yes,status=no,toolbar=no,menubar=no,location=no,scrollbars=no');return false;");
-		//p.getChildren().add(WFUtil.group(WFUtil.group(bodyArea, WFUtil.getBreak()), editButton));
-		p.getChildren().add(bodyArea);
-		WFContainer imageContainer = new WFContainer();		
-		imageContainer.add(WFUtil.getButtonVB(ADD_IMAGE_ID, bref + "add_image", this));
-		imageContainer.add(WFUtil.getBreak());
-		imageContainer.add(getImageList());
-		p.getChildren().add(imageContainer);
-		p.getChildren().add(WFUtil.group(WFUtil.getTextVB(bref + "source"), WFUtil.getText(":")));		
-		p.getChildren().add(WFUtil.group(WFUtil.getTextVB(bref + "main_category"), WFUtil.getText(":")));		
-		HtmlInputTextarea sourceArea = WFUtil.getTextArea(SOURCE_ID, ref + "source", "440px", "30px");
-		p.getChildren().add(sourceArea);		
-		HtmlSelectOneMenu mainCategoryMenu = WFUtil.getSelectOneMenu(MAIN_CATEGORY_ID, ref + "categories", ref + "mainCategoryId");
-		p.getChildren().add(mainCategoryMenu);		
+//		HtmlCommandButton editButton = WFUtil.getButtonVB(EDIT_HTML_ID, bref + "edit");
+//		editButton.setOnclick("wurl='htmlarea/webface/htmledit.jsp?" + PREVIEW_ARTICLE_ITEM_ID + 
+//					"='+this.tabindex;window.open(wurl,'Edit','height=450,width=600,resizable=yes,status=no,toolbar=no,menubar=no,location=no,scrollbars=no');return false;");
+//		p.getChildren().add(WFUtil.group(WFUtil.group(bodyArea, WFUtil.getBreak()), editButton));
+//		WFContainer imageContainer = new WFContainer();
+//		imageContainer.add(WFUtil.getButtonVB(ADD_IMAGE_ID, bref + "add_image", this));
+//		imageContainer.add(WFUtil.getBreak());
+//		imageContainer.add(getImageList());
+//		p.getChildren().add(imageContainer);
+//		p.getChildren().add(WFUtil.group(WFUtil.getTextVB(bref + "source"), WFUtil.getText(":")));		
+//		p.getChildren().add(WFUtil.group(WFUtil.getTextVB(bref + "main_category"), WFUtil.getText(":")));		
+//		HtmlInputTextarea sourceArea = WFUtil.getTextArea(SOURCE_ID, ref + "source", "440px", "30px");
+//		p.getChildren().add(sourceArea);		
+		//HtmlSelectOneMenu mainCategoryMenu = WFUtil.getSelectOneMenu(MAIN_CATEGORY_ID, ref + "categories", ref + "mainCategoryId");
+		//p.getChildren().add(mainCategoryMenu);		
 
 		mainContainer.add(p);
 		mainContainer.add(WFUtil.getBreak());
@@ -239,15 +242,15 @@ public class ArticleBlock extends WFBlock implements ActionListener, ManagedCont
 		mainContainer.add(WFUtil.getBreak());
 		
 		p = WFPanelUtil.getFormPanel(2);		
-		p.getChildren().add(WFUtil.group(WFUtil.getTextVB(bref + "comment"), WFUtil.getText(":")));		
-		p.getChildren().add(WFUtil.group(WFUtil.getTextVB(bref + "attachments"), WFUtil.getText(":")));		
+		p.getChildren().add(WFUtil.group(WFUtil.getTextVB(bref + "comment"), WFUtil.getText(":")));
+//		p.getChildren().add(WFUtil.group(WFUtil.getTextVB(bref + "attachments"), WFUtil.getText(":")));		
 		HtmlInputTextarea commentArea = WFUtil.getTextArea(COMMENT_ID, ref + "comment", "400px", "60px");		
 		p.getChildren().add(commentArea);
-		WFContainer attachmentContainer = new WFContainer();		
-		attachmentContainer.add(WFUtil.getButtonVB(ADD_ATTACHMENT_ID, bref + "add_attachment", this));
-		attachmentContainer.add(WFUtil.getBreak());
-		attachmentContainer.add(getAttachmentList());
-		p.getChildren().add(attachmentContainer);
+//		WFContainer attachmentContainer = new WFContainer();		
+//		attachmentContainer.add(WFUtil.getButtonVB(ADD_ATTACHMENT_ID, bref + "add_attachment", this));
+//		attachmentContainer.add(WFUtil.getBreak());
+//		attachmentContainer.add(getAttachmentList());
+//		p.getChildren().add(attachmentContainer);
 		
 		mainContainer.add(p);
 		
@@ -271,8 +274,17 @@ public class ArticleBlock extends WFBlock implements ActionListener, ManagedCont
 		mainContainer.add(WFUtil.getBreak());
 
 		p = WFPanelUtil.getPlainFormPanel(1);
-		HtmlCommandButton editCategoriesButton = WFUtil.getButtonVB(EDIT_CATEGORIES_ID, bref + "edit_categories", this);
-		p.getChildren().add(editCategoriesButton);
+//		HtmlCommandButton editCategoriesButton = WFUtil.getButtonVB(EDIT_CATEGORIES_ID, bref + "edit_categories", this);
+//		p.getChildren().add(editCategoriesButton);
+
+		p.getChildren().add(WFUtil.group(WFUtil.getTextVB(bref + "category"), WFUtil.getText(":")));
+		HtmlInputText categoryInput = WFUtil.getInputText(MAIN_CATEGORY_ID, ref + "mainCategory");
+		if(null==categoryInput.getValue() || "".equals(categoryInput.getValue())) {
+			categoryInput.setValue(ROOT_CATEGORY);
+		}
+		categoryInput.setSize(40);
+		p.getChildren().add(categoryInput);		
+		
 		p.getChildren().add(WFUtil.getBreak());
 		WFComponentSelector cs = new WFComponentSelector();
 		cs.setId(BUTTON_SELECTOR_ID);

@@ -1,5 +1,5 @@
 /*
- * $Id: ArticleItemBean.java,v 1.2 2004/11/09 11:18:14 joakim Exp $
+ * $Id: ArticleItemBean.java,v 1.3 2004/11/17 14:39:37 joakim Exp $
  *
  * Copyright (C) 2004 Idega. All Rights Reserved.
  *
@@ -15,7 +15,15 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import org.apache.commons.httpclient.HttpURL;
+import org.apache.webdav.lib.WebdavResource;
 import org.apache.xmlbeans.XmlException;
+import com.idega.business.IBOLookup;
+import com.idega.idegaweb.IWApplicationContext;
+import com.idega.idegaweb.IWUserContext;
+import com.idega.presentation.IWContext;
+import com.idega.slide.business.IWSlideService;
+import com.idega.slide.business.IWSlideSession;
 import com.idega.webface.test.bean.ContentItemBean;
 import com.idega.webface.test.bean.ContentItemCase;
 import com.idega.webface.test.bean.ContentItemField;
@@ -25,10 +33,10 @@ import com.idega.webface.test.bean.ContentItemFieldBean;
 /**
  * Bean for idegaWeb article content items.   
  * <p>
- * Last modified: $Date: 2004/11/09 11:18:14 $ by $Author: joakim $
+ * Last modified: $Date: 2004/11/17 14:39:37 $ by $Author: joakim $
  *
  * @author Anders Lindman
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 
 public class ArticleItemBean extends ContentItemBean implements Serializable {
@@ -57,6 +65,7 @@ public class ArticleItemBean extends ContentItemBean implements Serializable {
 	public String getComment() { return getItemField("comment").getValue(); }
 	public List getImages() { return getItemFields("image"); }
 	public List getAttachments() { return getItemFields("attachment"); }
+	public String getMainCategory() { return getItemField("main_category").getValue(); }
 	public List getRelatedContentItems() { return getItemFields("related_items"); }
 
 	public void setHeadline(String s) { setItemField("headline", s); } 
@@ -68,6 +77,7 @@ public class ArticleItemBean extends ContentItemBean implements Serializable {
 	public void setComment(String s) { setItemField("comment", s); }
 	public void setImages(List l) { setItemFields("image", l); }
 	public void setAttachment(List l) { setItemFields("attachment", l); }
+	public void setMainCategory(String l) { setItemField("main_category", l); }
 	public void setRelatedContentItems(List l) { setItemFields("related_items", l); }
 
 	public boolean isUpdated() { return _isUpdated; }
@@ -202,23 +212,84 @@ public class ArticleItemBean extends ContentItemBean implements Serializable {
 			}
 		}
 		
-	    article.setHeadline(getHeadline());
-	    article.setBody(getBody());
-	    article.setTeaser(getTeaser());
-	    article.setAuthor(getAuthor());
-	    article.setSource(getSource());
-	    article.setComment(getComment());
+		article.setHeadline(getHeadline());
+		article.setBody(getBody());
+		article.setTeaser(getTeaser());
+		article.setAuthor(getAuthor());
+		article.setSource(getSource());
+		article.setComment(getComment());
 //	    article.setImage(getImages());
 //	    article.setAttachment(getAttachments());
 //	    article.setRelatedItems(getRelatedContentItems());
-	    
-	    String filename = getHeadline();
-	    if(null==filename || filename.length()==0) {
-	    	filename = "empty";
+//Need to create	    article.setCategory(getCategory());
+
+		String filename = getHeadline();
+		if(null==filename || filename.length()==0) {
+			filename = "empty";
+		}
+/*	    
+	    File path = new File(getMainCategory());
+	    if(!path.exists()) {
+	    	path.mkdirs();
 	    }
-	    
-	    try {
-			articleDoc.save(new File("/Test/article/"+filename+".xml"));
+*/
+		try {
+			IWUserContext iwuc = IWContext.getInstance();
+			IWApplicationContext iwac = iwuc.getApplicationContext();
+			
+			IWSlideSession session = (IWSlideSession)IBOLookup.getSessionInstance(iwuc,IWSlideSession.class);
+			IWSlideService service = (IWSlideService)IBOLookup.getServiceInstance(iwac,IWSlideService.class);
+		
+			System.out.println("webdavServerURL = "+service.getWebdavServerURL());
+			System.out.println("webdavServletURL = "+getWebdavServletURL(iwuc));
+			System.out.println("Main category = "+getMainCategory());
+
+			HttpURL root = service.getWebdavServerURL();
+			root.setUserinfo("root","root");
+			WebdavResource webdavResource = new WebdavResource(root);
+//			boolean success = webdavResource.mkcolMethod("/servlet/webdav/files/test/test2");
+			boolean success = webdavResource.mkcolMethod(getWebdavServletURL(iwuc)+getMainCategory());
+			System.out.println("success "+success);
+			success = webdavResource.putMethod(getWebdavServletURL(iwuc)+getMainCategory()+"/"+filename+".xml",articleDoc.toString());
+			System.out.println("success "+success);
+
+//			String webdavServletURL = getWebdavServletURL(iwuc)+"/"+getMainCategory();
+//			System.out.println("webdavServletURL = "+webdavServletURL);
+//			System.out.println("webdavServerURL = "+service.getWebdavServerURL());
+//			WebdavResource webdavResource = session.getWebdavResource(session.getWebdavServerURL().toString());
+//			WebdavResource webdavResource = session.getWebdavResource("http://localhost:8080/servlet/webdav");
+//			WebdavResource webdavResource = new WebdavResource("http://localhost:8080/servlet/webdav/");
+			
+//			WebdavFile webdavFile = session.getWebdavFile();
+//			WebdavFile path = new WebdavFile(webdavFile, getMainCategory());
+//			path.mkdirs();
+
+//			webdavResource = session.getWebdavResource(getWebdavServletURL(iwuc)+getMainCategory()+"/"+filename+".xml");
+//			WebdavResource webdavResource = session.getWebdavResource("http://localhost:8080/servlet/webdav/"+filename+".xml");
+
+//			IWSlideService iwss = new IWSlideService();
+//			HttpURL root = new HttpURL("http://localhost:8080/servlet/webdav/files/");
+//			WebdavResource webdavResource = new WebdavResource("http://localhost:8080/servlet/webdav/files/"+filename+".xml");
+//			WebdavFile webdavFile = session.getWebdavFile();
+//			webdavResource.putMethod(new File(filename+".xml"));
+
+			/*
+			HttpURL root = new HttpURL("http://localhost:8080/servlet/webdav/files/"+filename+".xml");
+			root.setUserinfo("root","root");
+			WebdavFile webdavFile = new WebdavFile(webdavResource.getHttpURL());
+	    	webdavResource.close();
+			*/
+//			HttpURL root = new HttpURL("http://localhost:8080/servlet/webdav/files/"+filename+".xml", "root", "root");
+//			root.setUserinfo("root","root");
+			
+//			WebdavFile webdavFile = new WebdavFile("http://localhost:8080/servlet/webdav/files/"+filename+".xml", "root", "root");
+//			webdavFile.createNewFile();
+//			if(!webdavFile.exists()) {
+//			}
+			
+//			articleDoc.save(new File(getMainCategory()+"/"+filename+".xml"));
+//	    	articleDoc.save(webdavFile);
+//	    	webdavFile.close();
 		}
 		catch (IOException e1) {
 			storeOk = false;
@@ -236,7 +307,61 @@ public class ArticleItemBean extends ContentItemBean implements Serializable {
 		return new Boolean(storeOk);
 	}
 	
-	public void load(File file) throws XmlException, IOException{
+    public String getWebdavServletURL(IWUserContext iwuc){
+    	String root = iwuc.getApplicationContext().getIWMainApplication().getApplicationContextURI();
+    	if(null!=root && root.length()>1) {
+    		return root + WEBDAV_SERVLET_URI;
+    	}else {
+    		return WEBDAV_SERVLET_URI;
+    	}
+	}
+    
+    protected static final String WEBDAV_SERVLET_URI = "/servlet/webdav";
+    
+	/**
+	 * Loads all xml files in the given folder
+	 * @param folder
+	 * @return List containing ArticleItemBean
+	 * @throws XmlException
+	 * @throws IOException
+	 */
+	public void load(String path) throws XmlException, IOException{
+		IWUserContext iwuc = IWContext.getInstance();
+		IWApplicationContext iwac = iwuc.getApplicationContext();
+		
+		IWSlideSession session = (IWSlideSession)IBOLookup.getSessionInstance(iwuc,IWSlideSession.class);
+		IWSlideService service = (IWSlideService)IBOLookup.getServiceInstance(iwac,IWSlideService.class);
+
+		//TODO have to find the host machine url to load the resource.
+//		WebdavResource webdavResource = session.getWebdavResource(getWebdavServletURL(iwuc)+path);
+//		WebdavFile webdavFile = session.getWebdavFile();
+		HttpURL root = new HttpURL(service.getWebdavServerURL()+path);
+		root.setUserinfo("root","root");
+		WebdavResource webdavResource = new WebdavResource(root);
+		
+		ArticleDocument articleDoc;
+		
+		articleDoc = ArticleDocument.Factory.parse(webdavResource.getMethodDataAsString());
+		
+	    ArticleDocument.Article article =  articleDoc.getArticle();
+//	    ArticleItemBean articleBean = new ArticleItemBean();
+	    setHeadline(article.getHeadline());
+	    setBody(article.getBody());
+	    setTeaser(article.getTeaser());
+	    setAuthor(article.getAuthor());
+	    setSource(article.getSource());
+	    setComment(article.getComment());
+		String category = "";
+		int lastSlash = path.lastIndexOf('/');
+		if(lastSlash>0) {
+			category = path.substring(0,lastSlash);
+		}
+	    setMainCategory(category);
+	    
+//		System.out.println("loaded "+getBody());
+	}
+	
+	public void loadOld(File file) throws XmlException, IOException{
 		ArticleDocument articleDoc;
 		
 		articleDoc = ArticleDocument.Factory.parse(file);
@@ -249,6 +374,7 @@ public class ArticleItemBean extends ContentItemBean implements Serializable {
 	    setAuthor(article.getAuthor());
 	    setSource(article.getSource());
 	    setComment(article.getComment());
+//Need to create this	    setMainCategory(article.getMainCategory());
 	    
 //		System.out.println("loaded "+getBody());
 	}

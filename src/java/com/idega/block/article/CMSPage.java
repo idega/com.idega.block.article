@@ -1,5 +1,5 @@
 /*
- * $Id: CMSPage.java,v 1.7 2004/11/16 01:17:32 tryggvil Exp $
+ * $Id: CMSPage.java,v 1.8 2004/11/17 14:39:37 joakim Exp $
  *
  * Copyright (C) 2004 Idega. All Rights Reserved.
  *
@@ -18,7 +18,8 @@ import javax.faces.component.html.HtmlPanelGrid;
 import javax.faces.context.FacesContext;
 import javax.faces.event.ActionEvent;
 import javax.faces.event.ActionListener;
-import com.idega.block.article.bean.ArticleListBean;
+import org.apache.xmlbeans.XmlException;
+import com.idega.block.article.bean.ArticleItemBean;
 import com.idega.block.article.component.ArticleBlock;
 import com.idega.block.article.component.ArticleVersionBlock;
 import com.idega.webface.WFBlock;
@@ -38,10 +39,10 @@ import com.idega.webface.test.bean.ManagedContentBeans;
 /**
  * Content management system test/demo page. 
  * <p>
- * Last modified: $Date: 2004/11/16 01:17:32 $ by $Author: tryggvil $
+ * Last modified: $Date: 2004/11/17 14:39:37 $ by $Author: joakim $
  *
  * @author Anders Lindman
- * @version $Revision: 1.7 $
+ * @version $Revision: 1.8 $
  */
 public class CMSPage extends WFPage implements  ManagedContentBeans, WFTabListener, ActionListener, Serializable {
 	
@@ -256,20 +257,44 @@ public class CMSPage extends WFPage implements  ManagedContentBeans, WFTabListen
 			ab.setEditMode();
 		}
 
-		WFUtil.invoke(ARTICLE_ITEM_BEAN_ID, "clear");
-		WFUtil.invoke(ARTICLE_ITEM_BEAN_ID, "setLocaleId", "sv");
-		WFUtil.invoke(ARTICLE_ITEM_BEAN_ID, "setHeadline", "headline");
-		WFUtil.invoke(ARTICLE_ITEM_BEAN_ID, "setBody", id);
-		WFUtil.invoke(ARTICLE_ITEM_BEAN_ID, "setAuthor", "author");
-		WFUtil.invoke(ARTICLE_ITEM_BEAN_ID, "setComment", "comment");
-		WFUtil.invoke(ARTICLE_ITEM_BEAN_ID, "setDescription", "description");
-		WFUtil.invoke(ARTICLE_ITEM_BEAN_ID, "setSource", "source");
-		if (link.getId().equals(ArticleListBean.ARTICLE_ID)) {
-			WFUtil.invoke(ARTICLE_ITEM_BEAN_ID, "setStatus", ContentItemCase.STATUS_PUBLISHED);
-		} else {
-			WFUtil.invoke(ARTICLE_ITEM_BEAN_ID, "setStatus", ContentItemCase.STATUS_UNDER_REVIEW);
+		ArticleItemBean articleItem = new ArticleItemBean();
+		try {
+//			articleItem.load("/files/content/"+id+".xml");
+			articleItem.load(id);
+
+			WFUtil.invoke(ARTICLE_ITEM_BEAN_ID, "clear");
+
+			WFUtil.invoke(ARTICLE_ITEM_BEAN_ID, "setLocaleId", "en");
+			WFUtil.invoke(ARTICLE_ITEM_BEAN_ID, "setHeadline", notNull(articleItem.getHeadline()));
+			WFUtil.invoke(ARTICLE_ITEM_BEAN_ID, "setTeaser", notNull(articleItem.getTeaser()));
+			WFUtil.invoke(ARTICLE_ITEM_BEAN_ID, "setBody", notNull(articleItem.getBody()));
+			WFUtil.invoke(ARTICLE_ITEM_BEAN_ID, "setAuthor", notNull(articleItem.getAuthor()));
+			WFUtil.invoke(ARTICLE_ITEM_BEAN_ID, "setComment", notNull(articleItem.getComment()));
+			WFUtil.invoke(ARTICLE_ITEM_BEAN_ID, "setDescription", notNull(articleItem.getDescription()));
+			WFUtil.invoke(ARTICLE_ITEM_BEAN_ID, "setStatus", 
+//					articleItem.getStatus()
+					ContentItemCase.STATUS_PUBLISHED
+					);
+			WFUtil.invoke(ARTICLE_ITEM_BEAN_ID, "setMainCategoryId", new Integer(3));
+			WFUtil.invoke(ARTICLE_ITEM_BEAN_ID, "setMainCategory", articleItem.getMainCategory());
+			WFUtil.invoke(ARTICLE_ITEM_BEAN_ID, "setLocaleId", "sv");
+
+			//And one more time since it won't work after just setting the params once...
+			
+			WFUtil.invoke(ARTICLE_ITEM_BEAN_ID, "setHeadline", notNull(articleItem.getHeadline()));
+			WFUtil.invoke(ARTICLE_ITEM_BEAN_ID, "setTeaser", notNull(articleItem.getTeaser()));
+			WFUtil.invoke(ARTICLE_ITEM_BEAN_ID, "setBody", notNull(articleItem.getBody()));
+			WFUtil.invoke(ARTICLE_ITEM_BEAN_ID, "setAuthor", notNull(articleItem.getAuthor()));
+			WFUtil.invoke(ARTICLE_ITEM_BEAN_ID, "setMainCategory", articleItem.getMainCategory());
 		}
-		WFUtil.invoke(ARTICLE_ITEM_BEAN_ID, "setMainCategoryId", new Integer(3));
+		catch (XmlException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 
 		
 		if(ab!=null){
@@ -277,6 +302,13 @@ public class CMSPage extends WFPage implements  ManagedContentBeans, WFTabListen
 		}
 	}
 	
+	private String notNull(String str) {
+		if(null==str) {
+			return "<Empty>";
+		}
+		return str;
+	}
+
 	/**
 	 * Sets the page in edit mode.
 	 */
