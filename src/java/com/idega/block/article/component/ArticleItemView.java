@@ -1,5 +1,5 @@
 /*
- * $Id: ArticleItemView.java,v 1.6 2004/12/20 16:49:18 joakim Exp $
+ * $Id: ArticleItemView.java,v 1.7 2004/12/21 15:37:14 joakim Exp $
  *
  * Copyright (C) 2004 Idega. All Rights Reserved.
  *
@@ -10,7 +10,7 @@ package com.idega.block.article.component;
 
 import java.io.IOException;
 import javax.faces.component.UIComponent;
-import javax.faces.component.html.HtmlCommandButton;
+import javax.faces.component.html.HtmlOutputLink;
 import javax.faces.component.html.HtmlPanelGrid;
 import javax.faces.context.FacesContext;
 import javax.faces.event.AbortProcessingException;
@@ -25,12 +25,12 @@ import com.idega.webface.WFUtil;
 import com.idega.webface.test.bean.ManagedContentBeans;
 
 /**
- * Last modified: $Date: 2004/12/20 16:49:18 $ by $Author: joakim $
+ * Last modified: $Date: 2004/12/21 15:37:14 $ by $Author: joakim $
  *
  * Displays the article item
  *
  * @author Joakim
- * @version $Revision: 1.6 $
+ * @version $Revision: 1.7 $
  */
 public class ArticleItemView extends IWBaseComponent implements ManagedContentBeans, ActionListener{
 	public final static String EDIT_ARTICLE_BLOCK_ID = "edit_articles_block";
@@ -87,9 +87,15 @@ public class ArticleItemView extends IWBaseComponent implements ManagedContentBe
 		c2.add(WFUtil.getTextVB(ref + "body"));
 		c2.add(WFUtil.getBreak(1));
 		c.add(c2);
-		HtmlCommandButton editButton = WFUtilArticle.getButtonVB(EDIT_ID, "edit", this);
-		c.add(editButton);
-		c.add(WFUtil.getLinkVB("", ref + "headline", null));
+		
+		HtmlOutputLink editLink = new HtmlOutputLink();
+
+		HtmlOutputLink link = new HtmlOutputLink();
+		link.setValue("http://localhost:8080/cms/workspace/content/article/create");
+		link.setStyleClass("wf_listlink");
+		link.setId(getId() + "_dl");
+		link.getChildren().add(WFUtil.getText("Edit"));
+		c.add(link);
 
 		cs.add(c);
 
