@@ -1,5 +1,5 @@
 /*
- * $Id: EditArticleBlock.java,v 1.23 2005/03/03 10:37:22 joakim Exp $
+ * $Id: EditArticleBlock.java,v 1.24 2005/03/07 15:29:55 joakim Exp $
  *
  * Copyright (C) 2004 Idega. All Rights Reserved.
  *
@@ -56,10 +56,10 @@ import com.idega.webface.WFUtil;
 import com.idega.webface.htmlarea.HTMLArea;
 
 /**
- * Last modified: $Date: 2005/03/03 10:37:22 $ by $Author: joakim $
+ * Last modified: $Date: 2005/03/07 15:29:55 $ by $Author: joakim $
  *
  * @author Joakim
- * @version $Revision: 1.23 $
+ * @version $Revision: 1.24 $
  */
 public class EditArticleBlock extends IWBaseComponent implements ManagedContentBeans, ActionListener, ValueChangeListener {
 	public final static String EDIT_ARTICLE_BLOCK_ID = "edit_articles_block";
@@ -128,6 +128,9 @@ public class EditArticleBlock extends IWBaseComponent implements ManagedContentB
 	}
 
 	protected void initializeContent() {
+		if(clearOnInit) {
+			WFUtil.invoke(ARTICLE_ITEM_BEAN_ID, "clear");
+		}
 		setId(EDIT_ARTICLE_BLOCK_ID);
 //		WFUtil.invoke(EDIT_ARTICLES_BEAN_ID, "setArticleLinkListener", this, ActionListener.class);
 		add(getEditContainer());
@@ -614,16 +617,20 @@ public class EditArticleBlock extends IWBaseComponent implements ManagedContentB
 	 * @see javax.faces.component.UIComponent#encodeBegin(javax.faces.context.FacesContext)
 	 */
 	public void encodeBegin(FacesContext context) throws IOException {
-		WFUtil.invoke(ARTICLE_ITEM_BEAN_ID, "updateLocale");
+//		if(clearOnInit) {
+			WFUtil.invoke(ARTICLE_ITEM_BEAN_ID, "clear");
+//		}
+//		WFUtil.invoke(ARTICLE_ITEM_BEAN_ID, "updateLocale");
 //		updateEditButtons();
 		
+		super.encodeBegin(context);
+
 		IWContext iwc = IWContext.getIWContext(context);
 		String resourcePath = iwc.getParameter(ContentViewer.PARAMETER_CONTENT_RESOURCE);
 		if(resourcePath!=null){
 			WFUtil.invoke(ARTICLE_ITEM_BEAN_ID,"load",resourcePath,String.class);
 		}
 		
-		super.encodeBegin(context);
 	}
 
 	/* (non-Javadoc)
@@ -664,5 +671,14 @@ public class EditArticleBlock extends IWBaseComponent implements ManagedContentB
 		}
 		WFUtil.invoke(ARTICLE_ITEM_BEAN_ID, "getHeadline",arg0.getNewValue());
 */
+	}
+	
+	boolean clearOnInit = false;
+
+	/**
+	 * @param mode
+	 */
+	public void setEditMode(String mode) {
+		clearOnInit = mode.equalsIgnoreCase("create");
 	}
 }

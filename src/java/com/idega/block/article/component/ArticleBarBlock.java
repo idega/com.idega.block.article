@@ -1,5 +1,5 @@
 /*
- * $Id: ArticleBarBlock.java,v 1.6 2005/02/18 13:34:48 joakim Exp $
+ * $Id: ArticleBarBlock.java,v 1.7 2005/03/07 15:28:49 joakim Exp $
  *
  * Copyright (C) 2004 Idega. All Rights Reserved.
  *
@@ -20,10 +20,10 @@ import com.idega.webface.event.WFTabListener;
 
 
 /**
- * Last modified: $Date: 2005/02/18 13:34:48 $ by $Author: joakim $
+ * Last modified: $Date: 2005/03/07 15:28:49 $ by $Author: joakim $
  *
  * @author Joakim
- * @version $Revision: 1.6 $
+ * @version $Revision: 1.7 $
  */
 public class ArticleBarBlock extends WFBlock implements ActionListener, ManagedContentBeans {
 
@@ -35,10 +35,13 @@ public class ArticleBarBlock extends WFBlock implements ActionListener, ManagedC
 //	public final static String TASK_ID_PREVIEW = P + "t_preview";
 	public final static String TASK_ID_LIST = P + "t_list";
 	public final static String TASK_ID_DETAILS = P + "t_details";
-	
-	private EditArticleBlock articleBlock;
+	EditArticleBlock editArticleBlock = new EditArticleBlock();
 
 	public ArticleBarBlock() {
+	}
+	
+	public void setEditMode(String mode) {
+		editArticleBlock.setEditMode(mode);
 	}
 	
 	/**
@@ -54,7 +57,7 @@ public class ArticleBarBlock extends WFBlock implements ActionListener, ManagedC
 		WFTabbedPane tb = new WFTabbedPane();
 		tb.setId(TASKBAR_ID);
 		add(tb);
-		tb.addTabVB(TASK_ID_EDIT, bref + "edit", new EditArticleBlock());
+		tb.addTabVB(TASK_ID_EDIT, bref + "edit", editArticleBlock);
 		tb.addTabVB(TASK_ID_DETAILS, bref + "details", new ArticleDetailView());
 		tb.addTabVB(TASK_ID_LIST, bref + "list", new ListArticlesBlock());
 //		tb.addTabVB(TASK_ID_PREVIEW, bref + "preview", new ArticlePreview());

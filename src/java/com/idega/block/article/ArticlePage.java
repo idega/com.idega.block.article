@@ -18,7 +18,7 @@ import com.idega.webface.WFPage;
  * Window - Preferences - Java - Code Style - Code Templates
  */
 public class ArticlePage extends CMSPage {
-	
+	ArticleBarBlock abb=null;
 	
 	public ArticlePage(){
 		super();
@@ -49,8 +49,17 @@ public class ArticlePage extends CMSPage {
 		String bref = WFPage.CONTENT_BUNDLE + ".";
 		//Has to be set to value bound for this to work...
 //		String bref = WFUtilArticle.getBundleString() + ".";
-		ArticleBarBlock abb = new ArticleBarBlock(bref + "article");
+		abb = new ArticleBarBlock(bref + "article");
 		abb.setId("article_block");
 		return abb;
+	}
+
+	/**
+	 * @param mode
+	 */
+	public void setEditMode(String mode) {
+		if(abb!=null) {
+			abb.setEditMode(mode);
+		}
 	}
 }
