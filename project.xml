@@ -116,7 +116,9 @@
       </properties>
     </dependency>
     
-	<!-- These are required only to run the xmlbeans tool -->
+	<!-- These are required only to run the xmlbeans tool 
+	
+	commented out updater gets confused about it (these jars are put to a special lib folder)
     <dependency>
       <groupId>xmlbeans</groupId>
       <artifactId>xbean_xpath</artifactId>
@@ -138,6 +140,8 @@
       <type>jar</type>
       <url>http://www.jaxen.org/</url>
     </dependency>
+    
+    -->
 
     <dependency>
       <groupId>jtidy</groupId>
