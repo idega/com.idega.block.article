@@ -1,5 +1,5 @@
 /*
- * $Id: ArticleItemBean.java,v 1.23 2005/02/18 13:28:30 joakim Exp $
+ * $Id: ArticleItemBean.java,v 1.24 2005/02/18 16:39:31 joakim Exp $
  *
  * Copyright (C) 2004 Idega. All Rights Reserved.
  *
@@ -16,6 +16,7 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Logger;
 import org.apache.xmlbeans.XmlException;
 import org.w3c.tidy.Tidy;
 import com.idega.business.IBOLookup;
@@ -42,10 +43,10 @@ import com.idega.xmlns.block.article.document.ArticleDocument;
 /**
  * Bean for idegaWeb article content items.   
  * <p>
- * Last modified: $Date: 2005/02/18 13:28:30 $ by $Author: joakim $
+ * Last modified: $Date: 2005/02/18 16:39:31 $ by $Author: joakim $
  *
  * @author Anders Lindman
- * @version $Revision: 1.23 $
+ * @version $Revision: 1.24 $
  */
 
 public class ArticleItemBean extends ContentItemBean implements Serializable, ContentItem {
@@ -69,6 +70,7 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 	//Note "comment" seems to be a reserved attribute in DAV so use "article_comment" for that!!!
 	public final static String FIELDNAME_ARTICLE_COMMENT = "article_comment";
 	public final static String FIELDNAME_IMAGES = "images";
+	public final static String FIELDNAME_FILENAME = "filename";
 	public final static String FIELDNAME_FOLDER_LOCATION = "folder_location";
 	
 	public final static String ARTICLE_FILENAME_SCOPE = "article";
@@ -95,6 +97,7 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 	public String getSource() { return (String)getValue(FIELDNAME_SOURCE); }
 	public String getComment() { return (String)getValue(FIELDNAME_COMMENT); }
 	public List getImages() { return getItemFields(FIELDNAME_IMAGES); }
+	public String getFilename() { return (String)getValue(FIELDNAME_FILENAME); }
 	public String getFolderLocation() { return (String)getValue(FIELDNAME_FOLDER_LOCATION); }
 
 	public void setHeadline(String s) { setValue(FIELDNAME_HEADLINE, s); } 
@@ -123,6 +126,7 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 	public void setSource(String s) { setValue(FIELDNAME_SOURCE, s); }
 	public void setComment(String s) { setValue(FIELDNAME_COMMENT, s); }
 	public void setImages(List l) { setItemFields(FIELDNAME_IMAGES, l); }
+	public void setFilename(String l) { setValue(FIELDNAME_FILENAME, l); }
 	public void setFolderLocation(String l) { setValue(FIELDNAME_FOLDER_LOCATION, l); }
 
 	public boolean isUpdated() { return _isUpdated; }
@@ -142,6 +146,7 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 		setSource(null);
 		setComment(null);
 		setImages(null);
+		setFilename(null);
 		setFolderLocation(null);
 		_isUpdated = false;
 	}
@@ -220,7 +225,7 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 		name.append(service.createUniqueFileName(ARTICLE_FILENAME_SCOPE));
 		IWUserContext iwuc = IWContext.getInstance();
 		name.append("-").append(iwuc.getCurrentLocale().getLanguage());
-		System.out.println("FileName is "+name);
+//		System.out.println("FileName is "+name);
 		return name.toString();
 	}
 	
@@ -286,7 +291,7 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 	 * @deprecated use getAsXML() instead. We have dropped XMLBeans, since it insisted on adding CData
 	 * @return
 	 */
-	public String getAsXMLFromXMLBeans() {
+/*	public String getAsXMLFromXMLBeans() {
 		ArticleDocument articleDoc = ArticleDocument.Factory.newInstance();
 	    
 	    ArticleDocument.Article article =  articleDoc.addNewArticle();
@@ -303,13 +308,12 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 		
 		return articleDoc.toString();
 	}
-	
+*/
 	/**
 	 * This is a temporary holder for the Slide implementation
 	 * This should be replace as soon as Slide is working
 	 */
 	public void store() throws IDOStoreException{
-//	public Boolean store() {
 		boolean storeOk = true;
 		clearErrorKeys();
 
@@ -500,14 +504,22 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 //			System.out.println("htmlBody value= "+bodyValue);
 			setBody(bodyValue);
 		}catch(Exception e) {		//Nullpointer could occur if field isn't used
-			e.printStackTrace();
+//			e.printStackTrace();
+			Logger log = Logger.getLogger(this.getClass().toString());
+			log.warning("Body of article is empty");
 			setBody("");
 		}
 		
-		setComment(rootElement.getChild(FIELDNAME_ARTICLE_COMMENT,idegans).getText());
+		try {
+			setComment(rootElement.getChild(FIELDNAME_ARTICLE_COMMENT,idegans).getText());
+		}catch(Exception e) {		//Nullpointer could occur if field isn't used
+			e.printStackTrace();
+			setComment("");
+		}
 
 		String folder = webdavResource.getParentPath();
 	    setFolderLocation(folder);
+//	    setFilename();
 //		setFolderLocation(bodyElement.getChild(FIELDNAME_FOLDER_LOCATION,idegans).getText());
 	}
 	

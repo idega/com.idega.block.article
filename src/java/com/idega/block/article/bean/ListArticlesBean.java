@@ -1,5 +1,5 @@
 /*
- * $Id: ListArticlesBean.java,v 1.11 2005/02/14 15:16:34 gummi Exp $
+ * $Id: ListArticlesBean.java,v 1.12 2005/02/18 16:39:44 joakim Exp $
  *
  * Copyright (C) 2004 Idega. All Rights Reserved.
  *
@@ -28,10 +28,10 @@ import com.idega.webface.model.WFDataModel;
 /**
  * Bean for listing articles.   
  * <p>
- * Last modified: $Date: 2005/02/14 15:16:34 $ by $Author: gummi $
+ * Last modified: $Date: 2005/02/18 16:39:44 $ by $Author: joakim $
  *
  * @author Anders Lindman
- * @version $Revision: 1.11 $
+ * @version $Revision: 1.12 $
  */
 
 public class ListArticlesBean implements WFListBean, Serializable {
@@ -134,7 +134,7 @@ public class ListArticlesBean implements WFListBean, Serializable {
 		}
 		try {
 //			ArticleItemBean[] articleItemBean = (ArticleItemBean[]) ArticleListBean.loadAllArticlesInFolder("/files/content").toArray(new ArticleItemBean[0]);
-			ArticleItemBean[] articleItemBean = (ArticleItemBean[]) ArticleListBean.loadAllArticlesInFolder(ArticleUtil.getArticleRootPath()).toArray(new ArticleItemBean[0]);
+			ArticleItemBean[] articleItemBean = (ArticleItemBean[]) ArticleListBean.loadAllArticlesInFolder(ArticleUtil.getArticleYearMonthPath()).toArray(new ArticleItemBean[0]);
 			int availableRows = articleItemBean.length;
 			
 			int nrOfRows = rows.intValue();
@@ -144,7 +144,8 @@ public class ListArticlesBean implements WFListBean, Serializable {
 			int maxRow = Math.min(start.intValue() + nrOfRows,availableRows);
 			for (int i = start.intValue(); i < maxRow; i++) {
 				//TODO we don't have published in the article item bean
-				String id = articleItemBean[i].getFolderLocation()+"/"+articleItemBean[i].getHeadline()+ArticleItemBean.ARTICLE_SUFFIX;
+//				String id = articleItemBean[i].getFolderLocation()+"/"+articleItemBean[i].getHeadline()+ArticleItemBean.ARTICLE_SUFFIX;
+				String id = articleItemBean[i].getFolderLocation()+"/"+articleItemBean[i].getFilename();
 				ListArticlesBean bean = new ListArticlesBean(id, articleItemBean[i].getHeadline(), "");
 				_dataModel.set(bean, i);
 			}

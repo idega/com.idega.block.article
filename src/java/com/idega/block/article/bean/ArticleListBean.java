@@ -1,5 +1,5 @@
 /*
- * $Id: ArticleListBean.java,v 1.16 2005/02/14 15:16:34 gummi Exp $
+ * $Id: ArticleListBean.java,v 1.17 2005/02/18 16:39:31 joakim Exp $
  *
  * Copyright (C) 2004 Idega. All Rights Reserved.
  *
@@ -33,10 +33,10 @@ import com.idega.webface.model.WFDataModel;
 /**
  * Bean for article list rows.   
  * <p>
- * Last modified: $Date: 2005/02/14 15:16:34 $ by $Author: gummi $
+ * Last modified: $Date: 2005/02/18 16:39:31 $ by $Author: joakim $
  *
  * @author Anders Lindman
- * @version $Revision: 1.16 $
+ * @version $Revision: 1.17 $
  */
 
 public class ArticleListBean implements WFListBean, Serializable {
@@ -124,7 +124,8 @@ public class ArticleListBean implements WFListBean, Serializable {
 			int maxRow = Math.min(start.intValue() + nrOfRows,availableRows);
 			
 			for (int i = start.intValue(); i < maxRow; i++) {
-				ArticleListBean a = new ArticleListBean(articleItemBean[i].getFolderLocation()+"/"+articleItemBean[i].getHeadline()+ArticleItemBean.ARTICLE_SUFFIX, articleItemBean[i].getHeadline(), articleItemBean[i].getItemType(), articleItemBean[i].getAuthor(), articleItemBean[i].getStatus());
+//				ArticleListBean a = new ArticleListBean(articleItemBean[i].getFolderLocation()+"/"+articleItemBean[i].getHeadline()+ArticleItemBean.ARTICLE_SUFFIX, articleItemBean[i].getHeadline(), articleItemBean[i].getItemType(), articleItemBean[i].getAuthor(), articleItemBean[i].getStatus());
+				ArticleListBean a = new ArticleListBean(articleItemBean[i].getFolderLocation()+"/"+articleItemBean[i].getFilename(), articleItemBean[i].getHeadline(), articleItemBean[i].getItemType(), articleItemBean[i].getAuthor(), articleItemBean[i].getStatus());
 				_dataModel.set(a, i);
 			}
 		}
@@ -171,6 +172,7 @@ public class ArticleListBean implements WFListBean, Serializable {
 	//				article.load(folder+"/"+file[i]);
 					//TODO this is a patch since getWebdavResource(folder) seems to return the whole path now
 					article.load(file[i].substring(12));
+					article.setFilename(ArticleUtil.getFilenameFromPath(file[i].substring(12)));
 					list.add(article);
 				}catch(Exception e) {
 					e.printStackTrace();
