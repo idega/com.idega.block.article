@@ -1,5 +1,5 @@
 /*
- * $Id: ArticleListManagedBean.java,v 1.5 2005/02/25 11:26:54 gummi Exp $
+ * $Id: ArticleListManagedBean.java,v 1.6 2005/03/05 18:36:33 gummi Exp $
  * Created on 27.1.2005
  *
  * Copyright (C) 2005 Idega Software hf. All Rights Reserved.
@@ -31,9 +31,7 @@ import com.idega.content.bean.ContentListViewerManagedBean;
 import com.idega.content.business.ContentSearch;
 import com.idega.content.presentation.ContentItemViewer;
 import com.idega.core.search.business.Search;
-import com.idega.core.search.business.SearchQuery;
 import com.idega.core.search.business.SearchResult;
-import com.idega.core.search.data.AdvancedSearchQuery;
 import com.idega.presentation.IWContext;
 import com.idega.slide.business.IWSlideSession;
 import com.idega.slide.util.IWSlideConstants;
@@ -43,10 +41,10 @@ import com.idega.util.IWTimestamp;
 
 /**
  * 
- *  Last modified: $Date: 2005/02/25 11:26:54 $ by $Author: gummi $
+ *  Last modified: $Date: 2005/03/05 18:36:33 $ by $Author: gummi $
  * 
  * @author <a href="mailto:gummi@idega.com">Gudmundur Agust Saemundsson</a>
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
  */
 public class ArticleListManagedBean implements ContentListViewerManagedBean {
 
@@ -100,11 +98,7 @@ public class ArticleListManagedBean implements ContentListViewerManagedBean {
 	public List loadAllArticlesInFolder(String folder) throws XmlException, IOException{
 		List list = new ArrayList();		
 			
-		IWContext iwc = IWContext.getInstance();
-		
-		SearchQuery query = new AdvancedSearchQuery();
-		
-		
+		IWContext iwc = IWContext.getInstance();		
 		
 		IWTimestamp oldest = null;
 		
@@ -220,9 +214,9 @@ public class ArticleListManagedBean implements ContentListViewerManagedBean {
 		
 		
 		s.setWhereExpression(expression);
-		System.out.println("------------------------");
-		System.out.println(s.asString());
-		System.out.println("------------------------");
+//		System.out.println("------------------------");
+//		System.out.println(s.asString());
+//		System.out.println("------------------------");
 		return s;
 	}
 
