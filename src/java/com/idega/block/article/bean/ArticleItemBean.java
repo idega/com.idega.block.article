@@ -1,5 +1,5 @@
 /*
- * $Id: ArticleItemBean.java,v 1.7 2004/12/09 14:25:51 joakim Exp $
+ * $Id: ArticleItemBean.java,v 1.8 2004/12/09 16:19:19 joakim Exp $
  *
  * Copyright (C) 2004 Idega. All Rights Reserved.
  *
@@ -26,18 +26,16 @@ import com.idega.presentation.IWContext;
 import com.idega.slide.business.IWSlideService;
 import com.idega.slide.business.IWSlideSession;
 import com.idega.webface.test.bean.ContentItemBean;
-import com.idega.webface.test.bean.ContentItemCase;
 import com.idega.webface.test.bean.ContentItemField;
 import com.idega.webface.test.bean.ContentItemFieldBean;
-
 
 /**
  * Bean for idegaWeb article content items.   
  * <p>
- * Last modified: $Date: 2004/12/09 14:25:51 $ by $Author: joakim $
+ * Last modified: $Date: 2004/12/09 16:19:19 $ by $Author: joakim $
  *
  * @author Anders Lindman
- * @version $Revision: 1.7 $
+ * @version $Revision: 1.8 $
  */
 
 public class ArticleItemBean extends ContentItemBean implements Serializable {
@@ -215,12 +213,13 @@ public class ArticleItemBean extends ContentItemBean implements Serializable {
 			addErrorKey(KEY_ERROR_BODY_EMPTY);
 			storeOk = false;
 		}
-		if (getRequestedStatus() != null && getRequestedStatus().equals(ContentItemCase.STATUS_PUBLISHED)) {
-			if (getCase().getPublishedFromDate() == null) {
-				addErrorKey(KEY_ERROR_PUBLISHED_FROM_DATE_EMPTY);
-				storeOk = false;
-			}
-		}
+		
+//		if (getRequestedStatus() != null && getRequestedStatus().equals(ContentItemCase.STATUS_PUBLISHED)) {
+//			if (getCase().getPublishedFromDate() == null) {
+//				addErrorKey(KEY_ERROR_PUBLISHED_FROM_DATE_EMPTY);
+//				storeOk = false;
+//			}
+//		}
 		
 		article.setHeadline(getHeadline());
 		article.setBody(getBody());

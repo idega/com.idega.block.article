@@ -1,5 +1,5 @@
 /*
- * $Id: EditArticleBlock.java,v 1.3 2004/12/09 14:42:15 joakim Exp $
+ * $Id: EditArticleBlock.java,v 1.4 2004/12/09 16:19:19 joakim Exp $
  *
  * Copyright (C) 2004 Idega. All Rights Reserved.
  *
@@ -28,7 +28,6 @@ import javax.faces.event.ActionListener;
 import com.idega.presentation.IWBaseComponent;
 import com.idega.webface.WFComponentSelector;
 import com.idega.webface.WFContainer;
-import com.idega.webface.WFDateInput;
 import com.idega.webface.WFErrorMessages;
 import com.idega.webface.WFList;
 import com.idega.webface.WFPage;
@@ -41,12 +40,11 @@ import com.idega.webface.test.bean.CaseListBean;
 import com.idega.webface.test.bean.ContentItemCase;
 import com.idega.webface.test.bean.ManagedContentBeans;
 
-
 /**
- * Last modified: $Date: 2004/12/09 14:42:15 $ by $Author: joakim $
+ * Last modified: $Date: 2004/12/09 16:19:19 $ by $Author: joakim $
  *
  * @author Joakim
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
 public class EditArticleBlock extends IWBaseComponent implements ManagedContentBeans, ActionListener {
 	public final static String EDIT_ARTICLE_BLOCK_ID = "edit_articles_block";
@@ -139,8 +137,8 @@ public class EditArticleBlock extends IWBaseComponent implements ManagedContentB
 		WFErrorMessages em = new WFErrorMessages();
 		em.addErrorMessage(HEADLINE_ID);
 		em.addErrorMessage(TEASER_ID);
-		em.addErrorMessage(PUBLISHED_FROM_DATE_ID);
-		em.addErrorMessage(PUBLISHED_TO_DATE_ID);
+//		em.addErrorMessage(PUBLISHED_FROM_DATE_ID);
+//		em.addErrorMessage(PUBLISHED_TO_DATE_ID);
 		em.addErrorMessage(SAVE_ID);
 		
 		mainContainer.add(em);
@@ -223,21 +221,21 @@ public class EditArticleBlock extends IWBaseComponent implements ManagedContentB
 		
 		mainContainer.add(p);
 		
-		p = WFPanelUtil.getFormPanel(1);
-		p.getChildren().add(WFUtil.group(WFUtil.getTextVB(bref + "related_content_items"), WFUtil.getText(":")));		
-		WFContainer contentItemContainer = new WFContainer();		
-		contentItemContainer.add(WFUtil.getButtonVB(ADD_RELATED_CONTENT_ITEM_ID, bref + "add_content_item", this));
-		contentItemContainer.add(WFUtil.getBreak());
-		contentItemContainer.add(getRelatedContentItemsList());
-		p.getChildren().add(contentItemContainer);
-		p.getChildren().add(WFUtil.group(WFUtil.getTextVB(bref + "publishing_date"), WFUtil.getText(":")));		
-		WFDateInput publishedFromInput = WFUtil.getDateInput(PUBLISHED_FROM_DATE_ID, ref + "case.publishedFromDate");
-		publishedFromInput.setShowTime(true);
-		p.getChildren().add(publishedFromInput);
-		p.getChildren().add(WFUtil.group(WFUtil.getTextVB(bref + "expiration_date"), WFUtil.getText(":")));		
-		WFDateInput publishedToInput = WFUtil.getDateInput(PUBLISHED_TO_DATE_ID, ref + "case.publishedToDate");
-		publishedToInput.setShowTime(true);
-		p.getChildren().add(publishedToInput);
+//		p = WFPanelUtil.getFormPanel(1);
+//		p.getChildren().add(WFUtil.group(WFUtil.getTextVB(bref + "related_content_items"), WFUtil.getText(":")));		
+//		WFContainer contentItemContainer = new WFContainer();		
+//		contentItemContainer.add(WFUtil.getButtonVB(ADD_RELATED_CONTENT_ITEM_ID, bref + "add_content_item", this));
+//		contentItemContainer.add(WFUtil.getBreak());
+//		contentItemContainer.add(getRelatedContentItemsList());
+//		p.getChildren().add(contentItemContainer);
+//		p.getChildren().add(WFUtil.group(WFUtil.getTextVB(bref + "publishing_date"), WFUtil.getText(":")));		
+//		WFDateInput publishedFromInput = WFUtil.getDateInput(PUBLISHED_FROM_DATE_ID, ref + "case.publishedFromDate");
+//		publishedFromInput.setShowTime(true);
+//		p.getChildren().add(publishedFromInput);
+//		p.getChildren().add(WFUtil.group(WFUtil.getTextVB(bref + "expiration_date"), WFUtil.getText(":")));		
+//		WFDateInput publishedToInput = WFUtil.getDateInput(PUBLISHED_TO_DATE_ID, ref + "case.publishedToDate");
+//		publishedToInput.setShowTime(true);
+//		p.getChildren().add(publishedToInput);
 		
 		mainContainer.add(p);
 		mainContainer.add(WFUtil.getBreak());
@@ -255,20 +253,20 @@ public class EditArticleBlock extends IWBaseComponent implements ManagedContentB
 		p.getChildren().add(categoryInput);		
 		
 		p.getChildren().add(WFUtil.getBreak());
-		WFComponentSelector cs = new WFComponentSelector();
-		cs.setId(BUTTON_SELECTOR_ID);
-		cs.setDividerText(" ");
+//		WFComponentSelector cs = new WFComponentSelector();
+//		cs.setId(BUTTON_SELECTOR_ID);
+//		cs.setDividerText(" ");
 		HtmlCommandButton saveButton = WFUtil.getButtonVB(SAVE_ID, bref + "save", this);
-		cs.add(saveButton);
-		cs.add(WFUtil.getButtonVB(FOR_REVIEW_ID, bref + "for_review", this));
-		cs.add(WFUtil.getButtonVB(PUBLISH_ID, bref + "publish", this));
-		cs.add(WFUtil.getButtonVB(REWRITE_ID, bref + "rewrite", this));
-		cs.add(WFUtil.getButtonVB(REJECT_ID, bref + "reject", this));
-		cs.add(WFUtil.getButtonVB(DELETE_ID, bref + "delete", this));
-		cs.add(WFUtil.getButtonVB(CANCEL_ID, bref + "cancel", this));
-		cs.setSelectedId(CANCEL_ID, true);
-		p.getChildren().add(cs);
-//		p.getChildren().add(saveButton);
+//		cs.add(saveButton);
+//		cs.add(WFUtil.getButtonVB(FOR_REVIEW_ID, bref + "for_review", this));
+//		cs.add(WFUtil.getButtonVB(PUBLISH_ID, bref + "publish", this));
+//		cs.add(WFUtil.getButtonVB(REWRITE_ID, bref + "rewrite", this));
+//		cs.add(WFUtil.getButtonVB(REJECT_ID, bref + "reject", this));
+//		cs.add(WFUtil.getButtonVB(DELETE_ID, bref + "delete", this));
+//		cs.add(WFUtil.getButtonVB(CANCEL_ID, bref + "cancel", this));
+//		cs.setSelectedId(CANCEL_ID, true);
+//		p.getChildren().add(cs);
+		p.getChildren().add(saveButton);
 		
 		mainContainer.add(p);
 		
@@ -552,7 +550,7 @@ public class EditArticleBlock extends IWBaseComponent implements ManagedContentB
 	 */
 	public void encodeBegin(FacesContext context) throws IOException {
 		WFUtil.invoke(ARTICLE_ITEM_BEAN_ID, "updateLocale");
-		updateEditButtons();
+//		updateEditButtons();
 		super.encodeBegin(context);
 	}
 }
