@@ -1,5 +1,5 @@
 /*
- * $Id: EditArticleBlock.java,v 1.19 2005/02/23 17:17:18 joakim Exp $
+ * $Id: EditArticleBlock.java,v 1.20 2005/02/24 16:52:55 joakim Exp $
  *
  * Copyright (C) 2004 Idega. All Rights Reserved.
  *
@@ -12,6 +12,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Locale;
 import javax.faces.component.UIColumn;
 import javax.faces.component.UIComponent;
 import javax.faces.component.UIInput;
@@ -31,7 +32,6 @@ import javax.faces.el.ValueBinding;
 import javax.faces.event.ActionEvent;
 import javax.faces.event.ActionListener;
 import javax.faces.model.SelectItem;
-import com.idega.block.article.business.ArticleUtil;
 import com.idega.block.article.component.reference.FileUploadForm;
 import com.idega.content.bean.CaseListBean;
 import com.idega.content.bean.ManagedContentBeans;
@@ -51,10 +51,10 @@ import com.idega.webface.WFUtil;
 import com.idega.webface.htmlarea.HTMLArea;
 
 /**
- * Last modified: $Date: 2005/02/23 17:17:18 $ by $Author: joakim $
+ * Last modified: $Date: 2005/02/24 16:52:55 $ by $Author: joakim $
  *
  * @author Joakim
- * @version $Revision: 1.19 $
+ * @version $Revision: 1.20 $
  */
 public class EditArticleBlock extends IWBaseComponent implements ManagedContentBeans, ActionListener {
 	public final static String EDIT_ARTICLE_BLOCK_ID = "edit_articles_block";
@@ -153,7 +153,7 @@ public class EditArticleBlock extends IWBaseComponent implements ManagedContentB
 		p.getChildren().add(WFUtil.group(localizer.getTextVB("headline"), WFUtil.getText(":")));
 //		p.getChildren().add(WFUtil.group(WFUtil.getTextVB(bref + "language"), WFUtil.getText(":")));
 		HtmlInputText headlineInput = WFUtil.getInputText(HEADLINE_ID, ref + "headline");
-		headlineInput.setSize(50);
+		headlineInput.setSize(70);
 		p.getChildren().add(headlineInput);
 		//HtmlSelectOneMenu localeMenu = WFUtil.getSelectOneMenu(LOCALE_ID, ref + "allLocales", ref + "pendingLocaleId");
 		//localeMenu.setOnchange("document.forms[0].submit();");
@@ -163,7 +163,7 @@ public class EditArticleBlock extends IWBaseComponent implements ManagedContentB
 		p.getChildren().add(teaserArea);
 		p.getChildren().add(WFUtil.group(localizer.getTextVB("author"), WFUtil.getText(":")));
 		HtmlInputText authorInput = WFUtil.getInputText(AUTHOR_ID, ref + "author");
-		authorInput.setSize(50);
+		authorInput.setSize(70);
 		p.getChildren().add(authorInput);
 
 		//Article dropdown
@@ -173,8 +173,10 @@ public class EditArticleBlock extends IWBaseComponent implements ManagedContentB
 		UIInput langDropdown = new HtmlSelectOneMenu();
 		List arrayList = new ArrayList();
 		while(iter.hasNext()) {
-			String langStr = iter.next().toString();
-			SelectItem itemTemp = new SelectItem(langStr, langStr, langStr, false);
+			Locale locale = (Locale)iter.next();
+			String keyStr = locale.getLanguage();
+			String langStr = locale.getDisplayLanguage();
+			SelectItem itemTemp = new SelectItem(keyStr, langStr, keyStr, false);
 			arrayList.add(itemTemp);
 		}
 		
@@ -282,16 +284,21 @@ public class EditArticleBlock extends IWBaseComponent implements ManagedContentB
 //		HtmlCommandButton editCategoriesButton = WFUtil.getButtonVB(EDIT_CATEGORIES_ID, bref + "edit_categories", this);
 //		p.getChildren().add(editCategoriesButton);
 
+		//Temporary taking away folderr location
+/*
 		p.getChildren().add(WFUtil.group(localizer.getTextVB("folder"), WFUtil.getText(":")));
 		HtmlInputText folderInput = WFUtil.getInputText(FOLDER_ID, ref + "folderLocation");
 		if(null==folderInput.getValue() || "".equals(folderInput.getValue())) {
 			String FolderString = ArticleUtil.getArticleYearMonthPath();
 //			System.out.println("Folder "+FolderString);
 			folderInput.setValue(FolderString);
+		} else {
+			File file = new File(folderInput.getValue().toString());
+			folderInput.setValue(file.getParentFile().getParent());
 		}
-		folderInput.setSize(50);
+		folderInput.setSize(70);
 		p.getChildren().add(folderInput);		
-		
+*/		
 		p.getChildren().add(WFUtil.getBreak());
 		p.getChildren().add(WFUtil.getBreak());
 		p.getChildren().add(WFUtil.getBreak());
