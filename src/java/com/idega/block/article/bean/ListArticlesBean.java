@@ -1,5 +1,5 @@
 /*
- * $Id: ListArticlesBean.java,v 1.3 2004/11/17 14:39:37 joakim Exp $
+ * $Id: ListArticlesBean.java,v 1.4 2004/11/23 13:12:59 joakim Exp $
  *
  * Copyright (C) 2004 Idega. All Rights Reserved.
  *
@@ -27,10 +27,10 @@ import com.idega.webface.model.WFDataModel;
 /**
  * Bean for listing articles.   
  * <p>
- * Last modified: $Date: 2004/11/17 14:39:37 $ by $Author: joakim $
+ * Last modified: $Date: 2004/11/23 13:12:59 $ by $Author: joakim $
  *
  * @author Anders Lindman
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
 
 public class ListArticlesBean implements WFListBean, Serializable {
@@ -49,7 +49,7 @@ public class ListArticlesBean implements WFListBean, Serializable {
 	private int _searchCategoryId = 0;
 	
 	private Map _allCategories = null;
-	
+/*
 	private String[] testHeadlines = {
 		"Electronic Reykjavik built with IdegaWeb eGov",
 		"Idega represented in the Baltic",
@@ -71,7 +71,7 @@ public class ListArticlesBean implements WFListBean, Serializable {
 		"10/30/03 3:10 PM",
 		"10/27/03"				
 	};
-
+*/
 	/**
 	 * Default constructor.
 	 */
@@ -163,10 +163,9 @@ public class ListArticlesBean implements WFListBean, Serializable {
 			}
 			int maxRow = Math.min(start.intValue() + nrOfRows,availableRows);
 			for (int i = start.intValue(); i < maxRow; i++) {
-//				ListArticlesBean bean = new ListArticlesBean(String.valueOf(i), testHeadlines[i], testPublished[i]);
 				//TODO we don't have published in the article item bean
-				ListArticlesBean bean = new ListArticlesBean(articleItemBean[i].getHeadline(), articleItemBean[i].getHeadline(), "");
-//				ArticleListBean a = new ArticleListBean(String.valueOf(i), articleItemBean[i].getHeadline(), articleItemBean[i].getItemType(), articleItemBean[i].getAuthor(), articleItemBean[i].getStatus());
+				String id = articleItemBean[i].getMainCategory()+"/"+articleItemBean[i].getHeadline()+".xml";
+				ListArticlesBean bean = new ListArticlesBean(id, articleItemBean[i].getHeadline(), "");
 				_dataModel.set(bean, i);
 			}
 			_dataModel.setRowCount(availableRows);
