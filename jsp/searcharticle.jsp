@@ -9,7 +9,7 @@ version="1.2">
 <jsf:view>
         <ws:page>
                 <h:form>
-                        <article:search_article_page id="search_article_page"/>
+                        <article:ArticleSearch id="article_advanced_search"/>
                 </h:form>
         </ws:page>
 </jsf:view>
