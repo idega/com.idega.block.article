@@ -6,6 +6,7 @@
 	xmlns:a="http://xmlns.idega.com/com.idega.block.article"
 version="1.2">
 
+<jsp:directive.page session="false" contentType="text/html"/>
 <jsf:view>
 	<jsp:output omit-xml-declaration="false" doctype-root-element="html" doctype-public="-//W3C//DTD XHTML 1.1//EN" doctype-system="http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd"/>
 	<html xmlns="http://www.w3.org/1999/xhtml">
