@@ -1,5 +1,5 @@
 /*
- * $Id: EditArticleBlock.java,v 1.21 2005/03/01 11:49:41 gummi Exp $
+ * $Id: EditArticleBlock.java,v 1.22 2005/03/02 15:06:07 joakim Exp $
  *
  * Copyright (C) 2004 Idega. All Rights Reserved.
  *
@@ -15,7 +15,6 @@ import java.util.List;
 import java.util.Locale;
 import javax.faces.component.UIColumn;
 import javax.faces.component.UIComponent;
-import javax.faces.component.UIInput;
 import javax.faces.component.UISelectItems;
 import javax.faces.component.html.HtmlCommandButton;
 import javax.faces.component.html.HtmlDataTable;
@@ -29,9 +28,13 @@ import javax.faces.component.html.HtmlSelectOneMenu;
 import javax.faces.context.FacesContext;
 import javax.faces.convert.IntegerConverter;
 import javax.faces.el.ValueBinding;
+import javax.faces.event.AbortProcessingException;
 import javax.faces.event.ActionEvent;
 import javax.faces.event.ActionListener;
+import javax.faces.event.ValueChangeEvent;
+import javax.faces.event.ValueChangeListener;
 import javax.faces.model.SelectItem;
+import com.idega.block.article.bean.ArticleItemBean;
 import com.idega.block.article.component.reference.FileUploadForm;
 import com.idega.content.bean.CaseListBean;
 import com.idega.content.bean.ManagedContentBeans;
@@ -53,12 +56,12 @@ import com.idega.webface.WFUtil;
 import com.idega.webface.htmlarea.HTMLArea;
 
 /**
- * Last modified: $Date: 2005/03/01 11:49:41 $ by $Author: gummi $
+ * Last modified: $Date: 2005/03/02 15:06:07 $ by $Author: joakim $
  *
  * @author Joakim
- * @version $Revision: 1.21 $
+ * @version $Revision: 1.22 $
  */
-public class EditArticleBlock extends IWBaseComponent implements ManagedContentBeans, ActionListener {
+public class EditArticleBlock extends IWBaseComponent implements ManagedContentBeans, ActionListener, ValueChangeListener {
 	public final static String EDIT_ARTICLE_BLOCK_ID = "edit_articles_block";
 	private final static String P = "list_articles_block_"; // Id prefix
 	
@@ -152,27 +155,12 @@ public class EditArticleBlock extends IWBaseComponent implements ManagedContentB
 		mainContainer.add(em);
 
 		HtmlPanelGrid p = WFPanelUtil.getPlainFormPanel(2);
-		p.getChildren().add(WFUtil.group(localizer.getTextVB("headline"), WFUtil.getText(":")));
-//		p.getChildren().add(WFUtil.group(WFUtil.getTextVB(bref + "language"), WFUtil.getText(":")));
-		HtmlInputText headlineInput = WFUtil.getInputText(HEADLINE_ID, ref + "headline");
-		headlineInput.setSize(70);
-		p.getChildren().add(headlineInput);
-		//HtmlSelectOneMenu localeMenu = WFUtil.getSelectOneMenu(LOCALE_ID, ref + "allLocales", ref + "pendingLocaleId");
-		//localeMenu.setOnchange("document.forms[0].submit();");
-		//p.getChildren().add(localeMenu);
-		p.getChildren().add(WFUtil.group(localizer.getTextVB("teaser"), WFUtil.getText(":")));
-		HtmlInputTextarea teaserArea = WFUtil.getTextArea(TEASER_ID, ref + "teaser", "600px", "60px");
-		p.getChildren().add(teaserArea);
-		p.getChildren().add(WFUtil.group(localizer.getTextVB("author"), WFUtil.getText(":")));
-		HtmlInputText authorInput = WFUtil.getInputText(AUTHOR_ID, ref + "author");
-		authorInput.setSize(70);
-		p.getChildren().add(authorInput);
 
-		//Article dropdown
+		//Language dropdown
 		p.getChildren().add(WFUtil.group(localizer.getTextVB("language"), WFUtil.getText(":")));
 		
 		Iterator iter = ICLocaleBusiness.getListOfLocalesJAVA().iterator();
-		UIInput langDropdown = new HtmlSelectOneMenu();
+		HtmlSelectOneMenu langDropdown = new HtmlSelectOneMenu();
 		List arrayList = new ArrayList();
 		while(iter.hasNext()) {
 			Locale locale = (Locale)iter.next();
@@ -188,8 +176,27 @@ public class EditArticleBlock extends IWBaseComponent implements ManagedContentB
 		ValueBinding vb = WFUtil.createValueBinding("#{" + ref +"contentLanguage" + "}");
 		langDropdown.setValueBinding("value", vb);
 		langDropdown.getValue();
+		langDropdown.addValueChangeListener(this);
+		langDropdown.setImmediate(true);
+		langDropdown.setOnchange("submit();");
 
 		p.getChildren().add(langDropdown);
+
+		p.getChildren().add(WFUtil.group(localizer.getTextVB("headline"), WFUtil.getText(":")));
+//		p.getChildren().add(WFUtil.group(WFUtil.getTextVB(bref + "language"), WFUtil.getText(":")));
+		HtmlInputText headlineInput = WFUtil.getInputText(HEADLINE_ID, ref + "headline");
+		headlineInput.setSize(70);
+		p.getChildren().add(headlineInput);
+		//HtmlSelectOneMenu localeMenu = WFUtil.getSelectOneMenu(LOCALE_ID, ref + "allLocales", ref + "pendingLocaleId");
+		//localeMenu.setOnchange("document.forms[0].submit();");
+		//p.getChildren().add(localeMenu);
+		p.getChildren().add(WFUtil.group(localizer.getTextVB("teaser"), WFUtil.getText(":")));
+		HtmlInputTextarea teaserArea = WFUtil.getTextArea(TEASER_ID, ref + "teaser", "600px", "60px");
+		p.getChildren().add(teaserArea);
+		p.getChildren().add(WFUtil.group(localizer.getTextVB("author"), WFUtil.getText(":")));
+		HtmlInputText authorInput = WFUtil.getInputText(AUTHOR_ID, ref + "author");
+		authorInput.setSize(70);
+		p.getChildren().add(authorInput);
 
 		//Article body
 		p.getChildren().add(WFUtil.group(localizer.getTextVB("body"), WFUtil.getText(":")));
@@ -213,13 +220,19 @@ public class EditArticleBlock extends IWBaseComponent implements ManagedContentB
 		imageContainer.add(WFUtil.getBreak());
 		imageContainer.add(getImageList());
 		p.getChildren().add(imageContainer);
-		p.getChildren().add(WFUtil.group(WFUtil.getTextVB(bref + "source"), WFUtil.getText(":")));
-		p.getChildren().add(WFUtil.group(WFUtil.getTextVB(bref + "main_category"), WFUtil.getText(":")));
-		HtmlInputTextarea sourceArea = WFUtil.getTextArea(SOURCE_ID, ref + "source", "440px", "30px");
-		p.getChildren().add(sourceArea);		
-		HtmlSelectOneMenu mainCategoryMenu = WFUtil.getSelectOneMenu(MAIN_CATEGORY_ID, ref + "categories", ref + "mainCategoryId");
-		p.getChildren().add(mainCategoryMenu);		
 */
+		p.getChildren().add(WFUtil.group(localizer.getTextVB("source"), WFUtil.getText(":")));
+	//	p.getChildren().add(WFUtil.group(WFUtil.getTextVB(bref + "main_category"), WFUtil.getText(":")));
+		HtmlInputText sourceArea = WFUtil.getInputText(AUTHOR_ID, ref + "source");
+		sourceArea.setSize(70);
+		p.getChildren().add(sourceArea);
+
+//		HtmlInputTextarea sourceArea = WFUtil.getTextArea(SOURCE_ID, ref + "source", "440px", "30px");
+//		p.getChildren().add(sourceArea);
+		
+//		HtmlSelectOneMenu mainCategoryMenu = WFUtil.getSelectOneMenu(MAIN_CATEGORY_ID, ref + "categories", ref + "mainCategoryId");
+//		p.getChildren().add(mainCategoryMenu);		
+
 //		mainContainer.add(p);
 //		mainContainer.add(WFUtil.getBreak());
 		p.getChildren().add(WFUtil.getBreak());
@@ -611,5 +624,41 @@ public class EditArticleBlock extends IWBaseComponent implements ManagedContentB
 		}
 		
 		super.encodeBegin(context);
+	}
+
+	/* (non-Javadoc)
+	 * @see javax.faces.event.ValueChangeListener#processValueChange(javax.faces.event.ValueChangeEvent)
+	 */
+	public void processValueChange(ValueChangeEvent arg0) throws AbortProcessingException {
+		System.out.println("Language value has changed from "+arg0.getOldValue()+" to "+arg0.getNewValue());
+		
+		String resourcePath = (String)WFUtil.invoke(ARTICLE_ITEM_BEAN_ID, "getResourcePath");
+		if(null==resourcePath) {
+			//Article has not been stored previousley, so nothing have to be done
+			return;
+		}
+		resourcePath+="/"+arg0.getNewValue()+ArticleItemBean.ARTICLE_SUFFIX;
+		System.out.println("Resoure path"+resourcePath);
+		boolean result = ((Boolean)WFUtil.invoke(ARTICLE_ITEM_BEAN_ID, "load",resourcePath)).booleanValue();
+		System.out.println("loading other language "+result);
+//		String leftString = resourcePath.substring(0,resourcePath.lastIndexOf("/"));
+//		String newPath = leftString+arg0.getNewValue()+ArticleItemBean.ARTICLE_SUFFIX;
+//		System.out.println("New Resoure path"+newPath);
+//		WFUtil.invoke(ARTICLE_ITEM_BEAN_ID, "setResourcePath",newPath);
+		
+/*
+		UIComponent uiComponent;
+		UIComponent parent = arg0.getComponent();
+		int iter=0;
+		do{
+			uiComponent = parent.findComponent(EDIT_ARTICLE_BLOCK_ID);
+			parent = parent.getParent();
+			System.out.println("Iteration "+iter);
+		}while(uiComponent==null && parent!=null);
+		if(uiComponent!=null) {
+			EditArticleBlock ab = (EditArticleBlock)uiComponent;
+		}
+		WFUtil.invoke(ARTICLE_ITEM_BEAN_ID, "getHeadline",arg0.getNewValue());
+*/
 	}
 }
