@@ -1,5 +1,5 @@
 /*
- * $Id: ArticleItemBean.java,v 1.28 2005/02/24 16:51:41 joakim Exp $
+ * $Id: ArticleItemBean.java,v 1.29 2005/03/01 11:22:31 gummi Exp $
  *
  * Copyright (C) 2004 Idega. All Rights Reserved.
  *
@@ -30,6 +30,7 @@ import com.idega.content.bean.ContentItem;
 import com.idega.content.bean.ContentItemBean;
 import com.idega.content.bean.ContentItemField;
 import com.idega.content.bean.ContentItemFieldBean;
+import com.idega.content.business.ContentUtil;
 import com.idega.data.IDOStoreException;
 import com.idega.idegaweb.IWApplicationContext;
 import com.idega.idegaweb.IWUserContext;
@@ -49,10 +50,10 @@ import com.idega.xmlns.block.article.document.ArticleDocument;
 /**
  * Bean for idegaWeb article content items.   
  * <p>
- * Last modified: $Date: 2005/02/24 16:51:41 $ by $Author: joakim $
+ * Last modified: $Date: 2005/03/01 11:22:31 $ by $Author: gummi $
  *
  * @author Anders Lindman
- * @version $Revision: 1.28 $
+ * @version $Revision: 1.29 $
  */
 
 public class ArticleItemBean extends ContentItemBean implements Serializable, ContentItem {
@@ -106,14 +107,12 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 	public String getComment() { return (String)getValue(FIELDNAME_COMMENT); }
 	public List getImages() { return getItemFields(FIELDNAME_IMAGES); }
 	public String getFilename() { return (String)getValue(FIELDNAME_FILENAME); }
+	
 	public String getFolderLocation() {
 		String resourcePath = getResourcePath();
-		if(null!=resourcePath) {
-			return new File(resourcePath).getParent();
-		}
-		return null;
-//		return (String)getValue(FIELDNAME_FOLDER_LOCATION); 
-		}
+		return ContentUtil.getParentPath(resourcePath);
+	}
+	
 	public String getContentLanguage() { return (String)getValue(FIELDNAME_CONTENT_LANGUAGE); }
 
 	public void setHeadline(String s) { setValue(FIELDNAME_HEADLINE, s); } 
@@ -380,7 +379,7 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 			rootResource.proppatchMethod(parentPath,new PropertyName("IW:",CONTENT_TYPE),"LocalizedFile",true);
 			
 			String article = getAsXML();
-			
+			System.out.println(article);
 			rootResource.putMethod(session.getURI(filePath),article);
 			rootResource.proppatchMethod(filePath,new PropertyName("IW:",CONTENT_TYPE),ARTICLE_FILENAME_SCOPE,true);
 			rootResource.close();
@@ -519,9 +518,8 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 			//article not found
 			Logger log = Logger.getLogger(this.getClass().toString());
 			log.warning("Article xml file was not found");
+			setRendered(false);
 		}
-		String folder = webdavResource.getParentPath();
-	    setResourcePath(folder);
 //	    setFilename();
 //		setFolderLocation(bodyElement.getChild(FIELDNAME_FOLDER_LOCATION,idegans).getText());
 	}
