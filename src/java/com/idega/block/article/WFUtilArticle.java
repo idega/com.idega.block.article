@@ -1,5 +1,5 @@
 /*
- * $Id: WFUtilArticle.java,v 1.4 2004/12/21 16:28:44 joakim Exp $
+ * $Id: WFUtilArticle.java,v 1.5 2005/01/04 15:19:44 joakim Exp $
  *
  * Copyright (C) 2004 Idega. All Rights Reserved.
  *
@@ -12,16 +12,17 @@ package com.idega.block.article;
 import javax.faces.component.UIComponent;
 import javax.faces.component.html.HtmlCommandButton;
 import javax.faces.component.html.HtmlOutputText;
+import javax.faces.event.ActionListener;
 import com.idega.webface.WFUtil;
 
 
 /**
  * Util class to set the bundle for the localization 
  * <p>
- * Last modified: $Date: 2004/12/21 16:28:44 $ by $Author: joakim $
+ * Last modified: $Date: 2005/01/04 15:19:44 $ by $Author: joakim $
  *
  * @author Joakim Johnson
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  */
 public class WFUtilArticle{
 	private String BUNDLE = "com.idega.block.article";
@@ -62,8 +63,8 @@ public class WFUtilArticle{
 	/**
 	 * Returns a localized HtmlCommand Button
 	 */
-	public HtmlCommandButton getButtonVB(String id, String localizationKey) {
-		return WFUtil.getButtonVB(id, BUNDLE, localizationKey);
+	public HtmlCommandButton getButtonVB(String id, String localizationKey, ActionListener actionListener) {
+		return WFUtil.getButtonVB(id, BUNDLE, localizationKey, actionListener);
 	}
 	
 	/**
