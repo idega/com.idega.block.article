@@ -1,5 +1,5 @@
 /*
- * $Id: ArticleListManagedBean.java,v 1.2 2005/02/14 15:18:48 gummi Exp $
+ * $Id: ArticleListManagedBean.java,v 1.3 2005/02/21 16:16:19 gummi Exp $
  * Created on 27.1.2005
  *
  * Copyright (C) 2005 Idega Software hf. All Rights Reserved.
@@ -12,9 +12,11 @@ package com.idega.block.article.component;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
+import javax.faces.component.html.HtmlOutputLink;
 import org.apache.webdav.lib.search.CompareOperator;
 import org.apache.webdav.lib.search.SearchException;
 import org.apache.webdav.lib.search.SearchExpression;
@@ -24,6 +26,7 @@ import org.apache.xmlbeans.XmlException;
 import com.idega.block.article.bean.ArticleItemBean;
 import com.idega.block.article.business.ArticleUtil;
 import com.idega.business.IBOLookup;
+import com.idega.content.bean.ContentItemBeanComparator;
 import com.idega.content.bean.ContentListViewerManagedBean;
 import com.idega.content.business.ContentSearch;
 import com.idega.content.presentation.ContentItemViewer;
@@ -40,16 +43,20 @@ import com.idega.util.IWTimestamp;
 
 /**
  * 
- *  Last modified: $Date: 2005/02/14 15:18:48 $ by $Author: gummi $
+ *  Last modified: $Date: 2005/02/21 16:16:19 $ by $Author: gummi $
  * 
  * @author <a href="mailto:gummi@idega.com">Gudmundur Agust Saemundsson</a>
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 public class ArticleListManagedBean implements ContentListViewerManagedBean {
 
 	private String resourcePath=null;
 
 	private int numberOfDaysDisplayed = 30;
+
+	private String LOCALIZEDKEY_MORE = "itemviewer.more";
+
+	private String detailsViewerPath = null;
 	
 	/**
 	 * 
@@ -63,7 +70,11 @@ public class ArticleListManagedBean implements ContentListViewerManagedBean {
 	 */
 	public List getContentItems() {
 		try {
-			return loadAllArticlesInFolder(ArticleUtil.getArticleRootPath());
+			List l = loadAllArticlesInFolder(ArticleUtil.getArticleRootPath());
+			ContentItemBeanComparator c = new ContentItemBeanComparator();
+			c.setReverseOrder(true);
+			Collections.sort(l,c);
+			return l;
 		}
 		catch (XmlException e) {
 			// TODO Auto-generated catch block
@@ -196,7 +207,25 @@ public class ArticleListManagedBean implements ContentListViewerManagedBean {
 	 * @see com.idega.content.bean.ContentListViewerManagedBean#getContentViewer()
 	 */
 	public ContentItemViewer getContentViewer() {
-		ArticleItemView viewer = new ArticleItemView();
+		ArticleItemViewer viewer = new ArticleItemViewer();
+		
+		
+		
+		if(detailsViewerPath != null){
+			HtmlOutputLink moreLink = new HtmlOutputLink();
+			IWContext iwc = IWContext.getInstance();
+			
+			String appContext = iwc.getIWMainApplication().getApplicationContextURI();
+			if (appContext.endsWith("/")){
+				appContext = appContext.substring(0, appContext.lastIndexOf("/"));			
+			}
+			moreLink.setValue(appContext+detailsViewerPath);
+			
+			moreLink.getChildren().add(ArticleUtil.getBundle().getLocalizedText(LOCALIZEDKEY_MORE));
+			viewer.setDetailsCommand(moreLink);
+//			viewer.setRenderBody(false);
+		}
+		
 		return viewer;
 	}
 
@@ -212,6 +241,13 @@ public class ArticleListManagedBean implements ContentListViewerManagedBean {
 	 */
 	public void setResourcePath(String path) {
 		resourcePath=path;
+	}
+
+	/* (non-Javadoc)
+	 * @see com.idega.content.bean.ContentListViewerManagedBean#setDetailsViewerPath(java.lang.String)
+	 */
+	public void setDetailsViewerPath(String path) {
+		detailsViewerPath = path;
 	}
 	
 }

@@ -1,5 +1,5 @@
 /*
- * $Id: PreviewArticlePage.java,v 1.3 2005/02/07 10:59:53 gummi Exp $
+ * $Id: PreviewArticlePage.java,v 1.4 2005/02/21 16:16:19 gummi Exp $
  *
  * Copyright (C) 2004 Idega. All Rights Reserved.
  *
@@ -10,16 +10,16 @@
 package com.idega.block.article;
 
 import javax.faces.component.UIComponent;
-import com.idega.block.article.component.ArticleItemView;
+import com.idega.block.article.component.ArticleItemViewer;
 import com.idega.webface.WFUtil;
 
 /**
  * Preview article test/demo page. 
  * <p>
- * Last modified: $Date: 2005/02/07 10:59:53 $ by $Author: gummi $
+ * Last modified: $Date: 2005/02/21 16:16:19 $ by $Author: gummi $
  *
  * @author Anders Lindman
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
 public class PreviewArticlePage extends CMSPage {
 	
@@ -41,7 +41,7 @@ public class PreviewArticlePage extends CMSPage {
 		String ref = ARTICLE_ITEM_BEAN_ID + ".";
 
 
-		ArticleItemView item = new ArticleItemView();
+		ArticleItemViewer item = new ArticleItemViewer();
 		
 		WFUtil.setValueBinding(item, "author", ref+"author");
 		WFUtil.setValueBinding(item, "creation_date", ref+"creationDate");

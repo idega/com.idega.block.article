@@ -1,5 +1,5 @@
 /*
- * $Id: ArticleItemView.java,v 1.14 2005/02/07 10:59:53 gummi Exp $
+ * $Id: ArticleItemViewer.java,v 1.1 2005/02/21 16:16:19 gummi Exp $
  *
  * Copyright (C) 2004 Idega. All Rights Reserved.
  *
@@ -9,21 +9,23 @@
 package com.idega.block.article.component;
 
 import java.sql.Timestamp;
-import javax.faces.component.UIOutput;
+import javax.faces.component.UIComponent;
 import javax.faces.component.html.HtmlOutputText;
+import com.idega.block.article.bean.ArticleItemBean;
+import com.idega.content.bean.ContentItem;
 import com.idega.content.presentation.ContentItemViewer;
 import com.idega.webface.WFHtml;
 import com.idega.webface.convert.WFTimestampConverter;
 
 /**
- * Last modified: $Date: 2005/02/07 10:59:53 $ by $Author: gummi $
+ * Last modified: $Date: 2005/02/21 16:16:19 $ by $Author: gummi $
  *
  * Displays the article item
  *
- * @author Joakim
- * @version $Revision: 1.14 $
+ * @author <a href="mailto:gummi@idega.com">Gudmundur Agust Saemundsson</a>
+ * @version $Revision: 1.1 $
  */
-public class ArticleItemView extends ContentItemViewer {
+public class ArticleItemViewer extends ContentItemViewer {
 	
 	private final static String ATTRIBUTE_AUTHOR = "author";
 	private final static String ATTRIBUTE_CREATION_DATE = "creation_date";
@@ -36,14 +38,14 @@ public class ArticleItemView extends ContentItemViewer {
 	private final static String styleClassPrefix = "article_";
 	
 	
-	public ArticleItemView() {
+	public ArticleItemViewer() {
 		super();
 		this.setStyleClass("article_item");
 	}
 	
 	
 	
-	protected String[] getViewerAttributes(){
+	public String[] getViewerFieldNames(){
 		return ATTRIBUTE_ARRAY;
 	}
 	
@@ -61,7 +63,7 @@ public class ArticleItemView extends ContentItemViewer {
 		return styleClassPrefix;
 	}
 	
-	protected UIOutput createUIOutputComponent(String attribute){
+	protected UIComponent createFieldComponent(String attribute){
 		if(ATTRIBUTE_BODY.equals(attribute)){
 			return new WFHtml();
 		} else {
@@ -71,19 +73,8 @@ public class ArticleItemView extends ContentItemViewer {
 	
 	protected void initializeContent() {	
 		super.initializeContent();
-		((HtmlOutputText)getFieldViewerComponent(ATTRIBUTE_CREATION_DATE)).setConverter(new WFTimestampConverter());  /////----------------------------------------------
-		
-		
-//		HtmlOutputLink link = new HtmlOutputLink();
-//		link.setValue("http://localhost:8080/cms/workspace/content/article/create");
-//		link.setStyleClass("wf_listlink");
-//		link.setId(getId() + "_dl");
-//		link.getChildren().add(WFUtil.getText("Edit"));
-//		this.add(link);
-
+		((HtmlOutputText)getFieldViewerComponent(ATTRIBUTE_CREATION_DATE)).setConverter(new WFTimestampConverter());
 	}
-
-
 
 
 	/**
@@ -149,6 +140,19 @@ public class ArticleItemView extends ContentItemViewer {
 	 */
 	public void setTeaser(String teaser) {
 		setFieldLocalValue(ATTRIBUTE_TEASER,teaser);
+	}
+	
+	
+	public ContentItem loadContentItem(String itemResourcePath) {
+		try {
+			ArticleItemBean bean = new ArticleItemBean();
+			bean.load(itemResourcePath);
+			return bean;
+		}
+		catch (Exception e) {
+			e.printStackTrace();
+		}
+		return null;
 	}
 	
 
