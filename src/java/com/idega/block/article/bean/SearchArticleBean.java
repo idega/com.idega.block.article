@@ -1,5 +1,5 @@
 /*
- * $Id: SearchArticleBean.java,v 1.2 2004/11/26 10:27:53 joakim Exp $
+ * $Id: SearchArticleBean.java,v 1.3 2005/01/04 15:18:18 joakim Exp $
  *
  * Copyright (C) 2004 Idega. All Rights Reserved.
  *
@@ -20,6 +20,7 @@ import javax.faces.component.html.HtmlOutputText;
 import javax.faces.event.ActionListener;
 import javax.faces.model.DataModel;
 import org.apache.xmlbeans.XmlException;
+import com.idega.content.business.ContentUtil;
 import com.idega.webface.WFUtil;
 import com.idega.webface.bean.WFListBean;
 import com.idega.webface.model.WFDataModel;
@@ -27,10 +28,10 @@ import com.idega.webface.model.WFDataModel;
 /**
  * Bean for searching articles.   
  * <p>
- * Last modified: $Date: 2004/11/26 10:27:53 $ by $Author: joakim $
+ * Last modified: $Date: 2005/01/04 15:18:18 $ by $Author: joakim $
  *
  * @author Anders Lindman
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 
 public class SearchArticleBean implements WFListBean, Serializable {
@@ -196,7 +197,7 @@ public class SearchArticleBean implements WFListBean, Serializable {
 		}
 		ArticleItemBean[] articleItemBean;
 		try {
-			articleItemBean = (ArticleItemBean[]) ArticleListBean.loadAllArticlesInFolder("/files/content").toArray(new ArticleItemBean[0]);
+			articleItemBean = (ArticleItemBean[]) ArticleListBean.loadAllArticlesInFolder(ContentUtil.CONTENT_PATH).toArray(new ArticleItemBean[0]);
 			int availableRows = articleItemBean.length;
 
 			int nrOfRows = rows.intValue();

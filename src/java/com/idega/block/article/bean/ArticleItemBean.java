@@ -1,5 +1,5 @@
 /*
- * $Id: ArticleItemBean.java,v 1.10 2004/12/14 11:59:29 gummi Exp $
+ * $Id: ArticleItemBean.java,v 1.11 2005/01/04 15:18:18 joakim Exp $
  *
  * Copyright (C) 2004 Idega. All Rights Reserved.
  *
@@ -32,10 +32,10 @@ import com.idega.webface.test.bean.ContentItemFieldBean;
 /**
  * Bean for idegaWeb article content items.   
  * <p>
- * Last modified: $Date: 2004/12/14 11:59:29 $ by $Author: gummi $
+ * Last modified: $Date: 2005/01/04 15:18:18 $ by $Author: joakim $
  *
  * @author Anders Lindman
- * @version $Revision: 1.10 $
+ * @version $Revision: 1.11 $
  */
 
 public class ArticleItemBean extends ContentItemBean implements Serializable {
@@ -256,8 +256,11 @@ public class ArticleItemBean extends ContentItemBean implements Serializable {
 
 			WebdavRootResource rootResource = session.getWebdavRootResource();
 //			boolean success = webdavResource.mkcolMethod("/servlet/webdav/files/test/test2");
-			boolean success = rootResource.mkcolMethod(getWebdavServletURL(iwuc)+getMainCategory());
+			String filePath = service.getWebdavServerURI()+getMainCategory();
+			boolean success = rootResource.mkcolMethod(filePath);
 			System.out.println("success "+success);
+//			boolean success = rootResource.mkcolMethod(getWebdavServletURL(iwuc)+getMainCategory());
+			System.out.println(filePath);
 			success = rootResource.putMethod(getWebdavServletURL(iwuc)+getMainCategory()+"/"+filename+".xml",articleDoc.toString());
 			System.out.println("success "+success);
 
@@ -324,7 +327,8 @@ public class ArticleItemBean extends ContentItemBean implements Serializable {
     	}
 	}
     
-    protected static final String WEBDAV_SERVLET_URI = "/servlet/webdav";
+//    protected static final String WEBDAV_SERVLET_URI = "/servlet/webdav";
+    protected static final String WEBDAV_SERVLET_URI = "/content";
     
 	/**
 	 * Loads all xml files in the given folder

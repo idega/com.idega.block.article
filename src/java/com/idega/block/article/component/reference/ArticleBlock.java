@@ -1,5 +1,5 @@
 /*
- * $Id: ArticleBlock.java,v 1.1 2004/12/21 15:47:12 joakim Exp $
+ * $Id: ArticleBlock.java,v 1.2 2005/01/04 15:18:18 joakim Exp $
  *
  * Copyright (C) 2004 Idega. All Rights Reserved.
  *
@@ -30,6 +30,7 @@ import javax.faces.event.ActionEvent;
 import javax.faces.event.ActionListener;
 import com.idega.block.article.PreviewArticlePage;
 import com.idega.block.article.component.ListArticlesBlock;
+import com.idega.content.business.ContentUtil;
 import com.idega.webface.WFBlock;
 import com.idega.webface.WFComponentSelector;
 import com.idega.webface.WFContainer;
@@ -52,10 +53,10 @@ import com.idega.webface.test.bean.ManagedContentBeans;
 /**
  * Block for editing an article.   
  * <p>
- * Last modified: $Date: 2004/12/21 15:47:12 $ by $Author: joakim $
+ * Last modified: $Date: 2005/01/04 15:18:18 $ by $Author: joakim $
  *
  * @author Anders Lindman
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public class ArticleBlock extends WFBlock implements ActionListener, ManagedContentBeans {
 
@@ -118,11 +119,6 @@ public class ArticleBlock extends WFBlock implements ActionListener, ManagedCont
 	private final static String SUB_CATEGORIES_ID = P + "sub_categories";
 	private final static String CATEGORY_BACK_ID = P + "category_back";
 
-	//TODO (JJ) change back to the longer path when we have created a function that creates 
-	//several subdirectories in one go. (/files is created automatically).
-//	private static final String ROOT_CATEGORY = "/files/content/articles";
-	private static final String ROOT_CATEGORY = "/files/content";
-	
 	/**
 	 * Default contructor.
 	 */
@@ -291,7 +287,7 @@ public class ArticleBlock extends WFBlock implements ActionListener, ManagedCont
 		p.getChildren().add(WFUtil.group(WFUtil.getTextVB(bref + "category"), WFUtil.getText(":")));
 		HtmlInputText categoryInput = WFUtil.getInputText(MAIN_CATEGORY_ID, ref + "mainCategory");
 		if(null==categoryInput.getValue() || "".equals(categoryInput.getValue())) {
-			categoryInput.setValue(ROOT_CATEGORY);
+			categoryInput.setValue(ContentUtil.CONTENT_PATH);
 		}
 		categoryInput.setSize(40);
 		p.getChildren().add(categoryInput);		

@@ -1,5 +1,5 @@
 /*
- * $Id: ArticleListBean.java,v 1.9 2004/12/15 15:45:37 joakim Exp $
+ * $Id: ArticleListBean.java,v 1.10 2005/01/04 15:18:18 joakim Exp $
  *
  * Copyright (C) 2004 Idega. All Rights Reserved.
  *
@@ -21,6 +21,7 @@ import javax.faces.model.DataModel;
 import org.apache.webdav.lib.WebdavResource;
 import org.apache.xmlbeans.XmlException;
 import com.idega.business.IBOLookup;
+import com.idega.content.business.ContentUtil;
 import com.idega.idegaweb.IWApplicationContext;
 import com.idega.idegaweb.IWUserContext;
 import com.idega.presentation.IWContext;
@@ -34,10 +35,10 @@ import com.idega.webface.model.WFDataModel;
 /**
  * Bean for article list rows.   
  * <p>
- * Last modified: $Date: 2004/12/15 15:45:37 $ by $Author: joakim $
+ * Last modified: $Date: 2005/01/04 15:18:18 $ by $Author: joakim $
  *
  * @author Anders Lindman
- * @version $Revision: 1.9 $
+ * @version $Revision: 1.10 $
  */
 
 public class ArticleListBean implements WFListBean, Serializable {
@@ -113,8 +114,7 @@ public class ArticleListBean implements WFListBean, Serializable {
 
 		ArticleItemBean[] articleItemBean;
 		try {
-			//TODO (JJ) Have to make the user select what folder to look at instead of the hardcoded folder selection
-			articleItemBean = (ArticleItemBean[])loadAllArticlesInFolder("/files/content").toArray(new ArticleItemBean[0]);
+			articleItemBean = (ArticleItemBean[])loadAllArticlesInFolder(ContentUtil.CONTENT_PATH).toArray(new ArticleItemBean[0]);
 			availableRows = articleItemBean.length;
 			
 			int nrOfRows = rows.intValue();
@@ -168,7 +168,9 @@ public class ArticleListBean implements WFListBean, Serializable {
 			try {
 				System.out.println("Attempting to load "+file[i].toString());
 				ArticleItemBean article = new ArticleItemBean();
-				article.load(folder+"/"+file[i]);
+//				article.load(folder+"/"+file[i]);
+				//TODO this is a patch since getWebdavResource(folder) seems to return the whole path now
+				article.load(file[i].substring(12));
 				list.add(article);
 			}catch(Exception e) {
 				e.printStackTrace();

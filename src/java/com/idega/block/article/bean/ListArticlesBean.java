@@ -1,5 +1,5 @@
 /*
- * $Id: ListArticlesBean.java,v 1.6 2004/12/15 15:46:02 joakim Exp $
+ * $Id: ListArticlesBean.java,v 1.7 2005/01/04 15:18:18 joakim Exp $
  *
  * Copyright (C) 2004 Idega. All Rights Reserved.
  *
@@ -19,6 +19,7 @@ import javax.faces.component.html.HtmlCommandLink;
 import javax.faces.event.ActionListener;
 import javax.faces.model.DataModel;
 import org.apache.xmlbeans.XmlException;
+import com.idega.content.business.ContentUtil;
 import com.idega.webface.WFPage;
 import com.idega.webface.WFUtil;
 import com.idega.webface.bean.WFListBean;
@@ -27,10 +28,10 @@ import com.idega.webface.model.WFDataModel;
 /**
  * Bean for listing articles.   
  * <p>
- * Last modified: $Date: 2004/12/15 15:46:02 $ by $Author: joakim $
+ * Last modified: $Date: 2005/01/04 15:18:18 $ by $Author: joakim $
  *
  * @author Anders Lindman
- * @version $Revision: 1.6 $
+ * @version $Revision: 1.7 $
  */
 
 public class ListArticlesBean implements WFListBean, Serializable {
@@ -132,7 +133,8 @@ public class ListArticlesBean implements WFListBean, Serializable {
 			_dataModel = new WFDataModel();
 		}
 		try {
-			ArticleItemBean[] articleItemBean = (ArticleItemBean[]) ArticleListBean.loadAllArticlesInFolder("/files/content").toArray(new ArticleItemBean[0]);
+//			ArticleItemBean[] articleItemBean = (ArticleItemBean[]) ArticleListBean.loadAllArticlesInFolder("/files/content").toArray(new ArticleItemBean[0]);
+			ArticleItemBean[] articleItemBean = (ArticleItemBean[]) ArticleListBean.loadAllArticlesInFolder(ContentUtil.CONTENT_PATH).toArray(new ArticleItemBean[0]);
 			int availableRows = articleItemBean.length;
 			
 			int nrOfRows = rows.intValue();
