@@ -1,5 +1,5 @@
 /*
- * $Id: ArticleListManagedBean.java,v 1.4 2005/02/22 15:11:32 gummi Exp $
+ * $Id: ArticleListManagedBean.java,v 1.5 2005/02/25 11:26:54 gummi Exp $
  * Created on 27.1.2005
  *
  * Copyright (C) 2005 Idega Software hf. All Rights Reserved.
@@ -43,10 +43,10 @@ import com.idega.util.IWTimestamp;
 
 /**
  * 
- *  Last modified: $Date: 2005/02/22 15:11:32 $ by $Author: gummi $
+ *  Last modified: $Date: 2005/02/25 11:26:54 $ by $Author: gummi $
  * 
  * @author <a href="mailto:gummi@idega.com">Gudmundur Agust Saemundsson</a>
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  */
 public class ArticleListManagedBean implements ContentListViewerManagedBean {
 
@@ -205,7 +205,7 @@ public class ArticleListManagedBean implements ContentListViewerManagedBean {
 		if(categoryList != null){
 			for (Iterator iter = categoryList.iterator(); iter.hasNext();) {
 				String categoryName = (String) iter.next();
-				categoryExpressions.add(s.compare(CompareOperator.PROPERTY_CONTAINS,IWSlideConstants.PROPERTY_CATEGORY,categoryName));
+				categoryExpressions.add(s.compare(CompareOperator.LIKE,IWSlideConstants.PROPERTY_CATEGORY,"%"+categoryName+"%"));
 			}
 			Iterator expr = categoryExpressions.iterator();
 			if(expr.hasNext()){
