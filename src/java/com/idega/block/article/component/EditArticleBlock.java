@@ -1,5 +1,5 @@
 /*
- * $Id: EditArticleBlock.java,v 1.20 2005/02/24 16:52:55 joakim Exp $
+ * $Id: EditArticleBlock.java,v 1.21 2005/03/01 11:49:41 gummi Exp $
  *
  * Copyright (C) 2004 Idega. All Rights Reserved.
  *
@@ -36,8 +36,10 @@ import com.idega.block.article.component.reference.FileUploadForm;
 import com.idega.content.bean.CaseListBean;
 import com.idega.content.bean.ManagedContentBeans;
 import com.idega.content.data.ContentItemCase;
+import com.idega.content.presentation.ContentViewer;
 import com.idega.core.localisation.business.ICLocaleBusiness;
 import com.idega.presentation.IWBaseComponent;
+import com.idega.presentation.IWContext;
 import com.idega.webface.WFComponentSelector;
 import com.idega.webface.WFContainer;
 import com.idega.webface.WFErrorMessages;
@@ -51,10 +53,10 @@ import com.idega.webface.WFUtil;
 import com.idega.webface.htmlarea.HTMLArea;
 
 /**
- * Last modified: $Date: 2005/02/24 16:52:55 $ by $Author: joakim $
+ * Last modified: $Date: 2005/03/01 11:49:41 $ by $Author: gummi $
  *
  * @author Joakim
- * @version $Revision: 1.20 $
+ * @version $Revision: 1.21 $
  */
 public class EditArticleBlock extends IWBaseComponent implements ManagedContentBeans, ActionListener {
 	public final static String EDIT_ARTICLE_BLOCK_ID = "edit_articles_block";
@@ -601,6 +603,13 @@ public class EditArticleBlock extends IWBaseComponent implements ManagedContentB
 	public void encodeBegin(FacesContext context) throws IOException {
 		WFUtil.invoke(ARTICLE_ITEM_BEAN_ID, "updateLocale");
 //		updateEditButtons();
+		
+		IWContext iwc = IWContext.getIWContext(context);
+		String resourcePath = iwc.getParameter(ContentViewer.PARAMETER_CONTENT_RESOURCE);
+		if(resourcePath!=null){
+			WFUtil.invoke(ARTICLE_ITEM_BEAN_ID,"load",resourcePath,String.class);
+		}
+		
 		super.encodeBegin(context);
 	}
 }
