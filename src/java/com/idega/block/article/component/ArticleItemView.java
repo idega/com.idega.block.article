@@ -1,5 +1,5 @@
 /*
- * $Id: ArticleItemView.java,v 1.7 2004/12/21 15:37:14 joakim Exp $
+ * $Id: ArticleItemView.java,v 1.8 2004/12/21 16:28:44 joakim Exp $
  *
  * Copyright (C) 2004 Idega. All Rights Reserved.
  *
@@ -25,12 +25,12 @@ import com.idega.webface.WFUtil;
 import com.idega.webface.test.bean.ManagedContentBeans;
 
 /**
- * Last modified: $Date: 2004/12/21 15:37:14 $ by $Author: joakim $
+ * Last modified: $Date: 2004/12/21 16:28:44 $ by $Author: joakim $
  *
  * Displays the article item
  *
  * @author Joakim
- * @version $Revision: 1.7 $
+ * @version $Revision: 1.8 $
  */
 public class ArticleItemView extends IWBaseComponent implements ManagedContentBeans, ActionListener{
 	public final static String EDIT_ARTICLE_BLOCK_ID = "edit_articles_block";
@@ -60,7 +60,7 @@ public class ArticleItemView extends IWBaseComponent implements ManagedContentBe
 		
 		HtmlPanelGrid p = WFPanelUtil.getPlainFormPanel(1);
 		p.setId(NO_ARTICLE_ID);
-		p.getChildren().add(WFUtilArticle.getHeaderTextVB("no_article_selected"));
+		p.getChildren().add(WFUtilArticle.getWFUtilArticle().getHeaderTextVB("no_article_selected"));
 		cs.add(p);
 
 		WFContainer c = new WFContainer();

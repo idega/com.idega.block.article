@@ -1,5 +1,5 @@
 /*
- * $Id: ArticleDetailView.java,v 1.6 2004/12/17 14:22:54 joakim Exp $
+ * $Id: ArticleDetailView.java,v 1.7 2004/12/21 16:28:44 joakim Exp $
  * 
  * Copyright (C) 2004 Idega. All Rights Reserved.
  * 
@@ -23,12 +23,12 @@ import com.idega.webface.convert.WFCommaSeparatedListConverter;
 import com.idega.webface.test.bean.ManagedContentBeans;
 
 /**
- * Last modified: $Date: 2004/12/17 14:22:54 $ by $Author: joakim $
+ * Last modified: $Date: 2004/12/21 16:28:44 $ by $Author: joakim $
  * 
  * Displays detailed info about the article
  * 
  * @author Joakim
- * @version $Revision: 1.6 $
+ * @version $Revision: 1.7 $
  */
 public class ArticleDetailView extends IWBaseComponent implements ManagedContentBeans {
 
@@ -52,12 +52,14 @@ public class ArticleDetailView extends IWBaseComponent implements ManagedContent
 	 * Creates a preview container for the article.
 	 */
 	private UIComponent getDetailPanel() {
+		
+		WFUtilArticle localizer = WFUtilArticle.getWFUtilArticle();
 		HtmlPanelGrid dp = WFPanelUtil.getPlainFormPanel(1);
 		WFComponentSelector cs = new WFComponentSelector();
 		cs.setId(COMPONENT_SELECTOR_ID);
 		HtmlPanelGrid p = WFPanelUtil.getPlainFormPanel(1);
 		p.setId(NO_ARTICLE_ID);
-		p.getChildren().add(WFUtilArticle.getHeaderTextVB("no_article_selected"));
+		p.getChildren().add(localizer.getHeaderTextVB("no_article_selected"));
 		
 		cs.add(p);
 		
@@ -72,33 +74,33 @@ public class ArticleDetailView extends IWBaseComponent implements ManagedContent
 		p.getChildren().add(bodyText);
 		p.getChildren().add(WFUtil.getBreak());
 		p.getChildren().add(new WFPlainOutputText("<hr/>"));
-		UIComponent g = WFUtil.group(WFUtilArticle.getHeaderTextVB("author"), WFUtil.getHeaderText(": "));
+		UIComponent g = WFUtil.group(localizer.getHeaderTextVB("author"), WFUtil.getHeaderText(": "));
 		g.getChildren().add(WFUtil.getTextVB(ref + "author"));
 		p.getChildren().add(g);
 		p.getChildren().add(WFUtil.getText(" "));
-		g = WFUtil.group(WFUtilArticle.getHeaderTextVB("created"), WFUtil.getHeaderText(": "));
+		g = WFUtil.group(localizer.getHeaderTextVB("created"), WFUtil.getHeaderText(": "));
 		g.getChildren().add(WFUtil.getTextVB(ref + "creationDate"));
 		p.getChildren().add(g);
 		p.getChildren().add(WFUtil.getText(" "));
-		g = WFUtil.group(WFUtilArticle.getHeaderTextVB("status"), WFUtil.getHeaderText(": "));
+		g = WFUtil.group(localizer.getHeaderTextVB("status"), WFUtil.getHeaderText(": "));
 		g.getChildren().add(WFUtil.getTextVB(ref + "status"));
 		p.getChildren().add(g);
 		p.getChildren().add(WFUtil.getText(" "));
 		HtmlOutputText t = WFUtil.getTextVB(ref + "categoryNames");
 		t.setConverter(new WFCommaSeparatedListConverter());
-		g = WFUtil.group(WFUtilArticle.getHeaderTextVB("categories"), WFUtil.getHeaderText(": "));
+		g = WFUtil.group(localizer.getHeaderTextVB("categories"), WFUtil.getHeaderText(": "));
 		g.getChildren().add(t);
 		p.getChildren().add(g);
 		p.getChildren().add(WFUtil.getText(" "));
-		g = WFUtil.group(WFUtilArticle.getHeaderTextVB("current_version"), WFUtil.getHeaderText(": "));
+		g = WFUtil.group(localizer.getHeaderTextVB("current_version"), WFUtil.getHeaderText(": "));
 		g.getChildren().add(WFUtil.getTextVB(ref + "versionId"));
 		p.getChildren().add(g);
 		p.getChildren().add(WFUtil.getText(" "));
-		g = WFUtil.group(WFUtilArticle.getHeaderTextVB("comment"), WFUtil.getHeaderText(": "));
+		g = WFUtil.group(localizer.getHeaderTextVB("comment"), WFUtil.getHeaderText(": "));
 		g.getChildren().add(WFUtil.getTextVB(ref + "comment"));
 		p.getChildren().add(g);
 		p.getChildren().add(WFUtil.getText(" "));
-		g = WFUtil.group(WFUtilArticle.getHeaderTextVB("source"), WFUtil.getHeaderText(": "));
+		g = WFUtil.group(localizer.getHeaderTextVB("source"), WFUtil.getHeaderText(": "));
 		g.getChildren().add(WFUtil.getTextVB(ref + "source"));
 		p.getChildren().add(g);
 		p.getChildren().add(WFUtil.getText(" "));

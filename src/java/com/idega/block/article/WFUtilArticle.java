@@ -1,5 +1,5 @@
 /*
- * $Id: WFUtilArticle.java,v 1.3 2004/12/21 15:46:24 joakim Exp $
+ * $Id: WFUtilArticle.java,v 1.4 2004/12/21 16:28:44 joakim Exp $
  *
  * Copyright (C) 2004 Idega. All Rights Reserved.
  *
@@ -18,57 +18,65 @@ import com.idega.webface.WFUtil;
 /**
  * Util class to set the bundle for the localization 
  * <p>
- * Last modified: $Date: 2004/12/21 15:46:24 $ by $Author: joakim $
+ * Last modified: $Date: 2004/12/21 16:28:44 $ by $Author: joakim $
  *
  * @author Joakim Johnson
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
-public class WFUtilArticle extends WFUtil{
-	private final static String BUNDLE = "com.idega.block.article";
+public class WFUtilArticle{
+	private String BUNDLE = "com.idega.block.article";
 
-	public static String getBundleString() {
+	public WFUtilArticle(String s) {
+		BUNDLE = s;
+	}
+	
+	public static WFUtilArticle getWFUtilArticle() {
+		return new WFUtilArticle("com.idega.block.article");
+	}
+
+	public String getBundleString() {
 		return BUNDLE;
 	}
 
 	/**
 	 * Returns a localized HtmlOutputText as a header
 	 */
-	public static HtmlOutputText getHeaderTextVB(String localizationKey) {
-		return getHeaderTextVB(BUNDLE, localizationKey);
+	public HtmlOutputText getHeaderTextVB(String localizationKey) {
+		return WFUtil.getHeaderTextVB(BUNDLE, localizationKey);
 	}
 
 	/**
 	 * Returns a localized HtmlOutputText
 	 */
-	public static HtmlOutputText getTextVB(String localizationKey) {
-		return getTextVB(BUNDLE, localizationKey);
+	public HtmlOutputText getTextVB(String localizationKey) {
+		return WFUtil.getTextVB(BUNDLE, localizationKey);
 	}
 
 	/**
 	 * Returns an html list text with value binding.
 	 */
-	public static HtmlOutputText getListTextVB(String localizationKey) {
-		return getListTextVB(BUNDLE, localizationKey);
+	public HtmlOutputText getListTextVB(String localizationKey) {
+		return WFUtil.getListTextVB(BUNDLE, localizationKey);
 	}
 
 	/**
 	 * Returns a localized HtmlCommand Button
 	 */
-	public static HtmlCommandButton getButtonVB(String id, String localizationKey) {
-		return getButtonVB(id, BUNDLE, localizationKey);
+	public HtmlCommandButton getButtonVB(String id, String localizationKey) {
+		return WFUtil.getButtonVB(id, BUNDLE, localizationKey);
 	}
 	
 	/**
 	 * Adds a UIParameter with value binding to the specified component. 
 	 */
-	public static void addParameterVB(UIComponent component, String name, String localizationKey) {
-		addParameterVB(component, name, BUNDLE, localizationKey);
+	public void addParameterVB(UIComponent component, String name, String localizationKey) {
+		WFUtil.addParameterVB(component, name, BUNDLE, localizationKey);
 	}
 	
 	/**
 	 * Adds a message with value binding for the specified component. 
 	 */
-	public static void addMessageVB(UIComponent component, String localizationKey) {
-		addMessageVB(component, BUNDLE, localizationKey);
+	public void addMessageVB(UIComponent component, String localizationKey) {
+		WFUtil.addMessageVB(component, BUNDLE, localizationKey);
 	}
 }
