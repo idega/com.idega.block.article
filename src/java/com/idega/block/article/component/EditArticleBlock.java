@@ -1,5 +1,5 @@
 /*
- * $Id: EditArticleBlock.java,v 1.25 2005/03/07 16:11:33 gummi Exp $
+ * $Id: EditArticleBlock.java,v 1.26 2005/03/08 18:33:14 gummi Exp $
  *
  * Copyright (C) 2004 Idega. All Rights Reserved.
  *
@@ -56,10 +56,10 @@ import com.idega.webface.WFUtil;
 import com.idega.webface.htmlarea.HTMLArea;
 
 /**
- * Last modified: $Date: 2005/03/07 16:11:33 $ by $Author: gummi $
+ * Last modified: $Date: 2005/03/08 18:33:14 $ by $Author: gummi $
  *
  * @author Joakim
- * @version $Revision: 1.25 $
+ * @version $Revision: 1.26 $
  */
 public class EditArticleBlock extends IWBaseComponent implements ManagedContentBeans, ActionListener, ValueChangeListener {
 	public final static String EDIT_ARTICLE_BLOCK_ID = "edit_articles_block";
@@ -628,7 +628,11 @@ public class EditArticleBlock extends IWBaseComponent implements ManagedContentB
 		IWContext iwc = IWContext.getIWContext(context);
 		String resourcePath = iwc.getParameter(ContentViewer.PARAMETER_CONTENT_RESOURCE);
 		if(resourcePath!=null){
-			WFUtil.invoke(ARTICLE_ITEM_BEAN_ID,"load",resourcePath,String.class);
+			if("create".equals(iwc.getParameter(ContentViewer.PARAMETER_CONTENT_RESOURCE))){
+				WFUtil.invoke(ARTICLE_ITEM_BEAN_ID,"setFolderLocation",resourcePath,String.class);
+			} else {
+				WFUtil.invoke(ARTICLE_ITEM_BEAN_ID,"load",resourcePath,String.class);
+			}
 		}
 		
 	}

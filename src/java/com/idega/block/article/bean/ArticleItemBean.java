@@ -1,5 +1,5 @@
 /*
- * $Id: ArticleItemBean.java,v 1.36 2005/03/08 17:23:55 joakim Exp $
+ * $Id: ArticleItemBean.java,v 1.37 2005/03/08 18:33:14 gummi Exp $
  *
  * Copyright (C) 2004 Idega. All Rights Reserved.
  *
@@ -51,10 +51,10 @@ import com.idega.xmlns.block.article.document.ArticleDocument;
 /**
  * Bean for idegaWeb article content items.   
  * <p>
- * Last modified: $Date: 2005/03/08 17:23:55 $ by $Author: joakim $
+ * Last modified: $Date: 2005/03/08 18:33:14 $ by $Author: gummi $
  *
  * @author Anders Lindman
- * @version $Revision: 1.36 $
+ * @version $Revision: 1.37 $
  */
 
 public class ArticleItemBean extends ContentItemBean implements Serializable, ContentItem {
@@ -86,9 +86,11 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 	public final static String CONTENT_TYPE = "ContentType";
 	
 	private final static String[] ATTRIBUTE_ARRAY = new String[] {FIELDNAME_AUTHOR,FIELDNAME_CREATION_DATE,FIELDNAME_HEADLINE,FIELDNAME_TEASER,FIELDNAME_BODY};
-	private final static String[] ACTION_ARRAY = new String[] {"edit"};
+	private final static String[] ACTION_ARRAY = new String[] {"edit","delete"};
 	
 	XMLNamespace idegans = new XMLNamespace("http://xmlns.idega.com/block/article/xml");
+
+	private String folderLocation = null;
 	
 	/**
 	 * Default constructor.
@@ -168,12 +170,18 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 	
 	
 	public String getFolderLocation() {
+		if(folderLocation!=null) return folderLocation;
+		
 		String articlePath = getResourcePath();
 		if(articlePath!=null){
 			return ContentUtil.getParentPath(ContentUtil.getParentPath(articlePath));
 		} else {
 			return null;
 		}
+	}
+	
+	public void setFolderLocation(String path) {
+		folderLocation = path;
 	}
 	
 	public String getContentLanguage() { return (String)getValue(FIELDNAME_CONTENT_LANGUAGE); }

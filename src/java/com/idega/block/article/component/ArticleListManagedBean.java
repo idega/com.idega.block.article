@@ -1,5 +1,5 @@
 /*
- * $Id: ArticleListManagedBean.java,v 1.6 2005/03/05 18:36:33 gummi Exp $
+ * $Id: ArticleListManagedBean.java,v 1.7 2005/03/08 18:33:14 gummi Exp $
  * Created on 27.1.2005
  *
  * Copyright (C) 2005 Idega Software hf. All Rights Reserved.
@@ -24,6 +24,7 @@ import org.apache.webdav.lib.search.SearchRequest;
 import org.apache.webdav.lib.search.SearchScope;
 import org.apache.xmlbeans.XmlException;
 import com.idega.block.article.bean.ArticleItemBean;
+import com.idega.block.article.business.ArticleActionURIHandler;
 import com.idega.block.article.business.ArticleUtil;
 import com.idega.business.IBOLookup;
 import com.idega.content.bean.ContentItemBeanComparator;
@@ -41,10 +42,10 @@ import com.idega.util.IWTimestamp;
 
 /**
  * 
- *  Last modified: $Date: 2005/03/05 18:36:33 $ by $Author: gummi $
+ *  Last modified: $Date: 2005/03/08 18:33:14 $ by $Author: gummi $
  * 
  * @author <a href="mailto:gummi@idega.com">Gudmundur Agust Saemundsson</a>
- * @version $Revision: 1.6 $
+ * @version $Revision: 1.7 $
  */
 public class ArticleListManagedBean implements ContentListViewerManagedBean {
 
@@ -278,5 +279,12 @@ public class ArticleListManagedBean implements ContentListViewerManagedBean {
 	 */
 	public void setCategories(List categories) {
 		this.categories = categories;
+	}
+
+	/* (non-Javadoc)
+	 * @see com.idega.content.bean.ContentListViewerManagedBean#getIWActionURIHandlerIdentifier()
+	 */
+	public String getIWActionURIHandlerIdentifier() {
+		return (new ArticleActionURIHandler()).getHandlerIdentifier();
 	}
 }
