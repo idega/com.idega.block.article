@@ -26,17 +26,9 @@
       <roles/>
     </developer>
   </developers>
+ 
   <dependencies>
-    <dependency>
-      <groupId>article</groupId>
-      <artifactId>article</artifactId>
-      <version>1.0</version>
-      <type>jar</type>
-      <url>http://www.idega.is/</url>
-      <properties>
-        <idegaweb.bundle.include>true</idegaweb.bundle.include>
-      </properties>
-    </dependency>
+
     <dependency>
       <groupId>xmlbeans</groupId>
       <artifactId>xbean</artifactId>
@@ -111,5 +103,22 @@
         <idegaweb.bundle.include>true</idegaweb.bundle.include>
       </properties>
     </dependency>
+    
+	<!-- These are required only to run the xmlbeans tool -->
+    <dependency>
+      <groupId>xmlbeans</groupId>
+      <artifactId>xbean_xpath</artifactId>
+      <version>1.0.3</version>
+      <type>jar</type>
+      <url>http://xmlbeans.apache.org/</url>
+    </dependency>
+    <dependency>
+      <groupId>jaxen</groupId>
+      <artifactId>jaxen</artifactId>
+      <version>1.1-beta-4</version>
+      <type>jar</type>
+      <url>http://www.jaxen.org/</url>
+    </dependency>
+
   </dependencies>
 </project>

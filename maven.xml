@@ -1,0 +1,16 @@
+<project>
+
+	<!--xmlbeans generator -->
+	<preGoal name="java:compile" >
+		<java classname="org.apache.xmlbeans.impl.tool.SchemaCompiler"
+		          classpathref="maven.dependency.classpath"
+		          fork="true">
+		      <arg value="-d"/>
+		      <arg value="${maven.src.dir}/java"/>
+		      <arg value="-src"/>
+		      <arg value="${ maven.src.dir}/java"/>		      
+		      <arg value="${basedir}/resources/schemas"/>
+		    </java>
+  </preGoal>
+
+</project>
