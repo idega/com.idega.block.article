@@ -1,6 +1,8 @@
 package com.idega.block.article.component;
 
 import java.io.IOException;
+import java.util.Iterator;
+import java.util.List;
 import javax.faces.component.UIColumn;
 import javax.faces.component.UIComponent;
 import javax.faces.component.html.HtmlCommandButton;
@@ -24,6 +26,7 @@ import com.idega.webface.WFList;
 import com.idega.webface.WFPage;
 import com.idega.webface.WFPanelUtil;
 import com.idega.webface.WFPlainOutputText;
+import com.idega.webface.WFTabbedPane;
 import com.idega.webface.WFUtil;
 import com.idega.webface.htmlarea.HTMLArea;
 import com.idega.webface.test.bean.CaseListBean;
@@ -177,13 +180,21 @@ public class EditArticleBlock extends IWBaseComponent implements ManagedContentB
 		mainContainer.add(WFUtil.getBreak());
 		
 		p = WFPanelUtil.getPlainFormPanel(1);
-		p.getChildren().add(WFUtil.group(WFUtil.getHeaderTextVB(bref + "created"), WFUtil.getText(": 4/20/04 3:04 PM")));
+/*
+		p.getChildren().add(WFUtil.group(WFUtil.getHeaderTextVB(bref + "created"), 
+				WFUtil.getTextVB(ref + "creationDate")
+//				WFUtil.getText(": 4/20/04 3:04 PM")
+				));
+*/
 		p.getChildren().add(WFUtil.getText(" "));
 		UIComponent t = WFUtil.group(WFUtil.getHeaderTextVB(bref + "status"), WFUtil.getText(": "));
 		t.getChildren().add(WFUtil.getTextVB(ref + "status"));
 		p.getChildren().add(t);
 		p.getChildren().add(WFUtil.getText(" "));
-		p.getChildren().add(WFUtil.group(WFUtil.getHeaderTextVB(bref + "current_version"), WFUtil.getText(": 1.5")));
+		p.getChildren().add(WFUtil.group(WFUtil.getHeaderTextVB(bref + "current_version"), 
+				WFUtil.getTextVB(ref + "versionId")
+//				WFUtil.getText(": 1.5")
+				));
 		
 		mainContainer.add(p);
 		mainContainer.add(WFUtil.getBreak());
@@ -246,6 +257,7 @@ public class EditArticleBlock extends IWBaseComponent implements ManagedContentB
 		cs.add(WFUtil.getButtonVB(CANCEL_ID, bref + "cancel", this));
 		cs.setSelectedId(CANCEL_ID, true);
 		p.getChildren().add(cs);
+//		p.getChildren().add(saveButton);
 		
 		mainContainer.add(p);
 		
@@ -354,7 +366,7 @@ public class EditArticleBlock extends IWBaseComponent implements ManagedContentB
 	 */
 	public void processAction(ActionEvent event) {
 		String id = event.getComponent().getId();
-		ArticleBlock ab = (ArticleBlock) event.getComponent().getParent().getParent().getParent().findComponent(EDIT_ARTICLE_BLOCK_ID);
+		EditArticleBlock ab = (EditArticleBlock) event.getComponent().getParent().getParent().getParent().findComponent(EDIT_ARTICLE_BLOCK_ID);
 		if (id.equals(SAVE_ID)) {
 			ab.storeArticle();
 		} else if (id.equals(FOR_REVIEW_ID)) {
@@ -403,6 +415,60 @@ public class EditArticleBlock extends IWBaseComponent implements ManagedContentB
 		}
 	}
 
+	/**
+	 * Stores the current article. 
+	 */
+	public void storeArticle() {
+		String bref = WFPage.CONTENT_BUNDLE + ".";
+		boolean storeOk = ((Boolean) WFUtil.invoke(ARTICLE_ITEM_BEAN_ID, "storeArticle")).booleanValue();
+		if (!storeOk) {
+			List errorKeys = (List) WFUtil.getValue(ARTICLE_ITEM_BEAN_ID, "errorKeys");
+			if (errorKeys != null) {
+				for (Iterator iter = errorKeys.iterator(); iter.hasNext();) {
+					String errorKey = (String) iter.next();
+					WFUtil.addMessageVB(findComponent(SAVE_ID), bref + errorKey);
+				}
+			}
+			return;
+		}
+		setUserMessage("article_saved");
+	}
+	/*
+	 * Sets the text in the message task container. 
+	 */
+	private void setUserMessage(String ref) {
+		String bref = WFPage.CONTENT_BUNDLE + ".";
+		HtmlOutputText t = (HtmlOutputText) findComponent(USER_MESSAGE_ID);
+		if(t!=null){
+			t.setValueBinding("value", WFUtil.createValueBinding("#{" + bref + ref + "}"));
+			setMessageMode();
+		}
+		else{
+			System.out.println("AtricleBlock: t==null: Message out: "+bref + ref);
+		}
+	}
+	
+	/**
+	 * Sets this block to message mode. 
+	 */
+	public void setMessageMode() {
+		WFTabbedPane tb = (WFTabbedPane) findComponent(TASKBAR_ID);
+		tb.setSelectedMenuItemId(TASK_ID_MESSAGES);
+	}
+	
+
+	/**
+	 * Sets the editor view for this article block.
+	 *
+	 */
+	public void setEditView(String s) {
+		WFComponentSelector cs = (WFComponentSelector) findComponent(EDITOR_SELECTOR_ID);
+		cs.setSelectedId(ARTICLE_EDITOR_ID, s.equals(ARTICLE_EDITOR_ID));
+		cs.setSelectedId(CATEGORY_EDITOR_ID, s.equals(CATEGORY_EDITOR_ID));
+		cs.setSelectedId(FILE_UPLOAD_FORM_ID, s.equals(FILE_UPLOAD_FORM_ID));
+		cs.setSelectedId(RELATED_CONTENT_ITEMS_EDITOR_ID, s.equals(RELATED_CONTENT_ITEMS_EDITOR_ID));
+	}
+	
 	/**
 	 * Updates the buttons in edit mode depending on the status of the current article.
 	 */
