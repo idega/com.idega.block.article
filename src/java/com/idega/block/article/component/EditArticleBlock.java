@@ -1,5 +1,5 @@
 /*
- * $Id: EditArticleBlock.java,v 1.17 2005/02/14 15:16:34 gummi Exp $
+ * $Id: EditArticleBlock.java,v 1.18 2005/02/18 16:37:48 joakim Exp $
  *
  * Copyright (C) 2004 Idega. All Rights Reserved.
  *
@@ -31,7 +31,6 @@ import com.idega.content.bean.CaseListBean;
 import com.idega.content.bean.ManagedContentBeans;
 import com.idega.content.data.ContentItemCase;
 import com.idega.presentation.IWBaseComponent;
-import com.idega.util.IWTimestamp;
 import com.idega.webface.WFComponentSelector;
 import com.idega.webface.WFContainer;
 import com.idega.webface.WFErrorMessages;
@@ -45,10 +44,10 @@ import com.idega.webface.WFUtil;
 import com.idega.webface.htmlarea.HTMLArea;
 
 /**
- * Last modified: $Date: 2005/02/14 15:16:34 $ by $Author: gummi $
+ * Last modified: $Date: 2005/02/18 16:37:48 $ by $Author: joakim $
  *
  * @author Joakim
- * @version $Revision: 1.17 $
+ * @version $Revision: 1.18 $
  */
 public class EditArticleBlock extends IWBaseComponent implements ManagedContentBeans, ActionListener {
 	public final static String EDIT_ARTICLE_BLOCK_ID = "edit_articles_block";
@@ -169,10 +168,11 @@ public class EditArticleBlock extends IWBaseComponent implements ManagedContentB
 		bodyArea.addPlugin(HTMLArea.PLUGIN_CHARACTER_MAP);
 		bodyArea.setAllowFontSelection(false);
 		
-		HtmlCommandButton editButton = localizer.getButtonVB(EDIT_HTML_ID, "edit", this);
-		editButton.setOnclick("wurl='htmlarea/webface/htmledit.jsp?" + PREVIEW_ARTICLE_ITEM_ID + 
-					"='+this.tabindex;window.open(wurl,'Edit','height=450,width=600,resizable=yes,status=no,toolbar=no,menubar=no,location=no,scrollbars=no');return false;");
-		p.getChildren().add(WFUtil.group(WFUtil.group(bodyArea, WFUtil.getBreak()), editButton));
+		p.getChildren().add(WFUtil.group(bodyArea, WFUtil.getBreak()));
+//		HtmlCommandButton editButton = localizer.getButtonVB(EDIT_HTML_ID, "edit", this);
+//		editButton.setOnclick("wurl='htmlarea/webface/htmledit.jsp?" + PREVIEW_ARTICLE_ITEM_ID + 
+//					"='+this.tabindex;window.open(wurl,'Edit','height=450,width=600,resizable=yes,status=no,toolbar=no,menubar=no,location=no,scrollbars=no');return false;");
+//		p.getChildren().add(WFUtil.group(WFUtil.group(bodyArea, WFUtil.getBreak()), editButton));
 /*
 		WFContainer imageContainer = new WFContainer();
 		imageContainer.add(WFUtil.getButtonVB(ADD_IMAGE_ID, bref + "add_image", this));
@@ -255,9 +255,8 @@ public class EditArticleBlock extends IWBaseComponent implements ManagedContentB
 		p.getChildren().add(WFUtil.group(localizer.getTextVB("folder"), WFUtil.getText(":")));
 		HtmlInputText folderInput = WFUtil.getInputText(FOLDER_ID, ref + "folderLocation");
 		if(null==folderInput.getValue() || "".equals(folderInput.getValue())) {
-			IWTimestamp now = new IWTimestamp();
-			String FolderString = ArticleUtil.getArticleRootPath()+"/"+now.getYear()+"/"+now.getDateString("MM");
-			System.out.println("Folder "+FolderString);
+			String FolderString = ArticleUtil.getArticleYearMonthPath();
+//			System.out.println("Folder "+FolderString);
 			folderInput.setValue(FolderString);
 		}
 		folderInput.setSize(50);
