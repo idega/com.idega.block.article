@@ -1,5 +1,5 @@
 /*
- * $Id: ArticleItemView.java,v 1.4 2004/12/16 17:11:17 joakim Exp $
+ * $Id: ArticleItemView.java,v 1.5 2004/12/17 14:22:54 joakim Exp $
  *
  * Copyright (C) 2004 Idega. All Rights Reserved.
  *
@@ -21,10 +21,12 @@ import com.idega.webface.WFUtil;
 import com.idega.webface.test.bean.ManagedContentBeans;
 
 /**
- * Last modified: $Date: 2004/12/16 17:11:17 $ by $Author: joakim $
+ * Last modified: $Date: 2004/12/17 14:22:54 $ by $Author: joakim $
+ *
+ * Displays the article item
  *
  * @author Joakim
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  */
 public class ArticleItemView extends IWBaseComponent implements ManagedContentBeans {
 
@@ -46,14 +48,12 @@ public class ArticleItemView extends IWBaseComponent implements ManagedContentBe
 	 */
 	private UIComponent getPreviewPanel() {
 		String ref = ARTICLE_ITEM_BEAN_ID + ".";
-//		String bref = WFPage.CONTENT_BUNDLE + ".";
 
 		WFComponentSelector cs = new WFComponentSelector();
 		cs.setId(COMPONENT_SELECTOR_ID);
 		
 		HtmlPanelGrid p = WFPanelUtil.getPlainFormPanel(1);
 		p.setId(NO_ARTICLE_ID);
-//		p.getChildren().add(WFUtil.getHeaderTextVB(bref + "no_article_selected"));
 		p.getChildren().add(WFUtilArticle.getHeaderTextVB("no_article_selected"));
 		cs.add(p);
 
@@ -73,7 +73,12 @@ public class ArticleItemView extends IWBaseComponent implements ManagedContentBe
 		return cs;
 	}
 
-	private void selectComponent() {
+	/**
+	 * Selects what component to display. Either the detaild information 
+	 * or the text saying that no article is selected.
+	 * The decision is based on the presence of article_item_bean.headline is pressent in the session
+	 */
+ 	private void selectComponent() {
 		WFComponentSelector cs = (WFComponentSelector) findComponent(COMPONENT_SELECTOR_ID);
 
 		String headline = WFUtil.getStringValue(ARTICLE_ITEM_BEAN_ID, "headline");
