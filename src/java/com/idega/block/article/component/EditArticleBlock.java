@@ -1,5 +1,5 @@
 /*
- * $Id: EditArticleBlock.java,v 1.7 2004/12/21 16:28:44 joakim Exp $
+ * $Id: EditArticleBlock.java,v 1.8 2005/01/04 13:33:59 joakim Exp $
  *
  * Copyright (C) 2004 Idega. All Rights Reserved.
  *
@@ -43,10 +43,10 @@ import com.idega.webface.test.bean.ContentItemCase;
 import com.idega.webface.test.bean.ManagedContentBeans;
 
 /**
- * Last modified: $Date: 2004/12/21 16:28:44 $ by $Author: joakim $
+ * Last modified: $Date: 2005/01/04 13:33:59 $ by $Author: joakim $
  *
  * @author Joakim
- * @version $Revision: 1.7 $
+ * @version $Revision: 1.8 $
  */
 public class EditArticleBlock extends IWBaseComponent implements ManagedContentBeans, ActionListener {
 	public final static String EDIT_ARTICLE_BLOCK_ID = "edit_articles_block";
@@ -189,28 +189,35 @@ public class EditArticleBlock extends IWBaseComponent implements ManagedContentB
 		HtmlSelectOneMenu mainCategoryMenu = WFUtil.getSelectOneMenu(MAIN_CATEGORY_ID, ref + "categories", ref + "mainCategoryId");
 		p.getChildren().add(mainCategoryMenu);		
 */
-		mainContainer.add(p);
-		mainContainer.add(WFUtil.getBreak());
+//		mainContainer.add(p);
+//		mainContainer.add(WFUtil.getBreak());
+		p.getChildren().add(WFUtil.getBreak());
+		p.getChildren().add(WFUtil.getBreak());
 		
-		p = WFPanelUtil.getPlainFormPanel(1);
+//		p = WFPanelUtil.getPlainFormPanel(1);
 /*
 		p.getChildren().add(WFUtil.group(WFUtil.getHeaderTextVB(bref + "created"), 
 				WFUtil.getTextVB(ref + "creationDate")
 				));
 */
-		p.getChildren().add(WFUtil.getText(" "));
-		UIComponent t = WFUtil.group(localizer.getHeaderTextVB("status"), WFUtil.getText(": "));
-		t.getChildren().add(WFUtil.getTextVB(ref + "status"));
-		p.getChildren().add(t);
-		p.getChildren().add(WFUtil.getText(" "));
-		p.getChildren().add(WFUtil.group(localizer.getHeaderTextVB("current_version"), 
-				WFUtil.getTextVB(ref + "versionId")
-				));
+//		p.getChildren().add(WFUtil.getText(" "));
+//		UIComponent t = WFUtil.group(localizer.getHeaderTextVB("status"), WFUtil.getText(": "));
+//		t.getChildren().add(WFUtil.getTextVB(ref + "status"));
+//		p.getChildren().add(t);
+		p.getChildren().add(WFUtil.group(localizer.getTextVB("status"), WFUtil.getText(":")));
+		p.getChildren().add(WFUtil.getTextVB(ref + "status"));
+		p.getChildren().add(WFUtil.group(localizer.getTextVB("current_version"), WFUtil.getText(":")));
+		p.getChildren().add(WFUtil.getTextVB(ref + "versionId"));
+//		p.getChildren().add(WFUtil.getText(" "));
+//		p.getChildren().add(WFUtil.group(localizer.getHeaderTextVB("current_version"), 
+//				WFUtil.getTextVB(ref + "versionId")
+//				));
 		
-		mainContainer.add(p);
-		mainContainer.add(WFUtil.getBreak());
+//		mainContainer.add(p);
+		p.getChildren().add(WFUtil.getBreak());
+		p.getChildren().add(WFUtil.getBreak());
 		
-		p = WFPanelUtil.getFormPanel(2);
+//		p = WFPanelUtil.getFormPanel(2);
 		p.getChildren().add(WFUtil.group(localizer.getTextVB("comment"), WFUtil.getText(":")));
 //		p.getChildren().add(WFUtil.group(WFUtil.getTextVB(bref + "attachments"), WFUtil.getText(":")));	
 		HtmlInputTextarea commentArea = WFUtil.getTextArea(COMMENT_ID, ref + "comment", "400px", "60px");
@@ -221,7 +228,7 @@ public class EditArticleBlock extends IWBaseComponent implements ManagedContentB
 //		attachmentContainer.add(getAttachmentList());
 //		p.getChildren().add(attachmentContainer);
 		
-		mainContainer.add(p);
+//		mainContainer.add(p);
 		
 //		p = WFPanelUtil.getFormPanel(1);
 //		p.getChildren().add(WFUtil.group(WFUtil.getTextVB(bref + "related_content_items"), WFUtil.getText(":")));		
@@ -239,10 +246,12 @@ public class EditArticleBlock extends IWBaseComponent implements ManagedContentB
 //		publishedToInput.setShowTime(true);
 //		p.getChildren().add(publishedToInput);
 		
-		mainContainer.add(p);
-		mainContainer.add(WFUtil.getBreak());
+//		mainContainer.add(p);
+		p.getChildren().add(WFUtil.getBreak());
+		p.getChildren().add(WFUtil.getBreak());
+//		mainContainer.add(WFUtil.getBreak());
 
-		p = WFPanelUtil.getPlainFormPanel(1);
+//		p = WFPanelUtil.getPlainFormPanel(1);
 //		HtmlCommandButton editCategoriesButton = WFUtil.getButtonVB(EDIT_CATEGORIES_ID, bref + "edit_categories", this);
 //		p.getChildren().add(editCategoriesButton);
 
@@ -255,10 +264,13 @@ public class EditArticleBlock extends IWBaseComponent implements ManagedContentB
 		p.getChildren().add(categoryInput);		
 		
 		p.getChildren().add(WFUtil.getBreak());
+		p.getChildren().add(WFUtil.getBreak());
+		p.getChildren().add(WFUtil.getBreak());
 //		WFComponentSelector cs = new WFComponentSelector();
 //		cs.setId(BUTTON_SELECTOR_ID);
 //		cs.setDividerText(" ");
-		HtmlCommandButton saveButton = WFUtil.getButtonVB(SAVE_ID, "save", this);
+		HtmlCommandButton saveButton = localizer.getButtonVB(SAVE_ID, "save");
+//		HtmlCommandButton saveButton = WFUtil.getButtonVB(SAVE_ID, "save", this);
 //		cs.add(saveButton);
 //		cs.add(WFUtil.getButtonVB(FOR_REVIEW_ID, bref + "for_review", this));
 //		cs.add(WFUtil.getButtonVB(PUBLISH_ID, bref + "publish", this));
