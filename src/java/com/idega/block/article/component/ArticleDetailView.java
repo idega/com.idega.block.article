@@ -1,5 +1,5 @@
 /*
- * $Id: ArticleDetailView.java,v 1.8 2005/01/10 10:24:31 joakim Exp $
+ * $Id: ArticleDetailView.java,v 1.9 2005/01/31 16:55:30 joakim Exp $
  * 
  * Copyright (C) 2004 Idega. All Rights Reserved.
  * 
@@ -13,6 +13,7 @@ import javax.faces.component.UIComponent;
 import javax.faces.component.html.HtmlOutputText;
 import javax.faces.component.html.HtmlPanelGrid;
 import javax.faces.context.FacesContext;
+import com.idega.content.presentation.WebDAVMetadata;
 import com.idega.presentation.IWBaseComponent;
 import com.idega.webface.WFComponentSelector;
 import com.idega.webface.WFPanelUtil;
@@ -23,12 +24,12 @@ import com.idega.webface.convert.WFCommaSeparatedListConverter;
 import com.idega.webface.test.bean.ManagedContentBeans;
 
 /**
- * Last modified: $Date: 2005/01/10 10:24:31 $ by $Author: joakim $
+ * Last modified: $Date: 2005/01/31 16:55:30 $ by $Author: joakim $
  * 
  * Displays detailed info about the article
  * 
  * @author Joakim
- * @version $Revision: 1.8 $
+ * @version $Revision: 1.9 $
  */
 public class ArticleDetailView extends IWBaseComponent implements ManagedContentBeans {
 
@@ -46,6 +47,19 @@ public class ArticleDetailView extends IWBaseComponent implements ManagedContent
 
 	protected void initializeContent() {
 		add(getDetailPanel());
+		add(getMetadataPanel());
+	}
+
+	/*
+	 * returns the metadata UI component
+	 */
+	private UIComponent getMetadataPanel() {
+		String path = (String)WFUtil.invoke(ARTICLE_ITEM_BEAN_ID, "getMainCategory");
+		String fileName = (String)WFUtil.invoke(ARTICLE_ITEM_BEAN_ID, "getHeadline");
+//		System.out.println("path = "+path+"/"+fileName+".xml");
+
+		WebDAVMetadata metadataUI = new WebDAVMetadata(path+"/"+fileName+".xml");
+		return metadataUI;
 	}
 
 	/*
