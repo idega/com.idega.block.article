@@ -1,5 +1,5 @@
 /*
- * $Id: IWBundleStarter.java,v 1.9 2005/03/01 11:53:11 gummi Exp $
+ * $Id: IWBundleStarter.java,v 1.10 2005/03/06 12:26:15 tryggvil Exp $
  * Created on 2.11.2004
  *
  * Copyright (C) 2004 Idega Software hf. All Rights Reserved.
@@ -21,10 +21,10 @@ import com.idega.idegaweb.IWBundleStartable;
 
 /**
  * 
- *  Last modified: $Date: 2005/03/01 11:53:11 $ by $Author: gummi $
+ *  Last modified: $Date: 2005/03/06 12:26:15 $ by $Author: tryggvil $
  * 
  * @author <a href="mailto:tryggvil@idega.com">Tryggvi Larusson</a>
- * @version $Revision: 1.9 $
+ * @version $Revision: 1.10 $
  */
 public class IWBundleStarter implements IWBundleStartable {
 	private static final String STYLE_SHEET_URL = "/style/article.css";
@@ -76,14 +76,14 @@ public class IWBundleStarter implements IWBundleStartable {
 		
 		DefaultViewNode editNewArticleNode = new DefaultViewNode("edit",articleNode);
 		editNewArticleNode.setJspUri(bundle.getJSPURI("createarticle.jsp"));
-		editNewArticleNode.setRendered(false);
+		editNewArticleNode.setVisibleInMenus(false);
 		
 		DefaultViewNode listArticlesNode = new DefaultViewNode("list",articleNode);
 		listArticlesNode.setJspUri(bundle.getJSPURI("listarticles.jsp"));
 		
 		DefaultViewNode previewArticlesNode = new DefaultViewNode("preview",articleNode);
 		previewArticlesNode.setJspUri(bundle.getJSPURI("previewarticle.jsp"));
-		previewArticlesNode.setRendered(false);
+		previewArticlesNode.setVisibleInMenus(false);
 
 		DefaultViewNode searchArticlesNode = new DefaultViewNode("search",articleNode);
 		searchArticlesNode.setJspUri(bundle.getJSPURI("searcharticle.jsp"));
