@@ -1,5 +1,5 @@
 /*
- * $Id: ArticleListBean.java,v 1.14 2005/02/03 11:30:54 joakim Exp $
+ * $Id: ArticleListBean.java,v 1.15 2005/02/07 10:59:53 gummi Exp $
  *
  * Copyright (C) 2004 Idega. All Rights Reserved.
  *
@@ -33,10 +33,10 @@ import com.idega.webface.model.WFDataModel;
 /**
  * Bean for article list rows.   
  * <p>
- * Last modified: $Date: 2005/02/03 11:30:54 $ by $Author: joakim $
+ * Last modified: $Date: 2005/02/07 10:59:53 $ by $Author: gummi $
  *
  * @author Anders Lindman
- * @version $Revision: 1.14 $
+ * @version $Revision: 1.15 $
  */
 
 public class ArticleListBean implements WFListBean, Serializable {
@@ -162,16 +162,18 @@ public class ArticleListBean implements WFListBean, Serializable {
 
 		//TODO(JJ) need to only get the article files. Right now it gets all folders and other filetypes
 		//This code will probably never be used, so not wasting any time on it.
-		for(int i=0;i<file.length;i++){
-			try {
-				System.out.println("Attempting to load "+file[i].toString());
-				ArticleItemBean article = new ArticleItemBean();
-//				article.load(folder+"/"+file[i]);
-				//TODO this is a patch since getWebdavResource(folder) seems to return the whole path now
-				article.load(file[i].substring(12));
-				list.add(article);
-			}catch(Exception e) {
-				e.printStackTrace();
+		if(file!=null){
+			for(int i=0;i<file.length;i++){
+				try {
+					System.out.println("Attempting to load "+file[i].toString());
+					ArticleItemBean article = new ArticleItemBean();
+	//				article.load(folder+"/"+file[i]);
+					//TODO this is a patch since getWebdavResource(folder) seems to return the whole path now
+					article.load(file[i].substring(12));
+					list.add(article);
+				}catch(Exception e) {
+					e.printStackTrace();
+				}
 			}
 		}
 		

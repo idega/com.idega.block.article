@@ -1,5 +1,5 @@
 /*
- * $Id: CMSPage.java,v 1.13 2005/02/02 14:04:00 joakim Exp $
+ * $Id: CMSPage.java,v 1.14 2005/02/07 10:59:53 gummi Exp $
  *
  * Copyright (C) 2004 Idega. All Rights Reserved.
  *
@@ -19,6 +19,8 @@ import org.apache.xmlbeans.XmlException;
 import com.idega.block.article.bean.ArticleItemBean;
 import com.idega.block.article.component.ArticleVersionBlock;
 import com.idega.block.article.component.EditArticleBlock;
+import com.idega.content.bean.ManagedContentBeans;
+import com.idega.content.data.ContentItemCase;
 import com.idega.webface.WFBlock;
 import com.idega.webface.WFList;
 import com.idega.webface.WFPage;
@@ -27,16 +29,14 @@ import com.idega.webface.WFUtil;
 import com.idega.webface.WFViewMenu;
 import com.idega.webface.event.WFTabEvent;
 import com.idega.webface.event.WFTabListener;
-import com.idega.webface.test.bean.ContentItemCase;
-import com.idega.webface.test.bean.ManagedContentBeans;
 
 /**
  * Content management system test/demo page. 
  * <p>
- * Last modified: $Date: 2005/02/02 14:04:00 $ by $Author: joakim $
+ * Last modified: $Date: 2005/02/07 10:59:53 $ by $Author: gummi $
  *
  * @author Anders Lindman
- * @version $Revision: 1.13 $
+ * @version $Revision: 1.14 $
  */
 public class CMSPage extends WFPage implements  ManagedContentBeans, WFTabListener, ActionListener, Serializable {
 	
@@ -284,6 +284,10 @@ public class CMSPage extends WFPage implements  ManagedContentBeans, WFTabListen
 			e.printStackTrace();
 		}
 		catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}

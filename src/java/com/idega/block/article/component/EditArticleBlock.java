@@ -1,5 +1,5 @@
 /*
- * $Id: EditArticleBlock.java,v 1.14 2005/02/03 10:33:17 joakim Exp $
+ * $Id: EditArticleBlock.java,v 1.15 2005/02/07 10:59:53 gummi Exp $
  *
  * Copyright (C) 2004 Idega. All Rights Reserved.
  *
@@ -26,7 +26,10 @@ import javax.faces.convert.IntegerConverter;
 import javax.faces.event.ActionEvent;
 import javax.faces.event.ActionListener;
 import com.idega.block.article.component.reference.FileUploadForm;
+import com.idega.content.bean.CaseListBean;
+import com.idega.content.bean.ManagedContentBeans;
 import com.idega.content.business.ContentUtil;
+import com.idega.content.data.ContentItemCase;
 import com.idega.presentation.IWBaseComponent;
 import com.idega.util.IWTimestamp;
 import com.idega.webface.WFComponentSelector;
@@ -40,15 +43,12 @@ import com.idega.webface.WFResourceUtil;
 import com.idega.webface.WFTabbedPane;
 import com.idega.webface.WFUtil;
 import com.idega.webface.htmlarea.HTMLArea;
-import com.idega.webface.test.bean.CaseListBean;
-import com.idega.webface.test.bean.ContentItemCase;
-import com.idega.webface.test.bean.ManagedContentBeans;
 
 /**
- * Last modified: $Date: 2005/02/03 10:33:17 $ by $Author: joakim $
+ * Last modified: $Date: 2005/02/07 10:59:53 $ by $Author: gummi $
  *
  * @author Joakim
- * @version $Revision: 1.14 $
+ * @version $Revision: 1.15 $
  */
 public class EditArticleBlock extends IWBaseComponent implements ManagedContentBeans, ActionListener {
 	public final static String EDIT_ARTICLE_BLOCK_ID = "edit_articles_block";

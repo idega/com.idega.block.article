@@ -1,5 +1,5 @@
 /*
- * $Id: ArticleItemView.java,v 1.13 2005/02/03 11:30:54 joakim Exp $
+ * $Id: ArticleItemView.java,v 1.14 2005/02/07 10:59:53 gummi Exp $
  *
  * Copyright (C) 2004 Idega. All Rights Reserved.
  *
@@ -8,156 +8,149 @@
  */
 package com.idega.block.article.component;
 
-import java.io.IOException;
-import javax.faces.component.UIComponent;
-import javax.faces.component.html.HtmlOutputLink;
-import javax.faces.component.html.HtmlPanelGrid;
-import javax.faces.context.FacesContext;
-import javax.faces.event.AbortProcessingException;
-import javax.faces.event.ActionEvent;
-import javax.faces.event.ActionListener;
-import com.idega.block.article.bean.ArticleItemBean;
-import com.idega.content.presentation.WebDAVMetadata;
-import com.idega.presentation.IWBaseComponent;
-import com.idega.webface.WFComponentSelector;
-import com.idega.webface.WFContainer;
-import com.idega.webface.WFPanelUtil;
-import com.idega.webface.WFResourceUtil;
-import com.idega.webface.WFUtil;
-import com.idega.webface.test.bean.ManagedContentBeans;
+import java.sql.Timestamp;
+import javax.faces.component.UIOutput;
+import javax.faces.component.html.HtmlOutputText;
+import com.idega.content.presentation.ContentItemViewer;
+import com.idega.webface.WFHtml;
+import com.idega.webface.convert.WFTimestampConverter;
 
 /**
- * Last modified: $Date: 2005/02/03 11:30:54 $ by $Author: joakim $
+ * Last modified: $Date: 2005/02/07 10:59:53 $ by $Author: gummi $
  *
  * Displays the article item
  *
  * @author Joakim
- * @version $Revision: 1.13 $
+ * @version $Revision: 1.14 $
  */
-public class ArticleItemView extends IWBaseComponent implements ManagedContentBeans, ActionListener{
-	public final static String EDIT_ARTICLE_BLOCK_ID = "edit_articles_block";
-
-	private final static String P = "article_item_view_"; // Id prefix
-
-	private final static String EDIT_ID = P + "edit";
-	private final static String COMPONENT_SELECTOR_ID = P + "component_selector";
-	private final static String NO_ARTICLE_ID = P + "no_article";
-	private final static String ARTICLE_VIEW_ID = P + "article_view";
-
+public class ArticleItemView extends ContentItemViewer {
+	
+	private final static String ATTRIBUTE_AUTHOR = "author";
+	private final static String ATTRIBUTE_CREATION_DATE = "creation_date";
+	private final static String ATTRIBUTE_HEADLINE = "headline";
+	private final static String ATTRIBUTE_TEASER = "teaser";
+	private final static String ATTRIBUTE_BODY = "body";
+	
+	private final static String[] ATTRIBUTE_ARRAY = new String[] {ATTRIBUTE_AUTHOR,ATTRIBUTE_CREATION_DATE,ATTRIBUTE_HEADLINE,ATTRIBUTE_TEASER,ATTRIBUTE_BODY};
+	private final static String facetIdPrefix = "article_";
+	private final static String styleClassPrefix = "article_";
+	
+	
 	public ArticleItemView() {
+		super();
+		this.setStyleClass("article_item");
 	}
-
-	protected void initializeContent() {
-		add(getPreviewPanel());
-		add(getMetadataPanel());
+	
+	
+	
+	protected String[] getViewerAttributes(){
+		return ATTRIBUTE_ARRAY;
 	}
-
-	/*
-	 * returns the metadata UI component
+	
+	/**
+	 * @return Returns the facetIdPrefix.
 	 */
-	private UIComponent getMetadataPanel() {
-		String path = (String)WFUtil.invoke(ARTICLE_ITEM_BEAN_ID, "getFolderLocation");
-		String fileName = (String)WFUtil.invoke(ARTICLE_ITEM_BEAN_ID, "getHeadline");
-//		System.out.println("path = "+path+"/"+fileName+ArticleItemBean.ARTICLE_SUFFIX);
-
-		WebDAVMetadata metadataUI = new WebDAVMetadata(path+"/"+fileName+ArticleItemBean.ARTICLE_SUFFIX);
-		return metadataUI;
-	}
-
-	/*
-	 * Creates a search form panel.
-	 */
-	private UIComponent getPreviewPanel() {
-		String ref = ARTICLE_ITEM_BEAN_ID + ".";
-
-		WFComponentSelector cs = new WFComponentSelector();
-		cs.setId(COMPONENT_SELECTOR_ID);
-		
-		HtmlPanelGrid p = WFPanelUtil.getPlainFormPanel(1);
-		p.setId(NO_ARTICLE_ID);
-		p.getChildren().add(WFResourceUtil.getResourceUtilArticle().getHeaderTextVB("no_article_selected"));
-		cs.add(p);
-
-		WFContainer c = new WFContainer();
-		c.setId(ARTICLE_VIEW_ID);
-		WFContainer c2 = new WFContainer();
-		c2.setStyleClass("article_author");
-		c2.add(WFUtil.getTextVB(ref + "author"));
-		c2.add(WFUtil.getText(" : "));
-		c2.add(WFUtil.getTextVB(ref + "creationDate"));
-		c2.add(WFUtil.getBreak(1));
-		c.add(c2);
-		c2 = new WFContainer();
-		c2.setStyleClass("article_headline");
-		c2.add(WFUtil.getTextVB(ref + "headline"));
-		c2.add(WFUtil.getBreak(1));
-		c.add(c2);
-		c2 = new WFContainer();
-		c2.setStyleClass("article_teaser");
-		c2.add(WFUtil.getTextVB(ref + "teaser"));
-		c2.add(WFUtil.getBreak(1));
-		c.add(c2);
-		c2 = new WFContainer();
-		c2.setStyleClass("article_body");
-		c2.add(WFUtil.getTextVB(ref + "body"));
-		c2.add(WFUtil.getBreak(1));
-		c.add(c2);
-		
-//		HtmlOutputLink editLink = new HtmlOutputLink();
-
-		HtmlOutputLink link = new HtmlOutputLink();
-		link.setValue("http://localhost:8080/cms/workspace/content/article/create");
-		link.setStyleClass("wf_listlink");
-		link.setId(getId() + "_dl");
-		link.getChildren().add(WFUtil.getText("Edit"));
-		c.add(link);
-
-		cs.add(c);
-
-		cs.setSelectedId(NO_ARTICLE_ID, true);
-		return cs;
+	protected String getFacetIdPrefix() {
+		return facetIdPrefix;
 	}
 
 	/**
-	 * Selects what component to display. Either the detaild information 
-	 * or the text saying that no article is selected.
-	 * The decision is based on the presence of article_item_bean.headline is pressent in the session
+	 * @return Returns the styleClassPrefix.
 	 */
- 	private void selectComponent() {
-		WFComponentSelector cs = (WFComponentSelector) findComponent(COMPONENT_SELECTOR_ID);
-
-		String headline = WFUtil.getStringValue(ARTICLE_ITEM_BEAN_ID, "headline");
-		if (cs != null) {
-			if (headline == null || headline.length() == 0) {
-				cs.setSelectedId(NO_ARTICLE_ID, true);
-				cs.setSelectedId(ARTICLE_VIEW_ID, false);
-			}else {
-				cs.setSelectedId(NO_ARTICLE_ID, false);
-				cs.setSelectedId(ARTICLE_VIEW_ID, true);
-			}
-		}else {
-			cs.setSelectedId(NO_ARTICLE_ID, false);
-			cs.setSelectedId(ARTICLE_VIEW_ID, true);
-			System.out.println("Could not find the Component selector!!!");
+	protected String getDefaultStyleClassPrefix() {
+		return styleClassPrefix;
+	}
+	
+	protected UIOutput createUIOutputComponent(String attribute){
+		if(ATTRIBUTE_BODY.equals(attribute)){
+			return new WFHtml();
+		} else {
+			return new HtmlOutputText();
 		}
 	}
+	
+	protected void initializeContent() {	
+		super.initializeContent();
+		((HtmlOutputText)getFieldViewerComponent(ATTRIBUTE_CREATION_DATE)).setConverter(new WFTimestampConverter());  /////----------------------------------------------
+		
+		
+//		HtmlOutputLink link = new HtmlOutputLink();
+//		link.setValue("http://localhost:8080/cms/workspace/content/article/create");
+//		link.setStyleClass("wf_listlink");
+//		link.setId(getId() + "_dl");
+//		link.getChildren().add(WFUtil.getText("Edit"));
+//		this.add(link);
+
+	}
+
+
+
 
 	/**
-	 * @see javax.faces.component.UIComponent#encodeBegin(javax.faces.context.FacesContext)
+	 * @return Returns the author.
 	 */
-	public void encodeBegin(FacesContext context) throws IOException {
-		super.encodeBegin(context);
-		selectComponent();
+	public String getAuthor() {
+		return (String)getValue(ATTRIBUTE_AUTHOR);
+	}	
+	/**
+	 * @param author The author to set.
+	 */
+	public void setAuthor(String author) {
+		setFieldLocalValue(ATTRIBUTE_AUTHOR,author);
 	}
 
-	/* (non-Javadoc)
-	 * @see javax.faces.event.ActionListener#processAction(javax.faces.event.ActionEvent)
+	/**
+	 * @return Returns the body.
 	 */
-	public void processAction(ActionEvent event) throws AbortProcessingException {
-//		String id = event.getComponent().getId();
-//		EditArticleBlock ab = (EditArticleBlock) event.getComponent().getParent().getParent().getParent().findComponent(EDIT_ARTICLE_BLOCK_ID);
-//		if (id.equals(EDIT_ID)) {
-//			ab.storeArticle();
-//		}
+	public String getBody() {
+		return (String)getValue(ATTRIBUTE_BODY);
 	}
+	/**
+	 * @param body The body to set.
+	 */
+	public void setBody(String body) {
+		setFieldLocalValue(ATTRIBUTE_BODY,body);
+	}
+
+	/**
+	 * @return Returns the creationDate.
+	 */
+	public Timestamp getCreationDate() {
+		return (Timestamp)getValue(ATTRIBUTE_CREATION_DATE);
+	}
+	/**
+	 * @param creationDate The creationDate to set.
+	 */
+	public void setCreationDate(Timestamp creationDate) {
+		setFieldLocalValue(ATTRIBUTE_CREATION_DATE,creationDate);
+	}
+
+	/**
+	 * @return Returns the headline.
+	 */
+	public String getHeadline() {
+		return (String)getValue(ATTRIBUTE_HEADLINE);
+	}
+	/**
+	 * @param headline The headline to set.
+	 */
+	public void setHeadline(String headline) {
+		setFieldLocalValue(ATTRIBUTE_HEADLINE,headline);
+	}
+
+	/**
+	 * @return Returns the teaser.
+	 */
+	public String getTeaser() {
+		return (String)getValue(ATTRIBUTE_TEASER);
+	}
+	/**
+	 * @param teaser The teaser to set.
+	 */
+	public void setTeaser(String teaser) {
+		setFieldLocalValue(ATTRIBUTE_TEASER,teaser);
+	}
+	
+
+	
 }

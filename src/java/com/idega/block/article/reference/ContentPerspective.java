@@ -12,6 +12,8 @@ import javax.faces.component.UIComponent;
 import javax.faces.event.ActionEvent;
 import com.idega.block.article.bean.ArticleListBean;
 import com.idega.block.article.component.reference.ArticleBlock;
+import com.idega.content.bean.ManagedContentBeans;
+import com.idega.content.data.ContentItemCase;
 import com.idega.webface.WFBlock;
 import com.idega.webface.WFContainer;
 import com.idega.webface.WFList;
@@ -19,8 +21,6 @@ import com.idega.webface.WFPage;
 import com.idega.webface.WFTabbedPane;
 import com.idega.webface.WFUtil;
 import com.idega.webface.WFViewMenu;
-import com.idega.webface.test.bean.ContentItemCase;
-import com.idega.webface.test.bean.ManagedContentBeans;
 
 
 /**

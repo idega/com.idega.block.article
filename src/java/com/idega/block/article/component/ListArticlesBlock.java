@@ -1,5 +1,5 @@
 /*
- * $Id: ListArticlesBlock.java,v 1.7 2005/02/02 14:04:00 joakim Exp $
+ * $Id: ListArticlesBlock.java,v 1.8 2005/02/07 10:59:53 gummi Exp $
  *
  * Copyright (C) 2004 Idega. All Rights Reserved.
  *
@@ -18,6 +18,8 @@ import javax.faces.event.ActionEvent;
 import javax.faces.event.ActionListener;
 import org.apache.xmlbeans.XmlException;
 import com.idega.block.article.bean.ArticleItemBean;
+import com.idega.content.bean.ManagedContentBeans;
+import com.idega.content.data.ContentItemCase;
 import com.idega.presentation.IWBaseComponent;
 import com.idega.webface.WFComponentSelector;
 import com.idega.webface.WFContainer;
@@ -28,16 +30,14 @@ import com.idega.webface.WFPanelUtil;
 import com.idega.webface.WFPlainOutputText;
 import com.idega.webface.WFUtil;
 import com.idega.webface.convert.WFDateConverter;
-import com.idega.webface.test.bean.ContentItemCase;
-import com.idega.webface.test.bean.ManagedContentBeans;
 
 /**
  * Block for listing articles.   
  * <p>
- * Last modified: $Date: 2005/02/02 14:04:00 $ by $Author: joakim $
+ * Last modified: $Date: 2005/02/07 10:59:53 $ by $Author: gummi $
  *
  * @author Anders Lindman
- * @version $Revision: 1.7 $
+ * @version $Revision: 1.8 $
  */
 public class ListArticlesBlock extends 
 IWBaseComponent
@@ -224,6 +224,10 @@ implements ManagedContentBeans, ActionListener, Serializable {
 			e.printStackTrace();
 		}
 		catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}

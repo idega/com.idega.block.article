@@ -1,5 +1,5 @@
 /*
- * $Id: FileUploadForm.java,v 1.1 2004/12/21 15:47:12 joakim Exp $
+ * $Id: FileUploadForm.java,v 1.2 2005/02/07 10:59:53 gummi Exp $
  *
  * Copyright (C) 2004 Idega. All Rights Reserved.
  *
@@ -10,18 +10,18 @@
 package com.idega.block.article.component.reference;
 
 import java.io.Serializable;
+import com.idega.content.bean.ManagedContentBeans;
 import com.idega.webface.WFContainer;
-import com.idega.webface.test.bean.ManagedContentBeans;
 //import com.idega.webface.WFPanel;
 //import com.idega.webface.WFUtil;
 
 /**
  * Form for uploading files.   
  * <p>
- * Last modified: $Date: 2004/12/21 15:47:12 $ by $Author: joakim $
+ * Last modified: $Date: 2005/02/07 10:59:53 $ by $Author: gummi $
  *
  * @author Anders Lindman
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public class FileUploadForm extends WFContainer implements ManagedContentBeans, Serializable {
 
