@@ -9,7 +9,6 @@ package com.idega.block.article;
 import javax.faces.component.UIComponent;
 import com.idega.block.article.component.ArticleBarBlock;
 import com.idega.webface.WFPage;
-import com.idega.webface.WFUtil;
 
 
 /**
