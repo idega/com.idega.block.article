@@ -1,5 +1,5 @@
 /*
- * $Id: EditArticleBlock.java,v 1.18 2005/02/18 16:37:48 joakim Exp $
+ * $Id: EditArticleBlock.java,v 1.19 2005/02/23 17:17:18 joakim Exp $
  *
  * Copyright (C) 2004 Idega. All Rights Reserved.
  *
@@ -9,10 +9,13 @@
 package com.idega.block.article.component;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import javax.faces.component.UIColumn;
 import javax.faces.component.UIComponent;
+import javax.faces.component.UIInput;
+import javax.faces.component.UISelectItems;
 import javax.faces.component.html.HtmlCommandButton;
 import javax.faces.component.html.HtmlDataTable;
 import javax.faces.component.html.HtmlInputText;
@@ -21,15 +24,19 @@ import javax.faces.component.html.HtmlOutputLink;
 import javax.faces.component.html.HtmlOutputText;
 import javax.faces.component.html.HtmlPanelGrid;
 import javax.faces.component.html.HtmlSelectManyListbox;
+import javax.faces.component.html.HtmlSelectOneMenu;
 import javax.faces.context.FacesContext;
 import javax.faces.convert.IntegerConverter;
+import javax.faces.el.ValueBinding;
 import javax.faces.event.ActionEvent;
 import javax.faces.event.ActionListener;
+import javax.faces.model.SelectItem;
 import com.idega.block.article.business.ArticleUtil;
 import com.idega.block.article.component.reference.FileUploadForm;
 import com.idega.content.bean.CaseListBean;
 import com.idega.content.bean.ManagedContentBeans;
 import com.idega.content.data.ContentItemCase;
+import com.idega.core.localisation.business.ICLocaleBusiness;
 import com.idega.presentation.IWBaseComponent;
 import com.idega.webface.WFComponentSelector;
 import com.idega.webface.WFContainer;
@@ -44,10 +51,10 @@ import com.idega.webface.WFUtil;
 import com.idega.webface.htmlarea.HTMLArea;
 
 /**
- * Last modified: $Date: 2005/02/18 16:37:48 $ by $Author: joakim $
+ * Last modified: $Date: 2005/02/23 17:17:18 $ by $Author: joakim $
  *
  * @author Joakim
- * @version $Revision: 1.18 $
+ * @version $Revision: 1.19 $
  */
 public class EditArticleBlock extends IWBaseComponent implements ManagedContentBeans, ActionListener {
 	public final static String EDIT_ARTICLE_BLOCK_ID = "edit_articles_block";
@@ -158,6 +165,29 @@ public class EditArticleBlock extends IWBaseComponent implements ManagedContentB
 		HtmlInputText authorInput = WFUtil.getInputText(AUTHOR_ID, ref + "author");
 		authorInput.setSize(50);
 		p.getChildren().add(authorInput);
+
+		//Article dropdown
+		p.getChildren().add(WFUtil.group(localizer.getTextVB("language"), WFUtil.getText(":")));
+		
+		Iterator iter = ICLocaleBusiness.getListOfLocalesJAVA().iterator();
+		UIInput langDropdown = new HtmlSelectOneMenu();
+		List arrayList = new ArrayList();
+		while(iter.hasNext()) {
+			String langStr = iter.next().toString();
+			SelectItem itemTemp = new SelectItem(langStr, langStr, langStr, false);
+			arrayList.add(itemTemp);
+		}
+		
+		UISelectItems items = new UISelectItems();
+		items.setValue(arrayList);
+		langDropdown.getChildren().add(items);
+		ValueBinding vb = WFUtil.createValueBinding("#{" + ref +"contentLanguage" + "}");
+		langDropdown.setValueBinding("value", vb);
+		langDropdown.getValue();
+
+		p.getChildren().add(langDropdown);
+
+		//Article body
 		p.getChildren().add(WFUtil.group(localizer.getTextVB("body"), WFUtil.getText(":")));
 		HTMLArea bodyArea = WFUtil.getHtmlAreaTextArea(BODY_ID, ref + "body", "100%", "400px");
 		bodyArea.addPlugin(HTMLArea.PLUGIN_TABLE_OPERATIONS);
