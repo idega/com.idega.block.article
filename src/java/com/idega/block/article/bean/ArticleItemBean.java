@@ -1,5 +1,5 @@
 /*
- * $Id: ArticleItemBean.java,v 1.4 2004/11/17 17:40:04 joakim Exp $
+ * $Id: ArticleItemBean.java,v 1.5 2004/11/18 10:40:31 tryggvil Exp $
  *
  * Copyright (C) 2004 Idega. All Rights Reserved.
  *
@@ -33,10 +33,10 @@ import com.idega.webface.test.bean.ContentItemFieldBean;
 /**
  * Bean for idegaWeb article content items.   
  * <p>
- * Last modified: $Date: 2004/11/17 17:40:04 $ by $Author: joakim $
+ * Last modified: $Date: 2004/11/18 10:40:31 $ by $Author: tryggvil $
  *
  * @author Anders Lindman
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  */
 
 public class ArticleItemBean extends ContentItemBean implements Serializable {
@@ -335,9 +335,11 @@ public class ArticleItemBean extends ContentItemBean implements Serializable {
 		//TODO have to find the host machine url to load the resource.
 //		WebdavResource webdavResource = session.getWebdavResource(getWebdavServletURL(iwuc)+path);
 //		WebdavFile webdavFile = session.getWebdavFile();
-		HttpURL root = new HttpURL(service.getWebdavServerURL()+path, "root", "root");
+		HttpURL contentRoot = service.getWebdavServerURL(path);
+		contentRoot.setUserinfo("root","root");
+		
 //		root.setUserinfo("root","root");
-		WebdavResource webdavResource = new WebdavResource(root);
+		WebdavResource webdavResource = new WebdavResource(contentRoot);
 		
 		ArticleDocument articleDoc;
 		
