@@ -1,5 +1,5 @@
 /*
- * $Id: ArticleDetailView.java,v 1.13 2005/02/22 11:30:13 joakim Exp $
+ * $Id: ArticleDetailView.java,v 1.14 2005/03/17 17:35:42 joakim Exp $
  * 
  * Copyright (C) 2004 Idega. All Rights Reserved.
  * 
@@ -26,12 +26,12 @@ import com.idega.webface.WFUtil;
 import com.idega.webface.convert.WFCommaSeparatedListConverter;
 
 /**
- * Last modified: $Date: 2005/02/22 11:30:13 $ by $Author: joakim $
+ * Last modified: $Date: 2005/03/17 17:35:42 $ by $Author: joakim $
  * 
  * Displays detailed info about the article
  * 
  * @author Joakim
- * @version $Revision: 1.13 $
+ * @version $Revision: 1.14 $
  */
 public class ArticleDetailView extends IWBaseComponent implements ManagedContentBeans {
 
@@ -109,7 +109,8 @@ public class ArticleDetailView extends IWBaseComponent implements ManagedContent
 		p.getChildren().add(g);
 		p.getChildren().add(WFUtil.getText(" "));
 		g = WFUtil.group(localizer.getHeaderTextVB("current_version"), WFUtil.getHeaderText(": "));
-		g.getChildren().add(WFUtil.getTextVB(ref + "versionId"));
+//		g.getChildren().add(WFUtil.getTextVB(ref + "versionId"));
+		g.getChildren().add(WFUtil.getTextVB(ref + "versionName"));
 		p.getChildren().add(g);
 		p.getChildren().add(WFUtil.getText(" "));
 		g = WFUtil.group(localizer.getHeaderTextVB("comment"), WFUtil.getHeaderText(": "));
