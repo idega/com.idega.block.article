@@ -1,5 +1,5 @@
 /*
- * $Id: ArticleItemBean.java,v 1.40 2005/03/10 18:26:59 eiki Exp $
+ * $Id: ArticleItemBean.java,v 1.41 2005/03/17 17:35:05 joakim Exp $
  *
  * Copyright (C) 2004 Idega. All Rights Reserved.
  *
@@ -21,7 +21,6 @@ import java.util.logging.Logger;
 import org.apache.webdav.lib.PropertyName;
 import org.apache.webdav.lib.WebdavResource;
 import org.apache.webdav.lib.WebdavResources;
-import org.apache.xmlbeans.XmlException;
 import org.w3c.tidy.Tidy;
 import com.idega.block.article.business.ArticleUtil;
 import com.idega.business.IBOLookup;
@@ -45,15 +44,14 @@ import com.idega.xml.XMLException;
 import com.idega.xml.XMLNamespace;
 import com.idega.xml.XMLOutput;
 import com.idega.xml.XMLParser;
-import com.idega.xmlns.block.article.document.ArticleDocument;
 
 /**
  * Bean for idegaWeb article content items.   
  * <p>
- * Last modified: $Date: 2005/03/10 18:26:59 $ by $Author: eiki $
+ * Last modified: $Date: 2005/03/17 17:35:05 $ by $Author: joakim $
  *
  * @author Anders Lindman
- * @version $Revision: 1.40 $
+ * @version $Revision: 1.41 $
  */
 
 public class ArticleItemBean extends ContentItemBean implements Serializable, ContentItem {
