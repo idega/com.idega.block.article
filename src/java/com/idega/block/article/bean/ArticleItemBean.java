@@ -1,5 +1,5 @@
 /*
- * $Id: ArticleItemBean.java,v 1.12 2005/01/13 14:02:04 joakim Exp $
+ * $Id: ArticleItemBean.java,v 1.13 2005/01/18 14:04:56 joakim Exp $
  *
  * Copyright (C) 2004 Idega. All Rights Reserved.
  *
@@ -33,10 +33,10 @@ import com.idega.xmlns.block.article.document.ArticleDocument;
 /**
  * Bean for idegaWeb article content items.   
  * <p>
- * Last modified: $Date: 2005/01/13 14:02:04 $ by $Author: joakim $
+ * Last modified: $Date: 2005/01/18 14:04:56 $ by $Author: joakim $
  *
  * @author Anders Lindman
- * @version $Revision: 1.12 $
+ * @version $Revision: 1.13 $
  */
 
 public class ArticleItemBean extends ContentItemBean implements Serializable {
@@ -250,9 +250,9 @@ public class ArticleItemBean extends ContentItemBean implements Serializable {
 			IWSlideSession session = (IWSlideSession)IBOLookup.getSessionInstance(iwuc,IWSlideSession.class);
 			IWSlideService service = (IWSlideService)IBOLookup.getServiceInstance(iwac,IWSlideService.class);
 		
-			System.out.println("webdavServerURL = "+service.getWebdavServerURL());
-			System.out.println("webdavServletURL = "+getWebdavServletURL(iwuc));
-			System.out.println("Main category = "+getMainCategory());
+//			System.out.println("webdavServerURL = "+service.getWebdavServerURL());
+//			System.out.println("webdavServletURL = "+getWebdavServletURL(iwuc));
+//			System.out.println("Main category = "+getMainCategory());
 
 
 			WebdavRootResource rootResource = session.getWebdavRootResource();
@@ -261,7 +261,8 @@ public class ArticleItemBean extends ContentItemBean implements Serializable {
 			boolean success = rootResource.mkcolMethod(filePath);
 			System.out.println("success "+success);
 //			boolean success = rootResource.mkcolMethod(getWebdavServletURL(iwuc)+getMainCategory());
-			System.out.println(filePath);
+//			System.out.println(filePath);
+//			System.out.println(getWebdavServletURL(iwuc)+getMainCategory()+"/"+filename+".xml");
 			success = rootResource.putMethod(getWebdavServletURL(iwuc)+getMainCategory()+"/"+filename+".xml",articleDoc.toString());
 			System.out.println("success "+success);
 
@@ -341,10 +342,10 @@ public class ArticleItemBean extends ContentItemBean implements Serializable {
 	public void load(String path) throws XmlException, IOException{
 		System.out.println("Attempting to load path "+path);
 		IWUserContext iwuc = IWContext.getInstance();
-		IWApplicationContext iwac = iwuc.getApplicationContext();
+//		IWApplicationContext iwac = iwuc.getApplicationContext();
 		
 		IWSlideSession session = (IWSlideSession)IBOLookup.getSessionInstance(iwuc,IWSlideSession.class);
-		IWSlideService service = (IWSlideService)IBOLookup.getServiceInstance(iwac,IWSlideService.class);
+//		IWSlideService service = (IWSlideService)IBOLookup.getServiceInstance(iwac,IWSlideService.class);
 
 		WebdavResource webdavResource = session.getWebdavResource(path);
 		
