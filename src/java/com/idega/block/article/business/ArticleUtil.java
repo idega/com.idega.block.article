@@ -1,5 +1,5 @@
 /*
- * $Id: ArticleUtil.java,v 1.1 2005/02/14 15:16:34 gummi Exp $
+ * $Id: ArticleUtil.java,v 1.2 2005/02/18 15:54:39 joakim Exp $
  * Created on 7.2.2005
  *
  * Copyright (C) 2005 Idega Software hf. All Rights Reserved.
@@ -10,14 +10,15 @@
 package com.idega.block.article.business;
 
 import com.idega.content.business.ContentUtil;
+import com.idega.util.IWTimestamp;
 
 
 /**
  * 
- *  Last modified: $Date: 2005/02/14 15:16:34 $ by $Author: gummi $
+ *  Last modified: $Date: 2005/02/18 15:54:39 $ by $Author: joakim $
  * 
  * @author <a href="mailto:gummi@idega.com">Gudmundur Agust Saemundsson</a>
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public class ArticleUtil extends ContentUtil{
 	
@@ -34,5 +35,10 @@ public class ArticleUtil extends ContentUtil{
 	public static String getArticleRootPath(){
 		return ContentUtil.getContentRootPath()+ARTICLE_CONTENT_PATH;
 	}
-	
+
+	public static String getArticleYearMonthPath() {
+		IWTimestamp now = new IWTimestamp();
+		String folderString = ArticleUtil.getArticleRootPath()+"/"+now.getYear()+"/"+now.getDateString("MM");
+		return folderString;
+	}
 }
