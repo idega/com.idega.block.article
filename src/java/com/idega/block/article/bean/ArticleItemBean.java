@@ -1,5 +1,5 @@
 /*
- * $Id: ArticleItemBean.java,v 1.17 2005/02/07 10:59:53 gummi Exp $
+ * $Id: ArticleItemBean.java,v 1.18 2005/02/07 13:51:39 joakim Exp $
  *
  * Copyright (C) 2004 Idega. All Rights Reserved.
  *
@@ -28,15 +28,16 @@ import com.idega.slide.business.IWSlideService;
 import com.idega.slide.business.IWSlideSession;
 import com.idega.slide.util.WebdavExtendedResource;
 import com.idega.slide.util.WebdavRootResource;
+import com.idega.util.IWTimestamp;
 import com.idega.xmlns.block.article.document.ArticleDocument;
 
 /**
  * Bean for idegaWeb article content items.   
  * <p>
- * Last modified: $Date: 2005/02/07 10:59:53 $ by $Author: gummi $
+ * Last modified: $Date: 2005/02/07 13:51:39 $ by $Author: joakim $
  *
  * @author Anders Lindman
- * @version $Revision: 1.17 $
+ * @version $Revision: 1.18 $
  */
 
 public class ArticleItemBean extends ContentItemBean implements Serializable, ContentItem {
@@ -174,6 +175,16 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 		return getFolderLocation()+"/"+filename+ARTICLE_SUFFIX;
 	}
 	
+	private String getFileName() {
+		StringBuffer name = new StringBuffer("");
+		IWTimestamp timestamp = new IWTimestamp();
+		name.append(timestamp.getDateString("yyyyMMddHHmmssSSSS"));
+		IWUserContext iwuc = IWContext.getInstance();
+		name.append("_").append(iwuc.getCurrentLocale().getLanguage());
+		System.out.println("FileName is "+name);
+		return name.toString();
+	}
+	
 	/**
 	 * This is a temporary holder for the Slide implementation
 	 * This should be replace as soon as Slide is working
@@ -214,10 +225,12 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 //	    article.setRelatedItems(getRelatedContentItems());
 //Need to create	    article.setCategory(getCategory());
 
-		String filename = getHeadline();
-		if(null==filename || filename.length()==0) {
-			filename = "empty";
-		}
+		
+		String filename = getFileName();
+//		String filename = getHeadline();
+//		if(null==filename || filename.length()==0) {
+//			filename = "empty";
+//		}
 /*	    
 	    File path = new File(getFolder());
 	    if(!path.exists()) {
