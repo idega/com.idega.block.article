@@ -1,5 +1,5 @@
 /*
- * $Id: ArticleItemBean.java,v 1.32 2005/03/05 18:45:57 gummi Exp $
+ * $Id: ArticleItemBean.java,v 1.33 2005/03/05 21:33:21 gummi Exp $
  *
  * Copyright (C) 2004 Idega. All Rights Reserved.
  *
@@ -52,10 +52,10 @@ import com.idega.xmlns.block.article.document.ArticleDocument;
 /**
  * Bean for idegaWeb article content items.   
  * <p>
- * Last modified: $Date: 2005/03/05 18:45:57 $ by $Author: gummi $
+ * Last modified: $Date: 2005/03/05 21:33:21 $ by $Author: gummi $
  *
  * @author Anders Lindman
- * @version $Revision: 1.32 $
+ * @version $Revision: 1.33 $
  */
 
 public class ArticleItemBean extends ContentItemBean implements Serializable, ContentItem {
@@ -169,8 +169,12 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 	
 	
 	public String getFolderLocation() {
-		String articlePath = getArticlePath();
-		return ContentUtil.getParentPath(articlePath);
+		String articlePath = getResourcePath();
+		if(articlePath!=null){
+			return ContentUtil.getParentPath(ContentUtil.getParentPath(articlePath));
+		} else {
+			return null;
+		}
 	}
 	
 	public String getContentLanguage() { return (String)getValue(FIELDNAME_CONTENT_LANGUAGE); }
