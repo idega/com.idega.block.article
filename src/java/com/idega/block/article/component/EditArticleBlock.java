@@ -1,5 +1,5 @@
 /*
- * $Id: EditArticleBlock.java,v 1.22 2005/03/02 15:06:07 joakim Exp $
+ * $Id: EditArticleBlock.java,v 1.23 2005/03/03 10:37:22 joakim Exp $
  *
  * Copyright (C) 2004 Idega. All Rights Reserved.
  *
@@ -56,10 +56,10 @@ import com.idega.webface.WFUtil;
 import com.idega.webface.htmlarea.HTMLArea;
 
 /**
- * Last modified: $Date: 2005/03/02 15:06:07 $ by $Author: joakim $
+ * Last modified: $Date: 2005/03/03 10:37:22 $ by $Author: joakim $
  *
  * @author Joakim
- * @version $Revision: 1.22 $
+ * @version $Revision: 1.23 $
  */
 public class EditArticleBlock extends IWBaseComponent implements ManagedContentBeans, ActionListener, ValueChangeListener {
 	public final static String EDIT_ARTICLE_BLOCK_ID = "edit_articles_block";
@@ -633,14 +633,18 @@ public class EditArticleBlock extends IWBaseComponent implements ManagedContentB
 		System.out.println("Language value has changed from "+arg0.getOldValue()+" to "+arg0.getNewValue());
 		
 		String resourcePath = (String)WFUtil.invoke(ARTICLE_ITEM_BEAN_ID, "getResourcePath");
+		String language = (String)WFUtil.invoke(ARTICLE_ITEM_BEAN_ID, "getContentLanguage");
 		if(null==resourcePath) {
 			//Article has not been stored previousley, so nothing have to be done
 			return;
 		}
-		resourcePath+="/"+arg0.getNewValue()+ArticleItemBean.ARTICLE_SUFFIX;
 		System.out.println("Resoure path"+resourcePath);
-		boolean result = ((Boolean)WFUtil.invoke(ARTICLE_ITEM_BEAN_ID, "load",resourcePath)).booleanValue();
+		boolean result = ((Boolean)WFUtil.invoke(ARTICLE_ITEM_BEAN_ID, "load",resourcePath+"/"+arg0.getNewValue()+ArticleItemBean.ARTICLE_SUFFIX)).booleanValue();
 		System.out.println("loading other language "+result);
+		if(!result) {
+			result = ((Boolean)WFUtil.invoke(ARTICLE_ITEM_BEAN_ID, "load",resourcePath+"/"+language+ArticleItemBean.ARTICLE_SUFFIX)).booleanValue();
+			System.out.println("loading other language "+result);
+		}
 //		String leftString = resourcePath.substring(0,resourcePath.lastIndexOf("/"));
 //		String newPath = leftString+arg0.getNewValue()+ArticleItemBean.ARTICLE_SUFFIX;
 //		System.out.println("New Resoure path"+newPath);
