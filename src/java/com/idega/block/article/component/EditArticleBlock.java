@@ -1,5 +1,5 @@
 /*
- * $Id: EditArticleBlock.java,v 1.15 2005/02/07 10:59:53 gummi Exp $
+ * $Id: EditArticleBlock.java,v 1.16 2005/02/07 13:52:03 joakim Exp $
  *
  * Copyright (C) 2004 Idega. All Rights Reserved.
  *
@@ -45,10 +45,10 @@ import com.idega.webface.WFUtil;
 import com.idega.webface.htmlarea.HTMLArea;
 
 /**
- * Last modified: $Date: 2005/02/07 10:59:53 $ by $Author: gummi $
+ * Last modified: $Date: 2005/02/07 13:52:03 $ by $Author: joakim $
  *
  * @author Joakim
- * @version $Revision: 1.15 $
+ * @version $Revision: 1.16 $
  */
 public class EditArticleBlock extends IWBaseComponent implements ManagedContentBeans, ActionListener {
 	public final static String EDIT_ARTICLE_BLOCK_ID = "edit_articles_block";
@@ -147,17 +147,17 @@ public class EditArticleBlock extends IWBaseComponent implements ManagedContentB
 		p.getChildren().add(WFUtil.group(localizer.getTextVB("headline"), WFUtil.getText(":")));
 //		p.getChildren().add(WFUtil.group(WFUtil.getTextVB(bref + "language"), WFUtil.getText(":")));
 		HtmlInputText headlineInput = WFUtil.getInputText(HEADLINE_ID, ref + "headline");
-		headlineInput.setSize(40);
+		headlineInput.setSize(50);
 		p.getChildren().add(headlineInput);
 		//HtmlSelectOneMenu localeMenu = WFUtil.getSelectOneMenu(LOCALE_ID, ref + "allLocales", ref + "pendingLocaleId");
 		//localeMenu.setOnchange("document.forms[0].submit();");
 		//p.getChildren().add(localeMenu);
 		p.getChildren().add(WFUtil.group(localizer.getTextVB("teaser"), WFUtil.getText(":")));
-		HtmlInputTextarea teaserArea = WFUtil.getTextArea(TEASER_ID, ref + "teaser", "440px", "30px");
+		HtmlInputTextarea teaserArea = WFUtil.getTextArea(TEASER_ID, ref + "teaser", "600px", "60px");
 		p.getChildren().add(teaserArea);
 		p.getChildren().add(WFUtil.group(localizer.getTextVB("author"), WFUtil.getText(":")));
 		HtmlInputText authorInput = WFUtil.getInputText(AUTHOR_ID, ref + "author");
-		authorInput.setSize(22);
+		authorInput.setSize(50);
 		p.getChildren().add(authorInput);
 		p.getChildren().add(WFUtil.group(localizer.getTextVB("body"), WFUtil.getText(":")));
 		HTMLArea bodyArea = WFUtil.getHtmlAreaTextArea(BODY_ID, ref + "body", "100%", "400px");
@@ -217,7 +217,7 @@ public class EditArticleBlock extends IWBaseComponent implements ManagedContentB
 //		p = WFPanelUtil.getFormPanel(2);
 		p.getChildren().add(WFUtil.group(localizer.getTextVB("comment"), WFUtil.getText(":")));
 //		p.getChildren().add(WFUtil.group(WFUtil.getTextVB(bref + "attachments"), WFUtil.getText(":")));	
-		HtmlInputTextarea commentArea = WFUtil.getTextArea(COMMENT_ID, ref + "comment", "400px", "60px");
+		HtmlInputTextarea commentArea = WFUtil.getTextArea(COMMENT_ID, ref + "comment", "600px", "60px");
 		p.getChildren().add(commentArea);
 //		WFContainer attachmentContainer = new WFContainer();
 //		attachmentContainer.add(WFUtil.getButtonVB(ADD_ATTACHMENT_ID, bref + "add_attachment", this));
@@ -260,7 +260,7 @@ public class EditArticleBlock extends IWBaseComponent implements ManagedContentB
 			System.out.println("Folder "+FolderString);
 			folderInput.setValue(FolderString);
 		}
-		folderInput.setSize(40);
+		folderInput.setSize(50);
 		p.getChildren().add(folderInput);		
 		
 		p.getChildren().add(WFUtil.getBreak());
