@@ -1,5 +1,5 @@
 /*
- * $Id: ArticleItemBean.java,v 1.18 2005/02/07 13:51:39 joakim Exp $
+ * $Id: ArticleItemBean.java,v 1.19 2005/02/14 15:13:19 gummi Exp $
  *
  * Copyright (C) 2004 Idega. All Rights Reserved.
  *
@@ -34,10 +34,10 @@ import com.idega.xmlns.block.article.document.ArticleDocument;
 /**
  * Bean for idegaWeb article content items.   
  * <p>
- * Last modified: $Date: 2005/02/07 13:51:39 $ by $Author: joakim $
+ * Last modified: $Date: 2005/02/14 15:13:19 $ by $Author: gummi $
  *
  * @author Anders Lindman
- * @version $Revision: 1.18 $
+ * @version $Revision: 1.19 $
  */
 
 public class ArticleItemBean extends ContentItemBean implements Serializable, ContentItem {
@@ -60,6 +60,8 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 	public final static String FIELDNAME_COMMENT = "comment";
 	public final static String FIELDNAME_IMAGES = "images";
 	public final static String FIELDNAME_FOLDER_LOCATION = "folder_location";
+	
+	public final static String ARTICLE_FILENAME_SCOPE = "article";
 	
 	private final static String[] ATTRIBUTE_ARRAY = new String[] {FIELDNAME_AUTHOR,FIELDNAME_CREATION_DATE,FIELDNAME_HEADLINE,FIELDNAME_TEASER,FIELDNAME_BODY};
 
@@ -175,12 +177,11 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 		return getFolderLocation()+"/"+filename+ARTICLE_SUFFIX;
 	}
 	
-	private String getFileName() {
+	private String createFileName(IWSlideService service) {
 		StringBuffer name = new StringBuffer("");
-		IWTimestamp timestamp = new IWTimestamp();
-		name.append(timestamp.getDateString("yyyyMMddHHmmssSSSS"));
+		name.append(service.createUniqueFileName(ARTICLE_FILENAME_SCOPE));
 		IWUserContext iwuc = IWContext.getInstance();
-		name.append("_").append(iwuc.getCurrentLocale().getLanguage());
+		name.append("-").append(iwuc.getCurrentLocale().getLanguage());
 		System.out.println("FileName is "+name);
 		return name.toString();
 	}
@@ -226,7 +227,7 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 //Need to create	    article.setCategory(getCategory());
 
 		
-		String filename = getFileName();
+		
 //		String filename = getHeadline();
 //		if(null==filename || filename.length()==0) {
 //			filename = "empty";
@@ -258,6 +259,9 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 			
 //			System.out.println("success "+success);
 //			success = 
+			
+			String filename = createFileName(service);
+			
 			rootResource.putMethod(session.getURI(getArticlePath(filename)),articleDoc.toString());
 			try {
 				load(getArticlePath(filename));
