@@ -1,5 +1,5 @@
 /*
- * $Id: CMSPage.java,v 1.11 2005/01/10 10:02:10 gimmi Exp $
+ * $Id: CMSPage.java,v 1.12 2005/01/18 14:31:42 joakim Exp $
  *
  * Copyright (C) 2004 Idega. All Rights Reserved.
  *
@@ -22,7 +22,6 @@ import com.idega.block.article.component.EditArticleBlock;
 import com.idega.webface.WFBlock;
 import com.idega.webface.WFList;
 import com.idega.webface.WFPage;
-import com.idega.webface.WFTab;
 import com.idega.webface.WFTabbedPane;
 import com.idega.webface.WFUtil;
 import com.idega.webface.WFViewMenu;
@@ -34,10 +33,10 @@ import com.idega.webface.test.bean.ManagedContentBeans;
 /**
  * Content management system test/demo page. 
  * <p>
- * Last modified: $Date: 2005/01/10 10:02:10 $ by $Author: gimmi $
+ * Last modified: $Date: 2005/01/18 14:31:42 $ by $Author: joakim $
  *
  * @author Anders Lindman
- * @version $Revision: 1.11 $
+ * @version $Revision: 1.12 $
  */
 public class CMSPage extends WFPage implements  ManagedContentBeans, WFTabListener, ActionListener, Serializable {
 	
@@ -60,16 +59,15 @@ public class CMSPage extends WFPage implements  ManagedContentBeans, WFTabListen
 			createContent();
 			isInitalized=true;
 		}
-		else {
+//		else {
 			//debug
-			UIComponent button1 = findComponent(TASK_ID_CONTENT);
-			WFTab contentButton = (WFTab)button1;
-			if(contentButton!=null) {
-				ActionListener[] listeners = contentButton.getActionListeners();
-				String st = listeners.toString();
-			}
-			
-		}
+//			UIComponent button1 = findComponent(TASK_ID_CONTENT);
+//			WFTab contentButton = (WFTab)button1;
+//			if(contentButton!=null) {
+//				ActionListener[] listeners = contentButton.getActionListeners();
+//				String st = listeners.toString();
+//			}
+//		}
 		super.encodeBegin(context);
 	}
 
@@ -244,7 +242,7 @@ public class CMSPage extends WFPage implements  ManagedContentBeans, WFTabListen
 //		EditArticleBlock ab = null;
 		
 		String id = WFUtil.getParameter(link, "id");
-		UIComponent component = link.getParent().getParent().getParent().findComponent(MAIN_TASKBAR_ID);
+//		UIComponent component = link.getParent().getParent().getParent().findComponent(MAIN_TASKBAR_ID);
 //		if(component instanceof WFTabbedPane){
 //			WFTabbedPane tb = (WFTabbedPane) component;
 //			tb.setSelectedMenuItemId(TASK_ID_EDIT);
@@ -309,7 +307,7 @@ public class CMSPage extends WFPage implements  ManagedContentBeans, WFTabListen
 	public void setEditMode() {
 		WFTabbedPane tb = (WFTabbedPane) findComponent(MAIN_TASKBAR_ID);
 		tb.setSelectedMenuItemId(TASK_ID_EDIT);
-		EditArticleBlock ab = (EditArticleBlock) tb.findComponent(EditArticleBlock.EDIT_ARTICLE_BLOCK_ID);
+//		EditArticleBlock ab = (EditArticleBlock) tb.findComponent(EditArticleBlock.EDIT_ARTICLE_BLOCK_ID);
 		//TODO (JJ) what is this... should not be needed.
 //		ab.setEditMode();		
 	}

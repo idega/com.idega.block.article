@@ -1,5 +1,5 @@
 /*
- * $Id: ArticleItemView.java,v 1.9 2005/01/10 10:24:31 joakim Exp $
+ * $Id: ArticleItemView.java,v 1.10 2005/01/18 14:31:42 joakim Exp $
  *
  * Copyright (C) 2004 Idega. All Rights Reserved.
  *
@@ -25,12 +25,12 @@ import com.idega.webface.WFUtil;
 import com.idega.webface.test.bean.ManagedContentBeans;
 
 /**
- * Last modified: $Date: 2005/01/10 10:24:31 $ by $Author: joakim $
+ * Last modified: $Date: 2005/01/18 14:31:42 $ by $Author: joakim $
  *
  * Displays the article item
  *
  * @author Joakim
- * @version $Revision: 1.9 $
+ * @version $Revision: 1.10 $
  */
 public class ArticleItemView extends IWBaseComponent implements ManagedContentBeans, ActionListener{
 	public final static String EDIT_ARTICLE_BLOCK_ID = "edit_articles_block";
@@ -88,7 +88,7 @@ public class ArticleItemView extends IWBaseComponent implements ManagedContentBe
 		c2.add(WFUtil.getBreak(1));
 		c.add(c2);
 		
-		HtmlOutputLink editLink = new HtmlOutputLink();
+//		HtmlOutputLink editLink = new HtmlOutputLink();
 
 		HtmlOutputLink link = new HtmlOutputLink();
 		link.setValue("http://localhost:8080/cms/workspace/content/article/create");
@@ -139,10 +139,10 @@ public class ArticleItemView extends IWBaseComponent implements ManagedContentBe
 	 * @see javax.faces.event.ActionListener#processAction(javax.faces.event.ActionEvent)
 	 */
 	public void processAction(ActionEvent event) throws AbortProcessingException {
-		String id = event.getComponent().getId();
-		EditArticleBlock ab = (EditArticleBlock) event.getComponent().getParent().getParent().getParent().findComponent(EDIT_ARTICLE_BLOCK_ID);
-		if (id.equals(EDIT_ID)) {
+//		String id = event.getComponent().getId();
+//		EditArticleBlock ab = (EditArticleBlock) event.getComponent().getParent().getParent().getParent().findComponent(EDIT_ARTICLE_BLOCK_ID);
+//		if (id.equals(EDIT_ID)) {
 //			ab.storeArticle();
-		}
+//		}
 	}
 }

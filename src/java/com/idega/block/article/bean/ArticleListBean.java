@@ -1,5 +1,5 @@
 /*
- * $Id: ArticleListBean.java,v 1.11 2005/01/10 10:18:13 joakim Exp $
+ * $Id: ArticleListBean.java,v 1.12 2005/01/18 14:31:42 joakim Exp $
  *
  * Copyright (C) 2004 Idega. All Rights Reserved.
  *
@@ -22,10 +22,8 @@ import org.apache.webdav.lib.WebdavResource;
 import org.apache.xmlbeans.XmlException;
 import com.idega.business.IBOLookup;
 import com.idega.content.business.ContentUtil;
-import com.idega.idegaweb.IWApplicationContext;
 import com.idega.idegaweb.IWUserContext;
 import com.idega.presentation.IWContext;
-import com.idega.slide.business.IWSlideService;
 import com.idega.slide.business.IWSlideSession;
 import com.idega.webface.WFPage;
 import com.idega.webface.WFUtil;
@@ -35,10 +33,10 @@ import com.idega.webface.model.WFDataModel;
 /**
  * Bean for article list rows.   
  * <p>
- * Last modified: $Date: 2005/01/10 10:18:13 $ by $Author: joakim $
+ * Last modified: $Date: 2005/01/18 14:31:42 $ by $Author: joakim $
  *
  * @author Anders Lindman
- * @version $Revision: 1.11 $
+ * @version $Revision: 1.12 $
  */
 
 public class ArticleListBean implements WFListBean, Serializable {
@@ -153,10 +151,10 @@ public class ArticleListBean implements WFListBean, Serializable {
 //		File[] articleFile = folder.listFiles();
 		
 		IWUserContext iwuc = IWContext.getInstance();
-		IWApplicationContext iwac = iwuc.getApplicationContext();
+//		IWApplicationContext iwac = iwuc.getApplicationContext();
 		
 		IWSlideSession session = (IWSlideSession)IBOLookup.getSessionInstance(iwuc,IWSlideSession.class);
-		IWSlideService service = (IWSlideService)IBOLookup.getServiceInstance(iwac,IWSlideService.class);
+//		IWSlideService service = (IWSlideService)IBOLookup.getServiceInstance(iwac,IWSlideService.class);
 		
 		WebdavResource folderResource = session.getWebdavResource(folder);
 		

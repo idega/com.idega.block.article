@@ -1,5 +1,5 @@
 /*
- * $Id: ArticleBar.java,v 1.3 2004/12/09 14:42:15 joakim Exp $
+ * $Id: ArticleBar.java,v 1.4 2005/01/18 14:31:42 joakim Exp $
  *
  * Copyright (C) 2004 Idega. All Rights Reserved.
  *
@@ -10,24 +10,18 @@ package com.idega.block.article.component;
 
 import java.io.Serializable;
 import java.util.Iterator;
-import javax.faces.component.UIComponent;
 import javax.faces.context.FacesContext;
-import javax.faces.event.ActionEvent;
 import com.idega.core.view.ViewManager;
 import com.idega.core.view.ViewNode;
-import com.idega.idegaweb.IWMainApplication;
 import com.idega.webface.WFContainer;
 import com.idega.webface.WFMenu;
 import com.idega.webface.WFTabBar;
-import com.idega.webface.WFTabbedPane;
-import com.idega.webface.WFUtil;
-import com.idega.webface.event.WFTabEvent;
 
 /**
- * Last modified: $Date: 2004/12/09 14:42:15 $ by $Author: joakim $
+ * Last modified: $Date: 2005/01/18 14:31:42 $ by $Author: joakim $
  *
  * @author Joakim
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
 public class ArticleBar extends WFContainer implements  Serializable{
 
@@ -72,7 +66,7 @@ public class ArticleBar extends WFContainer implements  Serializable{
 		ViewManager viewManager = ViewManager.getInstance(context);
 		
 		ViewNode workspaceNode = viewManager.getViewNodeForContext(context);
-		IWMainApplication iwma = IWMainApplication.getIWMainApplication(context);
+//		IWMainApplication iwma = IWMainApplication.getIWMainApplication(context);
 		
 		for (Iterator iter = workspaceNode.getParent().getChildren().iterator(); iter.hasNext();) {
 			ViewNode subNode = (ViewNode) iter.next();
@@ -87,16 +81,16 @@ public class ArticleBar extends WFContainer implements  Serializable{
 	 * Called when the edit mode in the article block changes.
 	 * @see com.idega.webface.event.WFTabListener#taskbarButtonPressed() 
 	 */
-	public void tabPressed(WFTabEvent e) {
-		WFTabbedPane t = e.getTaskbar();
-	}
+//	public void tabPressed(WFTabEvent e) {
+//		WFTabbedPane t = e.getTaskbar();
+//	}
 
 	
 	/**
 	 * @see javax.faces.event.ActionListener#processAction(javax.faces.event.ActionEvent)
 	 */
-	public void processAction(ActionEvent event) {
-		UIComponent link = event.getComponent();
-		String id = WFUtil.getParameter(link, "id");
-	}
+//	public void processAction(ActionEvent event) {
+//		UIComponent link = event.getComponent();
+//		String id = WFUtil.getParameter(link, "id");
+//	}
 }
