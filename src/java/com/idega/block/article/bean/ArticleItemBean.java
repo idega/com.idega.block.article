@@ -1,5 +1,5 @@
 /*
- * $Id: ArticleItemBean.java,v 1.30 2005/03/02 15:03:19 joakim Exp $
+ * $Id: ArticleItemBean.java,v 1.31 2005/03/03 10:36:11 joakim Exp $
  *
  * Copyright (C) 2004 Idega. All Rights Reserved.
  *
@@ -49,10 +49,10 @@ import com.idega.xmlns.block.article.document.ArticleDocument;
 /**
  * Bean for idegaWeb article content items.   
  * <p>
- * Last modified: $Date: 2005/03/02 15:03:19 $ by $Author: joakim $
+ * Last modified: $Date: 2005/03/03 10:36:11 $ by $Author: joakim $
  *
  * @author Anders Lindman
- * @version $Revision: 1.30 $
+ * @version $Revision: 1.31 $
  */
 
 public class ArticleItemBean extends ContentItemBean implements Serializable, ContentItem {
@@ -286,17 +286,21 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 		
 		
 		XMLElement root = new XMLElement("article",idegans);
+		XMLElement contentLanguage = new XMLElement(FIELDNAME_CONTENT_LANGUAGE,idegans).setText(getContentLanguage());
 		XMLElement headline = new XMLElement(FIELDNAME_HEADLINE,idegans).setText(getHeadline());
 		XMLElement teaser = new XMLElement(FIELDNAME_TEASER,idegans).setText(getTeaser());
 		XMLElement author = new XMLElement(FIELDNAME_AUTHOR,idegans).setText(getAuthor());
+		XMLElement source = new XMLElement(FIELDNAME_SOURCE,idegans).setText(getSource());
 		XMLElement articleComment = new XMLElement("article_comment",idegans).setText(getComment());
 
 		XMLElement body = new XMLElement(FIELDNAME_BODY,idegans).addContent(bodyElement);
 
+		root.addContent(contentLanguage);
 		root.addContent(headline);
 		root.addContent(teaser);
 		root.addContent(body);
 		root.addContent(author);
+		root.addContent(source);
 		root.addContent(articleComment);
 		XMLDocument doc = new XMLDocument(root);
 		XMLOutput outputter = new XMLOutput();
@@ -472,6 +476,11 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 			XMLElement rootElement = bodyDoc.getRootElement();
 	
 			try {
+				setContentLanguage(rootElement.getChild(FIELDNAME_CONTENT_LANGUAGE,idegans).getText());
+			}catch(Exception e) {		//Nullpointer could occur if field isn't used
+				setContentLanguage("");
+			}
+			try {
 				setHeadline(rootElement.getChild(FIELDNAME_HEADLINE,idegans).getText());
 			}catch(Exception e) {		//Nullpointer could occur if field isn't used
 				e.printStackTrace();
@@ -506,6 +515,11 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 				setBody("");
 			}
 			
+			try {
+				setSource(rootElement.getChild(FIELDNAME_SOURCE,idegans).getText());
+			}catch(Exception e) {		//Nullpointer could occur if field isn't used
+				setSource("");
+			}
 			try {
 				setComment(rootElement.getChild(FIELDNAME_ARTICLE_COMMENT,idegans).getText());
 			}catch(Exception e) {		//Nullpointer could occur if field isn't used
