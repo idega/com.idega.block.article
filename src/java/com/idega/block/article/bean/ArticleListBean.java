@@ -1,5 +1,5 @@
 /*
- * $Id: ArticleListBean.java,v 1.8 2004/12/14 14:59:12 joakim Exp $
+ * $Id: ArticleListBean.java,v 1.9 2004/12/15 15:45:37 joakim Exp $
  *
  * Copyright (C) 2004 Idega. All Rights Reserved.
  *
@@ -18,6 +18,7 @@ import javax.faces.component.html.HtmlCommandLink;
 import javax.faces.component.html.HtmlOutputText;
 import javax.faces.event.ActionListener;
 import javax.faces.model.DataModel;
+import org.apache.webdav.lib.WebdavResource;
 import org.apache.xmlbeans.XmlException;
 import com.idega.business.IBOLookup;
 import com.idega.idegaweb.IWApplicationContext;
@@ -25,7 +26,6 @@ import com.idega.idegaweb.IWUserContext;
 import com.idega.presentation.IWContext;
 import com.idega.slide.business.IWSlideService;
 import com.idega.slide.business.IWSlideSession;
-import com.idega.slide.util.WebdavRootResource;
 import com.idega.webface.WFPage;
 import com.idega.webface.WFUtil;
 import com.idega.webface.bean.WFListBean;
@@ -34,10 +34,10 @@ import com.idega.webface.model.WFDataModel;
 /**
  * Bean for article list rows.   
  * <p>
- * Last modified: $Date: 2004/12/14 14:59:12 $ by $Author: joakim $
+ * Last modified: $Date: 2004/12/15 15:45:37 $ by $Author: joakim $
  *
  * @author Anders Lindman
- * @version $Revision: 1.8 $
+ * @version $Revision: 1.9 $
  */
 
 public class ArticleListBean implements WFListBean, Serializable {
@@ -158,17 +158,21 @@ public class ArticleListBean implements WFListBean, Serializable {
 		IWSlideSession session = (IWSlideSession)IBOLookup.getSessionInstance(iwuc,IWSlideSession.class);
 		IWSlideService service = (IWSlideService)IBOLookup.getServiceInstance(iwac,IWSlideService.class);
 		
-		WebdavRootResource rootResource = session.getWebdavRootResource();
+		WebdavResource folderResource = session.getWebdavResource(folder);
 		
-		String[] file = rootResource.list();
-	
+		String[] file = folderResource.list();
+
+		//TODO(JJ) need to only get the article files. Right now it gets all folders and other filetypes
+		//This code will probably never be used, so not wasting any time on it.
 		for(int i=0;i<file.length;i++){
-//			System.out.println("Attempting to load "+articleFile[i].toString());
-			System.out.println("Attempting to load "+file[i].toString());
-			ArticleItemBean article = new ArticleItemBean();
-//			article.load(articleFile[i].toString());
-			article.load(folder+"/"+file[i]);
-			list.add(article);
+			try {
+				System.out.println("Attempting to load "+file[i].toString());
+				ArticleItemBean article = new ArticleItemBean();
+				article.load(folder+"/"+file[i]);
+				list.add(article);
+			}catch(Exception e) {
+				e.printStackTrace();
+			}
 		}
 		
 		return list;
