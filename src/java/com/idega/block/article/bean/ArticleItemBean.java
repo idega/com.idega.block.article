@@ -1,5 +1,5 @@
 /*
- * $Id: ArticleItemBean.java,v 1.34 2005/03/06 17:28:23 gummi Exp $
+ * $Id: ArticleItemBean.java,v 1.35 2005/03/07 15:27:52 joakim Exp $
  *
  * Copyright (C) 2004 Idega. All Rights Reserved.
  *
@@ -40,7 +40,6 @@ import com.idega.slide.business.IWSlideService;
 import com.idega.slide.business.IWSlideSession;
 import com.idega.slide.util.WebdavExtendedResource;
 import com.idega.slide.util.WebdavRootResource;
-import com.idega.webface.bean.WFEditableListDataBean;
 import com.idega.xml.XMLDocument;
 import com.idega.xml.XMLElement;
 import com.idega.xml.XMLException;
@@ -52,10 +51,10 @@ import com.idega.xmlns.block.article.document.ArticleDocument;
 /**
  * Bean for idegaWeb article content items.   
  * <p>
- * Last modified: $Date: 2005/03/06 17:28:23 $ by $Author: gummi $
+ * Last modified: $Date: 2005/03/07 15:27:52 $ by $Author: joakim $
  *
  * @author Anders Lindman
- * @version $Revision: 1.34 $
+ * @version $Revision: 1.35 $
  */
 
 public class ArticleItemBean extends ContentItemBean implements Serializable, ContentItem {
@@ -427,7 +426,7 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 			IWApplicationContext iwac = iwuc.getApplicationContext();
 			
 			IWSlideSession session = (IWSlideSession)IBOLookup.getSessionInstance(iwuc,IWSlideSession.class);
-			IWSlideService service = (IWSlideService)IBOLookup.getServiceInstance(iwac,IWSlideService.class);
+//			IWSlideService service = (IWSlideService)IBOLookup.getServiceInstance(iwac,IWSlideService.class);
 		
 			WebdavRootResource rootResource = session.getWebdavRootResource();
 
