@@ -12,7 +12,7 @@ version="1.2">
 		<ws:page>
 			<h:form>
 				<wf:wfblock id="article_list_block" title="Article List">
-					<co:ContentItemListViewer id="article_list" beanIdentifier="articleItemListBean" resourcePath="/files/cms/article" detailsViewerPath="/workspace/content/article/list/preview" />
+					<co:ContentItemListViewer id="article_list" beanIdentifier="articleItemListBean" resourcePath="/files/cms/article" detailsViewerPath="/workspace/content/article/preview" />
 				</wf:wfblock>
 			</h:form>
 		</ws:page>
