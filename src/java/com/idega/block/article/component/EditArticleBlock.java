@@ -1,5 +1,5 @@
 /*
- * $Id: EditArticleBlock.java,v 1.26 2005/03/08 18:33:14 gummi Exp $
+ * $Id: EditArticleBlock.java,v 1.27 2005/03/09 11:44:37 joakim Exp $
  *
  * Copyright (C) 2004 Idega. All Rights Reserved.
  *
@@ -56,10 +56,10 @@ import com.idega.webface.WFUtil;
 import com.idega.webface.htmlarea.HTMLArea;
 
 /**
- * Last modified: $Date: 2005/03/08 18:33:14 $ by $Author: gummi $
+ * Last modified: $Date: 2005/03/09 11:44:37 $ by $Author: joakim $
  *
  * @author Joakim
- * @version $Revision: 1.26 $
+ * @version $Revision: 1.27 $
  */
 public class EditArticleBlock extends IWBaseComponent implements ManagedContentBeans, ActionListener, ValueChangeListener {
 	public final static String EDIT_ARTICLE_BLOCK_ID = "edit_articles_block";
@@ -128,9 +128,9 @@ public class EditArticleBlock extends IWBaseComponent implements ManagedContentB
 	}
 
 	protected void initializeContent() {
-		if(clearOnInit) {
-			WFUtil.invoke(ARTICLE_ITEM_BEAN_ID, "clear");
-		}
+//		if(clearOnInit) {
+//			WFUtil.invoke(ARTICLE_ITEM_BEAN_ID, "clear");
+//		}
 		setId(EDIT_ARTICLE_BLOCK_ID);
 //		WFUtil.invoke(EDIT_ARTICLES_BEAN_ID, "setArticleLinkListener", this, ActionListener.class);
 		add(getEditContainer());
@@ -446,6 +446,7 @@ public class EditArticleBlock extends IWBaseComponent implements ManagedContentB
 		EditArticleBlock ab = (EditArticleBlock) event.getComponent().getParent().getParent().getParent().findComponent(EDIT_ARTICLE_BLOCK_ID);
 		if (id.equals(SAVE_ID)) {
 			ab.storeArticle();
+			clearOnInit=false;
 		} else if (id.equals(FOR_REVIEW_ID)) {
 			WFUtil.invoke(ARTICLE_ITEM_BEAN_ID, "setRequestedStatus", ContentItemCase.STATUS_READY_FOR_REVIEW);
 			ab.storeArticle();
@@ -617,9 +618,9 @@ public class EditArticleBlock extends IWBaseComponent implements ManagedContentB
 	 * @see javax.faces.component.UIComponent#encodeBegin(javax.faces.context.FacesContext)
 	 */
 	public void encodeBegin(FacesContext context) throws IOException {
-//		if(clearOnInit) {
+		if(clearOnInit) {
 			WFUtil.invoke(ARTICLE_ITEM_BEAN_ID, "clear");
-//		}
+		}
 //		WFUtil.invoke(ARTICLE_ITEM_BEAN_ID, "updateLocale");
 //		updateEditButtons();
 		
@@ -634,7 +635,6 @@ public class EditArticleBlock extends IWBaseComponent implements ManagedContentB
 				WFUtil.invoke(ARTICLE_ITEM_BEAN_ID,"load",resourcePath,String.class);
 			}
 		}
-		
 	}
 
 	/* (non-Javadoc)
@@ -643,38 +643,19 @@ public class EditArticleBlock extends IWBaseComponent implements ManagedContentB
 	public void processValueChange(ValueChangeEvent arg0) throws AbortProcessingException {
 		System.out.println("Language value has changed from "+arg0.getOldValue()+" to "+arg0.getNewValue());
 		
-		String resourcePath = (String)WFUtil.invoke(ARTICLE_ITEM_BEAN_ID, "getResourcePath");
+		String articlePath = (String)WFUtil.invoke(ARTICLE_ITEM_BEAN_ID, "getArticlePath");
 		String language = (String)WFUtil.invoke(ARTICLE_ITEM_BEAN_ID, "getContentLanguage");
-		if(null==resourcePath) {
+		if(null==articlePath) {
 			//Article has not been stored previousley, so nothing have to be done
 			return;
 		}
-		System.out.println("Resoure path"+resourcePath);
-		boolean result = ((Boolean)WFUtil.invoke(ARTICLE_ITEM_BEAN_ID, "load",resourcePath+"/"+arg0.getNewValue()+ArticleItemBean.ARTICLE_SUFFIX)).booleanValue();
+		System.out.println("Article path"+articlePath);
+		boolean result = ((Boolean)WFUtil.invoke(ARTICLE_ITEM_BEAN_ID, "load",articlePath+"/"+arg0.getNewValue()+ArticleItemBean.ARTICLE_SUFFIX)).booleanValue();
 		System.out.println("loading other language "+result);
 		if(!result) {
-			result = ((Boolean)WFUtil.invoke(ARTICLE_ITEM_BEAN_ID, "load",resourcePath+"/"+language+ArticleItemBean.ARTICLE_SUFFIX)).booleanValue();
+			result = ((Boolean)WFUtil.invoke(ARTICLE_ITEM_BEAN_ID, "load",articlePath+"/"+language+ArticleItemBean.ARTICLE_SUFFIX)).booleanValue();
 			System.out.println("loading other language "+result);
 		}
-//		String leftString = resourcePath.substring(0,resourcePath.lastIndexOf("/"));
-//		String newPath = leftString+arg0.getNewValue()+ArticleItemBean.ARTICLE_SUFFIX;
-//		System.out.println("New Resoure path"+newPath);
-//		WFUtil.invoke(ARTICLE_ITEM_BEAN_ID, "setResourcePath",newPath);
-		
-/*
-		UIComponent uiComponent;
-		UIComponent parent = arg0.getComponent();
-		int iter=0;
-		do{
-			uiComponent = parent.findComponent(EDIT_ARTICLE_BLOCK_ID);
-			parent = parent.getParent();
-			System.out.println("Iteration "+iter);
-		}while(uiComponent==null && parent!=null);
-		if(uiComponent!=null) {
-			EditArticleBlock ab = (EditArticleBlock)uiComponent;
-		}
-		WFUtil.invoke(ARTICLE_ITEM_BEAN_ID, "getHeadline",arg0.getNewValue());
-*/
 	}
 	
 	boolean clearOnInit = false;
