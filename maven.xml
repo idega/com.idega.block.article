@@ -1,7 +1,7 @@
-<project>
+<!--<project>-->
 
 	<!--xmlbeans generator -->
-	<preGoal name="java:compile" >
+<!--	<preGoal name="java:compile" >
 		<java classname="org.apache.xmlbeans.impl.tool.SchemaCompiler"
 		          classpathref="maven.dependency.classpath"
 		          fork="true">
@@ -13,4 +13,4 @@
 		    </java>
   </preGoal>
 
-</project>
+</project>-->
