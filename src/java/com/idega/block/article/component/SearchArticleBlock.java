@@ -1,5 +1,5 @@
 /*
- * $Id: SearchArticleBlock.java,v 1.6 2005/03/09 14:33:19 eiki Exp $
+ * $Id: SearchArticleBlock.java,v 1.7 2005/03/10 18:32:48 eiki Exp $
  *
  * Copyright (C) 2004 Idega. All Rights Reserved.
  *
@@ -34,10 +34,10 @@ import com.idega.webface.convert.WFDateConverter;
 /**
  * Block for searching articles.   
  * <p>
- * Last modified: $Date: 2005/03/09 14:33:19 $ by $Author: eiki $
+ * Last modified: $Date: 2005/03/10 18:32:48 $ by $Author: eiki $
  *
  * @author Anders Lindman
- * @version $Revision: 1.6 $
+ * @version $Revision: 1.7 $
  */
 public class SearchArticleBlock extends WFBlock implements ManagedContentBeans, ActionListener, Serializable {
 
@@ -173,6 +173,8 @@ public class SearchArticleBlock extends WFBlock implements ManagedContentBeans, 
 	protected UIComponent getSearchResultList() {
 		WFList l = new WFList(SEARCH_ARTICLE_BEAN_ID, 0, 0);
 		l.setId(RESULT_LIST_ID);
+		WFUtil.setValueBinding(l,"rendered",SEARCH_ARTICLE_BEAN_ID+".showSearchResults");
+		
 		return l;
 	}
 	
@@ -180,28 +182,28 @@ public class SearchArticleBlock extends WFBlock implements ManagedContentBeans, 
 	 * javax.faces.event.ActionListener#processAction()
 	 */
 	public void processAction(ActionEvent event) {
-		String date = "no date";
-		date = "" + WFUtil.getValue(SEARCH_ARTICLE_BEAN_ID, "searchPublishedFrom");
-		
+//		String date = "no date";
+//		date = "" + WFUtil.getValue(SEARCH_ARTICLE_BEAN_ID, "searchPublishedFrom");
+//		
 		if (event.getComponent().getId().equals(SEARCH_BUTTON_ID)) {
 			WFUtil.invoke(SEARCH_ARTICLE_BEAN_ID, "search");
 			return;
 		}
 		
-		UIComponent link = event.getComponent();
-		String id = WFUtil.getParameter(link, "id");
-		WFUtil.invoke(ARTICLE_ITEM_BEAN_ID, "clear");
-		WFUtil.invoke(ARTICLE_ITEM_BEAN_ID, "setLocaleId", "sv");
-		WFUtil.invoke(ARTICLE_ITEM_BEAN_ID, "setHeadline", "search result, date =" + date);
-		WFUtil.invoke(ARTICLE_ITEM_BEAN_ID, "setTeaser", "Teaser");
-		WFUtil.invoke(ARTICLE_ITEM_BEAN_ID, "setBody", "Article " + id);
-		WFUtil.invoke(ARTICLE_ITEM_BEAN_ID, "setAuthor", "author");
-		WFUtil.invoke(ARTICLE_ITEM_BEAN_ID, "setComment", "comment");
-		WFUtil.invoke(ARTICLE_ITEM_BEAN_ID, "setDescription", "description");
-		WFUtil.invoke(ARTICLE_ITEM_BEAN_ID, "setStatus", ContentItemCase.STATUS_PUBLISHED);
-//		WFUtil.invoke(ARTICLE_ITEM_BEAN_ID, "setMainCategoryId", new Integer(3));
-		WFUtil.invoke(ARTICLE_ITEM_BEAN_ID, "setUpdated", new Boolean(true));
-				
-		WFUtil.setViewRoot("/cmspage.jsf");
+//		UIComponent link = event.getComponent();
+//		String id = WFUtil.getParameter(link, "id");
+//		WFUtil.invoke(ARTICLE_ITEM_BEAN_ID, "clear");
+//		WFUtil.invoke(ARTICLE_ITEM_BEAN_ID, "setLocaleId", "sv");
+//		WFUtil.invoke(ARTICLE_ITEM_BEAN_ID, "setHeadline", "search result, date =" + date);
+//		WFUtil.invoke(ARTICLE_ITEM_BEAN_ID, "setTeaser", "Teaser");
+//		WFUtil.invoke(ARTICLE_ITEM_BEAN_ID, "setBody", "Article " + id);
+//		WFUtil.invoke(ARTICLE_ITEM_BEAN_ID, "setAuthor", "author");
+//		WFUtil.invoke(ARTICLE_ITEM_BEAN_ID, "setComment", "comment");
+//		WFUtil.invoke(ARTICLE_ITEM_BEAN_ID, "setDescription", "description");
+//		WFUtil.invoke(ARTICLE_ITEM_BEAN_ID, "setStatus", ContentItemCase.STATUS_PUBLISHED);
+////		WFUtil.invoke(ARTICLE_ITEM_BEAN_ID, "setMainCategoryId", new Integer(3));
+//		WFUtil.invoke(ARTICLE_ITEM_BEAN_ID, "setUpdated", new Boolean(true));
+//				
+//		WFUtil.setViewRoot("/cmspage.jsf");
 	}
 }
