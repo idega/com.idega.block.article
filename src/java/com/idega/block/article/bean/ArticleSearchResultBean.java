@@ -1,5 +1,5 @@
 /*
- * $Id: ArticleSearchResultBean.java,v 1.1 2005/03/05 17:21:48 gummi Exp $
+ * $Id: ArticleSearchResultBean.java,v 1.2 2005/03/09 14:27:21 eiki Exp $
  * Created on 5.3.2005
  *
  * Copyright (C) 2005 Idega Software hf. All Rights Reserved.
@@ -11,15 +11,16 @@ package com.idega.block.article.bean;
 
 import java.util.ArrayList;
 import java.util.List;
+import com.idega.core.uri.IWActionURIManager;
 import com.idega.webface.bean.WFEditableListDataBean;
 
 
 /**
  * 
- *  Last modified: $Date: 2005/03/05 17:21:48 $ by $Author: gummi $
+ *  Last modified: $Date: 2005/03/09 14:27:21 $ by $Author: eiki $
  * 
  * @author <a href="mailto:gummi@idega.com">Gudmundur Agust Saemundsson</a>
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public class ArticleSearchResultBean extends ArticleItemBean implements WFEditableListDataBean {
 
@@ -51,4 +52,11 @@ public class ArticleSearchResultBean extends ArticleItemBean implements WFEditab
 		
 		return values.toArray(new Object[values.size()]);
 	}
+	
+	
+	
+	public String getPreviewIWActionURI(){
+		return IWActionURIManager.getInstance().getActionURIPrefixWithContext("preview",getResourcePath());
+	}
+	
 }
