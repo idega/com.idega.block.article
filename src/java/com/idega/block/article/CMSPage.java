@@ -1,5 +1,5 @@
 /*
- * $Id: CMSPage.java,v 1.2 2004/10/27 13:10:22 joakim Exp $
+ * $Id: CMSPage.java,v 1.3 2004/11/01 19:04:37 tryggvil Exp $
  *
  * Copyright (C) 2004 Idega. All Rights Reserved.
  *
@@ -15,7 +15,6 @@ import javax.faces.component.UICommand;
 import javax.faces.component.UIComponent;
 import javax.faces.component.html.HtmlCommandButton;
 import javax.faces.component.html.HtmlInputSecret;
-import javax.faces.component.html.HtmlOutputText;
 import javax.faces.component.html.HtmlPanelGrid;
 import javax.faces.context.FacesContext;
 import javax.faces.event.ActionEvent;
@@ -29,7 +28,7 @@ import com.idega.webface.WFList;
 import com.idega.webface.WFPage;
 import com.idega.webface.WFPanelUtil;
 import com.idega.webface.WFTab;
-import com.idega.webface.WFTabBar;
+import com.idega.webface.WFTabbedPane;
 import com.idega.webface.WFUtil;
 import com.idega.webface.WFViewMenu;
 import com.idega.webface.event.WFTabEvent;
@@ -40,10 +39,10 @@ import com.idega.webface.test.bean.ManagedContentBeans;
 /**
  * Content management system test/demo page. 
  * <p>
- * Last modified: $Date: 2004/10/27 13:10:22 $ by $Author: joakim $
+ * Last modified: $Date: 2004/11/01 19:04:37 $ by $Author: tryggvil $
  *
  * @author Anders Lindman
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 public class CMSPage extends WFPage implements  ManagedContentBeans, WFTabListener, ActionListener, Serializable {
 	
@@ -129,14 +128,14 @@ public class CMSPage extends WFPage implements  ManagedContentBeans, WFTabListen
 	 */
 	protected UIComponent getMainTaskbar() {
 		String bref = WFPage.CONTENT_BUNDLE + ".";
-		WFTabBar tb = new WFTabBar();
+		WFTabbedPane tb = new WFTabbedPane();
 		tb.setMainAreaStyleClass(null);
 		tb.setId(MAIN_TASKBAR_ID);
 		WFTab buttonContent = tb.addButtonVB(TASK_ID_CONTENT, bref + "content", getContentPerspective());
 		buttonContent.addActionListener(this);
 		WFTab buttonEdit = tb.addButtonVB(TASK_ID_EDIT, bref + "edit", getEditPerspective());
 		buttonEdit.addActionListener(this);
-		tb.addTaskbarListener(this);
+		tb.addTabListener(this);
 		
 		
 		UICommand debugButton = new HtmlCommandButton();
@@ -246,9 +245,9 @@ public class CMSPage extends WFPage implements  ManagedContentBeans, WFTabListen
 		UIComponent link = event.getComponent();
 
 		String id = WFUtil.getParameter(link, "id");
-		WFTabBar tb = (WFTabBar) link.getParent().getParent().getParent().findComponent(MAIN_TASKBAR_ID);
+		WFTabbedPane tb = (WFTabbedPane) link.getParent().getParent().getParent().findComponent(MAIN_TASKBAR_ID);
 
-		tb.setSelectedButtonId(TASK_ID_EDIT);
+		tb.setSelectedMenuItemId(TASK_ID_EDIT);
 		ArticleBlock ab = (ArticleBlock) tb.findComponent(ArticleBlock.ARTICLE_BLOCK_ID);
 		ab.setEditMode();
 
@@ -274,8 +273,8 @@ public class CMSPage extends WFPage implements  ManagedContentBeans, WFTabListen
 	 * Sets the page in edit mode.
 	 */
 	public void setEditMode() {
-		WFTabBar tb = (WFTabBar) findComponent(MAIN_TASKBAR_ID);
-		tb.setSelectedButtonId(TASK_ID_EDIT);
+		WFTabbedPane tb = (WFTabbedPane) findComponent(MAIN_TASKBAR_ID);
+		tb.setSelectedMenuItemId(TASK_ID_EDIT);
 		ArticleBlock ab = (ArticleBlock) tb.findComponent(ArticleBlock.ARTICLE_BLOCK_ID);
 		ab.setEditMode();		
 	}
@@ -285,9 +284,9 @@ public class CMSPage extends WFPage implements  ManagedContentBeans, WFTabListen
 	 * @see com.idega.webface.event.WFTabListener#taskbarButtonPressed() 
 	 */
 	public void tabPressed(WFTabEvent e) {
-		WFTabBar t = e.getTaskbar();
+		WFTabbedPane t = e.getTaskbar();
 		UIComponent articleVersionBlock = t.findComponent(ArticleVersionBlock.ARTICLE_VERSION_BLOCK_ID);
-		if (t.getSelectedButtonId().equals(ArticleBlock.TASK_ID_PREVIEW)) {
+		if (t.getSelectedMenuItemId().equals(ArticleBlock.TASK_ID_PREVIEW)) {
 			articleVersionBlock.setRendered(true);
 		} else {
 			articleVersionBlock.setRendered(false);			

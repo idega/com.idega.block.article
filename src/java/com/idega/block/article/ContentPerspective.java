@@ -16,7 +16,7 @@ import com.idega.webface.WFBlock;
 import com.idega.webface.WFContainer;
 import com.idega.webface.WFList;
 import com.idega.webface.WFPage;
-import com.idega.webface.WFTabBar;
+import com.idega.webface.WFTabbedPane;
 import com.idega.webface.WFUtil;
 import com.idega.webface.WFViewMenu;
 import com.idega.webface.test.bean.ContentItemCase;
@@ -105,8 +105,8 @@ public class ContentPerspective extends WFContainer implements ManagedContentBea
 	public void processAction(ActionEvent event) {
 		UIComponent link = event.getComponent();
 		String id = WFUtil.getParameter(link, "id");
-		WFTabBar tb = (WFTabBar) link.getParent().getParent().getParent().findComponent(MAIN_TASKBAR_ID);
-		tb.setSelectedButtonId(TASK_ID_EDIT);
+		WFTabbedPane tb = (WFTabbedPane) link.getParent().getParent().getParent().findComponent(MAIN_TASKBAR_ID);
+		tb.setSelectedMenuItemId(TASK_ID_EDIT);
 		ArticleBlock ab = (ArticleBlock) tb.findComponent(ArticleBlock.ARTICLE_BLOCK_ID);
 		ab.setEditMode();
 
@@ -132,8 +132,8 @@ public class ContentPerspective extends WFContainer implements ManagedContentBea
 	 * Sets the page in edit mode.
 	 */
 	public void setEditMode() {
-		WFTabBar tb = (WFTabBar) findComponent(MAIN_TASKBAR_ID);
-		tb.setSelectedButtonId(TASK_ID_EDIT);
+		WFTabbedPane tb = (WFTabbedPane) findComponent(MAIN_TASKBAR_ID);
+		tb.setSelectedMenuItemId(TASK_ID_EDIT);
 		ArticleBlock ab = (ArticleBlock) tb.findComponent(ArticleBlock.ARTICLE_BLOCK_ID);
 		ab.setEditMode();		
 	}

@@ -1,5 +1,5 @@
 /*
- * $Id: ArticleBlock.java,v 1.1 2004/10/26 12:45:00 joakim Exp $
+ * $Id: ArticleBlock.java,v 1.2 2004/11/01 19:04:37 tryggvil Exp $
  *
  * Copyright (C) 2004 Idega. All Rights Reserved.
  *
@@ -40,7 +40,7 @@ import com.idega.webface.WFList;
 import com.idega.webface.WFPage;
 import com.idega.webface.WFPanelUtil;
 import com.idega.webface.WFPlainOutputText;
-import com.idega.webface.WFTabBar;
+import com.idega.webface.WFTabbedPane;
 import com.idega.webface.WFUtil;
 import com.idega.webface.convert.WFCommaSeparatedListConverter;
 import com.idega.webface.event.WFTabListener;
@@ -51,10 +51,10 @@ import com.idega.webface.test.bean.ManagedContentBeans;
 /**
  * Block for editing an article.   
  * <p>
- * Last modified: $Date: 2004/10/26 12:45:00 $ by $Author: joakim $
+ * Last modified: $Date: 2004/11/01 19:04:37 $ by $Author: tryggvil $
  *
  * @author Anders Lindman
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public class ArticleBlock extends WFBlock implements ActionListener, ManagedContentBeans {
 
@@ -132,15 +132,15 @@ public class ArticleBlock extends WFBlock implements ActionListener, ManagedCont
 		
 		String bref = WFPage.CONTENT_BUNDLE + ".";
 		
-		WFTabBar tb = new WFTabBar();
+		WFTabbedPane tb = new WFTabbedPane();
 		tb.setId(TASKBAR_ID);
 		add(tb);
 		tb.addButtonVB(TASK_ID_EDIT, bref + "edit", getEditContainer());
 		tb.addButtonVB(TASK_ID_PREVIEW, bref + "preview", getPreviewContainer());
 //		tb.addButtonVB(TASK_ID_MESSAGES, bref + "messages", getMessageContainer());
-		tb.setSelectedButtonId(TASK_ID_EDIT);
+		tb.setSelectedMenuItemId(TASK_ID_EDIT);
 		if (taskbarListener != null) {
-			tb.addTaskbarListener(taskbarListener);
+			tb.addTabListener(taskbarListener);
 		}
 	}
 	
@@ -562,24 +562,24 @@ public class ArticleBlock extends WFBlock implements ActionListener, ManagedCont
 	 * Sets this block to edit mode. 
 	 */
 	public void setEditMode() {
-		WFTabBar tb = (WFTabBar) findComponent(TASKBAR_ID);
-		tb.setSelectedButtonId(TASK_ID_EDIT);
+		WFTabbedPane tb = (WFTabbedPane) findComponent(TASKBAR_ID);
+		tb.setSelectedMenuItemId(TASK_ID_EDIT);
 	}
 
 	/**
 	 * Sets this block to preview mode. 
 	 */
 	public void setPreviewMode() {
-		WFTabBar tb = (WFTabBar) findComponent(TASKBAR_ID);
-		tb.setSelectedButtonId(TASK_ID_PREVIEW);
+		WFTabbedPane tb = (WFTabbedPane) findComponent(TASKBAR_ID);
+		tb.setSelectedMenuItemId(TASK_ID_PREVIEW);
 	}
 
 	/**
 	 * Sets this block to message mode. 
 	 */
 	public void setMessageMode() {
-		WFTabBar tb = (WFTabBar) findComponent(TASKBAR_ID);
-		tb.setSelectedButtonId(TASK_ID_MESSAGES);
+		WFTabbedPane tb = (WFTabbedPane) findComponent(TASKBAR_ID);
+		tb.setSelectedMenuItemId(TASK_ID_MESSAGES);
 	}
 	
 	/**
