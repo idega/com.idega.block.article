@@ -25,6 +25,8 @@
   </classpathentry>
   <classpathentry kind="var" path="MAVEN_REPO/jtidy/jars/jtidy-4aug2000r7-dev.jar">
   </classpathentry>
+  <classpathentry kind="var" path="MAVEN_REPO/myfaces/jars/myfaces-components-1.0.7.jar">
+  </classpathentry>
   <classpathentry kind="var" path="MAVEN_REPO/jdom/jars/jdom-1.0.jar">
   </classpathentry>
   <classpathentry kind="var" path="MAVEN_REPO/jai/jars/jai-1.0.jar">

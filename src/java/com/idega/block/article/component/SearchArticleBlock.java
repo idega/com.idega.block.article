@@ -1,5 +1,5 @@
 /*
- * $Id: SearchArticleBlock.java,v 1.5 2005/03/05 16:27:29 eiki Exp $
+ * $Id: SearchArticleBlock.java,v 1.6 2005/03/09 14:33:19 eiki Exp $
  *
  * Copyright (C) 2004 Idega. All Rights Reserved.
  *
@@ -16,8 +16,13 @@ import javax.faces.component.html.HtmlPanelGrid;
 import javax.faces.component.html.HtmlSelectOneMenu;
 import javax.faces.event.ActionEvent;
 import javax.faces.event.ActionListener;
+import net.sourceforge.myfaces.custom.calendar.HtmlInputCalendar;
+import net.sourceforge.myfaces.custom.stylesheet.Stylesheet;
 import com.idega.content.bean.ManagedContentBeans;
 import com.idega.content.data.ContentItemCase;
+import com.idega.idegaweb.IWBundle;
+import com.idega.idegaweb.IWMainApplication;
+import com.idega.presentation.Script;
 import com.idega.webface.WFBlock;
 import com.idega.webface.WFContainer;
 import com.idega.webface.WFErrorMessages;
@@ -29,10 +34,10 @@ import com.idega.webface.convert.WFDateConverter;
 /**
  * Block for searching articles.   
  * <p>
- * Last modified: $Date: 2005/03/05 16:27:29 $ by $Author: eiki $
+ * Last modified: $Date: 2005/03/09 14:33:19 $ by $Author: eiki $
  *
  * @author Anders Lindman
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
  */
 public class SearchArticleBlock extends WFBlock implements ManagedContentBeans, ActionListener, Serializable {
 
@@ -57,30 +62,11 @@ public class SearchArticleBlock extends WFBlock implements ManagedContentBeans, 
 	 * Default contructor.
 	 */
 	public SearchArticleBlock() {
+		super("Article Search");
 		setId(SEARCH_ARTICLE_BLOCK_ID);
 		WFUtil.invoke(SEARCH_ARTICLE_BEAN_ID, "setArticleLinkListener", this, ActionListener.class);
 	}
-	
-	/**
-	 * Constructs an ArticleBlock with the specified title key. 
-	 */
-//	public SearchArticleBlock(String titleKey) {
-//		super(titleKey);
-//		setId(SEARCH_ARTICLE_BLOCK_ID);
-//		
-//		WFUtil.invoke(SEARCH_ARTICLE_BEAN_ID, "setArticleLinkListener", this, ActionListener.class);
-//
-//	//	add(new ArticleBar());
-//		add(getSearchPanel());
-//		add(WFUtil.getBreak());
-//		add(getSearchResultList());
-//		add(WFUtil.getBreak());
-//	}
-	
-	
-	
-	
-	
+		
 	/* (non-Javadoc)
 	 * @see com.idega.presentation.IWBaseComponent#initializeContent()
 	 */
@@ -108,6 +94,28 @@ public class SearchArticleBlock extends WFBlock implements ManagedContentBeans, 
 
 		HtmlPanelGrid p = WFPanelUtil.getFormPanel(3);
 		
+		//adding myfaces component stuff
+		IWMainApplication iwma = IWMainApplication.getDefaultIWMainApplication();
+		IWBundle myfacesBundle = iwma.getBundle("net.sourceforge.myfaces");
+		String jsPath = myfacesBundle.getResourcesVirtualPath()+"/popcalendar.js";
+		String styleSheet1Path = myfacesBundle.getResourcesVirtualPath()+"/style/WH/theme.css";
+		String styleSheet2Path = myfacesBundle.getResourcesVirtualPath()+"/style/DB/theme.css";
+
+		Stylesheet stylesheet = new Stylesheet();
+		stylesheet.setPath(styleSheet1Path);
+		stylesheet.setId("css1");
+		mainContainer.add(stylesheet);
+		
+		Stylesheet stylesheet2 = new Stylesheet();
+		stylesheet2.setPath(styleSheet2Path);
+		stylesheet2.setId("css2");
+		mainContainer.add(stylesheet2);
+		
+		Script script = new Script();
+		script.setScriptSource(jsPath);
+		mainContainer.add(script);
+		//myfaces done
+		
 		p.getChildren().add(WFUtil.getText("Article text:"));
 		p.getChildren().add(WFUtil.getText("Author:"));
 		p.getChildren().add(WFUtil.getText("Category"));
@@ -125,13 +133,26 @@ public class SearchArticleBlock extends WFBlock implements ManagedContentBeans, 
 		p.getChildren().add(WFUtil.getText("Published to:"));		
 		p.getChildren().add(WFUtil.getText(" "));		
 
-		HtmlInputText searchPublishedFromInput = WFUtil.getInputText(SEARCH_PUBLISHED_FROM_ID, ref + "searchPublishedFrom");		
-		searchPublishedFromInput.setSize(20);
-		searchPublishedFromInput.setConverter(new WFDateConverter());
+//		HtmlInputText searchPublishedFromInput = WFUtil.getInputText(SEARCH_PUBLISHED_FROM_ID, ref + "searchPublishedFrom");		
+//		searchPublishedFromInput.setSize(20);
+//		searchPublishedFromInput.setConverter(new WFDateConverter());
+//		
+		HtmlInputCalendar searchPublishedFromInput = new HtmlInputCalendar();
+		searchPublishedFromInput.setId("fromDate");
+		searchPublishedFromInput.setRenderAsPopup(true);
+		
+		WFUtil.setValueBinding(searchPublishedFromInput,"value",ref + "searchPublishedFrom");
 		p.getChildren().add(searchPublishedFromInput);		
-		HtmlInputText searchPublishedToInput = WFUtil.getInputText(SEARCH_PUBLISHED_TO_ID, ref + "searchPublishedTo");		
-		searchPublishedToInput.setSize(20);
-		searchPublishedToInput.setConverter(new WFDateConverter());
+		
+//		HtmlInputText searchPublishedToInput = WFUtil.getInputText(SEARCH_PUBLISHED_TO_ID, ref + "searchPublishedTo");		
+//		searchPublishedToInput.setSize(20);
+//		searchPublishedToInput.setConverter(new WFDateConverter());
+		
+		HtmlInputCalendar searchPublishedToInput = new HtmlInputCalendar();
+		searchPublishedToInput.setId("toDate");
+		searchPublishedToInput.setRenderAsPopup(true);
+		WFUtil.setValueBinding(searchPublishedToInput,"value",ref + "searchPublishedTo");
+		
 		p.getChildren().add(searchPublishedToInput);		
 		p.getChildren().add(WFUtil.getText(" "));
 
