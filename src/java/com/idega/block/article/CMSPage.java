@@ -1,5 +1,5 @@
 /*
- * $Id: CMSPage.java,v 1.9 2004/12/21 15:39:35 joakim Exp $
+ * $Id: CMSPage.java,v 1.10 2005/01/04 14:30:58 joakim Exp $
  *
  * Copyright (C) 2004 Idega. All Rights Reserved.
  *
@@ -34,10 +34,10 @@ import com.idega.webface.test.bean.ManagedContentBeans;
 /**
  * Content management system test/demo page. 
  * <p>
- * Last modified: $Date: 2004/12/21 15:39:35 $ by $Author: joakim $
+ * Last modified: $Date: 2005/01/04 14:30:58 $ by $Author: joakim $
  *
  * @author Anders Lindman
- * @version $Revision: 1.9 $
+ * @version $Revision: 1.10 $
  */
 public class CMSPage extends WFPage implements  ManagedContentBeans, WFTabListener, ActionListener, Serializable {
 	
@@ -257,7 +257,6 @@ public class CMSPage extends WFPage implements  ManagedContentBeans, WFTabListen
 
 		ArticleItemBean articleItem = new ArticleItemBean();
 		try {
-//			articleItem.load("/files/content/"+id+".xml");
 			articleItem.load(id);
 
 			WFUtil.invoke(ARTICLE_ITEM_BEAN_ID, "clear");
