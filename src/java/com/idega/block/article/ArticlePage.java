@@ -30,7 +30,9 @@ public class ArticlePage extends CMSPage {
 	 */
 	protected void createContent() {
 		add(getEditPerspective());
-		WFUtil.invoke(ARTICLE_ITEM_BEAN_ID, "clear");
+		//When using the HtmlOutputLink, this code is executed. Either have to set a flag,
+		//or use some other methode to cleane the bean when necesary.
+//		WFUtil.invoke(ARTICLE_ITEM_BEAN_ID, "clear");
 	}
 	
 	/**
@@ -46,6 +48,8 @@ public class ArticlePage extends CMSPage {
 	protected UIComponent getEditPerspective() {
 		//TODO (JJ) This should be changed to ARTICLE_BUNDLE
 		String bref = WFPage.CONTENT_BUNDLE + ".";
+		//Has to be set to value bound for this to work...
+//		String bref = WFUtilArticle.getBundleString() + ".";
 		ArticleBarBlock abb = new ArticleBarBlock(bref + "article");
 		abb.setId("article_block");
 		return abb;
