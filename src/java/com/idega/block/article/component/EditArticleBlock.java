@@ -1,5 +1,5 @@
 /*
- * $Id: EditArticleBlock.java,v 1.27 2005/03/09 11:44:37 joakim Exp $
+ * $Id: EditArticleBlock.java,v 1.28 2005/03/09 11:45:35 joakim Exp $
  *
  * Copyright (C) 2004 Idega. All Rights Reserved.
  *
@@ -56,10 +56,10 @@ import com.idega.webface.WFUtil;
 import com.idega.webface.htmlarea.HTMLArea;
 
 /**
- * Last modified: $Date: 2005/03/09 11:44:37 $ by $Author: joakim $
+ * Last modified: $Date: 2005/03/09 11:45:35 $ by $Author: joakim $
  *
  * @author Joakim
- * @version $Revision: 1.27 $
+ * @version $Revision: 1.28 $
  */
 public class EditArticleBlock extends IWBaseComponent implements ManagedContentBeans, ActionListener, ValueChangeListener {
 	public final static String EDIT_ARTICLE_BLOCK_ID = "edit_articles_block";
@@ -124,13 +124,12 @@ public class EditArticleBlock extends IWBaseComponent implements ManagedContentB
 	private final static String SUB_CATEGORIES_ID = P + "sub_categories";
 	private final static String CATEGORY_BACK_ID = P + "category_back";
 
+	boolean clearOnInit = false;
+
 	public EditArticleBlock() {
 	}
 
 	protected void initializeContent() {
-//		if(clearOnInit) {
-//			WFUtil.invoke(ARTICLE_ITEM_BEAN_ID, "clear");
-//		}
 		setId(EDIT_ARTICLE_BLOCK_ID);
 //		WFUtil.invoke(EDIT_ARTICLES_BEAN_ID, "setArticleLinkListener", this, ActionListener.class);
 		add(getEditContainer());
@@ -658,8 +657,6 @@ public class EditArticleBlock extends IWBaseComponent implements ManagedContentB
 		}
 	}
 	
-	boolean clearOnInit = false;
-
 	/**
 	 * @param mode
 	 */
