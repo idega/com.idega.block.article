@@ -1,5 +1,5 @@
 /*
- * $Id: ArticleActionURIHandler.java,v 1.2 2005/02/25 15:06:38 eiki Exp $
+ * $Id: ArticleActionURIHandler.java,v 1.3 2005/02/28 13:36:23 eiki Exp $
  * Created on Jan 31, 2005
  *
  * Copyright (C) 2005 Idega Software hf. All Rights Reserved.
@@ -19,11 +19,11 @@ import com.idega.core.uri.IWActionURIHandler;
 
 /**
  * 
- *  Last modified: $Date: 2005/02/25 15:06:38 $ by $Author: eiki $
+ *  Last modified: $Date: 2005/02/28 13:36:23 $ by $Author: eiki $
  * 
  * An IWActionURIHandler handler that handles a
  * @author <a href="mailto:eiki@idega.com">eiki</a>
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 public class ArticleActionURIHandler extends DefaultIWActionURIHandler implements IWActionURIHandler {
 
@@ -45,10 +45,9 @@ public class ArticleActionURIHandler extends DefaultIWActionURIHandler implement
 	 * @see com.idega.core.uri.IWActionURIHandler#getRedirectURI(com.idega.core.uri.IWActionURI)
 	 */
 	public String getRedirectURI(IWActionURI uri) {
-		//String identifier = uri.getIdentifierPart();
-		String redirectURI = "/workspace/content/article/list/preview?"+ContentViewer.PARAMETER_CONTENT_RESOURCE+"="+uri.getPathPart();
 		//todo set to previewer or editor depending on action
-		
+		//todo register actions as subnodes of article
+		String redirectURI = uri.getContextURI()+"workspace/content/article/list/"+uri.getActionPart()+"/?"+ContentViewer.PARAMETER_CONTENT_RESOURCE+"="+uri.getPathPart();
 		return redirectURI;
 	}
 	/* (non-Javadoc)

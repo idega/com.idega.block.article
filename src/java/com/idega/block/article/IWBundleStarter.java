@@ -1,5 +1,5 @@
 /*
- * $Id: IWBundleStarter.java,v 1.6 2005/02/27 15:16:05 eiki Exp $
+ * $Id: IWBundleStarter.java,v 1.7 2005/02/28 13:36:23 eiki Exp $
  * Created on 2.11.2004
  *
  * Copyright (C) 2004 Idega Software hf. All Rights Reserved.
@@ -10,7 +10,6 @@
 package com.idega.block.article;
 
 import com.idega.block.article.business.ArticleActionURIHandler;
-import com.idega.block.article.business.ArticleIWActionURI;
 import com.idega.content.view.ContentViewManager;
 import com.idega.core.uri.IWActionURIManager;
 import com.idega.core.view.DefaultViewNode;
@@ -22,10 +21,10 @@ import com.idega.idegaweb.IWBundleStartable;
 
 /**
  * 
- *  Last modified: $Date: 2005/02/27 15:16:05 $ by $Author: eiki $
+ *  Last modified: $Date: 2005/02/28 13:36:23 $ by $Author: eiki $
  * 
  * @author <a href="mailto:tryggvil@idega.com">Tryggvi Larusson</a>
- * @version $Revision: 1.6 $
+ * @version $Revision: 1.7 $
  */
 public class IWBundleStarter implements IWBundleStartable {
 	private static final String STYLE_SHEET_URL = "/style/article.css";
@@ -54,7 +53,8 @@ public class IWBundleStarter implements IWBundleStartable {
 	private void addArticleIWActionURIHandler() {
 		IWActionURIManager manager = IWActionURIManager.getInstance();
 		
-		manager.registerHandler(new ArticleActionURIHandler());
+		//so it is called before contenthandler
+		manager.registerHandler(0,new ArticleActionURIHandler());
 		
 	}
 
