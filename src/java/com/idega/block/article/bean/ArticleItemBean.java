@@ -1,5 +1,5 @@
 /*
- * $Id: ArticleItemBean.java,v 1.6 2004/12/03 14:43:31 joakim Exp $
+ * $Id: ArticleItemBean.java,v 1.7 2004/12/09 14:25:51 joakim Exp $
  *
  * Copyright (C) 2004 Idega. All Rights Reserved.
  *
@@ -19,6 +19,7 @@ import org.apache.commons.httpclient.HttpURL;
 import org.apache.webdav.lib.WebdavResource;
 import org.apache.xmlbeans.XmlException;
 import com.idega.business.IBOLookup;
+import com.idega.data.IDOStoreException;
 import com.idega.idegaweb.IWApplicationContext;
 import com.idega.idegaweb.IWUserContext;
 import com.idega.presentation.IWContext;
@@ -33,10 +34,10 @@ import com.idega.webface.test.bean.ContentItemFieldBean;
 /**
  * Bean for idegaWeb article content items.   
  * <p>
- * Last modified: $Date: 2004/12/03 14:43:31 $ by $Author: joakim $
+ * Last modified: $Date: 2004/12/09 14:25:51 $ by $Author: joakim $
  *
  * @author Anders Lindman
- * @version $Revision: 1.6 $
+ * @version $Revision: 1.7 $
  */
 
 public class ArticleItemBean extends ContentItemBean implements Serializable {
@@ -185,11 +186,19 @@ public class ArticleItemBean extends ContentItemBean implements Serializable {
 		_errorKeys = new ArrayList();
 	}
 	
+	public Boolean storeArticle() {
+		try {
+			store();
+		}catch(ArticleStoreException e) {
+			return new Boolean(false);
+		}
+		return new Boolean(true);
+	}
 	/**
 	 * This is a temporary holder for the Slide implementation
 	 * This should be replace as soon as Slide is working
 	 */
-	public void store() {
+	public void store() throws IDOStoreException{
 //	public Boolean store() {
 		boolean storeOk = true;
 		clearErrorKeys();
@@ -303,9 +312,9 @@ public class ArticleItemBean extends ContentItemBean implements Serializable {
 				setStatus(getRequestedStatus());
 				setRequestedStatus(null);
 			}
+		}else {
+			throw new ArticleStoreException();
 		}
-
-//		return new Boolean(storeOk);
 	}
 	
     public String getWebdavServletURL(IWUserContext iwuc){
@@ -327,6 +336,7 @@ public class ArticleItemBean extends ContentItemBean implements Serializable {
 	 * @throws IOException
 	 */
 	public void load(String path) throws XmlException, IOException{
+		System.out.println("Attempting to load path "+path);
 		IWUserContext iwuc = IWContext.getInstance();
 		IWApplicationContext iwac = iwuc.getApplicationContext();
 		
