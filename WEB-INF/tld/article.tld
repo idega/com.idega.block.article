@@ -13,7 +13,7 @@
 
 	<tag>
 		<name>articleblock</name>
-		<tag-class>com.idega.block.article.component.ArticleBlockTag</tag-class>
+		<tag-class>com.idega.block.article.component.reference.ArticleBlockTag</tag-class>
 		<attribute>
 			<name>id</name>
 			<required>false</required>

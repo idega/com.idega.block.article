@@ -13,7 +13,7 @@
 
 	<component>
 		<component-type>ArticleBlock</component-type>
-		<component-class>com.idega.block.article.component.ArticleBlock</component-class>
+		<component-class>com.idega.block.article.component.reference.ArticleBlock</component-class>
 	</component>
 
 	<component>
