@@ -1,4 +1,4 @@
-<!--<project>-->
+<project>
 
 	<!--xmlbeans generator -->
 <!--	<preGoal name="java:compile" >
@@ -12,5 +12,6 @@
 		      <arg value="${basedir}/resources/schemas"/>
 		    </java>
   </preGoal>
+-->
 
-</project>-->
+</project>
