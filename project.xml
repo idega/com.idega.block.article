@@ -4,12 +4,17 @@
   <extend>${base.project.dir}/block-dependencies.xml</extend>
   <name>idegaWeb Article</name>
   <artifactId>com.idega.block.article</artifactId>
-  <currentVersion>0.1.0-SNAPSHOT</currentVersion>
+  <currentVersion>0.1.0</currentVersion>
   <inceptionYear>2003</inceptionYear>
   <shortDescription>Articles</shortDescription>
   <description>idegaWeb article is a component for content management of articles</description>
   <versions>
-  </versions>  
+    <version>
+      <id>0.1.0</id>
+      <name>0.1.0</name>
+      <tag>ARTICLE_0_1_0</tag>
+    </version>
+  </versions> 
   <developers>
     <developer>
       <id>tryggvil</id>
@@ -29,21 +34,12 @@
  
   <dependencies>
 
-    <dependency>
-      <groupId>xmlbeans</groupId>
-      <artifactId>xbean</artifactId>
-      <version>1.0.3</version>
-      <type>jar</type>
-      <url>http://www.idega.is/</url>
-      <properties>
-        <idegaweb.bundle.include>true</idegaweb.bundle.include>
-      </properties>
-    </dependency>
+
     <dependency>
       <groupId>bundles</groupId>
       <artifactId>com.idega.core</artifactId>
-      <!--<version>1.9.1</version>-->
-      <version>SNAPSHOT</version>
+      <version>3.0.0</version>
+      <!--<version>SNAPSHOT</version>-->
       <type>jar</type>
       <url>http://www.idega.com/</url>
       <properties>
@@ -53,8 +49,8 @@
     <dependency>
       <groupId>bundles</groupId>
       <artifactId>com.idega.webface</artifactId>
-      <!--<version>0.8</version>-->
-      <version>SNAPSHOT</version>
+      <version>0.8.1</version>
+      <!--<version>SNAPSHOT</version>-->
       <type>jar</type>
       <url>http://www.idega.com/</url>
       <properties>
@@ -64,8 +60,8 @@
     <dependency>
       <groupId>bundles</groupId>
       <artifactId>com.idega.content</artifactId>
-      <!--<version>0.8</version>-->
-      <version>SNAPSHOT</version>
+      <version>0.5.0</version>
+      <!--<version>SNAPSHOT</version>-->
       <type>jar</type>
       <url>http://www.idega.com/</url>
       <properties>
@@ -75,12 +71,23 @@
     <dependency>
       <groupId>bundles</groupId>
       <artifactId>com.idega.slide</artifactId>
-      <!--<version>0.9</version>-->
-      <version>SNAPSHOT</version>
+      <version>0.3.0</version>
+      <!--<version>SNAPSHOT</version>-->
       <type>jar</type>
       <url>http://www.idega.com/</url>
       <properties>
         <eclipse.dependency>true</eclipse.dependency>
+      </properties>
+    </dependency>
+    
+    <dependency>
+      <groupId>xmlbeans</groupId>
+      <artifactId>xbean</artifactId>
+      <version>1.0.3</version>
+      <type>jar</type>
+      <url>http://www.idega.is/</url>
+      <properties>
+        <idegaweb.bundle.include>true</idegaweb.bundle.include>
       </properties>
     </dependency>
     <dependency>
