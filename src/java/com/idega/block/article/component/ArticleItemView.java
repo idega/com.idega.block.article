@@ -1,5 +1,5 @@
 /*
- * $Id: ArticleItemView.java,v 1.5 2004/12/17 14:22:54 joakim Exp $
+ * $Id: ArticleItemView.java,v 1.6 2004/12/20 16:49:18 joakim Exp $
  *
  * Copyright (C) 2004 Idega. All Rights Reserved.
  *
@@ -10,8 +10,12 @@ package com.idega.block.article.component;
 
 import java.io.IOException;
 import javax.faces.component.UIComponent;
+import javax.faces.component.html.HtmlCommandButton;
 import javax.faces.component.html.HtmlPanelGrid;
 import javax.faces.context.FacesContext;
+import javax.faces.event.AbortProcessingException;
+import javax.faces.event.ActionEvent;
+import javax.faces.event.ActionListener;
 import com.idega.block.article.WFUtilArticle;
 import com.idega.presentation.IWBaseComponent;
 import com.idega.webface.WFComponentSelector;
@@ -21,17 +25,19 @@ import com.idega.webface.WFUtil;
 import com.idega.webface.test.bean.ManagedContentBeans;
 
 /**
- * Last modified: $Date: 2004/12/17 14:22:54 $ by $Author: joakim $
+ * Last modified: $Date: 2004/12/20 16:49:18 $ by $Author: joakim $
  *
  * Displays the article item
  *
  * @author Joakim
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
  */
-public class ArticleItemView extends IWBaseComponent implements ManagedContentBeans {
+public class ArticleItemView extends IWBaseComponent implements ManagedContentBeans, ActionListener{
+	public final static String EDIT_ARTICLE_BLOCK_ID = "edit_articles_block";
 
 	private final static String P = "article_item_view_"; // Id prefix
 
+	private final static String EDIT_ID = P + "edit";
 	private final static String COMPONENT_SELECTOR_ID = P + "component_selector";
 	private final static String NO_ARTICLE_ID = P + "no_article";
 	private final static String ARTICLE_VIEW_ID = P + "article_view";
@@ -59,14 +65,32 @@ public class ArticleItemView extends IWBaseComponent implements ManagedContentBe
 
 		WFContainer c = new WFContainer();
 		c.setId(ARTICLE_VIEW_ID);
-		c.add(WFUtil.getTextVB(ref + "author"));
-		c.add(WFUtil.getText(" : "));
-		c.add(WFUtil.getTextVB(ref + "creationDate"));
-		c.add(WFUtil.getBreak(1));
-		c.add(WFUtil.getTextVB(ref + "headline"));
-		c.add(WFUtil.getBreak(2));
-		c.add(WFUtil.getTextVB(ref + "body"));
-		c.add(WFUtil.getBreak(1));
+		WFContainer c2 = new WFContainer();
+		c2.setStyleClass("article_author");
+		c2.add(WFUtil.getTextVB(ref + "author"));
+		c2.add(WFUtil.getText(" : "));
+		c2.add(WFUtil.getTextVB(ref + "creationDate"));
+		c2.add(WFUtil.getBreak(1));
+		c.add(c2);
+		c2 = new WFContainer();
+		c2.setStyleClass("article_headline");
+		c2.add(WFUtil.getTextVB(ref + "headline"));
+		c2.add(WFUtil.getBreak(1));
+		c.add(c2);
+		c2 = new WFContainer();
+		c2.setStyleClass("article_teaser");
+		c2.add(WFUtil.getTextVB(ref + "teaser"));
+		c2.add(WFUtil.getBreak(1));
+		c.add(c2);
+		c2 = new WFContainer();
+		c2.setStyleClass("article_body");
+		c2.add(WFUtil.getTextVB(ref + "body"));
+		c2.add(WFUtil.getBreak(1));
+		c.add(c2);
+		HtmlCommandButton editButton = WFUtilArticle.getButtonVB(EDIT_ID, "edit", this);
+		c.add(editButton);
+		c.add(WFUtil.getLinkVB("", ref + "headline", null));
+
 		cs.add(c);
 
 		cs.setSelectedId(NO_ARTICLE_ID, true);
@@ -103,5 +127,16 @@ public class ArticleItemView extends IWBaseComponent implements ManagedContentBe
 	public void encodeBegin(FacesContext context) throws IOException {
 		super.encodeBegin(context);
 		selectComponent();
+	}
+
+	/* (non-Javadoc)
+	 * @see javax.faces.event.ActionListener#processAction(javax.faces.event.ActionEvent)
+	 */
+	public void processAction(ActionEvent event) throws AbortProcessingException {
+		String id = event.getComponent().getId();
+		EditArticleBlock ab = (EditArticleBlock) event.getComponent().getParent().getParent().getParent().findComponent(EDIT_ARTICLE_BLOCK_ID);
+		if (id.equals(EDIT_ID)) {
+//			ab.storeArticle();
+		}
 	}
 }
