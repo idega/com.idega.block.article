@@ -1,5 +1,5 @@
 /*
- * $Id: EditArticleBlock.java,v 1.8 2005/01/04 13:33:59 joakim Exp $
+ * $Id: EditArticleBlock.java,v 1.9 2005/01/04 15:17:33 joakim Exp $
  *
  * Copyright (C) 2004 Idega. All Rights Reserved.
  *
@@ -27,6 +27,7 @@ import javax.faces.event.ActionEvent;
 import javax.faces.event.ActionListener;
 import com.idega.block.article.WFUtilArticle;
 import com.idega.block.article.component.reference.FileUploadForm;
+import com.idega.content.business.ContentUtil;
 import com.idega.presentation.IWBaseComponent;
 import com.idega.webface.WFComponentSelector;
 import com.idega.webface.WFContainer;
@@ -43,10 +44,10 @@ import com.idega.webface.test.bean.ContentItemCase;
 import com.idega.webface.test.bean.ManagedContentBeans;
 
 /**
- * Last modified: $Date: 2005/01/04 13:33:59 $ by $Author: joakim $
+ * Last modified: $Date: 2005/01/04 15:17:33 $ by $Author: joakim $
  *
  * @author Joakim
- * @version $Revision: 1.8 $
+ * @version $Revision: 1.9 $
  */
 public class EditArticleBlock extends IWBaseComponent implements ManagedContentBeans, ActionListener {
 	public final static String EDIT_ARTICLE_BLOCK_ID = "edit_articles_block";
@@ -111,11 +112,6 @@ public class EditArticleBlock extends IWBaseComponent implements ManagedContentB
 	private final static String SUB_CATEGORIES_ID = P + "sub_categories";
 	private final static String CATEGORY_BACK_ID = P + "category_back";
 
-	//TODO (JJ) change back to the longer path when we have created a function that creates 
-	//several subdirectories in one go. (/files is created automatically).
-//	private static final String ROOT_CATEGORY = "/files/content/articles";
-	private static final String ROOT_CATEGORY = "/files/content";
-	
 	public EditArticleBlock() {
 	}
 
@@ -172,7 +168,7 @@ public class EditArticleBlock extends IWBaseComponent implements ManagedContentB
 		bodyArea.addPlugin(HTMLArea.PLUGIN_CHARACTER_MAP);
 		bodyArea.setAllowFontSelection(false);
 		
-		HtmlCommandButton editButton = localizer.getButtonVB(EDIT_HTML_ID, "edit");
+		HtmlCommandButton editButton = localizer.getButtonVB(EDIT_HTML_ID, "edit", this);
 		editButton.setOnclick("wurl='htmlarea/webface/htmledit.jsp?" + PREVIEW_ARTICLE_ITEM_ID + 
 					"='+this.tabindex;window.open(wurl,'Edit','height=450,width=600,resizable=yes,status=no,toolbar=no,menubar=no,location=no,scrollbars=no');return false;");
 		p.getChildren().add(WFUtil.group(WFUtil.group(bodyArea, WFUtil.getBreak()), editButton));
@@ -258,7 +254,7 @@ public class EditArticleBlock extends IWBaseComponent implements ManagedContentB
 		p.getChildren().add(WFUtil.group(localizer.getTextVB("category"), WFUtil.getText(":")));
 		HtmlInputText categoryInput = WFUtil.getInputText(MAIN_CATEGORY_ID, ref + "mainCategory");
 		if(null==categoryInput.getValue() || "".equals(categoryInput.getValue())) {
-			categoryInput.setValue(ROOT_CATEGORY);
+			categoryInput.setValue(ContentUtil.CONTENT_PATH);
 		}
 		categoryInput.setSize(40);
 		p.getChildren().add(categoryInput);		
@@ -269,8 +265,8 @@ public class EditArticleBlock extends IWBaseComponent implements ManagedContentB
 //		WFComponentSelector cs = new WFComponentSelector();
 //		cs.setId(BUTTON_SELECTOR_ID);
 //		cs.setDividerText(" ");
-		HtmlCommandButton saveButton = localizer.getButtonVB(SAVE_ID, "save");
-//		HtmlCommandButton saveButton = WFUtil.getButtonVB(SAVE_ID, "save", this);
+		HtmlCommandButton saveButton = localizer.getButtonVB(SAVE_ID, "save", this);
+//		HtmlCommandButton saveButton = WFUtil.getButtonVB(SAVE_ID, WFPage.CONTENT_BUNDLE + "save", this);
 //		cs.add(saveButton);
 //		cs.add(WFUtil.getButtonVB(FOR_REVIEW_ID, bref + "for_review", this));
 //		cs.add(WFUtil.getButtonVB(PUBLISH_ID, bref + "publish", this));
