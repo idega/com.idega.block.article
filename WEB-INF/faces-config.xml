@@ -1,0 +1,86 @@
+<?xml version="1.0"?>
+
+<!DOCTYPE faces-config PUBLIC
+  "-//Sun Microsystems, Inc.//DTD JavaServer Faces Config 1.0//EN"
+  "http://java.sun.com/dtd/web-facesconfig_1_0.dtd">
+
+<faces-config>
+
+	<component>
+		<component-type>CMSPage</component-type>
+		<component-class>com.idega.block.article.CMSPage</component-class>
+	</component>
+
+	<component>
+		<component-type>ArticleBlock</component-type>
+		<component-class>com.idega.block.article.component.ArticleBlock</component-class>
+	</component>
+
+	<component>
+		<component-type>ListArticlesBlock</component-type>
+		<component-class>com.idega.block.article.component.ListArticlesBlock</component-class>
+	</component>
+
+	<component>
+		<component-type>CreateArticlePage</component-type>
+		<component-class>com.idega.block.article.CreateArticlePage</component-class>
+	</component>
+
+	<component>
+		<component-type>SearchArticlePage</component-type>
+		<component-class>com.idega.block.article.SearchArticlePage</component-class>
+	</component>
+
+	<component>
+		<component-type>ListArticlesPage</component-type>
+		<component-class>com.idega.block.article.ListArticlesPage</component-class>
+	</component>
+
+	<component>
+		<component-type>PreviewArticlePage</component-type>
+		<component-class>com.idega.block.article.PreviewArticlePage</component-class>
+	</component>
+
+	<managed-bean>
+		<managed-bean-name>articleItemBean</managed-bean-name>
+		<managed-bean-class>com.idega.block.article.bean.ArticleItemBean</managed-bean-class>
+		<managed-bean-scope>session</managed-bean-scope>
+	</managed-bean>
+
+	<managed-bean>
+		<managed-bean-name>articleVersionItemBean</managed-bean-name>
+		<managed-bean-class>com.idega.block.article.bean.ArticleItemBean</managed-bean-class>
+		<managed-bean-scope>session</managed-bean-scope>
+	</managed-bean>
+
+	<managed-bean>
+		<managed-bean-name>previewArticleBean</managed-bean-name>
+		<managed-bean-class>com.idega.block.article.bean.ArticleItemBean</managed-bean-class>
+		<managed-bean-scope>session</managed-bean-scope>
+	</managed-bean>
+
+	<managed-bean>
+		<managed-bean-name>articleVersionListBean</managed-bean-name>
+		<managed-bean-class>com.idega.block.article.bean.ArticleVersionListBean</managed-bean-class>
+		<managed-bean-scope>session</managed-bean-scope>
+	</managed-bean>
+	
+	<managed-bean>
+		<managed-bean-name>articleListBean</managed-bean-name>
+		<managed-bean-class>com.idega.block.article.bean.ArticleListBean</managed-bean-class>
+		<managed-bean-scope>session</managed-bean-scope>
+	</managed-bean>
+	
+	<managed-bean>
+		<managed-bean-name>searchArticleBean</managed-bean-name>
+		<managed-bean-class>com.idega.block.article.bean.SearchArticleBean</managed-bean-class>
+		<managed-bean-scope>session</managed-bean-scope>
+	</managed-bean>
+	
+	<managed-bean>
+		<managed-bean-name>listArticlesBean</managed-bean-name>
+		<managed-bean-class>com.idega.block.article.bean.ListArticlesBean</managed-bean-class>
+		<managed-bean-scope>session</managed-bean-scope>
+	</managed-bean>
+	
+</faces-config>
