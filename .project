@@ -1,17 +1,20 @@
 <?xml version="1.0" encoding="UTF-8"?>
+
 <projectDescription>
-	<name>com.idega.block.article</name>
-	<comment></comment>
-	<projects>
-	</projects>
-	<buildSpec>
-		<buildCommand>
-			<name>org.eclipse.jdt.core.javabuilder</name>
-			<arguments>
-			</arguments>
-		</buildCommand>
-	</buildSpec>
-	<natures>
-		<nature>org.eclipse.jdt.core.javanature</nature>
-	</natures>
+  <name>com.idega.block.article</name>
+  <comment>idegaWeb article is a component for content management of articles</comment>
+  <projects>
+    <project>com.idega.core</project>
+    <project>com.idega.webface</project>
+  </projects>
+  <buildSpec>
+    <buildCommand>
+      <name>org.eclipse.jdt.core.javabuilder</name>
+      <arguments>
+      </arguments>
+    </buildCommand>
+  </buildSpec>
+  <natures>
+    <nature>org.eclipse.jdt.core.javanature</nature>
+  </natures>
 </projectDescription>
