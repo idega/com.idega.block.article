@@ -28,6 +28,26 @@
   </developers>
   <dependencies>
     <dependency>
+      <groupId>article</groupId>
+      <artifactId>article</artifactId>
+      <version>1.0</version>
+      <type>jar</type>
+      <url>http://www.idega.is/</url>
+      <properties>
+        <idegaweb.bundle.include>true</idegaweb.bundle.include>
+      </properties>
+    </dependency>
+    <dependency>
+      <groupId>xmlbeans</groupId>
+      <artifactId>xbean</artifactId>
+      <version>1.0.3</version>
+      <type>jar</type>
+      <url>http://www.idega.is/</url>
+      <properties>
+        <idegaweb.bundle.include>true</idegaweb.bundle.include>
+      </properties>
+    </dependency>
+    <dependency>
       <groupId>bundles</groupId>
       <artifactId>com.idega.core</artifactId>
       <!--<version>1.9.1</version>-->

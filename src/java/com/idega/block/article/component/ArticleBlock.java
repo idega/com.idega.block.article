@@ -1,5 +1,5 @@
 /*
- * $Id: ArticleBlock.java,v 1.2 2004/11/01 19:04:37 tryggvil Exp $
+ * $Id: ArticleBlock.java,v 1.3 2004/11/09 11:18:14 joakim Exp $
  *
  * Copyright (C) 2004 Idega. All Rights Reserved.
  *
@@ -51,10 +51,10 @@ import com.idega.webface.test.bean.ManagedContentBeans;
 /**
  * Block for editing an article.   
  * <p>
- * Last modified: $Date: 2004/11/01 19:04:37 $ by $Author: tryggvil $
+ * Last modified: $Date: 2004/11/09 11:18:14 $ by $Author: joakim $
  *
  * @author Anders Lindman
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 public class ArticleBlock extends WFBlock implements ActionListener, ManagedContentBeans {
 
@@ -177,9 +177,9 @@ public class ArticleBlock extends WFBlock implements ActionListener, ManagedCont
 		HtmlInputText headlineInput = WFUtil.getInputText(HEADLINE_ID, ref + "headline");		
 		headlineInput.setSize(40);
 		p.getChildren().add(headlineInput);		
-		HtmlSelectOneMenu localeMenu = WFUtil.getSelectOneMenu(LOCALE_ID, ref + "allLocales", ref + "pendingLocaleId");
-		localeMenu.setOnchange("document.forms[0].submit();");
-		p.getChildren().add(localeMenu);		
+		//HtmlSelectOneMenu localeMenu = WFUtil.getSelectOneMenu(LOCALE_ID, ref + "allLocales", ref + "pendingLocaleId");
+		//localeMenu.setOnchange("document.forms[0].submit();");
+		//p.getChildren().add(localeMenu);		
 		p.getChildren().add(WFUtil.group(WFUtil.getTextVB(bref + "teaser"), WFUtil.getText(":")));		
 		p.getChildren().add(WFUtil.group(WFUtil.getTextVB(bref + "author"), WFUtil.getText(":")));		
 		HtmlInputTextarea teaserArea = WFUtil.getTextArea(TEASER_ID, ref + "teaser", "440px", "30px");
@@ -203,8 +203,8 @@ public class ArticleBlock extends WFBlock implements ActionListener, ManagedCont
 		p.getChildren().add(WFUtil.group(WFUtil.getTextVB(bref + "main_category"), WFUtil.getText(":")));		
 		HtmlInputTextarea sourceArea = WFUtil.getTextArea(SOURCE_ID, ref + "source", "440px", "30px");
 		p.getChildren().add(sourceArea);		
-		HtmlSelectOneMenu mainCategoryMenu = WFUtil.getSelectOneMenu(MAIN_CATEGORY_ID, ref + "categories", ref + "mainCategoryId");
-		p.getChildren().add(mainCategoryMenu);		
+		//HtmlSelectOneMenu mainCategoryMenu = WFUtil.getSelectOneMenu(MAIN_CATEGORY_ID, ref + "categories", ref + "mainCategoryId");
+		//p.getChildren().add(mainCategoryMenu);		
 
 		mainContainer.add(p);
 		mainContainer.add(WFUtil.getBreak());

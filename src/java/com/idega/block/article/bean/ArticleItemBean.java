@@ -1,5 +1,5 @@
 /*
- * $Id: ArticleItemBean.java,v 1.1 2004/10/26 12:45:00 joakim Exp $
+ * $Id: ArticleItemBean.java,v 1.2 2004/11/09 11:18:14 joakim Exp $
  *
  * Copyright (C) 2004 Idega. All Rights Reserved.
  *
@@ -9,10 +9,13 @@
  */
 package com.idega.block.article.bean;
 
+import java.io.File;
+import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import org.apache.xmlbeans.XmlException;
 import com.idega.webface.test.bean.ContentItemBean;
 import com.idega.webface.test.bean.ContentItemCase;
 import com.idega.webface.test.bean.ContentItemField;
@@ -22,10 +25,10 @@ import com.idega.webface.test.bean.ContentItemFieldBean;
 /**
  * Bean for idegaWeb article content items.   
  * <p>
- * Last modified: $Date: 2004/10/26 12:45:00 $ by $Author: joakim $
+ * Last modified: $Date: 2004/11/09 11:18:14 $ by $Author: joakim $
  *
  * @author Anders Lindman
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 
 public class ArticleItemBean extends ContentItemBean implements Serializable {
@@ -173,9 +176,102 @@ public class ArticleItemBean extends ContentItemBean implements Serializable {
 	}
 	
 	/**
-	 * Stores this article item to the database. 
+	 * This is a temporary holder for the Slide implementation
+	 * This should be replace as soon as Slide is working
 	 */
 	public Boolean store() {
+		boolean storeOk = true;
+		clearErrorKeys();
+
+	    ArticleDocument articleDoc = ArticleDocument.Factory.newInstance();
+	    
+	    ArticleDocument.Article article =  articleDoc.addNewArticle();
+	    
+		if (getHeadline().trim().equals("")) {
+			addErrorKey(KEY_ERROR_HEADLINE_EMPTY);
+			storeOk = false;
+		}
+		if (getBody().trim().equals("")) {
+			addErrorKey(KEY_ERROR_BODY_EMPTY);
+			storeOk = false;
+		}
+		if (getRequestedStatus() != null && getRequestedStatus().equals(ContentItemCase.STATUS_PUBLISHED)) {
+			if (getCase().getPublishedFromDate() == null) {
+				addErrorKey(KEY_ERROR_PUBLISHED_FROM_DATE_EMPTY);
+				storeOk = false;
+			}
+		}
+		
+	    article.setHeadline(getHeadline());
+	    article.setBody(getBody());
+	    article.setTeaser(getTeaser());
+	    article.setAuthor(getAuthor());
+	    article.setSource(getSource());
+	    article.setComment(getComment());
+//	    article.setImage(getImages());
+//	    article.setAttachment(getAttachments());
+//	    article.setRelatedItems(getRelatedContentItems());
+	    
+	    String filename = getHeadline();
+	    if(null==filename || filename.length()==0) {
+	    	filename = "empty";
+	    }
+	    
+	    try {
+			articleDoc.save(new File("/Test/article/"+filename+".xml"));
+		}
+		catch (IOException e1) {
+			storeOk = false;
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+
+		if (storeOk) {
+			if (getRequestedStatus() != null) {
+				setStatus(getRequestedStatus());
+				setRequestedStatus(null);
+			}
+		}
+
+		return new Boolean(storeOk);
+	}
+	
+	public void load(File file) throws XmlException, IOException{
+		ArticleDocument articleDoc;
+		
+		articleDoc = ArticleDocument.Factory.parse(file);
+		
+	    ArticleDocument.Article article =  articleDoc.getArticle();
+//	    ArticleItemBean articleBean = new ArticleItemBean();
+	    setHeadline(article.getHeadline());
+	    setBody(article.getBody());
+	    setTeaser(article.getTeaser());
+	    setAuthor(article.getAuthor());
+	    setSource(article.getSource());
+	    setComment(article.getComment());
+	    
+//		System.out.println("loaded "+getBody());
+	}
+	
+//	public List getAll() throws XmlException, IOException{
+//		List list = new ArrayList();
+//		
+//		File root = new File("/Test/article/");
+//		
+//		File[] articleFile = root.listFiles();
+//		
+//		for(int i=0;i<articleFile.length;i++){
+//			System.out.println("Attempting to load "+articleFile[i].toString());
+//				list.add(load(articleFile[i]));
+//		}
+//		
+//		return list;
+//	}
+	
+	/**
+	 * Stores this article item to the database. 
+	 */
+/*	public Boolean store() {
 		boolean storeOk = true;
 		clearErrorKeys();
 		
@@ -203,4 +299,5 @@ public class ArticleItemBean extends ContentItemBean implements Serializable {
 		
 		return new Boolean(storeOk);
 	}
+*/
 }

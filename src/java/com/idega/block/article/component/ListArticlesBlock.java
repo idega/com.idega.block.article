@@ -1,5 +1,5 @@
 /*
- * $Id: ListArticlesBlock.java,v 1.1 2004/10/26 12:45:00 joakim Exp $
+ * $Id: ListArticlesBlock.java,v 1.2 2004/11/09 11:18:14 joakim Exp $
  *
  * Copyright (C) 2004 Idega. All Rights Reserved.
  *
@@ -9,15 +9,19 @@
  */
 package com.idega.block.article.component;
 
+import java.io.File;
+import java.io.IOException;
 import java.io.Serializable;
 import java.util.Date;
 import javax.faces.component.UIComponent;
 import javax.faces.component.html.HtmlInputText;
 import javax.faces.component.html.HtmlPanelGrid;
-import javax.faces.component.html.HtmlSelectOneMenu;
+//import javax.faces.component.html.HtmlSelectOneMenu;
 import javax.faces.convert.IntegerConverter;
 import javax.faces.event.ActionEvent;
 import javax.faces.event.ActionListener;
+import org.apache.xmlbeans.XmlException;
+import com.idega.block.article.bean.ArticleItemBean;
 import com.idega.webface.WFBlock;
 import com.idega.webface.WFComponentSelector;
 import com.idega.webface.WFContainer;
@@ -35,10 +39,10 @@ import com.idega.webface.test.bean.ManagedContentBeans;
 /**
  * Block for listing articles.   
  * <p>
- * Last modified: $Date: 2004/10/26 12:45:00 $ by $Author: joakim $
+ * Last modified: $Date: 2004/11/09 11:18:14 $ by $Author: joakim $
  *
  * @author Anders Lindman
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public class ListArticlesBlock extends WFBlock implements ManagedContentBeans, ActionListener, Serializable {
 
@@ -78,6 +82,9 @@ public class ListArticlesBlock extends WFBlock implements ManagedContentBeans, A
 		
 		WFUtil.invoke(LIST_ARTICLES_BEAN_ID, "setArticleLinkListener", this, ActionListener.class);
 
+	}
+
+	protected void initializeContent() {
 		WFComponentSelector cs = new WFComponentSelector();
 		cs.setId(DISPLAY_SELECTOR_ID);
 		cs.add(getListPanel());
@@ -86,7 +93,6 @@ public class ListArticlesBlock extends WFBlock implements ManagedContentBeans, A
 		cs.setSelectedId(VIEW_ARTICLE_PANEL_ID, false);		
 		add(cs);
 	}
-	
 	/*
 	 * Creates a search form panel.
 	 */
@@ -126,9 +132,9 @@ public class ListArticlesBlock extends WFBlock implements ManagedContentBeans, A
 		searchPublishedToInput.setSize(20);
 		searchPublishedToInput.setConverter(new WFDateConverter());
 		p.getChildren().add(searchPublishedToInput);		
-		HtmlSelectOneMenu searchCategoryMenu = WFUtil.getSelectOneMenu(SEARCH_CATEGORY_ID, ref + "categories", ref + "searchCategoryId");
-		searchCategoryMenu.setConverter(new IntegerConverter());
-		p.getChildren().add(searchCategoryMenu);
+		//HtmlSelectOneMenu searchCategoryMenu = WFUtil.getSelectOneMenu(SEARCH_CATEGORY_ID, ref + "categories", ref + "searchCategoryId");
+		//searchCategoryMenu.setConverter(new IntegerConverter());
+		//p.getChildren().add(searchCategoryMenu);
 		
 		mainContainer.add(p);
 		mainContainer.add(WFUtil.getText(" "));
@@ -163,9 +169,9 @@ public class ListArticlesBlock extends WFBlock implements ManagedContentBeans, A
 		c.setId(VIEW_ARTICLE_PANEL_ID);
 		c.add(WFUtil.getTextVB(ref + "case.publishedFromDate"));
 		c.add(new WFPlainOutputText("&nbsp;&nbsp;"));
-		HtmlSelectOneMenu localeMenu = WFUtil.getSelectOneMenu(LOCALE_ID, ref + "allLocales", ref + "localeId");
-		localeMenu.setOnchange("document.forms[0].submit();");
-		c.add(localeMenu);		
+		//HtmlSelectOneMenu localeMenu = WFUtil.getSelectOneMenu(LOCALE_ID, ref + "allLocales", ref + "localeId");
+		//localeMenu.setOnchange("document.forms[0].submit();");
+		//c.add(localeMenu);		
 		c.add(WFUtil.getBreak(2));
 		c.add(WFUtil.getLinkVB("", ref + "headline", null));
 		c.add(WFUtil.getBreak(2));
@@ -190,39 +196,73 @@ public class ListArticlesBlock extends WFBlock implements ManagedContentBeans, A
 			cs.setSelectedId(VIEW_ARTICLE_PANEL_ID, false);
 			return;
 		}
-		
+
 		UIComponent link = event.getComponent();
 		String id = WFUtil.getParameter(link, "id");
-		WFUtil.invoke(ARTICLE_ITEM_BEAN_ID, "clear");
-		ContentItemCase caze = new ContentItemCaseBean();
-		caze.setPublishedFromDate(new Date());
-		WFUtil.invoke(ARTICLE_ITEM_BEAN_ID, "setCase", caze);		
-		WFUtil.invoke(ARTICLE_ITEM_BEAN_ID, "setLocaleId", "en");
-		WFUtil.invoke(ARTICLE_ITEM_BEAN_ID, "setHeadline", "Electronic Reykjavik Up-And-Running (id = " + id + ")");
-		WFUtil.invoke(ARTICLE_ITEM_BEAN_ID, "setTeaser", "Teaser");
-		WFUtil.invoke(ARTICLE_ITEM_BEAN_ID, "setBody", "The first 24/7 service offered by Reykjavik Municipality as part of the Electronic Reykjavik " +
-				"concept, was launched on May 25th., as planned. Now all applications and administration " +
-				"processes regarding Music school applications and internal student registration are " +
-				"implemented in the IdegaWeb eGOV solution.<br/><br/>" +
-				"All applications are submitted through the Citizen Account to the Music schools. "+
-				"The schools use the system to process the applications. "+
-				"In the Citizen Account users can see the status of cases and applications, " + 
-				"view messages and communicate with the Music school administrators.<br/><br/>" +
-				"For more information, you can access the website of Reykjavik <a href=\"#\">here</a>. " +
-				"Click on the icon for Electronic Reykjavik (Rafræn Reykjavik) or go directly to the portal " +
-				"<a href=\"#\">here</a>.");
-		WFUtil.invoke(ARTICLE_ITEM_BEAN_ID, "setAuthor", "Author");
-		WFUtil.invoke(ARTICLE_ITEM_BEAN_ID, "setComment", "Comment");
-		WFUtil.invoke(ARTICLE_ITEM_BEAN_ID, "setDescription", "Description");
-		WFUtil.invoke(ARTICLE_ITEM_BEAN_ID, "setStatus", ContentItemCase.STATUS_PUBLISHED);
-		WFUtil.invoke(ARTICLE_ITEM_BEAN_ID, "setMainCategoryId", new Integer(3));
-		WFUtil.invoke(ARTICLE_ITEM_BEAN_ID, "setLocaleId", "sv");
-		WFUtil.invoke(ARTICLE_ITEM_BEAN_ID, "setHeadline", "Electronic Rykjavik klar");
-		WFUtil.invoke(ARTICLE_ITEM_BEAN_ID, "setBody", "Den första 24-timmarsmyndigheten för Reykjaviks kommun igång.");
-		WFUtil.invoke(ARTICLE_ITEM_BEAN_ID, "setLocaleId", "en");
+		
+		ArticleItemBean articleItem = new ArticleItemBean();
+		try {
+			articleItem.load(new File("/Test/article/"+id+".xml"));
+			WFUtil.invoke(ARTICLE_ITEM_BEAN_ID, "clear");
+//			ContentItemCase caze = new ContentItemCaseBean();
+//			caze.setPublishedFromDate(new Date());
+//			WFUtil.invoke(ARTICLE_ITEM_BEAN_ID, "setCase", caze);
+			WFUtil.invoke(ARTICLE_ITEM_BEAN_ID, "setLocaleId", "en");
+			WFUtil.invoke(ARTICLE_ITEM_BEAN_ID, "setHeadline", notNull(articleItem.getHeadline())+" (id = " + id + ")");
+			WFUtil.invoke(ARTICLE_ITEM_BEAN_ID, "setTeaser", notNull(articleItem.getTeaser()));
+			WFUtil.invoke(ARTICLE_ITEM_BEAN_ID, "setBody", notNull(articleItem.getBody()));
+			WFUtil.invoke(ARTICLE_ITEM_BEAN_ID, "setAuthor", notNull(articleItem.getAuthor()));
+			WFUtil.invoke(ARTICLE_ITEM_BEAN_ID, "setComment", notNull(articleItem.getComment()));
+			WFUtil.invoke(ARTICLE_ITEM_BEAN_ID, "setDescription", notNull(articleItem.getDescription()));
+			WFUtil.invoke(ARTICLE_ITEM_BEAN_ID, "setStatus", 
+//					articleItem.getStatus()
+					ContentItemCase.STATUS_PUBLISHED
+					);
+			WFUtil.invoke(ARTICLE_ITEM_BEAN_ID, "setMainCategoryId", new Integer(3));
+			WFUtil.invoke(ARTICLE_ITEM_BEAN_ID, "setLocaleId", "sv");
 
-		WFComponentSelector cs = (WFComponentSelector) event.getComponent().getParent().getParent().getParent().findComponent(DISPLAY_SELECTOR_ID);
-		cs.setSelectedId(LIST_PANEL_ID, false);
-		cs.setSelectedId(VIEW_ARTICLE_PANEL_ID, true);
+			//And one more time since it won't work after just setting the params once!!!
+//			WFUtil.invoke(ARTICLE_ITEM_BEAN_ID, "setLocaleId", "en");
+//			WFUtil.invoke(ARTICLE_ITEM_BEAN_ID, "setHeadline", notNull(articleItem.getHeadline())+" (id = " + id + ")");
+//			WFUtil.invoke(ARTICLE_ITEM_BEAN_ID, "setTeaser", notNull(articleItem.getTeaser()));
+//			WFUtil.invoke(ARTICLE_ITEM_BEAN_ID, "setBody", notNull(articleItem.getBody()));
+//			WFUtil.invoke(ARTICLE_ITEM_BEAN_ID, "setAuthor", notNull(articleItem.getAuthor()));
+//			WFUtil.invoke(ARTICLE_ITEM_BEAN_ID, "setComment", notNull(articleItem.getComment()));
+//			WFUtil.invoke(ARTICLE_ITEM_BEAN_ID, "setDescription", notNull(articleItem.getDescription()));
+//			WFUtil.invoke(ARTICLE_ITEM_BEAN_ID, "setStatus", 
+////					articleItem.getStatus()
+//					ContentItemCase.STATUS_PUBLISHED
+//					);
+//			WFUtil.invoke(ARTICLE_ITEM_BEAN_ID, "setMainCategoryId", new Integer(3));
+//			WFUtil.invoke(ARTICLE_ITEM_BEAN_ID, "setLocaleId", "sv");
+			
+			WFUtil.invoke(ARTICLE_ITEM_BEAN_ID, "setHeadline", notNull(articleItem.getHeadline())+" (id = " + id + ")");
+			WFUtil.invoke(ARTICLE_ITEM_BEAN_ID, "setTeaser", notNull(articleItem.getTeaser()));
+			WFUtil.invoke(ARTICLE_ITEM_BEAN_ID, "setBody", notNull(articleItem.getBody()));
+
+//			WFUtil.invoke(ARTICLE_ITEM_BEAN_ID, "setHeadline", "Electronic Rykjavik klar");
+//			WFUtil.invoke(ARTICLE_ITEM_BEAN_ID, "setBody", "Den första 24-timmarsmyndigheten för Reykjaviks kommun igång.");
+//			WFUtil.invoke(ARTICLE_ITEM_BEAN_ID, "setLocaleId", "en");
+
+			WFComponentSelector cs = (WFComponentSelector) event.getComponent().getParent().getParent().getParent().findComponent(DISPLAY_SELECTOR_ID);
+			cs.setSelectedId(LIST_PANEL_ID, false);
+			cs.setSelectedId(VIEW_ARTICLE_PANEL_ID, true);
+		}
+		catch (XmlException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+	}
+	
+	private String notNull(String str) {
+		if(null==str) {
+			return "<Empty>";
+		}
+		return str;
 	}
 }

@@ -1,9 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <classpath>
-  <classpathentry excluding="" kind="src" path="src/java">
+  <classpathentry excluding="" kind="src" path="src\java">
   </classpathentry>
   <classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER">
+  </classpathentry>
+  <classpathentry kind="var" path="MAVEN_REPO/article/jars/article-1.0.jar">
+  </classpathentry>
+  <classpathentry kind="var" path="MAVEN_REPO/xmlbeans/jars/xbean-1.0.3.jar">
   </classpathentry>
   <classpathentry kind="src" path="/com.idega.core">
   </classpathentry>
@@ -35,6 +39,6 @@
   </classpathentry>
   <classpathentry kind="var" path="MAVEN_REPO/jspapi/jars/jsp-api-2.0.jar">
   </classpathentry>
-  <classpathentry kind="output" path="target/classes">
+  <classpathentry kind="output" path="target\classes">
   </classpathentry>
 </classpath>

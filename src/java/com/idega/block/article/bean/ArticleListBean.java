@@ -1,5 +1,5 @@
 /*
- * $Id: ArticleListBean.java,v 1.1 2004/10/26 12:45:00 joakim Exp $
+ * $Id: ArticleListBean.java,v 1.2 2004/11/09 11:18:14 joakim Exp $
  *
  * Copyright (C) 2004 Idega. All Rights Reserved.
  *
@@ -9,13 +9,18 @@
  */
 package com.idega.block.article.bean;
 
+import java.io.File;
+import java.io.IOException;
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.faces.component.UIColumn;
 import javax.faces.component.html.HtmlCommandLink;
 import javax.faces.component.html.HtmlOutputText;
 import javax.faces.event.ActionListener;
 import javax.faces.model.DataModel;
+import org.apache.xmlbeans.XmlException;
 
 import com.idega.webface.WFPage;
 import com.idega.webface.WFUtil;
@@ -25,10 +30,10 @@ import com.idega.webface.model.WFDataModel;
 /**
  * Bean for article list rows.   
  * <p>
- * Last modified: $Date: 2004/10/26 12:45:00 $ by $Author: joakim $
+ * Last modified: $Date: 2004/11/09 11:18:14 $ by $Author: joakim $
  *
  * @author Anders Lindman
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 
 public class ArticleListBean implements WFListBean, Serializable {
@@ -144,24 +149,56 @@ public class ArticleListBean implements WFListBean, Serializable {
 		if (_dataModel == null) {
 			_dataModel = new WFDataModel();
 		}
-		int availableRows = testHeadlines.length;
-		int nrOfRows = rows.intValue();
-		if (nrOfRows == 0) {
-			nrOfRows = availableRows;
-		}
-		int maxRow = start.intValue() + nrOfRows;
-		if (maxRow > availableRows) {
-			maxRow = availableRows;
-		}
-		for (int i = start.intValue(); i < maxRow; i++) {
-			ArticleListBean a = new ArticleListBean(String.valueOf(i), testHeadlines[i], testPublished[i], testAuthors[i], testStatus[i]);
-			if (i == 5) {
-				// set test style red
-				a.setTestStyle("color:red");
+		int availableRows = 0;
+
+		ArticleItemBean[] articleItemBean;
+		try {
+			articleItemBean = (ArticleItemBean[])loadAllArticlesInFolder(new File("/Test/article/")).toArray(new ArticleItemBean[0]);
+			availableRows = articleItemBean.length;
+			
+			int nrOfRows = rows.intValue();
+			if (nrOfRows == 0) {
+				nrOfRows = availableRows;
 			}
-			_dataModel.set(a, i);
+
+			int maxRow = Math.min(start.intValue() + nrOfRows,availableRows);
+			
+			for (int i = start.intValue(); i < maxRow; i++) {
+//				ArticleListBean a = new ArticleListBean(String.valueOf(i), testHeadlines[i], testPublished[i], testAuthors[i], testStatus[i]);
+				ArticleListBean a = new ArticleListBean(String.valueOf(i), articleItemBean[i].getHeadline(), articleItemBean[i].getItemType(), articleItemBean[i].getAuthor(), articleItemBean[i].getStatus());
+//				if (i == 5) {
+					// set test style red
+//					a.setTestStyle("color:red");
+//				}
+				_dataModel.set(a, i);
+			}
+		}
+		catch (XmlException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
 		_dataModel.setRowCount(availableRows);
+	}
+	
+	public static List loadAllArticlesInFolder(File folder) throws XmlException, IOException{
+		List list = new ArrayList();
+		
+//		File root = new File("/Test/article/");
+		
+		File[] articleFile = folder.listFiles();
+		
+		for(int i=0;i<articleFile.length;i++){
+			System.out.println("Attempting to load "+articleFile[i].toString());
+			ArticleItemBean article = new ArticleItemBean();
+			article.load(articleFile[i]);
+			list.add(article);
+		}
+		
+		return list;
 	}
 	
 	/**

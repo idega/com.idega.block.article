@@ -1,5 +1,5 @@
 /*
- * $Id: ListArticlesBean.java,v 1.1 2004/10/26 12:45:00 joakim Exp $
+ * $Id: ListArticlesBean.java,v 1.2 2004/11/09 11:18:14 joakim Exp $
  *
  * Copyright (C) 2004 Idega. All Rights Reserved.
  *
@@ -9,6 +9,8 @@
  */
 package com.idega.block.article.bean;
 
+import java.io.File;
+import java.io.IOException;
 import java.io.Serializable;
 import java.util.Date;
 import java.util.LinkedHashMap;
@@ -18,6 +20,7 @@ import javax.faces.component.UIColumn;
 import javax.faces.component.html.HtmlCommandLink;
 import javax.faces.event.ActionListener;
 import javax.faces.model.DataModel;
+import org.apache.xmlbeans.XmlException;
 
 import com.idega.webface.WFPage;
 import com.idega.webface.WFUtil;
@@ -27,10 +30,10 @@ import com.idega.webface.model.WFDataModel;
 /**
  * Bean for listing articles.   
  * <p>
- * Last modified: $Date: 2004/10/26 12:45:00 $ by $Author: joakim $
+ * Last modified: $Date: 2004/11/09 11:18:14 $ by $Author: joakim $
  *
  * @author Anders Lindman
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 
 public class ListArticlesBean implements WFListBean, Serializable {
@@ -153,20 +156,32 @@ public class ListArticlesBean implements WFListBean, Serializable {
 		if (_dataModel == null) {
 			_dataModel = new WFDataModel();
 		}
-		int availableRows = testHeadlines.length;
-		int nrOfRows = rows.intValue();
-		if (nrOfRows == 0) {
-			nrOfRows = availableRows;
+		try {
+			ArticleItemBean[] articleItemBean = (ArticleItemBean[]) ArticleListBean.loadAllArticlesInFolder(new File("/Test/article/")).toArray(new ArticleItemBean[0]);
+			int availableRows = articleItemBean.length;
+			
+			int nrOfRows = rows.intValue();
+			if (nrOfRows == 0) {
+				nrOfRows = availableRows;
+			}
+			int maxRow = Math.min(start.intValue() + nrOfRows,availableRows);
+			for (int i = start.intValue(); i < maxRow; i++) {
+//				ListArticlesBean bean = new ListArticlesBean(String.valueOf(i), testHeadlines[i], testPublished[i]);
+				//TODO we don't have published in the article item bean
+				ListArticlesBean bean = new ListArticlesBean(articleItemBean[i].getHeadline(), articleItemBean[i].getHeadline(), "");
+//				ArticleListBean a = new ArticleListBean(String.valueOf(i), articleItemBean[i].getHeadline(), articleItemBean[i].getItemType(), articleItemBean[i].getAuthor(), articleItemBean[i].getStatus());
+				_dataModel.set(bean, i);
+			}
+			_dataModel.setRowCount(availableRows);
 		}
-		int maxRow = start.intValue() + nrOfRows;
-		if (maxRow > availableRows) {
-			maxRow = availableRows;
+		catch (XmlException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
-		for (int i = start.intValue(); i < maxRow; i++) {
-			ListArticlesBean bean = new ListArticlesBean(String.valueOf(i), testHeadlines[i], testPublished[i]);
-			_dataModel.set(bean, i);
+		catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
-		_dataModel.setRowCount(availableRows);
 	}
 	
 	/**
