@@ -1,5 +1,5 @@
 /*
- * $Id: ArticleBlock.java,v 1.5 2004/11/14 23:39:41 tryggvil Exp $
+ * $Id: ArticleBlock.java,v 1.6 2004/11/16 00:49:29 tryggvil Exp $
  *
  * Copyright (C) 2004 Idega. All Rights Reserved.
  *
@@ -50,10 +50,10 @@ import com.idega.webface.test.bean.ManagedContentBeans;
 /**
  * Block for editing an article.   
  * <p>
- * Last modified: $Date: 2004/11/14 23:39:41 $ by $Author: tryggvil $
+ * Last modified: $Date: 2004/11/16 00:49:29 $ by $Author: tryggvil $
  *
  * @author Anders Lindman
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
  */
 public class ArticleBlock extends WFBlock implements ActionListener, ManagedContentBeans {
 
@@ -131,16 +131,23 @@ public class ArticleBlock extends WFBlock implements ActionListener, ManagedCont
 		
 		String bref = WFPage.CONTENT_BUNDLE + ".";
 		
-		WFTabbedPane tb = new WFTabbedPane();
-		tb.setId(TASKBAR_ID);
-		add(tb);
-		tb.addTabVB(TASK_ID_EDIT, bref + "edit", getEditContainer());
-		tb.addTabVB(TASK_ID_PREVIEW, bref + "preview", getPreviewContainer());
+		//WFTabbedPane tb = new WFTabbedPane();
+		//tb.setId(TASKBAR_ID);
+		//add(tb);
+		//tb.addTabVB(TASK_ID_EDIT, bref + "edit", getEditContainer());
+		//tb.addTabVB(TASK_ID_PREVIEW, bref + "preview", getPreviewContainer());
 //		tb.addButtonVB(TASK_ID_MESSAGES, bref + "messages", getMessageContainer());
-		tb.setSelectedMenuItemId(TASK_ID_EDIT);
-		if (taskbarListener != null) {
-			tb.addTabListener(taskbarListener);
-		}
+		//tb.setSelectedMenuItemId(TASK_ID_EDIT);
+		//if (taskbarListener != null) {
+		//	tb.addTabListener(taskbarListener);
+		//}
+		
+		WFContainer mainArea = new WFContainer();
+		mainArea.setStyleClass("wf_blockmainarea");
+		//add(getEditContainer());
+	
+		add(mainArea);
+		mainArea.add(getEditContainer());
 	}
 	
 	/**
