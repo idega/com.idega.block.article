@@ -1,5 +1,5 @@
 /*
- * $Id: ArticleItemBean.java,v 1.37 2005/03/08 18:33:14 gummi Exp $
+ * $Id: ArticleItemBean.java,v 1.38 2005/03/09 14:32:12 eiki Exp $
  *
  * Copyright (C) 2004 Idega. All Rights Reserved.
  *
@@ -51,10 +51,10 @@ import com.idega.xmlns.block.article.document.ArticleDocument;
 /**
  * Bean for idegaWeb article content items.   
  * <p>
- * Last modified: $Date: 2005/03/08 18:33:14 $ by $Author: gummi $
+ * Last modified: $Date: 2005/03/09 14:32:12 $ by $Author: eiki $
  *
  * @author Anders Lindman
- * @version $Revision: 1.37 $
+ * @version $Revision: 1.38 $
  */
 
 public class ArticleItemBean extends ContentItemBean implements Serializable, ContentItem {
@@ -87,10 +87,10 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 	
 	private final static String[] ATTRIBUTE_ARRAY = new String[] {FIELDNAME_AUTHOR,FIELDNAME_CREATION_DATE,FIELDNAME_HEADLINE,FIELDNAME_TEASER,FIELDNAME_BODY};
 	private final static String[] ACTION_ARRAY = new String[] {"edit","delete"};
-	
-	XMLNamespace idegans = new XMLNamespace("http://xmlns.idega.com/block/article/xml");
 
+	XMLNamespace idegaXMLNameSpace = new XMLNamespace("http://xmlns.idega.com/block/article/xml");
 	private String folderLocation = null;
+
 	
 	/**
 	 * Default constructor.
@@ -359,15 +359,15 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 
 		
 		
-		XMLElement root = new XMLElement("article",idegans);
-		XMLElement contentLanguage = new XMLElement(FIELDNAME_CONTENT_LANGUAGE,idegans).setText(getContentLanguage());
-		XMLElement headline = new XMLElement(FIELDNAME_HEADLINE,idegans).setText(getHeadline());
-		XMLElement teaser = new XMLElement(FIELDNAME_TEASER,idegans).setText(getTeaser());
-		XMLElement author = new XMLElement(FIELDNAME_AUTHOR,idegans).setText(getAuthor());
-		XMLElement source = new XMLElement(FIELDNAME_SOURCE,idegans).setText(getSource());
-		XMLElement articleComment = new XMLElement("article_comment",idegans).setText(getComment());
+		XMLElement root = new XMLElement("article",idegaXMLNameSpace);
+		XMLElement contentLanguage = new XMLElement(FIELDNAME_CONTENT_LANGUAGE,idegaXMLNameSpace).setText(getContentLanguage());
+		XMLElement headline = new XMLElement(FIELDNAME_HEADLINE,idegaXMLNameSpace).setText(getHeadline());
+		XMLElement teaser = new XMLElement(FIELDNAME_TEASER,idegaXMLNameSpace).setText(getTeaser());
+		XMLElement author = new XMLElement(FIELDNAME_AUTHOR,idegaXMLNameSpace).setText(getAuthor());
+		XMLElement source = new XMLElement(FIELDNAME_SOURCE,idegaXMLNameSpace).setText(getSource());
+		XMLElement articleComment = new XMLElement("article_comment",idegaXMLNameSpace).setText(getComment());
 
-		XMLElement body = new XMLElement(FIELDNAME_BODY,idegans).addContent(bodyElement);
+		XMLElement body = new XMLElement(FIELDNAME_BODY,idegaXMLNameSpace).addContent(bodyElement);
 
 		root.addContent(contentLanguage);
 		root.addContent(headline);
@@ -434,8 +434,6 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 			IWApplicationContext iwac = iwuc.getApplicationContext();
 			
 			IWSlideSession session = (IWSlideSession)IBOLookup.getSessionInstance(iwuc,IWSlideSession.class);
-//			IWSlideService service = (IWSlideService)IBOLookup.getServiceInstance(iwac,IWSlideService.class);
-		
 			WebdavRootResource rootResource = session.getWebdavRootResource();
 
 			IWSlideService slideService = (IWSlideService)IBOLookup.getServiceInstance(iwac,IWSlideService.class);
@@ -477,14 +475,12 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 				load(filePath);
 			}
 			catch (Exception e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 
 		}
 		catch (IOException e1) {
 			storeOk = false;
-			// TODO Auto-generated catch block
 			e1.printStackTrace();
 		}
 
@@ -585,7 +581,7 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 			XMLElement rootElement = bodyDoc.getRootElement();
 	
 			try {
-				XMLElement language  = rootElement.getChild(FIELDNAME_CONTENT_LANGUAGE,idegans);
+				XMLElement language  = rootElement.getChild(FIELDNAME_CONTENT_LANGUAGE,idegaXMLNameSpace);
 				if(language != null){
 					setContentLanguage(language.getText());
 				} else {
@@ -595,7 +591,7 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 				setContentLanguage(null);
 			}
 			try {
-				XMLElement headline = rootElement.getChild(FIELDNAME_HEADLINE,idegans);
+				XMLElement headline = rootElement.getChild(FIELDNAME_HEADLINE,idegaXMLNameSpace);
 				if(headline != null){
 					setHeadline(headline.getText());
 				} else {
@@ -606,7 +602,7 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 				setHeadline("");
 			}
 			try {
-				XMLElement teaser = rootElement.getChild(FIELDNAME_TEASER,idegans);
+				XMLElement teaser = rootElement.getChild(FIELDNAME_TEASER,idegaXMLNameSpace);
 				if(teaser != null){
 					setTeaser(teaser.getText());
 				} else {
@@ -617,7 +613,7 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 				setTeaser("");
 			}
 			try {
-				XMLElement author = rootElement.getChild(FIELDNAME_AUTHOR,idegans);
+				XMLElement author = rootElement.getChild(FIELDNAME_AUTHOR,idegaXMLNameSpace);
 				if(author != null){
 					setAuthor(author.getText());
 				} else {
@@ -631,7 +627,7 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 			//Parse out the body
 			try {
 				XMLNamespace htmlNamespace = new XMLNamespace("http://www.w3.org/1999/xhtml");
-				XMLElement bodyElement = rootElement.getChild(FIELDNAME_BODY,idegans);
+				XMLElement bodyElement = rootElement.getChild(FIELDNAME_BODY,idegaXMLNameSpace);
 				XMLElement htmlElement = bodyElement.getChild("html",htmlNamespace);
 				XMLElement htmlBodyElement = htmlElement.getChild("body",htmlNamespace);
 				String bodyValue = new XMLOutput().outputString(htmlBodyElement);
@@ -645,7 +641,7 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 			}
 			
 			try {
-				XMLElement source = rootElement.getChild(FIELDNAME_SOURCE,idegans);
+				XMLElement source = rootElement.getChild(FIELDNAME_SOURCE,idegaXMLNameSpace);
 				if(source != null){
 					setSource(source.getText());
 				} else {
@@ -655,7 +651,7 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 				setSource("");
 			}
 			try {
-				XMLElement comment = rootElement.getChild(FIELDNAME_ARTICLE_COMMENT,idegans);
+				XMLElement comment = rootElement.getChild(FIELDNAME_ARTICLE_COMMENT,idegaXMLNameSpace);
 				if(comment != null){
 					setComment(comment.getText());
 				} else {
