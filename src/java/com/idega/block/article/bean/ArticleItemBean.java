@@ -1,5 +1,5 @@
 /*
- * $Id: ArticleItemBean.java,v 1.5 2004/11/18 10:40:31 tryggvil Exp $
+ * $Id: ArticleItemBean.java,v 1.6 2004/12/03 14:43:31 joakim Exp $
  *
  * Copyright (C) 2004 Idega. All Rights Reserved.
  *
@@ -33,10 +33,10 @@ import com.idega.webface.test.bean.ContentItemFieldBean;
 /**
  * Bean for idegaWeb article content items.   
  * <p>
- * Last modified: $Date: 2004/11/18 10:40:31 $ by $Author: tryggvil $
+ * Last modified: $Date: 2004/12/03 14:43:31 $ by $Author: joakim $
  *
  * @author Anders Lindman
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
  */
 
 public class ArticleItemBean extends ContentItemBean implements Serializable {
@@ -189,7 +189,8 @@ public class ArticleItemBean extends ContentItemBean implements Serializable {
 	 * This is a temporary holder for the Slide implementation
 	 * This should be replace as soon as Slide is working
 	 */
-	public Boolean store() {
+	public void store() {
+//	public Boolean store() {
 		boolean storeOk = true;
 		clearErrorKeys();
 
@@ -304,7 +305,7 @@ public class ArticleItemBean extends ContentItemBean implements Serializable {
 			}
 		}
 
-		return new Boolean(storeOk);
+//		return new Boolean(storeOk);
 	}
 	
     public String getWebdavServletURL(IWUserContext iwuc){

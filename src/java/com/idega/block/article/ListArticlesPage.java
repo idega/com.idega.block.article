@@ -1,5 +1,5 @@
 /*
- * $Id: ListArticlesPage.java,v 1.1 2004/10/26 12:45:00 joakim Exp $
+ * $Id: ListArticlesPage.java,v 1.2 2004/12/03 14:43:31 joakim Exp $
  *
  * Copyright (C) 2004 Idega. All Rights Reserved.
  *
@@ -20,10 +20,10 @@ import com.idega.webface.WFUtil;
 /**
  * Search article test/demo page. 
  * <p>
- * Last modified: $Date: 2004/10/26 12:45:00 $ by $Author: joakim $
+ * Last modified: $Date: 2004/12/03 14:43:31 $ by $Author: joakim $
  *
  * @author Anders Lindman
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public class ListArticlesPage extends CMSPage {
 
@@ -42,7 +42,7 @@ public class ListArticlesPage extends CMSPage {
 		String bref = WFPage.CONTENT_BUNDLE + ".";
 		HtmlPanelGrid ap = WFPanelUtil.getApplicationPanel();
 		ap.getChildren().add(getFunctionBlock());
-		ListArticlesBlock block = new ListArticlesBlock(bref + "list_articles");
+		ListArticlesBlock block = new ListArticlesBlock();
 		ap.getChildren().add(block);
 		return ap;
 	}

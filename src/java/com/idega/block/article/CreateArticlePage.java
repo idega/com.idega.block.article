@@ -1,5 +1,5 @@
 /*
- * $Id: CreateArticlePage.java,v 1.2 2004/11/14 23:39:41 tryggvil Exp $
+ * $Id: CreateArticlePage.java,v 1.3 2004/12/03 14:43:31 joakim Exp $
  *
  * Copyright (C) 2004 Idega. All Rights Reserved.
  *
@@ -18,16 +18,16 @@ import com.idega.webface.WFUtil;
 /**
  * Created article test/demo page. 
  * <p>
- * Last modified: $Date: 2004/11/14 23:39:41 $ by $Author: tryggvil $
+ * Last modified: $Date: 2004/12/03 14:43:31 $ by $Author: joakim $
  *
  * @author Anders Lindman
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 public class CreateArticlePage extends CMSPage {
 	
 	
 	public CreateArticlePage(){
-		super();
+//		super();
 	}
 
 	/**

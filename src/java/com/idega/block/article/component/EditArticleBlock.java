@@ -1,23 +1,10 @@
-/*
- * $Id: ArticleBlock.java,v 1.11 2004/12/03 14:43:31 joakim Exp $
- *
- * Copyright (C) 2004 Idega. All Rights Reserved.
- *
- * This software is the proprietary information of Idega.
- * Use is subject to license terms.
- *
- */
 package com.idega.block.article.component;
 
 import java.io.IOException;
-import java.util.Iterator;
-import java.util.List;
 import javax.faces.component.UIColumn;
 import javax.faces.component.UIComponent;
 import javax.faces.component.html.HtmlCommandButton;
-import javax.faces.component.html.HtmlCommandLink;
 import javax.faces.component.html.HtmlDataTable;
-import javax.faces.component.html.HtmlGraphicImage;
 import javax.faces.component.html.HtmlInputText;
 import javax.faces.component.html.HtmlInputTextarea;
 import javax.faces.component.html.HtmlOutputLink;
@@ -28,8 +15,7 @@ import javax.faces.context.FacesContext;
 import javax.faces.convert.IntegerConverter;
 import javax.faces.event.ActionEvent;
 import javax.faces.event.ActionListener;
-import com.idega.block.article.PreviewArticlePage;
-import com.idega.webface.WFBlock;
+import com.idega.presentation.IWBaseComponent;
 import com.idega.webface.WFComponentSelector;
 import com.idega.webface.WFContainer;
 import com.idega.webface.WFDateInput;
@@ -38,28 +24,23 @@ import com.idega.webface.WFList;
 import com.idega.webface.WFPage;
 import com.idega.webface.WFPanelUtil;
 import com.idega.webface.WFPlainOutputText;
-import com.idega.webface.WFTabbedPane;
 import com.idega.webface.WFUtil;
-import com.idega.webface.convert.WFCommaSeparatedListConverter;
-import com.idega.webface.event.WFTabListener;
 import com.idega.webface.htmlarea.HTMLArea;
 import com.idega.webface.test.bean.CaseListBean;
 import com.idega.webface.test.bean.ContentItemCase;
 import com.idega.webface.test.bean.ManagedContentBeans;
 
-/**
- * Block for editing an article.   
- * <p>
- * Last modified: $Date: 2004/12/03 14:43:31 $ by $Author: joakim $
- *
- * @author Anders Lindman
- * @version $Revision: 1.11 $
- */
-public class ArticleBlock extends WFBlock implements ActionListener, ManagedContentBeans {
 
-	public final static String ARTICLE_BLOCK_ID = "article_block";
+/**
+ * @author Joakim
+ */
+public class EditArticleBlock extends IWBaseComponent implements ManagedContentBeans, ActionListener {
+	public final static String EDIT_ARTICLE_BLOCK_ID = "edit_articles_block";
+	private final static String P = "list_articles_block_"; // Id prefix
 	
-	private final static String P = "article_block_"; // Id prefix
+	public final static String EDIT_ARTICLES_BEAN_ID = "editArticlesBean";
+	
+//	public final static String ARTICLE_BLOCK_ID = "article_block";
 	
 	public final static String TASK_ID_EDIT = P + "t_edit";
 	public final static String TASK_ID_PREVIEW = P + "t_preview";
@@ -104,7 +85,7 @@ public class ArticleBlock extends WFBlock implements ActionListener, ManagedCont
 
 	private final static String BUTTON_SELECTOR_ID = P + "button_selector";
 	private final static String EDITOR_SELECTOR_ID = P + "editor_selector";
-	private final static String ARTICLE_EDITOR_ID = P + "article_editor2";
+	private final static String ARTICLE_EDITOR_ID = P + "article_editor";
 	private final static String CATEGORY_EDITOR_ID = P + "category_editor";
 	private final static String RELATED_CONTENT_ITEMS_EDITOR_ID = P + "related_items_editor";
 
@@ -121,49 +102,13 @@ public class ArticleBlock extends WFBlock implements ActionListener, ManagedCont
 //	private static final String ROOT_CATEGORY = "/files/content/articles";
 	private static final String ROOT_CATEGORY = "/files/content";
 	
-	/**
-	 * Default contructor.
-	 */
-	public ArticleBlock() {
+	public EditArticleBlock() {
 	}
-	
-	/**
-	 * Constructs an ArticleBlock with the specified title key. 
-	 */
-	public ArticleBlock(String titleKey, WFTabListener taskbarListener) {
-		super(titleKey);
-		setId(ARTICLE_BLOCK_ID);
-		getTitlebar().setValueRefTitle(true);
-		setMainAreaStyleClass(null);
-		
-		String bref = WFPage.CONTENT_BUNDLE + ".";
-		
-		WFTabbedPane tb = new WFTabbedPane();
-		tb.setId(TASKBAR_ID);
-		add(tb);
-		tb.addTabVB(TASK_ID_EDIT, bref + "edit", getEditContainer());
-		tb.addTabVB(TASK_ID_PREVIEW, bref + "details", getPreviewContainer());
-		tb.addTabVB(TASK_ID_LIST, bref + "list", new ListArticlesBlock());
-		tb.addTabVB(TASK_ID_DETAILS, bref + "preview", new PreviewArticlePage());
-//		tb.addButtonVB(TASK_ID_MESSAGES, bref + "messages", getMessageContainer());
-		tb.setSelectedMenuItemId(TASK_ID_EDIT);
-		if (taskbarListener != null) {
-			tb.addTabListener(taskbarListener);
-		}
-		
-		WFContainer mainArea = new WFContainer();
-		mainArea.setStyleClass("wf_blockmainarea");
-		//add(getEditContainer());
-	
-//		add(mainArea);
-//		mainArea.add(getEditContainer());
-	}
-	
-	/**
-	 * Constructs an ArticleBlock with the specified title key and taskbar listener. 
-	 */
-	public ArticleBlock(String titleKey) {
-		this(titleKey, null);
+
+	protected void initializeContent() {
+		setId(EDIT_ARTICLE_BLOCK_ID);
+//		WFUtil.invoke(EDIT_ARTICLES_BEAN_ID, "setArticleLinkListener", this, ActionListener.class);
+		add(getEditContainer());
 	}
 	
 	/*
@@ -203,9 +148,6 @@ public class ArticleBlock extends WFBlock implements ActionListener, ManagedCont
 		authorInput.setSize(22);
 		p.getChildren().add(authorInput);		
 		p.getChildren().add(WFUtil.group(WFUtil.getTextVB(bref + "body"), WFUtil.getText(":")));		
-//		p.getChildren().add(WFUtil.group(WFUtil.getTextVB(bref + "images"), WFUtil.getText(":")));		
-//		HtmlInputTextarea bodyArea = WFUtil.getHtmlAreaTextArea(BODY_ID, ref + "body", "460px", "400px");
-		
 		HTMLArea bodyArea = WFUtil.getHtmlAreaTextArea(BODY_ID, ref + "body", "100%", "400px");
 		bodyArea.addPlugin(HTMLArea.PLUGIN_TABLE_OPERATIONS);
 		bodyArea.addPlugin(HTMLArea.PLUGIN_DYNAMIC_CSS, "3");
@@ -322,94 +264,6 @@ public class ArticleBlock extends WFBlock implements ActionListener, ManagedCont
 	}
 
 	/*
-	 * Returns a list with images for the article.
-	 */
-	private UIComponent getImageList() {
-		String bref = WFPage.CONTENT_BUNDLE + ".";
-		String var = "article_images";
-		HtmlDataTable t = new HtmlDataTable();
-		t.setVar(var);
-		WFUtil.setValueBinding(t, "value", ARTICLE_ITEM_BEAN_ID + ".images");
-		t.setColumnClasses("wf_valign_middle");
-		
-		UIColumn col = new UIColumn();
-		HtmlGraphicImage image = new HtmlGraphicImage();
-		image.setStyle("width:40px;height:40px;");
-		WFUtil.setValueBinding(image, "url", var + ".imageURI");
-		col.getChildren().add(image);
-		t.getChildren().add(col);
-		
-		col = new UIColumn();
-		HtmlCommandButton removeButton = WFUtil.getButtonVB(REMOVE_IMAGE_ID, bref + "remove", this);
-		removeButton.setOnclick("return confirm('Are you sure you want to remove the image?');return false;");
-		WFUtil.addParameterVB(removeButton, "image_no", var + ".orderNoString");
-		col.getChildren().add(removeButton);
-		t.getChildren().add(col);
-		
-		return t;
-	}
-
-	/*
-	 * Returns a list with attachment links for the article.
-	 */
-	private UIComponent getAttachmentList() {
-		String bref = WFPage.CONTENT_BUNDLE + ".";
-		String var = "article_attachment";
-		HtmlDataTable t = new HtmlDataTable();
-		t.setVar(var);
-		WFUtil.setValueBinding(t, "value", ARTICLE_ITEM_BEAN_ID + ".attachments");
-		t.setColumnClasses("wf_valign_middle");
-		
-		UIColumn col = new UIColumn();
-		HtmlCommandLink link = new HtmlCommandLink();
-		WFUtil.setValueBinding(link, "value", var + ".imageURI");
-		col.getChildren().add(link);
-		t.getChildren().add(col);
-		
-		col = new UIColumn();
-		HtmlCommandButton removeButton = WFUtil.getButtonVB(REMOVE_ATTACHMENT_ID, bref + "remove", this);
-		removeButton.setValueBinding("onclick", WFUtil.createValueBinding("#{" + bref + "onclick_remove_attachment}"));
-		WFUtil.addParameterVB(removeButton, "attachment_no", var + ".orderNoString");
-		col.getChildren().add(removeButton);
-		t.getChildren().add(col);
-		
-		return t;
-	}
-
-	/*
-	 * Returns a list with realted content item links for the article.
-	 */
-	private UIComponent getRelatedContentItemsList() {
-		String bref = WFPage.CONTENT_BUNDLE + ".";
-		String var = "article_related_items";
-		HtmlDataTable t = new HtmlDataTable();
-		t.setVar(var);
-		WFUtil.setValueBinding(t, "value", ARTICLE_ITEM_BEAN_ID + ".relatedContentItems");
-		t.setColumnClasses("wf_valign_middle");
-		
-		UIColumn col = new UIColumn();
-		HtmlOutputLink link = new HtmlOutputLink();
-		WFUtil.setValueBinding(link, "tabindex", var + ".value");
-		link.setOnclick("wurl='previewarticle.jsf?" + PREVIEW_ARTICLE_ITEM_ID + 
-					"='+this.tabindex;window.open(wurl,'Preview','height=300,width=500,status=no,toolbar=no,menubar=no,location=no,scrollbars=yes');return false;");
-		HtmlOutputText txt = new HtmlOutputText();
-		WFUtil.setValueBinding(txt, "value", var + ".name");
-		link.getChildren().add(txt);
-		col.getChildren().add(link);
-		t.getChildren().add(col);
-		
-		col = new UIColumn();
-		HtmlCommandButton removeButton = WFUtil.getButtonVB(REMOVE_RELATED_CONTENT_ITEM_ID, bref + "remove", this);
-		WFUtil.addParameterVB(removeButton, "item_id", var + ".value");
-		removeButton.setValueBinding("onclick", WFUtil.createValueBinding("#{" + bref + "onclick_remove_related_content_item}"));
-		WFUtil.addParameterVB(removeButton, "related_item_no", var + ".orderNoString");
-		col.getChildren().add(removeButton);
-		t.getChildren().add(col);
-		
-		return t;
-	}
-	
-	/*
 	 * Returns container with form for editing categories.
 	 */
 	private UIComponent getCategoryEditContainer() {
@@ -446,6 +300,39 @@ public class ArticleBlock extends WFBlock implements ActionListener, ManagedCont
 	}
 	
 	/*
+	 * Returns a list with realted content item links for the article.
+	 */
+	private UIComponent getRelatedContentItemsList() {
+		String bref = WFPage.CONTENT_BUNDLE + ".";
+		String var = "article_related_items";
+		HtmlDataTable t = new HtmlDataTable();
+		t.setVar(var);
+		WFUtil.setValueBinding(t, "value", ARTICLE_ITEM_BEAN_ID + ".relatedContentItems");
+		t.setColumnClasses("wf_valign_middle");
+		
+		UIColumn col = new UIColumn();
+		HtmlOutputLink link = new HtmlOutputLink();
+		WFUtil.setValueBinding(link, "tabindex", var + ".value");
+		link.setOnclick("wurl='previewarticle.jsf?" + PREVIEW_ARTICLE_ITEM_ID + 
+					"='+this.tabindex;window.open(wurl,'Preview','height=300,width=500,status=no,toolbar=no,menubar=no,location=no,scrollbars=yes');return false;");
+		HtmlOutputText txt = new HtmlOutputText();
+		WFUtil.setValueBinding(txt, "value", var + ".name");
+		link.getChildren().add(txt);
+		col.getChildren().add(link);
+		t.getChildren().add(col);
+		
+		col = new UIColumn();
+		HtmlCommandButton removeButton = WFUtil.getButtonVB(REMOVE_RELATED_CONTENT_ITEM_ID, bref + "remove", this);
+		WFUtil.addParameterVB(removeButton, "item_id", var + ".value");
+		removeButton.setValueBinding("onclick", WFUtil.createValueBinding("#{" + bref + "onclick_remove_related_content_item}"));
+		WFUtil.addParameterVB(removeButton, "related_item_no", var + ".orderNoString");
+		col.getChildren().add(removeButton);
+		t.getChildren().add(col);
+		
+		return t;
+	}
+	
+	/*
 	 * Returns container with form for selecting related content items.
 	 */
 	private UIComponent getRelatedContentItemsContainer() {
@@ -462,6 +349,60 @@ public class ArticleBlock extends WFBlock implements ActionListener, ManagedCont
 		return c;
 	}
 	
+	/**
+	 * javax.faces.event.ActionListener#processAction()
+	 */
+	public void processAction(ActionEvent event) {
+		String id = event.getComponent().getId();
+		ArticleBlock ab = (ArticleBlock) event.getComponent().getParent().getParent().getParent().findComponent(EDIT_ARTICLE_BLOCK_ID);
+		if (id.equals(SAVE_ID)) {
+			ab.storeArticle();
+		} else if (id.equals(FOR_REVIEW_ID)) {
+			WFUtil.invoke(ARTICLE_ITEM_BEAN_ID, "setRequestedStatus", ContentItemCase.STATUS_READY_FOR_REVIEW);
+			ab.storeArticle();
+		} else if (id.equals(PUBLISH_ID)) {
+			WFUtil.invoke(ARTICLE_ITEM_BEAN_ID, "setRequestedStatus", ContentItemCase.STATUS_PUBLISHED);
+			ab.storeArticle();
+		} else if (id.equals(REWRITE_ID)) {
+			WFUtil.invoke(ARTICLE_ITEM_BEAN_ID, "setRequestedStatus", ContentItemCase.STATUS_REWRITE);
+			ab.storeArticle();
+		} else if (id.equals(REJECT_ID)) {
+			WFUtil.invoke(ARTICLE_ITEM_BEAN_ID, "setRequestedStatus", ContentItemCase.STATUS_DELETED);
+			ab.storeArticle();
+		} else if (id.equals(DELETE_ID)) {
+			WFUtil.invoke(ARTICLE_ITEM_BEAN_ID, "setRequestedStatus", ContentItemCase.STATUS_DELETED);
+			ab.storeArticle();
+		} else if (id.equals(EDIT_CATEGORIES_ID)) {
+			ab.setEditView(CATEGORY_EDITOR_ID);
+		} else if (id.equals(ADD_CATEGORIES_ID)) {
+			WFUtil.invoke(ARTICLE_ITEM_BEAN_ID, "addSelectedCategories");
+		} else if (id.equals(SUB_CATEGORIES_ID)) {
+			WFUtil.invoke(ARTICLE_ITEM_BEAN_ID, "removeSelectedCategories");
+		} else if (id.equals(CATEGORY_BACK_ID)) {
+			ab.setEditView(ARTICLE_EDITOR_ID);
+		} else if (id.equals(ADD_RELATED_CONTENT_ITEM_ID)) {
+			ab.setEditView(RELATED_CONTENT_ITEMS_EDITOR_ID);
+		} else if (id.equals(ADD_IMAGE_ID)) {
+			ab.setEditView(FILE_UPLOAD_FORM_ID);
+		} else if (id.equals(FILE_UPLOAD_CANCEL_ID)) {
+			ab.setEditView(ARTICLE_EDITOR_ID);
+		} else if (id.equals(FILE_UPLOAD_ID)) {
+			ab.setEditView(ARTICLE_EDITOR_ID);
+		} else if (id.equals(REMOVE_IMAGE_ID)) {
+			int imageNo = WFUtil.getIntParameter(event.getComponent(), "image_no");
+			WFUtil.invoke(ARTICLE_ITEM_BEAN_ID, "removeImage", new Integer(imageNo));
+		} else if (id.equals(CaseListBean.CASE_ID)){
+			String itemId = WFUtil.getParameter(event.getComponent(), "id");
+			WFUtil.invoke(ARTICLE_ITEM_BEAN_ID, "addRelatedContentItem", new Integer(itemId));
+			ab.setEditView(ARTICLE_EDITOR_ID);
+		} else if (id.equals(RELATED_CONTENT_ITEMS_CANCEL_ID)) {
+			ab.setEditView(ARTICLE_EDITOR_ID);
+		} else if (id.equals(REMOVE_RELATED_CONTENT_ITEM_ID)) {
+			int itemId = WFUtil.getIntParameter(event.getComponent(), "item_id");
+			WFUtil.invoke(ARTICLE_ITEM_BEAN_ID, "removeRelatedContentItem", new Integer(itemId));
+		}
+	}
+
 	/**
 	 * Updates the buttons in edit mode depending on the status of the current article.
 	 */
@@ -526,193 +467,6 @@ public class ArticleBlock extends WFBlock implements ActionListener, ManagedCont
 				cs.setSelectedId(REJECT_ID, true);
 				cs.setSelectedId(DELETE_ID, true);
 			}
-		}
-	}
-	
-	/*
-	 * Creates a preview container for the article.
-	 */
-	private UIComponent getPreviewContainer() {
-		String ref = ARTICLE_ITEM_BEAN_ID + ".";
-		String bref = WFPage.CONTENT_BUNDLE + ".";
-
-		HtmlPanelGrid p = WFPanelUtil.getPlainFormPanel(1);
-		p.getChildren().add(WFUtil.getHeaderTextVB(ref + "headline"));
-		p.getChildren().add(WFUtil.getText(" "));
-		p.getChildren().add(WFUtil.getTextVB(ref + "teaser"));
-		p.getChildren().add(WFUtil.getText(" "));
-		WFPlainOutputText bodyText = new WFPlainOutputText();
-		WFUtil.setValueBinding(bodyText, "value", ref + "body");
-		p.getChildren().add(bodyText);
-		p.getChildren().add(WFUtil.getBreak());		
-		p.getChildren().add(new WFPlainOutputText("<hr/>"));
-		UIComponent g = WFUtil.group(WFUtil.getHeaderTextVB(bref + "author"), WFUtil.getHeaderText(": ")); 
-		g.getChildren().add(WFUtil.getTextVB(ref + "author"));
-		p.getChildren().add(g);
-		p.getChildren().add(WFUtil.getText(" "));
-		g = WFUtil.group(WFUtil.getHeaderTextVB(bref + "created"), WFUtil.getHeaderText(": "));
-		g.getChildren().add(WFUtil.getText("4/20/04 3:04 PM"));
-		p.getChildren().add(g);
-		p.getChildren().add(WFUtil.getText(" "));
-		g = WFUtil.group(WFUtil.getHeaderTextVB(bref + "status"), WFUtil.getHeaderText(": "));
-		g.getChildren().add(WFUtil.getTextVB(ref + "status"));
-		p.getChildren().add(g);
-		p.getChildren().add(WFUtil.getText(" "));
-		HtmlOutputText t = WFUtil.getTextVB(ref + "categoryNames");
-		t.setConverter(new WFCommaSeparatedListConverter());
-		g = WFUtil.group(WFUtil.getHeaderTextVB(bref + "categories"), WFUtil.getHeaderText(": "));
-		g.getChildren().add(t);
-		p.getChildren().add(g);
-		p.getChildren().add(WFUtil.getText(" "));
-		g = WFUtil.group(WFUtil.getHeaderTextVB(bref + "current_version"), WFUtil.getHeaderText(": "));
-		g.getChildren().add(WFUtil.getText("1.5"));
-		p.getChildren().add(g);
-		p.getChildren().add(WFUtil.getText(" "));
-		g = WFUtil.group(WFUtil.getHeaderTextVB(bref + "comment"), WFUtil.getHeaderText(": "));
-		g.getChildren().add(WFUtil.getTextVB(ref + "comment"));
-		p.getChildren().add(g);
-		p.getChildren().add(WFUtil.getText(" "));
-		g = WFUtil.group(WFUtil.getHeaderText("source"), WFUtil.getHeaderText(": "));
-		g.getChildren().add(WFUtil.getTextVB(ref + "source"));
-		p.getChildren().add(g);
-		p.getChildren().add(WFUtil.getText(" "));
-				
-		return p;
-	}
-	
-	/*
-	 * Creates a message container for the article.
-	 */
-	private UIComponent getMessageContainer() {
-		String bref = WFPage.CONTENT_BUNDLE + ".";
-		WFContainer c = new WFContainer();
-		HtmlOutputText t = WFUtil.getTextVB(bref + "no_messages");
-		t.setId(USER_MESSAGE_ID);
-		c.add(t);		
-		return c;
-	}
-
-	/**
-	 * Sets this block to edit mode. 
-	 */
-	public void setEditMode() {
-		WFTabbedPane tb = (WFTabbedPane) findComponent(TASKBAR_ID);
-		tb.setSelectedMenuItemId(TASK_ID_EDIT);
-	}
-
-	/**
-	 * Sets this block to preview mode. 
-	 */
-	public void setPreviewMode() {
-		WFTabbedPane tb = (WFTabbedPane) findComponent(TASKBAR_ID);
-		tb.setSelectedMenuItemId(TASK_ID_PREVIEW);
-	}
-
-	/**
-	 * Sets this block to message mode. 
-	 */
-	public void setMessageMode() {
-		WFTabbedPane tb = (WFTabbedPane) findComponent(TASKBAR_ID);
-		tb.setSelectedMenuItemId(TASK_ID_MESSAGES);
-	}
-	
-	/**
-	 * javax.faces.event.ActionListener#processAction()
-	 */
-	public void processAction(ActionEvent event) {
-		String id = event.getComponent().getId();
-		ArticleBlock ab = (ArticleBlock) event.getComponent().getParent().getParent().getParent().findComponent(ARTICLE_BLOCK_ID);
-		if (id.equals(SAVE_ID)) {
-			ab.storeArticle();
-		} else if (id.equals(FOR_REVIEW_ID)) {
-			WFUtil.invoke(ARTICLE_ITEM_BEAN_ID, "setRequestedStatus", ContentItemCase.STATUS_READY_FOR_REVIEW);
-			ab.storeArticle();
-		} else if (id.equals(PUBLISH_ID)) {
-			WFUtil.invoke(ARTICLE_ITEM_BEAN_ID, "setRequestedStatus", ContentItemCase.STATUS_PUBLISHED);
-			ab.storeArticle();
-		} else if (id.equals(REWRITE_ID)) {
-			WFUtil.invoke(ARTICLE_ITEM_BEAN_ID, "setRequestedStatus", ContentItemCase.STATUS_REWRITE);
-			ab.storeArticle();
-		} else if (id.equals(REJECT_ID)) {
-			WFUtil.invoke(ARTICLE_ITEM_BEAN_ID, "setRequestedStatus", ContentItemCase.STATUS_DELETED);
-			ab.storeArticle();
-		} else if (id.equals(DELETE_ID)) {
-			WFUtil.invoke(ARTICLE_ITEM_BEAN_ID, "setRequestedStatus", ContentItemCase.STATUS_DELETED);
-			ab.storeArticle();
-		} else if (id.equals(EDIT_CATEGORIES_ID)) {
-			ab.setEditView(CATEGORY_EDITOR_ID);
-		} else if (id.equals(ADD_CATEGORIES_ID)) {
-			WFUtil.invoke(ARTICLE_ITEM_BEAN_ID, "addSelectedCategories");
-		} else if (id.equals(SUB_CATEGORIES_ID)) {
-			WFUtil.invoke(ARTICLE_ITEM_BEAN_ID, "removeSelectedCategories");
-		} else if (id.equals(CATEGORY_BACK_ID)) {
-			ab.setEditView(ARTICLE_EDITOR_ID);
-		} else if (id.equals(ADD_RELATED_CONTENT_ITEM_ID)) {
-			ab.setEditView(RELATED_CONTENT_ITEMS_EDITOR_ID);
-		} else if (id.equals(ADD_IMAGE_ID)) {
-			ab.setEditView(FILE_UPLOAD_FORM_ID);
-		} else if (id.equals(FILE_UPLOAD_CANCEL_ID)) {
-			ab.setEditView(ARTICLE_EDITOR_ID);
-		} else if (id.equals(FILE_UPLOAD_ID)) {
-			ab.setEditView(ARTICLE_EDITOR_ID);
-		} else if (id.equals(REMOVE_IMAGE_ID)) {
-			int imageNo = WFUtil.getIntParameter(event.getComponent(), "image_no");
-			WFUtil.invoke(ARTICLE_ITEM_BEAN_ID, "removeImage", new Integer(imageNo));
-		} else if (id.equals(CaseListBean.CASE_ID)){
-			String itemId = WFUtil.getParameter(event.getComponent(), "id");
-			WFUtil.invoke(ARTICLE_ITEM_BEAN_ID, "addRelatedContentItem", new Integer(itemId));
-			ab.setEditView(ARTICLE_EDITOR_ID);
-		} else if (id.equals(RELATED_CONTENT_ITEMS_CANCEL_ID)) {
-			ab.setEditView(ARTICLE_EDITOR_ID);
-		} else if (id.equals(REMOVE_RELATED_CONTENT_ITEM_ID)) {
-			int itemId = WFUtil.getIntParameter(event.getComponent(), "item_id");
-			WFUtil.invoke(ARTICLE_ITEM_BEAN_ID, "removeRelatedContentItem", new Integer(itemId));
-		}
-	}
-
-	/**
-	 * Sets the editor view for this article block.
-	 *
-	 */
-	public void setEditView(String s) {
-		WFComponentSelector cs = (WFComponentSelector) findComponent(EDITOR_SELECTOR_ID);
-		cs.setSelectedId(ARTICLE_EDITOR_ID, s.equals(ARTICLE_EDITOR_ID));
-		cs.setSelectedId(CATEGORY_EDITOR_ID, s.equals(CATEGORY_EDITOR_ID));
-		cs.setSelectedId(FILE_UPLOAD_FORM_ID, s.equals(FILE_UPLOAD_FORM_ID));
-		cs.setSelectedId(RELATED_CONTENT_ITEMS_EDITOR_ID, s.equals(RELATED_CONTENT_ITEMS_EDITOR_ID));
-	}
-	
-	/**
-	 * Stores the current article. 
-	 */
-	public void storeArticle() {
-		String bref = WFPage.CONTENT_BUNDLE + ".";
-		boolean storeOk = ((Boolean) WFUtil.invoke(ARTICLE_ITEM_BEAN_ID, "store")).booleanValue();
-		if (!storeOk) {
-			List errorKeys = (List) WFUtil.getValue(ARTICLE_ITEM_BEAN_ID, "errorKeys");
-			if (errorKeys != null) {
-				for (Iterator iter = errorKeys.iterator(); iter.hasNext();) {
-					String errorKey = (String) iter.next();
-					WFUtil.addMessageVB(findComponent(SAVE_ID), bref + errorKey);
-				}
-			}
-			return;
-		}
-		setUserMessage("article_saved");
-	}
-	
-	/*
-	 * Sets the text in the message task container. 
-	 */
-	private void setUserMessage(String ref) {
-		String bref = WFPage.CONTENT_BUNDLE + ".";
-		HtmlOutputText t = (HtmlOutputText) findComponent(USER_MESSAGE_ID);
-		if(t!=null){
-			t.setValueBinding("value", WFUtil.createValueBinding("#{" + bref + ref + "}"));
-			setMessageMode();
-		}
-		else{
-			System.out.println("AtricleBlock: t==null: Message out: "+bref + ref);
 		}
 	}
 	

@@ -1,5 +1,5 @@
 /*
- * $Id: ListArticlesBlock.java,v 1.5 2004/11/26 10:27:53 joakim Exp $
+ * $Id: ListArticlesBlock.java,v 1.6 2004/12/03 14:43:31 joakim Exp $
  *
  * Copyright (C) 2004 Idega. All Rights Reserved.
  *
@@ -18,7 +18,7 @@ import javax.faces.event.ActionEvent;
 import javax.faces.event.ActionListener;
 import org.apache.xmlbeans.XmlException;
 import com.idega.block.article.bean.ArticleItemBean;
-import com.idega.webface.WFBlock;
+import com.idega.presentation.IWBaseComponent;
 import com.idega.webface.WFComponentSelector;
 import com.idega.webface.WFContainer;
 import com.idega.webface.WFErrorMessages;
@@ -34,12 +34,14 @@ import com.idega.webface.test.bean.ManagedContentBeans;
 /**
  * Block for listing articles.   
  * <p>
- * Last modified: $Date: 2004/11/26 10:27:53 $ by $Author: joakim $
+ * Last modified: $Date: 2004/12/03 14:43:31 $ by $Author: joakim $
  *
  * @author Anders Lindman
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
  */
-public class ListArticlesBlock extends WFBlock implements ManagedContentBeans, ActionListener, Serializable {
+public class ListArticlesBlock extends 
+IWBaseComponent
+implements ManagedContentBeans, ActionListener, Serializable {
 
 	public final static String LIST_ARTICLES_BLOCK_ID = "list_articles_block";
 
@@ -61,25 +63,14 @@ public class ListArticlesBlock extends WFBlock implements ManagedContentBeans, A
 	private final static String DISPLAY_SELECTOR_ID = P + "selector";
 	
 	/**
-	 * Default contructor.
-	 */
-	public ListArticlesBlock() {
-		this("untitled");
-	}
-	
-	/**
 	 * Constructs a ListArticlesBlock with the specified title key. 
 	 */
-	public ListArticlesBlock(String titleKey) {
-		super(titleKey);
-		setId(LIST_ARTICLES_BLOCK_ID);
-		getTitlebar().setValueRefTitle(true);
-		
+	public ListArticlesBlock() {
 		WFUtil.invoke(LIST_ARTICLES_BEAN_ID, "setArticleLinkListener", this, ActionListener.class);
-
 	}
 
 	protected void initializeContent() {
+		setId(LIST_ARTICLES_BLOCK_ID);
 		WFComponentSelector cs = new WFComponentSelector();
 		cs.setId(DISPLAY_SELECTOR_ID);
 		cs.add(getListPanel());

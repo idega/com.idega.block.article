@@ -21,9 +21,14 @@
 		<component-class>com.idega.block.article.component.ListArticlesBlock</component-class>
 	</component>
 
+	<managed-bean>
+		<component-type>ArticleItemView</component-type>
+		<component-class>com.idega.block.article.component.ArticleItemView</component-class>
+	</managed-bean>
+	
 	<component>
 		<component-type>CreateArticlePage</component-type>
-		<component-class>com.idega.block.article.CreateArticlePage</component-class>
+		<component-class>com.idega.block.article.ArticlePage</component-class>
 	</component>
 
 	<component>
