@@ -1,5 +1,5 @@
 /*
- * $Id: CMSPage.java,v 1.5 2004/11/14 23:39:41 tryggvil Exp $
+ * $Id: CMSPage.java,v 1.6 2004/11/16 00:42:30 tryggvil Exp $
  *
  * Copyright (C) 2004 Idega. All Rights Reserved.
  *
@@ -39,10 +39,10 @@ import com.idega.webface.test.bean.ManagedContentBeans;
 /**
  * Content management system test/demo page. 
  * <p>
- * Last modified: $Date: 2004/11/14 23:39:41 $ by $Author: tryggvil $
+ * Last modified: $Date: 2004/11/16 00:42:30 $ by $Author: tryggvil $
  *
  * @author Anders Lindman
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
  */
 public class CMSPage extends WFPage implements  ManagedContentBeans, WFTabListener, ActionListener, Serializable {
 	
@@ -110,13 +110,16 @@ public class CMSPage extends WFPage implements  ManagedContentBeans, WFTabListen
 		
 		WFUtil.invoke(CASE_LIST_BEAN_ID, "setCaseLinkListener", this, ActionListener.class);
 		
-		getChildren().add(WFUtil.getBannerBox());
-		getChildren().add(getMainTaskbar());
+		//getChildren().add(WFUtil.getBannerBox());
+		//getChildren().add(getMainTaskbar());
 		
-		HtmlInputSecret passwdInput = new HtmlInputSecret();
-		passwdInput.setValue("test");
-		passwdInput.setTitle("Testtitle");
-		getChildren().add(passwdInput);
+		getChildren().add(getCaseList());
+		getChildren().add(getArticleList());
+		
+		//HtmlInputSecret passwdInput = new HtmlInputSecret();
+		//passwdInput.setValue("test");
+		//passwdInput.setTitle("Testtitle");
+		//getChildren().add(passwdInput);
 		
 		if (isArticleBeanUpdated) {
 			setEditMode();
@@ -243,13 +246,16 @@ public class CMSPage extends WFPage implements  ManagedContentBeans, WFTabListen
 	 */
 	public void processAction(ActionEvent event) {
 		UIComponent link = event.getComponent();
-
+		ArticleBlock ab = null;
+		
 		String id = WFUtil.getParameter(link, "id");
-		WFTabbedPane tb = (WFTabbedPane) link.getParent().getParent().getParent().findComponent(MAIN_TASKBAR_ID);
-
-		tb.setSelectedMenuItemId(TASK_ID_EDIT);
-		ArticleBlock ab = (ArticleBlock) tb.findComponent(ArticleBlock.ARTICLE_BLOCK_ID);
-		ab.setEditMode();
+		UIComponent component = link.getParent().getParent().getParent().findComponent(MAIN_TASKBAR_ID);
+		if(component instanceof WFTabbedPane){
+			WFTabbedPane tb = (WFTabbedPane) component;
+			tb.setSelectedMenuItemId(TASK_ID_EDIT);
+			ab = (ArticleBlock) tb.findComponent(ArticleBlock.ARTICLE_BLOCK_ID);
+			ab.setEditMode();
+		}
 
 		WFUtil.invoke(ARTICLE_ITEM_BEAN_ID, "clear");
 		WFUtil.invoke(ARTICLE_ITEM_BEAN_ID, "setLocaleId", "sv");
@@ -266,7 +272,10 @@ public class CMSPage extends WFPage implements  ManagedContentBeans, WFTabListen
 		}
 		WFUtil.invoke(ARTICLE_ITEM_BEAN_ID, "setMainCategoryId", new Integer(3));
 
-		ab.updateEditButtons();
+		
+		if(ab!=null){
+			ab.updateEditButtons();
+		}
 	}
 	
 	/**
