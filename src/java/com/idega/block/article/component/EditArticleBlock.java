@@ -1,5 +1,5 @@
 /*
- * $Id: EditArticleBlock.java,v 1.13 2005/02/02 14:10:31 joakim Exp $
+ * $Id: EditArticleBlock.java,v 1.14 2005/02/03 10:33:17 joakim Exp $
  *
  * Copyright (C) 2004 Idega. All Rights Reserved.
  *
@@ -28,6 +28,7 @@ import javax.faces.event.ActionListener;
 import com.idega.block.article.component.reference.FileUploadForm;
 import com.idega.content.business.ContentUtil;
 import com.idega.presentation.IWBaseComponent;
+import com.idega.util.IWTimestamp;
 import com.idega.webface.WFComponentSelector;
 import com.idega.webface.WFContainer;
 import com.idega.webface.WFErrorMessages;
@@ -44,10 +45,10 @@ import com.idega.webface.test.bean.ContentItemCase;
 import com.idega.webface.test.bean.ManagedContentBeans;
 
 /**
- * Last modified: $Date: 2005/02/02 14:10:31 $ by $Author: joakim $
+ * Last modified: $Date: 2005/02/03 10:33:17 $ by $Author: joakim $
  *
  * @author Joakim
- * @version $Revision: 1.13 $
+ * @version $Revision: 1.14 $
  */
 public class EditArticleBlock extends IWBaseComponent implements ManagedContentBeans, ActionListener {
 	public final static String EDIT_ARTICLE_BLOCK_ID = "edit_articles_block";
@@ -254,7 +255,10 @@ public class EditArticleBlock extends IWBaseComponent implements ManagedContentB
 		p.getChildren().add(WFUtil.group(localizer.getTextVB("folder"), WFUtil.getText(":")));
 		HtmlInputText folderInput = WFUtil.getInputText(FOLDER_ID, ref + "folderLocation");
 		if(null==folderInput.getValue() || "".equals(folderInput.getValue())) {
-			folderInput.setValue(ContentUtil.ARTICLE_PATH);
+			IWTimestamp now = new IWTimestamp();
+			String FolderString = ContentUtil.ARTICLE_PATH+"/"+now.getYear()+"/"+now.getDateString("MM");
+			System.out.println("Folder "+FolderString);
+			folderInput.setValue(FolderString);
 		}
 		folderInput.setSize(40);
 		p.getChildren().add(folderInput);		

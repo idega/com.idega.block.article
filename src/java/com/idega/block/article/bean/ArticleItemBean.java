@@ -1,5 +1,5 @@
 /*
- * $Id: ArticleItemBean.java,v 1.14 2005/02/02 14:04:00 joakim Exp $
+ * $Id: ArticleItemBean.java,v 1.15 2005/02/03 10:33:17 joakim Exp $
  *
  * Copyright (C) 2004 Idega. All Rights Reserved.
  *
@@ -33,10 +33,10 @@ import com.idega.xmlns.block.article.document.ArticleDocument;
 /**
  * Bean for idegaWeb article content items.   
  * <p>
- * Last modified: $Date: 2005/02/02 14:04:00 $ by $Author: joakim $
+ * Last modified: $Date: 2005/02/03 10:33:17 $ by $Author: joakim $
  *
  * @author Anders Lindman
- * @version $Revision: 1.14 $
+ * @version $Revision: 1.15 $
  */
 
 public class ArticleItemBean extends ContentItemBean implements Serializable {
@@ -248,11 +248,21 @@ public class ArticleItemBean extends ContentItemBean implements Serializable {
 			IWSlideService service = (IWSlideService)IBOLookup.getServiceInstance(iwac,IWSlideService.class);
 		
 			WebdavRootResource rootResource = session.getWebdavRootResource();
-			String filePath = service.getWebdavServerURI()+getFolderLocation();
-			boolean success = rootResource.mkcolMethod(filePath);
-			System.out.println("success "+success);
-			success = rootResource.putMethod(getWebdavServletURL(iwuc)+getFolderLocation()+"/"+filename+".xml",articleDoc.toString());
-			System.out.println("success "+success);
+			String uri = service.getWebdavServerURI();
+			String folderLoaction = getFolderLocation();
+//			String filePath = service.getWebdavServerURI()+getFolderLocation();
+//			boolean success = rootResource.mkcolMethod(filePath);
+//			createPath(getFolderLocation());
+			IWSlideService slideService = (IWSlideService)IBOLookup.getServiceInstance(iwac,IWSlideService.class);
+			slideService.createAllFoldersInPath(getFolderLocation());
+			
+			System.out.println("URI = "+uri);
+			System.out.println("Folder location = "+folderLoaction);
+			
+//			System.out.println("success "+success);
+//			success = 
+			rootResource.putMethod(getWebdavServletURL(iwuc)+getFolderLocation()+"/"+filename+".xml",articleDoc.toString());
+//			System.out.println("success "+success);
 
 //			String webdavServletURL = getWebdavServletURL(iwuc)+"/"+getFolder();
 //			System.out.println("webdavServletURL = "+webdavServletURL);
@@ -307,6 +317,26 @@ public class ArticleItemBean extends ContentItemBean implements Serializable {
 			throw new ArticleStoreException();
 		}
 	}
+/*
+	private void createPath(String path) throws HttpException, RemoteException, IOException {
+		IWUserContext iwuc = IWContext.getInstance();
+		IWApplicationContext iwac = iwuc.getApplicationContext();
+		
+		IWSlideSession session = (IWSlideSession)IBOLookup.getSessionInstance(iwuc,IWSlideSession.class);
+		IWSlideService service = (IWSlideService)IBOLookup.getServiceInstance(iwac,IWSlideService.class);
+	
+		WebdavRootResource rootResource = session.getWebdavRootResource();
+		
+		StringBuffer createPath = new StringBuffer(service.getWebdavServerURI());
+		StringTokenizer st = new StringTokenizer(path,"/");
+		while(st.hasMoreTokens()) {
+			createPath.append("/").append(st.nextToken());
+			System.out.println("Creaet path "+createPath);
+			boolean success = rootResource.mkcolMethod(createPath.toString());
+		}
+		
+	}
+*/
 	
     public String getWebdavServletURL(IWUserContext iwuc){
     	String root = iwuc.getApplicationContext().getIWMainApplication().getApplicationContextURI();
