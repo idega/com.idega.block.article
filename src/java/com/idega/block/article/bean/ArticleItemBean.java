@@ -1,5 +1,5 @@
 /*
- * $Id: ArticleItemBean.java,v 1.39 2005/03/09 18:52:28 joakim Exp $
+ * $Id: ArticleItemBean.java,v 1.40 2005/03/10 18:26:59 eiki Exp $
  *
  * Copyright (C) 2004 Idega. All Rights Reserved.
  *
@@ -32,7 +32,6 @@ import com.idega.content.bean.ContentItemField;
 import com.idega.content.bean.ContentItemFieldBean;
 import com.idega.content.business.ContentUtil;
 import com.idega.data.IDOStoreException;
-import com.idega.idegaweb.IWApplicationContext;
 import com.idega.idegaweb.IWUserContext;
 import com.idega.idegaweb.UnavailableIWContext;
 import com.idega.presentation.IWContext;
@@ -51,10 +50,10 @@ import com.idega.xmlns.block.article.document.ArticleDocument;
 /**
  * Bean for idegaWeb article content items.   
  * <p>
- * Last modified: $Date: 2005/03/09 18:52:28 $ by $Author: joakim $
+ * Last modified: $Date: 2005/03/10 18:26:59 $ by $Author: eiki $
  *
  * @author Anders Lindman
- * @version $Revision: 1.39 $
+ * @version $Revision: 1.40 $
  */
 
 public class ArticleItemBean extends ContentItemBean implements Serializable, ContentItem {
@@ -85,6 +84,8 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 	public final static String ARTICLE_FILENAME_SCOPE = "article";
 	public final static String ARTICLE_SUFFIX = ".xml";
 	public final static String CONTENT_TYPE = "ContentType";
+	
+public static final PropertyName PROPERTY_CONTENT_TYPE = new PropertyName("IW:",CONTENT_TYPE);
 	
 	private final static String[] ATTRIBUTE_ARRAY = new String[] {FIELDNAME_AUTHOR,FIELDNAME_CREATION_DATE,FIELDNAME_HEADLINE,FIELDNAME_TEASER,FIELDNAME_BODY};
 	private final static String[] ACTION_ARRAY = new String[] {"edit","delete"};
@@ -434,13 +435,9 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 
 		try {
 			IWUserContext iwuc = IWContext.getInstance();
-			IWApplicationContext iwac = iwuc.getApplicationContext();
-			
 			IWSlideSession session = (IWSlideSession)IBOLookup.getSessionInstance(iwuc,IWSlideSession.class);
 			WebdavRootResource rootResource = session.getWebdavRootResource();
 
-			IWSlideService slideService = (IWSlideService)IBOLookup.getServiceInstance(iwac,IWSlideService.class);
-			
 			//Setting the path for creating new file/creating localized version/updating existing file
 			String filePath=getResourcePath();
 			String articleFolderPath=getArticlePath();
@@ -451,10 +448,15 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 				articleFolderPath = getArticlePath();
 			}
 	
-			slideService.createAllFoldersInPath(articleFolderPath);
+			boolean hadToCreate = session.createAllFoldersInPath(articleFolderPath);
 
-			rootResource.proppatchMethod(articleFolderPath,new PropertyName("IW:",CONTENT_TYPE),"LocalizedFile",true);
-			
+			if(hadToCreate){
+				String fixedFolderURL = session.getURI(articleFolderPath);
+				rootResource.proppatchMethod(fixedFolderURL,PROPERTY_CONTENT_TYPE,"LocalizedFile",true);
+			}
+			else{
+				rootResource.proppatchMethod(articleFolderPath,PROPERTY_CONTENT_TYPE,"LocalizedFile",true);
+			}
 			String article = getAsXML();
 //			System.out.println(article);
 			
@@ -463,16 +465,16 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 			//Apparently in verion below works in some cases and the other in other cases.
 			//Seems to be connected to creating files in folders created in same tomcat session or similar
 			//not quite clear...
-			if(session.getExistence(filePath)){
-				if(!rootResource.putMethod(filePath,article)) {
-					rootResource.putMethod(session.getURI(filePath),article);
-				}
-			} else {
-				if(!rootResource.putMethod(session.getURI(filePath),article)) {
-					rootResource.putMethod(filePath,article);
-				}
+			
+			if(rootResource.putMethod(filePath,article)){
+				rootResource.proppatchMethod(filePath,PROPERTY_CONTENT_TYPE,ARTICLE_FILENAME_SCOPE,true);
 			}
-			rootResource.proppatchMethod(filePath,new PropertyName("IW:",CONTENT_TYPE),ARTICLE_FILENAME_SCOPE,true);
+			else{
+				String fixedURL = session.getURI(filePath);
+				rootResource.putMethod(fixedURL,article);
+				rootResource.proppatchMethod(fixedURL,PROPERTY_CONTENT_TYPE,ARTICLE_FILENAME_SCOPE,true);
+			}
+			
 			rootResource.close();
 			try {
 				load(filePath);

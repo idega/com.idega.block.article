@@ -1,5 +1,5 @@
 /*
- * $Id: ArticleSearchResultBean.java,v 1.2 2005/03/09 14:27:21 eiki Exp $
+ * $Id: ArticleSearchResultBean.java,v 1.3 2005/03/10 18:26:59 eiki Exp $
  * Created on 5.3.2005
  *
  * Copyright (C) 2005 Idega Software hf. All Rights Reserved.
@@ -17,10 +17,10 @@ import com.idega.webface.bean.WFEditableListDataBean;
 
 /**
  * 
- *  Last modified: $Date: 2005/03/09 14:27:21 $ by $Author: eiki $
+ *  Last modified: $Date: 2005/03/10 18:26:59 $ by $Author: eiki $
  * 
  * @author <a href="mailto:gummi@idega.com">Gudmundur Agust Saemundsson</a>
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 public class ArticleSearchResultBean extends ArticleItemBean implements WFEditableListDataBean {
 
@@ -36,7 +36,7 @@ public class ArticleSearchResultBean extends ArticleItemBean implements WFEditab
 	 * @see com.idega.webface.bean.WFEditableListDataBean#getSelectItemListArray()
 	 */
 	public Object[] getSelectItemListArray() {
-		return new Object[4];
+		return new Object[6];
 	}
 
 	/* (non-Javadoc)
@@ -49,6 +49,8 @@ public class ArticleSearchResultBean extends ArticleItemBean implements WFEditab
 		values.add(getAuthor());
 		values.add(getSource());
 		values.add(getCreationDate());
+		values.add(getLocaleIdAsString());
+		values.add(getStatus());
 		
 		return values.toArray(new Object[values.size()]);
 	}

@@ -1,5 +1,5 @@
 /*
- * $Id: SearchArticleBean.java,v 1.10 2005/03/09 14:29:09 eiki Exp $
+ * $Id: SearchArticleBean.java,v 1.11 2005/03/10 18:26:59 eiki Exp $
  *
  * Copyright (C) 2004 Idega. All Rights Reserved.
  *
@@ -39,6 +39,7 @@ import com.idega.core.search.business.SearchResult;
 import com.idega.presentation.IWContext;
 import com.idega.slide.business.IWSlideSession;
 import com.idega.slide.util.IWSlideConstants;
+import com.idega.util.IWTimestamp;
 import com.idega.webface.WFUtil;
 import com.idega.webface.bean.AbstractWFEditableListManagedBean;
 import com.idega.webface.bean.WFEditableListCellWrapper;
@@ -49,29 +50,29 @@ import com.idega.webface.model.WFDataModel;
 /**
  * Bean for searching articles.   
  * <p>
- * Last modified: $Date: 2005/03/09 14:29:09 $ by $Author: eiki $
+ * Last modified: $Date: 2005/03/10 18:26:59 $ by $Author: eiki $
  *
  * @author Anders Lindman
- * @version $Revision: 1.10 $
+ * @version $Revision: 1.11 $
  */
 
 public class SearchArticleBean extends AbstractWFEditableListManagedBean implements WFListBean, Serializable {
 	
 	public final static String ARTICLE_ID = "article_id";
 	
-	protected String[] localizationKey = new String[] { "Headline", "Author", "Source", "Creation date"};
+	protected String[] localizationKey = new String[] { "Headline", "Author", "Source", "Creation date", "Language", "Status"};
 
 	
 	private WFDataModel _dataModel = null;
 	private ActionListener _articleLinkListener = null;
 
-	private String _id = null;
-	private String _headline = null;
-	private String _published = null;
-	private String _author = null;
-	private String _status = null;
-	private String _testStyle = null;
-	
+//	private String _id = null;
+//	private String _headline = null;
+//	private String _published = null;
+//	private String _author = null;
+//	private String _status = null;
+//	private String _testStyle = null;
+//	
 	private String _searchText = null;
 	private String _searchAuthor = null;
 	private String _searchCategoryId = null;
@@ -81,13 +82,14 @@ public class SearchArticleBean extends AbstractWFEditableListManagedBean impleme
 	private Map _allCategories = null;
 	
 	private boolean searching = false;
+	private boolean showResults = false;
 			
 	/**
 	 * Default constructor.
 	 */
 	public SearchArticleBean() { 
-		_searchPublishedFrom = new Date();
-		_searchText = "searchtext"; 
+//		_searchPublishedFrom = new Date();
+//		_searchText = "searchtext"; 
 	}
 
 	/**
@@ -101,21 +103,21 @@ public class SearchArticleBean extends AbstractWFEditableListManagedBean impleme
 	/**
 	 * Constructs a new search article bean with the specified parameters. 
 	 */
-	public SearchArticleBean(String id, String headline, String published, String author, String status) {
-		_id = id;
-		_headline = headline;
-		_published = published;
-		_author = author;
-		_status = status;
-		_testStyle = "";
-	}
-		
-	public String getId() { return _id; }
-	public String getHeadline() { return _headline; }
-	public String getPublished() { return _published; }
-	public String getAuthor() { return _author; }
-	public String getStatus() { return _status; }
-	public String getTestStyle() { return _testStyle; }
+//	public SearchArticleBean(String id, String headline, String published, String author, String status) {
+//		_id = id;
+//		_headline = headline;
+//		_published = published;
+//		_author = author;
+//		_status = status;
+//		_testStyle = "";
+//	}
+//		
+//	public String getId() { return _id; }
+//	public String getHeadline() { return _headline; }
+//	public String getPublished() { return _published; }
+//	public String getAuthor() { return _author; }
+//	public String getStatus() { return _status; }
+//	public String getTestStyle() { return _testStyle; }
 
 	public String getSearchText() { return _searchText; }
 	public String getSearchAuthor() { return _searchAuthor; }
@@ -123,12 +125,12 @@ public class SearchArticleBean extends AbstractWFEditableListManagedBean impleme
 	public Date getSearchPublishedFrom() { return _searchPublishedFrom; }
 	public Date getSearchPublishedTo() { return _searchPublishedTo; }
 
-	public void setId(String s) { _id = s; }
-	public void setHeadline(String s) { _headline = s; }
-	public void setPublished(String s) { _published = s; }
-	public void setAuthor(String s) { _author = s; }
-	public void setStatus(String s) { _status = s; }
-	public void setTestStyle(String s) { _testStyle = s; }
+//	public void setId(String s) { _id = s; }
+//	public void setHeadline(String s) { _headline = s; }
+//	public void setPublished(String s) { _published = s; }
+//	public void setAuthor(String s) { _author = s; }
+//	public void setStatus(String s) { _status = s; }
+//	public void setTestStyle(String s) { _testStyle = s; }
 
 	public void setSearchText(String s) { _searchText = s; }
 	public void setSearchAuthor(String s) { _searchAuthor = s; }
@@ -162,6 +164,7 @@ public class SearchArticleBean extends AbstractWFEditableListManagedBean impleme
 	 */
 	public void search() {
 		searching = true;
+		showResults = true;
 		updateDataModel(new Integer(0),new Integer(0));
 		searching = false;
 	}
@@ -182,7 +185,7 @@ public class SearchArticleBean extends AbstractWFEditableListManagedBean impleme
 	 * @see com.idega.webface.bean.AbstractWFEditableListManagedBean#getNumberOfColumns()
 	 */
 	public int getNumberOfColumns() {
-		return 4;
+		return 6;
 	}
 
 	
@@ -301,13 +304,25 @@ public class SearchArticleBean extends AbstractWFEditableListManagedBean impleme
 		SearchExpression whereExpression = null;
 		
 		
-		String localeString = ""; //((locale!=null)?locale.getLanguage():"");
-		SearchExpression namePatternExpression = s.compare(CompareOperator.LIKE, IWSlideConstants.PROPERTY_DISPLAY_NAME,"%"+localeString+".article");
+		//String localeString = ""; //((locale!=null)?locale.getLanguage():"");
+		//TODO create search input for language
+		SearchExpression namePatternExpression = s.compare(CompareOperator.LIKE, IWSlideConstants.PROPERTY_DISPLAY_NAME,"%.article");
+		//todo search by the content type
+		//SearchExpression contentTypeExpression = s.compare(CompareOperator.LIKE, ArticleItemBean.PROPERTY_CONTENT_TYPE, ArticleItemBean.ARTICLE_FILENAME_SCOPE);
+		whereExpression = namePatternExpression;
+		//whereExpression = contentTypeExpression;
 		
 		SearchExpression creationDateFromExpression = null;		
 		if(getSearchPublishedFrom() != null){
-			creationDateFromExpression = s.compare(CompareOperator.GTE, IWSlideConstants.PROPERTY_CREATION_DATE,getSearchPublishedFrom());
-			whereExpression = s.and(namePatternExpression,creationDateFromExpression);
+			Date from = getSearchPublishedFrom();
+			
+			IWTimestamp stamp = new IWTimestamp(from);
+			//the date's time is at 24:00 so anything from that day will not be found. So be back up a day to 24:00
+			stamp.addDays(-1);
+			
+			from = stamp.getDate();
+			creationDateFromExpression = s.compare(CompareOperator.GTE, IWSlideConstants.PROPERTY_CREATION_DATE,from);
+			whereExpression = s.and(whereExpression,creationDateFromExpression);
 		}
 		
 		SearchExpression creationDateToExpression = null;		
@@ -322,8 +337,9 @@ public class SearchArticleBean extends AbstractWFEditableListManagedBean impleme
 			whereExpression = s.and(whereExpression,categoryExpression);
 		}
 		
-		if(getSearchAuthor()!=null){
-			SearchExpression authorExpression = s.compare(CompareOperator.LIKE,IWSlideConstants.PROPERTY_CREATOR_DISPLAY_NAME,"%"+getSearchAuthor()+"%");
+		String author = getSearchAuthor();
+		if(author!=null && !"".equals(author)){
+			SearchExpression authorExpression = s.compare(CompareOperator.LIKE,IWSlideConstants.PROPERTY_CREATOR_DISPLAY_NAME,"%"+author+"%");
 			whereExpression = s.and(whereExpression,authorExpression);
 		}
 		
@@ -355,10 +371,15 @@ public class SearchArticleBean extends AbstractWFEditableListManagedBean impleme
 		}
 				
 		s.setWhereExpression(whereExpression);
-		
+	
 		System.out.println("------------------------");
 		System.out.println(s.asString());
 		System.out.println("------------------------");
 		return s;
+	}
+	
+	
+	public boolean getShowSearchResults(){
+		return showResults;
 	}
 }
