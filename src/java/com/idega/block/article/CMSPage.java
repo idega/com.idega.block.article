@@ -1,5 +1,5 @@
 /*
- * $Id: CMSPage.java,v 1.12 2005/01/18 14:31:42 joakim Exp $
+ * $Id: CMSPage.java,v 1.13 2005/02/02 14:04:00 joakim Exp $
  *
  * Copyright (C) 2004 Idega. All Rights Reserved.
  *
@@ -33,10 +33,10 @@ import com.idega.webface.test.bean.ManagedContentBeans;
 /**
  * Content management system test/demo page. 
  * <p>
- * Last modified: $Date: 2005/01/18 14:31:42 $ by $Author: joakim $
+ * Last modified: $Date: 2005/02/02 14:04:00 $ by $Author: joakim $
  *
  * @author Anders Lindman
- * @version $Revision: 1.12 $
+ * @version $Revision: 1.13 $
  */
 public class CMSPage extends WFPage implements  ManagedContentBeans, WFTabListener, ActionListener, Serializable {
 	
@@ -267,8 +267,8 @@ public class CMSPage extends WFPage implements  ManagedContentBeans, WFTabListen
 //					articleItem.getStatus()
 					ContentItemCase.STATUS_PUBLISHED
 					);
-			WFUtil.invoke(ARTICLE_ITEM_BEAN_ID, "setMainCategoryId", new Integer(3));
-			WFUtil.invoke(ARTICLE_ITEM_BEAN_ID, "setMainCategory", articleItem.getMainCategory());
+//			WFUtil.invoke(ARTICLE_ITEM_BEAN_ID, "setMainCategoryId", new Integer(3));
+			WFUtil.invoke(ARTICLE_ITEM_BEAN_ID, "setFolderLocation", articleItem.getFolderLocation());
 			WFUtil.invoke(ARTICLE_ITEM_BEAN_ID, "setLocaleId", "sv");
 
 			//And one more time since it won't work after just setting the params once...
@@ -277,7 +277,7 @@ public class CMSPage extends WFPage implements  ManagedContentBeans, WFTabListen
 			WFUtil.invoke(ARTICLE_ITEM_BEAN_ID, "setTeaser", notNull(articleItem.getTeaser()));
 			WFUtil.invoke(ARTICLE_ITEM_BEAN_ID, "setBody", notNull(articleItem.getBody()));
 			WFUtil.invoke(ARTICLE_ITEM_BEAN_ID, "setAuthor", notNull(articleItem.getAuthor()));
-			WFUtil.invoke(ARTICLE_ITEM_BEAN_ID, "setMainCategory", articleItem.getMainCategory());
+			WFUtil.invoke(ARTICLE_ITEM_BEAN_ID, "setFolderLocation", articleItem.getFolderLocation());
 		}
 		catch (XmlException e) {
 			// TODO Auto-generated catch block

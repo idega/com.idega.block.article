@@ -1,5 +1,5 @@
 /*
- * $Id: ArticleItemView.java,v 1.11 2005/01/31 17:02:56 joakim Exp $
+ * $Id: ArticleItemView.java,v 1.12 2005/02/02 14:04:00 joakim Exp $
  *
  * Copyright (C) 2004 Idega. All Rights Reserved.
  *
@@ -26,12 +26,12 @@ import com.idega.webface.WFUtil;
 import com.idega.webface.test.bean.ManagedContentBeans;
 
 /**
- * Last modified: $Date: 2005/01/31 17:02:56 $ by $Author: joakim $
+ * Last modified: $Date: 2005/02/02 14:04:00 $ by $Author: joakim $
  *
  * Displays the article item
  *
  * @author Joakim
- * @version $Revision: 1.11 $
+ * @version $Revision: 1.12 $
  */
 public class ArticleItemView extends IWBaseComponent implements ManagedContentBeans, ActionListener{
 	public final static String EDIT_ARTICLE_BLOCK_ID = "edit_articles_block";
@@ -55,7 +55,7 @@ public class ArticleItemView extends IWBaseComponent implements ManagedContentBe
 	 * returns the metadata UI component
 	 */
 	private UIComponent getMetadataPanel() {
-		String path = (String)WFUtil.invoke(ARTICLE_ITEM_BEAN_ID, "getMainCategory");
+		String path = (String)WFUtil.invoke(ARTICLE_ITEM_BEAN_ID, "getFolderLocation");
 		String fileName = (String)WFUtil.invoke(ARTICLE_ITEM_BEAN_ID, "getHeadline");
 //		System.out.println("path = "+path+"/"+fileName+".xml");
 

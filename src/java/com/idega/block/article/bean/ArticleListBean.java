@@ -1,5 +1,5 @@
 /*
- * $Id: ArticleListBean.java,v 1.12 2005/01/18 14:31:42 joakim Exp $
+ * $Id: ArticleListBean.java,v 1.13 2005/02/02 14:04:00 joakim Exp $
  *
  * Copyright (C) 2004 Idega. All Rights Reserved.
  *
@@ -33,10 +33,10 @@ import com.idega.webface.model.WFDataModel;
 /**
  * Bean for article list rows.   
  * <p>
- * Last modified: $Date: 2005/01/18 14:31:42 $ by $Author: joakim $
+ * Last modified: $Date: 2005/02/02 14:04:00 $ by $Author: joakim $
  *
  * @author Anders Lindman
- * @version $Revision: 1.12 $
+ * @version $Revision: 1.13 $
  */
 
 public class ArticleListBean implements WFListBean, Serializable {
@@ -123,7 +123,7 @@ public class ArticleListBean implements WFListBean, Serializable {
 			int maxRow = Math.min(start.intValue() + nrOfRows,availableRows);
 			
 			for (int i = start.intValue(); i < maxRow; i++) {
-				ArticleListBean a = new ArticleListBean(articleItemBean[i].getMainCategory()+"/"+articleItemBean[i].getHeadline()+".xml", articleItemBean[i].getHeadline(), articleItemBean[i].getItemType(), articleItemBean[i].getAuthor(), articleItemBean[i].getStatus());
+				ArticleListBean a = new ArticleListBean(articleItemBean[i].getFolderLocation()+"/"+articleItemBean[i].getHeadline()+".xml", articleItemBean[i].getHeadline(), articleItemBean[i].getItemType(), articleItemBean[i].getAuthor(), articleItemBean[i].getStatus());
 				_dataModel.set(a, i);
 			}
 		}

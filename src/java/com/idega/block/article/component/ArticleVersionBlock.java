@@ -1,5 +1,5 @@
 /*
- * $Id: ArticleVersionBlock.java,v 1.2 2005/01/10 10:02:10 gimmi Exp $
+ * $Id: ArticleVersionBlock.java,v 1.3 2005/02/02 14:04:00 joakim Exp $
  *
  * Copyright (C) 2004 Idega. All Rights Reserved.
  *
@@ -27,10 +27,10 @@ import com.idega.webface.test.bean.ManagedContentBeans;
 /**
  * Block for listing article versions.   
  * <p>
- * Last modified: $Date: 2005/01/10 10:02:10 $ by $Author: gimmi $
+ * Last modified: $Date: 2005/02/02 14:04:00 $ by $Author: joakim $
  *
  * @author Anders Lindman
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 public class ArticleVersionBlock extends WFBlock implements ManagedContentBeans, ActionListener, Serializable {
 
@@ -144,7 +144,7 @@ public class ArticleVersionBlock extends WFBlock implements ManagedContentBeans,
 		WFUtil.invoke(ARTICLE_VERSION_ITEM_BEAN_ID, "setDescription", "description");
 		WFUtil.invoke(ARTICLE_VERSION_ITEM_BEAN_ID, "setSource", "source");
 		WFUtil.invoke(ARTICLE_VERSION_ITEM_BEAN_ID, "setStatus", ContentItemCase.STATUS_PUBLISHED);
-		WFUtil.invoke(ARTICLE_VERSION_ITEM_BEAN_ID, "setMainCategoryId", new Integer(3));
+//		WFUtil.invoke(ARTICLE_VERSION_ITEM_BEAN_ID, "setMainCategoryId", new Integer(3));
 		
 		WFUtil.invoke(ARTICLE_VERSION_ITEM_BEAN_ID, "setUpdated", new Boolean(true));
 		

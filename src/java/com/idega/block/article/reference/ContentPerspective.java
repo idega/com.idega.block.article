@@ -120,7 +120,7 @@ public class ContentPerspective extends WFContainer implements ManagedContentBea
 		} else {
 			WFUtil.invoke(ARTICLE_ITEM_BEAN_ID, "setStatus", ContentItemCase.STATUS_UNDER_REVIEW);
 		}
-		WFUtil.invoke(ARTICLE_ITEM_BEAN_ID, "setMainCategoryId", new Integer(3));
+//		WFUtil.invoke(ARTICLE_ITEM_BEAN_ID, "setMainCategoryId", new Integer(3));
 
 		ab.updateEditButtons();
 	}

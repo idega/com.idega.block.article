@@ -1,5 +1,5 @@
 /*
- * $Id: ArticleDetailView.java,v 1.9 2005/01/31 16:55:30 joakim Exp $
+ * $Id: ArticleDetailView.java,v 1.10 2005/02/02 14:04:00 joakim Exp $
  * 
  * Copyright (C) 2004 Idega. All Rights Reserved.
  * 
@@ -24,12 +24,12 @@ import com.idega.webface.convert.WFCommaSeparatedListConverter;
 import com.idega.webface.test.bean.ManagedContentBeans;
 
 /**
- * Last modified: $Date: 2005/01/31 16:55:30 $ by $Author: joakim $
+ * Last modified: $Date: 2005/02/02 14:04:00 $ by $Author: joakim $
  * 
  * Displays detailed info about the article
  * 
  * @author Joakim
- * @version $Revision: 1.9 $
+ * @version $Revision: 1.10 $
  */
 public class ArticleDetailView extends IWBaseComponent implements ManagedContentBeans {
 
@@ -54,7 +54,7 @@ public class ArticleDetailView extends IWBaseComponent implements ManagedContent
 	 * returns the metadata UI component
 	 */
 	private UIComponent getMetadataPanel() {
-		String path = (String)WFUtil.invoke(ARTICLE_ITEM_BEAN_ID, "getMainCategory");
+		String path = (String)WFUtil.invoke(ARTICLE_ITEM_BEAN_ID, "getFolderLocation");
 		String fileName = (String)WFUtil.invoke(ARTICLE_ITEM_BEAN_ID, "getHeadline");
 //		System.out.println("path = "+path+"/"+fileName+".xml");
 

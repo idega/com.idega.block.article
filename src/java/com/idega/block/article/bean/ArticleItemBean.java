@@ -1,5 +1,5 @@
 /*
- * $Id: ArticleItemBean.java,v 1.13 2005/01/18 14:04:56 joakim Exp $
+ * $Id: ArticleItemBean.java,v 1.14 2005/02/02 14:04:00 joakim Exp $
  *
  * Copyright (C) 2004 Idega. All Rights Reserved.
  *
@@ -33,10 +33,10 @@ import com.idega.xmlns.block.article.document.ArticleDocument;
 /**
  * Bean for idegaWeb article content items.   
  * <p>
- * Last modified: $Date: 2005/01/18 14:04:56 $ by $Author: joakim $
+ * Last modified: $Date: 2005/02/02 14:04:00 $ by $Author: joakim $
  *
  * @author Anders Lindman
- * @version $Revision: 1.13 $
+ * @version $Revision: 1.14 $
  */
 
 public class ArticleItemBean extends ContentItemBean implements Serializable {
@@ -65,7 +65,8 @@ public class ArticleItemBean extends ContentItemBean implements Serializable {
 	public String getComment() { return getItemField("comment").getValue(); }
 	public List getImages() { return getItemFields("image"); }
 	public List getAttachments() { return getItemFields("attachment"); }
-	public String getMainCategory() { return getItemField("main_category").getValue(); }
+	//From the original main_category. If possible, folder location should be removed.
+	public String getFolderLocation() { return getItemField("folder_location").getValue(); }
 	public List getRelatedContentItems() { return getItemFields("related_items"); }
 
 	public void setHeadline(String s) { setItemField("headline", s); } 
@@ -77,7 +78,7 @@ public class ArticleItemBean extends ContentItemBean implements Serializable {
 	public void setComment(String s) { setItemField("comment", s); }
 	public void setImages(List l) { setItemFields("image", l); }
 	public void setAttachment(List l) { setItemFields("attachment", l); }
-	public void setMainCategory(String l) { setItemField("main_category", l); }
+	public void setFolderLocation(String l) { setItemField("folder_location", l); }
 	public void setRelatedContentItems(List l) { setItemFields("related_items", l); }
 
 	public boolean isUpdated() { return _isUpdated; }
@@ -228,17 +229,13 @@ public class ArticleItemBean extends ContentItemBean implements Serializable {
 		article.setAuthor(getAuthor());
 		article.setSource(getSource());
 		article.setComment(getComment());
-//	    article.setImage(getImages());
-//	    article.setAttachment(getAttachments());
-//	    article.setRelatedItems(getRelatedContentItems());
-//Need to create	    article.setCategory(getCategory());
 
 		String filename = getHeadline();
 		if(null==filename || filename.length()==0) {
 			filename = "empty";
 		}
 /*	    
-	    File path = new File(getMainCategory());
+	    File path = new File(getFolder());
 	    if(!path.exists()) {
 	    	path.mkdirs();
 	    }
@@ -250,23 +247,14 @@ public class ArticleItemBean extends ContentItemBean implements Serializable {
 			IWSlideSession session = (IWSlideSession)IBOLookup.getSessionInstance(iwuc,IWSlideSession.class);
 			IWSlideService service = (IWSlideService)IBOLookup.getServiceInstance(iwac,IWSlideService.class);
 		
-//			System.out.println("webdavServerURL = "+service.getWebdavServerURL());
-//			System.out.println("webdavServletURL = "+getWebdavServletURL(iwuc));
-//			System.out.println("Main category = "+getMainCategory());
-
-
 			WebdavRootResource rootResource = session.getWebdavRootResource();
-//			boolean success = webdavResource.mkcolMethod("/servlet/webdav/files/test/test2");
-			String filePath = service.getWebdavServerURI()+getMainCategory();
+			String filePath = service.getWebdavServerURI()+getFolderLocation();
 			boolean success = rootResource.mkcolMethod(filePath);
 			System.out.println("success "+success);
-//			boolean success = rootResource.mkcolMethod(getWebdavServletURL(iwuc)+getMainCategory());
-//			System.out.println(filePath);
-//			System.out.println(getWebdavServletURL(iwuc)+getMainCategory()+"/"+filename+".xml");
-			success = rootResource.putMethod(getWebdavServletURL(iwuc)+getMainCategory()+"/"+filename+".xml",articleDoc.toString());
+			success = rootResource.putMethod(getWebdavServletURL(iwuc)+getFolderLocation()+"/"+filename+".xml",articleDoc.toString());
 			System.out.println("success "+success);
 
-//			String webdavServletURL = getWebdavServletURL(iwuc)+"/"+getMainCategory();
+//			String webdavServletURL = getWebdavServletURL(iwuc)+"/"+getFolder();
 //			System.out.println("webdavServletURL = "+webdavServletURL);
 //			System.out.println("webdavServerURL = "+service.getWebdavServerURL());
 //			WebdavResource webdavResource = session.getWebdavResource(session.getWebdavServerURL().toString());
@@ -274,10 +262,10 @@ public class ArticleItemBean extends ContentItemBean implements Serializable {
 //			WebdavResource webdavResource = new WebdavResource("http://localhost:8080/servlet/webdav/");
 			
 //			WebdavFile webdavFile = session.getWebdavFile();
-//			WebdavFile path = new WebdavFile(webdavFile, getMainCategory());
+//			WebdavFile path = new WebdavFile(webdavFile, getFolder());
 //			path.mkdirs();
 
-//			webdavResource = session.getWebdavResource(getWebdavServletURL(iwuc)+getMainCategory()+"/"+filename+".xml");
+//			webdavResource = session.getWebdavResource(getWebdavServletURL(iwuc)+getFolder()+"/"+filename+".xml");
 //			WebdavResource webdavResource = session.getWebdavResource("http://localhost:8080/servlet/webdav/"+filename+".xml");
 
 //			IWSlideService iwss = new IWSlideService();
@@ -300,7 +288,7 @@ public class ArticleItemBean extends ContentItemBean implements Serializable {
 //			if(!webdavFile.exists()) {
 //			}
 			
-//			articleDoc.save(new File(getMainCategory()+"/"+filename+".xml"));
+//			articleDoc.save(new File(getFolder()+"/"+filename+".xml"));
 //	    	articleDoc.save(webdavFile);
 //	    	webdavFile.close();
 		}
@@ -354,21 +342,19 @@ public class ArticleItemBean extends ContentItemBean implements Serializable {
 		articleDoc = ArticleDocument.Factory.parse(webdavResource.getMethodDataAsString());
 		
 	    ArticleDocument.Article article =  articleDoc.getArticle();
-//	    ArticleItemBean articleBean = new ArticleItemBean();
 	    setHeadline(article.getHeadline());
 	    setBody(article.getBody());
 	    setTeaser(article.getTeaser());
 	    setAuthor(article.getAuthor());
 	    setSource(article.getSource());
 	    setComment(article.getComment());
-		String category = "";
+		String folder = "";
 		int lastSlash = path.lastIndexOf('/');
 		if(lastSlash>0) {
-			category = path.substring(0,lastSlash);
+			folder = path.substring(0,lastSlash);
 		}
-	    setMainCategory(category);
+	    setFolderLocation(folder);
 	    
-//		System.out.println("loaded "+getBody());
 	}
 	
 	public void loadOld(File file) throws XmlException, IOException{
@@ -384,7 +370,7 @@ public class ArticleItemBean extends ContentItemBean implements Serializable {
 	    setAuthor(article.getAuthor());
 	    setSource(article.getSource());
 	    setComment(article.getComment());
-//Need to create this	    setMainCategory(article.getMainCategory());
+//Need to create this	    setFolder(article.getFolder());
 	    
 //		System.out.println("loaded "+getBody());
 	}

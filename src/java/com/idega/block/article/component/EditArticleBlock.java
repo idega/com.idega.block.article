@@ -1,5 +1,5 @@
 /*
- * $Id: EditArticleBlock.java,v 1.11 2005/01/14 11:57:48 joakim Exp $
+ * $Id: EditArticleBlock.java,v 1.12 2005/02/02 14:04:00 joakim Exp $
  *
  * Copyright (C) 2004 Idega. All Rights Reserved.
  *
@@ -44,10 +44,10 @@ import com.idega.webface.test.bean.ContentItemCase;
 import com.idega.webface.test.bean.ManagedContentBeans;
 
 /**
- * Last modified: $Date: 2005/01/14 11:57:48 $ by $Author: joakim $
+ * Last modified: $Date: 2005/02/02 14:04:00 $ by $Author: joakim $
  *
  * @author Joakim
- * @version $Revision: 1.11 $
+ * @version $Revision: 1.12 $
  */
 public class EditArticleBlock extends IWBaseComponent implements ManagedContentBeans, ActionListener {
 	public final static String EDIT_ARTICLE_BLOCK_ID = "edit_articles_block";
@@ -67,7 +67,7 @@ public class EditArticleBlock extends IWBaseComponent implements ManagedContentB
 	private final static String LOCALE_ID = P + "locale";
 	private final static String TEASER_ID = P + "teaser";
 	public final static String BODY_ID = P + "body";
-	private final static String MAIN_CATEGORY_ID = P + "main_category";
+	private final static String FOLDER_ID = P + "folder_location";
 	private final static String AUTHOR_ID = P + "author";
 	private final static String SOURCE_ID = P + "source";
 	private final static String COMMENT_ID = P + "comment";
@@ -251,13 +251,14 @@ public class EditArticleBlock extends IWBaseComponent implements ManagedContentB
 //		HtmlCommandButton editCategoriesButton = WFUtil.getButtonVB(EDIT_CATEGORIES_ID, bref + "edit_categories", this);
 //		p.getChildren().add(editCategoriesButton);
 
-		p.getChildren().add(WFUtil.group(localizer.getTextVB("category"), WFUtil.getText(":")));
-		HtmlInputText categoryInput = WFUtil.getInputText(MAIN_CATEGORY_ID, ref + "mainCategory");
-		if(null==categoryInput.getValue() || "".equals(categoryInput.getValue())) {
-			categoryInput.setValue(ContentUtil.ARTICLE_PATH);
+		p.getChildren().add(WFUtil.group(localizer.getTextVB("folder"), WFUtil.getText(":")));
+		HtmlInputText folderInput = WFUtil.getInputText(FOLDER_ID, ref + "folderLocation");
+		String folder = folderInput.getValue().toString();
+		if(null==folderInput.getValue() || "".equals(folderInput.getValue())) {
+			folderInput.setValue(ContentUtil.ARTICLE_PATH);
 		}
-		categoryInput.setSize(40);
-		p.getChildren().add(categoryInput);		
+		folderInput.setSize(40);
+		p.getChildren().add(folderInput);		
 		
 		p.getChildren().add(WFUtil.getBreak());
 		p.getChildren().add(WFUtil.getBreak());
