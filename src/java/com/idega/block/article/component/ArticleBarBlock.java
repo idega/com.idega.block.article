@@ -1,5 +1,5 @@
 /*
- * $Id: ArticleBarBlock.java,v 1.2 2004/12/09 14:42:15 joakim Exp $
+ * $Id: ArticleBarBlock.java,v 1.3 2004/12/21 15:37:51 joakim Exp $
  *
  * Copyright (C) 2004 Idega. All Rights Reserved.
  *
@@ -20,10 +20,10 @@ import com.idega.webface.test.bean.ManagedContentBeans;
 
 
 /**
- * Last modified: $Date: 2004/12/09 14:42:15 $ by $Author: joakim $
+ * Last modified: $Date: 2004/12/21 15:37:51 $ by $Author: joakim $
  *
  * @author Joakim
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 public class ArticleBarBlock extends WFBlock implements ActionListener, ManagedContentBeans {
 
@@ -36,7 +36,7 @@ public class ArticleBarBlock extends WFBlock implements ActionListener, ManagedC
 	public final static String TASK_ID_LIST = P + "t_list";
 	public final static String TASK_ID_DETAILS = P + "t_details";
 	
-	private ArticleBlock articleBlock;
+	private EditArticleBlock articleBlock;
 
 	public ArticleBarBlock() {
 	}
@@ -56,10 +56,8 @@ public class ArticleBarBlock extends WFBlock implements ActionListener, ManagedC
 		tb.setId(TASKBAR_ID);
 		add(tb);
 		tb.addTabVB(TASK_ID_EDIT, bref + "edit", new EditArticleBlock());
-//		tb.addTabVB(TASK_ID_PREVIEW, bref + "details", getPreviewContainer());
 		tb.addTabVB(TASK_ID_PREVIEW, bref + "details", new ArticleDetailView());
 		tb.addTabVB(TASK_ID_LIST, bref + "list", new ListArticlesBlock());
-//		tb.addTabVB(TASK_ID_EDIT, bref + "edit2", articleBlock.getEditContainer());
 		tb.addTabVB(TASK_ID_DETAILS, bref + "preview", new ArticleItemView());
 		tb.setSelectedMenuItemId(TASK_ID_EDIT);
 		if (taskbarListener != null) {
@@ -83,13 +81,4 @@ public class ArticleBarBlock extends WFBlock implements ActionListener, ManagedC
 	public void processAction(ActionEvent arg0) throws AbortProcessingException {
 		// TODO Auto-generated method stub
 	}
-	
-	/**
-	 * @see javax.faces.component.UIComponent#encodeBegin(javax.faces.context.FacesContext)
-	 */
-/*
-	public void encodeBegin(FacesContext context) throws IOException {
-		super.encodeBegin(context);
-	}
-*/
 }
