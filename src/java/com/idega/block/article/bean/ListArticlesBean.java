@@ -1,5 +1,5 @@
 /*
- * $Id: ListArticlesBean.java,v 1.9 2005/02/02 14:04:00 joakim Exp $
+ * $Id: ListArticlesBean.java,v 1.10 2005/02/03 11:30:54 joakim Exp $
  *
  * Copyright (C) 2004 Idega. All Rights Reserved.
  *
@@ -28,10 +28,10 @@ import com.idega.webface.model.WFDataModel;
 /**
  * Bean for listing articles.   
  * <p>
- * Last modified: $Date: 2005/02/02 14:04:00 $ by $Author: joakim $
+ * Last modified: $Date: 2005/02/03 11:30:54 $ by $Author: joakim $
  *
  * @author Anders Lindman
- * @version $Revision: 1.9 $
+ * @version $Revision: 1.10 $
  */
 
 public class ListArticlesBean implements WFListBean, Serializable {
@@ -144,7 +144,7 @@ public class ListArticlesBean implements WFListBean, Serializable {
 			int maxRow = Math.min(start.intValue() + nrOfRows,availableRows);
 			for (int i = start.intValue(); i < maxRow; i++) {
 				//TODO we don't have published in the article item bean
-				String id = articleItemBean[i].getFolderLocation()+"/"+articleItemBean[i].getHeadline()+".xml";
+				String id = articleItemBean[i].getFolderLocation()+"/"+articleItemBean[i].getHeadline()+ArticleItemBean.ARTICLE_SUFFIX;
 				ListArticlesBean bean = new ListArticlesBean(id, articleItemBean[i].getHeadline(), "");
 				_dataModel.set(bean, i);
 			}

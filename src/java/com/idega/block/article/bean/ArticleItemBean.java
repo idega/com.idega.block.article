@@ -1,5 +1,5 @@
 /*
- * $Id: ArticleItemBean.java,v 1.15 2005/02/03 10:33:17 joakim Exp $
+ * $Id: ArticleItemBean.java,v 1.16 2005/02/03 11:30:54 joakim Exp $
  *
  * Copyright (C) 2004 Idega. All Rights Reserved.
  *
@@ -33,10 +33,10 @@ import com.idega.xmlns.block.article.document.ArticleDocument;
 /**
  * Bean for idegaWeb article content items.   
  * <p>
- * Last modified: $Date: 2005/02/03 10:33:17 $ by $Author: joakim $
+ * Last modified: $Date: 2005/02/03 11:30:54 $ by $Author: joakim $
  *
  * @author Anders Lindman
- * @version $Revision: 1.15 $
+ * @version $Revision: 1.16 $
  */
 
 public class ArticleItemBean extends ContentItemBean implements Serializable {
@@ -45,7 +45,8 @@ public class ArticleItemBean extends ContentItemBean implements Serializable {
 	
 	public final static String KEY_ERROR_HEADLINE_EMPTY = KP + "headline_empty";
 	public final static String KEY_ERROR_BODY_EMPTY = KP + "body_empty";
-	public final static String KEY_ERROR_PUBLISHED_FROM_DATE_EMPTY = KP + "published_from_date_empty";	
+	public final static String KEY_ERROR_PUBLISHED_FROM_DATE_EMPTY = KP + "published_from_date_empty";
+	public final static String ARTICLE_SUFFIX = ".article";
 	
 	private boolean _isUpdated = false;
 	private List _errorKeys = null;
@@ -261,7 +262,7 @@ public class ArticleItemBean extends ContentItemBean implements Serializable {
 			
 //			System.out.println("success "+success);
 //			success = 
-			rootResource.putMethod(getWebdavServletURL(iwuc)+getFolderLocation()+"/"+filename+".xml",articleDoc.toString());
+			rootResource.putMethod(getWebdavServletURL(iwuc)+getFolderLocation()+"/"+filename+ARTICLE_SUFFIX,articleDoc.toString());
 //			System.out.println("success "+success);
 
 //			String webdavServletURL = getWebdavServletURL(iwuc)+"/"+getFolder();
@@ -275,30 +276,30 @@ public class ArticleItemBean extends ContentItemBean implements Serializable {
 //			WebdavFile path = new WebdavFile(webdavFile, getFolder());
 //			path.mkdirs();
 
-//			webdavResource = session.getWebdavResource(getWebdavServletURL(iwuc)+getFolder()+"/"+filename+".xml");
-//			WebdavResource webdavResource = session.getWebdavResource("http://localhost:8080/servlet/webdav/"+filename+".xml");
+//			webdavResource = session.getWebdavResource(getWebdavServletURL(iwuc)+getFolder()+"/"+filename+ARTICLE_SUFFIX);
+//			WebdavResource webdavResource = session.getWebdavResource("http://localhost:8080/servlet/webdav/"+filename+ARTICLE_SUFFIX);
 
 //			IWSlideService iwss = new IWSlideService();
 //			HttpURL root = new HttpURL("http://localhost:8080/servlet/webdav/files/");
-//			WebdavResource webdavResource = new WebdavResource("http://localhost:8080/servlet/webdav/files/"+filename+".xml");
+//			WebdavResource webdavResource = new WebdavResource("http://localhost:8080/servlet/webdav/files/"+filename+ARTICLE_SUFFIX);
 //			WebdavFile webdavFile = session.getWebdavFile();
-//			webdavResource.putMethod(new File(filename+".xml"));
+//			webdavResource.putMethod(new File(filename+ARTICLE_SUFFIX));
 
 			/*
-			HttpURL root = new HttpURL("http://localhost:8080/servlet/webdav/files/"+filename+".xml");
+			HttpURL root = new HttpURL("http://localhost:8080/servlet/webdav/files/"+filename+ARTICLE_SUFFIX);
 			root.setUserinfo("root","root");
 			WebdavFile webdavFile = new WebdavFile(webdavResource.getHttpURL());
 	    	webdavResource.close();
 			*/
-//			HttpURL root = new HttpURL("http://localhost:8080/servlet/webdav/files/"+filename+".xml", "root", "root");
+//			HttpURL root = new HttpURL("http://localhost:8080/servlet/webdav/files/"+filename+ARTICLE_SUFFIX, "root", "root");
 //			root.setUserinfo("root","root");
 			
-//			WebdavFile webdavFile = new WebdavFile("http://localhost:8080/servlet/webdav/files/"+filename+".xml", "root", "root");
+//			WebdavFile webdavFile = new WebdavFile("http://localhost:8080/servlet/webdav/files/"+filename+ARTICLE_SUFFIX, "root", "root");
 //			webdavFile.createNewFile();
 //			if(!webdavFile.exists()) {
 //			}
 			
-//			articleDoc.save(new File(getFolder()+"/"+filename+".xml"));
+//			articleDoc.save(new File(getFolder()+"/"+filename+ARTICLE_SUFFIX));
 //	    	articleDoc.save(webdavFile);
 //	    	webdavFile.close();
 		}
@@ -317,26 +318,6 @@ public class ArticleItemBean extends ContentItemBean implements Serializable {
 			throw new ArticleStoreException();
 		}
 	}
-/*
-	private void createPath(String path) throws HttpException, RemoteException, IOException {
-		IWUserContext iwuc = IWContext.getInstance();
-		IWApplicationContext iwac = iwuc.getApplicationContext();
-		
-		IWSlideSession session = (IWSlideSession)IBOLookup.getSessionInstance(iwuc,IWSlideSession.class);
-		IWSlideService service = (IWSlideService)IBOLookup.getServiceInstance(iwac,IWSlideService.class);
-	
-		WebdavRootResource rootResource = session.getWebdavRootResource();
-		
-		StringBuffer createPath = new StringBuffer(service.getWebdavServerURI());
-		StringTokenizer st = new StringTokenizer(path,"/");
-		while(st.hasMoreTokens()) {
-			createPath.append("/").append(st.nextToken());
-			System.out.println("Creaet path "+createPath);
-			boolean success = rootResource.mkcolMethod(createPath.toString());
-		}
-		
-	}
-*/
 	
     public String getWebdavServletURL(IWUserContext iwuc){
     	String root = iwuc.getApplicationContext().getIWMainApplication().getApplicationContextURI();
