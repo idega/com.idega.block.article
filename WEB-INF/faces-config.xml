@@ -46,6 +46,11 @@
 		<component-class>com.idega.block.article.PreviewArticlePage</component-class>
 	</component>
 
+	<component>
+		<component-type>ArticleSearch</component-type>
+		<component-class>com.idega.block.article.component.SearchArticleBlock</component-class>
+	</component>
+
 	<managed-bean>
 		<managed-bean-name>articleItemBean</managed-bean-name>
 		<managed-bean-class>com.idega.block.article.bean.ArticleItemBean</managed-bean-class>

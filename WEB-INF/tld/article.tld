@@ -101,4 +101,14 @@
 		</attribute>
 	</tag>
 
+	<tag>
+		<name>ArticleSearch</name>
+		<tag-class>com.idega.block.article.taglib.SearchArticleBlockTag</tag-class>
+		<attribute>
+			<name>id</name>
+			<required>false</required>
+			<rtexprvalue>false</rtexprvalue>
+		</attribute>
+	</tag>
+
 </taglib>
