@@ -1,5 +1,5 @@
 /*
- * $Id: WFUtilArticle.java,v 1.2 2004/12/17 14:40:29 joakim Exp $
+ * $Id: WFUtilArticle.java,v 1.3 2004/12/21 15:46:24 joakim Exp $
  *
  * Copyright (C) 2004 Idega. All Rights Reserved.
  *
@@ -18,13 +18,17 @@ import com.idega.webface.WFUtil;
 /**
  * Util class to set the bundle for the localization 
  * <p>
- * Last modified: $Date: 2004/12/17 14:40:29 $ by $Author: joakim $
+ * Last modified: $Date: 2004/12/21 15:46:24 $ by $Author: joakim $
  *
  * @author Joakim Johnson
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 public class WFUtilArticle extends WFUtil{
 	private final static String BUNDLE = "com.idega.block.article";
+
+	public static String getBundleString() {
+		return BUNDLE;
+	}
 
 	/**
 	 * Returns a localized HtmlOutputText as a header
