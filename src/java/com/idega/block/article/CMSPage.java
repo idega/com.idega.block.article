@@ -1,5 +1,5 @@
 /*
- * $Id: CMSPage.java,v 1.4 2004/11/10 17:23:06 joakim Exp $
+ * $Id: CMSPage.java,v 1.5 2004/11/14 23:39:41 tryggvil Exp $
  *
  * Copyright (C) 2004 Idega. All Rights Reserved.
  *
@@ -39,10 +39,10 @@ import com.idega.webface.test.bean.ManagedContentBeans;
 /**
  * Content management system test/demo page. 
  * <p>
- * Last modified: $Date: 2004/11/10 17:23:06 $ by $Author: joakim $
+ * Last modified: $Date: 2004/11/14 23:39:41 $ by $Author: tryggvil $
  *
  * @author Anders Lindman
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  */
 public class CMSPage extends WFPage implements  ManagedContentBeans, WFTabListener, ActionListener, Serializable {
 	
@@ -131,9 +131,9 @@ public class CMSPage extends WFPage implements  ManagedContentBeans, WFTabListen
 		WFTabbedPane tb = new WFTabbedPane();
 		tb.setMainAreaStyleClass(null);
 		tb.setId(MAIN_TASKBAR_ID);
-		WFTab buttonContent = tb.addButtonVB(TASK_ID_CONTENT, bref + "content", getContentPerspective());
+		WFTab buttonContent = tb.addTabVB(TASK_ID_CONTENT, bref + "content", getContentPerspective());
 		buttonContent.addActionListener(this);
-		WFTab buttonEdit = tb.addButtonVB(TASK_ID_EDIT, bref + "edit", getEditPerspective());
+		WFTab buttonEdit = tb.addTabVB(TASK_ID_EDIT, bref + "edit", getEditPerspective());
 		buttonEdit.addActionListener(this);
 		tb.addTabListener(this);
 		

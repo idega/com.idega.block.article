@@ -1,5 +1,5 @@
 /*
- * $Id: ArticleBlock.java,v 1.4 2004/11/10 17:23:07 joakim Exp $
+ * $Id: ArticleBlock.java,v 1.5 2004/11/14 23:39:41 tryggvil Exp $
  *
  * Copyright (C) 2004 Idega. All Rights Reserved.
  *
@@ -24,6 +24,7 @@ import javax.faces.component.html.HtmlOutputLink;
 import javax.faces.component.html.HtmlOutputText;
 import javax.faces.component.html.HtmlPanelGrid;
 import javax.faces.component.html.HtmlSelectManyListbox;
+import javax.faces.component.html.HtmlSelectOneMenu;
 import javax.faces.context.FacesContext;
 import javax.faces.convert.IntegerConverter;
 import javax.faces.event.ActionEvent;
@@ -49,10 +50,10 @@ import com.idega.webface.test.bean.ManagedContentBeans;
 /**
  * Block for editing an article.   
  * <p>
- * Last modified: $Date: 2004/11/10 17:23:07 $ by $Author: joakim $
+ * Last modified: $Date: 2004/11/14 23:39:41 $ by $Author: tryggvil $
  *
  * @author Anders Lindman
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  */
 public class ArticleBlock extends WFBlock implements ActionListener, ManagedContentBeans {
 
@@ -133,8 +134,8 @@ public class ArticleBlock extends WFBlock implements ActionListener, ManagedCont
 		WFTabbedPane tb = new WFTabbedPane();
 		tb.setId(TASKBAR_ID);
 		add(tb);
-		tb.addButtonVB(TASK_ID_EDIT, bref + "edit", getEditContainer());
-		tb.addButtonVB(TASK_ID_PREVIEW, bref + "preview", getPreviewContainer());
+		tb.addTabVB(TASK_ID_EDIT, bref + "edit", getEditContainer());
+		tb.addTabVB(TASK_ID_PREVIEW, bref + "preview", getPreviewContainer());
 //		tb.addButtonVB(TASK_ID_MESSAGES, bref + "messages", getMessageContainer());
 		tb.setSelectedMenuItemId(TASK_ID_EDIT);
 		if (taskbarListener != null) {
@@ -175,9 +176,9 @@ public class ArticleBlock extends WFBlock implements ActionListener, ManagedCont
 		HtmlInputText headlineInput = WFUtil.getInputText(HEADLINE_ID, ref + "headline");		
 		headlineInput.setSize(40);
 		p.getChildren().add(headlineInput);		
-		//HtmlSelectOneMenu localeMenu = WFUtil.getSelectOneMenu(LOCALE_ID, ref + "allLocales", ref + "pendingLocaleId");
-		//localeMenu.setOnchange("document.forms[0].submit();");
-		//p.getChildren().add(localeMenu);		
+		HtmlSelectOneMenu localeMenu = WFUtil.getSelectOneMenu(LOCALE_ID, ref + "allLocales", ref + "pendingLocaleId");
+		localeMenu.setOnchange("document.forms[0].submit();");
+		p.getChildren().add(localeMenu);		
 		p.getChildren().add(WFUtil.group(WFUtil.getTextVB(bref + "teaser"), WFUtil.getText(":")));		
 		p.getChildren().add(WFUtil.group(WFUtil.getTextVB(bref + "author"), WFUtil.getText(":")));		
 		HtmlInputTextarea teaserArea = WFUtil.getTextArea(TEASER_ID, ref + "teaser", "440px", "30px");
@@ -198,10 +199,11 @@ public class ArticleBlock extends WFBlock implements ActionListener, ManagedCont
 		bodyArea.addPlugin(HTMLArea.PLUGIN_CHARACTER_MAP);
 		bodyArea.setAllowFontSelection(false);
 		
-		HtmlCommandButton editButton = WFUtil.getButtonVB(EDIT_HTML_ID, bref + "edit");
-		editButton.setOnclick("wurl='htmlarea/webface/htmledit.jsp?" + PREVIEW_ARTICLE_ITEM_ID + 
-					"='+this.tabindex;window.open(wurl,'Edit','height=450,width=600,resizable=yes,status=no,toolbar=no,menubar=no,location=no,scrollbars=no');return false;");
-		p.getChildren().add(WFUtil.group(WFUtil.group(bodyArea, WFUtil.getBreak()), editButton));
+		//HtmlCommandButton editButton = WFUtil.getButtonVB(EDIT_HTML_ID, bref + "edit");
+		//editButton.setOnclick("wurl='htmlarea/webface/htmledit.jsp?" + PREVIEW_ARTICLE_ITEM_ID + 
+		//			"='+this.tabindex;window.open(wurl,'Edit','height=450,width=600,resizable=yes,status=no,toolbar=no,menubar=no,location=no,scrollbars=no');return false;");
+		//p.getChildren().add(WFUtil.group(WFUtil.group(bodyArea, WFUtil.getBreak()), editButton));
+		p.getChildren().add(bodyArea);
 		WFContainer imageContainer = new WFContainer();		
 		imageContainer.add(WFUtil.getButtonVB(ADD_IMAGE_ID, bref + "add_image", this));
 		imageContainer.add(WFUtil.getBreak());
@@ -211,8 +213,8 @@ public class ArticleBlock extends WFBlock implements ActionListener, ManagedCont
 		p.getChildren().add(WFUtil.group(WFUtil.getTextVB(bref + "main_category"), WFUtil.getText(":")));		
 		HtmlInputTextarea sourceArea = WFUtil.getTextArea(SOURCE_ID, ref + "source", "440px", "30px");
 		p.getChildren().add(sourceArea);		
-		//HtmlSelectOneMenu mainCategoryMenu = WFUtil.getSelectOneMenu(MAIN_CATEGORY_ID, ref + "categories", ref + "mainCategoryId");
-		//p.getChildren().add(mainCategoryMenu);		
+		HtmlSelectOneMenu mainCategoryMenu = WFUtil.getSelectOneMenu(MAIN_CATEGORY_ID, ref + "categories", ref + "mainCategoryId");
+		p.getChildren().add(mainCategoryMenu);		
 
 		mainContainer.add(p);
 		mainContainer.add(WFUtil.getBreak());

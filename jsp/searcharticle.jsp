@@ -1,20 +1,16 @@
 <?xml version="1.0"?>
 <jsp:root xmlns:jsp="http://java.sun.com/JSP/Page"
-	xmlns:html="http://java.sun.com/jsf/html"
-	xmlns:jsf="http://java.sun.com/jsf/core"
-	xmlns:w="http://xmlns.idega.com/com.idega.webface"
-	xmlns:a="http://xmlns.idega.com/com.idega.block.article"
+        xmlns:html="http://java.sun.com/jsf/html"
+        xmlns:jsf="http://java.sun.com/jsf/core"
+        xmlns:wf="http://xmlns.idega.com/com.idega.webface"
+        xmlns:article="http://xmlns.idega.com/com.idega.block.article"
 version="1.2">
 
-<jsp:directive.page session="false" contentType="text/html"/>
 <jsf:view>
-	<jsp:output omit-xml-declaration="false" doctype-root-element="html" doctype-public="-//W3C//DTD XHTML 1.1//EN" doctype-system="http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd"/>
-	<html xmlns="http://www.w3.org/1999/xhtml">
-	<body>
-		<html:form>
-			<a:search_article_page id="search_article_page" />
-		</html:form>
-	</body>
-	</html>
+        <wf:workspace_page>
+                <html:form>
+                        <article:search_article_page id="search_article_page"/>
+                </html:form>
+        </wf:workspace_page>
 </jsf:view>
 </jsp:root>
