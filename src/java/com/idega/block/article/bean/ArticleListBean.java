@@ -1,5 +1,5 @@
 /*
- * $Id: ArticleListBean.java,v 1.5 2004/11/17 14:39:37 joakim Exp $
+ * $Id: ArticleListBean.java,v 1.6 2004/12/14 11:40:17 gummi Exp $
  *
  * Copyright (C) 2004 Idega. All Rights Reserved.
  *
@@ -27,6 +27,7 @@ import com.idega.idegaweb.IWUserContext;
 import com.idega.presentation.IWContext;
 import com.idega.slide.business.IWSlideService;
 import com.idega.slide.business.IWSlideSession;
+import com.idega.slide.utils.WebdavRootResource;
 import com.idega.webface.WFPage;
 import com.idega.webface.WFUtil;
 import com.idega.webface.bean.WFListBean;
@@ -35,10 +36,10 @@ import com.idega.webface.model.WFDataModel;
 /**
  * Bean for article list rows.   
  * <p>
- * Last modified: $Date: 2004/11/17 14:39:37 $ by $Author: joakim $
+ * Last modified: $Date: 2004/12/14 11:40:17 $ by $Author: gummi $
  *
  * @author Anders Lindman
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
  */
 
 public class ArticleListBean implements WFListBean, Serializable {
@@ -159,11 +160,9 @@ public class ArticleListBean implements WFListBean, Serializable {
 		IWSlideSession session = (IWSlideSession)IBOLookup.getSessionInstance(iwuc,IWSlideSession.class);
 		IWSlideService service = (IWSlideService)IBOLookup.getServiceInstance(iwac,IWSlideService.class);
 		
-		HttpURL root = new HttpURL(service.getWebdavServerURL()+folder);
-		root.setUserinfo("root","root");
-		WebdavResource webdavResource = new WebdavResource(root);
+		WebdavRootResource rootResource = session.getWebdavRootResource();
 		
-		String[] file = webdavResource.list();
+		String[] file = rootResource.list();
 	
 		for(int i=0;i<file.length;i++){
 //			System.out.println("Attempting to load "+articleFile[i].toString());

@@ -1,5 +1,5 @@
 /*
- * $Id: ArticleItemBean.java,v 1.8 2004/12/09 16:19:19 joakim Exp $
+ * $Id: ArticleItemBean.java,v 1.9 2004/12/14 11:40:17 gummi Exp $
  *
  * Copyright (C) 2004 Idega. All Rights Reserved.
  *
@@ -15,7 +15,6 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import org.apache.commons.httpclient.HttpURL;
 import org.apache.webdav.lib.WebdavResource;
 import org.apache.xmlbeans.XmlException;
 import com.idega.business.IBOLookup;
@@ -25,6 +24,7 @@ import com.idega.idegaweb.IWUserContext;
 import com.idega.presentation.IWContext;
 import com.idega.slide.business.IWSlideService;
 import com.idega.slide.business.IWSlideSession;
+import com.idega.slide.utils.WebdavRootResource;
 import com.idega.webface.test.bean.ContentItemBean;
 import com.idega.webface.test.bean.ContentItemField;
 import com.idega.webface.test.bean.ContentItemFieldBean;
@@ -32,10 +32,10 @@ import com.idega.webface.test.bean.ContentItemFieldBean;
 /**
  * Bean for idegaWeb article content items.   
  * <p>
- * Last modified: $Date: 2004/12/09 16:19:19 $ by $Author: joakim $
+ * Last modified: $Date: 2004/12/14 11:40:17 $ by $Author: gummi $
  *
  * @author Anders Lindman
- * @version $Revision: 1.8 $
+ * @version $Revision: 1.9 $
  */
 
 public class ArticleItemBean extends ContentItemBean implements Serializable {
@@ -253,13 +253,12 @@ public class ArticleItemBean extends ContentItemBean implements Serializable {
 			System.out.println("webdavServletURL = "+getWebdavServletURL(iwuc));
 			System.out.println("Main category = "+getMainCategory());
 
-			HttpURL root = service.getWebdavServerURL();
-			root.setUserinfo("root","root");
-			WebdavResource webdavResource = new WebdavResource(root);
+
+			WebdavRootResource rootResource = session.getWebdavRootResource();
 //			boolean success = webdavResource.mkcolMethod("/servlet/webdav/files/test/test2");
-			boolean success = webdavResource.mkcolMethod(getWebdavServletURL(iwuc)+getMainCategory());
+			boolean success = rootResource.mkcolMethod(getWebdavServletURL(iwuc)+getMainCategory());
 			System.out.println("success "+success);
-			success = webdavResource.putMethod(getWebdavServletURL(iwuc)+getMainCategory()+"/"+filename+".xml",articleDoc.toString());
+			success = rootResource.putMethod(getWebdavServletURL(iwuc)+getMainCategory()+"/"+filename+".xml",articleDoc.toString());
 			System.out.println("success "+success);
 
 //			String webdavServletURL = getWebdavServletURL(iwuc)+"/"+getMainCategory();
@@ -342,14 +341,7 @@ public class ArticleItemBean extends ContentItemBean implements Serializable {
 		IWSlideSession session = (IWSlideSession)IBOLookup.getSessionInstance(iwuc,IWSlideSession.class);
 		IWSlideService service = (IWSlideService)IBOLookup.getServiceInstance(iwac,IWSlideService.class);
 
-		//TODO have to find the host machine url to load the resource.
-//		WebdavResource webdavResource = session.getWebdavResource(getWebdavServletURL(iwuc)+path);
-//		WebdavFile webdavFile = session.getWebdavFile();
-		HttpURL contentRoot = service.getWebdavServerURL(path);
-		contentRoot.setUserinfo("root","root");
-		
-//		root.setUserinfo("root","root");
-		WebdavResource webdavResource = new WebdavResource(contentRoot);
+		WebdavResource webdavResource = session.getWebdavResource(path);
 		
 		ArticleDocument articleDoc;
 		
