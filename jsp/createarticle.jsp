@@ -2,15 +2,15 @@
 <jsp:root xmlns:jsp="http://java.sun.com/JSP/Page"
         xmlns:html="http://java.sun.com/jsf/html"
         xmlns:jsf="http://java.sun.com/jsf/core"
-        xmlns:wf="http://xmlns.idega.com/com.idega.webface"
+        xmlns:ws="http://xmlns.idega.com/com.idega.workspace"
         xmlns:article="http://xmlns.idega.com/com.idega.block.article"
 version="1.2">
 
 <jsf:view>
-        <wf:workspace_page>
+        <ws:page>
                 <html:form>
                         <article:create_article_page id="create_article_page"/>
                 </html:form>
-        </wf:workspace_page>
+        </ws:page>
 </jsf:view>
 </jsp:root>
