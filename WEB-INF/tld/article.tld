@@ -12,18 +12,8 @@
     <uri>http://xmlns.idega.com/com.idega.block.article</uri>
 
 	<tag>
-		<name>articleblock</name>
-		<tag-class>com.idega.block.article.component.reference.ArticleBlockTag</tag-class>
-		<attribute>
-			<name>id</name>
-			<required>false</required>
-			<rtexprvalue>false</rtexprvalue>
-		</attribute>
-	</tag>
-
-	<tag>
 		<name>listarticlesblock</name>
-		<tag-class>com.idega.block.article.component.ListArticlesBlockTag</tag-class>
+		<tag-class>com.idega.block.article.taglib.ListArticlesBlockTag</tag-class>
 		<attribute>
 			<name>id</name>
 			<required>false</required>
@@ -33,7 +23,7 @@
 
 	<tag>
 		<name>article_item_view</name>
-		<tag-class>com.idega.block.article.component.ArticleItemViewTag</tag-class>
+		<tag-class>com.idega.block.article.taglib.ArticleItemViewTag</tag-class>
 		<attribute>
 			<name>id</name>
 			<required>false</required>
@@ -91,4 +81,14 @@
 		</attribute>
 	</tag>
 	
+	<tag>
+		<name>articleblock</name>
+		<tag-class>com.idega.block.article.component.reference.ArticleBlockTag</tag-class>
+		<attribute>
+			<name>id</name>
+			<required>false</required>
+			<rtexprvalue>false</rtexprvalue>
+		</attribute>
+	</tag>
+
 </taglib>
