@@ -1,19 +1,20 @@
 /*
- * Created on Dec 3, 2004
+ * $Id: ArticleItemViewTag.java,v 1.2 2004/12/09 14:42:15 joakim Exp $
  *
- * TODO To change the template for this generated file go to
- * Window - Preferences - Java - Code Style - Code Templates
- */
-package com.idega.block.article.component;
+ * Copyright (C) 2004 Idega. All Rights Reserved.
+ *
+ * This software is the proprietary information of Idega.
+ * Use is subject to license terms.
+ */package com.idega.block.article.component;
 
 import javax.faces.webapp.UIComponentTag;
 
 
 /**
- * @author Joakim
+ * Last modified: $Date: 2004/12/09 14:42:15 $ by $Author: joakim $
  *
- * TODO To change the template for this generated type comment go to
- * Window - Preferences - Java - Code Style - Code Templates
+ * @author Joakim
+ * @version $Revision: 1.2 $
  */
 public class ArticleItemViewTag extends UIComponentTag {
 	

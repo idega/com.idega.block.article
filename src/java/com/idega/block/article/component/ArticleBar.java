@@ -1,3 +1,11 @@
+/*
+ * $Id: ArticleBar.java,v 1.3 2004/12/09 14:42:15 joakim Exp $
+ *
+ * Copyright (C) 2004 Idega. All Rights Reserved.
+ *
+ * This software is the proprietary information of Idega.
+ * Use is subject to license terms.
+ */
 package com.idega.block.article.component;
 
 import java.io.Serializable;
@@ -15,11 +23,13 @@ import com.idega.webface.WFTabbedPane;
 import com.idega.webface.WFUtil;
 import com.idega.webface.event.WFTabEvent;
 
-
 /**
+ * Last modified: $Date: 2004/12/09 14:42:15 $ by $Author: joakim $
+ *
  * @author Joakim
+ * @version $Revision: 1.3 $
  */
-public class ArticleBar  extends WFContainer implements  Serializable{
+public class ArticleBar extends WFContainer implements  Serializable{
 
 	private final static String P = "article_page_"; // Parameter prefix
 	private final static String MAIN_TASKBAR_ID = P + "main_taskbar";
