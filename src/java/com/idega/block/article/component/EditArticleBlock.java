@@ -1,5 +1,5 @@
 /*
- * $Id: EditArticleBlock.java,v 1.9 2005/01/04 15:17:33 joakim Exp $
+ * $Id: EditArticleBlock.java,v 1.10 2005/01/10 10:24:31 joakim Exp $
  *
  * Copyright (C) 2004 Idega. All Rights Reserved.
  *
@@ -25,7 +25,6 @@ import javax.faces.context.FacesContext;
 import javax.faces.convert.IntegerConverter;
 import javax.faces.event.ActionEvent;
 import javax.faces.event.ActionListener;
-import com.idega.block.article.WFUtilArticle;
 import com.idega.block.article.component.reference.FileUploadForm;
 import com.idega.content.business.ContentUtil;
 import com.idega.presentation.IWBaseComponent;
@@ -36,6 +35,7 @@ import com.idega.webface.WFList;
 import com.idega.webface.WFPage;
 import com.idega.webface.WFPanelUtil;
 import com.idega.webface.WFPlainOutputText;
+import com.idega.webface.WFResourceUtil;
 import com.idega.webface.WFTabbedPane;
 import com.idega.webface.WFUtil;
 import com.idega.webface.htmlarea.HTMLArea;
@@ -44,10 +44,10 @@ import com.idega.webface.test.bean.ContentItemCase;
 import com.idega.webface.test.bean.ManagedContentBeans;
 
 /**
- * Last modified: $Date: 2005/01/04 15:17:33 $ by $Author: joakim $
+ * Last modified: $Date: 2005/01/10 10:24:31 $ by $Author: joakim $
  *
  * @author Joakim
- * @version $Revision: 1.9 $
+ * @version $Revision: 1.10 $
  */
 public class EditArticleBlock extends IWBaseComponent implements ManagedContentBeans, ActionListener {
 	public final static String EDIT_ARTICLE_BLOCK_ID = "edit_articles_block";
@@ -126,7 +126,7 @@ public class EditArticleBlock extends IWBaseComponent implements ManagedContentB
 	 */
 	public UIComponent getEditContainer() {
 		
-		WFUtilArticle localizer = WFUtilArticle.getWFUtilArticle();
+		WFResourceUtil localizer = WFResourceUtil.getResourceUtilArticle();
 		String ref = ARTICLE_ITEM_BEAN_ID + ".";
 //		String bref = WFPage.CONTENT_BUNDLE + ".";
 
@@ -254,7 +254,7 @@ public class EditArticleBlock extends IWBaseComponent implements ManagedContentB
 		p.getChildren().add(WFUtil.group(localizer.getTextVB("category"), WFUtil.getText(":")));
 		HtmlInputText categoryInput = WFUtil.getInputText(MAIN_CATEGORY_ID, ref + "mainCategory");
 		if(null==categoryInput.getValue() || "".equals(categoryInput.getValue())) {
-			categoryInput.setValue(ContentUtil.CONTENT_PATH);
+			categoryInput.setValue(ContentUtil.ARTICLE_PATH);
 		}
 		categoryInput.setSize(40);
 		p.getChildren().add(categoryInput);		
