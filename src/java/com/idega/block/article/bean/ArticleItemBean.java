@@ -1,5 +1,5 @@
 /*
- * $Id: ArticleItemBean.java,v 1.21 2005/02/15 17:08:06 joakim Exp $
+ * $Id: ArticleItemBean.java,v 1.22 2005/02/18 11:25:49 joakim Exp $
  *
  * Copyright (C) 2004 Idega. All Rights Reserved.
  *
@@ -42,10 +42,10 @@ import com.idega.xmlns.block.article.document.ArticleDocument;
 /**
  * Bean for idegaWeb article content items.   
  * <p>
- * Last modified: $Date: 2005/02/15 17:08:06 $ by $Author: joakim $
+ * Last modified: $Date: 2005/02/18 11:25:49 $ by $Author: joakim $
  *
  * @author Anders Lindman
- * @version $Revision: 1.21 $
+ * @version $Revision: 1.22 $
  */
 
 public class ArticleItemBean extends ContentItemBean implements Serializable, ContentItem {
@@ -102,7 +102,7 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 	public void setTeaser(String s) { setValue(FIELDNAME_TEASER, s); } 
 	public void setBody(String articleIn) {
 		if (null != articleIn) {
-			System.out.println("ArticleIn = "+articleIn);
+//			System.out.println("ArticleIn = "+articleIn);
 			//Use JTidy to clean up the html
 			Tidy tidy = new Tidy();
 			tidy.setXHTML(true);
@@ -111,7 +111,7 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 			ByteArrayOutputStream baos = new ByteArrayOutputStream();
 			tidy.parse(bais, baos);
 			String articleOut = baos.toString();
-			System.out.println("ArticleOut = "+articleOut);
+//			System.out.println("ArticleOut = "+articleOut);
 			setValue(FIELDNAME_BODY, articleOut);
 //			setValue(FIELDNAME_BODY, articleIn);
 		}
@@ -224,6 +224,11 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 		return name.toString();
 	}
 	
+	/**
+	 * Returns the Article Item as an XML-formatted string
+	 * @return the XML string
+	 * @throws IOException
+	 */
 	public String getAsXML() throws IOException {
 
 //		SAXBuilder builder = new SAXBuilder();
@@ -276,7 +281,11 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 		return outputter.outputString(doc);
 //		return writer.toString();
 	}
-	
+
+	/**
+	 * @deprecated use getAsXML() instead. We have dropped XMLBeans, since it insisted on adding CData
+	 * @return
+	 */
 	public String getAsXMLFromXMLBeans() {
 		ArticleDocument articleDoc = ArticleDocument.Factory.newInstance();
 	    
@@ -424,6 +433,7 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
     
 	/**
 	 * Loads all xml files in the given folder
+	 * @deprecated use load() instead
 	 * @param folder
 	 * @return List containing ArticleItemBean
 	 * @throws XmlException
@@ -447,6 +457,10 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 	    
 	}
 	
+	/**
+	 * Loads an xml file specified by the webdav resource
+	 * The beans atributes are then set according to the information in the XML file
+	 */
 	public void load(WebdavExtendedResource webdavResource) throws IOException {
 		XMLParser builder = new XMLParser();
 		XMLDocument bodyDoc = null;
@@ -455,25 +469,22 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 		} catch (XMLException e) {
 			e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
 		}
-//		Element bodyElement = bodyDoc.getRootElement();
-		XMLElement bodyElement = bodyDoc.getRootElement();
-//		List list = bodyElement.getChildren();
-//		System.out.println("List size= "+list.size());
-//		for(int i=0;i<list.size();i++) {
-//			System.out.println("list object "+i+" "+list.get(i));
-//			XMLElement el = (XMLElement) list.get(i);
-//			System.out.println("Text "+el.getText());
-//			try {
-//			System.out.println("Text "+bodyElement.getChild(FIELDNAME_HEADLINE));
-//			}catch(Exception e) {
-//				e.printStackTrace();
-//			}
-//		}
-		setHeadline(bodyElement.getChild(FIELDNAME_HEADLINE,idegans).getText());
-		setTeaser(bodyElement.getChild(FIELDNAME_TEASER,idegans).getText());
-		setAuthor(bodyElement.getChild(FIELDNAME_AUTHOR,idegans).getText());
-		setBody(bodyElement.getChild(FIELDNAME_BODY,idegans).getText());
-		setComment(bodyElement.getChild(FIELDNAME_ARTICLE_COMMENT,idegans).getText());
+		XMLElement rootElement = bodyDoc.getRootElement();
+
+		setHeadline(rootElement.getChild(FIELDNAME_HEADLINE,idegans).getText());
+		setTeaser(rootElement.getChild(FIELDNAME_TEASER,idegans).getText());
+		setAuthor(rootElement.getChild(FIELDNAME_AUTHOR,idegans).getText());
+
+		//Parse out the body
+		XMLNamespace htmlNamespace = new XMLNamespace("http://www.w3.org/1999/xhtml");
+		XMLElement bodyElement = rootElement.getChild(FIELDNAME_BODY,idegans);
+		XMLElement htmlElement = bodyElement.getChild("html",htmlNamespace);
+		XMLElement htmlBodyElement = htmlElement.getChild("body",htmlNamespace);
+		String bodyValue = new XMLOutput().outputString(htmlBodyElement);
+//		System.out.println("htmlBody value= "+bodyValue);
+		setBody(bodyValue);
+		
+		setComment(rootElement.getChild(FIELDNAME_ARTICLE_COMMENT,idegans).getText());
 
 		String folder = webdavResource.getParentPath();
 	    setFolderLocation(folder);
