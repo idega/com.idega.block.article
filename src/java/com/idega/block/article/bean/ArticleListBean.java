@@ -1,5 +1,5 @@
 /*
- * $Id: ArticleListBean.java,v 1.3 2004/11/10 17:23:07 joakim Exp $
+ * $Id: ArticleListBean.java,v 1.4 2004/11/16 00:03:17 tryggvil Exp $
  *
  * Copyright (C) 2004 Idega. All Rights Reserved.
  *
@@ -30,10 +30,10 @@ import com.idega.webface.model.WFDataModel;
 /**
  * Bean for article list rows.   
  * <p>
- * Last modified: $Date: 2004/11/10 17:23:07 $ by $Author: joakim $
+ * Last modified: $Date: 2004/11/16 00:03:17 $ by $Author: tryggvil $
  *
  * @author Anders Lindman
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
 
 public class ArticleListBean implements WFListBean, Serializable {
@@ -147,11 +147,13 @@ public class ArticleListBean implements WFListBean, Serializable {
 		
 		File[] articleFile = folder.listFiles();
 		
-		for(int i=0;i<articleFile.length;i++){
-			System.out.println("Attempting to load "+articleFile[i].toString());
-			ArticleItemBean article = new ArticleItemBean();
-			article.load(articleFile[i]);
-			list.add(article);
+		if(articleFile!=null){
+			for(int i=0;i<articleFile.length;i++){
+				System.out.println("Attempting to load "+articleFile[i].toString());
+				ArticleItemBean article = new ArticleItemBean();
+				article.load(articleFile[i]);
+				list.add(article);
+			}
 		}
 		
 		return list;
