@@ -1,5 +1,5 @@
 /*
- * $Id: ArticleDetailView.java,v 1.4 2004/12/15 15:47:16 joakim Exp $
+ * $Id: ArticleDetailView.java,v 1.5 2004/12/16 17:11:17 joakim Exp $
  * 
  * Copyright (C) 2004 Idega. All Rights Reserved.
  * 
@@ -13,9 +13,9 @@ import javax.faces.component.UIComponent;
 import javax.faces.component.html.HtmlOutputText;
 import javax.faces.component.html.HtmlPanelGrid;
 import javax.faces.context.FacesContext;
+import com.idega.block.article.WFUtilArticle;
 import com.idega.presentation.IWBaseComponent;
 import com.idega.webface.WFComponentSelector;
-import com.idega.webface.WFPage;
 import com.idega.webface.WFPanelUtil;
 import com.idega.webface.WFPlainOutputText;
 import com.idega.webface.WFUtil;
@@ -23,10 +23,10 @@ import com.idega.webface.convert.WFCommaSeparatedListConverter;
 import com.idega.webface.test.bean.ManagedContentBeans;
 
 /**
- * Last modified: $Date: 2004/12/15 15:47:16 $ by $Author: joakim $
+ * Last modified: $Date: 2004/12/16 17:11:17 $ by $Author: joakim $
  * 
  * @author Joakim
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  */
 public class ArticleDetailView extends IWBaseComponent implements ManagedContentBeans {
 
@@ -37,7 +37,8 @@ public class ArticleDetailView extends IWBaseComponent implements ManagedContent
 	private final static String ARTICLE_LIST_ID = P + "article_list";
 
 	private final static String ref = ARTICLE_ITEM_BEAN_ID + ".";
-	private final static String bref = WFPage.CONTENT_BUNDLE + ".";
+//	private final static String bref = WFPage.CONTENT_BUNDLE + ".";
+	private final static String BUNDLE = "com.idega.block.article";
 	
 	public ArticleDetailView() {
 	}
@@ -53,20 +54,14 @@ public class ArticleDetailView extends IWBaseComponent implements ManagedContent
 		HtmlPanelGrid dp = WFPanelUtil.getPlainFormPanel(1);
 		WFComponentSelector cs = new WFComponentSelector();
 		cs.setId(COMPONENT_SELECTOR_ID);
-		String headline = WFUtil.getTextVB(ref + "headline").getTitle();
-		System.out.println("Headline:'" + WFUtil.getTextVB(ref + "headline").getTitle() + "'");
 		HtmlPanelGrid p = WFPanelUtil.getPlainFormPanel(1);
 		p.setId(NO_ARTICLE_ID);
-		p.getChildren().add(WFUtil.getHeaderTextVB(bref + "no_article_selected"));
+		p.getChildren().add(WFUtilArticle.getHeaderTextVB("no_article_selected"));
 		
 		cs.add(p);
 		
 		p = WFPanelUtil.getPlainFormPanel(1);
 		p.setId(ARTICLE_LIST_ID);
-		//		System.out.println("Headline:"+WFUtil.getTextVB(ref +
-		// "headline").getTitle());
-		//		System.out.println("Headline length:"+WFUtil.getTextVB(ref +
-		// "headline").getTitle().length());
 		p.getChildren().add(WFUtil.getHeaderTextVB(ref + "headline"));
 		p.getChildren().add(WFUtil.getText(" "));
 		p.getChildren().add(WFUtil.getTextVB(ref + "teaser"));
@@ -76,34 +71,33 @@ public class ArticleDetailView extends IWBaseComponent implements ManagedContent
 		p.getChildren().add(bodyText);
 		p.getChildren().add(WFUtil.getBreak());
 		p.getChildren().add(new WFPlainOutputText("<hr/>"));
-		UIComponent g = WFUtil.group(WFUtil.getHeaderTextVB(bref + "author"), WFUtil.getHeaderText(": "));
+		UIComponent g = WFUtil.group(WFUtilArticle.getHeaderTextVB("author"), WFUtil.getHeaderText(": "));
 		g.getChildren().add(WFUtil.getTextVB(ref + "author"));
 		p.getChildren().add(g);
 		p.getChildren().add(WFUtil.getText(" "));
-		g = WFUtil.group(WFUtil.getHeaderTextVB(bref + "created"), WFUtil.getHeaderText(": "));
+		g = WFUtil.group(WFUtilArticle.getHeaderTextVB("created"), WFUtil.getHeaderText(": "));
 		g.getChildren().add(WFUtil.getTextVB(ref + "creationDate"));
 		p.getChildren().add(g);
 		p.getChildren().add(WFUtil.getText(" "));
-		g = WFUtil.group(WFUtil.getHeaderTextVB(bref + "status"), WFUtil.getHeaderText(": "));
+		g = WFUtil.group(WFUtilArticle.getHeaderTextVB("status"), WFUtil.getHeaderText(": "));
 		g.getChildren().add(WFUtil.getTextVB(ref + "status"));
 		p.getChildren().add(g);
 		p.getChildren().add(WFUtil.getText(" "));
 		HtmlOutputText t = WFUtil.getTextVB(ref + "categoryNames");
 		t.setConverter(new WFCommaSeparatedListConverter());
-		g = WFUtil.group(WFUtil.getHeaderTextVB(bref + "categories"), WFUtil.getHeaderText(": "));
+		g = WFUtil.group(WFUtilArticle.getHeaderTextVB("categories"), WFUtil.getHeaderText(": "));
 		g.getChildren().add(t);
 		p.getChildren().add(g);
 		p.getChildren().add(WFUtil.getText(" "));
-		g = WFUtil.group(WFUtil.getHeaderTextVB(bref + "current_version"), WFUtil.getHeaderText(": "));
+		g = WFUtil.group(WFUtilArticle.getHeaderTextVB("current_version"), WFUtil.getHeaderText(": "));
 		g.getChildren().add(WFUtil.getTextVB(ref + "versionId"));
-		//		g.getChildren().add(WFUtil.getText("1.5"));
 		p.getChildren().add(g);
 		p.getChildren().add(WFUtil.getText(" "));
-		g = WFUtil.group(WFUtil.getHeaderTextVB(bref + "comment"), WFUtil.getHeaderText(": "));
+		g = WFUtil.group(WFUtilArticle.getHeaderTextVB("comment"), WFUtil.getHeaderText(": "));
 		g.getChildren().add(WFUtil.getTextVB(ref + "comment"));
 		p.getChildren().add(g);
 		p.getChildren().add(WFUtil.getText(" "));
-		g = WFUtil.group(WFUtil.getHeaderText("source"), WFUtil.getHeaderText(": "));
+		g = WFUtil.group(WFUtilArticle.getHeaderTextVB("source"), WFUtil.getHeaderText(": "));
 		g.getChildren().add(WFUtil.getTextVB(ref + "source"));
 		p.getChildren().add(g);
 		p.getChildren().add(WFUtil.getText(" "));
@@ -114,6 +108,11 @@ public class ArticleDetailView extends IWBaseComponent implements ManagedContent
 		return dp;
 	}
 	
+	/**
+	 * Selects what component to display. Either the detaild information 
+	 * or the text saying that no article is selected.
+	 * The decision is based on the presence of article_item_bean.headline is pressent in the session
+	 */
 	private void selectComponent() {
 		WFComponentSelector cs = (WFComponentSelector) findComponent(COMPONENT_SELECTOR_ID);
 
