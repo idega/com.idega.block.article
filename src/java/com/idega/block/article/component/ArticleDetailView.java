@@ -1,5 +1,5 @@
 /*
- * $Id: ArticleDetailView.java,v 1.12 2005/02/07 10:59:53 gummi Exp $
+ * $Id: ArticleDetailView.java,v 1.13 2005/02/22 11:30:13 joakim Exp $
  * 
  * Copyright (C) 2004 Idega. All Rights Reserved.
  * 
@@ -15,6 +15,7 @@ import javax.faces.component.html.HtmlPanelGrid;
 import javax.faces.context.FacesContext;
 import com.idega.block.article.bean.ArticleItemBean;
 import com.idega.content.bean.ManagedContentBeans;
+import com.idega.content.presentation.WebDAVFileDetails;
 import com.idega.content.presentation.WebDAVMetadata;
 import com.idega.presentation.IWBaseComponent;
 import com.idega.webface.WFComponentSelector;
@@ -25,12 +26,12 @@ import com.idega.webface.WFUtil;
 import com.idega.webface.convert.WFCommaSeparatedListConverter;
 
 /**
- * Last modified: $Date: 2005/02/07 10:59:53 $ by $Author: gummi $
+ * Last modified: $Date: 2005/02/22 11:30:13 $ by $Author: joakim $
  * 
  * Displays detailed info about the article
  * 
  * @author Joakim
- * @version $Revision: 1.12 $
+ * @version $Revision: 1.13 $
  */
 public class ArticleDetailView extends IWBaseComponent implements ManagedContentBeans {
 
@@ -120,6 +121,10 @@ public class ArticleDetailView extends IWBaseComponent implements ManagedContent
 		p.getChildren().add(g);
 		p.getChildren().add(WFUtil.getText(" "));
 
+		WebDAVFileDetails details = new WebDAVFileDetails();
+		WFUtil.setValueBinding(details,"currentResourcePath",ref+"resourcePath");
+		
+		p.getChildren().add(details);
 		cs.add(p);
 		cs.setSelectedId(NO_ARTICLE_ID, true);
 		dp.getChildren().add(cs);
