@@ -1,5 +1,5 @@
 /*
- * $Id: CMSPage.java,v 1.6 2004/11/16 00:42:30 tryggvil Exp $
+ * $Id: CMSPage.java,v 1.7 2004/11/16 01:17:32 tryggvil Exp $
  *
  * Copyright (C) 2004 Idega. All Rights Reserved.
  *
@@ -14,7 +14,6 @@ import java.io.Serializable;
 import javax.faces.component.UICommand;
 import javax.faces.component.UIComponent;
 import javax.faces.component.html.HtmlCommandButton;
-import javax.faces.component.html.HtmlInputSecret;
 import javax.faces.component.html.HtmlPanelGrid;
 import javax.faces.context.FacesContext;
 import javax.faces.event.ActionEvent;
@@ -39,10 +38,10 @@ import com.idega.webface.test.bean.ManagedContentBeans;
 /**
  * Content management system test/demo page. 
  * <p>
- * Last modified: $Date: 2004/11/16 00:42:30 $ by $Author: tryggvil $
+ * Last modified: $Date: 2004/11/16 01:17:32 $ by $Author: tryggvil $
  *
  * @author Anders Lindman
- * @version $Revision: 1.6 $
+ * @version $Revision: 1.7 $
  */
 public class CMSPage extends WFPage implements  ManagedContentBeans, WFTabListener, ActionListener, Serializable {
 	
