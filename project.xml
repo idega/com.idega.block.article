@@ -113,11 +113,26 @@
       <url>http://xmlbeans.apache.org/</url>
     </dependency>
     <dependency>
+      <groupId>xmlbeans</groupId>
+      <artifactId>xbean</artifactId>
+      <version>1.0.3</version>
+      <type>jar</type>
+      <url>http://xmlbeans.apache.org/</url>
+    </dependency>
+    <dependency>
       <groupId>jaxen</groupId>
       <artifactId>jaxen</artifactId>
       <version>1.1-beta-4</version>
       <type>jar</type>
       <url>http://www.jaxen.org/</url>
+    </dependency>
+
+    <dependency>
+      <groupId>jtidy</groupId>
+      <artifactId>jtidy</artifactId>
+      <version>4aug2000r7-dev</version>
+      <type>jar</type>
+      <url>http://jtidy.sourceforge.net</url>
     </dependency>
 
   </dependencies>
