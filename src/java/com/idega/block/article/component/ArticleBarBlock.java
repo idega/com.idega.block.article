@@ -1,5 +1,5 @@
 /*
- * $Id: ArticleBarBlock.java,v 1.3 2004/12/21 15:37:51 joakim Exp $
+ * $Id: ArticleBarBlock.java,v 1.4 2005/01/10 10:02:10 gimmi Exp $
  *
  * Copyright (C) 2004 Idega. All Rights Reserved.
  *
@@ -20,10 +20,10 @@ import com.idega.webface.test.bean.ManagedContentBeans;
 
 
 /**
- * Last modified: $Date: 2004/12/21 15:37:51 $ by $Author: joakim $
+ * Last modified: $Date: 2005/01/10 10:02:10 $ by $Author: gimmi $
  *
  * @author Joakim
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
 public class ArticleBarBlock extends WFBlock implements ActionListener, ManagedContentBeans {
 
@@ -45,9 +45,8 @@ public class ArticleBarBlock extends WFBlock implements ActionListener, ManagedC
 	 * Constructs an ArticleBlock with the specified title key. 
 	 */
 	public ArticleBarBlock(String titleKey, WFTabListener taskbarListener) {
-		super(titleKey);
+		super(titleKey, true);
 		setId(ARTICLE_BLOCK_ID);
-		getTitlebar().setValueRefTitle(true);
 		setMainAreaStyleClass(null);
 		
 		String bref = WFPage.CONTENT_BUNDLE + ".";

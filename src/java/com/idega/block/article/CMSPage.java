@@ -1,5 +1,5 @@
 /*
- * $Id: CMSPage.java,v 1.10 2005/01/04 14:30:58 joakim Exp $
+ * $Id: CMSPage.java,v 1.11 2005/01/10 10:02:10 gimmi Exp $
  *
  * Copyright (C) 2004 Idega. All Rights Reserved.
  *
@@ -34,10 +34,10 @@ import com.idega.webface.test.bean.ManagedContentBeans;
 /**
  * Content management system test/demo page. 
  * <p>
- * Last modified: $Date: 2005/01/04 14:30:58 $ by $Author: joakim $
+ * Last modified: $Date: 2005/01/10 10:02:10 $ by $Author: gimmi $
  *
  * @author Anders Lindman
- * @version $Revision: 1.10 $
+ * @version $Revision: 1.11 $
  */
 public class CMSPage extends WFPage implements  ManagedContentBeans, WFTabListener, ActionListener, Serializable {
 	
@@ -188,8 +188,7 @@ public class CMSPage extends WFPage implements  ManagedContentBeans, WFTabListen
 	protected UIComponent getFunctionBlock() {
 
 		String bref = WFPage.CONTENT_BUNDLE + ".";
-		WFBlock b = new WFBlock(bref + "functions");
-		b.getTitlebar().setValueRefTitle(true);
+		WFBlock b = new WFBlock(bref + "functions", true);
 
 		WFViewMenu vm = new WFViewMenu();
 		b = WFUtil.setBlockStyle(b, vm);
@@ -218,8 +217,7 @@ public class CMSPage extends WFPage implements  ManagedContentBeans, WFTabListen
 	 */
 	protected UIComponent getArticleList() {
 		String bref = WFPage.CONTENT_BUNDLE + ".";
-		WFBlock b = new WFBlock(bref + "article_list");
-		b.getTitlebar().setValueRefTitle(true);
+		WFBlock b = new WFBlock(bref + "article_list", true);
 		WFList l = new WFList(ARTICLE_LIST_BEAN_ID, 0, 3);
 		l.setId(ARTICLE_LIST_ID);
 		b.add(l);
@@ -231,8 +229,7 @@ public class CMSPage extends WFPage implements  ManagedContentBeans, WFTabListen
 	 */
 	protected UIComponent getCaseList() {
 		String bref = WFPage.CONTENT_BUNDLE + ".";
-		WFBlock b = new WFBlock(bref + "case_list");
-		b.getTitlebar().setValueRefTitle(true);
+		WFBlock b = new WFBlock(bref + "case_list", true);
 		WFList l = new WFList(CASE_LIST_BEAN_ID, 0, 3);
 		l.setId(CASE_LIST_ID);
 		b.add(l);

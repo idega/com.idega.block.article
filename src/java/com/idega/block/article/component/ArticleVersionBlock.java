@@ -1,5 +1,5 @@
 /*
- * $Id: ArticleVersionBlock.java,v 1.1 2004/10/26 12:45:00 joakim Exp $
+ * $Id: ArticleVersionBlock.java,v 1.2 2005/01/10 10:02:10 gimmi Exp $
  *
  * Copyright (C) 2004 Idega. All Rights Reserved.
  *
@@ -27,10 +27,10 @@ import com.idega.webface.test.bean.ManagedContentBeans;
 /**
  * Block for listing article versions.   
  * <p>
- * Last modified: $Date: 2004/10/26 12:45:00 $ by $Author: joakim $
+ * Last modified: $Date: 2005/01/10 10:02:10 $ by $Author: gimmi $
  *
  * @author Anders Lindman
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public class ArticleVersionBlock extends WFBlock implements ManagedContentBeans, ActionListener, Serializable {
 
@@ -51,9 +51,8 @@ public class ArticleVersionBlock extends WFBlock implements ManagedContentBeans,
 	 * Constructs an ArticleVersionBlock with the specified title key. 
 	 */
 	public ArticleVersionBlock(String titleKey) {
-		super(titleKey);
+		super(titleKey, true);
 		setId(ARTICLE_VERSION_BLOCK_ID);
-		getTitlebar().setValueRefTitle(true);
 		
 		WFUtil.invoke(ARTICLE_VERSION_LIST_BEAN_ID, "setArticleLinkListener", this, ActionListener.class);
 

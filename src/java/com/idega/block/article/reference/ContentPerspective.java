@@ -57,8 +57,7 @@ public class ContentPerspective extends WFContainer implements ManagedContentBea
 	 */
 	protected UIComponent getFunctionBlock() {
 		String bref = WFPage.CONTENT_BUNDLE + ".";
-		WFBlock b = new WFBlock(bref + "functions");
-		b.getTitlebar().setValueRefTitle(true);
+		WFBlock b = new WFBlock(bref + "functions", true);
 
 		WFViewMenu vm = new WFViewMenu();
 		b = WFUtil.setBlockStyle(b, vm);
@@ -78,8 +77,7 @@ public class ContentPerspective extends WFContainer implements ManagedContentBea
 	 */
 	protected UIComponent getArticleList() {
 		String bref = WFPage.CONTENT_BUNDLE + ".";
-		WFBlock b = new WFBlock(bref + "article_list");
-		b.getTitlebar().setValueRefTitle(true);
+		WFBlock b = new WFBlock(bref + "article_list", true);
 		WFList l = new WFList(ARTICLE_LIST_BEAN_ID, 0, 3);
 		l.setId(ARTICLE_LIST_ID);
 		b.add(l);
@@ -91,8 +89,7 @@ public class ContentPerspective extends WFContainer implements ManagedContentBea
 	 */
 	protected UIComponent getCaseList() {
 		String bref = WFPage.CONTENT_BUNDLE + ".";
-		WFBlock b = new WFBlock(bref + "case_list");
-		b.getTitlebar().setValueRefTitle(true);
+		WFBlock b = new WFBlock(bref + "case_list", true);
 		WFList l = new WFList(CASE_LIST_BEAN_ID, 0, 3);
 		l.setId(CASE_LIST_ID);
 		b.add(l);
