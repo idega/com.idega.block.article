@@ -1,5 +1,5 @@
 /*
- * $Id: ArticleBarBlock.java,v 1.7 2005/03/07 15:28:49 joakim Exp $
+ * $Id: ArticleBarBlock.java,v 1.8 2005/03/30 21:31:19 eiki Exp $
  *
  * Copyright (C) 2004 Idega. All Rights Reserved.
  *
@@ -20,13 +20,16 @@ import com.idega.webface.event.WFTabListener;
 
 
 /**
- * Last modified: $Date: 2005/03/07 15:28:49 $ by $Author: joakim $
+ * Last modified: $Date: 2005/03/30 21:31:19 $ by $Author: eiki $
  *
  * @author Joakim
- * @version $Revision: 1.7 $
+ * @version $Revision: 1.8 $
  */
 public class ArticleBarBlock extends WFBlock implements ActionListener, ManagedContentBeans {
 
+	
+	private static final String STYLE_CLASS = "wf_block BlockStretch";
+	
 	public final static String ARTICLE_BLOCK_ID = "article_bar_block";
 	private final static String P = "article_bar_block_"; // Id prefix
 	
@@ -38,10 +41,14 @@ public class ArticleBarBlock extends WFBlock implements ActionListener, ManagedC
 	EditArticleBlock editArticleBlock = new EditArticleBlock();
 
 	public ArticleBarBlock() {
+		setStyleClass(STYLE_CLASS);
 	}
 	
-	public void setEditMode(String mode) {
-		editArticleBlock.setEditMode(mode);
+	/**
+	 * Constructs an ArticleBlock with the specified title key and taskbar listener. 
+	 */
+	public ArticleBarBlock(String titleKey) {
+		this(titleKey, null);
 	}
 	
 	/**
@@ -49,6 +56,9 @@ public class ArticleBarBlock extends WFBlock implements ActionListener, ManagedC
 	 */
 	public ArticleBarBlock(String titleKey, WFTabListener taskbarListener) {
 		super(titleKey, true);
+		
+		setStyleClass(STYLE_CLASS);
+		
 		setId(ARTICLE_BLOCK_ID);
 		setMainAreaStyleClass(null);
 		
@@ -65,18 +75,12 @@ public class ArticleBarBlock extends WFBlock implements ActionListener, ManagedC
 		if (taskbarListener != null) {
 			tb.addTabListener(taskbarListener);
 		}
-		
-		WFContainer mainArea = new WFContainer();
-		mainArea.setStyleClass("wf_blockmainarea");
-	}
-	
-	/**
-	 * Constructs an ArticleBlock with the specified title key and taskbar listener. 
-	 */
-	public ArticleBarBlock(String titleKey) {
-		this(titleKey, null);
 	}
 
+	public void setEditMode(String mode) {
+		editArticleBlock.setEditMode(mode);
+	}
+	
 	/* (non-Javadoc)
 	 * @see javax.faces.event.ActionListener#processAction(javax.faces.event.ActionEvent)
 	 */
