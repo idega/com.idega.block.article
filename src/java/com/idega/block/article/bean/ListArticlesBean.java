@@ -1,5 +1,5 @@
 /*
- * $Id: ListArticlesBean.java,v 1.5 2004/11/26 10:27:53 joakim Exp $
+ * $Id: ListArticlesBean.java,v 1.6 2004/12/15 15:46:02 joakim Exp $
  *
  * Copyright (C) 2004 Idega. All Rights Reserved.
  *
@@ -27,10 +27,10 @@ import com.idega.webface.model.WFDataModel;
 /**
  * Bean for listing articles.   
  * <p>
- * Last modified: $Date: 2004/11/26 10:27:53 $ by $Author: joakim $
+ * Last modified: $Date: 2004/12/15 15:46:02 $ by $Author: joakim $
  *
  * @author Anders Lindman
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
  */
 
 public class ListArticlesBean implements WFListBean, Serializable {
@@ -49,29 +49,7 @@ public class ListArticlesBean implements WFListBean, Serializable {
 	private int _searchCategoryId = 0;
 	
 	private Map _allCategories = null;
-/*
-	private String[] testHeadlines = {
-		"Electronic Reykjavik built with IdegaWeb eGov",
-		"Idega represented in the Baltic",
-		"Idega and Agura IT at the Markus Evans eGovernment Europe 2004...",
-		"Täby Municipality in Sweden now using IdegaWeb eGOV",
-		"Code name : Check & Peng",
-		"Conference sucess 'Electric Community - Here and now !'",
-		"Vinbud.is (idegaWeb) voted best corporate website 2003 in Iceland",
-		"The new Landsteinar-Strengur website implemented in IdegaWeb"
-	};
-	
-	private String[] testPublished = {
-		"4/20/04 3:04 PM",
-		"4/20/04 3:00 PM",
-		"4/14/04 2:48 PM",
-		"4/14/04 2:32 PM",
-		"4/14/04 12:17 PM",
-		"12/5/03 3:02 PM",
-		"10/30/03 3:10 PM",
-		"10/27/03"				
-	};
-*/
+
 	/**
 	 * Default constructor.
 	 */
