@@ -1,5 +1,5 @@
 /*
- * $Id: ArticleItemBean.java,v 1.31 2005/03/03 10:36:11 joakim Exp $
+ * $Id: ArticleItemBean.java,v 1.32 2005/03/05 18:45:57 gummi Exp $
  *
  * Copyright (C) 2004 Idega. All Rights Reserved.
  *
@@ -25,6 +25,7 @@ import org.apache.xmlbeans.XmlException;
 import org.w3c.tidy.Tidy;
 import com.idega.block.article.business.ArticleUtil;
 import com.idega.business.IBOLookup;
+import com.idega.business.IBOLookupException;
 import com.idega.content.bean.ContentItem;
 import com.idega.content.bean.ContentItemBean;
 import com.idega.content.bean.ContentItemField;
@@ -33,11 +34,13 @@ import com.idega.content.business.ContentUtil;
 import com.idega.data.IDOStoreException;
 import com.idega.idegaweb.IWApplicationContext;
 import com.idega.idegaweb.IWUserContext;
+import com.idega.idegaweb.UnavailableIWContext;
 import com.idega.presentation.IWContext;
 import com.idega.slide.business.IWSlideService;
 import com.idega.slide.business.IWSlideSession;
 import com.idega.slide.util.WebdavExtendedResource;
 import com.idega.slide.util.WebdavRootResource;
+import com.idega.webface.bean.WFEditableListDataBean;
 import com.idega.xml.XMLDocument;
 import com.idega.xml.XMLElement;
 import com.idega.xml.XMLException;
@@ -49,10 +52,10 @@ import com.idega.xmlns.block.article.document.ArticleDocument;
 /**
  * Bean for idegaWeb article content items.   
  * <p>
- * Last modified: $Date: 2005/03/03 10:36:11 $ by $Author: joakim $
+ * Last modified: $Date: 2005/03/05 18:45:57 $ by $Author: gummi $
  *
  * @author Anders Lindman
- * @version $Revision: 1.31 $
+ * @version $Revision: 1.32 $
  */
 
 public class ArticleItemBean extends ContentItemBean implements Serializable, ContentItem {
@@ -76,7 +79,7 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 	public final static String FIELDNAME_ARTICLE_COMMENT = "article_comment";
 	public final static String FIELDNAME_IMAGES = "images";
 	public final static String FIELDNAME_FILENAME = "filename";
-	public final static String FIELDNAME_FOLDER_LOCATION = "folder_location";
+	public final static String FIELDNAME_FOLDER_LOCATION = "folder_location"; // ../cms/article/YYYY/MM/
 	public final static String FIELDNAME_CONTENT_LANGUAGE = "content_language";
 	
 	public final static String ARTICLE_FILENAME_SCOPE = "article";
@@ -84,7 +87,8 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 	public final static String CONTENT_TYPE = "ContentType";
 	
 	private final static String[] ATTRIBUTE_ARRAY = new String[] {FIELDNAME_AUTHOR,FIELDNAME_CREATION_DATE,FIELDNAME_HEADLINE,FIELDNAME_TEASER,FIELDNAME_BODY};
-
+	private final static String[] ACTION_ARRAY = new String[] {"edit"};
+	
 	XMLNamespace idegans = new XMLNamespace("http://xmlns.idega.com/block/article/xml");
 	
 	/**
@@ -98,6 +102,10 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 		return ATTRIBUTE_ARRAY;
 	}
 	
+	public String[] getToolbarActions(){
+		return ACTION_ARRAY;
+	}
+	
 	public String getHeadline() { return (String)getValue(FIELDNAME_HEADLINE); }
 	public String getTeaser() { return (String)getValue(FIELDNAME_TEASER); }
 	public String getBody() { return (String)getValue(FIELDNAME_BODY); }
@@ -107,9 +115,62 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 	public List getImages() { return getItemFields(FIELDNAME_IMAGES); }
 	public String getFilename() { return (String)getValue(FIELDNAME_FILENAME); }
 	
+	
+	/**
+	 * This method returns the path of the article without the language part:
+	 * ../cms/article/YYYY/MM/YYYYMMDD-HHmm.article while ContentItem#getResourcePath()
+	 * returns the path to the actual resource ../cms/article/YYYY/MM/YYYYMMDD-HHmm.article/lang.xml
+	 * 
+	 * @see ContentItem#getResourcePath()
+	 * @return
+	 */
+	public String getArticlePath() {
+		String resourcePath = getArticleResourcePath();
+		int index = resourcePath.indexOf("."+ARTICLE_FILENAME_SCOPE);
+		if(index>-1){
+			String articlePath = resourcePath.substring(0,index+ARTICLE_FILENAME_SCOPE.length()+1);
+			System.out.println("Article path returned: "+articlePath);
+			return articlePath;
+		} else {
+			Logger log = Logger.getLogger(this.getClass().toString());
+			log.warning("Resource path for article '"+resourcePath+"' does not contain article filename scope '."+ARTICLE_FILENAME_SCOPE+"'.  The resource path is returned unchanged.");
+			return resourcePath;  
+		}
+	}
+	
+	public String getArticleResourcePath() {
+		String path = (String)getValue(FIELDNAME_RESOURCE_PATH);
+		if(path==null){
+			try {
+				IWContext iwc = IWContext.getInstance();
+				IWSlideService service = (IWSlideService)IBOLookup.getServiceInstance(iwc,IWSlideService.class);
+				path = createArticleResourcePath(service);
+				setArticleResourcePath(path);
+			}
+			catch (IBOLookupException e) {
+				e.printStackTrace();
+			}
+			catch (UnavailableIWContext e) {
+				e.printStackTrace();
+			}
+		}
+		return path;
+	}
+	
+	public void setArticleResourcePath(String path) {
+		if(path!=null){
+			if(path.indexOf("."+ARTICLE_FILENAME_SCOPE) == -1 || !path.endsWith(ARTICLE_SUFFIX)){
+				throw new RuntimeException("["+this.getClass().getName()+"]: setArticleResourcePath("+path+") path is not valid article path!");
+			}
+		}
+		setResourcePath(path);
+	}
+	
+	
+	
 	public String getFolderLocation() {
-		String resourcePath = getResourcePath();
-		return ContentUtil.getParentPath(resourcePath);
+		String articlePath = getArticlePath();
+		return ContentUtil.getParentPath(articlePath);
 	}
 	
 	public String getContentLanguage() { return (String)getValue(FIELDNAME_CONTENT_LANGUAGE); }
@@ -117,24 +178,25 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 	public void setHeadline(String s) { setValue(FIELDNAME_HEADLINE, s); } 
 	public void setHeadline(Object o) { setValue(FIELDNAME_HEADLINE, o.toString()); } 
 	public void setTeaser(String s) { setValue(FIELDNAME_TEASER, s); } 
-	public void setBody(String articleIn) {
-		if (null != articleIn) {
-//			System.out.println("ArticleIn = "+articleIn);
-			//Use JTidy to clean up the html
-			Tidy tidy = new Tidy();
-			tidy.setXHTML(true);
-			tidy.setXmlOut(true);
-			ByteArrayInputStream bais = new ByteArrayInputStream(articleIn.getBytes());
-			ByteArrayOutputStream baos = new ByteArrayOutputStream();
-			tidy.parse(bais, baos);
-			String articleOut = baos.toString();
-//			System.out.println("ArticleOut = "+articleOut);
-			setValue(FIELDNAME_BODY, articleOut);
-//			setValue(FIELDNAME_BODY, articleIn);
-		}
-		else {
-			setValue(FIELDNAME_BODY, null);
-		}
+	public void setBody(String body) {
+		setValue(FIELDNAME_BODY, body);
+//		if (null != articleIn) {
+////			System.out.println("ArticleIn = "+articleIn);
+//			//Use JTidy to clean up the html
+//			Tidy tidy = new Tidy();
+//			tidy.setXHTML(true);
+//			tidy.setXmlOut(true);
+//			ByteArrayInputStream bais = new ByteArrayInputStream(articleIn.getBytes());
+//			ByteArrayOutputStream baos = new ByteArrayOutputStream();
+//			tidy.parse(bais, baos);
+//			String articleOut = baos.toString();
+////			System.out.println("ArticleOut = "+articleOut);
+//			setValue(FIELDNAME_BODY, articleOut);
+////			setValue(FIELDNAME_BODY, articleIn);
+//		}
+//		else {
+//			setValue(FIELDNAME_BODY, null);
+//		}
 	} 
 	public void setAuthor(String s) { setValue(FIELDNAME_AUTHOR, s); } 
 	public void setSource(String s) { setValue(FIELDNAME_SOURCE, s); }
@@ -240,7 +302,7 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 	 * @param service
 	 * @return
 	 */
-	protected String getArticlePath(IWSlideService service){
+	protected String createArticleResourcePath(IWSlideService service){
 		String folderLocation = getFolderLocation();
 		if(null==folderLocation || "".equalsIgnoreCase(folderLocation)) {
 			folderLocation=ArticleUtil.getArticleYearMonthPath();
@@ -277,6 +339,7 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 		XMLParser builder = new XMLParser();
 		XMLDocument bodyDoc = null;
 		try {
+			prettifyBody();
 			bodyDoc = builder.parse(new ByteArrayInputStream(getBody().getBytes()));
 		} catch (XMLException e) {
 			e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
@@ -366,20 +429,12 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 
 			IWSlideService slideService = (IWSlideService)IBOLookup.getServiceInstance(iwac,IWSlideService.class);
 			
-			String filePath=getResourcePath();
-			String parentPath;
-			if(null!=filePath) { //File alrady exist
-				parentPath=filePath;
-				filePath += "/"+getArticleName();
-			}else {	//Create new file(name)
-				filePath = getArticlePath(service);
-				parentPath = ContentUtil.getParentPath(filePath);
-			}
-//			File file = new File(path);
-			
-			slideService.createAllFoldersInPath(parentPath);
+			String filePath=getArticleResourcePath();
+			String articleFolderPath = getArticlePath();
+	
+			slideService.createAllFoldersInPath(articleFolderPath);
 
-			rootResource.proppatchMethod(parentPath,new PropertyName("IW:",CONTENT_TYPE),"LocalizedFile",true);
+			rootResource.proppatchMethod(articleFolderPath,new PropertyName("IW:",CONTENT_TYPE),"LocalizedFile",true);
 			
 			String article = getAsXML();
 			System.out.println(article);
@@ -411,6 +466,26 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 		}
 	}
     
+	/**
+	 * 
+	 */
+	protected void prettifyBody() {
+		String body = getBody();
+		if(body!=null){
+//		System.out.println("ArticleIn = "+articleIn);
+			//Use JTidy to clean up the html
+			Tidy tidy = new Tidy();
+			tidy.setXHTML(true);
+			tidy.setXmlOut(true);
+			ByteArrayInputStream bais = new ByteArrayInputStream(body.getBytes());
+			ByteArrayOutputStream baos = new ByteArrayOutputStream();
+			tidy.parse(bais, baos);
+			String articleOut = baos.toString();
+//			System.out.println("ArticleOut = "+articleOut);
+			setBody(articleOut);
+		}
+	}
+
 	/**
 	 * Loads all xml files in the given folder
 	 * @deprecated use load() instead
@@ -464,10 +539,12 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 				}
 			} else {
 				theArticle = webdavResource;
-				setResourcePath(webdavResource.getParentPath());
 			}
-			if(theArticle!=null){
+			if(theArticle!=null && !theArticle.isCollection()){
+				setArticleResourcePath(theArticle.getPath());
 				bodyDoc = builder.parse(new ByteArrayInputStream(theArticle.getMethodDataAsString().getBytes()));
+			} else {
+				bodyDoc = null;
 			}
 		} catch (XMLException e) {
 			e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
@@ -476,24 +553,44 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 			XMLElement rootElement = bodyDoc.getRootElement();
 	
 			try {
-				setContentLanguage(rootElement.getChild(FIELDNAME_CONTENT_LANGUAGE,idegans).getText());
-			}catch(Exception e) {		//Nullpointer could occur if field isn't used
-				setContentLanguage("");
+				XMLElement language  = rootElement.getChild(FIELDNAME_CONTENT_LANGUAGE,idegans);
+				if(language != null){
+					setContentLanguage(language.getText());
+				} else {
+					setContentLanguage(null);
+				}
+			}catch(Exception e) {	
+				setContentLanguage(null);
 			}
 			try {
-				setHeadline(rootElement.getChild(FIELDNAME_HEADLINE,idegans).getText());
+				XMLElement headline = rootElement.getChild(FIELDNAME_HEADLINE,idegans);
+				if(headline != null){
+					setHeadline(headline.getText());
+				} else {
+					setHeadline("");
+				}
 			}catch(Exception e) {		//Nullpointer could occur if field isn't used
 				e.printStackTrace();
 				setHeadline("");
 			}
 			try {
-				setTeaser(rootElement.getChild(FIELDNAME_TEASER,idegans).getText());
+				XMLElement teaser = rootElement.getChild(FIELDNAME_TEASER,idegans);
+				if(teaser != null){
+					setTeaser(teaser.getText());
+				} else {
+					setTeaser("");
+				}
 			}catch(Exception e) {		//Nullpointer could occur if field isn't used
 				e.printStackTrace();
 				setTeaser("");
 			}
 			try {
-				setAuthor(rootElement.getChild(FIELDNAME_AUTHOR,idegans).getText());
+				XMLElement author = rootElement.getChild(FIELDNAME_AUTHOR,idegans);
+				if(author != null){
+					setAuthor(author.getText());
+				} else {
+					setAuthor("");
+				}
 			}catch(Exception e) {		//Nullpointer could occur if field isn't used
 				e.printStackTrace();
 				setAuthor("");
@@ -516,12 +613,22 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 			}
 			
 			try {
-				setSource(rootElement.getChild(FIELDNAME_SOURCE,idegans).getText());
+				XMLElement source = rootElement.getChild(FIELDNAME_SOURCE,idegans);
+				if(source != null){
+					setSource(source.getText());
+				} else {
+					setSource("");
+				}
 			}catch(Exception e) {		//Nullpointer could occur if field isn't used
 				setSource("");
 			}
 			try {
-				setComment(rootElement.getChild(FIELDNAME_ARTICLE_COMMENT,idegans).getText());
+				XMLElement comment = rootElement.getChild(FIELDNAME_ARTICLE_COMMENT,idegans);
+				if(comment != null){
+					setComment(comment.getText());
+				} else {
+					setComment("");
+				}
 			}catch(Exception e) {		//Nullpointer could occur if field isn't used
 				e.printStackTrace();
 				setComment("");
