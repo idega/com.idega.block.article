@@ -49,7 +49,17 @@
         <eclipse.dependency>true</eclipse.dependency>
       </properties>
     </dependency>
-
+    <dependency>
+      <groupId>bundles</groupId>
+      <artifactId>com.idega.content</artifactId>
+      <!--<version>0.8</version>-->
+      <version>SNAPSHOT</version>
+      <type>jar</type>
+      <url>http://www.idega.com/</url>
+      <properties>
+        <eclipse.dependency>true</eclipse.dependency>
+      </properties>
+    </dependency>
   </dependencies>
   <build>
     <sourceDirectory>src/java</sourceDirectory>

@@ -6,6 +6,7 @@
   <projects>
     <project>com.idega.core</project>
     <project>com.idega.webface</project>
+    <project>com.idega.content</project>
   </projects>
   <buildSpec>
     <buildCommand>
