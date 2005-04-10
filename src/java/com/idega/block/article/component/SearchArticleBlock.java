@@ -1,5 +1,5 @@
 /*
- * $Id: SearchArticleBlock.java,v 1.7 2005/03/10 18:32:48 eiki Exp $
+ * $Id: SearchArticleBlock.java,v 1.8 2005/04/10 23:19:26 eiki Exp $
  *
  * Copyright (C) 2004 Idega. All Rights Reserved.
  *
@@ -34,10 +34,10 @@ import com.idega.webface.convert.WFDateConverter;
 /**
  * Block for searching articles.   
  * <p>
- * Last modified: $Date: 2005/03/10 18:32:48 $ by $Author: eiki $
+ * Last modified: $Date: 2005/04/10 23:19:26 $ by $Author: eiki $
  *
  * @author Anders Lindman
- * @version $Revision: 1.7 $
+ * @version $Revision: 1.8 $
  */
 public class SearchArticleBlock extends WFBlock implements ManagedContentBeans, ActionListener, Serializable {
 
@@ -126,7 +126,7 @@ public class SearchArticleBlock extends WFBlock implements ManagedContentBeans, 
 		HtmlInputText searchAuthorInput = WFUtil.getInputText(SEARCH_AUTHOR_ID, ref + "searchAuthor");		
 		searchAuthorInput.setSize(30);
 		p.getChildren().add(searchAuthorInput);		
-		HtmlSelectOneMenu searchCategoryMenu = WFUtil.getSelectOneMenu(SEARCH_CATEGORY_ID, ref + "categories", ref + "searchCategoryId");
+		HtmlSelectOneMenu searchCategoryMenu = WFUtil.getSelectOneMenu(SEARCH_CATEGORY_ID, ref + "categories", ref + "searchCategory");
 		
 		p.getChildren().add(searchCategoryMenu);		
 		p.getChildren().add(WFUtil.getText("Published from:"));		
