@@ -1,5 +1,5 @@
 /*
- * $Id: SearchArticleBean.java,v 1.11 2005/03/10 18:26:59 eiki Exp $
+ * $Id: SearchArticleBean.java,v 1.12 2005/04/10 22:16:23 eiki Exp $
  *
  * Copyright (C) 2004 Idega. All Rights Reserved.
  *
@@ -33,6 +33,7 @@ import org.apache.xmlbeans.XmlException;
 import com.idega.block.article.business.ArticleUtil;
 import com.idega.business.IBOLookup;
 import com.idega.content.bean.ContentItemBeanComparator;
+import com.idega.content.business.CategoryUtil;
 import com.idega.content.business.ContentSearch;
 import com.idega.core.search.business.Search;
 import com.idega.core.search.business.SearchResult;
@@ -50,10 +51,10 @@ import com.idega.webface.model.WFDataModel;
 /**
  * Bean for searching articles.   
  * <p>
- * Last modified: $Date: 2005/03/10 18:26:59 $ by $Author: eiki $
+ * Last modified: $Date: 2005/04/10 22:16:23 $ by $Author: eiki $
  *
  * @author Anders Lindman
- * @version $Revision: 1.11 $
+ * @version $Revision: 1.12 $
  */
 
 public class SearchArticleBean extends AbstractWFEditableListManagedBean implements WFListBean, Serializable {
@@ -75,7 +76,7 @@ public class SearchArticleBean extends AbstractWFEditableListManagedBean impleme
 //	
 	private String _searchText = null;
 	private String _searchAuthor = null;
-	private String _searchCategoryId = null;
+	private String _searchCategory = null;
 	private Date _searchPublishedFrom = null;
 	private Date _searchPublishedTo = null;
 	
@@ -121,7 +122,7 @@ public class SearchArticleBean extends AbstractWFEditableListManagedBean impleme
 
 	public String getSearchText() { return _searchText; }
 	public String getSearchAuthor() { return _searchAuthor; }
-	public String getSearchCategoryId() { return _searchCategoryId; }
+	public String getSearchCategory() { return _searchCategory; }
 	public Date getSearchPublishedFrom() { return _searchPublishedFrom; }
 	public Date getSearchPublishedTo() { return _searchPublishedTo; }
 
@@ -134,7 +135,7 @@ public class SearchArticleBean extends AbstractWFEditableListManagedBean impleme
 
 	public void setSearchText(String s) { _searchText = s; }
 	public void setSearchAuthor(String s) { _searchAuthor = s; }
-	public void setSearchCategoryId(String s) { _searchCategoryId = s; }
+	public void setSearchCategoryId(String s) { _searchCategory = s; }
 	public void setSearchPublishedFrom(Date d) { _searchPublishedFrom = d; }
 	public void setSearchPublishedTo(Date d) { _searchPublishedTo = d; }
 	
@@ -146,15 +147,19 @@ public class SearchArticleBean extends AbstractWFEditableListManagedBean impleme
 	 */
 	public Map getCategories() {
 		if (_allCategories == null) {
-			_allCategories = new LinkedHashMap();
-			_allCategories.put("All categories", "" + new Integer(-1));
-			_allCategories.put("Public news", "" + new Integer(1));
-			_allCategories.put("Business news", "" + new Integer(2));
-			_allCategories.put("Company info", "" + new Integer(3));
-			_allCategories.put("General info", "" + new Integer(4));
-			_allCategories.put("IT stuff", "" + new Integer(5));
-			_allCategories.put("Press releases", "" + new Integer(6));
-			_allCategories.put("Internal info", "" + new Integer(7));
+			Collection cats = CategoryUtil.getCategories();
+			if(cats!=null && !cats.isEmpty()){
+				_allCategories = new LinkedHashMap();
+				_allCategories.put(ArticleUtil.getBundle().getLocalizedText("All categories"), "-1");
+				
+				Iterator cat = cats.iterator();
+				while (cat.hasNext()) {
+					String category = (String) cat.next();
+					
+					_allCategories.put(ArticleUtil.getBundle().getLocalizedText(category),category);
+					
+				}
+			}	
 		}
 		return _allCategories;
 	}
@@ -332,8 +337,8 @@ public class SearchArticleBean extends AbstractWFEditableListManagedBean impleme
 		}
 		
 //		List categoryExpressions = new ArrayList();
-		if(!getSearchCategoryId().equals("-1")){
-			SearchExpression categoryExpression = s.compare(CompareOperator.LIKE,IWSlideConstants.PROPERTY_CATEGORY,"%"+getSearchCategoryId()+"%");
+		if(!getSearchCategory().equals("-1")){
+			SearchExpression categoryExpression = s.compare(CompareOperator.LIKE,IWSlideConstants.PROPERTY_CATEGORY,","+getSearchCategory()+",");
 			whereExpression = s.and(whereExpression,categoryExpression);
 		}
 		

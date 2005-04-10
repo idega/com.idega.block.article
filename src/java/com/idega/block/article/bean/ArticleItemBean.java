@@ -1,5 +1,5 @@
 /*
- * $Id: ArticleItemBean.java,v 1.41 2005/03/17 17:35:05 joakim Exp $
+ * $Id: ArticleItemBean.java,v 1.42 2005/04/10 22:16:23 eiki Exp $
  *
  * Copyright (C) 2004 Idega. All Rights Reserved.
  *
@@ -48,10 +48,10 @@ import com.idega.xml.XMLParser;
 /**
  * Bean for idegaWeb article content items.   
  * <p>
- * Last modified: $Date: 2005/03/17 17:35:05 $ by $Author: joakim $
+ * Last modified: $Date: 2005/04/10 22:16:23 $ by $Author: eiki $
  *
  * @author Anders Lindman
- * @version $Revision: 1.41 $
+ * @version $Revision: 1.42 $
  */
 
 public class ArticleItemBean extends ContentItemBean implements Serializable, ContentItem {
@@ -125,7 +125,7 @@ public static final PropertyName PROPERTY_CONTENT_TYPE = new PropertyName("IW:",
 	 * @see ContentItem#getResourcePath()
 	 * @return
 	 */
-	public String getArticlePath() {
+	public synchronized String getArticlePath() {
 		String resourcePath = getArticleResourcePath();
 		int index = resourcePath.indexOf("."+ARTICLE_FILENAME_SCOPE);
 		if(index>-1){
@@ -160,7 +160,7 @@ public static final PropertyName PROPERTY_CONTENT_TYPE = new PropertyName("IW:",
 	
 	public void setArticleResourcePath(String path) {
 		if(path!=null){
-			if(path.indexOf("."+ARTICLE_FILENAME_SCOPE) == -1 || !path.endsWith(ARTICLE_SUFFIX)){
+			if(path.indexOf("."+ARTICLE_FILENAME_SCOPE) < 0 || !path.endsWith(ARTICLE_SUFFIX)){
 				throw new RuntimeException("["+this.getClass().getName()+"]: setArticleResourcePath("+path+") path is not valid article path!");
 			}
 		}
