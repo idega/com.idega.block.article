@@ -1,5 +1,5 @@
 /*
- * $Id: SearchArticleBean.java,v 1.12 2005/04/10 22:16:23 eiki Exp $
+ * $Id: SearchArticleBean.java,v 1.13 2005/04/10 23:50:02 eiki Exp $
  *
  * Copyright (C) 2004 Idega. All Rights Reserved.
  *
@@ -51,10 +51,10 @@ import com.idega.webface.model.WFDataModel;
 /**
  * Bean for searching articles.   
  * <p>
- * Last modified: $Date: 2005/04/10 22:16:23 $ by $Author: eiki $
+ * Last modified: $Date: 2005/04/10 23:50:02 $ by $Author: eiki $
  *
  * @author Anders Lindman
- * @version $Revision: 1.12 $
+ * @version $Revision: 1.13 $
  */
 
 public class SearchArticleBean extends AbstractWFEditableListManagedBean implements WFListBean, Serializable {
@@ -161,7 +161,13 @@ public class SearchArticleBean extends AbstractWFEditableListManagedBean impleme
 				}
 			}	
 		}
-		return _allCategories;
+		
+		if(_allCategories==null){
+			return new LinkedHashMap();
+		}
+		else{
+			return _allCategories;
+		}
 	}
 	
 	/**
@@ -337,7 +343,7 @@ public class SearchArticleBean extends AbstractWFEditableListManagedBean impleme
 		}
 		
 //		List categoryExpressions = new ArrayList();
-		if(!getSearchCategory().equals("-1")){
+		if(!("-1").equals(getSearchCategory())){
 			SearchExpression categoryExpression = s.compare(CompareOperator.LIKE,IWSlideConstants.PROPERTY_CATEGORY,","+getSearchCategory()+",");
 			whereExpression = s.and(whereExpression,categoryExpression);
 		}

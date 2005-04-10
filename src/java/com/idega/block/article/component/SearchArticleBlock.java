@@ -1,5 +1,5 @@
 /*
- * $Id: SearchArticleBlock.java,v 1.8 2005/04/10 23:19:26 eiki Exp $
+ * $Id: SearchArticleBlock.java,v 1.9 2005/04/10 23:50:02 eiki Exp $
  *
  * Copyright (C) 2004 Idega. All Rights Reserved.
  *
@@ -19,7 +19,6 @@ import javax.faces.event.ActionListener;
 import net.sourceforge.myfaces.custom.calendar.HtmlInputCalendar;
 import net.sourceforge.myfaces.custom.stylesheet.Stylesheet;
 import com.idega.content.bean.ManagedContentBeans;
-import com.idega.content.data.ContentItemCase;
 import com.idega.idegaweb.IWBundle;
 import com.idega.idegaweb.IWMainApplication;
 import com.idega.presentation.Script;
@@ -29,15 +28,14 @@ import com.idega.webface.WFErrorMessages;
 import com.idega.webface.WFList;
 import com.idega.webface.WFPanelUtil;
 import com.idega.webface.WFUtil;
-import com.idega.webface.convert.WFDateConverter;
 
 /**
  * Block for searching articles.   
  * <p>
- * Last modified: $Date: 2005/04/10 23:19:26 $ by $Author: eiki $
+ * Last modified: $Date: 2005/04/10 23:50:02 $ by $Author: eiki $
  *
  * @author Anders Lindman
- * @version $Revision: 1.8 $
+ * @version $Revision: 1.9 $
  */
 public class SearchArticleBlock extends WFBlock implements ManagedContentBeans, ActionListener, Serializable {
 
