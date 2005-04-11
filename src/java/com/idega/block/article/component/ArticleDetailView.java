@@ -1,5 +1,5 @@
 /*
- * $Id: ArticleDetailView.java,v 1.14 2005/03/17 17:35:42 joakim Exp $
+ * $Id: ArticleDetailView.java,v 1.15 2005/04/11 16:30:16 joakim Exp $
  * 
  * Copyright (C) 2004 Idega. All Rights Reserved.
  * 
@@ -15,6 +15,7 @@ import javax.faces.component.html.HtmlPanelGrid;
 import javax.faces.context.FacesContext;
 import com.idega.block.article.bean.ArticleItemBean;
 import com.idega.content.bean.ManagedContentBeans;
+import com.idega.content.presentation.WebDAVCategories;
 import com.idega.content.presentation.WebDAVFileDetails;
 import com.idega.content.presentation.WebDAVMetadata;
 import com.idega.presentation.IWBaseComponent;
@@ -26,12 +27,12 @@ import com.idega.webface.WFUtil;
 import com.idega.webface.convert.WFCommaSeparatedListConverter;
 
 /**
- * Last modified: $Date: 2005/03/17 17:35:42 $ by $Author: joakim $
+ * Last modified: $Date: 2005/04/11 16:30:16 $ by $Author: joakim $
  * 
  * Displays detailed info about the article
  * 
  * @author Joakim
- * @version $Revision: 1.14 $
+ * @version $Revision: 1.15 $
  */
 public class ArticleDetailView extends IWBaseComponent implements ManagedContentBeans {
 
@@ -50,6 +51,7 @@ public class ArticleDetailView extends IWBaseComponent implements ManagedContent
 	protected void initializeContent() {
 		add(getDetailPanel());
 		add(getMetadataPanel());
+		add(getCategoriesPanel());
 	}
 
 	/*
@@ -62,6 +64,18 @@ public class ArticleDetailView extends IWBaseComponent implements ManagedContent
 
 		WebDAVMetadata metadataUI = new WebDAVMetadata(path+"/"+fileName+ArticleItemBean.ARTICLE_SUFFIX);
 		return metadataUI;
+	}
+
+	/*
+	 * returns the metadata UI component
+	 */
+	private UIComponent getCategoriesPanel() {
+		String path = (String)WFUtil.invoke(ARTICLE_ITEM_BEAN_ID, "getFolderLocation");
+		String fileName = (String)WFUtil.invoke(ARTICLE_ITEM_BEAN_ID, "getHeadline");
+//		System.out.println("path = "+path+"/"+fileName+ArticleItemBean.ARTICLE_SUFFIX);
+
+		WebDAVCategories categoriesUI = new WebDAVCategories(path+"/"+fileName+ArticleItemBean.ARTICLE_SUFFIX);
+		return categoriesUI;
 	}
 
 	/*
