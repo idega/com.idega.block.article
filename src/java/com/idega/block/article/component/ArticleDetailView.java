@@ -1,5 +1,5 @@
 /*
- * $Id: ArticleDetailView.java,v 1.15 2005/04/11 16:30:16 joakim Exp $
+ * $Id: ArticleDetailView.java,v 1.16 2005/04/13 17:31:51 joakim Exp $
  * 
  * Copyright (C) 2004 Idega. All Rights Reserved.
  * 
@@ -27,12 +27,12 @@ import com.idega.webface.WFUtil;
 import com.idega.webface.convert.WFCommaSeparatedListConverter;
 
 /**
- * Last modified: $Date: 2005/04/11 16:30:16 $ by $Author: joakim $
+ * Last modified: $Date: 2005/04/13 17:31:51 $ by $Author: joakim $
  * 
  * Displays detailed info about the article
  * 
  * @author Joakim
- * @version $Revision: 1.15 $
+ * @version $Revision: 1.16 $
  */
 public class ArticleDetailView extends IWBaseComponent implements ManagedContentBeans {
 
@@ -49,15 +49,28 @@ public class ArticleDetailView extends IWBaseComponent implements ManagedContent
 	}
 
 	protected void initializeContent() {
-		add(getDetailPanel());
-		add(getMetadataPanel());
-		add(getCategoriesPanel());
+		WFComponentSelector componentSelector = new WFComponentSelector();
+		componentSelector.setId(COMPONENT_SELECTOR_ID);
+
+		componentSelector.add(getNoArticleSelectedPanel());
+		componentSelector.add(getAllDetails());
+		
+		componentSelector.setSelectedId(NO_ARTICLE_ID, true);
+		add(componentSelector);
+	}
+	
+	private UIComponent getAllDetails() {
+		HtmlPanelGrid detailsPanel = WFPanelUtil.getPlainFormPanel(1);
+		detailsPanel.setId(ARTICLE_LIST_ID);
+		detailsPanel.getChildren().add(getDetailPanel());
+		
+		return detailsPanel;
 	}
 
 	/*
 	 * returns the metadata UI component
 	 */
-	private UIComponent getMetadataPanel() {
+/*	private UIComponent getMetadataPanel() {
 		String path = (String)WFUtil.invoke(ARTICLE_ITEM_BEAN_ID, "getFolderLocation");
 		String fileName = (String)WFUtil.invoke(ARTICLE_ITEM_BEAN_ID, "getHeadline");
 //		System.out.println("path = "+path+"/"+fileName+ArticleItemBean.ARTICLE_SUFFIX);
@@ -65,17 +78,26 @@ public class ArticleDetailView extends IWBaseComponent implements ManagedContent
 		WebDAVMetadata metadataUI = new WebDAVMetadata(path+"/"+fileName+ArticleItemBean.ARTICLE_SUFFIX);
 		return metadataUI;
 	}
-
+*/
 	/*
 	 * returns the metadata UI component
 	 */
-	private UIComponent getCategoriesPanel() {
+/*	private UIComponent getCategoriesPanel() {
 		String path = (String)WFUtil.invoke(ARTICLE_ITEM_BEAN_ID, "getFolderLocation");
 		String fileName = (String)WFUtil.invoke(ARTICLE_ITEM_BEAN_ID, "getHeadline");
 //		System.out.println("path = "+path+"/"+fileName+ArticleItemBean.ARTICLE_SUFFIX);
 
 		WebDAVCategories categoriesUI = new WebDAVCategories(path+"/"+fileName+ArticleItemBean.ARTICLE_SUFFIX);
 		return categoriesUI;
+	}
+*/
+	
+	private UIComponent getNoArticleSelectedPanel() {
+		WFResourceUtil localizer = WFResourceUtil.getResourceUtilArticle();
+		HtmlPanelGrid p = WFPanelUtil.getPlainFormPanel(1);
+		p.setId(NO_ARTICLE_ID);
+		p.getChildren().add(localizer.getHeaderTextVB("no_article_selected"));
+		return p;
 	}
 
 	/*
@@ -84,17 +106,11 @@ public class ArticleDetailView extends IWBaseComponent implements ManagedContent
 	private UIComponent getDetailPanel() {
 		
 		WFResourceUtil localizer = WFResourceUtil.getResourceUtilArticle();
-		HtmlPanelGrid dp = WFPanelUtil.getPlainFormPanel(1);
-		WFComponentSelector cs = new WFComponentSelector();
-		cs.setId(COMPONENT_SELECTOR_ID);
+		
 		HtmlPanelGrid p = WFPanelUtil.getPlainFormPanel(1);
-		p.setId(NO_ARTICLE_ID);
-		p.getChildren().add(localizer.getHeaderTextVB("no_article_selected"));
 		
-		cs.add(p);
-		
+		//Add the detailed info
 		p = WFPanelUtil.getPlainFormPanel(1);
-		p.setId(ARTICLE_LIST_ID);
 		p.getChildren().add(WFUtil.getHeaderTextVB(ref + "headline"));
 		p.getChildren().add(WFUtil.getText(" "));
 		p.getChildren().add(WFUtil.getTextVB(ref + "teaser"));
@@ -140,10 +156,7 @@ public class ArticleDetailView extends IWBaseComponent implements ManagedContent
 		WFUtil.setValueBinding(details,"currentResourcePath",ref+"resourcePath");
 		
 		p.getChildren().add(details);
-		cs.add(p);
-		cs.setSelectedId(NO_ARTICLE_ID, true);
-		dp.getChildren().add(cs);
-		return dp;
+		return p;
 	}
 	
 	/**
@@ -152,22 +165,22 @@ public class ArticleDetailView extends IWBaseComponent implements ManagedContent
 	 * The decision is based on the presence of article_item_bean.headline is pressent in the session
 	 */
 	private void selectComponent() {
-		WFComponentSelector cs = (WFComponentSelector) findComponent(COMPONENT_SELECTOR_ID);
+		WFComponentSelector componentSelector = (WFComponentSelector) findComponent(COMPONENT_SELECTOR_ID);
 
 		String headline = WFUtil.getStringValue(ARTICLE_ITEM_BEAN_ID, "headline");
-		if (cs != null) {
+		if (componentSelector != null) {
 			if (headline == null || headline.length() == 0) {
-				cs.setSelectedId(NO_ARTICLE_ID, true);
-				cs.setSelectedId(ARTICLE_LIST_ID, false);
+				componentSelector.setSelectedId(NO_ARTICLE_ID, true);
+				componentSelector.setSelectedId(ARTICLE_LIST_ID, false);
 			}
 			else {
-				cs.setSelectedId(NO_ARTICLE_ID, false);
-				cs.setSelectedId(ARTICLE_LIST_ID, true);
+				componentSelector.setSelectedId(NO_ARTICLE_ID, false);
+				componentSelector.setSelectedId(ARTICLE_LIST_ID, true);
 			}
 		}
 		else {
-			cs.setSelectedId(NO_ARTICLE_ID, false);
-			cs.setSelectedId(ARTICLE_LIST_ID, true);
+			componentSelector.setSelectedId(NO_ARTICLE_ID, false);
+			componentSelector.setSelectedId(ARTICLE_LIST_ID, true);
 			System.out.println("Could not find the Component selector!!!");
 		}
 	}
