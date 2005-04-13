@@ -1,5 +1,5 @@
 /*
- * $Id: EditArticleBlock.java,v 1.30 2005/04/11 16:31:16 joakim Exp $
+ * $Id: EditArticleBlock.java,v 1.31 2005/04/13 17:32:27 joakim Exp $
  *
  * Copyright (C) 2004 Idega. All Rights Reserved.
  *
@@ -56,10 +56,10 @@ import com.idega.webface.WFUtil;
 import com.idega.webface.htmlarea.HTMLArea;
 
 /**
- * Last modified: $Date: 2005/04/11 16:31:16 $ by $Author: joakim $
+ * Last modified: $Date: 2005/04/13 17:32:27 $ by $Author: joakim $
  *
  * @author Joakim
- * @version $Revision: 1.30 $
+ * @version $Revision: 1.31 $
  */
 public class EditArticleBlock extends IWBaseComponent implements ManagedContentBeans, ActionListener, ValueChangeListener {
 	public final static String EDIT_ARTICLE_BLOCK_ID = "edit_articles_block";
@@ -666,8 +666,10 @@ public class EditArticleBlock extends IWBaseComponent implements ManagedContentB
 		if(result) {
 			WFUtil.invoke(ARTICLE_ITEM_BEAN_ID, "setLanguageChange",arg0.getNewValue().toString());
 		}else {
-			result = ((Boolean)WFUtil.invoke(ARTICLE_ITEM_BEAN_ID, "load",articlePath+"/"+language+ArticleItemBean.ARTICLE_SUFFIX)).booleanValue();
-			System.out.println("loading other language "+result);
+			if(null!=language) {
+				result = ((Boolean)WFUtil.invoke(ARTICLE_ITEM_BEAN_ID, "load",articlePath+"/"+language+ArticleItemBean.ARTICLE_SUFFIX)).booleanValue();
+				System.out.println("loading other language "+result);
+			}
 		}
 	}
 	
