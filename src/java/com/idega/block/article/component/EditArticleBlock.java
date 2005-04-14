@@ -1,5 +1,5 @@
 /*
- * $Id: EditArticleBlock.java,v 1.31 2005/04/13 17:32:27 joakim Exp $
+ * $Id: EditArticleBlock.java,v 1.32 2005/04/14 15:29:18 joakim Exp $
  *
  * Copyright (C) 2004 Idega. All Rights Reserved.
  *
@@ -56,10 +56,10 @@ import com.idega.webface.WFUtil;
 import com.idega.webface.htmlarea.HTMLArea;
 
 /**
- * Last modified: $Date: 2005/04/13 17:32:27 $ by $Author: joakim $
+ * Last modified: $Date: 2005/04/14 15:29:18 $ by $Author: joakim $
  *
  * @author Joakim
- * @version $Revision: 1.31 $
+ * @version $Revision: 1.32 $
  */
 public class EditArticleBlock extends IWBaseComponent implements ManagedContentBeans, ActionListener, ValueChangeListener {
 	public final static String EDIT_ARTICLE_BLOCK_ID = "edit_articles_block";
@@ -652,6 +652,9 @@ public class EditArticleBlock extends IWBaseComponent implements ManagedContentB
 	 * @see javax.faces.event.ValueChangeListener#processValueChange(javax.faces.event.ValueChangeEvent)
 	 */
 	public void processValueChange(ValueChangeEvent arg0) throws AbortProcessingException {
+		if(arg0.getOldValue()==null) {
+			return;
+		}
 		System.out.println("Language value has changed from "+arg0.getOldValue()+" to "+arg0.getNewValue());
 		
 		String articlePath = (String)WFUtil.invoke(ARTICLE_ITEM_BEAN_ID, "getArticlePath");
