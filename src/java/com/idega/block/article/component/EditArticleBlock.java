@@ -1,5 +1,5 @@
 /*
- * $Id: EditArticleBlock.java,v 1.32 2005/04/14 15:29:18 joakim Exp $
+ * $Id: EditArticleBlock.java,v 1.33 2005/04/18 14:04:10 joakim Exp $
  *
  * Copyright (C) 2004 Idega. All Rights Reserved.
  *
@@ -36,10 +36,10 @@ import javax.faces.event.ValueChangeListener;
 import javax.faces.model.SelectItem;
 import com.idega.block.article.bean.ArticleItemBean;
 import com.idega.block.article.component.reference.FileUploadForm;
-import com.idega.content.bean.CaseListBean;
 import com.idega.content.bean.ManagedContentBeans;
 import com.idega.content.data.ContentItemCase;
 import com.idega.content.presentation.ContentViewer;
+import com.idega.content.presentation.WebDAVCategories;
 import com.idega.core.localisation.business.ICLocaleBusiness;
 import com.idega.presentation.IWBaseComponent;
 import com.idega.presentation.IWContext;
@@ -56,10 +56,10 @@ import com.idega.webface.WFUtil;
 import com.idega.webface.htmlarea.HTMLArea;
 
 /**
- * Last modified: $Date: 2005/04/14 15:29:18 $ by $Author: joakim $
+ * Last modified: $Date: 2005/04/18 14:04:10 $ by $Author: joakim $
  *
  * @author Joakim
- * @version $Revision: 1.32 $
+ * @version $Revision: 1.33 $
  */
 public class EditArticleBlock extends IWBaseComponent implements ManagedContentBeans, ActionListener, ValueChangeListener {
 	public final static String EDIT_ARTICLE_BLOCK_ID = "edit_articles_block";
@@ -123,6 +123,8 @@ public class EditArticleBlock extends IWBaseComponent implements ManagedContentB
 	private final static String ADD_CATEGORIES_ID = P + "add_categories";
 	private final static String SUB_CATEGORIES_ID = P + "sub_categories";
 	private final static String CATEGORY_BACK_ID = P + "category_back";
+
+	WebDAVCategories categoriesUI = new WebDAVCategories();
 
 	boolean clearOnInit = false;
 
@@ -212,31 +214,12 @@ public class EditArticleBlock extends IWBaseComponent implements ManagedContentB
 		bodyArea.setAllowFontSelection(false);
 		
 		p.getChildren().add(WFUtil.group(bodyArea, WFUtil.getBreak()));
-//		HtmlCommandButton editButton = localizer.getButtonVB(EDIT_HTML_ID, "edit", this);
-//		editButton.setOnclick("wurl='htmlarea/webface/htmledit.jsp?" + PREVIEW_ARTICLE_ITEM_ID + 
-//					"='+this.tabindex;window.open(wurl,'Edit','height=450,width=600,resizable=yes,status=no,toolbar=no,menubar=no,location=no,scrollbars=no');return false;");
-//		p.getChildren().add(WFUtil.group(WFUtil.group(bodyArea, WFUtil.getBreak()), editButton));
-/*
-		WFContainer imageContainer = new WFContainer();
-		imageContainer.add(WFUtil.getButtonVB(ADD_IMAGE_ID, bref + "add_image", this));
-		imageContainer.add(WFUtil.getBreak());
-		imageContainer.add(getImageList());
-		p.getChildren().add(imageContainer);
-*/
+
 		p.getChildren().add(WFUtil.group(localizer.getTextVB("source"), WFUtil.getText(":")));
-	//	p.getChildren().add(WFUtil.group(WFUtil.getTextVB(bref + "main_category"), WFUtil.getText(":")));
 		HtmlInputText sourceArea = WFUtil.getInputText(AUTHOR_ID, ref + "source");
 		sourceArea.setSize(70);
 		p.getChildren().add(sourceArea);
 
-//		HtmlInputTextarea sourceArea = WFUtil.getTextArea(SOURCE_ID, ref + "source", "440px", "30px");
-//		p.getChildren().add(sourceArea);
-		
-//		HtmlSelectOneMenu mainCategoryMenu = WFUtil.getSelectOneMenu(MAIN_CATEGORY_ID, ref + "categories", ref + "mainCategoryId");
-//		p.getChildren().add(mainCategoryMenu);		
-
-//		mainContainer.add(p);
-//		mainContainer.add(WFUtil.getBreak());
 		p.getChildren().add(WFUtil.getBreak());
 		p.getChildren().add(WFUtil.getBreak());
 		
@@ -254,12 +237,6 @@ public class EditArticleBlock extends IWBaseComponent implements ManagedContentB
 		p.getChildren().add(WFUtil.getTextVB(ref + "status"));
 		p.getChildren().add(WFUtil.group(localizer.getTextVB("current_version"), WFUtil.getText(":")));
 		p.getChildren().add(WFUtil.getTextVB(ref + "versionName"));
-//		p.getChildren().add(WFUtil.getText(" "));
-//		p.getChildren().add(WFUtil.group(localizer.getHeaderTextVB("current_version"), 
-//				WFUtil.getTextVB(ref + "versionId")
-//				));
-		
-//		mainContainer.add(p);
 		p.getChildren().add(WFUtil.getBreak());
 		p.getChildren().add(WFUtil.getBreak());
 		
@@ -317,8 +294,13 @@ public class EditArticleBlock extends IWBaseComponent implements ManagedContentB
 		p.getChildren().add(folderInput);		
 */		
 		p.getChildren().add(WFUtil.getBreak());
+		//Categories
+//		WebDAVCategories categoriesUI = new WebDAVCategories();
+		p.getChildren().add(categoriesUI);
 		p.getChildren().add(WFUtil.getBreak());
 		p.getChildren().add(WFUtil.getBreak());
+		p.getChildren().add(WFUtil.getBreak());
+
 //		WFComponentSelector cs = new WFComponentSelector();
 //		cs.setId(BUTTON_SELECTOR_ID);
 //		cs.setDividerText(" ");
@@ -445,8 +427,12 @@ public class EditArticleBlock extends IWBaseComponent implements ManagedContentB
 		EditArticleBlock ab = (EditArticleBlock) event.getComponent().getParent().getParent().getParent().findComponent(EDIT_ARTICLE_BLOCK_ID);
 		if (id.equals(SAVE_ID)) {
 			ab.storeArticle();
+			String resourcePath = (String) WFUtil.invoke(ARTICLE_ITEM_BEAN_ID, "getArticleResourcePath");
+			UIComponent comp = ab.findComponent(WebDAVCategories.CATEGORIES_BLOCK_ID);
+			categoriesUI.saveCategoriesSettings(resourcePath, comp);
 			clearOnInit=false;
-		} else if (id.equals(FOR_REVIEW_ID)) {
+		} 
+/*		else if (id.equals(FOR_REVIEW_ID)) {
 			WFUtil.invoke(ARTICLE_ITEM_BEAN_ID, "setRequestedStatus", ContentItemCase.STATUS_READY_FOR_REVIEW);
 			ab.storeArticle();
 		} else if (id.equals(PUBLISH_ID)) {
@@ -461,35 +447,18 @@ public class EditArticleBlock extends IWBaseComponent implements ManagedContentB
 		} else if (id.equals(DELETE_ID)) {
 			WFUtil.invoke(ARTICLE_ITEM_BEAN_ID, "setRequestedStatus", ContentItemCase.STATUS_DELETED);
 			ab.storeArticle();
-		} else if (id.equals(EDIT_CATEGORIES_ID)) {
-			ab.setEditView(CATEGORY_EDITOR_ID);
-		} else if (id.equals(ADD_CATEGORIES_ID)) {
-			WFUtil.invoke(ARTICLE_ITEM_BEAN_ID, "addSelectedCategories");
-		} else if (id.equals(SUB_CATEGORIES_ID)) {
-			WFUtil.invoke(ARTICLE_ITEM_BEAN_ID, "removeSelectedCategories");
-		} else if (id.equals(CATEGORY_BACK_ID)) {
-			ab.setEditView(ARTICLE_EDITOR_ID);
-		} else if (id.equals(ADD_RELATED_CONTENT_ITEM_ID)) {
-			ab.setEditView(RELATED_CONTENT_ITEMS_EDITOR_ID);
 		} else if (id.equals(ADD_IMAGE_ID)) {
 			ab.setEditView(FILE_UPLOAD_FORM_ID);
 		} else if (id.equals(FILE_UPLOAD_CANCEL_ID)) {
 			ab.setEditView(ARTICLE_EDITOR_ID);
 		} else if (id.equals(FILE_UPLOAD_ID)) {
 			ab.setEditView(ARTICLE_EDITOR_ID);
-		} else if (id.equals(REMOVE_IMAGE_ID)) {
-			int imageNo = WFUtil.getIntParameter(event.getComponent(), "image_no");
-			WFUtil.invoke(ARTICLE_ITEM_BEAN_ID, "removeImage", new Integer(imageNo));
 		} else if (id.equals(CaseListBean.CASE_ID)){
 			String itemId = WFUtil.getParameter(event.getComponent(), "id");
 			WFUtil.invoke(ARTICLE_ITEM_BEAN_ID, "addRelatedContentItem", new Integer(itemId));
 			ab.setEditView(ARTICLE_EDITOR_ID);
-		} else if (id.equals(RELATED_CONTENT_ITEMS_CANCEL_ID)) {
-			ab.setEditView(ARTICLE_EDITOR_ID);
-		} else if (id.equals(REMOVE_RELATED_CONTENT_ITEM_ID)) {
-			int itemId = WFUtil.getIntParameter(event.getComponent(), "item_id");
-			WFUtil.invoke(ARTICLE_ITEM_BEAN_ID, "removeRelatedContentItem", new Integer(itemId));
 		}
+*/
 	}
 
 	/**
@@ -508,6 +477,7 @@ public class EditArticleBlock extends IWBaseComponent implements ManagedContentB
 			}
 			return;
 		}
+		
 		setUserMessage("article_saved");
 	}
 	/*
