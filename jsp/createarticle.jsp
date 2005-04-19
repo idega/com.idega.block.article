@@ -5,10 +5,10 @@
         xmlns:ws="http://xmlns.idega.com/com.idega.workspace"
         xmlns:article="http://xmlns.idega.com/com.idega.block.article"
 version="1.2">
-
+<jsp:directive.page contentType="text/html;charset=UTF-8" pageEncoding="UTF-8"/>
 <jsf:view>
-        <ws:page>
-                <html:form>
+        <ws:page id="createarticle1">
+                <html:form id="createarticleform1">
                         <article:create_article_page  id="create_article_page" mode="create"/>
                 </html:form>
         </ws:page>

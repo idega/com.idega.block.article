@@ -7,10 +7,10 @@
         xmlns:article="http://xmlns.idega.com/com.idega.block.article"
         xmlns:co="http://xmlns.idega.com/com.idega.content"
 version="1.2">
-
+<jsp:directive.page contentType="text/html;charset=UTF-8" pageEncoding="UTF-8"/>
 	<jsf:view>
-		<ws:page>
-			<h:form>
+		<ws:page id="listarticles1">
+			<h:form id="listarticlesform1">
 				<wf:wfblock id="article_list_block" title="Article List">
 					<co:ContentItemListViewer id="article_list" beanIdentifier="articleItemListBean" resourcePath="/files/cms/article" detailsViewerPath="/workspace/content/article/preview" />
 				</wf:wfblock>
