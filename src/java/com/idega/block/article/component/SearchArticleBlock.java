@@ -1,5 +1,5 @@
 /*
- * $Id: SearchArticleBlock.java,v 1.10 2005/04/13 11:46:31 tryggvil Exp $
+ * $Id: SearchArticleBlock.java,v 1.11 2005/04/20 17:10:54 tryggvil Exp $
  *
  * Copyright (C) 2004 Idega. All Rights Reserved.
  *
@@ -32,10 +32,10 @@ import com.idega.webface.WFUtil;
 /**
  * Block for searching articles.   
  * <p>
- * Last modified: $Date: 2005/04/13 11:46:31 $ by $Author: tryggvil $
+ * Last modified: $Date: 2005/04/20 17:10:54 $ by $Author: tryggvil $
  *
  * @author Anders Lindman
- * @version $Revision: 1.10 $
+ * @version $Revision: 1.11 $
  */
 public class SearchArticleBlock extends WFBlock implements ManagedContentBeans, ActionListener, Serializable {
 
@@ -94,7 +94,7 @@ public class SearchArticleBlock extends WFBlock implements ManagedContentBeans, 
 		
 		//adding myfaces component stuff
 		IWMainApplication iwma = IWMainApplication.getDefaultIWMainApplication();
-		IWBundle myfacesBundle = iwma.getBundle("net.sourceforge.myfaces");
+		IWBundle myfacesBundle = iwma.getBundle("org.apache.myfaces");
 		String jsPath = myfacesBundle.getResourcesVirtualPath()+"/popcalendar.js";
 		String styleSheet1Path = myfacesBundle.getResourcesVirtualPath()+"/style/WH/theme.css";
 		String styleSheet2Path = myfacesBundle.getResourcesVirtualPath()+"/style/DB/theme.css";
