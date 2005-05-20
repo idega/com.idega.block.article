@@ -1,5 +1,5 @@
 /*
- * $Id: EditArticleBlock.java,v 1.33 2005/04/18 14:04:10 joakim Exp $
+ * $Id: EditArticleBlock.java,v 1.34 2005/05/20 15:07:14 gummi Exp $
  *
  * Copyright (C) 2004 Idega. All Rights Reserved.
  *
@@ -56,10 +56,10 @@ import com.idega.webface.WFUtil;
 import com.idega.webface.htmlarea.HTMLArea;
 
 /**
- * Last modified: $Date: 2005/04/18 14:04:10 $ by $Author: joakim $
+ * Last modified: $Date: 2005/05/20 15:07:14 $ by $Author: gummi $
  *
  * @author Joakim
- * @version $Revision: 1.33 $
+ * @version $Revision: 1.34 $
  */
 public class EditArticleBlock extends IWBaseComponent implements ManagedContentBeans, ActionListener, ValueChangeListener {
 	public final static String EDIT_ARTICLE_BLOCK_ID = "edit_articles_block";
@@ -349,7 +349,7 @@ public class EditArticleBlock extends IWBaseComponent implements ManagedContentB
 		HtmlSelectManyListbox availableCategories = WFUtil.getSelectManyListbox(AVAILABLE_CATEGORIES_ID,
 				ref + "availableCategories", ref + "selectedAvailableCategories");
 		availableCategories.setStyle("width:200px;height:160px;");
-		availableCategories.setConverter(new IntegerConverter());
+//		availableCategories.setConverter(new IntegerConverter());
 		c.add(availableCategories);
 		c.add(WFUtil.getBreak(2));
 		c.add(WFUtil.getButtonVB(CATEGORY_BACK_ID, bref + "back", this));
@@ -363,7 +363,7 @@ public class EditArticleBlock extends IWBaseComponent implements ManagedContentB
 		HtmlSelectManyListbox articleCategories = WFUtil.getSelectManyListbox(ARTICLE_CATEGORIES_ID, 
 				ref + "categories", ref + "selectedCategories");
 		articleCategories.setStyle("width:200px;height:160px;");
-		articleCategories.setConverter(new IntegerConverter());
+//		articleCategories.setConverter(new IntegerConverter());
 		p.getChildren().add(articleCategories);
 				
 		return p;
