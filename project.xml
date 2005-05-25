@@ -4,8 +4,9 @@
   <extend>${base.project.dir}/block-dependencies.xml</extend>
   <name>idegaWeb Article</name>
   <artifactId>com.idega.block.article</artifactId>
-    <currentVersion>0.2.2</currentVersion>
+  <currentVersion>0.2.2</currentVersion>
   <!--currentVersion>0.3.0-SNAPSHOT</currentVersion-->
+
   <inceptionYear>2003</inceptionYear>
   <shortDescription>Articles</shortDescription>
   <description>idegaWeb article is a component for content management of articles</description>
@@ -25,7 +26,12 @@
       <name>0.2.1</name>
       <tag>ARTICLE_0_2_1</tag>
     </version>
-  </versions> 
+    <version>
+      <id>0.2.2</id>
+      <name>0.2.2</name>
+      <tag>ARTICLE_0_2_2</tag>
+    </version>
+  </versions>
   <developers>
     <developer>
       <id>tryggvil</id>
@@ -42,26 +48,25 @@
       <roles/>
     </developer>
   </developers>
- 
   <dependencies>
-
-
     <dependency>
       <groupId>bundles</groupId>
       <artifactId>com.idega.core</artifactId>
       <!--HELPER--><version>3.0.5</version><!--HELPER-->
       <!--HELPERversion>SNAPSHOT</versionHELPER-->
+
       <type>jar</type>
       <url>http://www.idega.com/</url>
       <properties>
         <eclipse.dependency>true</eclipse.dependency>
       </properties>
-    </dependency>  
+    </dependency>
     <dependency>
       <groupId>bundles</groupId>
       <artifactId>com.idega.webface</artifactId>
       <!--HELPER--><version>0.9.2</version><!--HELPER-->
       <!--HELPERversion>SNAPSHOT</versionHELPER-->
+
       <type>jar</type>
       <url>http://www.idega.com/</url>
       <properties>
@@ -73,6 +78,7 @@
       <artifactId>com.idega.content</artifactId>
       <!--HELPER--><version>0.6.2</version><!--HELPER-->
       <!--HELPERversion>SNAPSHOT</versionHELPER-->
+
       <type>jar</type>
       <url>http://www.idega.com/</url>
       <properties>
@@ -84,13 +90,13 @@
       <artifactId>com.idega.slide</artifactId>
       <!--HELPER--><version>0.4.2</version><!--HELPER-->
       <!--HELPERversion>SNAPSHOT</versionHELPER-->
+
       <type>jar</type>
       <url>http://www.idega.com/</url>
       <properties>
         <eclipse.dependency>true</eclipse.dependency>
       </properties>
     </dependency>
-    
     <dependency>
       <groupId>xmlbeans</groupId>
       <artifactId>xbean</artifactId>
@@ -102,6 +108,7 @@
       </properties>
     </dependency>
     <!-- already included in core -->
+
     <dependency>
       <groupId>slide</groupId>
       <artifactId>jakarta-slide-webdavlib</artifactId>
@@ -110,15 +117,15 @@
       <url>http://jakarta.apache.org/slide/</url>
     </dependency>
     <dependency>
-    <!-- already included in core -->
+      <!-- already included in core -->
+
       <groupId>commons-httpclient</groupId>
       <artifactId>commons-httpclient</artifactId>
       <version>2.0.2</version>
       <type>jar</type>
       <url>http://jakarta.apache.org/commons/httpclient/</url>
     </dependency>
-    
-	<!-- These are required only to run the xmlbeans tool 
+    <!-- These are required only to run the xmlbeans tool 
 	
 	+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 	commented out updater (com.idega.manager) gets confused about it (these jars are put to a special lib folder)
@@ -156,16 +163,16 @@
       <url>http://jtidy.sourceforge.net</url>
       <properties>
         <idegaweb.bundle.include>true</idegaweb.bundle.include>
-      </properties>      
+      </properties>
     </dependency>
     <!-- already included in core -->
-     <dependency>
+
+    <dependency>
       <groupId>myfaces</groupId>
       <artifactId>myfaces-extensions</artifactId>
       <version>1.0.9</version>
       <type>jar</type>
       <url>http://www.myfaces.org/</url>
     </dependency>
-
   </dependencies>
 </project>
