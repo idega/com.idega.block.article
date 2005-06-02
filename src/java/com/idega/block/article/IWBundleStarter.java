@@ -1,5 +1,5 @@
 /*
- * $Id: IWBundleStarter.java,v 1.13 2005/03/08 15:14:37 gummi Exp $
+ * $Id: IWBundleStarter.java,v 1.14 2005/06/02 17:08:29 eiki Exp $
  * Created on 2.11.2004
  *
  * Copyright (C) 2004 Idega Software hf. All Rights Reserved.
@@ -13,6 +13,7 @@ import com.idega.block.article.business.ArticleActionURIHandler;
 import com.idega.content.view.ContentViewManager;
 import com.idega.core.uri.IWActionURIManager;
 import com.idega.core.view.DefaultViewNode;
+import com.idega.core.view.KeyboardShortcut;
 import com.idega.core.view.ViewNode;
 import com.idega.idegaweb.IWBundle;
 import com.idega.idegaweb.IWBundleStartable;
@@ -21,10 +22,10 @@ import com.idega.idegaweb.include.GlobalIncludeManager;
 
 /**
  * 
- *  Last modified: $Date: 2005/03/08 15:14:37 $ by $Author: gummi $
+ *  Last modified: $Date: 2005/06/02 17:08:29 $ by $Author: eiki $
  * 
  * @author <a href="mailto:tryggvil@idega.com">Tryggvi Larusson</a>
- * @version $Revision: 1.13 $
+ * @version $Revision: 1.14 $
  */
 public class IWBundleStarter implements IWBundleStartable {
 	private static final String STYLE_SHEET_URL = "/style/article.css";
@@ -70,6 +71,8 @@ public class IWBundleStarter implements IWBundleStartable {
 		
 		DefaultViewNode articleNode = new DefaultViewNode("article",contentNode);
 		articleNode.setJspUri(bundle.getJSPURI("createarticle.jsp"));
+		articleNode.setKeyboardShortcut(new KeyboardShortcut("a"));
+		
 		DefaultViewNode createNewArticleNode = new DefaultViewNode("create",articleNode);
 		String jspUri = bundle.getJSPURI("createarticle.jsp");
 		createNewArticleNode.setJspUri(jspUri);

@@ -1,5 +1,5 @@
 /*
- * $Id: ArticleBar.java,v 1.4 2005/01/18 14:31:42 joakim Exp $
+ * $Id: ArticleBar.java,v 1.5 2005/06/02 17:12:42 eiki Exp $
  *
  * Copyright (C) 2004 Idega. All Rights Reserved.
  *
@@ -10,7 +10,9 @@ package com.idega.block.article.component;
 
 import java.io.Serializable;
 import java.util.Iterator;
+import javax.faces.component.html.HtmlOutputLink;
 import javax.faces.context.FacesContext;
+import com.idega.core.view.KeyboardShortcut;
 import com.idega.core.view.ViewManager;
 import com.idega.core.view.ViewNode;
 import com.idega.webface.WFContainer;
@@ -18,10 +20,10 @@ import com.idega.webface.WFMenu;
 import com.idega.webface.WFTabBar;
 
 /**
- * Last modified: $Date: 2005/01/18 14:31:42 $ by $Author: joakim $
+ * Last modified: $Date: 2005/06/02 17:12:42 $ by $Author: eiki $
  *
  * @author Joakim
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  */
 public class ArticleBar extends WFContainer implements  Serializable{
 
@@ -71,7 +73,13 @@ public class ArticleBar extends WFContainer implements  Serializable{
 		for (Iterator iter = workspaceNode.getParent().getChildren().iterator(); iter.hasNext();) {
 			ViewNode subNode = (ViewNode) iter.next();
 			String url = subNode.getURI();
-			tb.addLink(subNode.getName(),url);
+			HtmlOutputLink link =  tb.addLink(subNode.getName(),url);
+			
+			//Add a shortcut key if the view node has one
+			KeyboardShortcut shortCut = subNode.getKeyboardShortcut();
+			if(shortCut!=null){
+				link.setAccesskey(shortCut.getActionKey());
+			}
 		}
 		
 		return tb;
