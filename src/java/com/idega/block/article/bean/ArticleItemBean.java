@@ -1,5 +1,5 @@
 /*
- * $Id: ArticleItemBean.java,v 1.43 2005/06/16 15:10:40 anna Exp $
+ * $Id: ArticleItemBean.java,v 1.44 2005/06/30 13:50:46 gummi Exp $
  *
  * Copyright (C) 2004 Idega. All Rights Reserved.
  *
@@ -48,10 +48,10 @@ import com.idega.xml.XMLParser;
 /**
  * Bean for idegaWeb article content items.   
  * <p>
- * Last modified: $Date: 2005/06/16 15:10:40 $ by $Author: anna $
+ * Last modified: $Date: 2005/06/30 13:50:46 $ by $Author: gummi $
  *
  * @author Anders Lindman
- * @version $Revision: 1.43 $
+ * @version $Revision: 1.44 $
  */
 
 public class ArticleItemBean extends ContentItemBean implements Serializable, ContentItem {
@@ -346,18 +346,22 @@ public static final PropertyName PROPERTY_CONTENT_TYPE = new PropertyName("IW:",
 	 * Returns the Article Item as an XML-formatted string
 	 * @return the XML string
 	 * @throws IOException
+	 * @throws XMLException
 	 */
-	public String getAsXML() throws IOException {
+	public String getAsXML() throws IOException, XMLException {
 
 		XMLParser builder = new XMLParser();
-		XMLDocument bodyDoc = null;
-		try {
-			prettifyBody();
-			bodyDoc = builder.parse(new ByteArrayInputStream(getBody().getBytes()));
-		} catch (XMLException e) {
-			e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+		
+		XMLElement bodyElement = null;
+		
+		prettifyBody();
+		
+		String bodyString = getBody();
+		if(bodyString != null && !bodyString.trim().equals("")){
+			XMLDocument bodyDoc = builder.parse(new ByteArrayInputStream(bodyString.getBytes()));
+			bodyElement = bodyDoc.getRootElement();
 		}
-		XMLElement bodyElement = bodyDoc.getRootElement();
+		
 
 		
 		
@@ -369,7 +373,10 @@ public static final PropertyName PROPERTY_CONTENT_TYPE = new PropertyName("IW:",
 		XMLElement source = new XMLElement(FIELDNAME_SOURCE,idegaXMLNameSpace).setText(getSource());
 		XMLElement articleComment = new XMLElement("article_comment",idegaXMLNameSpace).setText(getComment());
 
-		XMLElement body = new XMLElement(FIELDNAME_BODY,idegaXMLNameSpace).addContent(bodyElement);
+		XMLElement body = new XMLElement(FIELDNAME_BODY,idegaXMLNameSpace);
+		if(bodyElement != null){
+			body.addContent(bodyElement);
+		}
 
 		root.addContent(contentLanguage);
 		root.addContent(headline);
@@ -380,7 +387,7 @@ public static final PropertyName PROPERTY_CONTENT_TYPE = new PropertyName("IW:",
 		root.addContent(articleComment);
 		XMLDocument doc = new XMLDocument(root);
 		XMLOutput outputter = new XMLOutput();
-		return outputter.outputString(doc);
+		return outputter.outputString(doc);		
 	}
 
 	/**
@@ -414,10 +421,10 @@ public static final PropertyName PROPERTY_CONTENT_TYPE = new PropertyName("IW:",
 			addErrorKey(KEY_ERROR_HEADLINE_EMPTY);
 			storeOk = false;
 		}
-		if (getBody().trim().equals("")) {
-			addErrorKey(KEY_ERROR_BODY_EMPTY);
-			storeOk = false;
-		}
+//		if (getBody().trim().equals("")) {
+//			addErrorKey(KEY_ERROR_BODY_EMPTY);
+//			storeOk = false;
+//		}
 		
 //		if (getRequestedStatus() != null && getRequestedStatus().equals(ContentItemCase.STATUS_PUBLISHED)) {
 //			if (getCase().getPublishedFromDate() == null) {
@@ -430,61 +437,68 @@ public static final PropertyName PROPERTY_CONTENT_TYPE = new PropertyName("IW:",
 //		if(null==filename || filename.length()==0) {
 //			filename = "empty";
 //		}
-
-		try {
-			IWUserContext iwuc = IWContext.getInstance();
-			IWSlideSession session = (IWSlideSession)IBOLookup.getSessionInstance(iwuc,IWSlideSession.class);
-			WebdavRootResource rootResource = session.getWebdavRootResource();
-
-			//Setting the path for creating new file/creating localized version/updating existing file
-			String filePath=getResourcePath();
-			String articleFolderPath=getArticlePath();
-			if(articleFolderPath!=null) {
-				filePath=articleFolderPath+"/"+getArticleName();
-			}else {
-				filePath=getArticleResourcePath();
-				articleFolderPath = getArticlePath();
-			}
-	
-			boolean hadToCreate = session.createAllFoldersInPath(articleFolderPath);
-
-			if(hadToCreate){
-				String fixedFolderURL = session.getURI(articleFolderPath);
-				rootResource.proppatchMethod(fixedFolderURL,PROPERTY_CONTENT_TYPE,"LocalizedFile",true);
-			}
-			else{
-				rootResource.proppatchMethod(articleFolderPath,PROPERTY_CONTENT_TYPE,"LocalizedFile",true);
-			}
-			String article = getAsXML();
-//			System.out.println(article);
-			
-			//Conflict fix: uri for creating but path for updating
-			//Note! This is a patch to what seems to be a bug in WebDav
-			//Apparently in verion below works in some cases and the other in other cases.
-			//Seems to be connected to creating files in folders created in same tomcat session or similar
-			//not quite clear...
-			
-			if(rootResource.putMethod(filePath,article)){
-				rootResource.proppatchMethod(filePath,PROPERTY_CONTENT_TYPE,ARTICLE_FILENAME_SCOPE,true);
-			}
-			else{
-				String fixedURL = session.getURI(filePath);
-				rootResource.putMethod(fixedURL,article);
-				rootResource.proppatchMethod(fixedURL,PROPERTY_CONTENT_TYPE,ARTICLE_FILENAME_SCOPE,true);
-			}
-			
-			rootResource.close();
+		if(storeOk){
 			try {
-				load(filePath);
+				IWUserContext iwuc = IWContext.getInstance();
+				IWSlideSession session = (IWSlideSession)IBOLookup.getSessionInstance(iwuc,IWSlideSession.class);
+				WebdavRootResource rootResource = session.getWebdavRootResource();
+	
+				//Setting the path for creating new file/creating localized version/updating existing file
+				String filePath=getResourcePath();
+				String articleFolderPath=getArticlePath();
+				if(articleFolderPath!=null) {
+					filePath=articleFolderPath+"/"+getArticleName();
+				}else {
+					filePath=getArticleResourcePath();
+					articleFolderPath = getArticlePath();
+				}
+		
+				boolean hadToCreate = session.createAllFoldersInPath(articleFolderPath);
+	
+				if(hadToCreate){
+					String fixedFolderURL = session.getURI(articleFolderPath);
+					rootResource.proppatchMethod(fixedFolderURL,PROPERTY_CONTENT_TYPE,"LocalizedFile",true);
+				}
+				else{
+					rootResource.proppatchMethod(articleFolderPath,PROPERTY_CONTENT_TYPE,"LocalizedFile",true);
+				}
+				
+				
+				String article = getAsXML();
+	//			System.out.println(article);
+				
+				//Conflict fix: uri for creating but path for updating
+				//Note! This is a patch to what seems to be a bug in WebDav
+				//Apparently in verion below works in some cases and the other in other cases.
+				//Seems to be connected to creating files in folders created in same tomcat session or similar
+				//not quite clear...
+				
+				if(rootResource.putMethod(filePath,article)){
+					rootResource.proppatchMethod(filePath,PROPERTY_CONTENT_TYPE,ARTICLE_FILENAME_SCOPE,true);
+				}
+				else{
+					String fixedURL = session.getURI(filePath);
+					rootResource.putMethod(fixedURL,article);
+					rootResource.proppatchMethod(fixedURL,PROPERTY_CONTENT_TYPE,ARTICLE_FILENAME_SCOPE,true);
+				}
+				
+				rootResource.close();
+				try {
+					load(filePath);
+				}
+				catch (Exception e) {
+					e.printStackTrace();
+				}
+	
 			}
-			catch (Exception e) {
+			catch (IOException e1) {
+				storeOk = false;
+				e1.printStackTrace();
+			}
+			catch (XMLException e) {
+				storeOk = false;
 				e.printStackTrace();
 			}
-
-		}
-		catch (IOException e1) {
-			storeOk = false;
-			e1.printStackTrace();
 		}
 
 		if (storeOk) {
