@@ -1,5 +1,5 @@
 /*
- * $Id: IWBundleStarter.java,v 1.15 2005/06/29 17:56:02 eiki Exp $
+ * $Id: IWBundleStarter.java,v 1.16 2005/08/11 18:54:57 tryggvil Exp $
  * Created on 2.11.2004
  *
  * Copyright (C) 2004 Idega Software hf. All Rights Reserved.
@@ -22,10 +22,10 @@ import com.idega.idegaweb.include.GlobalIncludeManager;
 
 /**
  * 
- *  Last modified: $Date: 2005/06/29 17:56:02 $ by $Author: eiki $
+ *  Last modified: $Date: 2005/08/11 18:54:57 $ by $Author: tryggvil $
  * 
  * @author <a href="mailto:tryggvil@idega.com">Tryggvi Larusson</a>
- * @version $Revision: 1.15 $
+ * @version $Revision: 1.16 $
  */
 public class IWBundleStarter implements IWBundleStartable {
 	private static final String STYLE_SHEET_URL = "/style/article.css";
@@ -71,25 +71,31 @@ public class IWBundleStarter implements IWBundleStartable {
 		DefaultViewNode articleNode = new DefaultViewNode("article",contentNode);
 		articleNode.setJspUri(bundle.getJSPURI("createarticle.jsp"));
 		articleNode.setKeyboardShortcut(new KeyboardShortcut("a"));
+		articleNode.setName("#{localizedStrings['com.idega.block.article']['article']}");
 		
 		DefaultViewNode createNewArticleNode = new DefaultViewNode("create",articleNode);
 		String jspUri = bundle.getJSPURI("createarticle.jsp");
 		createNewArticleNode.setJspUri(jspUri);
+		createNewArticleNode.setName("#{localizedStrings['com.idega.block.article']['create_article']}");
 		
 		DefaultViewNode editNewArticleNode = new DefaultViewNode("edit",articleNode);
 //		editNewArticleNode.setJspUri(bundle.getJSPURI("createarticle.jsp"));
 		editNewArticleNode.setJspUri(bundle.getJSPURI("editarticle.jsp"));
 		editNewArticleNode.setVisibleInMenus(false);
+		editNewArticleNode.setName("#{localizedStrings['com.idega.block.article']['edit']}");
 		
 		DefaultViewNode listArticlesNode = new DefaultViewNode("list",articleNode);
 		listArticlesNode.setJspUri(bundle.getJSPURI("listarticles.jsp"));
+		listArticlesNode.setName("#{localizedStrings['com.idega.block.article']['list_articles']}");
 		
 		
 		DefaultViewNode previewArticlesNode = new DefaultViewNode("preview",articleNode);
 		previewArticlesNode.setJspUri(bundle.getJSPURI("previewarticle.jsp"));
 		previewArticlesNode.setVisibleInMenus(false);
+		previewArticlesNode.setName("#{localizedStrings['com.idega.block.article']['preview']}");
 
 		DefaultViewNode searchArticlesNode = new DefaultViewNode("search",articleNode);
 		searchArticlesNode.setJspUri(bundle.getJSPURI("searcharticle.jsp"));
+		searchArticlesNode.setName("#{localizedStrings['com.idega.block.article']['search_articles']}");
 	}
 }
