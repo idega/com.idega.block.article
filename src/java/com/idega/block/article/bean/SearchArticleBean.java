@@ -1,5 +1,5 @@
 /*
- * $Id: SearchArticleBean.java,v 1.13 2005/04/10 23:50:02 eiki Exp $
+ * $Id: SearchArticleBean.java,v 1.14 2005/08/11 18:37:07 tryggvil Exp $
  *
  * Copyright (C) 2004 Idega. All Rights Reserved.
  *
@@ -51,14 +51,19 @@ import com.idega.webface.model.WFDataModel;
 /**
  * Bean for searching articles.   
  * <p>
- * Last modified: $Date: 2005/04/10 23:50:02 $ by $Author: eiki $
+ * Last modified: $Date: 2005/08/11 18:37:07 $ by $Author: tryggvil $
  *
  * @author Anders Lindman
- * @version $Revision: 1.13 $
+ * @version $Revision: 1.14 $
  */
 
 public class SearchArticleBean extends AbstractWFEditableListManagedBean implements WFListBean, Serializable {
 	
+	/**
+	 * Comment for <code>serialVersionUID</code>
+	 */
+	private static final long serialVersionUID = 3257288011107481141L;
+
 	public final static String ARTICLE_ID = "article_id";
 	
 	protected String[] localizationKey = new String[] { "Headline", "Author", "Source", "Creation date", "Language", "Status"};
@@ -214,12 +219,12 @@ public class SearchArticleBean extends AbstractWFEditableListManagedBean impleme
 
 		HtmlOutputLink namePreviewLink = new HtmlOutputLink();
 		
-		namePreviewLink.setId(columnIndex+"_preview");
+		namePreviewLink.setId("columnIndex"+columnIndex+"_preview");
 		namePreviewLink.setValueBinding("value", WFUtil.createValueBinding("#{"+ var + ".previewIWActionURI}"));
 		namePreviewLink.setStyleClass("wf_listtext");
 
 		HtmlOutputText textOnLink = new HtmlOutputText();	
-		textOnLink.setId(columnIndex+"_text");
+		textOnLink.setId("columnIndex"+columnIndex+"_text");
 		WFUtil.setValueBindingToArray(textOnLink,"value",var+".values",columnIndex);
 		namePreviewLink.getChildren().add(textOnLink);
 		
