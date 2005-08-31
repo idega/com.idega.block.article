@@ -1,5 +1,5 @@
 /*
- * $Id: ArticleItemBean.java,v 1.46 2005/08/31 19:35:36 eiki Exp $
+ * $Id: ArticleItemBean.java,v 1.47 2005/08/31 20:01:48 eiki Exp $
  *
  * Copyright (C) 2004 Idega. All Rights Reserved.
  *
@@ -13,6 +13,7 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.Serializable;
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.List;
@@ -21,6 +22,7 @@ import java.util.logging.Logger;
 import org.apache.webdav.lib.PropertyName;
 import org.apache.webdav.lib.WebdavResource;
 import org.apache.webdav.lib.WebdavResources;
+import org.w3c.tidy.Configuration;
 import org.w3c.tidy.Tidy;
 import com.idega.block.article.business.ArticleUtil;
 import com.idega.business.IBOLookup;
@@ -48,10 +50,10 @@ import com.idega.xml.XMLParser;
 /**
  * Bean for idegaWeb article content items.   
  * <p>
- * Last modified: $Date: 2005/08/31 19:35:36 $ by $Author: eiki $
+ * Last modified: $Date: 2005/08/31 20:01:48 $ by $Author: eiki $
  *
  * @author Anders Lindman
- * @version $Revision: 1.46 $
+ * @version $Revision: 1.47 $
  */
 
 public class ArticleItemBean extends ContentItemBean implements Serializable, ContentItem {
@@ -526,12 +528,21 @@ public static final PropertyName PROPERTY_CONTENT_TYPE = new PropertyName("IW:",
 			Tidy tidy = new Tidy();
 			tidy.setXHTML(true);
 			tidy.setXmlOut(true);
-			ByteArrayInputStream bais = new ByteArrayInputStream(body.getBytes());
-			ByteArrayOutputStream baos = new ByteArrayOutputStream();
-			tidy.parse(bais, baos);
-			String articleOut = baos.toString();
+			tidy.setCharEncoding(Configuration.UTF8);
+			ByteArrayInputStream bais;
+			try {
+				bais = new ByteArrayInputStream(body.getBytes("UTF-8"));
+				ByteArrayOutputStream baos = new ByteArrayOutputStream();
+				
+				tidy.parse(bais, baos);
+				body = baos.toString();
+			}
+			catch (UnsupportedEncodingException e) {
+				e.printStackTrace();
+			}
+			
 //			System.out.println("ArticleOut = "+articleOut);
-			setBody(articleOut);
+			setBody(body);
 		}
 	}
 
