@@ -1,5 +1,5 @@
 /*
- * $Id: ArticleItemBean.java,v 1.45 2005/08/31 17:42:16 eiki Exp $
+ * $Id: ArticleItemBean.java,v 1.46 2005/08/31 19:35:36 eiki Exp $
  *
  * Copyright (C) 2004 Idega. All Rights Reserved.
  *
@@ -48,10 +48,10 @@ import com.idega.xml.XMLParser;
 /**
  * Bean for idegaWeb article content items.   
  * <p>
- * Last modified: $Date: 2005/08/31 17:42:16 $ by $Author: eiki $
+ * Last modified: $Date: 2005/08/31 19:35:36 $ by $Author: eiki $
  *
  * @author Anders Lindman
- * @version $Revision: 1.45 $
+ * @version $Revision: 1.46 $
  */
 
 public class ArticleItemBean extends ContentItemBean implements Serializable, ContentItem {
@@ -480,6 +480,7 @@ public static final PropertyName PROPERTY_CONTENT_TYPE = new PropertyName("IW:",
 					rootResource.proppatchMethod(filePath,PROPERTY_CONTENT_TYPE,ARTICLE_FILENAME_SCOPE,true);
 				}
 				else{
+					utf8stream = new ByteArrayInputStream(article.getBytes("UTF-8"));
 					String fixedURL = session.getURI(filePath);
 					rootResource.putMethod(fixedURL,utf8stream);
 					rootResource.proppatchMethod(fixedURL,PROPERTY_CONTENT_TYPE,ARTICLE_FILENAME_SCOPE,true);
