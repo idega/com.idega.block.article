@@ -1,5 +1,5 @@
 /*
- * $Id: ArticleItemBean.java,v 1.47 2005/08/31 20:01:48 eiki Exp $
+ * $Id: ArticleItemBean.java,v 1.48 2005/09/01 00:18:00 eiki Exp $
  *
  * Copyright (C) 2004 Idega. All Rights Reserved.
  *
@@ -50,10 +50,10 @@ import com.idega.xml.XMLParser;
 /**
  * Bean for idegaWeb article content items.   
  * <p>
- * Last modified: $Date: 2005/08/31 20:01:48 $ by $Author: eiki $
+ * Last modified: $Date: 2005/09/01 00:18:00 $ by $Author: eiki $
  *
  * @author Anders Lindman
- * @version $Revision: 1.47 $
+ * @version $Revision: 1.48 $
  */
 
 public class ArticleItemBean extends ContentItemBean implements Serializable, ContentItem {
@@ -360,7 +360,7 @@ public static final PropertyName PROPERTY_CONTENT_TYPE = new PropertyName("IW:",
 		
 		String bodyString = getBody();
 		if(bodyString != null && !bodyString.trim().equals("")){
-			XMLDocument bodyDoc = builder.parse(new ByteArrayInputStream(bodyString.getBytes()));
+			XMLDocument bodyDoc = builder.parse(new ByteArrayInputStream(bodyString.getBytes("UTF-8")));
 			bodyElement = bodyDoc.getRootElement();
 		}
 		
@@ -636,7 +636,8 @@ public static final PropertyName PROPERTY_CONTENT_TYPE = new PropertyName("IW:",
 				XMLElement bodyElement = rootElement.getChild(FIELDNAME_BODY,idegaXMLNameSpace);
 				XMLElement htmlElement = bodyElement.getChild("html",htmlNamespace);
 				XMLElement htmlBodyElement = htmlElement.getChild("body",htmlNamespace);
-				String bodyValue = new XMLOutput().outputString(htmlBodyElement);
+			
+				String bodyValue = htmlBodyElement.getText();
 	//			System.out.println("htmlBody value= "+bodyValue);
 				setBody(bodyValue);
 			}catch(Exception e) {		//Nullpointer could occur if field isn't used
