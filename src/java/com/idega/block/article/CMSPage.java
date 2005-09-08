@@ -1,5 +1,5 @@
 /*
- * $Id: CMSPage.java,v 1.14 2005/02/07 10:59:53 gummi Exp $
+ * $Id: CMSPage.java,v 1.15 2005/09/08 23:00:57 tryggvil Exp $
  *
  * Copyright (C) 2004 Idega. All Rights Reserved.
  *
@@ -18,7 +18,7 @@ import javax.faces.event.ActionListener;
 import org.apache.xmlbeans.XmlException;
 import com.idega.block.article.bean.ArticleItemBean;
 import com.idega.block.article.component.ArticleVersionBlock;
-import com.idega.block.article.component.EditArticleBlock;
+import com.idega.block.article.component.EditArticleView;
 import com.idega.content.bean.ManagedContentBeans;
 import com.idega.content.data.ContentItemCase;
 import com.idega.webface.WFBlock;
@@ -33,10 +33,10 @@ import com.idega.webface.event.WFTabListener;
 /**
  * Content management system test/demo page. 
  * <p>
- * Last modified: $Date: 2005/02/07 10:59:53 $ by $Author: gummi $
+ * Last modified: $Date: 2005/09/08 23:00:57 $ by $Author: tryggvil $
  *
  * @author Anders Lindman
- * @version $Revision: 1.14 $
+ * @version $Revision: 1.15 $
  */
 public class CMSPage extends WFPage implements  ManagedContentBeans, WFTabListener, ActionListener, Serializable {
 	
@@ -324,7 +324,7 @@ public class CMSPage extends WFPage implements  ManagedContentBeans, WFTabListen
 		WFTabbedPane t = e.getTaskbar();
 		UIComponent articleVersionBlock = t.findComponent(ArticleVersionBlock.ARTICLE_VERSION_BLOCK_ID);
 //		TODO (JJ) what is this... should not be needed.
-		if (t.getSelectedMenuItemId().equals(EditArticleBlock.TASK_ID_PREVIEW)) {
+		if (t.getSelectedMenuItemId().equals(EditArticleView.TASK_ID_PREVIEW)) {
 			articleVersionBlock.setRendered(true);
 		} else {
 			articleVersionBlock.setRendered(false);			

@@ -1,5 +1,5 @@
 /*
- * $Id: SearchArticleBean.java,v 1.14 2005/08/11 18:37:07 tryggvil Exp $
+ * $Id: SearchArticleBean.java,v 1.15 2005/09/08 23:00:57 tryggvil Exp $
  *
  * Copyright (C) 2004 Idega. All Rights Reserved.
  *
@@ -33,7 +33,7 @@ import org.apache.xmlbeans.XmlException;
 import com.idega.block.article.business.ArticleUtil;
 import com.idega.business.IBOLookup;
 import com.idega.content.bean.ContentItemBeanComparator;
-import com.idega.content.business.CategoryUtil;
+import com.idega.content.business.CategoryBean;
 import com.idega.content.business.ContentSearch;
 import com.idega.core.search.business.Search;
 import com.idega.core.search.business.SearchResult;
@@ -51,10 +51,10 @@ import com.idega.webface.model.WFDataModel;
 /**
  * Bean for searching articles.   
  * <p>
- * Last modified: $Date: 2005/08/11 18:37:07 $ by $Author: tryggvil $
+ * Last modified: $Date: 2005/09/08 23:00:57 $ by $Author: tryggvil $
  *
  * @author Anders Lindman
- * @version $Revision: 1.14 $
+ * @version $Revision: 1.15 $
  */
 
 public class SearchArticleBean extends AbstractWFEditableListManagedBean implements WFListBean, Serializable {
@@ -152,7 +152,7 @@ public class SearchArticleBean extends AbstractWFEditableListManagedBean impleme
 	 */
 	public Map getCategories() {
 		if (_allCategories == null) {
-			Collection cats = CategoryUtil.getCategories();
+			Collection cats = CategoryBean.getInstance().getCategories();
 			if(cats!=null && !cats.isEmpty()){
 				_allCategories = new LinkedHashMap();
 				_allCategories.put(ArticleUtil.getBundle().getLocalizedText("All categories"), "-1");

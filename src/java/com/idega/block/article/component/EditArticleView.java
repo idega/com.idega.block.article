@@ -1,5 +1,5 @@
 /*
- * $Id: EditArticleBlock.java,v 1.34 2005/05/20 15:07:14 gummi Exp $
+ * $Id: EditArticleView.java,v 1.1 2005/09/08 23:00:57 tryggvil Exp $
  *
  * Copyright (C) 2004 Idega. All Rights Reserved.
  *
@@ -26,7 +26,6 @@ import javax.faces.component.html.HtmlPanelGrid;
 import javax.faces.component.html.HtmlSelectManyListbox;
 import javax.faces.component.html.HtmlSelectOneMenu;
 import javax.faces.context.FacesContext;
-import javax.faces.convert.IntegerConverter;
 import javax.faces.el.ValueBinding;
 import javax.faces.event.AbortProcessingException;
 import javax.faces.event.ActionEvent;
@@ -56,12 +55,15 @@ import com.idega.webface.WFUtil;
 import com.idega.webface.htmlarea.HTMLArea;
 
 /**
- * Last modified: $Date: 2005/05/20 15:07:14 $ by $Author: gummi $
+ * <p>
+ * This is the part for the editor of article is inside the admin interface
+ * </p>
+ * Last modified: $Date: 2005/09/08 23:00:57 $ by $Author: tryggvil $
  *
- * @author Joakim
- * @version $Revision: 1.34 $
+ * @author Joakim,Tryggvi Larusson
+ * @version $Revision: 1.1 $
  */
-public class EditArticleBlock extends IWBaseComponent implements ManagedContentBeans, ActionListener, ValueChangeListener {
+public class EditArticleView extends IWBaseComponent implements ManagedContentBeans, ActionListener, ValueChangeListener {
 	public final static String EDIT_ARTICLE_BLOCK_ID = "edit_articles_block";
 	private final static String P = "list_articles_block_"; // Id prefix
 	
@@ -128,7 +130,7 @@ public class EditArticleBlock extends IWBaseComponent implements ManagedContentB
 
 	boolean clearOnInit = false;
 
-	public EditArticleBlock() {
+	public EditArticleView() {
 	}
 
 	protected void initializeContent() {
@@ -195,7 +197,7 @@ public class EditArticleBlock extends IWBaseComponent implements ManagedContentB
 		//localeMenu.setOnchange("document.forms[0].submit();");
 		//p.getChildren().add(localeMenu);
 		p.getChildren().add(WFUtil.group(localizer.getTextVB("teaser"), WFUtil.getText(":")));
-		HtmlInputTextarea teaserArea = WFUtil.getTextArea(TEASER_ID, ref + "teaser", "600px", "60px");
+		HtmlInputTextarea teaserArea = WFUtil.getTextArea(TEASER_ID, ref + "teaser", "500px", "60px");
 		p.getChildren().add(teaserArea);
 		p.getChildren().add(WFUtil.group(localizer.getTextVB("author"), WFUtil.getText(":")));
 		HtmlInputText authorInput = WFUtil.getInputText(AUTHOR_ID, ref + "author");
@@ -204,7 +206,7 @@ public class EditArticleBlock extends IWBaseComponent implements ManagedContentB
 
 		//Article body
 		p.getChildren().add(WFUtil.group(localizer.getTextVB("body"), WFUtil.getText(":")));
-		HTMLArea bodyArea = WFUtil.getHtmlAreaTextArea(BODY_ID, ref + "body", "100%", "400px");
+		HTMLArea bodyArea = WFUtil.getHtmlAreaTextArea(BODY_ID, ref + "body", "500px", "400px");
 		bodyArea.addPlugin(HTMLArea.PLUGIN_TABLE_OPERATIONS);
 		bodyArea.addPlugin(HTMLArea.PLUGIN_DYNAMIC_CSS, "3");
 		bodyArea.addPlugin(HTMLArea.PLUGIN_CSS, "3");
@@ -243,7 +245,7 @@ public class EditArticleBlock extends IWBaseComponent implements ManagedContentB
 //		p = WFPanelUtil.getFormPanel(2);
 		p.getChildren().add(WFUtil.group(localizer.getTextVB("comment"), WFUtil.getText(":")));
 //		p.getChildren().add(WFUtil.group(WFUtil.getTextVB(bref + "attachments"), WFUtil.getText(":")));	
-		HtmlInputTextarea commentArea = WFUtil.getTextArea(COMMENT_ID, ref + "comment", "600px", "60px");
+		HtmlInputTextarea commentArea = WFUtil.getTextArea(COMMENT_ID, ref + "comment", "500px", "60px");
 		p.getChildren().add(commentArea);
 //		WFContainer attachmentContainer = new WFContainer();
 //		attachmentContainer.add(WFUtil.getButtonVB(ADD_ATTACHMENT_ID, bref + "add_attachment", this));
@@ -424,7 +426,7 @@ public class EditArticleBlock extends IWBaseComponent implements ManagedContentB
 	 */
 	public void processAction(ActionEvent event) {
 		String id = event.getComponent().getId();
-		EditArticleBlock ab = (EditArticleBlock) event.getComponent().getParent().getParent().getParent().findComponent(EDIT_ARTICLE_BLOCK_ID);
+		EditArticleView ab = (EditArticleView) event.getComponent().getParent().getParent().getParent().findComponent(EDIT_ARTICLE_BLOCK_ID);
 		if (id.equals(SAVE_ID)) {
 			ab.storeArticle();
 			String resourcePath = (String) WFUtil.invoke(ARTICLE_ITEM_BEAN_ID, "getArticleResourcePath");
@@ -510,10 +512,12 @@ public class EditArticleBlock extends IWBaseComponent implements ManagedContentB
 	 */
 	public void setEditView(String s) {
 		WFComponentSelector cs = (WFComponentSelector) findComponent(EDITOR_SELECTOR_ID);
-		cs.setSelectedId(ARTICLE_EDITOR_ID, s.equals(ARTICLE_EDITOR_ID));
-		cs.setSelectedId(CATEGORY_EDITOR_ID, s.equals(CATEGORY_EDITOR_ID));
-		cs.setSelectedId(FILE_UPLOAD_FORM_ID, s.equals(FILE_UPLOAD_FORM_ID));
-		cs.setSelectedId(RELATED_CONTENT_ITEMS_EDITOR_ID, s.equals(RELATED_CONTENT_ITEMS_EDITOR_ID));
+		if(cs!=null){
+			cs.setSelectedId(ARTICLE_EDITOR_ID, s.equals(ARTICLE_EDITOR_ID));
+			cs.setSelectedId(CATEGORY_EDITOR_ID, s.equals(CATEGORY_EDITOR_ID));
+			cs.setSelectedId(FILE_UPLOAD_FORM_ID, s.equals(FILE_UPLOAD_FORM_ID));
+			cs.setSelectedId(RELATED_CONTENT_ITEMS_EDITOR_ID, s.equals(RELATED_CONTENT_ITEMS_EDITOR_ID));
+		}
 	}
 	
 	/**

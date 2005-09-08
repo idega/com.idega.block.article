@@ -9,7 +9,7 @@ version="1.2">
 <jsf:view>
         <ws:page id="createarticle1">
                 <html:form id="createarticleform1">
-                        <article:create_article_page  id="create_article_page" mode="create"/>
+                        <article:articleAdminBlock  id="createArticleBlock" mode="create"/>
                 </html:form>
         </ws:page>
 </jsf:view>

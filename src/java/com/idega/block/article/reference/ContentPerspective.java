@@ -11,7 +11,7 @@ package com.idega.block.article.reference;
 import javax.faces.component.UIComponent;
 import javax.faces.event.ActionEvent;
 import com.idega.block.article.bean.ArticleListBean;
-import com.idega.block.article.component.reference.ArticleBlock;
+import com.idega.block.article.component.reference.ArticleBlockOld;
 import com.idega.content.bean.ManagedContentBeans;
 import com.idega.content.data.ContentItemCase;
 import com.idega.webface.WFBlock;
@@ -104,7 +104,7 @@ public class ContentPerspective extends WFContainer implements ManagedContentBea
 		String id = WFUtil.getParameter(link, "id");
 		WFTabbedPane tb = (WFTabbedPane) link.getParent().getParent().getParent().findComponent(MAIN_TASKBAR_ID);
 		tb.setSelectedMenuItemId(TASK_ID_EDIT);
-		ArticleBlock ab = (ArticleBlock) tb.findComponent(ArticleBlock.ARTICLE_BLOCK_ID);
+		ArticleBlockOld ab = (ArticleBlockOld) tb.findComponent(ArticleBlockOld.ARTICLE_BLOCK_ID);
 		ab.setEditMode();
 
 		WFUtil.invoke(ARTICLE_ITEM_BEAN_ID, "clear");
@@ -131,7 +131,7 @@ public class ContentPerspective extends WFContainer implements ManagedContentBea
 	public void setEditMode() {
 		WFTabbedPane tb = (WFTabbedPane) findComponent(MAIN_TASKBAR_ID);
 		tb.setSelectedMenuItemId(TASK_ID_EDIT);
-		ArticleBlock ab = (ArticleBlock) tb.findComponent(ArticleBlock.ARTICLE_BLOCK_ID);
+		ArticleBlockOld ab = (ArticleBlockOld) tb.findComponent(ArticleBlockOld.ARTICLE_BLOCK_ID);
 		ab.setEditMode();		
 	}
 	

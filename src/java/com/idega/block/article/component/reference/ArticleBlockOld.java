@@ -1,5 +1,5 @@
 /*
- * $Id: ArticleBlock.java,v 1.7 2005/02/14 15:16:34 gummi Exp $
+ * $Id: ArticleBlockOld.java,v 1.1 2005/09/08 23:00:57 tryggvil Exp $
  *
  * Copyright (C) 2004 Idega. All Rights Reserved.
  *
@@ -53,12 +53,12 @@ import com.idega.webface.htmlarea.HTMLArea;
 /**
  * Block for editing an article.   
  * <p>
- * Last modified: $Date: 2005/02/14 15:16:34 $ by $Author: gummi $
+ * Last modified: $Date: 2005/09/08 23:00:57 $ by $Author: tryggvil $
  *
  * @author Anders Lindman
- * @version $Revision: 1.7 $
+ * @version $Revision: 1.1 $
  */
-public class ArticleBlock extends WFBlock implements ActionListener, ManagedContentBeans {
+public class ArticleBlockOld extends WFBlock implements ActionListener, ManagedContentBeans {
 
 	public final static String ARTICLE_BLOCK_ID = "article_block";
 	
@@ -122,20 +122,20 @@ public class ArticleBlock extends WFBlock implements ActionListener, ManagedCont
 	/**
 	 * Default contructor.
 	 */
-	public ArticleBlock() {
+	public ArticleBlockOld() {
 	}
 	
 	/**
 	 * Constructs an ArticleBlock with the specified title key and taskbar listener. 
 	 */
-	public ArticleBlock(String titleKey) {
+	public ArticleBlockOld(String titleKey) {
 		this(titleKey, null);
 	}
 	
 	/**
 	 * Constructs an ArticleBlock with the specified title key. 
 	 */
-	public ArticleBlock(String titleKey, WFTabListener taskbarListener) {
+	public ArticleBlockOld(String titleKey, WFTabListener taskbarListener) {
 		super(titleKey, true);
 		setId(ARTICLE_BLOCK_ID);
 		setMainAreaStyleClass(null);
@@ -622,7 +622,7 @@ public class ArticleBlock extends WFBlock implements ActionListener, ManagedCont
 	 */
 	public void processAction(ActionEvent event) {
 		String id = event.getComponent().getId();
-		ArticleBlock ab = (ArticleBlock) event.getComponent().getParent().getParent().getParent().findComponent(ARTICLE_BLOCK_ID);
+		ArticleBlockOld ab = (ArticleBlockOld) event.getComponent().getParent().getParent().getParent().findComponent(ARTICLE_BLOCK_ID);
 		if (id.equals(SAVE_ID)) {
 			ab.storeArticle();
 		} else if (id.equals(FOR_REVIEW_ID)) {

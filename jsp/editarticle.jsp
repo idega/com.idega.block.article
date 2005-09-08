@@ -9,7 +9,7 @@ version="1.2">
 <jsf:view>
         <ws:page id="editarticlepage1">
                 <html:form id="editarticleform1">
-                        <article:create_article_page id="editarticlemodule1"/>
+                        <article:articleAdminBlock id="editarticlemodule1"/>
                 </html:form>
         </ws:page>
 </jsf:view>

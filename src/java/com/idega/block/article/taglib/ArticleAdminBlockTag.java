@@ -1,5 +1,5 @@
 /*
- * $Id: CreateArticlePageTag.java,v 1.2 2005/03/07 15:31:54 joakim Exp $
+ * $Id: ArticleAdminBlockTag.java,v 1.1 2005/09/08 23:00:57 tryggvil Exp $
  *
  * Copyright (C) 2004 Idega. All Rights Reserved.
  *
@@ -11,17 +11,17 @@ package com.idega.block.article.taglib;
 
 import javax.faces.component.UIComponent;
 import javax.faces.webapp.UIComponentTag;
-import com.idega.block.article.ArticlePage;
+import com.idega.block.article.component.ArticleAdminBlock;
 
 /**
  * JSP tag for create article test/demo page. 
  * <p>
- * Last modified: $Date: 2005/03/07 15:31:54 $ by $Author: joakim $
+ * Last modified: $Date: 2005/09/08 23:00:57 $ by $Author: tryggvil $
  *
  * @author Anders Lindman
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.1 $
  */
-public class CreateArticlePageTag extends UIComponentTag {
+public class ArticleAdminBlockTag extends UIComponentTag {
 	String mode=null;
 	
 	/**
@@ -35,7 +35,7 @@ public class CreateArticlePageTag extends UIComponentTag {
 	 * @see javax.faces.webapp.UIComponentTag#getComponentType()
 	 */
 	public String getComponentType() {
-		return "CreateArticlePage";
+		return "ArticleAdminBlock";
 	}
 	
 	public void release() {      
@@ -47,8 +47,8 @@ public class CreateArticlePageTag extends UIComponentTag {
 	protected void setProperties(UIComponent component) {      
 		super.setProperties(component);
 		if (component != null) {
-			ArticlePage articlePage = ((ArticlePage)component);
-			articlePage.setEditMode(mode);
+			ArticleAdminBlock articleBlock = ((ArticleAdminBlock)component);
+			articleBlock.setEditMode(mode);
 		}
 	}
 	
