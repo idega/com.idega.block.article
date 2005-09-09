@@ -19,17 +19,17 @@
 	
 	<component>
 		<component-type>SearchArticlePage</component-type>
-		<component-class>com.idega.block.article.SearchArticlePage</component-class>
+		<component-class>com.idega.block.article.old.SearchArticlePage</component-class>
 	</component>
 
 	<component>
 		<component-type>ListArticlesPage</component-type>
-		<component-class>com.idega.block.article.ListArticlesPage</component-class>
+		<component-class>com.idega.block.article.old.ListArticlesPage</component-class>
 	</component>
 
 	<component>
 		<component-type>PreviewArticlePage</component-type>
-		<component-class>com.idega.block.article.PreviewArticlePage</component-class>
+		<component-class>com.idega.block.article.old.PreviewArticlePage</component-class>
 	</component>
 
 	<component>
@@ -72,26 +72,20 @@
 	</managed-bean>
 	
 	<managed-bean>
-		<managed-bean-name>articleListBean</managed-bean-name>
-		<managed-bean-class>com.idega.block.article.bean.ArticleListBean</managed-bean-class>
-		<managed-bean-scope>session</managed-bean-scope>
-	</managed-bean>
-	
-	<managed-bean>
 		<managed-bean-name>searchArticleBean</managed-bean-name>
 		<managed-bean-class>com.idega.block.article.bean.SearchArticleBean</managed-bean-class>
 		<managed-bean-scope>request</managed-bean-scope>
 	</managed-bean>
 	
 	<managed-bean>
-		<managed-bean-name>listArticlesBean</managed-bean-name>
-		<managed-bean-class>com.idega.block.article.bean.ListArticlesBean</managed-bean-class>
+		<managed-bean-name>listArticlesBeanOld</managed-bean-name>
+		<managed-bean-class>com.idega.block.article.old.ListArticlesBeanOld</managed-bean-class>
 		<managed-bean-scope>session</managed-bean-scope>
 	</managed-bean>
 	
 	<managed-bean>
 		<managed-bean-name>articleItemListBean</managed-bean-name>
-		<managed-bean-class>com.idega.block.article.component.ArticleListManagedBean</managed-bean-class>
+		<managed-bean-class>com.idega.block.article.bean.ArticleListManagedBean</managed-bean-class>
 		<managed-bean-scope>request</managed-bean-scope>
 	</managed-bean>
 	

@@ -1,5 +1,5 @@
 /*
- * $Id: ArticleBlockOld.java,v 1.1 2005/09/08 23:00:57 tryggvil Exp $
+ * $Id: ArticleBlockOld.java,v 1.1 2005/09/09 16:14:05 tryggvil Exp $
  *
  * Copyright (C) 2004 Idega. All Rights Reserved.
  *
@@ -7,7 +7,7 @@
  * Use is subject to license terms.
  *
  */
-package com.idega.block.article.component.reference;
+package com.idega.block.article.old;
 
 import java.io.IOException;
 import java.util.Iterator;
@@ -28,7 +28,6 @@ import javax.faces.context.FacesContext;
 import javax.faces.convert.IntegerConverter;
 import javax.faces.event.ActionEvent;
 import javax.faces.event.ActionListener;
-import com.idega.block.article.PreviewArticlePage;
 import com.idega.block.article.business.ArticleUtil;
 import com.idega.block.article.component.ListArticlesBlock;
 import com.idega.content.bean.CaseListBean;
@@ -53,7 +52,7 @@ import com.idega.webface.htmlarea.HTMLArea;
 /**
  * Block for editing an article.   
  * <p>
- * Last modified: $Date: 2005/09/08 23:00:57 $ by $Author: tryggvil $
+ * Last modified: $Date: 2005/09/09 16:14:05 $ by $Author: tryggvil $
  *
  * @author Anders Lindman
  * @version $Revision: 1.1 $

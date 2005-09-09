@@ -1,5 +1,5 @@
 /*
- * $Id: ListArticlesPage.java,v 1.3 2004/12/17 14:22:06 joakim Exp $
+ * $Id: ListArticlesPage.java,v 1.1 2005/09/09 16:14:05 tryggvil Exp $
  *
  * Copyright (C) 2004 Idega. All Rights Reserved.
  *
@@ -7,7 +7,7 @@
  * Use is subject to license terms.
  *
  */
-package com.idega.block.article;
+package com.idega.block.article.old;
 
 import javax.faces.component.UIComponent;
 import javax.faces.component.html.HtmlPanelGrid;
@@ -18,10 +18,10 @@ import com.idega.webface.WFUtil;
 /**
  * Search article test/demo page. 
  * <p>
- * Last modified: $Date: 2004/12/17 14:22:06 $ by $Author: joakim $
+ * Last modified: $Date: 2005/09/09 16:14:05 $ by $Author: tryggvil $
  *
  * @author Anders Lindman
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.1 $
  */
 public class ListArticlesPage extends CMSPage {
 

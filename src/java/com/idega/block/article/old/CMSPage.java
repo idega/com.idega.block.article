@@ -1,5 +1,5 @@
 /*
- * $Id: CMSPage.java,v 1.15 2005/09/08 23:00:57 tryggvil Exp $
+ * $Id: CMSPage.java,v 1.1 2005/09/09 16:14:05 tryggvil Exp $
  *
  * Copyright (C) 2004 Idega. All Rights Reserved.
  *
@@ -7,7 +7,7 @@
  * Use is subject to license terms.
  *
  */
-package com.idega.block.article;
+package com.idega.block.article.old;
 
 import java.io.IOException;
 import java.io.Serializable;
@@ -33,10 +33,10 @@ import com.idega.webface.event.WFTabListener;
 /**
  * Content management system test/demo page. 
  * <p>
- * Last modified: $Date: 2005/09/08 23:00:57 $ by $Author: tryggvil $
+ * Last modified: $Date: 2005/09/09 16:14:05 $ by $Author: tryggvil $
  *
  * @author Anders Lindman
- * @version $Revision: 1.15 $
+ * @version $Revision: 1.1 $
  */
 public class CMSPage extends WFPage implements  ManagedContentBeans, WFTabListener, ActionListener, Serializable {
 	

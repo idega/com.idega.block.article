@@ -1,5 +1,5 @@
 /*
- * $Id: ListArticlesBlock.java,v 1.8 2005/02/07 10:59:53 gummi Exp $
+ * $Id: ListArticlesBlock.java,v 1.9 2005/09/09 16:14:05 tryggvil Exp $
  *
  * Copyright (C) 2004 Idega. All Rights Reserved.
  *
@@ -34,10 +34,10 @@ import com.idega.webface.convert.WFDateConverter;
 /**
  * Block for listing articles.   
  * <p>
- * Last modified: $Date: 2005/02/07 10:59:53 $ by $Author: gummi $
+ * Last modified: $Date: 2005/09/09 16:14:05 $ by $Author: tryggvil $
  *
  * @author Anders Lindman
- * @version $Revision: 1.8 $
+ * @version $Revision: 1.9 $
  */
 public class ListArticlesBlock extends 
 IWBaseComponent
@@ -45,7 +45,7 @@ implements ManagedContentBeans, ActionListener, Serializable {
 
 	public final static String LIST_ARTICLES_BLOCK_ID = "list_articles_block";
 
-	public final static String LIST_ARTICLES_BEAN_ID = "listArticlesBean";
+	public final static String LIST_ARTICLES_BEAN_ID = "listArticlesBeanOld";
 	
 	private final static String P = "list_articles_block_"; // Id prefix
 	

@@ -1,5 +1,5 @@
 /*
- * $Id: ArticleListManagedBean.java,v 1.9 2005/09/08 23:00:57 tryggvil Exp $
+ * $Id: ArticleListManagedBean.java,v 1.1 2005/09/09 16:14:05 tryggvil Exp $
  * Created on 27.1.2005
  *
  * Copyright (C) 2005 Idega Software hf. All Rights Reserved.
@@ -7,7 +7,7 @@
  * This software is the proprietary information of Idega hf.
  * Use is subject to license terms.
  */
-package com.idega.block.article.component;
+package com.idega.block.article.bean;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -23,9 +23,9 @@ import org.apache.webdav.lib.search.SearchExpression;
 import org.apache.webdav.lib.search.SearchRequest;
 import org.apache.webdav.lib.search.SearchScope;
 import org.apache.xmlbeans.XmlException;
-import com.idega.block.article.bean.ArticleItemBean;
 import com.idega.block.article.business.ArticleActionURIHandler;
 import com.idega.block.article.business.ArticleUtil;
+import com.idega.block.article.component.ArticleItemViewer;
 import com.idega.business.IBOLookup;
 import com.idega.content.bean.ContentItemBeanComparator;
 import com.idega.content.bean.ContentListViewerManagedBean;
@@ -42,10 +42,10 @@ import com.idega.util.IWTimestamp;
 
 /**
  * 
- *  Last modified: $Date: 2005/09/08 23:00:57 $ by $Author: tryggvil $
+ *  Last modified: $Date: 2005/09/09 16:14:05 $ by $Author: tryggvil $
  * 
  * @author <a href="mailto:gummi@idega.com">Gudmundur Agust Saemundsson</a>
- * @version $Revision: 1.9 $
+ * @version $Revision: 1.1 $
  */
 public class ArticleListManagedBean implements ContentListViewerManagedBean {
 

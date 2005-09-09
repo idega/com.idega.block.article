@@ -1,5 +1,5 @@
 /*
- * $Id: EditArticleView.java,v 1.2 2005/09/09 01:19:37 gimmi Exp $
+ * $Id: EditArticleView.java,v 1.3 2005/09/09 16:14:05 tryggvil Exp $
  *
  * Copyright (C) 2004 Idega. All Rights Reserved.
  *
@@ -34,7 +34,6 @@ import javax.faces.event.ValueChangeEvent;
 import javax.faces.event.ValueChangeListener;
 import javax.faces.model.SelectItem;
 import com.idega.block.article.bean.ArticleItemBean;
-import com.idega.block.article.component.reference.FileUploadForm;
 import com.idega.content.bean.ManagedContentBeans;
 import com.idega.content.data.ContentItemCase;
 import com.idega.content.presentation.ContentViewer;
@@ -42,6 +41,7 @@ import com.idega.content.presentation.WebDAVCategories;
 import com.idega.core.localisation.business.ICLocaleBusiness;
 import com.idega.presentation.IWBaseComponent;
 import com.idega.presentation.IWContext;
+import com.idega.user.data.User;
 import com.idega.webface.WFComponentSelector;
 import com.idega.webface.WFContainer;
 import com.idega.webface.WFErrorMessages;
@@ -58,10 +58,10 @@ import com.idega.webface.htmlarea.HTMLArea;
  * <p>
  * This is the part for the editor of article is inside the admin interface
  * </p>
- * Last modified: $Date: 2005/09/09 01:19:37 $ by $Author: gimmi $
+ * Last modified: $Date: 2005/09/09 16:14:05 $ by $Author: tryggvil $
  *
  * @author Joakim,Tryggvi Larusson
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 public class EditArticleView extends IWBaseComponent implements ManagedContentBeans, ActionListener, ValueChangeListener {
 	public final static String EDIT_ARTICLE_BLOCK_ID = "edit_articles_block";
@@ -102,9 +102,6 @@ public class EditArticleView extends IWBaseComponent implements ManagedContentBe
 	private final static String REMOVE_IMAGE_ID = P + "remove_image";
 	private final static String ADD_ATTACHMENT_ID = P + "add_attachment";
 	private final static String REMOVE_ATTACHMENT_ID = P + "remove_attachment";
-	private final static String FILE_UPLOAD_FORM_ID = P + "file_upload_form";
-	private final static String FILE_UPLOAD_ID = P + "file_upload";
-	private final static String FILE_UPLOAD_CANCEL_ID = P + "file_upload_cancel";
 	private final static String ADD_RELATED_CONTENT_ITEM_ID = P + "add_related_item";
 	private final static String REMOVE_RELATED_CONTENT_ITEM_ID = P + "remove_related_item";
 	private final static String RELATED_CONTENT_ITEMS_CANCEL_ID = P + "related_items_cancel";
@@ -135,6 +132,10 @@ public class EditArticleView extends IWBaseComponent implements ManagedContentBe
 
 	protected void initializeContent() {
 		setId(EDIT_ARTICLE_BLOCK_ID);
+		if(clearOnInit){
+			getArticleItemBean().clear();
+		}
+		
 //		WFUtil.invoke(EDIT_ARTICLES_BEAN_ID, "setArticleLinkListener", this, ActionListener.class);
 		add(getEditContainer());
 	}
@@ -144,6 +145,7 @@ public class EditArticleView extends IWBaseComponent implements ManagedContentBe
 	 */
 	public UIComponent getEditContainer() {
 		
+		IWContext iwc = IWContext.getInstance();
 		WFResourceUtil localizer = WFResourceUtil.getResourceUtilArticle();
 		String ref = ARTICLE_ITEM_BEAN_ID + ".";
 //		String bref = WFPage.CONTENT_BUNDLE + ".";
@@ -196,27 +198,38 @@ public class EditArticleView extends IWBaseComponent implements ManagedContentBe
 		//HtmlSelectOneMenu localeMenu = WFUtil.getSelectOneMenu(LOCALE_ID, ref + "allLocales", ref + "pendingLocaleId");
 		//localeMenu.setOnchange("document.forms[0].submit();");
 		//p.getChildren().add(localeMenu);
-		p.getChildren().add(WFUtil.group(localizer.getTextVB("teaser"), WFUtil.getText(":")));
-		HtmlInputTextarea teaserArea = WFUtil.getTextArea(TEASER_ID, ref + "teaser", "500px", "60px");
-		p.getChildren().add(teaserArea);
+
 		p.getChildren().add(WFUtil.group(localizer.getTextVB("author"), WFUtil.getText(":")));
 		HtmlInputText authorInput = WFUtil.getInputText(AUTHOR_ID, ref + "author");
 		authorInput.setSize(70);
+		User user = iwc.getCurrentUser();
+		if(user!=null){
+			String userName = user.getName();
+			getArticleItemBean().setAuthor(userName);
+		}
 		p.getChildren().add(authorInput);
 
 		//Article body
 		p.getChildren().add(WFUtil.group(localizer.getTextVB("body"), WFUtil.getText(":")));
 		HTMLArea bodyArea = WFUtil.getHtmlAreaTextArea(BODY_ID, ref + "body", "500px", "400px");
-		bodyArea.addPlugin(HTMLArea.PLUGIN_TABLE_OPERATIONS);
+		//HTMLArea bodyArea = WFUtil.getHtmlAreaTextArea(BODY_ID, ref + "body");
+		
+		/*bodyArea.addPlugin(HTMLArea.PLUGIN_TABLE_OPERATIONS);
 		bodyArea.addPlugin(HTMLArea.PLUGIN_DYNAMIC_CSS, "3");
 		bodyArea.addPlugin(HTMLArea.PLUGIN_CSS, "3");
 		bodyArea.addPlugin(HTMLArea.PLUGIN_CONTEXT_MENU);
 		bodyArea.addPlugin(HTMLArea.PLUGIN_LIST_TYPE);
 		bodyArea.addPlugin(HTMLArea.PLUGIN_CHARACTER_MAP);
+		*/
 		bodyArea.setAllowFontSelection(false);
+		
 		
 		p.getChildren().add(WFUtil.group(bodyArea, WFUtil.getBreak()));
 
+		p.getChildren().add(WFUtil.group(localizer.getTextVB("teaser"), WFUtil.getText(":")));
+		HtmlInputTextarea teaserArea = WFUtil.getTextArea(TEASER_ID, ref + "teaser", "500px", "60px");
+		p.getChildren().add(teaserArea);
+		
 		p.getChildren().add(WFUtil.group(localizer.getTextVB("source"), WFUtil.getText(":")));
 		HtmlInputText sourceArea = WFUtil.getInputText(AUTHOR_ID, ref + "source");
 		sourceArea.setSize(70);
@@ -329,9 +342,7 @@ public class EditArticleView extends IWBaseComponent implements ManagedContentBe
 		editorSelector.add(mainContainer);
 		editorSelector.add(getCategoryEditContainer());
 //		FileUploadForm f = new FileUploadForm(this, FILE_UPLOAD_ID, FILE_UPLOAD_CANCEL_ID);
-		FileUploadForm f = new FileUploadForm();
-		f.setId(FILE_UPLOAD_FORM_ID);
-		editorSelector.add(f);
+
 		editorSelector.add(getRelatedContentItemsContainer());
 		editorSelector.setSelectedId(ARTICLE_EDITOR_ID, true);
 		
@@ -520,7 +531,6 @@ public class EditArticleView extends IWBaseComponent implements ManagedContentBe
 		if(cs!=null){
 			cs.setSelectedId(ARTICLE_EDITOR_ID, s.equals(ARTICLE_EDITOR_ID));
 			cs.setSelectedId(CATEGORY_EDITOR_ID, s.equals(CATEGORY_EDITOR_ID));
-			cs.setSelectedId(FILE_UPLOAD_FORM_ID, s.equals(FILE_UPLOAD_FORM_ID));
 			cs.setSelectedId(RELATED_CONTENT_ITEMS_EDITOR_ID, s.equals(RELATED_CONTENT_ITEMS_EDITOR_ID));
 		}
 	}
@@ -661,4 +671,10 @@ public class EditArticleView extends IWBaseComponent implements ManagedContentBe
 	public void setEditMode(String mode) {
 		clearOnInit = mode.equalsIgnoreCase("create");
 	}
+	
+	
+	protected ArticleItemBean getArticleItemBean(){
+		return (ArticleItemBean)WFUtil.getBeanInstance(ARTICLE_ITEM_BEAN_ID);
+	}
+	
 }

@@ -1,5 +1,5 @@
 /*
- * $Id: SearchArticlePage.java,v 1.4 2005/03/05 16:27:42 eiki Exp $
+ * $Id: SearchArticlePage.java,v 1.1 2005/09/09 16:14:05 tryggvil Exp $
  *
  * Copyright (C) 2004 Idega. All Rights Reserved.
  *
@@ -7,7 +7,7 @@
  * Use is subject to license terms.
  *
  */
-package com.idega.block.article;
+package com.idega.block.article.old;
 
 import javax.faces.component.UIComponent;
 import com.idega.block.article.component.SearchArticleBlock;
@@ -15,10 +15,10 @@ import com.idega.block.article.component.SearchArticleBlock;
 /**
  * Search article test/demo page. 
  * <p>
- * Last modified: $Date: 2005/03/05 16:27:42 $ by $Author: eiki $
+ * Last modified: $Date: 2005/09/09 16:14:05 $ by $Author: tryggvil $
  *
  * @author Anders Lindman
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.1 $
  */
 public class SearchArticlePage extends CMSPage {
 	private static String FACET_HEAD="ws_head";

@@ -1,5 +1,5 @@
 /*
- * $Id: PreviewArticlePage.java,v 1.4 2005/02/21 16:16:19 gummi Exp $
+ * $Id: PreviewArticlePage.java,v 1.1 2005/09/09 16:14:05 tryggvil Exp $
  *
  * Copyright (C) 2004 Idega. All Rights Reserved.
  *
@@ -7,7 +7,7 @@
  * Use is subject to license terms.
  *
  */
-package com.idega.block.article;
+package com.idega.block.article.old;
 
 import javax.faces.component.UIComponent;
 import com.idega.block.article.component.ArticleItemViewer;
@@ -16,10 +16,10 @@ import com.idega.webface.WFUtil;
 /**
  * Preview article test/demo page. 
  * <p>
- * Last modified: $Date: 2005/02/21 16:16:19 $ by $Author: gummi $
+ * Last modified: $Date: 2005/09/09 16:14:05 $ by $Author: tryggvil $
  *
  * @author Anders Lindman
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.1 $
  */
 public class PreviewArticlePage extends CMSPage {
 	

@@ -6,12 +6,10 @@
  * This software is the proprietary information of Idega hf.
  * Use is subject to license terms.
  */
-package com.idega.block.article.reference;
+package com.idega.block.article.old;
 
 import javax.faces.component.UIComponent;
 import javax.faces.event.ActionEvent;
-import com.idega.block.article.bean.ArticleListBean;
-import com.idega.block.article.component.reference.ArticleBlockOld;
 import com.idega.content.bean.ManagedContentBeans;
 import com.idega.content.data.ContentItemCase;
 import com.idega.webface.WFBlock;
@@ -115,7 +113,7 @@ public class ContentPerspective extends WFContainer implements ManagedContentBea
 		WFUtil.invoke(ARTICLE_ITEM_BEAN_ID, "setComment", "comment");
 		WFUtil.invoke(ARTICLE_ITEM_BEAN_ID, "setDescription", "description");
 		WFUtil.invoke(ARTICLE_ITEM_BEAN_ID, "setSource", "source");
-		if (link.getId().equals(ArticleListBean.ARTICLE_ID)) {
+		if (link.getId().equals(ArticleListBeanOld.ARTICLE_ID)) {
 			WFUtil.invoke(ARTICLE_ITEM_BEAN_ID, "setStatus", ContentItemCase.STATUS_PUBLISHED);
 		} else {
 			WFUtil.invoke(ARTICLE_ITEM_BEAN_ID, "setStatus", ContentItemCase.STATUS_UNDER_REVIEW);

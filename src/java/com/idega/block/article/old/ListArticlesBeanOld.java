@@ -1,5 +1,5 @@
 /*
- * $Id: ListArticlesBean.java,v 1.12 2005/02/18 16:39:44 joakim Exp $
+ * $Id: ListArticlesBeanOld.java,v 1.1 2005/09/09 16:14:05 tryggvil Exp $
  *
  * Copyright (C) 2004 Idega. All Rights Reserved.
  *
@@ -7,19 +7,27 @@
  * Use is subject to license terms.
  *
  */
-package com.idega.block.article.bean;
+package com.idega.block.article.old;
 
 import java.io.IOException;
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import javax.faces.component.UIColumn;
 import javax.faces.component.html.HtmlCommandLink;
 import javax.faces.event.ActionListener;
 import javax.faces.model.DataModel;
+import org.apache.webdav.lib.WebdavResource;
 import org.apache.xmlbeans.XmlException;
+import com.idega.block.article.bean.ArticleItemBean;
 import com.idega.block.article.business.ArticleUtil;
+import com.idega.business.IBOLookup;
+import com.idega.idegaweb.IWUserContext;
+import com.idega.presentation.IWContext;
+import com.idega.slide.business.IWSlideSession;
 import com.idega.webface.WFPage;
 import com.idega.webface.WFUtil;
 import com.idega.webface.bean.WFListBean;
@@ -28,13 +36,13 @@ import com.idega.webface.model.WFDataModel;
 /**
  * Bean for listing articles.   
  * <p>
- * Last modified: $Date: 2005/02/18 16:39:44 $ by $Author: joakim $
+ * Last modified: $Date: 2005/09/09 16:14:05 $ by $Author: tryggvil $
  *
  * @author Anders Lindman
- * @version $Revision: 1.12 $
+ * @version $Revision: 1.1 $
  */
 
-public class ListArticlesBean implements WFListBean, Serializable {
+public class ListArticlesBeanOld implements WFListBean, Serializable {
 	
 	public final static String ARTICLE_ID = "article_id";
 	
@@ -54,12 +62,12 @@ public class ListArticlesBean implements WFListBean, Serializable {
 	/**
 	 * Default constructor.
 	 */
-	public ListArticlesBean() {}
+	public ListArticlesBeanOld() {}
 
 	/**
 	 * Constructs a new list articles bean with the specified article link listener.
 	 */
-	public ListArticlesBean(ActionListener l) {
+	public ListArticlesBeanOld(ActionListener l) {
 		this();
 		setArticleLinkListener(l);
 	}
@@ -67,7 +75,7 @@ public class ListArticlesBean implements WFListBean, Serializable {
 	/**
 	 * Constructs a new list articles bean with the specified parameters. 
 	 */
-	public ListArticlesBean(String id, String headline, String published) {
+	public ListArticlesBeanOld(String id, String headline, String published) {
 		_id = id;
 		_headline = headline;
 		_published = published;
@@ -133,8 +141,8 @@ public class ListArticlesBean implements WFListBean, Serializable {
 			_dataModel = new WFDataModel();
 		}
 		try {
-//			ArticleItemBean[] articleItemBean = (ArticleItemBean[]) ArticleListBean.loadAllArticlesInFolder("/files/content").toArray(new ArticleItemBean[0]);
-			ArticleItemBean[] articleItemBean = (ArticleItemBean[]) ArticleListBean.loadAllArticlesInFolder(ArticleUtil.getArticleYearMonthPath()).toArray(new ArticleItemBean[0]);
+//			ArticleItemBean[] articleItemBean = (ArticleItemBean[]) ArticleListBeanOld.loadAllArticlesInFolder("/files/content").toArray(new ArticleItemBean[0]);
+			ArticleItemBean[] articleItemBean = (ArticleItemBean[]) ListArticlesBeanOld.loadAllArticlesInFolder(ArticleUtil.getArticleYearMonthPath()).toArray(new ArticleItemBean[0]);
 			int availableRows = articleItemBean.length;
 			
 			int nrOfRows = rows.intValue();
@@ -146,7 +154,7 @@ public class ListArticlesBean implements WFListBean, Serializable {
 				//TODO we don't have published in the article item bean
 //				String id = articleItemBean[i].getFolderLocation()+"/"+articleItemBean[i].getHeadline()+ArticleItemBean.ARTICLE_SUFFIX;
 				String id = articleItemBean[i].getFolderLocation()+"/"+articleItemBean[i].getFilename();
-				ListArticlesBean bean = new ListArticlesBean(id, articleItemBean[i].getHeadline(), "");
+				ListArticlesBeanOld bean = new ListArticlesBeanOld(id, articleItemBean[i].getHeadline(), "");
 				_dataModel.set(bean, i);
 			}
 			_dataModel.setRowCount(availableRows);
@@ -180,7 +188,50 @@ public class ListArticlesBean implements WFListBean, Serializable {
 	 * Generates a list result from the current bean search values. 
 	 */
 	public void list() {
-		ListArticlesBean bean = new ListArticlesBean("100", "Headline", "--");
+		ListArticlesBeanOld bean = new ListArticlesBeanOld("100", "Headline", "--");
 		_dataModel.set(bean, _dataModel.getRowCount());
 	}
+
+	/**
+		 * Loads all xml files in the given folder
+		 * @param folder
+		 * @return List containing ArticleItemBean
+		 * @throws XmlException
+		 * @throws IOException
+		 */
+		public static List loadAllArticlesInFolder(String folder) throws XmlException, IOException{
+			List list = new ArrayList();
+			
+	//		File[] articleFile = folder.listFiles();
+			
+			IWUserContext iwuc = IWContext.getInstance();
+	//		IWApplicationContext iwac = iwuc.getApplicationContext();
+			
+			IWSlideSession session = (IWSlideSession)IBOLookup.getSessionInstance(iwuc,IWSlideSession.class);
+	//		IWSlideService service = (IWSlideService)IBOLookup.getServiceInstance(iwac,IWSlideService.class);
+			
+			WebdavResource folderResource = session.getWebdavResource(folder);
+			
+			String[] file = folderResource.list();
+	
+			//TODO(JJ) need to only get the article files. Right now it gets all folders and other filetypes
+			//This code will probably never be used, so not wasting any time on it.
+			if(file!=null){
+				for(int i=0;i<file.length;i++){
+					try {
+						System.out.println("Attempting to load "+file[i].toString());
+						ArticleItemBean article = new ArticleItemBean();
+		//				article.load(folder+"/"+file[i]);
+						//TODO this is a patch since getWebdavResource(folder) seems to return the whole path now
+						article.load(file[i].substring(12));
+						article.setFilename(ArticleUtil.getFilenameFromPath(file[i].substring(12)));
+						list.add(article);
+					}catch(Exception e) {
+						e.printStackTrace();
+					}
+				}
+			}
+			
+			return list;
+		}
 }
