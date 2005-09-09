@@ -1,5 +1,5 @@
 /*
- * $Id: EditArticleView.java,v 1.1 2005/09/08 23:00:57 tryggvil Exp $
+ * $Id: EditArticleView.java,v 1.2 2005/09/09 01:19:37 gimmi Exp $
  *
  * Copyright (C) 2004 Idega. All Rights Reserved.
  *
@@ -58,10 +58,10 @@ import com.idega.webface.htmlarea.HTMLArea;
  * <p>
  * This is the part for the editor of article is inside the admin interface
  * </p>
- * Last modified: $Date: 2005/09/08 23:00:57 $ by $Author: tryggvil $
+ * Last modified: $Date: 2005/09/09 01:19:37 $ by $Author: gimmi $
  *
  * @author Joakim,Tryggvi Larusson
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public class EditArticleView extends IWBaseComponent implements ManagedContentBeans, ActionListener, ValueChangeListener {
 	public final static String EDIT_ARTICLE_BLOCK_ID = "edit_articles_block";
@@ -298,6 +298,9 @@ public class EditArticleView extends IWBaseComponent implements ManagedContentBe
 		p.getChildren().add(WFUtil.getBreak());
 		//Categories
 //		WebDAVCategories categoriesUI = new WebDAVCategories();
+		ArticleItemBean articleItemBean = (ArticleItemBean) WFUtil.getBeanInstance(ARTICLE_ITEM_BEAN_ID);
+		String resourcePath = articleItemBean.getArticleResourcePath();
+		categoriesUI.setResourcePath(resourcePath);
 		p.getChildren().add(categoriesUI);
 		p.getChildren().add(WFUtil.getBreak());
 		p.getChildren().add(WFUtil.getBreak());
@@ -429,7 +432,9 @@ public class EditArticleView extends IWBaseComponent implements ManagedContentBe
 		EditArticleView ab = (EditArticleView) event.getComponent().getParent().getParent().getParent().findComponent(EDIT_ARTICLE_BLOCK_ID);
 		if (id.equals(SAVE_ID)) {
 			ab.storeArticle();
-			String resourcePath = (String) WFUtil.invoke(ARTICLE_ITEM_BEAN_ID, "getArticleResourcePath");
+//			String resourcePath = (String) WFUtil.invoke(ARTICLE_ITEM_BEAN_ID, "getArticleResourcePath");
+			ArticleItemBean articleItemBean = (ArticleItemBean) WFUtil.getBeanInstance(ARTICLE_ITEM_BEAN_ID);
+			String resourcePath = articleItemBean.getArticleResourcePath();
 			UIComponent comp = ab.findComponent(WebDAVCategories.CATEGORIES_BLOCK_ID);
 			categoriesUI.saveCategoriesSettings(resourcePath, comp);
 			clearOnInit=false;
