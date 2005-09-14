@@ -1,5 +1,5 @@
 /*
- * $Id: EditArticleView.java,v 1.3 2005/09/09 16:14:05 tryggvil Exp $
+ * $Id: EditArticleView.java,v 1.4 2005/09/14 15:18:24 tryggvil Exp $
  *
  * Copyright (C) 2004 Idega. All Rights Reserved.
  *
@@ -58,10 +58,10 @@ import com.idega.webface.htmlarea.HTMLArea;
  * <p>
  * This is the part for the editor of article is inside the admin interface
  * </p>
- * Last modified: $Date: 2005/09/09 16:14:05 $ by $Author: tryggvil $
+ * Last modified: $Date: 2005/09/14 15:18:24 $ by $Author: tryggvil $
  *
  * @author Joakim,Tryggvi Larusson
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
 public class EditArticleView extends IWBaseComponent implements ManagedContentBeans, ActionListener, ValueChangeListener {
 	public final static String EDIT_ARTICLE_BLOCK_ID = "edit_articles_block";
@@ -179,6 +179,7 @@ public class EditArticleView extends IWBaseComponent implements ManagedContentBe
 		}
 		
 		UISelectItems items = new UISelectItems();
+		items.setId(LOCALE_ID);
 		items.setValue(arrayList);
 		langDropdown.getChildren().add(items);
 		ValueBinding vb = WFUtil.createValueBinding("#{" + ref +"contentLanguage" + "}");
@@ -214,6 +215,7 @@ public class EditArticleView extends IWBaseComponent implements ManagedContentBe
 		HTMLArea bodyArea = WFUtil.getHtmlAreaTextArea(BODY_ID, ref + "body", "500px", "400px");
 		//HTMLArea bodyArea = WFUtil.getHtmlAreaTextArea(BODY_ID, ref + "body");
 		
+		
 		/*bodyArea.addPlugin(HTMLArea.PLUGIN_TABLE_OPERATIONS);
 		bodyArea.addPlugin(HTMLArea.PLUGIN_DYNAMIC_CSS, "3");
 		bodyArea.addPlugin(HTMLArea.PLUGIN_CSS, "3");
@@ -222,7 +224,25 @@ public class EditArticleView extends IWBaseComponent implements ManagedContentBe
 		bodyArea.addPlugin(HTMLArea.PLUGIN_CHARACTER_MAP);
 		*/
 		bodyArea.setAllowFontSelection(false);
+		//bodyArea.addPlugin("TableOperations");
+		//bodyArea.addPlugin("Template");
 		
+		//bodyArea.addPlugin("Forms");
+		//bodyArea.addPlugin("FormOperations");
+		//bodyArea.addPlugin("EditTag");
+		//bodyArea.addPlugin("Stylist");
+		//bodyArea.addPlugin("CSS");
+		//bodyArea.addPlugin("DynamicCSS");
+		//bodyArea.addPlugin("FullPage");
+		//bodyArea.addPlugin("NoteServer");
+		//bodyArea.addPlugin("QuickTag");
+		//bodyArea.addPlugin("InsertSmiley");
+		//bodyArea.addPlugin("InsertWords");
+		//bodyArea.addPlugin("ContextMenu");
+		//bodyArea.addPlugin("LangMarks");
+		//bodyArea.addPlugin("DoubleClick");
+		//bodyArea.addPlugin("ListType");
+		//bodyArea.addPlugin("ImageManager");
 		
 		p.getChildren().add(WFUtil.group(bodyArea, WFUtil.getBreak()));
 
@@ -231,7 +251,7 @@ public class EditArticleView extends IWBaseComponent implements ManagedContentBe
 		p.getChildren().add(teaserArea);
 		
 		p.getChildren().add(WFUtil.group(localizer.getTextVB("source"), WFUtil.getText(":")));
-		HtmlInputText sourceArea = WFUtil.getInputText(AUTHOR_ID, ref + "source");
+		HtmlInputText sourceArea = WFUtil.getInputText(SOURCE_ID, ref + "source");
 		sourceArea.setSize(70);
 		p.getChildren().add(sourceArea);
 
