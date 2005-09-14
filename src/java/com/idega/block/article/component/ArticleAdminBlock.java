@@ -1,5 +1,5 @@
 /*
- * $Id: ArticleAdminBlock.java,v 1.1 2005/09/08 23:00:57 tryggvil Exp $
+ * $Id: ArticleAdminBlock.java,v 1.2 2005/09/14 22:22:41 tryggvil Exp $
  *
  * Copyright (C) 2004 Idega. All Rights Reserved.
  *
@@ -25,10 +25,10 @@ import com.idega.webface.event.WFTabListener;
  * <p>
  * This is the main block for administering articles (creating,editing)
  * </p>
- * Last modified: $Date: 2005/09/08 23:00:57 $ by $Author: tryggvil $
+ * Last modified: $Date: 2005/09/14 22:22:41 $ by $Author: tryggvil $
  *
  * @author Joakim, Tryggvi Larusson
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public class ArticleAdminBlock extends WFBlock implements ActionListener, ManagedContentBeans {
 
@@ -87,7 +87,7 @@ public class ArticleAdminBlock extends WFBlock implements ActionListener, Manage
 		//}
 		String editMode = getEditMode();
 		if(editMode!=null){
-			editArticleBlock.setEditView(editMode);
+			editArticleBlock.setEditMode(editMode);
 		}
 	}
 

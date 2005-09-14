@@ -1,5 +1,5 @@
 /*
- * $Id: EditArticleView.java,v 1.4 2005/09/14 15:18:24 tryggvil Exp $
+ * $Id: EditArticleView.java,v 1.5 2005/09/14 22:22:41 tryggvil Exp $
  *
  * Copyright (C) 2004 Idega. All Rights Reserved.
  *
@@ -58,10 +58,10 @@ import com.idega.webface.htmlarea.HTMLArea;
  * <p>
  * This is the part for the editor of article is inside the admin interface
  * </p>
- * Last modified: $Date: 2005/09/14 15:18:24 $ by $Author: tryggvil $
+ * Last modified: $Date: 2005/09/14 22:22:41 $ by $Author: tryggvil $
  *
  * @author Joakim,Tryggvi Larusson
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  */
 public class EditArticleView extends IWBaseComponent implements ManagedContentBeans, ActionListener, ValueChangeListener {
 	public final static String EDIT_ARTICLE_BLOCK_ID = "edit_articles_block";
@@ -122,10 +122,14 @@ public class EditArticleView extends IWBaseComponent implements ManagedContentBe
 	private final static String ADD_CATEGORIES_ID = P + "add_categories";
 	private final static String SUB_CATEGORIES_ID = P + "sub_categories";
 	private final static String CATEGORY_BACK_ID = P + "category_back";
+	private static final String EDIT_MODE_CREATE = "create";
+	private static final String EDIT_MODE_EDIT = "edit";
+	
 
-	WebDAVCategories categoriesUI = new WebDAVCategories();
+	//WebDAVCategories categoriesUI = new WebDAVCategories();
 
 	boolean clearOnInit = false;
+	private String editMode;
 
 	public EditArticleView() {
 	}
@@ -331,10 +335,27 @@ public class EditArticleView extends IWBaseComponent implements ManagedContentBe
 		p.getChildren().add(WFUtil.getBreak());
 		//Categories
 //		WebDAVCategories categoriesUI = new WebDAVCategories();
-		ArticleItemBean articleItemBean = (ArticleItemBean) WFUtil.getBeanInstance(ARTICLE_ITEM_BEAN_ID);
-		String resourcePath = articleItemBean.getArticleResourcePath();
-		categoriesUI.setResourcePath(resourcePath);
-		p.getChildren().add(categoriesUI);
+		//ArticleItemBean articleItemBean = (ArticleItemBean) getArticleItemBean();
+		//String resourcePath = articleItemBean.getArticleResourcePath();
+		
+		WebDAVCategories categoriesUI = (WebDAVCategories) getCategoryEditor();
+		if(categoriesUI==null){
+			//id on the component is set implicitly
+			categoriesUI=new WebDAVCategories();
+			//we want to set the categories also on the parent ".article" folder:
+			categoriesUI.setCategoriesOnParent(true);
+			categoriesUI.setDisplaySaveButton(false);
+			//categoriesUI.setId(CATEGORY_EDITOR_ID);
+		
+			
+			//Categories are set in encodeBegin:
+			//if(!isInCreateMode()){
+				//there is no resourcepath set for the article if it's about to be created
+			//	categoriesUI.setResourcePath(resourcePath);
+			//}
+			p.getChildren().add(categoriesUI);
+		}
+		
 		p.getChildren().add(WFUtil.getBreak());
 		p.getChildren().add(WFUtil.getBreak());
 		p.getChildren().add(WFUtil.getBreak());
@@ -357,23 +378,25 @@ public class EditArticleView extends IWBaseComponent implements ManagedContentBe
 		
 		mainContainer.add(p);
 		
-		WFComponentSelector editorSelector = new WFComponentSelector();
-		editorSelector.setId(EDITOR_SELECTOR_ID);
-		editorSelector.add(mainContainer);
-		editorSelector.add(getCategoryEditContainer());
+		//WFComponentSelector editorSelector = new WFComponentSelector();
+		//editorSelector.setId(EDITOR_SELECTOR_ID);
+		//editorSelector.add(mainContainer);
+		//editorSelector.add(getCategoryEditContainer());
 //		FileUploadForm f = new FileUploadForm(this, FILE_UPLOAD_ID, FILE_UPLOAD_CANCEL_ID);
 
-		editorSelector.add(getRelatedContentItemsContainer());
-		editorSelector.setSelectedId(ARTICLE_EDITOR_ID, true);
+		//editorSelector.add(getRelatedContentItemsContainer());
+		//editorSelector.setSelectedId(ARTICLE_EDITOR_ID, true);
 		
-		return editorSelector;
+		//return editorSelector;
+		
+		return mainContainer;
 	}
 
 	/*
 	 * Returns container with form for editing categories.
 	 */
-	private UIComponent getCategoryEditContainer() {
-		String ref = ARTICLE_ITEM_BEAN_ID + ".";
+	private UIComponent getCategoryEditor() {
+		/*String ref = ARTICLE_ITEM_BEAN_ID + ".";
 		String bref = WFPage.CONTENT_BUNDLE + ".";
 
 		HtmlPanelGrid p = WFPanelUtil.getFormPanel(3);
@@ -402,7 +425,12 @@ public class EditArticleView extends IWBaseComponent implements ManagedContentBe
 //		articleCategories.setConverter(new IntegerConverter());
 		p.getChildren().add(articleCategories);
 				
-		return p;
+		return p;*/
+		
+		
+		UIComponent categoriesUi = findComponent(WebDAVCategories.CATEGORIES_BLOCK_ID);
+	
+		return categoriesUi;
 	}
 	
 	/*
@@ -460,14 +488,21 @@ public class EditArticleView extends IWBaseComponent implements ManagedContentBe
 	 */
 	public void processAction(ActionEvent event) {
 		String id = event.getComponent().getId();
-		EditArticleView ab = (EditArticleView) event.getComponent().getParent().getParent().getParent().findComponent(EDIT_ARTICLE_BLOCK_ID);
+		UIComponent rootParent = rootParent = event.getComponent().getParent().getParent().getParent();
+		
+		EditArticleView ab = (EditArticleView) rootParent.findComponent(EDIT_ARTICLE_BLOCK_ID);
 		if (id.equals(SAVE_ID)) {
 			ab.storeArticle();
 //			String resourcePath = (String) WFUtil.invoke(ARTICLE_ITEM_BEAN_ID, "getArticleResourcePath");
-			ArticleItemBean articleItemBean = (ArticleItemBean) WFUtil.getBeanInstance(ARTICLE_ITEM_BEAN_ID);
+			ArticleItemBean articleItemBean = getArticleItemBean();
 			String resourcePath = articleItemBean.getArticleResourcePath();
-			UIComponent comp = ab.findComponent(WebDAVCategories.CATEGORIES_BLOCK_ID);
-			categoriesUI.saveCategoriesSettings(resourcePath, comp);
+			//UIComponent comp = ab.findComponent(WebDAVCategories.CATEGORIES_BLOCK_ID);
+			
+			WebDAVCategories categoriesUI = (WebDAVCategories) ab.getCategoryEditor();
+			if(categoriesUI!=null){
+				categoriesUI.setResourcePath(resourcePath);
+				categoriesUI.saveCategoriesSettings(resourcePath, categoriesUI);
+			}
 			clearOnInit=false;
 		} 
 /*		else if (id.equals(FOR_REVIEW_ID)) {
@@ -504,9 +539,11 @@ public class EditArticleView extends IWBaseComponent implements ManagedContentBe
 	 */
 	public void storeArticle() {
 		String bref = WFPage.CONTENT_BUNDLE + ".";
-		boolean storeOk = ((Boolean) WFUtil.invoke(ARTICLE_ITEM_BEAN_ID, "storeArticle")).booleanValue();
+		//boolean storeOk = ((Boolean) WFUtil.invoke(ARTICLE_ITEM_BEAN_ID, "storeArticle")).booleanValue();
+		boolean storeOk = getArticleItemBean().storeArticle().booleanValue();
 		if (!storeOk) {
-			List errorKeys = (List) WFUtil.getValue(ARTICLE_ITEM_BEAN_ID, "errorKeys");
+			//List errorKeys = (List) WFUtil.getValue(ARTICLE_ITEM_BEAN_ID, "errorKeys");
+			List errorKeys = getArticleItemBean().getErrorKeys();
 			if (errorKeys != null) {
 				for (Iterator iter = errorKeys.iterator(); iter.hasNext();) {
 					String errorKey = (String) iter.next();
@@ -516,6 +553,7 @@ public class EditArticleView extends IWBaseComponent implements ManagedContentBe
 			return;
 		}
 		
+		setEditMode(EDIT_MODE_EDIT);
 		setUserMessage("article_saved");
 	}
 	/*
@@ -627,8 +665,15 @@ public class EditArticleView extends IWBaseComponent implements ManagedContentBe
 	 */
 	public void encodeBegin(FacesContext context) throws IOException {
 		if(clearOnInit) {
-			WFUtil.invoke(ARTICLE_ITEM_BEAN_ID, "clear");
+			//WFUtil.invoke(ARTICLE_ITEM_BEAN_ID, "clear");
+			ArticleItemBean bean = getArticleItemBean();
+			if(bean!=null){
+				bean.clear();
+			}
 		}
+		
+
+		
 //		WFUtil.invoke(ARTICLE_ITEM_BEAN_ID, "updateLocale");
 //		updateEditButtons();
 		
@@ -636,12 +681,29 @@ public class EditArticleView extends IWBaseComponent implements ManagedContentBe
 
 		IWContext iwc = IWContext.getIWContext(context);
 		String resourcePath = iwc.getParameter(ContentViewer.PARAMETER_CONTENT_RESOURCE);
+		
 		if(resourcePath!=null){
 			if("create".equals(iwc.getParameter(ContentViewer.PARAMETER_CONTENT_RESOURCE))){
-				WFUtil.invoke(ARTICLE_ITEM_BEAN_ID,"setFolderLocation",resourcePath,String.class);
+				//WFUtil.invoke(ARTICLE_ITEM_BEAN_ID,"setFolderLocation",resourcePath,String.class);
+				getArticleItemBean().setFolderLocation(resourcePath);
 			} else {
-				WFUtil.invoke(ARTICLE_ITEM_BEAN_ID,"load",resourcePath,String.class);
+				//WFUtil.invoke(ARTICLE_ITEM_BEAN_ID,"load",resourcePath,String.class);
+				try {
+					getArticleItemBean().load(resourcePath);
+				}
+				catch (Exception e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
 			}
+			
+			WebDAVCategories categoriesUI = (WebDAVCategories)getCategoryEditor();
+			//Update the categoriesUI with the resourcePath given:
+			if(!isInCreateMode()&& categoriesUI!=null){
+				//there is no resourcepath set for the article if it's about to be created
+				categoriesUI.setResourcePath(resourcePath);
+			}
+			
 		}
 //		if(((Boolean)WFUtil.invoke(ARTICLE_ITEM_BEAN_ID,"getLanguageChange")).booleanValue()) {
 		String languageChange=(String)WFUtil.invoke(ARTICLE_ITEM_BEAN_ID,"getLanguageChange");
@@ -690,11 +752,52 @@ public class EditArticleView extends IWBaseComponent implements ManagedContentBe
 	 */
 	public void setEditMode(String mode) {
 		clearOnInit = mode.equalsIgnoreCase("create");
+		this.editMode=mode;
 	}
 	
+	public String getEditMode(){
+		return editMode;
+	}
 	
 	protected ArticleItemBean getArticleItemBean(){
 		return (ArticleItemBean)WFUtil.getBeanInstance(ARTICLE_ITEM_BEAN_ID);
+	}
+	
+	/**
+	 * <p>
+	 *	Returns if mode==create
+	 * </p>
+	 * @return
+	 */
+	private boolean isInCreateMode(){
+		String mode = getEditMode();
+		if(mode!=null){
+			if(mode.equals(EDIT_MODE_CREATE)){
+				return true;
+			}
+		}
+		return false;
+	}
+	
+	/**
+	 * @see javax.faces.component.UIPanel#saveState(javax.faces.context.FacesContext)
+	 */
+	public Object saveState(FacesContext ctx) {
+		Object values[] = new Object[2];
+		values[0] = super.saveState(ctx);
+		values[1] = editMode;
+		return values;
+	}
+
+	/**
+	 * @see javax.faces.component.UIPanel#restoreState(javax.faces.context.FacesContext,
+	 *      java.lang.Object)
+	 */
+	public void restoreState(FacesContext ctx, Object state) {
+		Object values[] = (Object[]) state;
+		super.restoreState(ctx, values[0]);
+		editMode = (String)values[1];
+		//super.restoreState(ctx,state);
 	}
 	
 }

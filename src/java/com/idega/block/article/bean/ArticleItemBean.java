@@ -1,5 +1,5 @@
 /*
- * $Id: ArticleItemBean.java,v 1.48 2005/09/01 00:18:00 eiki Exp $
+ * $Id: ArticleItemBean.java,v 1.49 2005/09/14 22:22:41 tryggvil Exp $
  *
  * Copyright (C) 2004 Idega. All Rights Reserved.
  *
@@ -29,6 +29,7 @@ import com.idega.business.IBOLookup;
 import com.idega.business.IBOLookupException;
 import com.idega.content.bean.ContentItem;
 import com.idega.content.bean.ContentItemBean;
+import com.idega.content.bean.ContentItemCase;
 import com.idega.content.bean.ContentItemField;
 import com.idega.content.bean.ContentItemFieldBean;
 import com.idega.content.business.ContentUtil;
@@ -50,10 +51,10 @@ import com.idega.xml.XMLParser;
 /**
  * Bean for idegaWeb article content items.   
  * <p>
- * Last modified: $Date: 2005/09/01 00:18:00 $ by $Author: eiki $
+ * Last modified: $Date: 2005/09/14 22:22:41 $ by $Author: tryggvil $
  *
  * @author Anders Lindman
- * @version $Revision: 1.48 $
+ * @version $Revision: 1.49 $
  */
 
 public class ArticleItemBean extends ContentItemBean implements Serializable, ContentItem {
@@ -241,6 +242,7 @@ public static final PropertyName PROPERTY_CONTENT_TYPE = new PropertyName("IW:",
 		setFilename(null);
 //		setFolderLocation(null);
 		_isUpdated = false;
+		setFolderLocation(null);
 	}
 	
 	/**
@@ -302,10 +304,25 @@ public static final PropertyName PROPERTY_CONTENT_TYPE = new PropertyName("IW:",
 	public Boolean storeArticle() {
 		try {
 			store();
+			tryPublish();
 		}catch(ArticleStoreException e) {
 			return new Boolean(false);
 		}
 		return new Boolean(true);
+	}
+	
+	/**
+	 * <p>
+	 * Try to publish the article if it's
+	 * </p>
+	 */
+	protected void tryPublish(){
+		//TODO: Implement publishing here:
+		setPublished();
+	}
+	
+	protected void setPublished(){
+		setStatus(ContentItemCase.STATUS_PUBLISHED);
 	}
 	
 	/**

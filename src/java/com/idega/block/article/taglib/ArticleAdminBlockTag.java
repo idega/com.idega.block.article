@@ -1,5 +1,5 @@
 /*
- * $Id: ArticleAdminBlockTag.java,v 1.1 2005/09/08 23:00:57 tryggvil Exp $
+ * $Id: ArticleAdminBlockTag.java,v 1.2 2005/09/14 22:22:41 tryggvil Exp $
  *
  * Copyright (C) 2004 Idega. All Rights Reserved.
  *
@@ -16,10 +16,10 @@ import com.idega.block.article.component.ArticleAdminBlock;
 /**
  * JSP tag for create article test/demo page. 
  * <p>
- * Last modified: $Date: 2005/09/08 23:00:57 $ by $Author: tryggvil $
+ * Last modified: $Date: 2005/09/14 22:22:41 $ by $Author: tryggvil $
  *
  * @author Anders Lindman
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public class ArticleAdminBlockTag extends UIComponentTag {
 	String mode=null;
@@ -48,7 +48,9 @@ public class ArticleAdminBlockTag extends UIComponentTag {
 		super.setProperties(component);
 		if (component != null) {
 			ArticleAdminBlock articleBlock = ((ArticleAdminBlock)component);
-			articleBlock.setEditMode(mode);
+			if(mode!=null){
+				articleBlock.setEditMode(mode);
+			}
 		}
 	}
 	
