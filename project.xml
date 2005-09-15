@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<project xmlns:j="jelly:core" >
+<project xmlns:j="jelly:core">
   <extend>${base.project.dir}/block-dependencies.xml</extend>
   <name>idegaWeb Article</name>
   <artifactId>com.idega.block.article</artifactId>
@@ -31,6 +31,11 @@
       <name>0.2.2</name>
       <tag>ARTICLE_0_2_2</tag>
     </version>
+    <version>
+      <id>1.0</id>
+      <name>1.0</name>
+      <tag>ARTICLE_1_0</tag>
+    </version>
   </versions>
   <developers>
     <developer>
@@ -53,63 +58,83 @@
       <email>dainis.brjuhoveckis@idega.lv</email>
       <organization>idega baltic</organization>
       <roles/>
-    </developer>      
+    </developer>
   </developers>
   <dependencies>
     <dependency>
       <groupId>bundles</groupId>
       <artifactId>com.idega.core</artifactId>
-      <!--HELPER--><version>3.0.6</version><!--HELPER-->
+      <!--HELPER-->
+
+      <version>3.0.6</version>
+      <!--HELPER-->
       <!--HELPERversion>SNAPSHOT</versionHELPER-->
 
       <type>jar</type>
       <url>http://www.idega.com/</url>
       <properties>
-      	<!--j:if test="${idegaweb.project.source.dependent}=='true'}"-->
-          <eclipse.dependency>true</eclipse.dependency>
-       	<!--/j:if-->
+        <!--j:if test="${idegaweb.project.source.dependent}=='true'}"-->
+
+        <eclipse.dependency>true</eclipse.dependency>
+        <!--/j:if-->
+
       </properties>
     </dependency>
     <dependency>
       <groupId>bundles</groupId>
       <artifactId>com.idega.webface</artifactId>
-      <!--HELPER--><version>1.0</version><!--HELPER-->
+      <!--HELPER-->
+
+      <version>1.0</version>
+      <!--HELPER-->
       <!--HELPERversion>SNAPSHOT</versionHELPER-->
 
       <type>jar</type>
       <url>http://www.idega.com/</url>
       <properties>
-      	<!--j:if test="${idegaweb.project.source.dependent}=='true'}"-->
-          <eclipse.dependency>true</eclipse.dependency>
-       	<!--/j:if-->
+        <!--j:if test="${idegaweb.project.source.dependent}=='true'}"-->
+
+        <eclipse.dependency>true</eclipse.dependency>
+        <!--/j:if-->
+
       </properties>
     </dependency>
     <dependency>
       <groupId>bundles</groupId>
       <artifactId>com.idega.content</artifactId>
-      <!--HELPER--><version>1.0</version><!--HELPER-->
+      <!--HELPER-->
+
+      <version>1.0</version>
+      <!--HELPER-->
       <!--HELPERversion>SNAPSHOT</versionHELPER-->
 
       <type>jar</type>
       <url>http://www.idega.com/</url>
       <properties>
-      	<!--j:if test="${idegaweb.project.source.dependent}=='true'}"-->
-          <eclipse.dependency>true</eclipse.dependency>
-       	<!--/j:if-->
+        <!--j:if test="${idegaweb.project.source.dependent}=='true'}"-->
+
+        <eclipse.dependency>true</eclipse.dependency>
+        <!--/j:if-->
+
       </properties>
     </dependency>
     <dependency>
       <groupId>bundles</groupId>
       <artifactId>com.idega.slide</artifactId>
-      <!--HELPER--><version>1.0</version><!--HELPER-->
+      <!--HELPER-->
+
+      <version>1.0</version>
+      <!--HELPER-->
       <!--HELPERversion>SNAPSHOT</versionHELPER-->
 
       <type>jar</type>
       <url>http://www.idega.com/</url>
       <properties>
-      	<!--j:if test="${idegaweb.project.source.dependent}=='true'}"-->
-          <eclipse.dependency>true</eclipse.dependency>
-       	<!--/j:if-->
+        <!--j:if test="${idegaweb.project.source.dependent}=='true'}"-->
+
+        <eclipse.dependency>true</eclipse.dependency>
+        <!--/j:if-->
+
       </properties>
     </dependency>
     <dependency>
