@@ -1,5 +1,5 @@
 /*
- * $Id: EditArticleView.java,v 1.5 2005/09/14 22:22:41 tryggvil Exp $
+ * $Id: EditArticleView.java,v 1.6 2005/09/15 00:06:15 tryggvil Exp $
  *
  * Copyright (C) 2004 Idega. All Rights Reserved.
  *
@@ -58,10 +58,10 @@ import com.idega.webface.htmlarea.HTMLArea;
  * <p>
  * This is the part for the editor of article is inside the admin interface
  * </p>
- * Last modified: $Date: 2005/09/14 22:22:41 $ by $Author: tryggvil $
+ * Last modified: $Date: 2005/09/15 00:06:15 $ by $Author: tryggvil $
  *
  * @author Joakim,Tryggvi Larusson
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
  */
 public class EditArticleView extends IWBaseComponent implements ManagedContentBeans, ActionListener, ValueChangeListener {
 	public final static String EDIT_ARTICLE_BLOCK_ID = "edit_articles_block";
@@ -137,7 +137,10 @@ public class EditArticleView extends IWBaseComponent implements ManagedContentBe
 	protected void initializeContent() {
 		setId(EDIT_ARTICLE_BLOCK_ID);
 		if(clearOnInit){
-			getArticleItemBean().clear();
+			ArticleItemBean bean = getArticleItemBean();
+			if(bean!=null){
+				bean.clear();
+			}
 		}
 		
 //		WFUtil.invoke(EDIT_ARTICLES_BEAN_ID, "setArticleLinkListener", this, ActionListener.class);
