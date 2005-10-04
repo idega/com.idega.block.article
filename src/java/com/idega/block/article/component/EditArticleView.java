@@ -1,5 +1,5 @@
 /*
- * $Id: EditArticleView.java,v 1.6 2005/09/15 00:06:15 tryggvil Exp $
+ * $Id: EditArticleView.java,v 1.7 2005/10/04 11:47:03 gimmi Exp $
  *
  * Copyright (C) 2004 Idega. All Rights Reserved.
  *
@@ -23,7 +23,6 @@ import javax.faces.component.html.HtmlInputTextarea;
 import javax.faces.component.html.HtmlOutputLink;
 import javax.faces.component.html.HtmlOutputText;
 import javax.faces.component.html.HtmlPanelGrid;
-import javax.faces.component.html.HtmlSelectManyListbox;
 import javax.faces.component.html.HtmlSelectOneMenu;
 import javax.faces.context.FacesContext;
 import javax.faces.el.ValueBinding;
@@ -58,10 +57,10 @@ import com.idega.webface.htmlarea.HTMLArea;
  * <p>
  * This is the part for the editor of article is inside the admin interface
  * </p>
- * Last modified: $Date: 2005/09/15 00:06:15 $ by $Author: tryggvil $
+ * Last modified: $Date: 2005/10/04 11:47:03 $ by $Author: gimmi $
  *
  * @author Joakim,Tryggvi Larusson
- * @version $Revision: 1.6 $
+ * @version $Revision: 1.7 $
  */
 public class EditArticleView extends IWBaseComponent implements ManagedContentBeans, ActionListener, ValueChangeListener {
 	public final static String EDIT_ARTICLE_BLOCK_ID = "edit_articles_block";
