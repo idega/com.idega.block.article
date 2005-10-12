@@ -1,5 +1,5 @@
 /*
- * $Id: ArticleItemBean.java,v 1.49 2005/09/14 22:22:41 tryggvil Exp $
+ * $Id: ArticleItemBean.java,v 1.50 2005/10/12 22:51:49 tryggvil Exp $
  *
  * Copyright (C) 2004 Idega. All Rights Reserved.
  *
@@ -14,11 +14,15 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.Serializable;
 import java.io.UnsupportedEncodingException;
+import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.List;
 import java.util.Locale;
 import java.util.logging.Logger;
+import org.apache.commons.httpclient.HttpException;
+import org.apache.webdav.lib.Ace;
+import org.apache.webdav.lib.Privilege;
 import org.apache.webdav.lib.PropertyName;
 import org.apache.webdav.lib.WebdavResource;
 import org.apache.webdav.lib.WebdavResources;
@@ -33,12 +37,17 @@ import com.idega.content.bean.ContentItemCase;
 import com.idega.content.bean.ContentItemField;
 import com.idega.content.bean.ContentItemFieldBean;
 import com.idega.content.business.ContentUtil;
+import com.idega.core.accesscontrol.business.StandardRoles;
 import com.idega.data.IDOStoreException;
 import com.idega.idegaweb.IWUserContext;
 import com.idega.idegaweb.UnavailableIWContext;
 import com.idega.presentation.IWContext;
+import com.idega.slide.authentication.AuthenticationBusiness;
 import com.idega.slide.business.IWSlideService;
+import com.idega.slide.business.IWSlideServiceBean;
 import com.idega.slide.business.IWSlideSession;
+import com.idega.slide.util.AccessControlEntry;
+import com.idega.slide.util.AccessControlList;
 import com.idega.slide.util.WebdavExtendedResource;
 import com.idega.slide.util.WebdavRootResource;
 import com.idega.xml.XMLDocument;
@@ -51,10 +60,10 @@ import com.idega.xml.XMLParser;
 /**
  * Bean for idegaWeb article content items.   
  * <p>
- * Last modified: $Date: 2005/09/14 22:22:41 $ by $Author: tryggvil $
+ * Last modified: $Date: 2005/10/12 22:51:49 $ by $Author: tryggvil $
  *
  * @author Anders Lindman
- * @version $Revision: 1.49 $
+ * @version $Revision: 1.50 $
  */
 
 public class ArticleItemBean extends ContentItemBean implements Serializable, ContentItem {
@@ -64,6 +73,7 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 	public final static String KEY_ERROR_HEADLINE_EMPTY = KP + "headline_empty";
 	public final static String KEY_ERROR_BODY_EMPTY = KP + "body_empty";
 	public final static String KEY_ERROR_PUBLISHED_FROM_DATE_EMPTY = KP + "published_from_date_empty";
+	public final static String KEY_ERROR_ON_STORE = KP + "error_saving";
 
 	private boolean _isUpdated = false;
 	private List _errorKeys = null;
@@ -143,11 +153,12 @@ public static final PropertyName PROPERTY_CONTENT_TYPE = new PropertyName("IW:",
 	}
 	
 	public String getArticleResourcePath() {
+		makesureStandardFolderisCreated();
 		String path = (String)getValue(FIELDNAME_RESOURCE_PATH);
 		if(path==null){
 			try {
-				IWContext iwc = IWContext.getInstance();
-				IWSlideService service = (IWSlideService)IBOLookup.getServiceInstance(iwc,IWSlideService.class);
+				IWUserContext iwc = getIWUserContext();
+				IWSlideService service = (IWSlideService)IBOLookup.getServiceInstance(iwc.getApplicationContext(),IWSlideService.class);
 				path = createArticleResourcePath(service);
 				setArticleResourcePath(path);
 			}
@@ -161,6 +172,81 @@ public static final PropertyName PROPERTY_CONTENT_TYPE = new PropertyName("IW:",
 		return path;
 	}
 	
+	protected IWUserContext getIWUserContext(){
+		IWContext iwc = IWContext.getInstance();
+		return iwc;
+	}
+	
+	/**
+	 * <p>
+	 * TODO tryggvil describe method getIWSlideService
+	 * </p>
+	 * @param iwuc
+	 * @return
+	 */
+	private IWSlideService getIWSlideService(IWUserContext iwuc) {
+		try {
+			IWSlideService slideService = (IWSlideService) IBOLookup.getServiceInstance(iwuc.getApplicationContext(),IWSlideService.class);
+			return slideService;
+		}
+		catch (IBOLookupException e) {
+			throw new RuntimeException(e);
+		}
+	}
+	
+	/**
+	 * <p>
+	 * Makes sure the standard folder /cms/articles is created and that it has correct permissions.
+	 * </p>
+	 */
+	private void makesureStandardFolderisCreated() {
+		IWUserContext iwuc = getIWUserContext();
+		IWSlideService slideService = getIWSlideService(iwuc);
+		String contentFolderPath = ArticleUtil.getContentRootPath();
+		String articlePath = ArticleUtil.getArticleRootPath();
+		
+		
+		try {
+			//first make the folder:
+			slideService.createAllFoldersInPathAsRoot(articlePath);
+			
+			WebdavResource resource = slideService.getWebdavResourceAuthenticatedAsRoot(contentFolderPath);
+			AccessControlList aclList = slideService.getAccessControlList(contentFolderPath);
+			AuthenticationBusiness authBusiness = ((IWSlideServiceBean)slideService).getAuthenticationBusiness();
+			
+			String editorRoleUri = authBusiness.getRoleURI(StandardRoles.ROLE_KEY_EDITOR);
+			Ace editorAce = new Ace(editorRoleUri);
+			editorAce.addPrivilege(Privilege.READ);
+			editorAce.addPrivilege(Privilege.WRITE);
+			//editorAce.addPrivilege(Privilege.READ);
+			//editorAce.setInherited(true);
+			AccessControlEntry editorEntry = new AccessControlEntry(editorAce,AccessControlEntry.PRINCIPAL_TYPE_ROLE);
+			aclList.add(editorEntry);
+			
+			String authorRoleUri = authBusiness.getRoleURI(StandardRoles.ROLE_KEY_AUTHOR);
+			Ace authorAce = new Ace(authorRoleUri);
+			authorAce.addPrivilege(Privilege.READ);
+			authorAce.addPrivilege(Privilege.WRITE);
+			//editorAce.addPrivilege(Privilege.READ);
+			//editorAce.setInherited(true);
+			AccessControlEntry authorEntry = new AccessControlEntry(authorAce,AccessControlEntry.PRINCIPAL_TYPE_ROLE);
+			aclList.add(authorEntry);
+			
+			
+			slideService.storeAccessControlList(aclList);
+			
+			//debug:
+			aclList = slideService.getAccessControlList(contentFolderPath);
+			
+		}
+		catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+	}
+
+
 	public void setArticleResourcePath(String path) {
 		if(path!=null){
 			if(path.indexOf("."+ARTICLE_FILENAME_SCOPE) < 0 || !path.endsWith(ARTICLE_SUFFIX)){
@@ -306,6 +392,8 @@ public static final PropertyName PROPERTY_CONTENT_TYPE = new PropertyName("IW:",
 			store();
 			tryPublish();
 		}catch(ArticleStoreException e) {
+			addErrorKey(KEY_ERROR_ON_STORE);
+			e.printStackTrace();
 			return new Boolean(false);
 		}
 		return new Boolean(true);
@@ -507,10 +595,14 @@ public static final PropertyName PROPERTY_CONTENT_TYPE = new PropertyName("IW:",
 				
 				rootResource.close();
 				try {
-					load(filePath);
+					//load(filePath);
+					ArticleItemBean newBean = new ArticleItemBean();
+					newBean.load(filePath);
 				}
 				catch (Exception e) {
-					e.printStackTrace();
+					//storeOk = false;
+					//e.printStackTrace();
+					throw new ArticleStoreException(e.getMessage());
 				}
 	
 			}
