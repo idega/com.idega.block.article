@@ -1,5 +1,5 @@
 /*
- * $Id: ArticleItemBean.java,v 1.50 2005/10/12 22:51:49 tryggvil Exp $
+ * $Id: ArticleItemBean.java,v 1.51 2005/10/17 01:13:36 tryggvil Exp $
  *
  * Copyright (C) 2004 Idega. All Rights Reserved.
  *
@@ -17,6 +17,7 @@ import java.io.UnsupportedEncodingException;
 import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.Enumeration;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.logging.Logger;
@@ -60,10 +61,10 @@ import com.idega.xml.XMLParser;
 /**
  * Bean for idegaWeb article content items.   
  * <p>
- * Last modified: $Date: 2005/10/12 22:51:49 $ by $Author: tryggvil $
+ * Last modified: $Date: 2005/10/17 01:13:36 $ by $Author: tryggvil $
  *
  * @author Anders Lindman
- * @version $Revision: 1.50 $
+ * @version $Revision: 1.51 $
  */
 
 public class ArticleItemBean extends ContentItemBean implements Serializable, ContentItem {
@@ -745,9 +746,8 @@ public static final PropertyName PROPERTY_CONTENT_TYPE = new PropertyName("IW:",
 				XMLElement bodyElement = rootElement.getChild(FIELDNAME_BODY,idegaXMLNameSpace);
 				XMLElement htmlElement = bodyElement.getChild("html",htmlNamespace);
 				XMLElement htmlBodyElement = htmlElement.getChild("body",htmlNamespace);
-			
-				String bodyValue = htmlBodyElement.getText();
-	//			System.out.println("htmlBody value= "+bodyValue);
+				
+				String bodyValue = htmlBodyElement.getContentAsString();
 				setBody(bodyValue);
 			}catch(Exception e) {		//Nullpointer could occur if field isn't used
 	//			e.printStackTrace();
