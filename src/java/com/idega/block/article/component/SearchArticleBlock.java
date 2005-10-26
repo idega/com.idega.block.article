@@ -1,5 +1,5 @@
 /*
- * $Id: SearchArticleBlock.java,v 1.11 2005/04/20 17:10:54 tryggvil Exp $
+ * $Id: SearchArticleBlock.java,v 1.12 2005/10/26 11:44:04 tryggvil Exp $
  *
  * Copyright (C) 2004 Idega. All Rights Reserved.
  *
@@ -14,6 +14,7 @@ import javax.faces.component.UIComponent;
 import javax.faces.component.html.HtmlInputText;
 import javax.faces.component.html.HtmlPanelGrid;
 import javax.faces.component.html.HtmlSelectOneMenu;
+import javax.faces.context.FacesContext;
 import javax.faces.event.ActionEvent;
 import javax.faces.event.ActionListener;
 import org.apache.myfaces.custom.calendar.HtmlInputCalendar;
@@ -32,10 +33,10 @@ import com.idega.webface.WFUtil;
 /**
  * Block for searching articles.   
  * <p>
- * Last modified: $Date: 2005/04/20 17:10:54 $ by $Author: tryggvil $
+ * Last modified: $Date: 2005/10/26 11:44:04 $ by $Author: tryggvil $
  *
  * @author Anders Lindman
- * @version $Revision: 1.11 $
+ * @version $Revision: 1.12 $
  */
 public class SearchArticleBlock extends WFBlock implements ManagedContentBeans, ActionListener, Serializable {
 
@@ -68,7 +69,7 @@ public class SearchArticleBlock extends WFBlock implements ManagedContentBeans, 
 	/* (non-Javadoc)
 	 * @see com.idega.presentation.IWBaseComponent#initializeContent()
 	 */
-	protected void initializeContent() {
+	protected void initializeComponent(FacesContext context) {
 		add(getSearchPanel());
 		add(WFUtil.getBreak());
 		add(getSearchResultList());

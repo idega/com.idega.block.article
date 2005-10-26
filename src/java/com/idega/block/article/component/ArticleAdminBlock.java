@@ -1,5 +1,5 @@
 /*
- * $Id: ArticleAdminBlock.java,v 1.2 2005/09/14 22:22:41 tryggvil Exp $
+ * $Id: ArticleAdminBlock.java,v 1.3 2005/10/26 11:44:04 tryggvil Exp $
  *
  * Copyright (C) 2004 Idega. All Rights Reserved.
  *
@@ -25,10 +25,10 @@ import com.idega.webface.event.WFTabListener;
  * <p>
  * This is the main block for administering articles (creating,editing)
  * </p>
- * Last modified: $Date: 2005/09/14 22:22:41 $ by $Author: tryggvil $
+ * Last modified: $Date: 2005/10/26 11:44:04 $ by $Author: tryggvil $
  *
  * @author Joakim, Tryggvi Larusson
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 public class ArticleAdminBlock extends WFBlock implements ActionListener, ManagedContentBeans {
 
@@ -64,12 +64,11 @@ public class ArticleAdminBlock extends WFBlock implements ActionListener, Manage
 	}
 
 	
-	public void initializeContent(){
+	public void initializeComponent(FacesContext context){
 		//TODO Remove this and use newer localization system:
-		FacesContext context = FacesContext.getCurrentInstance();
 		WFPage.loadResourceBundles(context);
 		
-		super.initializeContent();
+		super.initializeComponent(context);
 
 		String bref = WFPage.CONTENT_BUNDLE + ".";
 		WFTabbedPane tb = new WFTabbedPane();

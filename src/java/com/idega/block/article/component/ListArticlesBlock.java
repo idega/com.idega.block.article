@@ -1,5 +1,5 @@
 /*
- * $Id: ListArticlesBlock.java,v 1.9 2005/09/09 16:14:05 tryggvil Exp $
+ * $Id: ListArticlesBlock.java,v 1.10 2005/10/26 11:44:04 tryggvil Exp $
  *
  * Copyright (C) 2004 Idega. All Rights Reserved.
  *
@@ -14,6 +14,7 @@ import java.io.Serializable;
 import javax.faces.component.UIComponent;
 import javax.faces.component.html.HtmlInputText;
 import javax.faces.component.html.HtmlPanelGrid;
+import javax.faces.context.FacesContext;
 import javax.faces.event.ActionEvent;
 import javax.faces.event.ActionListener;
 import org.apache.xmlbeans.XmlException;
@@ -34,10 +35,10 @@ import com.idega.webface.convert.WFDateConverter;
 /**
  * Block for listing articles.   
  * <p>
- * Last modified: $Date: 2005/09/09 16:14:05 $ by $Author: tryggvil $
+ * Last modified: $Date: 2005/10/26 11:44:04 $ by $Author: tryggvil $
  *
  * @author Anders Lindman
- * @version $Revision: 1.9 $
+ * @version $Revision: 1.10 $
  */
 public class ListArticlesBlock extends 
 IWBaseComponent
@@ -69,7 +70,7 @@ implements ManagedContentBeans, ActionListener, Serializable {
 		WFUtil.invoke(LIST_ARTICLES_BEAN_ID, "setArticleLinkListener", this, ActionListener.class);
 	}
 
-	protected void initializeContent() {
+	protected void initializeComponent(FacesContext context) {
 		setId(LIST_ARTICLES_BLOCK_ID);
 		WFComponentSelector cs = new WFComponentSelector();
 		cs.setId(DISPLAY_SELECTOR_ID);

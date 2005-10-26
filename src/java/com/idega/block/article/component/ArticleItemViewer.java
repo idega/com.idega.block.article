@@ -1,5 +1,5 @@
 /*
- * $Id: ArticleItemViewer.java,v 1.4 2005/08/11 18:04:13 dainis Exp $
+ * $Id: ArticleItemViewer.java,v 1.5 2005/10/26 11:44:04 tryggvil Exp $
  *
  * Copyright (C) 2004 Idega. All Rights Reserved.
  *
@@ -11,6 +11,7 @@ package com.idega.block.article.component;
 import java.sql.Timestamp;
 import javax.faces.component.UIComponent;
 import javax.faces.component.html.HtmlOutputText;
+import javax.faces.context.FacesContext;
 import com.idega.block.article.bean.ArticleItemBean;
 import com.idega.content.bean.ContentItem;
 import com.idega.content.presentation.ContentItemViewer;
@@ -18,12 +19,12 @@ import com.idega.webface.WFHtml;
 import com.idega.webface.convert.WFTimestampConverter;
 
 /**
- * Last modified: $Date: 2005/08/11 18:04:13 $ by $Author: dainis $
+ * Last modified: $Date: 2005/10/26 11:44:04 $ by $Author: tryggvil $
  *
  * Displays the article item
  *
  * @author <a href="mailto:gummi@idega.com">Gudmundur Agust Saemundsson</a>
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  */
 public class ArticleItemViewer extends ContentItemViewer {
 	
@@ -72,8 +73,8 @@ public class ArticleItemViewer extends ContentItemViewer {
 		}
 	}
 	
-	protected void initializeContent() {	
-		super.initializeContent();
+	protected void initializeComponent(FacesContext context) {	
+		super.initializeComponent(context);
 		((HtmlOutputText)getFieldViewerComponent(ATTRIBUTE_CREATION_DATE)).setConverter(new WFTimestampConverter());
 	}
 

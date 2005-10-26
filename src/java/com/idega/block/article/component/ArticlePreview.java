@@ -1,5 +1,5 @@
 /*
- * $Id: ArticlePreview.java,v 1.2 2005/02/21 16:16:19 gummi Exp $
+ * $Id: ArticlePreview.java,v 1.3 2005/10/26 11:44:04 tryggvil Exp $
  *
  * Copyright (C) 2004 Idega. All Rights Reserved.
  *
@@ -23,12 +23,12 @@ import com.idega.webface.WFResourceUtil;
 import com.idega.webface.WFUtil;
 
 /**
- * Last modified: $Date: 2005/02/21 16:16:19 $ by $Author: gummi $
+ * Last modified: $Date: 2005/10/26 11:44:04 $ by $Author: tryggvil $
  *
  * Displays the article item
  *
  * @author Joakim
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 public class ArticlePreview extends IWBaseComponent implements ManagedContentBeans, ActionListener{
 	public final static String EDIT_ARTICLE_BLOCK_ID = "edit_articles_block";
@@ -43,7 +43,7 @@ public class ArticlePreview extends IWBaseComponent implements ManagedContentBea
 	public ArticlePreview() {
 	}
 
-	protected void initializeContent() {
+	protected void initializeComponent(FacesContext context) {
 		add(getPreviewPanel());
 	}
 
