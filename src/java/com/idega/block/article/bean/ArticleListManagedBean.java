@@ -1,5 +1,5 @@
 /*
- * $Id: ArticleListManagedBean.java,v 1.1 2005/09/09 16:14:05 tryggvil Exp $
+ * $Id: ArticleListManagedBean.java,v 1.2 2005/11/02 13:33:29 tryggvil Exp $
  * Created on 27.1.2005
  *
  * Copyright (C) 2005 Idega Software hf. All Rights Reserved.
@@ -42,10 +42,10 @@ import com.idega.util.IWTimestamp;
 
 /**
  * 
- *  Last modified: $Date: 2005/09/09 16:14:05 $ by $Author: tryggvil $
+ *  Last modified: $Date: 2005/11/02 13:33:29 $ by $Author: tryggvil $
  * 
  * @author <a href="mailto:gummi@idega.com">Gudmundur Agust Saemundsson</a>
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public class ArticleListManagedBean implements ContentListViewerManagedBean {
 
@@ -230,15 +230,8 @@ public class ArticleListManagedBean implements ContentListViewerManagedBean {
 		
 		
 		if(detailsViewerPath != null){
-			HtmlOutputLink moreLink = new HtmlOutputLink();
-			IWContext iwc = IWContext.getInstance();
-			
-			String appContext = iwc.getIWMainApplication().getApplicationContextURI();
-			if (appContext.endsWith("/")){
-				appContext = appContext.substring(0, appContext.lastIndexOf("/"));			
-			}
-			moreLink.setValue(appContext+detailsViewerPath);
-			
+			viewer.setDetailsViewerPath(detailsViewerPath);
+			HtmlOutputLink moreLink = viewer.getEmptyMoreLink();
 			moreLink.getChildren().add(ArticleUtil.getBundle().getLocalizedText(LOCALIZEDKEY_MORE));
 			viewer.setDetailsCommand(moreLink);
 //			viewer.setRenderBody(false);
@@ -246,7 +239,7 @@ public class ArticleListManagedBean implements ContentListViewerManagedBean {
 		
 		return viewer;
 	}
-
+	
 	/* (non-Javadoc)
 	 * @see com.idega.content.bean.ContentListViewerManagedBean#getAttachmentViewers()
 	 */
