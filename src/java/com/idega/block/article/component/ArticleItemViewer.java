@@ -1,5 +1,5 @@
 /*
- * $Id: ArticleItemViewer.java,v 1.6 2005/11/02 13:33:29 tryggvil Exp $
+ * $Id: ArticleItemViewer.java,v 1.7 2005/11/03 16:06:26 tryggvil Exp $
  *
  * Copyright (C) 2004 Idega. All Rights Reserved.
  *
@@ -9,35 +9,39 @@
 package com.idega.block.article.component;
 
 import java.sql.Timestamp;
+import java.util.Map;
 import javax.faces.component.UIComponent;
 import javax.faces.component.html.HtmlOutputText;
 import javax.faces.context.FacesContext;
 import com.idega.block.article.bean.ArticleItemBean;
+import com.idega.block.article.bean.ArticleListManagedBean;
 import com.idega.content.bean.ContentItem;
 import com.idega.content.presentation.ContentItemViewer;
 import com.idega.webface.WFHtml;
 import com.idega.webface.convert.WFTimestampConverter;
 
 /**
- * Last modified: $Date: 2005/11/02 13:33:29 $ by $Author: tryggvil $
+ * Last modified: $Date: 2005/11/03 16:06:26 $ by $Author: tryggvil $
  *
  * Displays the article item
  *
  * @author <a href="mailto:gummi@idega.com">Gudmundur Agust Saemundsson</a>
- * @version $Revision: 1.6 $
+ * @version $Revision: 1.7 $
  */
 public class ArticleItemViewer extends ContentItemViewer {
 	
+	//constants:
 	private final static String ATTRIBUTE_AUTHOR = "author";
 	private final static String ATTRIBUTE_CREATION_DATE = "creation_date";
 	private final static String ATTRIBUTE_HEADLINE = "headline";
 	private final static String ATTRIBUTE_TEASER = "teaser";
 	private final static String ATTRIBUTE_BODY = "body";
-	
 	private final static String[] ATTRIBUTE_ARRAY = new String[] {ATTRIBUTE_AUTHOR,ATTRIBUTE_CREATION_DATE,ATTRIBUTE_HEADLINE,ATTRIBUTE_TEASER,ATTRIBUTE_BODY};
 	private final static String facetIdPrefix = "article_";
 	private final static String styleClassPrefix = "article_";
 	public final static String DEFAULT_STYLE_CLASS = styleClassPrefix + "item";
+	//instance variables:
+	private boolean headlineAsLink;
 	
 	
 	public ArticleItemViewer() {
@@ -165,5 +169,33 @@ public class ArticleItemViewer extends ContentItemViewer {
 	}
 	
 
+	public void setHeadlineAsLink(boolean asLink) {
+		this.headlineAsLink = asLink;
+	}
+
+	public boolean getHeadlineAsLink() {
+		return this.headlineAsLink;
+	}
+	
+	
+	/**
+	 * @see javax.faces.component.UIComponentBase#saveState(javax.faces.context.FacesContext)
+	 */
+	public Object saveState(FacesContext ctx) {
+		Object values[] = new Object[2];
+		values[0] = super.saveState(ctx);
+		values[1] = Boolean.valueOf(headlineAsLink);
+		return values;
+	}
+
+	/**
+	 * @see javax.faces.component.UIComponentBase#restoreState(javax.faces.context.FacesContext,
+	 *      java.lang.Object)
+	 */
+	public void restoreState(FacesContext ctx, Object state) {
+		Object values[] = (Object[]) state;
+		super.restoreState(ctx, values[0]);
+		headlineAsLink=((Boolean)values[1]).booleanValue();
+	}
 	
 }
