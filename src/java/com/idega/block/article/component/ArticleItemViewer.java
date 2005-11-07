@@ -1,5 +1,5 @@
 /*
- * $Id: ArticleItemViewer.java,v 1.7 2005/11/03 16:06:26 tryggvil Exp $
+ * $Id: ArticleItemViewer.java,v 1.8 2005/11/07 10:42:38 laddi Exp $
  *
  * Copyright (C) 2004 Idega. All Rights Reserved.
  *
@@ -9,24 +9,22 @@
 package com.idega.block.article.component;
 
 import java.sql.Timestamp;
-import java.util.Map;
 import javax.faces.component.UIComponent;
 import javax.faces.component.html.HtmlOutputText;
 import javax.faces.context.FacesContext;
 import com.idega.block.article.bean.ArticleItemBean;
-import com.idega.block.article.bean.ArticleListManagedBean;
 import com.idega.content.bean.ContentItem;
 import com.idega.content.presentation.ContentItemViewer;
 import com.idega.webface.WFHtml;
 import com.idega.webface.convert.WFTimestampConverter;
 
 /**
- * Last modified: $Date: 2005/11/03 16:06:26 $ by $Author: tryggvil $
+ * Last modified: $Date: 2005/11/07 10:42:38 $ by $Author: laddi $
  *
  * Displays the article item
  *
  * @author <a href="mailto:gummi@idega.com">Gudmundur Agust Saemundsson</a>
- * @version $Revision: 1.7 $
+ * @version $Revision: 1.8 $
  */
 public class ArticleItemViewer extends ContentItemViewer {
 	
