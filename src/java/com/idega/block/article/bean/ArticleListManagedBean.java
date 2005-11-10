@@ -1,5 +1,5 @@
 /*
- * $Id: ArticleListManagedBean.java,v 1.3 2005/11/03 16:06:26 tryggvil Exp $
+ * $Id: ArticleListManagedBean.java,v 1.4 2005/11/10 12:22:32 eiki Exp $
  * Created on 27.1.2005
  *
  * Copyright (C) 2005 Idega Software hf. All Rights Reserved.
@@ -42,16 +42,16 @@ import com.idega.util.IWTimestamp;
 
 /**
  * 
- *  Last modified: $Date: 2005/11/03 16:06:26 $ by $Author: tryggvil $
+ *  Last modified: $Date: 2005/11/10 12:22:32 $ by $Author: eiki $
  * 
  * @author <a href="mailto:gummi@idega.com">Gudmundur Agust Saemundsson</a>
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
 public class ArticleListManagedBean implements ContentListViewerManagedBean {
 
 	private String resourcePath=null;
 
-	private int numberOfDaysDisplayed = 30;
+	private int numberOfDaysDisplayed = 0;
 	private List categories = null;
 
 	private String LOCALIZEDKEY_MORE = "itemviewer.more";
@@ -181,14 +181,13 @@ public class ArticleListManagedBean implements ContentListViewerManagedBean {
 	 */
 	public SearchRequest getSearchRequest(String scope, Locale locale, IWTimestamp oldest, List categoryList) throws SearchException {
 		SearchRequest s = new SearchRequest();
-		s.addSelection(IWSlideConstants.PROPERTY_CREATION_DATE);
-		s.addSelection(IWSlideConstants.PROPERTY_CATEGORY);
+		s.addSelection(IWSlideConstants.PROPERTY_CONTENT_LENGTH);
 		s.addScope(new SearchScope(scope));
 		SearchExpression expression = null;
 		
 		
 		String localeString = ""; //((locale!=null)?locale.getLanguage():"");
-		SearchExpression namePatternExpression = s.compare(CompareOperator.LIKE, IWSlideConstants.PROPERTY_DISPLAY_NAME,"%"+localeString+".article");;
+		SearchExpression namePatternExpression = s.compare(CompareOperator.LIKE, IWSlideConstants.PROPERTY_DISPLAY_NAME,"%"+localeString+".article");
 		expression = namePatternExpression;
 		
 		SearchExpression creationDateExpression = null;		
