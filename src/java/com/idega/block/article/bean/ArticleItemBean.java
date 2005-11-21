@@ -1,5 +1,5 @@
 /*
- * $Id: ArticleItemBean.java,v 1.52 2005/10/18 08:50:16 laddi Exp $
+ * $Id: ArticleItemBean.java,v 1.53 2005/11/21 11:28:36 eiki Exp $
  *
  * Copyright (C) 2004 Idega. All Rights Reserved.
  *
@@ -58,10 +58,10 @@ import com.idega.xml.XMLParser;
 /**
  * Bean for idegaWeb article content items.   
  * <p>
- * Last modified: $Date: 2005/10/18 08:50:16 $ by $Author: laddi $
+ * Last modified: $Date: 2005/11/21 11:28:36 $ by $Author: eiki $
  *
  * @author Anders Lindman
- * @version $Revision: 1.52 $
+ * @version $Revision: 1.53 $
  */
 
 public class ArticleItemBean extends ContentItemBean implements Serializable, ContentItem {
@@ -522,7 +522,7 @@ public static final PropertyName PROPERTY_CONTENT_TYPE = new PropertyName("IW:",
 		boolean storeOk = true;
 		clearErrorKeys();
 
-		if (getHeadline().trim().equals("")) {
+		if ( (getHeadline()==null) || (getHeadline().trim().equals("")) ) {
 			addErrorKey(KEY_ERROR_HEADLINE_EMPTY);
 			storeOk = false;
 		}
