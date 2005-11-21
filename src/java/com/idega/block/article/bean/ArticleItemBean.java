@@ -1,5 +1,5 @@
 /*
- * $Id: ArticleItemBean.java,v 1.53 2005/11/21 11:28:36 eiki Exp $
+ * $Id: ArticleItemBean.java,v 1.54 2005/11/21 11:48:49 eiki Exp $
  *
  * Copyright (C) 2004 Idega. All Rights Reserved.
  *
@@ -58,10 +58,10 @@ import com.idega.xml.XMLParser;
 /**
  * Bean for idegaWeb article content items.   
  * <p>
- * Last modified: $Date: 2005/11/21 11:28:36 $ by $Author: eiki $
+ * Last modified: $Date: 2005/11/21 11:48:49 $ by $Author: eiki $
  *
  * @author Anders Lindman
- * @version $Revision: 1.53 $
+ * @version $Revision: 1.54 $
  */
 
 public class ArticleItemBean extends ContentItemBean implements Serializable, ContentItem {
@@ -208,7 +208,7 @@ public static final PropertyName PROPERTY_CONTENT_TYPE = new PropertyName("IW:",
 			//first make the folder:
 			slideService.createAllFoldersInPathAsRoot(articlePath);
 			
-			WebdavResource resource = slideService.getWebdavResourceAuthenticatedAsRoot(contentFolderPath);
+			//was not used? slideService.getWebdavResourceAuthenticatedAsRoot(contentFolderPath);
 			AccessControlList aclList = slideService.getAccessControlList(contentFolderPath);
 			AuthenticationBusiness authBusiness = ((IWSlideServiceBean)slideService).getAuthenticationBusiness();
 			
@@ -642,7 +642,7 @@ public static final PropertyName PROPERTY_CONTENT_TYPE = new PropertyName("IW:",
 				ByteArrayOutputStream baos = new ByteArrayOutputStream();
 				
 				tidy.parse(bais, baos);
-				body = baos.toString();
+				body = baos.toString("UTF-8");
 			}
 			catch (UnsupportedEncodingException e) {
 				e.printStackTrace();
