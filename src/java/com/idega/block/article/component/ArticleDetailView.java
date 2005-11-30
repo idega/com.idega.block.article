@@ -1,5 +1,5 @@
 /*
- * $Id: ArticleDetailView.java,v 1.18 2005/10/26 11:44:04 tryggvil Exp $
+ * $Id: ArticleDetailView.java,v 1.19 2005/11/30 09:34:52 laddi Exp $
  * 
  * Copyright (C) 2004 Idega. All Rights Reserved.
  * 
@@ -24,12 +24,12 @@ import com.idega.webface.WFUtil;
 import com.idega.webface.convert.WFCommaSeparatedListConverter;
 
 /**
- * Last modified: $Date: 2005/10/26 11:44:04 $ by $Author: tryggvil $
+ * Last modified: $Date: 2005/11/30 09:34:52 $ by $Author: laddi $
  * 
  * Displays detailed info about the article
  * 
  * @author Joakim
- * @version $Revision: 1.18 $
+ * @version $Revision: 1.19 $
  */
 public class ArticleDetailView extends IWBaseComponent implements ManagedContentBeans {
 
@@ -40,7 +40,6 @@ public class ArticleDetailView extends IWBaseComponent implements ManagedContent
 	private final static String ARTICLE_LIST_ID = P + "article_list";
 
 	private final static String ref = ARTICLE_ITEM_BEAN_ID + ".";
-	private final static String BUNDLE = "com.idega.block.article";
 	
 	public ArticleDetailView() {
 	}

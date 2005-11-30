@@ -1,5 +1,5 @@
 /*
- * $Id: SearchArticleBean.java,v 1.15 2005/09/08 23:00:57 tryggvil Exp $
+ * $Id: SearchArticleBean.java,v 1.16 2005/11/30 09:34:53 laddi Exp $
  *
  * Copyright (C) 2004 Idega. All Rights Reserved.
  *
@@ -46,15 +46,14 @@ import com.idega.webface.bean.AbstractWFEditableListManagedBean;
 import com.idega.webface.bean.WFEditableListCellWrapper;
 import com.idega.webface.bean.WFEditableListDataBean;
 import com.idega.webface.bean.WFListBean;
-import com.idega.webface.model.WFDataModel;
 
 /**
  * Bean for searching articles.   
  * <p>
- * Last modified: $Date: 2005/09/08 23:00:57 $ by $Author: tryggvil $
+ * Last modified: $Date: 2005/11/30 09:34:53 $ by $Author: laddi $
  *
  * @author Anders Lindman
- * @version $Revision: 1.15 $
+ * @version $Revision: 1.16 $
  */
 
 public class SearchArticleBean extends AbstractWFEditableListManagedBean implements WFListBean, Serializable {
@@ -68,17 +67,9 @@ public class SearchArticleBean extends AbstractWFEditableListManagedBean impleme
 	
 	protected String[] localizationKey = new String[] { "Headline", "Author", "Source", "Creation date", "Language", "Status"};
 
-	
-	private WFDataModel _dataModel = null;
 	private ActionListener _articleLinkListener = null;
 
-//	private String _id = null;
-//	private String _headline = null;
-//	private String _published = null;
-//	private String _author = null;
-//	private String _status = null;
-//	private String _testStyle = null;
-//	
+
 	private String _searchText = null;
 	private String _searchAuthor = null;
 	private String _searchCategory = null;
@@ -94,8 +85,6 @@ public class SearchArticleBean extends AbstractWFEditableListManagedBean impleme
 	 * Default constructor.
 	 */
 	public SearchArticleBean() { 
-//		_searchPublishedFrom = new Date();
-//		_searchText = "searchtext"; 
 	}
 
 	/**
@@ -106,37 +95,12 @@ public class SearchArticleBean extends AbstractWFEditableListManagedBean impleme
 		setArticleLinkListener(l);
 	}
 	
-	/**
-	 * Constructs a new search article bean with the specified parameters. 
-	 */
-//	public SearchArticleBean(String id, String headline, String published, String author, String status) {
-//		_id = id;
-//		_headline = headline;
-//		_published = published;
-//		_author = author;
-//		_status = status;
-//		_testStyle = "";
-//	}
-//		
-//	public String getId() { return _id; }
-//	public String getHeadline() { return _headline; }
-//	public String getPublished() { return _published; }
-//	public String getAuthor() { return _author; }
-//	public String getStatus() { return _status; }
-//	public String getTestStyle() { return _testStyle; }
 
 	public String getSearchText() { return _searchText; }
 	public String getSearchAuthor() { return _searchAuthor; }
 	public String getSearchCategory() { return _searchCategory; }
 	public Date getSearchPublishedFrom() { return _searchPublishedFrom; }
 	public Date getSearchPublishedTo() { return _searchPublishedTo; }
-
-//	public void setId(String s) { _id = s; }
-//	public void setHeadline(String s) { _headline = s; }
-//	public void setPublished(String s) { _published = s; }
-//	public void setAuthor(String s) { _author = s; }
-//	public void setStatus(String s) { _status = s; }
-//	public void setTestStyle(String s) { _testStyle = s; }
 
 	public void setSearchText(String s) { _searchText = s; }
 	public void setSearchAuthor(String s) { _searchAuthor = s; }
@@ -170,9 +134,7 @@ public class SearchArticleBean extends AbstractWFEditableListManagedBean impleme
 		if(_allCategories==null){
 			return new LinkedHashMap();
 		}
-		else{
-			return _allCategories;
-		}
+		return _allCategories;
 	}
 	
 	/**
@@ -192,9 +154,8 @@ public class SearchArticleBean extends AbstractWFEditableListManagedBean impleme
 		List beans = getContentItems();
 		if(beans!=null){
 			return (ArticleSearchResultBean[])beans.toArray(new ArticleSearchResultBean[beans.size()]);
-		} else {
-			return new ArticleSearchResultBean[0];
 		}
+		return new ArticleSearchResultBean[0];
 	}
 
 	/* (non-Javadoc)
@@ -320,13 +281,10 @@ public class SearchArticleBean extends AbstractWFEditableListManagedBean impleme
 		SearchExpression whereExpression = null;
 		
 		
-		//String localeString = ""; //((locale!=null)?locale.getLanguage():"");
 		//TODO create search input for language
 		SearchExpression namePatternExpression = s.compare(CompareOperator.LIKE, IWSlideConstants.PROPERTY_DISPLAY_NAME,"%.article");
 		//todo search by the content type
-		//SearchExpression contentTypeExpression = s.compare(CompareOperator.LIKE, ArticleItemBean.PROPERTY_CONTENT_TYPE, ArticleItemBean.ARTICLE_FILENAME_SCOPE);
 		whereExpression = namePatternExpression;
-		//whereExpression = contentTypeExpression;
 		
 		SearchExpression creationDateFromExpression = null;		
 		if(getSearchPublishedFrom() != null){
@@ -347,7 +305,6 @@ public class SearchArticleBean extends AbstractWFEditableListManagedBean impleme
 			whereExpression = s.and(whereExpression,creationDateToExpression);
 		}
 		
-//		List categoryExpressions = new ArrayList();
 		if(!("-1").equals(getSearchCategory())){
 			SearchExpression categoryExpression = s.compare(CompareOperator.LIKE,IWSlideConstants.PROPERTY_CATEGORY,","+getSearchCategory()+",");
 			whereExpression = s.and(whereExpression,categoryExpression);
@@ -358,23 +315,6 @@ public class SearchArticleBean extends AbstractWFEditableListManagedBean impleme
 			SearchExpression authorExpression = s.compare(CompareOperator.LIKE,IWSlideConstants.PROPERTY_CREATOR_DISPLAY_NAME,"%"+author+"%");
 			whereExpression = s.and(whereExpression,authorExpression);
 		}
-		
-		
-//			}
-//			whereExpression = s.and(whereExpression,categoryExpression);
-//			for (Iterator iter = categoryList.iterator(); iter.hasNext();) {
-//				String categoryName = (String) iter.next();
-//				categoryExpressions.add(s.compare(CompareOperator.LIKE,IWSlideConstants.PROPERTY_CATEGORY,"%"+categoryName+"%"));
-//			}
-//			Iterator expr = categoryExpressions.iterator();
-//			if(expr.hasNext()){
-//				SearchExpression categoryExpression = (SearchExpression)expr.next();
-//				while(expr.hasNext()){
-//					categoryExpression = s.or(categoryExpression,(SearchExpression)expr.next());
-//				}
-//				whereExpression = s.and(whereExpression,categoryExpression);
-//			}
-//		}
 		
 		SearchExpression containsExpression = null;		
 		if(getSearchText() != null && !"".equals(getSearchText())){

@@ -1,5 +1,5 @@
 /*
- * $Id: CMSPage.java,v 1.1 2005/09/09 16:14:05 tryggvil Exp $
+ * $Id: CMSPage.java,v 1.2 2005/11/30 09:34:53 laddi Exp $
  *
  * Copyright (C) 2004 Idega. All Rights Reserved.
  *
@@ -33,16 +33,16 @@ import com.idega.webface.event.WFTabListener;
 /**
  * Content management system test/demo page. 
  * <p>
- * Last modified: $Date: 2005/09/09 16:14:05 $ by $Author: tryggvil $
+ * Last modified: $Date: 2005/11/30 09:34:53 $ by $Author: laddi $
  *
  * @author Anders Lindman
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public class CMSPage extends WFPage implements  ManagedContentBeans, WFTabListener, ActionListener, Serializable {
 	
 	private final static String P = "cms_page_"; // Parameter prefix
 	
-	private final static String TASK_ID_CONTENT = P + "t_content";
+	//private final static String TASK_ID_CONTENT = P + "t_content";
 	private final static String TASK_ID_EDIT = P + "t_edit";
 
 	private final static String MAIN_TASKBAR_ID = P + "main_taskbar";

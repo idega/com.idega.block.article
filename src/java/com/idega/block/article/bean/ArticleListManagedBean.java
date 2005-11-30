@@ -1,5 +1,5 @@
 /*
- * $Id: ArticleListManagedBean.java,v 1.4 2005/11/10 12:22:32 eiki Exp $
+ * $Id: ArticleListManagedBean.java,v 1.5 2005/11/30 09:34:53 laddi Exp $
  * Created on 27.1.2005
  *
  * Copyright (C) 2005 Idega Software hf. All Rights Reserved.
@@ -42,10 +42,10 @@ import com.idega.util.IWTimestamp;
 
 /**
  * 
- *  Last modified: $Date: 2005/11/10 12:22:32 $ by $Author: eiki $
+ *  Last modified: $Date: 2005/11/30 09:34:53 $ by $Author: laddi $
  * 
  * @author <a href="mailto:gummi@idega.com">Gudmundur Agust Saemundsson</a>
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  */
 public class ArticleListManagedBean implements ContentListViewerManagedBean {
 
@@ -78,11 +78,9 @@ public class ArticleListManagedBean implements ContentListViewerManagedBean {
 			return l;
 		}
 		catch (XmlException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		return new ArrayList();
@@ -143,32 +141,6 @@ public class ArticleListManagedBean implements ContentListViewerManagedBean {
 			e1.printStackTrace();
 		}
 		
-
-	
-//		IWSlideSession session = (IWSlideSession)IBOLookup.getSessionInstance(iwc,IWSlideSession.class);
-//		
-//		WebdavResource folderResource = session.getWebdavResource(folder);
-//		
-//		String[] file = folderResource.list();
-//
-//
-//		//TODO(JJ) need to only get the article files. Right now it gets all folders and other filetypes
-//		//This code will probably never be used, so not wasting any time on it.
-//		if(file!=null){
-//			for(int i=0;i<file.length;i++){
-//				try {
-//					System.out.println("Attempting to load "+file[i].toString());
-//					ArticleItemBean article = new ArticleItemBean();
-//	//				article.load(folder+"/"+file[i]);
-//					//TODO this is a patch since getWebdavResource(folder) seems to return the whole path now
-//					article.load(file[i].substring(12));
-//					list.add(article);
-//				}catch(Exception e) {
-//					e.printStackTrace();
-//				}
-//			}
-//		}
-		
 		return list;
 	}
 
@@ -186,7 +158,7 @@ public class ArticleListManagedBean implements ContentListViewerManagedBean {
 		SearchExpression expression = null;
 		
 		
-		String localeString = ""; //((locale!=null)?locale.getLanguage():"");
+		String localeString = "";
 		SearchExpression namePatternExpression = s.compare(CompareOperator.LIKE, IWSlideConstants.PROPERTY_DISPLAY_NAME,"%"+localeString+".article");
 		expression = namePatternExpression;
 		
@@ -215,9 +187,6 @@ public class ArticleListManagedBean implements ContentListViewerManagedBean {
 		
 		
 		s.setWhereExpression(expression);
-//		System.out.println("------------------------");
-//		System.out.println(s.asString());
-//		System.out.println("------------------------");
 		return s;
 	}
 
@@ -233,7 +202,6 @@ public class ArticleListManagedBean implements ContentListViewerManagedBean {
 			moreLink.getChildren().add(ArticleUtil.getBundle().getLocalizedText(LOCALIZEDKEY_MORE));
 			viewer.setDetailsCommand(moreLink);
 			viewer.setHeadlineAsLink(getHeadlineAsLink());
-//			viewer.setRenderBody(false);
 		}
 		
 		return viewer;

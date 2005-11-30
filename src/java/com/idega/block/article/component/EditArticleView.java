@@ -1,5 +1,5 @@
 /*
- * $Id: EditArticleView.java,v 1.8 2005/10/26 11:44:04 tryggvil Exp $
+ * $Id: EditArticleView.java,v 1.9 2005/11/30 09:34:52 laddi Exp $
  *
  * Copyright (C) 2004 Idega. All Rights Reserved.
  *
@@ -13,14 +13,11 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
-import javax.faces.component.UIColumn;
 import javax.faces.component.UIComponent;
 import javax.faces.component.UISelectItems;
 import javax.faces.component.html.HtmlCommandButton;
-import javax.faces.component.html.HtmlDataTable;
 import javax.faces.component.html.HtmlInputText;
 import javax.faces.component.html.HtmlInputTextarea;
-import javax.faces.component.html.HtmlOutputLink;
 import javax.faces.component.html.HtmlOutputText;
 import javax.faces.component.html.HtmlPanelGrid;
 import javax.faces.component.html.HtmlSelectOneMenu;
@@ -44,10 +41,8 @@ import com.idega.user.data.User;
 import com.idega.webface.WFComponentSelector;
 import com.idega.webface.WFContainer;
 import com.idega.webface.WFErrorMessages;
-import com.idega.webface.WFList;
 import com.idega.webface.WFPage;
 import com.idega.webface.WFPanelUtil;
-import com.idega.webface.WFPlainOutputText;
 import com.idega.webface.WFResourceUtil;
 import com.idega.webface.WFTabbedPane;
 import com.idega.webface.WFUtil;
@@ -57,10 +52,10 @@ import com.idega.webface.htmlarea.HTMLArea;
  * <p>
  * This is the part for the editor of article is inside the admin interface
  * </p>
- * Last modified: $Date: 2005/10/26 11:44:04 $ by $Author: tryggvil $
+ * Last modified: $Date: 2005/11/30 09:34:52 $ by $Author: laddi $
  *
  * @author Joakim,Tryggvi Larusson
- * @version $Revision: 1.8 $
+ * @version $Revision: 1.9 $
  */
 public class EditArticleView extends IWBaseComponent implements ManagedContentBeans, ActionListener, ValueChangeListener {
 	public final static String EDIT_ARTICLE_BLOCK_ID = "edit_articles_block";
@@ -80,12 +75,12 @@ public class EditArticleView extends IWBaseComponent implements ManagedContentBe
 	private final static String LOCALE_ID = P + "locale";
 	private final static String TEASER_ID = P + "teaser";
 	public final static String BODY_ID = P + "body";
-	private final static String FOLDER_ID = P + "folder_location";
+	//private final static String FOLDER_ID = P + "folder_location";
 	private final static String AUTHOR_ID = P + "author";
 	private final static String SOURCE_ID = P + "source";
 	private final static String COMMENT_ID = P + "comment";
-	private final static String PUBLISHED_FROM_DATE_ID = P + "published_from_date";
-	private final static String PUBLISHED_TO_DATE_ID = P + "published_to_date";
+	//private final static String PUBLISHED_FROM_DATE_ID = P + "published_from_date";
+	//private final static String PUBLISHED_TO_DATE_ID = P + "published_to_date";
 	
 	private final static String USER_MESSAGE_ID = P + "user_message";
 	
@@ -95,7 +90,7 @@ public class EditArticleView extends IWBaseComponent implements ManagedContentBe
 	private final static String REWRITE_ID = P + "rewrite";
 	private final static String REJECT_ID = P + "reject";
 	private final static String DELETE_ID = P + "delete";
-	private final static String CANCEL_ID = P + "cancel";
+	/*private final static String CANCEL_ID = P + "cancel";
 	private final static String EDIT_CATEGORIES_ID = P + "edit_categories";
 	private final static String ADD_IMAGE_ID = P + "add_image";
 	private final static String REMOVE_IMAGE_ID = P + "remove_image";
@@ -104,7 +99,7 @@ public class EditArticleView extends IWBaseComponent implements ManagedContentBe
 	private final static String ADD_RELATED_CONTENT_ITEM_ID = P + "add_related_item";
 	private final static String REMOVE_RELATED_CONTENT_ITEM_ID = P + "remove_related_item";
 	private final static String RELATED_CONTENT_ITEMS_CANCEL_ID = P + "related_items_cancel";
-	private final static String EDIT_HTML_ID = P + "edit_html";
+	private final static String EDIT_HTML_ID = P + "edit_html";*/
 	
 	private final static String TASKBAR_ID = P + "taskbar";
 
@@ -114,13 +109,13 @@ public class EditArticleView extends IWBaseComponent implements ManagedContentBe
 	private final static String CATEGORY_EDITOR_ID = P + "category_editor";
 	private final static String RELATED_CONTENT_ITEMS_EDITOR_ID = P + "related_items_editor";
 
-	private final static String RELATED_CONTENT_ITEMS_LIST_ID = P + "related_items_list";
+	/*private final static String RELATED_CONTENT_ITEMS_LIST_ID = P + "related_items_list";
 
 	private final static String AVAILABLE_CATEGORIES_ID = P + "avaliable_categories";
 	private final static String ARTICLE_CATEGORIES_ID = P + "article_categories";
 	private final static String ADD_CATEGORIES_ID = P + "add_categories";
 	private final static String SUB_CATEGORIES_ID = P + "sub_categories";
-	private final static String CATEGORY_BACK_ID = P + "category_back";
+	private final static String CATEGORY_BACK_ID = P + "category_back";*/
 	private static final String EDIT_MODE_CREATE = "create";
 	private static final String EDIT_MODE_EDIT = "edit";
 	
@@ -437,7 +432,7 @@ public class EditArticleView extends IWBaseComponent implements ManagedContentBe
 	
 	/*
 	 * Returns a list with realted content item links for the article.
-	 */
+	 *
 	private UIComponent getRelatedContentItemsList() {
 		String bref = WFPage.CONTENT_BUNDLE + ".";
 		String var = "article_related_items";
@@ -466,11 +461,11 @@ public class EditArticleView extends IWBaseComponent implements ManagedContentBe
 		t.getChildren().add(col);
 		
 		return t;
-	}
+	}*/
 	
 	/*
 	 * Returns container with form for selecting related content items.
-	 */
+	 *
 	private UIComponent getRelatedContentItemsContainer() {
 		String bref = WFPage.CONTENT_BUNDLE + ".";
 		WFContainer c = new WFContainer();
@@ -483,7 +478,7 @@ public class EditArticleView extends IWBaseComponent implements ManagedContentBe
 		c.add(new WFPlainOutputText("&nbsp;&nbsp;&nbsp;"));
 		c.add(WFUtil.getButtonVB(RELATED_CONTENT_ITEMS_CANCEL_ID, bref + "cancel", this));
 		return c;
-	}
+	}*/
 	
 	/**
 	 * javax.faces.event.ActionListener#processAction()

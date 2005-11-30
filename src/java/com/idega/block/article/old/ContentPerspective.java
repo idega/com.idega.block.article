@@ -30,7 +30,7 @@ public class ContentPerspective extends WFContainer implements ManagedContentBea
 	
 	private final static String P = "cms_page_"; // Parameter prefix
 	
-	private final static String TASK_ID_CONTENT = P + "t_content";
+	//private final static String TASK_ID_CONTENT = P + "t_content";
 	private final static String TASK_ID_EDIT = P + "t_edit";
 
 	private final static String MAIN_TASKBAR_ID = P + "main_taskbar";

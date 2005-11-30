@@ -1,5 +1,5 @@
 /*
- * $Id: ArticleBar.java,v 1.6 2005/10/26 11:44:04 tryggvil Exp $
+ * $Id: ArticleBar.java,v 1.7 2005/11/30 09:34:52 laddi Exp $
  *
  * Copyright (C) 2004 Idega. All Rights Reserved.
  *
@@ -20,10 +20,10 @@ import com.idega.webface.WFMenu;
 import com.idega.webface.WFTabBar;
 
 /**
- * Last modified: $Date: 2005/10/26 11:44:04 $ by $Author: tryggvil $
+ * Last modified: $Date: 2005/11/30 09:34:52 $ by $Author: laddi $
  *
  * @author Joakim
- * @version $Revision: 1.6 $
+ * @version $Revision: 1.7 $
  */
 public class ArticleBar extends WFContainer implements  Serializable{
 
@@ -39,9 +39,6 @@ public class ArticleBar extends WFContainer implements  Serializable{
 		setStyleClass(STYLE_CLASS);
 		addApplicationDecoration();
 		addTabbar();
-	}
-
-	private void addLogin() {
 	}
 
 	private void addTabbar() {

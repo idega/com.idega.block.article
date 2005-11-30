@@ -1,5 +1,5 @@
 /*
- * $Id: ArticleItemBean.java,v 1.54 2005/11/21 11:48:49 eiki Exp $
+ * $Id: ArticleItemBean.java,v 1.55 2005/11/30 09:34:53 laddi Exp $
  *
  * Copyright (C) 2004 Idega. All Rights Reserved.
  *
@@ -58,10 +58,10 @@ import com.idega.xml.XMLParser;
 /**
  * Bean for idegaWeb article content items.   
  * <p>
- * Last modified: $Date: 2005/11/21 11:48:49 $ by $Author: eiki $
+ * Last modified: $Date: 2005/11/30 09:34:53 $ by $Author: laddi $
  *
  * @author Anders Lindman
- * @version $Revision: 1.54 $
+ * @version $Revision: 1.55 $
  */
 
 public class ArticleItemBean extends ContentItemBean implements Serializable, ContentItem {
@@ -143,11 +143,10 @@ public static final PropertyName PROPERTY_CONTENT_TYPE = new PropertyName("IW:",
 			String articlePath = resourcePath.substring(0,index+ARTICLE_FILENAME_SCOPE.length()+1);
 			System.out.println("Article path returned: "+articlePath);
 			return articlePath;
-		} else {
-			Logger log = Logger.getLogger(this.getClass().toString());
-			log.warning("Resource path for article '"+resourcePath+"' does not contain article filename scope '."+ARTICLE_FILENAME_SCOPE+"'.  The resource path is returned unchanged.");
-			return resourcePath;  
 		}
+		Logger log = Logger.getLogger(this.getClass().toString());
+		log.warning("Resource path for article '"+resourcePath+"' does not contain article filename scope '."+ARTICLE_FILENAME_SCOPE+"'.  The resource path is returned unchanged.");
+		return resourcePath;
 	}
 	
 	public String getArticleResourcePath() {
@@ -262,9 +261,8 @@ public static final PropertyName PROPERTY_CONTENT_TYPE = new PropertyName("IW:",
 		String articlePath = getResourcePath();
 		if(articlePath!=null){
 			return ContentUtil.getParentPath(ContentUtil.getParentPath(articlePath));
-		} else {
-			return null;
 		}
+		return null;
 	}
 	
 	public void setFolderLocation(String path) {

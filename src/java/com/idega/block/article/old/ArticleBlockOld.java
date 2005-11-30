@@ -1,5 +1,5 @@
 /*
- * $Id: ArticleBlockOld.java,v 1.1 2005/09/09 16:14:05 tryggvil Exp $
+ * $Id: ArticleBlockOld.java,v 1.2 2005/11/30 09:34:52 laddi Exp $
  *
  * Copyright (C) 2004 Idega. All Rights Reserved.
  *
@@ -15,9 +15,7 @@ import java.util.List;
 import javax.faces.component.UIColumn;
 import javax.faces.component.UIComponent;
 import javax.faces.component.html.HtmlCommandButton;
-import javax.faces.component.html.HtmlCommandLink;
 import javax.faces.component.html.HtmlDataTable;
-import javax.faces.component.html.HtmlGraphicImage;
 import javax.faces.component.html.HtmlInputText;
 import javax.faces.component.html.HtmlInputTextarea;
 import javax.faces.component.html.HtmlOutputLink;
@@ -52,10 +50,10 @@ import com.idega.webface.htmlarea.HTMLArea;
 /**
  * Block for editing an article.   
  * <p>
- * Last modified: $Date: 2005/09/09 16:14:05 $ by $Author: tryggvil $
+ * Last modified: $Date: 2005/11/30 09:34:52 $ by $Author: laddi $
  *
  * @author Anders Lindman
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public class ArticleBlockOld extends WFBlock implements ActionListener, ManagedContentBeans {
 
@@ -70,12 +68,12 @@ public class ArticleBlockOld extends WFBlock implements ActionListener, ManagedC
 	public final static String TASK_ID_MESSAGES = P + "t_messages";
 	
 	private final static String HEADLINE_ID = P + "headline";
-	private final static String LOCALE_ID = P + "locale";
+	//private final static String LOCALE_ID = P + "locale";
 	private final static String TEASER_ID = P + "teaser";
 	public final static String BODY_ID = P + "body";
 	private final static String FOLDER_ID = P + "folder_location";
 	private final static String AUTHOR_ID = P + "author";
-	private final static String SOURCE_ID = P + "source";
+	//private final static String SOURCE_ID = P + "source";
 	private final static String COMMENT_ID = P + "comment";
 	private final static String PUBLISHED_FROM_DATE_ID = P + "published_from_date";
 	private final static String PUBLISHED_TO_DATE_ID = P + "published_to_date";
@@ -92,8 +90,8 @@ public class ArticleBlockOld extends WFBlock implements ActionListener, ManagedC
 	private final static String EDIT_CATEGORIES_ID = P + "edit_categories";
 	private final static String ADD_IMAGE_ID = P + "add_image";
 	private final static String REMOVE_IMAGE_ID = P + "remove_image";
-	private final static String ADD_ATTACHMENT_ID = P + "add_attachment";
-	private final static String REMOVE_ATTACHMENT_ID = P + "remove_attachment";
+	//private final static String ADD_ATTACHMENT_ID = P + "add_attachment";
+	//private final static String REMOVE_ATTACHMENT_ID = P + "remove_attachment";
 	private final static String FILE_UPLOAD_FORM_ID = P + "file_upload_form";
 	private final static String FILE_UPLOAD_ID = P + "file_upload";
 	private final static String FILE_UPLOAD_CANCEL_ID = P + "file_upload_cancel";
@@ -323,7 +321,7 @@ public class ArticleBlockOld extends WFBlock implements ActionListener, ManagedC
 
 	/*
 	 * Returns a list with images for the article.
-	 */
+	 *
 	private UIComponent getImageList() {
 		String bref = WFPage.CONTENT_BUNDLE + ".";
 		String var = "article_images";
@@ -347,11 +345,11 @@ public class ArticleBlockOld extends WFBlock implements ActionListener, ManagedC
 		t.getChildren().add(col);
 		
 		return t;
-	}
+	}*/
 
 	/*
 	 * Returns a list with attachment links for the article.
-	 */
+	 *
 	private UIComponent getAttachmentList() {
 		String bref = WFPage.CONTENT_BUNDLE + ".";
 		String var = "article_attachment";
@@ -374,7 +372,7 @@ public class ArticleBlockOld extends WFBlock implements ActionListener, ManagedC
 		t.getChildren().add(col);
 		
 		return t;
-	}
+	}*/
 
 	/*
 	 * Returns a list with realted content item links for the article.

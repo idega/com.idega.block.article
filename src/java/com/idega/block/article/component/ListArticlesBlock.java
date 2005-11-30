@@ -1,5 +1,5 @@
 /*
- * $Id: ListArticlesBlock.java,v 1.10 2005/10/26 11:44:04 tryggvil Exp $
+ * $Id: ListArticlesBlock.java,v 1.11 2005/11/30 09:34:52 laddi Exp $
  *
  * Copyright (C) 2004 Idega. All Rights Reserved.
  *
@@ -35,10 +35,10 @@ import com.idega.webface.convert.WFDateConverter;
 /**
  * Block for listing articles.   
  * <p>
- * Last modified: $Date: 2005/10/26 11:44:04 $ by $Author: tryggvil $
+ * Last modified: $Date: 2005/11/30 09:34:52 $ by $Author: laddi $
  *
  * @author Anders Lindman
- * @version $Revision: 1.10 $
+ * @version $Revision: 1.11 $
  */
 public class ListArticlesBlock extends 
 IWBaseComponent
@@ -52,10 +52,10 @@ implements ManagedContentBeans, ActionListener, Serializable {
 	
 	private final static String SEARCH_PUBLISHED_FROM_ID = P + "search_published_from";
 	private final static String SEARCH_PUBLISHED_TO_ID = P + "search_published_to";
-	private final static String SEARCH_CATEGORY_ID = P + "search_category";
+	//private final static String SEARCH_CATEGORY_ID = P + "search_category";
 
 	private final static String RESULT_LIST_ID = P + "result_list";
-	private final static String LOCALE_ID = P + "locale_id";
+	//private final static String LOCALE_ID = P + "locale_id";
 	private final static String LIST_BUTTON_ID = P + "list_button";
 	private final static String VIEW_ARTICLE_BACK_BUTTON_ID = P + "view_back_button";
 
