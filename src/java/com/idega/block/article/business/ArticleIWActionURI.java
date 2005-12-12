@@ -1,5 +1,5 @@
 /*
- * $Id: ArticleIWActionURI.java,v 1.1 2005/02/25 14:18:36 eiki Exp $
+ * $Id: ArticleIWActionURI.java,v 1.2 2005/12/12 11:38:36 tryggvil Exp $
  * Created on Feb 22, 2005
  *
  * Copyright (C) 2005 Idega Software hf. All Rights Reserved.
@@ -14,18 +14,18 @@ import com.idega.core.uri.IWActionURI;
 
 /**
  * 
- *  Last modified: $Date: 2005/02/25 14:18:36 $ by $Author: eiki $
+ *  Last modified: $Date: 2005/12/12 11:38:36 $ by $Author: tryggvil $
  * 
  * @author <a href="mailto:eiki@idega.com">eiki</a>
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public class ArticleIWActionURI extends IWActionURI {
 
 	/**
 	 * @param requestURI
 	 */
-	public ArticleIWActionURI(String requestURI) {
-		super(requestURI);
+	public ArticleIWActionURI(String requestURI,String queryString) {
+		super(requestURI,queryString);
 	}
 	
 	
