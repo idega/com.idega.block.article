@@ -1,5 +1,5 @@
 /*
- * $Id: ArticleItemViewer.java,v 1.8 2005/11/07 10:42:38 laddi Exp $
+ * $Id: ArticleItemViewer.java,v 1.9 2005/12/12 11:39:18 tryggvil Exp $
  *
  * Copyright (C) 2004 Idega. All Rights Reserved.
  *
@@ -13,18 +13,20 @@ import javax.faces.component.UIComponent;
 import javax.faces.component.html.HtmlOutputText;
 import javax.faces.context.FacesContext;
 import com.idega.block.article.bean.ArticleItemBean;
+import com.idega.block.article.business.ArticleActionURIHandler;
 import com.idega.content.bean.ContentItem;
+import com.idega.content.presentation.ContentItemToolbar;
 import com.idega.content.presentation.ContentItemViewer;
 import com.idega.webface.WFHtml;
 import com.idega.webface.convert.WFTimestampConverter;
 
 /**
- * Last modified: $Date: 2005/11/07 10:42:38 $ by $Author: laddi $
+ * Last modified: $Date: 2005/12/12 11:39:18 $ by $Author: tryggvil $
  *
  * Displays the article item
  *
  * @author <a href="mailto:gummi@idega.com">Gudmundur Agust Saemundsson</a>
- * @version $Revision: 1.8 $
+ * @version $Revision: 1.9 $
  */
 public class ArticleItemViewer extends ContentItemViewer {
 	
@@ -157,6 +159,7 @@ public class ArticleItemViewer extends ContentItemViewer {
 	public ContentItem loadContentItem(String itemResourcePath) {
 		try {
 			ArticleItemBean bean = new ArticleItemBean();
+			bean.setAutoCreateResource(isAutoCreateResource());
 			bean.load(itemResourcePath);
 			return bean;
 		}
@@ -194,6 +197,17 @@ public class ArticleItemViewer extends ContentItemViewer {
 		Object values[] = (Object[]) state;
 		super.restoreState(ctx, values[0]);
 		headlineAsLink=((Boolean)values[1]).booleanValue();
+	}
+	
+	/**
+	 * 
+	 */
+	public void updateToolbar() {
+		ContentItemToolbar toolbar = getToolbar();
+		if (toolbar != null) {
+			toolbar.setActionHandlerIdentifier(ArticleActionURIHandler.HANDLER_IDENTIFIER);
+		}
+		super.updateToolbar();
 	}
 	
 }

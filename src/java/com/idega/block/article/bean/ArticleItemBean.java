@@ -1,5 +1,5 @@
 /*
- * $Id: ArticleItemBean.java,v 1.55 2005/11/30 09:34:53 laddi Exp $
+ * $Id: ArticleItemBean.java,v 1.56 2005/12/12 11:39:18 tryggvil Exp $
  *
  * Copyright (C) 2004 Idega. All Rights Reserved.
  *
@@ -58,10 +58,10 @@ import com.idega.xml.XMLParser;
 /**
  * Bean for idegaWeb article content items.   
  * <p>
- * Last modified: $Date: 2005/11/30 09:34:53 $ by $Author: laddi $
+ * Last modified: $Date: 2005/12/12 11:39:18 $ by $Author: tryggvil $
  *
  * @author Anders Lindman
- * @version $Revision: 1.55 $
+ * @version $Revision: 1.56 $
  */
 
 public class ArticleItemBean extends ContentItemBean implements Serializable, ContentItem {
@@ -97,7 +97,7 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 public static final PropertyName PROPERTY_CONTENT_TYPE = new PropertyName("IW:",CONTENT_TYPE);
 	
 	private final static String[] ATTRIBUTE_ARRAY = new String[] {FIELDNAME_AUTHOR,FIELDNAME_CREATION_DATE,FIELDNAME_HEADLINE,FIELDNAME_TEASER,FIELDNAME_BODY};
-	private final static String[] ACTION_ARRAY = new String[] {"edit","delete"};
+	//private final static String[] ACTION_ARRAY = new String[] {"edit","delete"};
 
 	XMLNamespace idegaXMLNameSpace = new XMLNamespace("http://xmlns.idega.com/block/article/xml");
 	private String folderLocation = null;
@@ -115,7 +115,8 @@ public static final PropertyName PROPERTY_CONTENT_TYPE = new PropertyName("IW:",
 	}
 	
 	public String[] getToolbarActions(){
-		return ACTION_ARRAY;
+		//return ACTION_ARRAY;
+		return super.getToolbarActions();
 	}
 	
 	public String getHeadline() { return (String)getValue(FIELDNAME_HEADLINE); }

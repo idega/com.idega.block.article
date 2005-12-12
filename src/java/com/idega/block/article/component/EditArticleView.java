@@ -1,5 +1,5 @@
 /*
- * $Id: EditArticleView.java,v 1.9 2005/11/30 09:34:52 laddi Exp $
+ * $Id: EditArticleView.java,v 1.10 2005/12/12 11:39:18 tryggvil Exp $
  *
  * Copyright (C) 2004 Idega. All Rights Reserved.
  *
@@ -52,10 +52,10 @@ import com.idega.webface.htmlarea.HTMLArea;
  * <p>
  * This is the part for the editor of article is inside the admin interface
  * </p>
- * Last modified: $Date: 2005/11/30 09:34:52 $ by $Author: laddi $
+ * Last modified: $Date: 2005/12/12 11:39:18 $ by $Author: tryggvil $
  *
  * @author Joakim,Tryggvi Larusson
- * @version $Revision: 1.9 $
+ * @version $Revision: 1.10 $
  */
 public class EditArticleView extends IWBaseComponent implements ManagedContentBeans, ActionListener, ValueChangeListener {
 	public final static String EDIT_ARTICLE_BLOCK_ID = "edit_articles_block";
@@ -680,7 +680,7 @@ public class EditArticleView extends IWBaseComponent implements ManagedContentBe
 		String resourcePath = iwc.getParameter(ContentViewer.PARAMETER_CONTENT_RESOURCE);
 		
 		if(resourcePath!=null){
-			if("create".equals(iwc.getParameter(ContentViewer.PARAMETER_CONTENT_RESOURCE))){
+			if("create".equals(iwc.getParameter(ContentViewer.PARAMETER_ACTION))){
 				//WFUtil.invoke(ARTICLE_ITEM_BEAN_ID,"setFolderLocation",resourcePath,String.class);
 				getArticleItemBean().setFolderLocation(resourcePath);
 			} else {

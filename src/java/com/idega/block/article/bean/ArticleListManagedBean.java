@@ -1,5 +1,5 @@
 /*
- * $Id: ArticleListManagedBean.java,v 1.5 2005/11/30 09:34:53 laddi Exp $
+ * $Id: ArticleListManagedBean.java,v 1.6 2005/12/12 11:39:18 tryggvil Exp $
  * Created on 27.1.2005
  *
  * Copyright (C) 2005 Idega Software hf. All Rights Reserved.
@@ -42,10 +42,10 @@ import com.idega.util.IWTimestamp;
 
 /**
  * 
- *  Last modified: $Date: 2005/11/30 09:34:53 $ by $Author: laddi $
+ *  Last modified: $Date: 2005/12/12 11:39:18 $ by $Author: tryggvil $
  * 
  * @author <a href="mailto:gummi@idega.com">Gudmundur Agust Saemundsson</a>
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
  */
 public class ArticleListManagedBean implements ContentListViewerManagedBean {
 
@@ -245,7 +245,7 @@ public class ArticleListManagedBean implements ContentListViewerManagedBean {
 	 * @see com.idega.content.bean.ContentListViewerManagedBean#getIWActionURIHandlerIdentifier()
 	 */
 	public String getIWActionURIHandlerIdentifier() {
-		return (new ArticleActionURIHandler()).getHandlerIdentifier();
+		return ArticleActionURIHandler.HANDLER_IDENTIFIER;
 	}
 
 	/**
