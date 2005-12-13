@@ -1,5 +1,5 @@
 /*
- * $Id: ArticleActionURIHandler.java,v 1.6 2005/12/12 11:38:36 tryggvil Exp $
+ * $Id: ArticleActionURIHandler.java,v 1.7 2005/12/13 19:58:13 laddi Exp $
  * Created on Jan 31, 2005
  *
  * Copyright (C) 2005 Idega Software hf. All Rights Reserved.
@@ -9,13 +9,10 @@
  */
 package com.idega.block.article.business;
 
-import java.util.StringTokenizer;
 import com.idega.content.presentation.ContentViewer;
 import com.idega.core.uri.DefaultIWActionURIHandler;
 import com.idega.core.uri.IWActionURI;
 import com.idega.core.uri.IWActionURIHandler;
-import com.idega.idegaweb.IWURL;
-import com.oreilly.servlet.ParameterParser;
 
 
 
@@ -24,11 +21,11 @@ import com.oreilly.servlet.ParameterParser;
  * <p>
  * An IWActionURIHandler handler that handles the actions for the article module (edit/delete).
  * </p>
- *  Last modified: $Date: 2005/12/12 11:38:36 $ by $Author: tryggvil $
+ *  Last modified: $Date: 2005/12/13 19:58:13 $ by $Author: laddi $
  * 
  * 
  * @author <a href="mailto:eiki@idega.com">eiki</a>
- * @version $Revision: 1.6 $
+ * @version $Revision: 1.7 $
  */
 public class ArticleActionURIHandler extends DefaultIWActionURIHandler implements IWActionURIHandler {
 
