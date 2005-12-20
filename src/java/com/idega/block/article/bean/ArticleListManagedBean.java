@@ -1,5 +1,5 @@
 /*
- * $Id: ArticleListManagedBean.java,v 1.6 2005/12/12 11:39:18 tryggvil Exp $
+ * $Id: ArticleListManagedBean.java,v 1.7 2005/12/20 16:40:42 tryggvil Exp $
  * Created on 27.1.2005
  *
  * Copyright (C) 2005 Idega Software hf. All Rights Reserved.
@@ -42,14 +42,12 @@ import com.idega.util.IWTimestamp;
 
 /**
  * 
- *  Last modified: $Date: 2005/12/12 11:39:18 $ by $Author: tryggvil $
+ *  Last modified: $Date: 2005/12/20 16:40:42 $ by $Author: tryggvil $
  * 
  * @author <a href="mailto:gummi@idega.com">Gudmundur Agust Saemundsson</a>
- * @version $Revision: 1.6 $
+ * @version $Revision: 1.7 $
  */
 public class ArticleListManagedBean implements ContentListViewerManagedBean {
-
-	private String resourcePath=null;
 
 	private int numberOfDaysDisplayed = 0;
 	private List categories = null;
@@ -58,6 +56,8 @@ public class ArticleListManagedBean implements ContentListViewerManagedBean {
 
 	private String detailsViewerPath = null;
 	private boolean headlineAsLink=false;
+	private String resourcePath;
+	private int maxNumberOfDisplayed=-1;
 	
 	/**
 	 * 
@@ -71,7 +71,7 @@ public class ArticleListManagedBean implements ContentListViewerManagedBean {
 	 */
 	public List getContentItems() {
 		try {
-			List l = loadAllArticlesInFolder(ArticleUtil.getArticleRootPath());
+			List l = loadAllArticlesInFolder(ArticleUtil.getArticleBaseFolderPath());
 			ContentItemBeanComparator c = new ContentItemBeanComparator();
 			c.setReverseOrder(true);
 			Collections.sort(l,c);
@@ -120,17 +120,25 @@ public class ArticleListManagedBean implements ContentListViewerManagedBean {
 				}
 			}
 			ContentSearch searchBusiness = new ContentSearch(iwc.getIWMainApplication());
-			Search search = searchBusiness.createSearch(getSearchRequest(scope, iwc.getCurrentLocale(), oldest,categories));
+			Locale requestedLocale = iwc.getCurrentLocale();
+			Search search = searchBusiness.createSearch(getSearchRequest(scope, requestedLocale, oldest,categories));
 			Collection results = search.getSearchResults();
-			
+			int count=0;
 			if(results!=null){				
 				for (Iterator iter = results.iterator(); iter.hasNext();) {
 					SearchResult result = (SearchResult) iter.next();
 					try {
-						System.out.println("Attempting to load "+result.getSearchResultURI());
+						System.out.println("ArticleListManagedBean: Attempting to load "+result.getSearchResultURI());
 						ArticleItemBean article = new ArticleItemBean();
-						article.load(result.getSearchResultURI());
-						list.add(article);
+						article.setResourcePath(result.getSearchResultURI());
+						article.load();
+						if(article.getAvilableInRequestedLanguage()){
+							int maxNumber = getMaxNumberOfDisplayed();
+							if(maxNumber==-1 || count<maxNumber){
+								list.add(article);
+								count++;
+							}
+						}
 					}catch(Exception e) {
 						e.printStackTrace();
 					}
@@ -215,13 +223,6 @@ public class ArticleListManagedBean implements ContentListViewerManagedBean {
 	}
 
 	/* (non-Javadoc)
-	 * @see com.idega.content.bean.ContentListViewerManagedBean#setResourcePath(java.lang.String)
-	 */
-	public void setResourcePath(String path) {
-		resourcePath=path;
-	}
-
-	/* (non-Javadoc)
 	 * @see com.idega.content.bean.ContentListViewerManagedBean#setDetailsViewerPath(java.lang.String)
 	 */
 	public void setDetailsViewerPath(String path) {
@@ -260,6 +261,34 @@ public class ArticleListManagedBean implements ContentListViewerManagedBean {
 	
 	public boolean getHeadlineAsLink(){
 		return headlineAsLink;
+	}
+
+	/* (non-Javadoc)
+	 * @see com.idega.content.bean.ContentListViewerManagedBean#setResourcePath(java.lang.String)
+	 */
+	public void setBaseFolderPath(String path) {
+		this.resourcePath=path;
+	}
+
+	/* (non-Javadoc)
+	 * @see com.idega.content.bean.ContentListViewerManagedBean#getResourcePath()
+	 */
+	public String getBaseFolderPath() {
+		return resourcePath;
+	}
+
+	/* (non-Javadoc)
+	 * @see com.idega.content.bean.ContentListViewerManagedBean#setMaxNumberOfDisplayed(int)
+	 */
+	public void setMaxNumberOfDisplayed(int maxItems) {
+		this.maxNumberOfDisplayed=maxItems;
+	}
+
+	/* (non-Javadoc)
+	 * @see com.idega.content.bean.ContentListViewerManagedBean#getMaxNumberOfDisplayed()
+	 */
+	public int getMaxNumberOfDisplayed() {
+		return maxNumberOfDisplayed;
 	}
 	
 	

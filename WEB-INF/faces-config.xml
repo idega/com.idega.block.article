@@ -16,22 +16,6 @@
 		<component-type>ArticleItemView</component-type>
 		<component-class>com.idega.block.article.component.ArticleItemViewer</component-class>
 	</component>
-	
-	<component>
-		<component-type>SearchArticlePage</component-type>
-		<component-class>com.idega.block.article.old.SearchArticlePage</component-class>
-	</component>
-
-	<component>
-		<component-type>ListArticlesPage</component-type>
-		<component-class>com.idega.block.article.old.ListArticlesPage</component-class>
-	</component>
-
-	<component>
-		<component-type>PreviewArticlePage</component-type>
-		<component-class>com.idega.block.article.old.PreviewArticlePage</component-class>
-	</component>
-
 	<component>
 		<component-type>ArticleSearch</component-type>
 		<component-class>com.idega.block.article.component.SearchArticleBlock</component-class>
@@ -50,25 +34,25 @@
 	<managed-bean>
 		<managed-bean-name>articleItemBean</managed-bean-name>
 		<managed-bean-class>com.idega.block.article.bean.ArticleItemBean</managed-bean-class>
-		<managed-bean-scope>session</managed-bean-scope>
+		<managed-bean-scope>request</managed-bean-scope>
 	</managed-bean>
 
 	<managed-bean>
 		<managed-bean-name>articleVersionItemBean</managed-bean-name>
 		<managed-bean-class>com.idega.block.article.bean.ArticleItemBean</managed-bean-class>
-		<managed-bean-scope>session</managed-bean-scope>
+		<managed-bean-scope>request</managed-bean-scope>
 	</managed-bean>
 
 	<managed-bean>
 		<managed-bean-name>previewArticleBean</managed-bean-name>
 		<managed-bean-class>com.idega.block.article.bean.ArticleItemBean</managed-bean-class>
-		<managed-bean-scope>session</managed-bean-scope>
+		<managed-bean-scope>request</managed-bean-scope>
 	</managed-bean>
 
 	<managed-bean>
 		<managed-bean-name>articleVersionListBean</managed-bean-name>
 		<managed-bean-class>com.idega.block.article.bean.ArticleVersionListBean</managed-bean-class>
-		<managed-bean-scope>session</managed-bean-scope>
+		<managed-bean-scope>request</managed-bean-scope>
 	</managed-bean>
 	
 	<managed-bean>
@@ -77,11 +61,6 @@
 		<managed-bean-scope>request</managed-bean-scope>
 	</managed-bean>
 	
-	<managed-bean>
-		<managed-bean-name>listArticlesBeanOld</managed-bean-name>
-		<managed-bean-class>com.idega.block.article.old.ListArticlesBeanOld</managed-bean-class>
-		<managed-bean-scope>session</managed-bean-scope>
-	</managed-bean>
 	
 	<managed-bean>
 		<managed-bean-name>articleItemListBean</managed-bean-name>

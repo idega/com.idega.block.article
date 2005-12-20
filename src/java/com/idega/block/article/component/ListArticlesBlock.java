@@ -1,5 +1,5 @@
 /*
- * $Id: ListArticlesBlock.java,v 1.11 2005/11/30 09:34:52 laddi Exp $
+ * $Id: ListArticlesBlock.java,v 1.12 2005/12/20 16:40:41 tryggvil Exp $
  *
  * Copyright (C) 2004 Idega. All Rights Reserved.
  *
@@ -11,6 +11,7 @@ package com.idega.block.article.component;
 
 import java.io.IOException;
 import java.io.Serializable;
+import java.util.Locale;
 import javax.faces.component.UIComponent;
 import javax.faces.component.html.HtmlInputText;
 import javax.faces.component.html.HtmlPanelGrid;
@@ -35,10 +36,10 @@ import com.idega.webface.convert.WFDateConverter;
 /**
  * Block for listing articles.   
  * <p>
- * Last modified: $Date: 2005/11/30 09:34:52 $ by $Author: laddi $
+ * Last modified: $Date: 2005/12/20 16:40:41 $ by $Author: tryggvil $
  *
  * @author Anders Lindman
- * @version $Revision: 1.11 $
+ * @version $Revision: 1.12 $
  */
 public class ListArticlesBlock extends 
 IWBaseComponent
@@ -189,33 +190,53 @@ implements ManagedContentBeans, ActionListener, Serializable {
 		
 		ArticleItemBean articleItem = new ArticleItemBean();
 		try {
-			articleItem.load(id);
-			WFUtil.invoke(ARTICLE_ITEM_BEAN_ID, "clear");
-
-			WFUtil.invoke(ARTICLE_ITEM_BEAN_ID, "setLocaleId", "en");
-			WFUtil.invoke(ARTICLE_ITEM_BEAN_ID, "setHeadline", notNull(articleItem.getHeadline()));
-			WFUtil.invoke(ARTICLE_ITEM_BEAN_ID, "setTeaser", notNull(articleItem.getTeaser()));
-			WFUtil.invoke(ARTICLE_ITEM_BEAN_ID, "setBody", notNull(articleItem.getBody()));
-			WFUtil.invoke(ARTICLE_ITEM_BEAN_ID, "setAuthor", notNull(articleItem.getAuthor()));
-			WFUtil.invoke(ARTICLE_ITEM_BEAN_ID, "setComment", notNull(articleItem.getComment()));
-			WFUtil.invoke(ARTICLE_ITEM_BEAN_ID, "setDescription", notNull(articleItem.getDescription()));
-			WFUtil.invoke(ARTICLE_ITEM_BEAN_ID, "setStatus", 
-//					articleItem.getStatus()
-					ContentItemCase.STATUS_PUBLISHED
-					);
-//			WFUtil.invoke(ARTICLE_ITEM_BEAN_ID, "setMainCategoryId", new Integer(3));
-			WFUtil.invoke(ARTICLE_ITEM_BEAN_ID, "setFolderLocation", notNull(articleItem.getFolderLocation()));
+			articleItem.setResourcePath(id);
+			articleItem.load();
 			
-			WFUtil.invoke(ARTICLE_ITEM_BEAN_ID, "setLocaleId", "sv");
+			ArticleItemBean bean = getArticleItemBean();
+			
+			//WFUtil.invoke(ARTICLE_ITEM_BEAN_ID, "clear");
+			bean.clear();
+			
+			//WFUtil.invoke(ARTICLE_ITEM_BEAN_ID, "setLocaleId", "en");
+			Locale locale = new Locale("en");
+			bean.setLocale(locale);
+			//WFUtil.invoke(ARTICLE_ITEM_BEAN_ID, "setHeadline", notNull(articleItem.getHeadline()));
+			bean.setHeadline(articleItem.getHeadline());
+			//WFUtil.invoke(ARTICLE_ITEM_BEAN_ID, "setTeaser", notNull(articleItem.getTeaser()));
+			bean.setTeaser(articleItem.getTeaser());
+			//WFUtil.invoke(ARTICLE_ITEM_BEAN_ID, "setBody", notNull(articleItem.getBody()));
+			bean.setBody(articleItem.getBody());
+			//WFUtil.invoke(ARTICLE_ITEM_BEAN_ID, "setAuthor", notNull(articleItem.getAuthor()));
+			bean.setAuthor(articleItem.getAuthor());
+			//WFUtil.invoke(ARTICLE_ITEM_BEAN_ID, "setComment", notNull(articleItem.getComment()));
+			bean.setComment(articleItem.getComment());
+			//WFUtil.invoke(ARTICLE_ITEM_BEAN_ID, "setDescription", notNull(articleItem.getDescription()));
+			bean.setDescription(articleItem.getDescription());
+			//WFUtil.invoke(ARTICLE_ITEM_BEAN_ID, "setStatus", 
+//					articleItem.getStatus()
+//					ContentItemCase.STATUS_PUBLISHED
+//					);
+			bean.setStatus(ContentItemCase.STATUS_PUBLISHED);
+//			WFUtil.invoke(ARTICLE_ITEM_BEAN_ID, "setMainCategoryId", new Integer(3));
+//			WFUtil.invoke(ARTICLE_ITEM_BEAN_ID, "setFolderLocation", notNull(articleItem.getFolderLocation()));
+			bean.setBaseFolderLocation(articleItem.getBaseFolderLocation());
+			//WFUtil.invoke(ARTICLE_ITEM_BEAN_ID, "setLocaleId", "sv");
 
 			//And one more time since it won't work after just setting the params once...
 			
-			WFUtil.invoke(ARTICLE_ITEM_BEAN_ID, "setHeadline", notNull(articleItem.getHeadline()));
+			/*WFUtil.invoke(ARTICLE_ITEM_BEAN_ID, "setHeadline", notNull(articleItem.getHeadline()));
 			WFUtil.invoke(ARTICLE_ITEM_BEAN_ID, "setTeaser", notNull(articleItem.getTeaser()));
 			WFUtil.invoke(ARTICLE_ITEM_BEAN_ID, "setBody", notNull(articleItem.getBody()));
 			WFUtil.invoke(ARTICLE_ITEM_BEAN_ID, "setAuthor", notNull(articleItem.getAuthor()));
-			WFUtil.invoke(ARTICLE_ITEM_BEAN_ID, "setFolderLocation", notNull(articleItem.getFolderLocation()));
-
+			WFUtil.invoke(ARTICLE_ITEM_BEAN_ID, "setFolderLocation", notNull(articleItem.getBaseFolderLocation()));
+			*/
+			bean.setHeadline(articleItem.getHeadline());
+			bean.setTeaser(articleItem.getTeaser());
+			bean.setBody(articleItem.getBody());
+			bean.setAuthor(articleItem.getAuthor());
+			bean.setBaseFolderLocation(articleItem.getBaseFolderLocation());
+			
 			WFComponentSelector cs = (WFComponentSelector) event.getComponent().getParent().getParent().getParent().findComponent(DISPLAY_SELECTOR_ID);
 			cs.setSelectedId(LIST_PANEL_ID, false);
 			cs.setSelectedId(VIEW_ARTICLE_PANEL_ID, true);
@@ -240,5 +261,9 @@ implements ManagedContentBeans, ActionListener, Serializable {
 			return "<Empty>";
 		}
 		return str;
+	}
+	
+	public ArticleItemBean getArticleItemBean(){
+		return (ArticleItemBean) WFUtil.getBeanInstance(ARTICLE_ITEM_BEAN_ID);
 	}
 }

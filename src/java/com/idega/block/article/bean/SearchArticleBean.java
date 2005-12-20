@@ -1,5 +1,5 @@
 /*
- * $Id: SearchArticleBean.java,v 1.16 2005/11/30 09:34:53 laddi Exp $
+ * $Id: SearchArticleBean.java,v 1.17 2005/12/20 16:40:42 tryggvil Exp $
  *
  * Copyright (C) 2004 Idega. All Rights Reserved.
  *
@@ -50,10 +50,10 @@ import com.idega.webface.bean.WFListBean;
 /**
  * Bean for searching articles.   
  * <p>
- * Last modified: $Date: 2005/11/30 09:34:53 $ by $Author: laddi $
+ * Last modified: $Date: 2005/12/20 16:40:42 $ by $Author: tryggvil $
  *
  * @author Anders Lindman
- * @version $Revision: 1.16 $
+ * @version $Revision: 1.17 $
  */
 
 public class SearchArticleBean extends AbstractWFEditableListManagedBean implements WFListBean, Serializable {
@@ -230,7 +230,7 @@ public class SearchArticleBean extends AbstractWFEditableListManagedBean impleme
 		IWContext iwc = IWContext.getInstance();
 	
 		try {
-			String scope = ArticleUtil.getArticleRootPath();
+			String scope = ArticleUtil.getArticleBaseFolderPath();
 			IWSlideSession session = (IWSlideSession)IBOLookup.getSessionInstance(iwc,IWSlideSession.class);
 			if(scope != null){
 				if(scope.startsWith(session.getWebdavServerURI())){

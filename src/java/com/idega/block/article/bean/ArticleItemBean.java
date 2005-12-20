@@ -1,7 +1,7 @@
 /*
- * $Id: ArticleItemBean.java,v 1.56 2005/12/12 11:39:18 tryggvil Exp $
+ * $Id: ArticleItemBean.java,v 1.57 2005/12/20 16:40:42 tryggvil Exp $
  *
- * Copyright (C) 2004 Idega. All Rights Reserved.
+ * Copyright (C) 2004-2005 Idega. All Rights Reserved.
  *
  * This software is the proprietary information of Idega.
  * Use is subject to license terms.
@@ -9,32 +9,25 @@
  */
 package com.idega.block.article.bean;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.Serializable;
-import java.io.UnsupportedEncodingException;
+import java.sql.Timestamp;
 import java.util.ArrayList;
-import java.util.Enumeration;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.logging.Logger;
+import javax.faces.context.FacesContext;
 import org.apache.webdav.lib.Ace;
 import org.apache.webdav.lib.Privilege;
 import org.apache.webdav.lib.PropertyName;
-import org.apache.webdav.lib.WebdavResource;
 import org.apache.webdav.lib.WebdavResources;
-import org.w3c.tidy.Configuration;
-import org.w3c.tidy.Tidy;
 import com.idega.block.article.business.ArticleUtil;
 import com.idega.business.IBOLookup;
 import com.idega.business.IBOLookupException;
 import com.idega.content.bean.ContentItem;
 import com.idega.content.bean.ContentItemBean;
 import com.idega.content.bean.ContentItemCase;
-import com.idega.content.bean.ContentItemField;
-import com.idega.content.bean.ContentItemFieldBean;
-import com.idega.content.business.ContentUtil;
 import com.idega.core.accesscontrol.business.StandardRoles;
 import com.idega.data.IDOStoreException;
 import com.idega.idegaweb.IWUserContext;
@@ -48,87 +41,1265 @@ import com.idega.slide.util.AccessControlEntry;
 import com.idega.slide.util.AccessControlList;
 import com.idega.slide.util.WebdavExtendedResource;
 import com.idega.slide.util.WebdavRootResource;
-import com.idega.xml.XMLDocument;
-import com.idega.xml.XMLElement;
+import com.idega.util.StringHandler;
 import com.idega.xml.XMLException;
-import com.idega.xml.XMLNamespace;
-import com.idega.xml.XMLOutput;
-import com.idega.xml.XMLParser;
 
 /**
- * Bean for idegaWeb article content items.   
  * <p>
- * Last modified: $Date: 2005/12/12 11:39:18 $ by $Author: tryggvil $
+ * This is a JSF managed bean that manages each article instance and delegates 
+ * all calls to the correct localized instance.
+ * <p>
+ * Last modified: $Date: 2005/12/20 16:40:42 $ by $Author: tryggvil $
  *
- * @author Anders Lindman
- * @version $Revision: 1.56 $
+ * @author Anders Lindman,<a href="mailto:tryggvi@idega.com">Tryggvi Larusson</a>
+ * @version $Revision: 1.57 $
  */
-
 public class ArticleItemBean extends ContentItemBean implements Serializable, ContentItem {
 	
-	public final static String KP = "error_"; // Key prefix
+	/**
+	 * Comment for <code>serialVersionUID</code>
+	 */
+	private static final long serialVersionUID = 4514851565086272678L;
+	final static String ARTICLE_FILENAME_SCOPE = "article";
+	private final static String ARTICLE_FILE_SUFFIX = ".xml";
 	
-	public final static String KEY_ERROR_HEADLINE_EMPTY = KP + "headline_empty";
-	public final static String KEY_ERROR_BODY_EMPTY = KP + "body_empty";
-	public final static String KEY_ERROR_PUBLISHED_FROM_DATE_EMPTY = KP + "published_from_date_empty";
-	public final static String KEY_ERROR_ON_STORE = KP + "error_saving";
-
-	private boolean _isUpdated = false;
-	private List _errorKeys = null;
-	
-	public final static String FIELDNAME_AUTHOR = "author";
-	public final static String FIELDNAME_HEADLINE = "headline";
-	public final static String FIELDNAME_TEASER = "teaser";
-	public final static String FIELDNAME_BODY = "body";
-	public final static String FIELDNAME_SOURCE = "source";
-	public final static String FIELDNAME_COMMENT = "comment";
-	//Note "comment" seems to be a reserved attribute in DAV so use "article_comment" for that!!!
-	public final static String FIELDNAME_ARTICLE_COMMENT = "article_comment";
-	public final static String FIELDNAME_IMAGES = "images";
-	public final static String FIELDNAME_FILENAME = "filename";
-	public final static String FIELDNAME_FOLDER_LOCATION = "folder_location"; // ../cms/article/YYYY/MM/
-	public final static String FIELDNAME_CONTENT_LANGUAGE = "content_language";
-	public final static String FIELDNAME_LANGUAGE_CHANGE = "language_change";
-	
-	public final static String ARTICLE_FILENAME_SCOPE = "article";
-	public final static String ARTICLE_SUFFIX = ".xml";
 	public final static String CONTENT_TYPE = "ContentType";
+	public static final PropertyName PROPERTY_CONTENT_TYPE = new PropertyName("IW:",CONTENT_TYPE);
 	
-public static final PropertyName PROPERTY_CONTENT_TYPE = new PropertyName("IW:",CONTENT_TYPE);
+	private ArticleLocalizedItemBean localizedArticle;
+	private String baseFolderLocation;
+	private String languageChange;
+	private boolean allowFallbackToSystemLanguage=false;
+	private String resourcePath;
+	private boolean avilableInRequestedLanguage=false;
 	
-	private final static String[] ATTRIBUTE_ARRAY = new String[] {FIELDNAME_AUTHOR,FIELDNAME_CREATION_DATE,FIELDNAME_HEADLINE,FIELDNAME_TEASER,FIELDNAME_BODY};
-	//private final static String[] ACTION_ARRAY = new String[] {"edit","delete"};
+	public ArticleLocalizedItemBean getLocalizedArticle(){
+		if(localizedArticle==null){
+			localizedArticle=new ArticleLocalizedItemBean();
+			localizedArticle.setLocale(getLocale());
+			localizedArticle.setArticleItem(this);
+		}
+		else{
+			String thisLanguage = getLanguage();
+			String fileLanguage = localizedArticle.getLanguage();
+			if(!thisLanguage.equals(fileLanguage)){
+				throw new RuntimeException("Locale inconsistency for article: "+getResourcePath()+" and localizedArticle: "+localizedArticle.getResourcePath());
+			}
+		}
+		return localizedArticle;
+	}
 
-	XMLNamespace idegaXMLNameSpace = new XMLNamespace("http://xmlns.idega.com/block/article/xml");
-	private String folderLocation = null;
+	/* (non-Javadoc)
+	 * @see com.idega.block.article.bean.ArticleLocalizedItemBean#addImage(byte[], java.lang.String)
+	 */
+	public void addImage(byte[] imageData, String contentType) {
+		// TODO Auto-generated method stub
+		getLocalizedArticle().addImage(imageData, contentType);
+	}
 
+	/* (non-Javadoc)
+	 * @see com.idega.block.article.bean.ArticleLocalizedItemBean#clear()
+	 */
+	public void clear() {
+		// TODO Auto-generated method stub
+		getLocalizedArticle().clear();
+	}
+	/* (non-Javadoc)
+	 * @see com.idega.block.article.bean.ArticleLocalizedItemBean#getAsXML()
+	 */
+	public String getAsXML() throws IOException, XMLException {
+		// TODO Auto-generated method stub
+		return getLocalizedArticle().getAsXML();
+	}
+
+	/* (non-Javadoc)
+	 * @see com.idega.block.article.bean.ArticleLocalizedItemBean#getAuthor()
+	 */
+	public String getAuthor() {
+		// TODO Auto-generated method stub
+		return getLocalizedArticle().getAuthor();
+	}
+
+	/* (non-Javadoc)
+	 * @see com.idega.block.article.bean.ArticleLocalizedItemBean#getBody()
+	 */
+	public String getBody() {
+		// TODO Auto-generated method stub
+		return getLocalizedArticle().getBody();
+	}
+
+	/* (non-Javadoc)
+	 * @see com.idega.block.article.bean.ArticleLocalizedItemBean#getComment()
+	 */
+	public String getComment() {
+		// TODO Auto-generated method stub
+		return getLocalizedArticle().getComment();
+	}
+
+	/* (non-Javadoc)
+	 * @see com.idega.block.article.bean.ArticleLocalizedItemBean#getContentFieldNames()
+	 */
+	public String[] getContentFieldNames() {
+		// TODO Auto-generated method stub
+		return getLocalizedArticle().getContentFieldNames();
+	}
+
+	/* (non-Javadoc)
+	 * @see com.idega.block.article.bean.ArticleLocalizedItemBean#getContentItemPrefix()
+	 */
+	public String getContentItemPrefix() {
+		// TODO Auto-generated method stub
+		return getLocalizedArticle().getContentItemPrefix();
+	}
+
+	/* (non-Javadoc)
+	 * @see com.idega.block.article.bean.ArticleLocalizedItemBean#getContentLanguage()
+	 */
+	public String getContentLanguage() {
+		// TODO Auto-generated method stub
+		return getLocalizedArticle().getContentLanguage();
+	}
+
+	/* (non-Javadoc)
+	 * @see com.idega.block.article.bean.ArticleLocalizedItemBean#getHeadline()
+	 */
+	public String getHeadline() {
+		// TODO Auto-generated method stub
+		return getLocalizedArticle().getHeadline();
+	}
+
+	/* (non-Javadoc)
+	 * @see com.idega.block.article.bean.ArticleLocalizedItemBean#getImages()
+	 */
+	public List getImages() {
+		// TODO Auto-generated method stub
+		return getLocalizedArticle().getImages();
+	}
+
+	/* (non-Javadoc)
+	 * @see com.idega.block.article.bean.ArticleLocalizedItemBean#getSource()
+	 */
+	public String getSource() {
+		// TODO Auto-generated method stub
+		return getLocalizedArticle().getSource();
+	}
+
+	/* (non-Javadoc)
+	 * @see com.idega.block.article.bean.ArticleLocalizedItemBean#getTeaser()
+	 */
+	public String getTeaser() {
+		// TODO Auto-generated method stub
+		return getLocalizedArticle().getTeaser();
+	}
+
+	/* (non-Javadoc)
+	 * @see com.idega.block.article.bean.ArticleLocalizedItemBean#getToolbarActions()
+	 */
+	public String[] getToolbarActions() {
+		// TODO Auto-generated method stub
+		return getLocalizedArticle().getToolbarActions();
+	}
+
+	/* (non-Javadoc)
+	 * @see com.idega.block.article.bean.ArticleLocalizedItemBean#isUpdated()
+	 */
+	public boolean isUpdated() {
+		// TODO Auto-generated method stub
+		return getLocalizedArticle().isUpdated();
+	}
+
+	/* (non-Javadoc)
+	 * @see com.idega.block.article.bean.ArticleLocalizedItemBean#prettifyBody()
+	 */
+	protected void prettifyBody() {
+		// TODO Auto-generated method stub
+		getLocalizedArticle().prettifyBody();
+	}
+
+	/* (non-Javadoc)
+	 * @see com.idega.block.article.bean.ArticleLocalizedItemBean#removeImage(java.lang.Integer)
+	 */
+	public void removeImage(Integer imageNumber) {
+		// TODO Auto-generated method stub
+		getLocalizedArticle().removeImage(imageNumber);
+	}
+
+	/* (non-Javadoc)
+	 * @see com.idega.block.article.bean.ArticleLocalizedItemBean#setAuthor(java.lang.String)
+	 */
+	public void setAuthor(String s) {
+		// TODO Auto-generated method stub
+		getLocalizedArticle().setAuthor(s);
+	}
+
+	/* (non-Javadoc)
+	 * @see com.idega.block.article.bean.ArticleLocalizedItemBean#setBody(java.lang.String)
+	 */
+	public void setBody(String body) {
+		// TODO Auto-generated method stub
+		getLocalizedArticle().setBody(body);
+	}
+
+	/* (non-Javadoc)
+	 * @see com.idega.block.article.bean.ArticleLocalizedItemBean#setComment(java.lang.String)
+	 */
+	public void setComment(String s) {
+		// TODO Auto-generated method stub
+		getLocalizedArticle().setComment(s);
+	}
+
+	/* (non-Javadoc)
+	 * @see com.idega.block.article.bean.ArticleLocalizedItemBean#setHeadline(java.lang.Object)
+	 */
+	public void setHeadline(Object o) {
+		// TODO Auto-generated method stub
+		getLocalizedArticle().setHeadline(o);
+	}
+
+	/* (non-Javadoc)
+	 * @see com.idega.block.article.bean.ArticleLocalizedItemBean#setHeadline(java.lang.String)
+	 */
+	public void setHeadline(String s) {
+		// TODO Auto-generated method stub
+		getLocalizedArticle().setHeadline(s);
+	}
+
+	/* (non-Javadoc)
+	 * @see com.idega.block.article.bean.ArticleLocalizedItemBean#setImages(java.util.List)
+	 */
+	public void setImages(List l) {
+		// TODO Auto-generated method stub
+		getLocalizedArticle().setImages(l);
+	}
+
+	/* (non-Javadoc)
+	 * @see com.idega.block.article.bean.ArticleLocalizedItemBean#setPublished()
+	 */
+	protected void setPublished() {
+		// TODO Auto-generated method stub
+		getLocalizedArticle().setPublished();
+	}
+
+	/* (non-Javadoc)
+	 * @see com.idega.block.article.bean.ArticleLocalizedItemBean#setSource(java.lang.String)
+	 */
+	public void setSource(String s) {
+		// TODO Auto-generated method stub
+		getLocalizedArticle().setSource(s);
+	}
+
+	/* (non-Javadoc)
+	 * @see com.idega.block.article.bean.ArticleLocalizedItemBean#setTeaser(java.lang.String)
+	 */
+	public void setTeaser(String s) {
+		// TODO Auto-generated method stub
+		getLocalizedArticle().setTeaser(s);
+	}
+
+	/* (non-Javadoc)
+	 * @see com.idega.block.article.bean.ArticleLocalizedItemBean#setUpdated(boolean)
+	 */
+	public void setUpdated(boolean b) {
+		// TODO Auto-generated method stub
+		getLocalizedArticle().setUpdated(b);
+	}
+
+	/* (non-Javadoc)
+	 * @see com.idega.block.article.bean.ArticleLocalizedItemBean#setUpdated(java.lang.Boolean)
+	 */
+	public void setUpdated(Boolean b) {
+		// TODO Auto-generated method stub
+		getLocalizedArticle().setUpdated(b);
+	}
+
+	/* (non-Javadoc)
+	 * @see com.idega.block.article.bean.ArticleLocalizedItemBean#store()
+	 */
+	public void store() throws IDOStoreException {
+		
+		//First validate headline and body:
+		
+		if ( (getHeadline()==null) || (getHeadline().trim().equals("")) ) {
+			ArticleStoreException exception = new ArticleStoreException();
+			exception.setErrorKey(ArticleStoreException.KEY_ERROR_HEADLINE_EMPTY);
+			throw exception;
+		}
+		if (getBody().trim().equals("")) {
+			ArticleStoreException exception = new ArticleStoreException();
+			exception.setErrorKey(ArticleStoreException.KEY_ERROR_BODY_EMPTY);
+			throw exception;
+		}
+		
+		try {
+			IWUserContext iwuc = IWContext.getInstance();
+			IWSlideSession session = getIWSlideSession(iwuc);
+			WebdavRootResource rootResource = session.getWebdavRootResource();
+
+			//Setting the path for creating new file/creating localized version/updating existing file
+			String articleFolderPath = getResourcePath();
+	
+			boolean hadToCreate = session.createAllFoldersInPath(articleFolderPath);
+
+			if(hadToCreate){
+				String fixedFolderURL = session.getURI(articleFolderPath);
+				rootResource.proppatchMethod(fixedFolderURL,PROPERTY_CONTENT_TYPE,"LocalizedFile",true);
+			}
+			else{
+				rootResource.proppatchMethod(articleFolderPath,PROPERTY_CONTENT_TYPE,"LocalizedFile",true);
+			}
+			
+			rootResource.close();
+
+			getLocalizedArticle().store();
+			
+		}
+		catch(ArticleStoreException ase){
+			throw ase;
+		}
+		catch(Exception e){
+			throw new RuntimeException(e);
+		}
+	}
+	
+	/* (non-Javadoc)
+	 * @see com.idega.block.article.bean.ArticleLocalizedItemBean#tryPublish()
+	 */
+	protected void tryPublish() {
+		// TODO Auto-generated method stub
+		getLocalizedArticle().tryPublish();
+	}
+
+	/* (non-Javadoc)
+	 * @see com.idega.content.bean.ContentItemBean#getName()
+	 */
+	public String getName() {
+		// TODO Auto-generated method stub
+		return getLocalizedArticle().getName();
+	}
+
+	/* (non-Javadoc)
+	 * @see com.idega.content.bean.ContentItemBean#getDescription()
+	 */
+	public String getDescription() {
+		// TODO Auto-generated method stub
+		return getLocalizedArticle().getDescription();
+	}
+
+	/* (non-Javadoc)
+	 * @see com.idega.content.bean.ContentItemBean#getItemType()
+	 */
+	public String getItemType() {
+		// TODO Auto-generated method stub
+		return getLocalizedArticle().getItemType();
+	}
+
+	/* (non-Javadoc)
+	 * @see com.idega.content.bean.ContentItemBean#getCreatedByUserId()
+	 */
+	public int getCreatedByUserId() {
+		// TODO Auto-generated method stub
+		return getLocalizedArticle().getCreatedByUserId();
+	}
+
+	/* (non-Javadoc)
+	 * @see com.idega.content.bean.ContentItemBean#setName(java.lang.String)
+	 */
+	public void setName(String s) {
+		// TODO Auto-generated method stub
+		getLocalizedArticle().setName(s);
+	}
+
+	/* (non-Javadoc)
+	 * @see com.idega.content.bean.ContentItemBean#setDescription(java.lang.String)
+	 */
+	public void setDescription(String s) {
+		// TODO Auto-generated method stub
+		getLocalizedArticle().setDescription(s);
+	}
+
+	/* (non-Javadoc)
+	 * @see com.idega.content.bean.ContentItemBean#setItemType(java.lang.String)
+	 */
+	public void setItemType(String s) {
+		// TODO Auto-generated method stub
+		getLocalizedArticle().setItemType(s);
+	}
+
+	/* (non-Javadoc)
+	 * @see com.idega.content.bean.ContentItemBean#setCreatedByUserId(int)
+	 */
+	public void setCreatedByUserId(int id) {
+		// TODO Auto-generated method stub
+		getLocalizedArticle().setCreatedByUserId(id);
+	}
+
+	/* (non-Javadoc)
+	 * @see com.idega.content.bean.ContentItemBean#getLocales()
+	 */
+	public Map getLocales() {
+		// TODO Auto-generated method stub
+		return getLocalizedArticle().getLocales();
+	}
+
+	/* (non-Javadoc)
+	 * @see com.idega.content.bean.ContentItemBean#getPendingLocaleId()
+	 */
+	public String getPendingLocaleId() {
+		// TODO Auto-generated method stub
+		return getLocalizedArticle().getPendingLocaleId();
+	}
+
+	/* (non-Javadoc)
+	 * @see com.idega.content.bean.ContentItemBean#setPendingLocaleId(java.lang.String)
+	 */
+	public void setPendingLocaleId(String localeId) {
+		// TODO Auto-generated method stub
+		getLocalizedArticle().setPendingLocaleId(localeId);
+	}
+
+	/* (non-Javadoc)
+	 * @see com.idega.content.bean.ContentItemBean#getRequestedStatus()
+	 */
+	public String getRequestedStatus() {
+		// TODO Auto-generated method stub
+		return getLocalizedArticle().getRequestedStatus();
+	}
+
+	/* (non-Javadoc)
+	 * @see com.idega.content.bean.ContentItemBean#setRequestedStatus(java.lang.String)
+	 */
+	public void setRequestedStatus(String requestedStatus) {
+		// TODO Auto-generated method stub
+		getLocalizedArticle().setRequestedStatus(requestedStatus);
+	}
+
+	/* (non-Javadoc)
+	 * @see com.idega.content.bean.ContentItemBean#getAttachments()
+	 */
+	public List getAttachments() {
+		// TODO Auto-generated method stub
+		return getLocalizedArticle().getAttachments();
+	}
+
+	/* (non-Javadoc)
+	 * @see com.idega.content.bean.ContentItemBean#setAttachment(java.util.List)
+	 */
+	public void setAttachment(List l) {
+		// TODO Auto-generated method stub
+		getLocalizedArticle().setAttachment(l);
+	}
+
+	/* (non-Javadoc)
+	 * @see com.idega.content.bean.ContentItemBean#getCase()
+	 */
+	public ContentItemCase getCase() {
+		// TODO Auto-generated method stub
+		return getLocalizedArticle().getCase();
+	}
+
+	/* (non-Javadoc)
+	 * @see com.idega.content.bean.ContentItemBean#setCase(com.idega.content.bean.ContentItemCase)
+	 */
+	public void setCase(ContentItemCase caseBean) {
+		// TODO Auto-generated method stub
+		getLocalizedArticle().setCase(caseBean);
+	}
+
+	/* (non-Javadoc)
+	 * @see com.idega.content.bean.ContentItemBean#getStatus()
+	 */
+	public String getStatus() {
+		// TODO Auto-generated method stub
+		return getLocalizedArticle().getStatus();
+	}
+
+	/* (non-Javadoc)
+	 * @see com.idega.content.bean.ContentItemBean#setStatus(java.lang.String)
+	 */
+	public void setStatus(String status) {
+		// TODO Auto-generated method stub
+		getLocalizedArticle().setStatus(status);
+	}
+
+	/* (non-Javadoc)
+	 * @see com.idega.content.bean.ContentItemBean#updateLocale()
+	 */
+	public void updateLocale() {
+		// TODO Auto-generated method stub
+		getLocalizedArticle().updateLocale();
+	}
+
+	/* (non-Javadoc)
+	 * @see com.idega.content.bean.ContentItemBean#getCreationDate()
+	 */
+	public Timestamp getCreationDate() {
+		// TODO Auto-generated method stub
+		return getLocalizedArticle().getCreationDate();
+	}
+
+	/* (non-Javadoc)
+	 * @see com.idega.content.bean.ContentItemBean#getVersionName()
+	 */
+	public String getVersionName() {
+		// TODO Auto-generated method stub
+		return getLocalizedArticle().getVersionName();
+	}
+
+	/* (non-Javadoc)
+	 * @see com.idega.content.bean.ContentItemBean#setVersionName(java.lang.String)
+	 */
+	public void setVersionName(String name) {
+		// TODO Auto-generated method stub
+		getLocalizedArticle().setVersionName(name);
+	}
+
+	/* (non-Javadoc)
+	 * @see com.idega.content.bean.ContentItemBean#getRendered()
+	 */
+	public Boolean getRendered() {
+		// TODO Auto-generated method stub
+		return getLocalizedArticle().getRendered();
+	}
+
+	/* (non-Javadoc)
+	 * @see com.idega.content.bean.ContentItemBean#setRendered(boolean)
+	 */
+	public void setRendered(boolean render) {
+		// TODO Auto-generated method stub
+		getLocalizedArticle().setRendered(render);
+	}
+
+	/* (non-Javadoc)
+	 * @see com.idega.content.bean.ContentItemBean#setRendered(java.lang.Boolean)
+	 */
+	public void setRendered(Boolean render) {
+		// TODO Auto-generated method stub
+		getLocalizedArticle().setRendered(render);
+	}
+//
+//	/* (non-Javadoc)
+//	 * @see com.idega.content.bean.ContentItemBean#getDeleted()
+//	 */
+//	public boolean getDeleted() {
+//		// TODO Auto-generated method stub
+//		return getLocalizedArticle().getDeleted();
+//	}
+//
+//	/* (non-Javadoc)
+//	 * @see com.idega.content.bean.ContentItemBean#getDeletedByUserId()
+//	 */
+//	public int getDeletedByUserId() {
+//		// TODO Auto-generated method stub
+//		return getLocalizedArticle().getDeletedByUserId();
+//	}
+//
+//	/* (non-Javadoc)
+//	 * @see com.idega.content.bean.ContentItemBean#getDeletedWhen()
+//	 */
+//	public Timestamp getDeletedWhen() {
+//		// TODO Auto-generated method stub
+//		return getLocalizedArticle().getDeletedWhen();
+//	}
+//
+//	/* (non-Javadoc)
+//	 * @see com.idega.content.bean.ContentItemBean#getFileSize()
+//	 */
+//	public Integer getFileSize() {
+//		// TODO Auto-generated method stub
+//		return getLocalizedArticle().getFileSize();
+//	}
+//
+//	/* (non-Javadoc)
+//	 * @see com.idega.content.bean.ContentItemBean#getFileValue()
+//	 */
+//	public InputStream getFileValue() {
+//		// TODO Auto-generated method stub
+//		return getLocalizedArticle().getFileValue();
+//	}
+//
+//	/* (non-Javadoc)
+//	 * @see com.idega.content.bean.ContentItemBean#getFileValueForWrite()
+//	 */
+//	public OutputStream getFileValueForWrite() {
+//		// TODO Auto-generated method stub
+//		return getLocalizedArticle().getFileValueForWrite();
+//	}
+//
+//	/* (non-Javadoc)
+//	 * @see com.idega.content.bean.ContentItemBean#getICLocale()
+//	 */
+//	public ICLocale getICLocale() {
+//		// TODO Auto-generated method stub
+//		return getLocalizedArticle().getICLocale();
+//	}
+//
+//	/* (non-Javadoc)
+//	 * @see com.idega.content.bean.ContentItemBean#getLanguage()
+//	 */
+//	public int getLanguage() {
+//		// TODO Auto-generated method stub
+//		return getLocalizedArticle().getLanguage();
+//	}
+//
+//	/* (non-Javadoc)
+//	 * @see com.idega.content.bean.ContentItemBean#getMimeType()
+//	 */
+//	public String getMimeType() {
+//		// TODO Auto-generated method stub
+//		return getLocalizedArticle().getMimeType();
+//	}
+//
+//	/* (non-Javadoc)
+//	 * @see com.idega.content.bean.ContentItemBean#getModificationDate()
+//	 */
+//	public Timestamp getModificationDate() {
+//		// TODO Auto-generated method stub
+//		return getLocalizedArticle().getModificationDate();
+//	}
+//
+//	/* (non-Javadoc)
+//	 * @see com.idega.content.bean.ContentItemBean#initializeAttributes()
+//	 */
+//	public void initializeAttributes() {
+//		// TODO Auto-generated method stub
+//		getLocalizedArticle().initializeAttributes();
+//	}
+//
+//	/* (non-Javadoc)
+//	 * @see com.idega.content.bean.ContentItemBean#isLeaf()
+//	 */
+//	public boolean isLeaf() {
+//		// TODO Auto-generated method stub
+//		return getLocalizedArticle().isLeaf();
+//	}
+//
+//	/* (non-Javadoc)
+//	 * @see com.idega.content.bean.ContentItemBean#setCreationDate(java.sql.Timestamp)
+//	 */
+//	public void setCreationDate(Timestamp date) {
+//		// TODO Auto-generated method stub
+//		getLocalizedArticle().setCreationDate(date);
+//	}
+//
+//	/* (non-Javadoc)
+//	 * @see com.idega.content.bean.ContentItemBean#setResourcePath(java.lang.String)
+//	 */
+//	public void setResourcePath(String path) {
+//		// TODO Auto-generated method stub
+//		getLocalizedArticle().setResourcePath(path);
+//	}
+//
+//	/* (non-Javadoc)
+//	 * @see com.idega.content.bean.ContentItemBean#setDeleted(boolean)
+//	 */
+//	public void setDeleted(boolean p0) {
+//		// TODO Auto-generated method stub
+//		getLocalizedArticle().setDeleted(p0);
+//	}
+//
+//	/* (non-Javadoc)
+//	 * @see com.idega.content.bean.ContentItemBean#setFileSize(java.lang.Integer)
+//	 */
+//	public void setFileSize(Integer p0) {
+//		// TODO Auto-generated method stub
+//		getLocalizedArticle().setFileSize(p0);
+//	}
+//
+//	/* (non-Javadoc)
+//	 * @see com.idega.content.bean.ContentItemBean#setFileSize(int)
+//	 */
+//	public void setFileSize(int p0) {
+//		// TODO Auto-generated method stub
+//		getLocalizedArticle().setFileSize(p0);
+//	}
+//
+//	/* (non-Javadoc)
+//	 * @see com.idega.content.bean.ContentItemBean#setFileValue(java.io.InputStream)
+//	 */
+//	public void setFileValue(InputStream p0) {
+//		// TODO Auto-generated method stub
+//		getLocalizedArticle().setFileValue(p0);
+//	}
+//
+//	/* (non-Javadoc)
+//	 * @see com.idega.content.bean.ContentItemBean#setLanguage(int)
+//	 */
+//	public void setLanguage(int p0) {
+//		// TODO Auto-generated method stub
+//		getLocalizedArticle().setLanguage(p0);
+//	}
+//
+//	/* (non-Javadoc)
+//	 * @see com.idega.content.bean.ContentItemBean#setLocale()
+//	 */
+//	public void setLocale() {
+//		// TODO Auto-generated method stub
+//		getLocalizedArticle().setLocale();
+//	}
+//
+//	/* (non-Javadoc)
+//	 * @see com.idega.content.bean.ContentItemBean#setMimeType(java.lang.String)
+//	 */
+//	public void setMimeType(String p0) {
+//		// TODO Auto-generated method stub
+//		getLocalizedArticle().setMimeType(p0);
+//	}
+//
+//	/* (non-Javadoc)
+//	 * @see com.idega.content.bean.ContentItemBean#setModificationDate(java.sql.Timestamp)
+//	 */
+//	public void setModificationDate(Timestamp p0) {
+//		// TODO Auto-generated method stub
+//		getLocalizedArticle().setModificationDate(p0);
+//	}
+//
+//	/* (non-Javadoc)
+//	 * @see com.idega.content.bean.ContentItemBean#superDelete()
+//	 */
+//	public void superDelete() throws SQLException {
+//		// TODO Auto-generated method stub
+//		getLocalizedArticle().superDelete();
+//	}
+//
+//	/* (non-Javadoc)
+//	 * @see com.idega.content.bean.ContentItemBean#unDelete(boolean)
+//	 */
+//	public void unDelete(boolean p0) throws SQLException {
+//		// TODO Auto-generated method stub
+//		getLocalizedArticle().unDelete(p0);
+//	}
+//
+//	/* (non-Javadoc)
+//	 * @see com.idega.content.bean.ContentItemBean#delete()
+//	 */
+//	public void delete() throws SQLException {
+//		// TODO Auto-generated method stub
+//		getLocalizedArticle().delete();
+//	}
+//
+//	/* (non-Javadoc)
+//	 * @see com.idega.content.bean.ContentItemBean#isFolder()
+//	 */
+//	public boolean isFolder() {
+//		// TODO Auto-generated method stub
+//		return getLocalizedArticle().isFolder();
+//	}
+//
+//	/* (non-Javadoc)
+//	 * @see com.idega.content.bean.ContentItemBean#isEmpty()
+//	 */
+//	public boolean isEmpty() {
+//		// TODO Auto-generated method stub
+//		return getLocalizedArticle().isEmpty();
+//	}
+//
+//	/* (non-Javadoc)
+//	 * @see com.idega.content.bean.ContentItemBean#getLocalizationKey()
+//	 */
+//	public String getLocalizationKey() {
+//		// TODO Auto-generated method stub
+//		return getLocalizedArticle().getLocalizationKey();
+//	}
+//
+//	/* (non-Javadoc)
+//	 * @see com.idega.content.bean.ContentItemBean#setLocalizationKey(java.lang.String)
+//	 */
+//	public void setLocalizationKey(String key) {
+//		// TODO Auto-generated method stub
+//		getLocalizedArticle().setLocalizationKey(key);
+//	}
+//
+//	/* (non-Javadoc)
+//	 * @see com.idega.content.bean.ContentItemBean#getEntityDefinition()
+//	 */
+//	public IDOEntityDefinition getEntityDefinition() {
+//		// TODO Auto-generated method stub
+//		return getLocalizedArticle().getEntityDefinition();
+//	}
+//
+//	/* (non-Javadoc)
+//	 * @see com.idega.content.bean.ContentItemBean#decode(java.lang.String)
+//	 */
+//	public Object decode(String pkString) {
+//		// TODO Auto-generated method stub
+//		return getLocalizedArticle().decode(pkString);
+//	}
+//
+//	/* (non-Javadoc)
+//	 * @see com.idega.content.bean.ContentItemBean#decode(java.lang.String[])
+//	 */
+//	public Collection decode(String[] pkString) {
+//		// TODO Auto-generated method stub
+//		return getLocalizedArticle().decode(pkString);
+//	}
+//
+//	/* (non-Javadoc)
+//	 * @see com.idega.content.bean.ContentItemBean#getEJBLocalHome()
+//	 */
+//	public EJBLocalHome getEJBLocalHome() throws EJBException {
+//		// TODO Auto-generated method stub
+//		return getLocalizedArticle().getEJBLocalHome();
+//	}
+//
+//	/* (non-Javadoc)
+//	 * @see com.idega.content.bean.ContentItemBean#getPrimaryKey()
+//	 */
+//	public Object getPrimaryKey() throws EJBException {
+//		// TODO Auto-generated method stub
+//		return getLocalizedArticle().getPrimaryKey();
+//	}
+//
+//	/* (non-Javadoc)
+//	 * @see com.idega.content.bean.ContentItemBean#remove()
+//	 */
+//	public void remove() throws RemoveException, EJBException {
+//		// TODO Auto-generated method stub
+//		getLocalizedArticle().remove();
+//	}
+//
+//	/* (non-Javadoc)
+//	 * @see com.idega.content.bean.ContentItemBean#isIdentical(javax.ejb.EJBLocalObject)
+//	 */
+//	public boolean isIdentical(EJBLocalObject arg0) throws EJBException {
+//		// TODO Auto-generated method stub
+//		return getLocalizedArticle().isIdentical(arg0);
+//	}
+//
+//	/* (non-Javadoc)
+//	 * @see com.idega.content.bean.ContentItemBean#compareTo(java.lang.Object)
+//	 */
+//	public int compareTo(Object o) {
+//		// TODO Auto-generated method stub
+//		return getLocalizedArticle().compareTo(o);
+//	}
+//
+//	/* (non-Javadoc)
+//	 * @see com.idega.content.bean.ContentItemBean#addChild(com.idega.data.TreeableEntity)
+//	 */
+//	public void addChild(TreeableEntity p0) throws SQLException {
+//		// TODO Auto-generated method stub
+//		getLocalizedArticle().addChild(p0);
+//	}
+//
+//	/* (non-Javadoc)
+//	 * @see com.idega.content.bean.ContentItemBean#getChildrenIterator(java.lang.String)
+//	 */
+//	public Iterator getChildrenIterator(String p0) {
+//		// TODO Auto-generated method stub
+//		return getLocalizedArticle().getChildrenIterator(p0);
+//	}
+//
+//	/* (non-Javadoc)
+//	 * @see com.idega.content.bean.ContentItemBean#getChildrenIterator(java.lang.String, boolean)
+//	 */
+//	public Iterator getChildrenIterator(String p0, boolean p1) {
+//		// TODO Auto-generated method stub
+//		return getLocalizedArticle().getChildrenIterator(p0, p1);
+//	}
+//
+//	/* (non-Javadoc)
+//	 * @see com.idega.content.bean.ContentItemBean#getIndex(com.idega.core.data.ICTreeNode)
+//	 */
+//	public int getIndex(ICTreeNode p0) {
+//		// TODO Auto-generated method stub
+//		return getLocalizedArticle().getIndex(p0);
+//	}
+//
+//	/* (non-Javadoc)
+//	 * @see com.idega.content.bean.ContentItemBean#getParentEntity()
+//	 */
+//	public TreeableEntity getParentEntity() {
+//		// TODO Auto-generated method stub
+//		return getLocalizedArticle().getParentEntity();
+//	}
+//
+//	/* (non-Javadoc)
+//	 * @see com.idega.content.bean.ContentItemBean#getTreeRelationshipChildColumnName(com.idega.data.TreeableEntity)
+//	 */
+//	public String getTreeRelationshipChildColumnName(TreeableEntity p0) {
+//		// TODO Auto-generated method stub
+//		return getLocalizedArticle().getTreeRelationshipChildColumnName(p0);
+//	}
+//
+//	/* (non-Javadoc)
+//	 * @see com.idega.content.bean.ContentItemBean#getTreeRelationshipTableName(com.idega.data.TreeableEntity)
+//	 */
+//	public String getTreeRelationshipTableName(TreeableEntity p0) {
+//		// TODO Auto-generated method stub
+//		return getLocalizedArticle().getTreeRelationshipTableName(p0);
+//	}
+//
+//	/* (non-Javadoc)
+//	 * @see com.idega.content.bean.ContentItemBean#moveChildrenFrom(com.idega.data.TreeableEntity)
+//	 */
+//	public void moveChildrenFrom(TreeableEntity p0) throws SQLException {
+//		// TODO Auto-generated method stub
+//		getLocalizedArticle().moveChildrenFrom(p0);
+//	}
+//
+//	/* (non-Javadoc)
+//	 * @see com.idega.content.bean.ContentItemBean#removeChild(com.idega.data.TreeableEntity)
+//	 */
+//	public void removeChild(TreeableEntity p0) throws SQLException {
+//		// TODO Auto-generated method stub
+//		getLocalizedArticle().removeChild(p0);
+//	}
+//
+//	/* (non-Javadoc)
+//	 * @see com.idega.content.bean.ContentItemBean#leafsFirst()
+//	 */
+//	public boolean leafsFirst() {
+//		// TODO Auto-generated method stub
+//		return getLocalizedArticle().leafsFirst();
+//	}
+//
+//	/* (non-Javadoc)
+//	 * @see com.idega.content.bean.ContentItemBean#sortLeafs()
+//	 */
+//	public boolean sortLeafs() {
+//		// TODO Auto-generated method stub
+//		return getLocalizedArticle().sortLeafs();
+//	}
+//
+//	/* (non-Javadoc)
+//	 * @see com.idega.content.bean.ContentItemBean#setLeafsFirst(boolean)
+//	 */
+//	public void setLeafsFirst(boolean b) {
+//		// TODO Auto-generated method stub
+//		getLocalizedArticle().setLeafsFirst(b);
+//	}
+//
+//	/* (non-Javadoc)
+//	 * @see com.idega.content.bean.ContentItemBean#setToSortLeafs(boolean)
+//	 */
+//	public void setToSortLeafs(boolean b) {
+//		// TODO Auto-generated method stub
+//		getLocalizedArticle().setToSortLeafs(b);
+//	}
+//
+//	/* (non-Javadoc)
+//	 * @see com.idega.content.bean.ContentItemBean#getChildren()
+//	 */
+//	public Collection getChildren() {
+//		// TODO Auto-generated method stub
+//		return getLocalizedArticle().getChildren();
+//	}
+//
+//	/* (non-Javadoc)
+//	 * @see com.idega.content.bean.ContentItemBean#getChildrenIterator()
+//	 */
+//	public Iterator getChildrenIterator() {
+//		// TODO Auto-generated method stub
+//		return getLocalizedArticle().getChildrenIterator();
+//	}
+//
+//	/* (non-Javadoc)
+//	 * @see com.idega.content.bean.ContentItemBean#getAllowsChildren()
+//	 */
+//	public boolean getAllowsChildren() {
+//		// TODO Auto-generated method stub
+//		return getLocalizedArticle().getAllowsChildren();
+//	}
+//
+//	/* (non-Javadoc)
+//	 * @see com.idega.content.bean.ContentItemBean#getChildAtIndex(int)
+//	 */
+//	public ICTreeNode getChildAtIndex(int childIndex) {
+//		// TODO Auto-generated method stub
+//		return getLocalizedArticle().getChildAtIndex(childIndex);
+//	}
+//
+//	/* (non-Javadoc)
+//	 * @see com.idega.content.bean.ContentItemBean#getChildCount()
+//	 */
+//	public int getChildCount() {
+//		// TODO Auto-generated method stub
+//		return getLocalizedArticle().getChildCount();
+//	}
+//
+//	/* (non-Javadoc)
+//	 * @see com.idega.content.bean.ContentItemBean#getParentNode()
+//	 */
+//	public ICTreeNode getParentNode() {
+//		// TODO Auto-generated method stub
+//		return getLocalizedArticle().getParentNode();
+//	}
+//
+//	/* (non-Javadoc)
+//	 * @see com.idega.content.bean.ContentItemBean#getNodeName()
+//	 */
+//	public String getNodeName() {
+//		// TODO Auto-generated method stub
+//		return getLocalizedArticle().getNodeName();
+//	}
+//
+//	/* (non-Javadoc)
+//	 * @see com.idega.content.bean.ContentItemBean#getNodeName(java.util.Locale)
+//	 */
+//	public String getNodeName(Locale locale) {
+//		// TODO Auto-generated method stub
+//		return getLocalizedArticle().getNodeName(locale);
+//	}
+//
+//	/* (non-Javadoc)
+//	 * @see com.idega.content.bean.ContentItemBean#getNodeName(java.util.Locale, com.idega.idegaweb.IWApplicationContext)
+//	 */
+//	public String getNodeName(Locale locale, IWApplicationContext iwac) {
+//		// TODO Auto-generated method stub
+//		return getLocalizedArticle().getNodeName(locale, iwac);
+//	}
+//
+//	/* (non-Javadoc)
+//	 * @see com.idega.content.bean.ContentItemBean#getNodeID()
+//	 */
+//	public int getNodeID() {
+//		// TODO Auto-generated method stub
+//		return getLocalizedArticle().getNodeID();
+//	}
+//
+//	/* (non-Javadoc)
+//	 * @see com.idega.content.bean.ContentItemBean#getSiblingCount()
+//	 */
+//	public int getSiblingCount() {
+//		// TODO Auto-generated method stub
+//		return getLocalizedArticle().getSiblingCount();
+//	}
+//
+//	/* (non-Javadoc)
+//	 * @see com.idega.content.bean.ContentItemBean#setMetaDataAttributes(java.util.Map)
+//	 */
+//	public void setMetaDataAttributes(Map map) {
+//		// TODO Auto-generated method stub
+//		getLocalizedArticle().setMetaDataAttributes(map);
+//	}
+//
+//	/* (non-Javadoc)
+//	 * @see com.idega.content.bean.ContentItemBean#getMetaDataAttributes()
+//	 */
+//	public Map getMetaDataAttributes() {
+//		// TODO Auto-generated method stub
+//		return getLocalizedArticle().getMetaDataAttributes();
+//	}
+//
+//	/* (non-Javadoc)
+//	 * @see com.idega.content.bean.ContentItemBean#getMetaDataTypes()
+//	 */
+//	public Map getMetaDataTypes() {
+//		// TODO Auto-generated method stub
+//		return getLocalizedArticle().getMetaDataTypes();
+//	}
+//
+//	/* (non-Javadoc)
+//	 * @see com.idega.content.bean.ContentItemBean#setMetaData(java.lang.String, java.lang.String)
+//	 */
+//	public void setMetaData(String metaDataKey, String value) {
+//		// TODO Auto-generated method stub
+//		getLocalizedArticle().setMetaData(metaDataKey, value);
+//	}
+//
+//	/* (non-Javadoc)
+//	 * @see com.idega.content.bean.ContentItemBean#setMetaData(java.lang.String, java.lang.String, java.lang.String)
+//	 */
+//	public void setMetaData(String metaDataKey, String value, String type) {
+//		// TODO Auto-generated method stub
+//		getLocalizedArticle().setMetaData(metaDataKey, value, type);
+//	}
+//
+//	/* (non-Javadoc)
+//	 * @see com.idega.content.bean.ContentItemBean#getMetaData(java.lang.String)
+//	 */
+//	public String getMetaData(String metaDataKey) {
+//		// TODO Auto-generated method stub
+//		return getLocalizedArticle().getMetaData(metaDataKey);
+//	}
+//
+//	/* (non-Javadoc)
+//	 * @see com.idega.content.bean.ContentItemBean#renameMetaData(java.lang.String, java.lang.String)
+//	 */
+//	public void renameMetaData(String oldKeyName, String newKeyName) {
+//		// TODO Auto-generated method stub
+//		getLocalizedArticle().renameMetaData(oldKeyName, newKeyName);
+//	}
+//
+//	/* (non-Javadoc)
+//	 * @see com.idega.content.bean.ContentItemBean#renameMetaData(java.lang.String, java.lang.String, java.lang.String)
+//	 */
+//	public void renameMetaData(String oldKeyName, String newKeyName, String value) {
+//		// TODO Auto-generated method stub
+//		getLocalizedArticle().renameMetaData(oldKeyName, newKeyName, value);
+//	}
+//
+//	/* (non-Javadoc)
+//	 * @see com.idega.content.bean.ContentItemBean#removeMetaData(java.lang.String)
+//	 */
+//	public boolean removeMetaData(String metaDataKey) {
+//		// TODO Auto-generated method stub
+//		return getLocalizedArticle().removeMetaData(metaDataKey);
+//	}
+//
+//	/* (non-Javadoc)
+//	 * @see com.idega.content.bean.ContentItemBean#updateMetaData()
+//	 */
+//	public void updateMetaData() throws SQLException {
+//		// TODO Auto-generated method stub
+//		getLocalizedArticle().updateMetaData();
+//	}
+//
+//	/* (non-Javadoc)
+//	 * @see com.idega.content.bean.ContentItemBean#getLocaleId()
+//	 */
+//	public int getLocaleId() {
+//		// TODO Auto-generated method stub
+//		return getLocalizedArticle().getLocaleId();
+//	}
+//
+//	/* (non-Javadoc)
+//	 * @see com.idega.content.bean.ContentItemBean#getDatasource()
+//	 */
+//	public String getDatasource() {
+//		// TODO Auto-generated method stub
+//		return getLocalizedArticle().getDatasource();
+//	}
+//
+//	/* (non-Javadoc)
+//	 * @see com.idega.content.bean.ContentItemBean#write(com.idega.io.serialization.ObjectWriter, com.idega.presentation.IWContext)
+//	 */
+//	public Object write(ObjectWriter writer, IWContext iwc) throws RemoteException {
+//		// TODO Auto-generated method stub
+//		return getLocalizedArticle().write(writer, iwc);
+//	}
+//
+//	/* (non-Javadoc)
+//	 * @see com.idega.content.bean.ContentItemBean#read(com.idega.io.serialization.ObjectReader, com.idega.presentation.IWContext)
+//	 */
+//	public Object read(ObjectReader reader, IWContext iwc) throws RemoteException {
+//		// TODO Auto-generated method stub
+//		return getLocalizedArticle().read(reader, iwc);
+//	}
+
+	/* (non-Javadoc)
+	 * @see com.idega.content.bean.ContentItemBean#isAutoCreateResource()
+	 */
+	public boolean isAutoCreateResource() {
+		// TODO Auto-generated method stub
+		return getLocalizedArticle().isAutoCreateResource();
+	}
+
+	/* (non-Javadoc)
+	 * @see com.idega.content.bean.ContentItemBean#setAutoCreateResource(boolean)
+	 */
+	public void setAutoCreateResource(boolean autoCreateResource) {
+		// TODO Auto-generated method stub
+		getLocalizedArticle().setAutoCreateResource(autoCreateResource);
+	}
+
+	/* (non-Javadoc)
+	 * @see com.idega.content.bean.ContentItemBean#getExists()
+	 */
+	public boolean getExists() {
+		// TODO Auto-generated method stub
+		return getLocalizedArticle().getExists();
+	}
+
+	/* (non-Javadoc)
+	 * @see com.idega.content.bean.ContentItemBean#setExists(boolean)
+	 */
+	public void setExists(boolean exists) {
+		// TODO Auto-generated method stub
+		getLocalizedArticle().setExists(exists);
+	}
+	
+	
+	public Object getValue(String fieldName) {
+		return getLocalizedArticle().getValue(fieldName);
+	}
+
+	public void setValue(String fieldName, Object value) {
+		getLocalizedArticle().setValue(fieldName,value);
+	}
+	
+	/*
+	 * If this is set this should return the base folder for storing articles.<br/> 
+	 * By default it is '/files/cms/article'
+	 */
+	public String getBaseFolderLocation() {
+		if(baseFolderLocation!=null){
+			return baseFolderLocation;
+		}
+		else{
+			return ArticleUtil.getArticleBaseFolderPath();
+		}
+		/*
+		String articlePath = getResourcePath();
+		if(articlePath!=null){
+			return ContentUtil.getParentPath(ContentUtil.getParentPath(articlePath));
+		}
+		return null;*/
+	}
+	/*
+	 * This sets the base folder for storing articles, 
+	 * something like '/files/cms/article'
+	 */
+	public void setBaseFolderLocation(String path) {
+		baseFolderLocation = path;
+	}
+	
+	public Locale getLocale(){
+		return super.getLocale();
+	}
+	
+	public void setLocale(Locale locale){
+		super.setLocale(locale);
+	}
+	
+	public void setResourcePath(String resourcePath){
+		//super.setResourcePath(resourcePath);
+		this.resourcePath=resourcePath;
+		updateLocalizedArticleBean();
+	}
+	
+	protected void updateLocalizedArticleBean(){
+		String resourcePath = getResourcePath();
+		String localizedResourcePath = calculateLocalizedResourcePath(resourcePath);
+		getLocalizedArticle().setResourcePath(localizedResourcePath);
+	}
 	
 	/**
-	 * Default constructor.
+	 * <p>
+	 * Creates the resourcePath for the localized file (.../myarticle.article/en.xml)
+	 * </p>
+	 * @param resourcePath
+	 * @return
 	 */
-	public ArticleItemBean() {
-		clear();
+	private String calculateLocalizedResourcePath(String resourcePath,String language) {
+		if(!resourcePath.endsWith(StringHandler.SLASH)){
+			resourcePath+=StringHandler.SLASH;
+		}
+		resourcePath += getArticleDefaultLocalizedFileName(language);
+		return resourcePath;
 	}
 	
-	public String[] getContentFieldNames(){
-		return ATTRIBUTE_ARRAY;
+	private String calculateLocalizedResourcePath(String resourcePath) {
+		return calculateLocalizedResourcePath(resourcePath,getLanguage());
 	}
 	
-	public String[] getToolbarActions(){
-		//return ACTION_ARRAY;
-		return super.getToolbarActions();
+	private String getArticleDefaultLocalizedFileName(){
+		return getArticleDefaultLocalizedFileName(getLanguage());
+	}
+
+	private String getArticleDefaultLocalizedFileName(String language){
+		return language+ARTICLE_FILE_SUFFIX;
 	}
 	
-	public String getHeadline() { return (String)getValue(FIELDNAME_HEADLINE); }
-	public String getTeaser() { return (String)getValue(FIELDNAME_TEASER); }
-	public String getBody() { return (String)getValue(FIELDNAME_BODY); }
-	public String getAuthor() { return (String)getValue(FIELDNAME_AUTHOR); }
-	public String getSource() { return (String)getValue(FIELDNAME_SOURCE); }
-	public String getComment() { return (String)getValue(FIELDNAME_COMMENT); }
-	public List getImages() { return getItemFields(FIELDNAME_IMAGES); }
-	public String getFilename() { return (String)getValue(FIELDNAME_FILENAME); }
+	private String getArticleDefaultLocalizedResourcePath(){
+		return getArticleDefaultLocalizedResourcePath(getLanguage());
+	}
 	
-	
+	private String getArticleDefaultLocalizedResourcePath(String language){
+		String resourcePath = getResourcePath();
+		return calculateLocalizedResourcePath(resourcePath);
+	}
+
 	/**
 	 * This method returns the path of the article without the language part:
 	 * ../cms/article/YYYY/MM/YYYYMMDD-HHmm.article while ContentItem#getResourcePath()
@@ -137,8 +1308,19 @@ public static final PropertyName PROPERTY_CONTENT_TYPE = new PropertyName("IW:",
 	 * @see ContentItem#getResourcePath()
 	 * @return
 	 */
-	public synchronized String getArticlePath() {
-		String resourcePath = getArticleResourcePath();
+	public String getResourcePath(){
+		//String resourcePath = super.getResourcePath();
+		String sResourcePath = this.resourcePath;
+		if(sResourcePath==null){
+			sResourcePath = createArticlePath();
+			setResourcePath(sResourcePath);
+		}
+		return sResourcePath;
+	}
+	
+	
+	public synchronized String createArticlePath() {
+		String resourcePath = getGeneratedArticleResourcePath();
 		int index = resourcePath.indexOf("."+ARTICLE_FILENAME_SCOPE);
 		if(index>-1){
 			String articlePath = resourcePath.substring(0,index+ARTICLE_FILENAME_SCOPE.length()+1);
@@ -150,46 +1332,68 @@ public static final PropertyName PROPERTY_CONTENT_TYPE = new PropertyName("IW:",
 		return resourcePath;
 	}
 	
-	public String getArticleResourcePath() {
+	/**
+	 * Returns the path to the actual resource (xml-file) ../cms/article/YYYY/MM/YYYYMMDD-HHmm.article/lang.xml
+	 * 
+	 * @see ContentItem#getResourcePath()
+	 * @return
+	 */
+	private String getGeneratedArticleResourcePath() {
 		makesureStandardFolderisCreated();
-		String path = (String)getValue(FIELDNAME_RESOURCE_PATH);
-		if(path==null){
+		String path = null;
+		//String path = getResourcePath();
+		//String path = (String)getValue(FIELDNAME_RESOURCE_PATH);
+		//if(path==null){
 			try {
 				IWUserContext iwc = getIWUserContext();
-				IWSlideService service = (IWSlideService)IBOLookup.getServiceInstance(iwc.getApplicationContext(),IWSlideService.class);
-				path = createArticleResourcePath(service);
-				setArticleResourcePath(path);
-			}
-			catch (IBOLookupException e) {
-				e.printStackTrace();
+				IWSlideService service = getIWSlideService(iwc);
+				path =  generateArticleResourcePath(service);
+				//setArticleResourcePath(path);
 			}
 			catch (UnavailableIWContext e) {
 				e.printStackTrace();
 			}
-		}
+		//}
 		return path;
 	}
 	
-	protected IWUserContext getIWUserContext(){
-		IWContext iwc = IWContext.getInstance();
-		return iwc;
-	}
-	
 	/**
-	 * <p>
-	 * TODO tryggvil describe method getIWSlideService
-	 * </p>
-	 * @param iwuc
+	 * Constructs the path for the article file as follows
+	 * First it gets the folder location of the article, this is typically generated by
+	 * ArticleUtil.getArticleYearMonthPath()
+	 * Then it appends a unique filename based on time, followed by .article
+	 * Example returnstring: /files/cms/article/2005/02/20050222-1246.article/en.xml
+	 * @param service
 	 * @return
 	 */
-	private IWSlideService getIWSlideService(IWUserContext iwuc) {
-		try {
-			IWSlideService slideService = (IWSlideService) IBOLookup.getServiceInstance(iwuc.getApplicationContext(),IWSlideService.class);
-			return slideService;
-		}
-		catch (IBOLookupException e) {
-			throw new RuntimeException(e);
-		}
+	protected String generateArticleResourcePath(IWSlideService service){
+		String baseFolderLocation = getBaseFolderLocation();
+		/*if(null==folderLocation || "".equalsIgnoreCase(folderLocation)) {
+			folderLocation=ArticleUtil.getDefaultArticleYearMonthPath();
+		}*/
+		String dateFolderLocation = ArticleUtil.getArticleYearMonthPath(baseFolderLocation);
+		StringBuffer path = new StringBuffer(dateFolderLocation);
+		path.append("/");
+		path.append(service.createUniqueFileName(ARTICLE_FILENAME_SCOPE));
+		path.append(".");
+		path.append(ARTICLE_FILENAME_SCOPE);
+		//path.append("/");
+		//path.append(getArticleName());
+		return path.toString();
+	}
+	
+	/* (non-Javadoc)
+	 * @see com.idega.block.article.bean.ArticleLocalizedItemBean#setLanguageChange(java.lang.String)
+	 */
+	public void setLanguageChange(String s) {
+		languageChange=s;
+	}
+	
+	/* (non-Javadoc)
+	 * @see com.idega.block.article.bean.ArticleLocalizedItemBean#getLanguageChange()
+	 */
+	public String getLanguageChange() {
+		return languageChange;
 	}
 	
 	/**
@@ -201,7 +1405,7 @@ public static final PropertyName PROPERTY_CONTENT_TYPE = new PropertyName("IW:",
 		IWUserContext iwuc = getIWUserContext();
 		IWSlideService slideService = getIWSlideService(iwuc);
 		String contentFolderPath = ArticleUtil.getContentRootPath();
-		String articlePath = ArticleUtil.getArticleRootPath();
+		String articlePath = ArticleUtil.getArticleBaseFolderPath();
 		
 		
 		try {
@@ -243,576 +1447,183 @@ public static final PropertyName PROPERTY_CONTENT_TYPE = new PropertyName("IW:",
 		}
 		
 	}
-
-
-	public void setArticleResourcePath(String path) {
-		if(path!=null){
-			if(path.indexOf("."+ARTICLE_FILENAME_SCOPE) < 0 || !path.endsWith(ARTICLE_SUFFIX)){
-				throw new RuntimeException("["+this.getClass().getName()+"]: setArticleResourcePath("+path+") path is not valid article path!");
-			}
+	/**
+	 * <p>
+	 * TODO tryggvil describe method getIWSlideService
+	 * </p>
+	 * @param iwuc
+	 * @return
+	 */
+	private IWSlideService getIWSlideService(IWUserContext iwuc) {
+		try {
+			IWSlideService slideService = (IWSlideService) IBOLookup.getServiceInstance(iwuc.getApplicationContext(),IWSlideService.class);
+			return slideService;
 		}
-		setResourcePath(path);
+		catch (IBOLookupException e) {
+			throw new RuntimeException(e);
+		}
 	}
 	
 	
+	/**
+	 * <p>
+	 * TODO tryggvil describe method getIWSlideService
+	 * </p>
+	 * @param iwuc
+	 * @return
+	 */
+	private IWSlideSession getIWSlideSession(IWUserContext iwuc) {
+		try {
+			IWSlideSession slideSession = (IWSlideSession) IBOLookup.getSessionInstance(iwuc,IWSlideSession.class);
+			return slideSession;
+		}
+		catch (IBOLookupException e) {
+			throw new RuntimeException(e);
+		}
+	}
 	
-	public String getFolderLocation() {
-		if(folderLocation!=null) return folderLocation;
-		
-		String articlePath = getResourcePath();
-		if(articlePath!=null){
-			return ContentUtil.getParentPath(ContentUtil.getParentPath(articlePath));
+	/**
+	 * Loads the article (folder)
+	 */
+	protected boolean load(String path) throws Exception {
+		return super.load(path);
+	}
+	
+	private void setLanguageFromFilePath(String filePath){
+		String fileEnding = ARTICLE_FILE_SUFFIX;
+		if(filePath.endsWith(fileEnding)){
+			String filePathWithoutEnding = filePath.substring(0,filePath.lastIndexOf(fileEnding));
+			int lastIndexofSlash = filePathWithoutEnding.lastIndexOf("/");
+			String language = filePathWithoutEnding.substring(lastIndexofSlash,filePathWithoutEnding.length());
+			setLanguage(language);
+		}
+		else{
+			throw new RuntimeException("filePath: "+filePath+" does not contain expected file ending: "+fileEnding);
+		}
+	}
+	
+	/**
+	 * Loads the article (folder)
+	 */
+	protected boolean load(WebdavExtendedResource webdavResource) throws Exception {
+		WebdavExtendedResource localizedArticleFile = null;
+		//First check if the resource is a folder, as it should be
+		if(webdavResource.isCollection()){
+			//IWContext iwc = IWContext.getInstance();
+			
+			WebdavResources resources = webdavResource.getChildResources();
+			String userLanguageArticleResourcePath = getArticleDefaultLocalizedResourcePath();
+			if(resources.isThereResourceName(userLanguageArticleResourcePath)){ //the language that the user has selected
+				localizedArticleFile = (WebdavExtendedResource) resources.getResource(userLanguageArticleResourcePath);
+				setAvilableInSelectedLanguage();
+			}
+			else{
+				//selected language not available:
+				if(getAllowFallbackToSystemLanguage()){
+					String systemLanguageArticleResourcePath = getArticleDefaultLocalizedResourcePath(getSystemLanguage());//getArticleName(iwc.getIWMainApplication().getDefaultLocale());
+					if(resources.isThereResourceName(systemLanguageArticleResourcePath)){ //the language default in the system.
+						localizedArticleFile = (WebdavExtendedResource) resources.getResource(systemLanguageArticleResourcePath);
+						setAvilableInSelectedLanguage();
+					}
+					else{
+						setNotAvilableInSelectedLanguage();
+					}
+				}
+				else{
+					setNotAvilableInSelectedLanguage();
+				}
+				
+			}
+				
+			/*} else if(resources.isThereResourceName(systemLanguageArticleName)){ //the language that is default for the system
+				articleFile = (WebdavExtendedResource) resources.getResource(systemLanguageArticleName);
+			} else {  // take the first language
+				Enumeration en = resources.getResources();
+				if(en.hasMoreElements()){
+					articleFile = (WebdavExtendedResource)en.nextElement();
+				}
+			}*/
+		} else {
+			//theArticle = webdavResource;
+			//throw new RuntimeException(webdavResource+" is directory, but should be a file");
+			String path = getResourcePath();
+			setLanguageFromFilePath(path);
+			String parentFolder = webdavResource.getParentPath();
+			setResourcePath(parentFolder);
+			return load(parentFolder);
+			
+			//WebdavResource folder = webdavResource.getParentPath();
+		}
+		if(localizedArticleFile!=null){
+			return getLocalizedArticle().load(localizedArticleFile);
+		}
+		return false;
+	}
+
+	protected IWUserContext getIWUserContext(){
+		IWContext iwc = IWContext.getInstance();
+		return iwc;
+	}
+	
+	/*public boolean getShowOnlyArticleInSelectedLanguage(){
+		return true;
+	}*/
+	
+	/**
+	 * <p>
+	 * Returns the language set as default in the System
+	 * </p>
+	 * @return
+	 */
+	public String getSystemLanguage(){
+		Locale systemLocale = getSystemLocale();
+		if(systemLocale!=null){
+			return systemLocale.getLanguage();
 		}
 		return null;
 	}
 	
-	public void setFolderLocation(String path) {
-		folderLocation = path;
-	}
-	
-	public String getContentLanguage() { return (String)getValue(FIELDNAME_CONTENT_LANGUAGE); }
-	public String getLanguageChange() { return (String)getValue(FIELDNAME_LANGUAGE_CHANGE); }
-
-	public void setHeadline(String s) { setValue(FIELDNAME_HEADLINE, s); }
-	public void setHeadline(Object o) { setValue(FIELDNAME_HEADLINE, o.toString()); } 
-	public void setTeaser(String s) { setValue(FIELDNAME_TEASER, s); } 
-	public void setBody(String body) {
-		setValue(FIELDNAME_BODY, body);
-//		if (null != articleIn) {
-////			System.out.println("ArticleIn = "+articleIn);
-//			//Use JTidy to clean up the html
-//			Tidy tidy = new Tidy();
-//			tidy.setXHTML(true);
-//			tidy.setXmlOut(true);
-//			ByteArrayInputStream bais = new ByteArrayInputStream(articleIn.getBytes());
-//			ByteArrayOutputStream baos = new ByteArrayOutputStream();
-//			tidy.parse(bais, baos);
-//			String articleOut = baos.toString();
-////			System.out.println("ArticleOut = "+articleOut);
-//			setValue(FIELDNAME_BODY, articleOut);
-////			setValue(FIELDNAME_BODY, articleIn);
-//		}
-//		else {
-//			setValue(FIELDNAME_BODY, null);
-//		}
-	} 
-	public void setAuthor(String s) { setValue(FIELDNAME_AUTHOR, s); } 
-	public void setSource(String s) { setValue(FIELDNAME_SOURCE, s); }
-	public void setComment(String s) { setValue(FIELDNAME_COMMENT, s); }
-	public void setImages(List l) { setItemFields(FIELDNAME_IMAGES, l); }
-	public void setFilename(String l) { setValue(FIELDNAME_FILENAME, l); }
-//	public void setFolderLocation(String l) { setValue(FIELDNAME_FOLDER_LOCATION, l); }
-	public void setContentLanguage(String s) { setValue(FIELDNAME_CONTENT_LANGUAGE, s); }
-	public void setLanguageChange(String s) { setValue(FIELDNAME_LANGUAGE_CHANGE, s); }
-
-	public boolean isUpdated() { return _isUpdated; }
-	public void setUpdated(boolean b) { _isUpdated = b; }
-	public void setUpdated(Boolean b) { _isUpdated = b.booleanValue(); }
-	
-	/**
-	 * Clears all all attributes for this bean. 
-	 */
-	public void clear() {
-		super.clear();
-
-		setHeadline(null);
-		setTeaser(null);
-		setBody(null);
-		setAuthor(null);
-		setSource(null);
-		setComment(null);
-		setImages(null);
-		setFilename(null);
-//		setFolderLocation(null);
-		_isUpdated = false;
-		setFolderLocation(null);
-	}
-	
-	/**
-	 * Adds an image to this article item.
-	 */
-	public void addImage(byte[] imageData, String contentType) {
-		List l = getImages();
-		if (l == null) {
-			l = new ArrayList();
+	public Locale getSystemLocale(){
+		FacesContext context = FacesContext.getCurrentInstance();
+		if(context!=null){
+			return context.getApplication().getDefaultLocale();
 		}
-		ContentItemField field = new ContentItemFieldBean();
-		field.setBinaryValue(imageData);
-		field.setFieldType(contentType);
-		field.setOrderNo(l.size());
-		l.add(field);
-		setImages(l);
+		return null;
 	}
 	
-	/**
-	 * Removes the image with the specified image number from this article item.
-	 */
-	public void removeImage(Integer imageNumber) {
-		int imageNo = imageNumber.intValue();
-		try {
-			List l = getImages();
-			l.remove(imageNo);
-			for (int i = 0; i < l.size(); i++) {
-				ContentItemField field = (ContentItemField) l.get(i);
-				field.setOrderNo(i);
-			}
-		} catch (Exception e) {}
+	public boolean getAllowFallbackToSystemLanguage(){
+		return allowFallbackToSystemLanguage;
 	}
 	
-	
-	/**
-	 * Returns localization keys for error messages.  
-	 */
-	public List getErrorKeys() {
-		return _errorKeys;
+	public void setAllowFallbackToSystemLanguage(boolean allow){
+		allowFallbackToSystemLanguage=allow;
 	}
 	
-	/**
-	 * Adds an error message localization key.  
-	 */
-	public void addErrorKey(String key) {
-		if (_errorKeys == null) {
-			_errorKeys = new ArrayList();
+	public void setAvilableInSelectedLanguage(){
+		avilableInRequestedLanguage=true;
+	}
+	
+	public void setNotAvilableInSelectedLanguage(){
+		avilableInRequestedLanguage=false;
+		if(!getAllowFallbackToSystemLanguage()){
+			getLocalizedArticle().setHeadline("Article not avilable");
+			getLocalizedArticle().setBody("The article you have chosen is not available in the selected language");
+			setExists(true);
+			setRendered(true);
+			getLocalizedArticle().setRendered(true);
+			getLocalizedArticle().setExists(true);
 		}
-		_errorKeys.add(key);
 	}
-	
-	/**
-	 * Clears all error message localization keys.  
-	 */
-	public void clearErrorKeys() {
-		_errorKeys = new ArrayList();
-	}
-	
-	public Boolean storeArticle() {
-		try {
-			store();
-			tryPublish();
-		}catch(ArticleStoreException e) {
-			addErrorKey(KEY_ERROR_ON_STORE);
-			e.printStackTrace();
-			return new Boolean(false);
-		}
-		return new Boolean(true);
-	}
-	
+
 	/**
 	 * <p>
-	 * Try to publish the article if it's
+	 * Returns true if this article is available for the language of the 
+	 * locale set on this article item.
 	 * </p>
-	 */
-	protected void tryPublish(){
-		//TODO: Implement publishing here:
-		setPublished();
-	}
-	
-	protected void setPublished(){
-		setStatus(ContentItemCase.STATUS_PUBLISHED);
-	}
-	
-	/**
-	 * Constructs the path for the article file as follows
-	 * First it gets the folder location of the article, this is typically generated by
-	 * ArticleUtil.getArticleYearMonthPath()
-	 * Then it appends a unique filename based on time, followed by .article
-	 * Example returnstring: /files/cms/article/2005/02/20050222-1246.article/en.xml
-	 * @param service
 	 * @return
 	 */
-	protected String createArticleResourcePath(IWSlideService service){
-		String folderLocation = getFolderLocation();
-		if(null==folderLocation || "".equalsIgnoreCase(folderLocation)) {
-			folderLocation=ArticleUtil.getArticleYearMonthPath();
-		}
-		StringBuffer path = new StringBuffer(folderLocation);
-		path.append("/");
-		path.append(service.createUniqueFileName(ARTICLE_FILENAME_SCOPE));
-		path.append(".");
-		path.append(ARTICLE_FILENAME_SCOPE);
-		path.append("/");
-		path.append(getArticleName());
-		return path.toString();
-	}
-	
-	protected String getArticleName(){
-		return getArticleName(getContentLanguage());
-	}
-	
-	protected String getArticleName(Locale locale){
-		return getArticleName(locale.getLanguage());
-	}
-	
-	protected String getArticleName(String language){
-		return language+ARTICLE_SUFFIX;
+	public boolean getAvilableInRequestedLanguage() {
+		return avilableInRequestedLanguage;
 	}
 
-	/**
-	 * Returns the Article Item as an XML-formatted string
-	 * @return the XML string
-	 * @throws IOException
-	 * @throws XMLException
-	 */
-	public String getAsXML() throws IOException, XMLException {
-
-		XMLParser builder = new XMLParser();
-		
-		XMLElement bodyElement = null;
-		
-		prettifyBody();
-		
-		String bodyString = getBody();
-		if(bodyString != null && !bodyString.trim().equals("")){
-			XMLDocument bodyDoc = builder.parse(new ByteArrayInputStream(bodyString.getBytes("UTF-8")));
-			bodyElement = bodyDoc.getRootElement();
-		}
-		
-
-		
-		
-		XMLElement root = new XMLElement("article",idegaXMLNameSpace);
-		XMLElement contentLanguage = new XMLElement(FIELDNAME_CONTENT_LANGUAGE,idegaXMLNameSpace).setText(getContentLanguage());
-		XMLElement headline = new XMLElement(FIELDNAME_HEADLINE,idegaXMLNameSpace).setText(getHeadline());
-		XMLElement teaser = new XMLElement(FIELDNAME_TEASER,idegaXMLNameSpace).setText(getTeaser());
-		XMLElement author = new XMLElement(FIELDNAME_AUTHOR,idegaXMLNameSpace).setText(getAuthor());
-		XMLElement source = new XMLElement(FIELDNAME_SOURCE,idegaXMLNameSpace).setText(getSource());
-		XMLElement articleComment = new XMLElement("article_comment",idegaXMLNameSpace).setText(getComment());
-
-		XMLElement body = new XMLElement(FIELDNAME_BODY,idegaXMLNameSpace);
-		if(bodyElement != null){
-			body.addContent(bodyElement);
-		}
-
-		root.addContent(contentLanguage);
-		root.addContent(headline);
-		root.addContent(teaser);
-		root.addContent(body);
-		root.addContent(author);
-		root.addContent(source);
-		root.addContent(articleComment);
-		XMLDocument doc = new XMLDocument(root);
-		XMLOutput outputter = new XMLOutput();
-		return outputter.outputString(doc);		
-	}
-
-	/**
-	 * @deprecated use getAsXML() instead. We have dropped XMLBeans, since it insisted on adding CData
-	 * @return
-	 */
-/*	public String getAsXMLFromXMLBeans() {
-		ArticleDocument articleDoc = ArticleDocument.Factory.newInstance();
-	    
-	    ArticleDocument.Article article =  articleDoc.addNewArticle();
-	    
-		article.setHeadline(getHeadline());
-		article.setBody(getBody());
-		article.setTeaser(getTeaser());
-		article.setAuthor(getAuthor());
-		article.setSource(getSource());
-		article.setComment(getComment());
-		
-		return articleDoc.toString();
-	}
-*/
-	/**
-	 * This is a temporary holder for the Slide implementation
-	 * This should be replace as soon as Slide is working
-	 */
-	public void store() throws IDOStoreException{
-		boolean storeOk = true;
-		clearErrorKeys();
-
-		if ( (getHeadline()==null) || (getHeadline().trim().equals("")) ) {
-			addErrorKey(KEY_ERROR_HEADLINE_EMPTY);
-			storeOk = false;
-		}
-//		if (getBody().trim().equals("")) {
-//			addErrorKey(KEY_ERROR_BODY_EMPTY);
-//			storeOk = false;
-//		}
-		
-//		if (getRequestedStatus() != null && getRequestedStatus().equals(ContentItemCase.STATUS_PUBLISHED)) {
-//			if (getCase().getPublishedFromDate() == null) {
-//				addErrorKey(KEY_ERROR_PUBLISHED_FROM_DATE_EMPTY);
-//				storeOk = false;
-//			}
-//		}
-		
-//		String filename = getHeadline();
-//		if(null==filename || filename.length()==0) {
-//			filename = "empty";
-//		}
-		if(storeOk){
-			try {
-				IWUserContext iwuc = IWContext.getInstance();
-				IWSlideSession session = (IWSlideSession)IBOLookup.getSessionInstance(iwuc,IWSlideSession.class);
-				WebdavRootResource rootResource = session.getWebdavRootResource();
-	
-				//Setting the path for creating new file/creating localized version/updating existing file
-				String filePath=getResourcePath();
-				String articleFolderPath=getArticlePath();
-				if(articleFolderPath!=null) {
-					filePath=articleFolderPath+"/"+getArticleName();
-				}else {
-					filePath=getArticleResourcePath();
-					articleFolderPath = getArticlePath();
-				}
-		
-				boolean hadToCreate = session.createAllFoldersInPath(articleFolderPath);
-	
-				if(hadToCreate){
-					String fixedFolderURL = session.getURI(articleFolderPath);
-					rootResource.proppatchMethod(fixedFolderURL,PROPERTY_CONTENT_TYPE,"LocalizedFile",true);
-				}
-				else{
-					rootResource.proppatchMethod(articleFolderPath,PROPERTY_CONTENT_TYPE,"LocalizedFile",true);
-				}
-				
-				
-				String article = getAsXML();
-				
-				ByteArrayInputStream utf8stream = new ByteArrayInputStream(article.getBytes("UTF-8"));
-				
-	//			System.out.println(article);
-				
-				//Conflict fix: uri for creating but path for updating
-				//Note! This is a patch to what seems to be a bug in WebDav
-				//Apparently in verion below works in some cases and the other in other cases.
-				//Seems to be connected to creating files in folders created in same tomcat session or similar
-				//not quite clear...
-				
-				if(rootResource.putMethod(filePath,utf8stream)){
-					rootResource.proppatchMethod(filePath,PROPERTY_CONTENT_TYPE,ARTICLE_FILENAME_SCOPE,true);
-				}
-				else{
-					utf8stream = new ByteArrayInputStream(article.getBytes("UTF-8"));
-					String fixedURL = session.getURI(filePath);
-					rootResource.putMethod(fixedURL,utf8stream);
-					rootResource.proppatchMethod(fixedURL,PROPERTY_CONTENT_TYPE,ARTICLE_FILENAME_SCOPE,true);
-				}
-				
-				rootResource.close();
-				try {
-					//load(filePath);
-					ArticleItemBean newBean = new ArticleItemBean();
-					newBean.load(filePath);
-				}
-				catch (Exception e) {
-					//storeOk = false;
-					//e.printStackTrace();
-					throw new ArticleStoreException(e.getMessage());
-				}
-	
-			}
-			catch (IOException e1) {
-				storeOk = false;
-				e1.printStackTrace();
-			}
-			catch (XMLException e) {
-				storeOk = false;
-				e.printStackTrace();
-			}
-		}
-
-		if (storeOk) {
-			if (getRequestedStatus() != null) {
-				setStatus(getRequestedStatus());
-				setRequestedStatus(null);
-			}
-		}else {
-			throw new ArticleStoreException();
-		}
-	}
-    
-	/**
-	 * 
-	 */
-	protected void prettifyBody() {
-		String body = getBody();
-		if(body!=null){
-//		System.out.println("ArticleIn = "+articleIn);
-			//Use JTidy to clean up the html
-			Tidy tidy = new Tidy();
-			tidy.setXHTML(true);
-			tidy.setXmlOut(true);
-			tidy.setCharEncoding(Configuration.UTF8);
-			ByteArrayInputStream bais;
-			try {
-				bais = new ByteArrayInputStream(body.getBytes("UTF-8"));
-				ByteArrayOutputStream baos = new ByteArrayOutputStream();
-				
-				tidy.parse(bais, baos);
-				body = baos.toString("UTF-8");
-			}
-			catch (UnsupportedEncodingException e) {
-				e.printStackTrace();
-			}
-			
-//			System.out.println("ArticleOut = "+articleOut);
-			setBody(body);
-		}
-	}
-
-	/**
-	 * Loads an xml file specified by the webdav resource
-	 * The beans atributes are then set according to the information in the XML file
-	 */
-	public boolean load(WebdavExtendedResource webdavResource) throws IOException {
-		XMLParser builder = new XMLParser();
-		XMLDocument bodyDoc = null;
-		try {
-			WebdavResource theArticle = null;
-			if(webdavResource.isCollection()){
-				IWContext iwc = IWContext.getInstance();
-				
-				WebdavResources resources = webdavResource.getChildResources();
-				String userLanguageArticleName = getArticleName(iwc.getCurrentLocale());
-				String systemLanguageArticleName = getArticleName(iwc.getIWMainApplication().getDefaultLocale());
-				if(resources.isThereResourceName(userLanguageArticleName)){ //the language that the user has selected
-					theArticle = resources.getResource(userLanguageArticleName);
-				} else if(resources.isThereResourceName(systemLanguageArticleName)){ //the language that is default for the system
-					theArticle = resources.getResource(systemLanguageArticleName);
-				} else {  // take the first language
-					Enumeration en = resources.getResources();
-					if(en.hasMoreElements()){
-						theArticle = (WebdavResource)en.nextElement();
-					}
-				}
-			} else {
-				theArticle = webdavResource;
-			}
-			if(theArticle!=null && !theArticle.isCollection()){
-				setArticleResourcePath(theArticle.getPath());
-				bodyDoc = builder.parse(new ByteArrayInputStream(theArticle.getMethodDataAsString().getBytes("UTF-8")));
-			} else {
-				bodyDoc = null;
-			}
-		} catch (XMLException e) {
-			e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
-		}
-		if(bodyDoc!=null){
-			XMLElement rootElement = bodyDoc.getRootElement();
-	
-			try {
-				XMLElement language  = rootElement.getChild(FIELDNAME_CONTENT_LANGUAGE,idegaXMLNameSpace);
-				if(language != null){
-					setContentLanguage(language.getText());
-				} else {
-					setContentLanguage(null);
-				}
-			}catch(Exception e) {	
-				setContentLanguage(null);
-			}
-			try {
-				XMLElement headline = rootElement.getChild(FIELDNAME_HEADLINE,idegaXMLNameSpace);
-				if(headline != null){
-					setHeadline(headline.getText());
-				} else {
-					setHeadline("");
-				}
-			}catch(Exception e) {		//Nullpointer could occur if field isn't used
-				e.printStackTrace();
-				setHeadline("");
-			}
-			try {
-				XMLElement teaser = rootElement.getChild(FIELDNAME_TEASER,idegaXMLNameSpace);
-				if(teaser != null){
-					setTeaser(teaser.getText());
-				} else {
-					setTeaser("");
-				}
-			}catch(Exception e) {		//Nullpointer could occur if field isn't used
-				e.printStackTrace();
-				setTeaser("");
-			}
-			try {
-				XMLElement author = rootElement.getChild(FIELDNAME_AUTHOR,idegaXMLNameSpace);
-				if(author != null){
-					setAuthor(author.getText());
-				} else {
-					setAuthor("");
-				}
-			}catch(Exception e) {		//Nullpointer could occur if field isn't used
-				e.printStackTrace();
-				setAuthor("");
-			}
-	
-			//Parse out the body
-			try {
-				XMLNamespace htmlNamespace = new XMLNamespace("http://www.w3.org/1999/xhtml");
-				XMLElement bodyElement = rootElement.getChild(FIELDNAME_BODY,idegaXMLNameSpace);
-				XMLElement htmlElement = bodyElement.getChild("html",htmlNamespace);
-				XMLElement htmlBodyElement = htmlElement.getChild("body",htmlNamespace);
-				
-				String bodyValue = htmlBodyElement.getContentAsString();
-				setBody(bodyValue);
-			}catch(Exception e) {		//Nullpointer could occur if field isn't used
-	//			e.printStackTrace();
-				Logger log = Logger.getLogger(this.getClass().toString());
-				log.warning("Body of article is empty");
-				setBody("");
-			}
-			
-			try {
-				XMLElement source = rootElement.getChild(FIELDNAME_SOURCE,idegaXMLNameSpace);
-				if(source != null){
-					setSource(source.getText());
-				} else {
-					setSource("");
-				}
-			}catch(Exception e) {		//Nullpointer could occur if field isn't used
-				setSource("");
-			}
-			try {
-				XMLElement comment = rootElement.getChild(FIELDNAME_ARTICLE_COMMENT,idegaXMLNameSpace);
-				if(comment != null){
-					setComment(comment.getText());
-				} else {
-					setComment("");
-				}
-			}catch(Exception e) {		//Nullpointer could occur if field isn't used
-				e.printStackTrace();
-				setComment("");
-			}
-			
-		} else {
-			//article not found
-			Logger log = Logger.getLogger(this.getClass().toString());
-			log.warning("Article xml file was not found");
-			setRendered(false);
-			return false;
-		}
-		return true;
-//	    setFilename();
-//		setFolderLocation(bodyElement.getChild(FIELDNAME_FOLDER_LOCATION,idegans).getText());
-	}
-	
-/*
- * The old XMLBean way of loading data
-	public void loadOld(File file) throws XmlException, IOException{
-		ArticleDocument articleDoc;
-		
-		articleDoc = ArticleDocument.Factory.parse(file);
-		
-	    ArticleDocument.Article article =  articleDoc.getArticle();
-	    setHeadline(article.getHeadline());
-	    setBody(article.getBody());
-	    setTeaser(article.getTeaser());
-	    setAuthor(article.getAuthor());
-	    setSource(article.getSource());
-	    setComment(article.getComment());
-	}
-*/
-	/* (non-Javadoc)
-	 * @see com.idega.content.bean.ContentItem#getContentItemPrefix()
-	 */
-	public String getContentItemPrefix() {
-		return "article_";
-	}
-	
-	/* (non-Javadoc)
-	 * @see com.idega.data.IDOEntity#setDatasource(java.lang.String)
-	 */
-	public void setDatasource(String datasource) {
-		// TODO Auto-generated method stub
-	}	
 }

@@ -1,5 +1,5 @@
 /*
- * $Id: EditArticleView.java,v 1.10 2005/12/12 11:39:18 tryggvil Exp $
+ * $Id: EditArticleView.java,v 1.11 2005/12/20 16:40:41 tryggvil Exp $
  *
  * Copyright (C) 2004 Idega. All Rights Reserved.
  *
@@ -29,9 +29,13 @@ import javax.faces.event.ActionListener;
 import javax.faces.event.ValueChangeEvent;
 import javax.faces.event.ValueChangeListener;
 import javax.faces.model.SelectItem;
+import org.apache.myfaces.custom.savestate.UISaveState;
 import com.idega.block.article.bean.ArticleItemBean;
+import com.idega.block.article.bean.ArticleStoreException;
+import com.idega.block.article.business.ArticleUtil;
 import com.idega.content.bean.ManagedContentBeans;
 import com.idega.content.data.ContentItemCase;
+import com.idega.content.presentation.ContentItemToolbar;
 import com.idega.content.presentation.ContentViewer;
 import com.idega.content.presentation.WebDAVCategories;
 import com.idega.core.localisation.business.ICLocaleBusiness;
@@ -52,16 +56,17 @@ import com.idega.webface.htmlarea.HTMLArea;
  * <p>
  * This is the part for the editor of article is inside the admin interface
  * </p>
- * Last modified: $Date: 2005/12/12 11:39:18 $ by $Author: tryggvil $
+ * Last modified: $Date: 2005/12/20 16:40:41 $ by $Author: tryggvil $
  *
  * @author Joakim,Tryggvi Larusson
- * @version $Revision: 1.10 $
+ * @version $Revision: 1.11 $
  */
 public class EditArticleView extends IWBaseComponent implements ManagedContentBeans, ActionListener, ValueChangeListener {
 	public final static String EDIT_ARTICLE_BLOCK_ID = "edit_articles_block";
 	private final static String P = "list_articles_block_"; // Id prefix
 	
 	public final static String EDIT_ARTICLES_BEAN_ID = "editArticlesBean";
+	public final static String ref = ARTICLE_ITEM_BEAN_ID + ".";
 	
 //	public final static String ARTICLE_BLOCK_ID = "article_block";
 	
@@ -148,7 +153,6 @@ public class EditArticleView extends IWBaseComponent implements ManagedContentBe
 		
 		IWContext iwc = IWContext.getInstance();
 		WFResourceUtil localizer = WFResourceUtil.getResourceUtilArticle();
-		String ref = ARTICLE_ITEM_BEAN_ID + ".";
 //		String bref = WFPage.CONTENT_BUNDLE + ".";
 
 		WFContainer mainContainer = new WFContainer();
@@ -162,34 +166,20 @@ public class EditArticleView extends IWBaseComponent implements ManagedContentBe
 		em.addErrorMessage(SAVE_ID);
 		
 		mainContainer.add(em);
-
+		
+		//Saving the state of the articleItemBean specially because the scpoe
+		//of this bean now is 'request' not 'session'
+		UISaveState beanSaveState = new UISaveState();
+		ValueBinding binding = WFUtil.createValueBinding("#{"+ARTICLE_ITEM_BEAN_ID+"}");
+		beanSaveState.setId("articleItemBeanSaveState");
+		beanSaveState.setValueBinding("value",binding);
+		mainContainer.add(beanSaveState);
+		
 		HtmlPanelGrid p = WFPanelUtil.getPlainFormPanel(2);
 
 		//Language dropdown
 		p.getChildren().add(WFUtil.group(localizer.getTextVB("language"), WFUtil.getText(":")));
-		
-		Iterator iter = ICLocaleBusiness.getListOfLocalesJAVA().iterator();
-		HtmlSelectOneMenu langDropdown = new HtmlSelectOneMenu();
-		List arrayList = new ArrayList();
-		while(iter.hasNext()) {
-			Locale locale = (Locale)iter.next();
-			String keyStr = locale.getLanguage();
-			String langStr = locale.getDisplayLanguage();
-			SelectItem itemTemp = new SelectItem(keyStr, langStr, keyStr, false);
-			arrayList.add(itemTemp);
-		}
-		
-		UISelectItems items = new UISelectItems();
-		items.setId(LOCALE_ID);
-		items.setValue(arrayList);
-		langDropdown.getChildren().add(items);
-		ValueBinding vb = WFUtil.createValueBinding("#{" + ref +"contentLanguage" + "}");
-		langDropdown.setValueBinding("value", vb);
-		langDropdown.getValue();
-		langDropdown.addValueChangeListener(this);
-		langDropdown.setImmediate(true);
-		langDropdown.setOnchange("submit();");
-
+		UIComponent langDropdown = getLanguageDropdownMenu();
 		p.getChildren().add(langDropdown);
 
 		p.getChildren().add(WFUtil.group(localizer.getTextVB("headline"), WFUtil.getText(":")));
@@ -335,23 +325,7 @@ public class EditArticleView extends IWBaseComponent implements ManagedContentBe
 		//ArticleItemBean articleItemBean = (ArticleItemBean) getArticleItemBean();
 		//String resourcePath = articleItemBean.getArticleResourcePath();
 		
-		WebDAVCategories categoriesUI = (WebDAVCategories) getCategoryEditor();
-		if(categoriesUI==null){
-			//id on the component is set implicitly
-			categoriesUI=new WebDAVCategories();
-			//we want to set the categories also on the parent ".article" folder:
-			categoriesUI.setCategoriesOnParent(true);
-			categoriesUI.setDisplaySaveButton(false);
-			//categoriesUI.setId(CATEGORY_EDITOR_ID);
-		
-			
-			//Categories are set in encodeBegin:
-			//if(!isInCreateMode()){
-				//there is no resourcepath set for the article if it's about to be created
-			//	categoriesUI.setResourcePath(resourcePath);
-			//}
-			p.getChildren().add(categoriesUI);
-		}
+		addCategoryEditor(p);
 		
 		p.getChildren().add(WFUtil.getBreak());
 		p.getChildren().add(WFUtil.getBreak());
@@ -389,45 +363,71 @@ public class EditArticleView extends IWBaseComponent implements ManagedContentBe
 		return mainContainer;
 	}
 
+	/**
+	 * <p>
+	 * TODO tryggvil describe method getLanguageDropdownMenu
+	 * </p>
+	 * @return
+	 */
+	private UIComponent getLanguageDropdownMenu() {
+		
+		
+		Iterator iter = ICLocaleBusiness.getListOfLocalesJAVA().iterator();
+		HtmlSelectOneMenu langDropdown = new HtmlSelectOneMenu();
+		List arrayList = new ArrayList();
+		while(iter.hasNext()) {
+			Locale locale = (Locale)iter.next();
+			String keyStr = locale.getLanguage();
+			String langStr = locale.getDisplayLanguage();
+			SelectItem itemTemp = new SelectItem(keyStr, langStr, keyStr, false);
+			arrayList.add(itemTemp);
+		}
+		
+		UISelectItems items = new UISelectItems();
+		items.setId(LOCALE_ID);
+		items.setValue(arrayList);
+		langDropdown.getChildren().add(items);
+		ValueBinding vb = WFUtil.createValueBinding("#{" + ref +"language" + "}");
+		langDropdown.setValueBinding("value", vb);
+		langDropdown.getValue();
+		langDropdown.addValueChangeListener(this);
+		langDropdown.setImmediate(true);
+		langDropdown.setOnchange("submit();");
+		
+		return langDropdown;
+	}
+
 	/*
 	 * Returns container with form for editing categories.
 	 */
 	private UIComponent getCategoryEditor() {
-		/*String ref = ARTICLE_ITEM_BEAN_ID + ".";
-		String bref = WFPage.CONTENT_BUNDLE + ".";
-
-		HtmlPanelGrid p = WFPanelUtil.getFormPanel(3);
-		p.setId(CATEGORY_EDITOR_ID);
-		p.getChildren().add(WFUtil.group(WFUtil.getTextVB(bref + "available_categories"), WFUtil.getText(":")));		
-		p.getChildren().add(WFUtil.getText(" "));		
-		p.getChildren().add(WFUtil.group(WFUtil.getTextVB(bref + "categories_for_this_article"), WFUtil.getText(":")));
-		WFContainer c = new WFContainer();
-		HtmlSelectManyListbox availableCategories = WFUtil.getSelectManyListbox(AVAILABLE_CATEGORIES_ID,
-				ref + "availableCategories", ref + "selectedAvailableCategories");
-		availableCategories.setStyle("width:200px;height:160px;");
-//		availableCategories.setConverter(new IntegerConverter());
-		c.add(availableCategories);
-		c.add(WFUtil.getBreak(2));
-		c.add(WFUtil.getButtonVB(CATEGORY_BACK_ID, bref + "back", this));
-		p.getChildren().add(c);		
-		c = new WFContainer();
-		c.add(WFUtil.getBreak());
-		c.add(WFUtil.getButton(ADD_CATEGORIES_ID, ">", this));
-		c.add(WFUtil.getBreak(2));
-		c.add(WFUtil.getButton(SUB_CATEGORIES_ID, "<", this));
-		p.getChildren().add(c);		
-		HtmlSelectManyListbox articleCategories = WFUtil.getSelectManyListbox(ARTICLE_CATEGORIES_ID, 
-				ref + "categories", ref + "selectedCategories");
-		articleCategories.setStyle("width:200px;height:160px;");
-//		articleCategories.setConverter(new IntegerConverter());
-		p.getChildren().add(articleCategories);
-				
-		return p;*/
-		
-		
 		UIComponent categoriesUi = findComponent(WebDAVCategories.CATEGORIES_BLOCK_ID);
-	
 		return categoriesUi;
+	}
+	
+	protected void addCategoryEditor(UIComponent parent){
+		WebDAVCategories categoriesUI = (WebDAVCategories) getCategoryEditor();
+		if(categoriesUI==null){
+			//id on the component is set implicitly
+			categoriesUI=new WebDAVCategories();
+			//we want to set the categories also on the parent ".article" folder:
+			categoriesUI.setCategoriesOnParent(true);
+			categoriesUI.setDisplaySaveButton(false);
+			//categoriesUI.setId(CATEGORY_EDITOR_ID);
+			
+			FacesContext context = getFacesContext();
+			
+			String setCategories = (String) context.getExternalContext().getRequestParameterMap().get(ContentItemToolbar.PARAMETER_CATEGORIES);
+			if(setCategories!=null){
+				categoriesUI.setCategories(setCategories);
+			}
+			//Categories are set in encodeBegin:
+			//if(!isInCreateMode()){
+				//there is no resourcepath set for the article if it's about to be created
+			//	categoriesUI.setResourcePath(resourcePath);
+			//}
+			parent.getChildren().add(categoriesUI);
+		}
 	}
 	
 	/*
@@ -486,19 +486,19 @@ public class EditArticleView extends IWBaseComponent implements ManagedContentBe
 	public void processAction(ActionEvent event) {
 		String id = event.getComponent().getId();
 		UIComponent rootParent = rootParent = event.getComponent().getParent().getParent().getParent();
-		
 		EditArticleView ab = (EditArticleView) rootParent.findComponent(EDIT_ARTICLE_BLOCK_ID);
 		if (id.equals(SAVE_ID)) {
-			ab.storeArticle();
-//			String resourcePath = (String) WFUtil.invoke(ARTICLE_ITEM_BEAN_ID, "getArticleResourcePath");
-			ArticleItemBean articleItemBean = getArticleItemBean();
-			String resourcePath = articleItemBean.getArticleResourcePath();
-			//UIComponent comp = ab.findComponent(WebDAVCategories.CATEGORIES_BLOCK_ID);
-			
-			WebDAVCategories categoriesUI = (WebDAVCategories) ab.getCategoryEditor();
-			if(categoriesUI!=null){
-				categoriesUI.setResourcePath(resourcePath);
-				categoriesUI.saveCategoriesSettings(resourcePath, categoriesUI);
+			//We have the save button pressed
+			boolean saveSuccessful=false;
+			saveSuccessful = ab.storeArticle();
+			if(saveSuccessful){
+				ArticleItemBean articleItemBean = getArticleItemBean();
+				String fileResourcePath = articleItemBean.getLocalizedArticle().getResourcePath();
+				WebDAVCategories categoriesUI = (WebDAVCategories) ab.getCategoryEditor();
+				if(categoriesUI!=null){
+					categoriesUI.setResourcePath(fileResourcePath);
+					categoriesUI.saveCategoriesSettings(fileResourcePath, categoriesUI);
+				}
 			}
 			clearOnInit=false;
 		} 
@@ -533,25 +533,27 @@ public class EditArticleView extends IWBaseComponent implements ManagedContentBe
 
 	/**
 	 * Stores the current article. 
+	 * Returns false if save failed
 	 */
-	public void storeArticle() {
-		String bref = WFPage.CONTENT_BUNDLE + ".";
-		//boolean storeOk = ((Boolean) WFUtil.invoke(ARTICLE_ITEM_BEAN_ID, "storeArticle")).booleanValue();
-		boolean storeOk = getArticleItemBean().storeArticle().booleanValue();
-		if (!storeOk) {
-			//List errorKeys = (List) WFUtil.getValue(ARTICLE_ITEM_BEAN_ID, "errorKeys");
-			List errorKeys = getArticleItemBean().getErrorKeys();
-			if (errorKeys != null) {
-				for (Iterator iter = errorKeys.iterator(); iter.hasNext();) {
-					String errorKey = (String) iter.next();
-					WFUtil.addMessageVB(findComponent(SAVE_ID), bref + errorKey);
-				}
-			}
-			return;
-		}
+	public boolean storeArticle() {
 		
-		setEditMode(EDIT_MODE_EDIT);
-		setUserMessage("article_saved");
+		try{
+			getArticleItemBean().store();
+			setEditMode(EDIT_MODE_EDIT);
+			setUserMessage("article_saved");
+			return true;
+		}
+		catch(ArticleStoreException ae){
+			String errorKey = ae.getErrorKey();
+			WFUtil.addMessageVB(findComponent(SAVE_ID),ArticleUtil.IW_BUNDLE_IDENTIFIER, errorKey);
+		}
+		catch(Exception e){
+			String errorKey = ArticleStoreException.KEY_ERROR_ON_STORE;
+			WFUtil.addMessageVB(findComponent(SAVE_ID),ArticleUtil.IW_BUNDLE_IDENTIFIER, errorKey);
+			WFUtil.addMessage(findComponent(SAVE_ID),e.getClass().getName()+" : "+e.getMessage());
+			e.printStackTrace();
+		}
+		return false;
 	}
 	/*
 	 * Sets the text in the message task container. 
@@ -678,15 +680,39 @@ public class EditArticleView extends IWBaseComponent implements ManagedContentBe
 
 		IWContext iwc = IWContext.getIWContext(context);
 		String resourcePath = iwc.getParameter(ContentViewer.PARAMETER_CONTENT_RESOURCE);
+		String baseFolderPath = iwc.getParameter(ContentItemToolbar.PARAMETER_BASE_FOLDER_PATH);
 		
 		if(resourcePath!=null){
-			if("create".equals(iwc.getParameter(ContentViewer.PARAMETER_ACTION))){
+			getArticleItemBean().setResourcePath(resourcePath);
+		}
+		
+		if(baseFolderPath!=null){
+			getArticleItemBean().setBaseFolderLocation(baseFolderPath);
+		}
+		
+			if(isInCreateMode()){
+			//if("create".equals(iwc.getParameter(ContentViewer.PARAMETER_ACTION))){
 				//WFUtil.invoke(ARTICLE_ITEM_BEAN_ID,"setFolderLocation",resourcePath,String.class);
-				getArticleItemBean().setFolderLocation(resourcePath);
+				//getArticleItemBean().setFolderLocation(resourcePath);
+
+				WebDAVCategories categoriesUI = (WebDAVCategories)getCategoryEditor();
+				categoriesUI.reset();
+				
 			} else {
+				//We are in edit mode and an article already exits
+				
 				//WFUtil.invoke(ARTICLE_ITEM_BEAN_ID,"load",resourcePath,String.class);
 				try {
-					getArticleItemBean().load(resourcePath);
+					//getArticleItemBean().load(resourcePath);
+					getArticleItemBean().load();
+
+					WebDAVCategories categoriesUI = (WebDAVCategories)getCategoryEditor();
+					//Update the categoriesUI with the resourcePath given:
+					if(categoriesUI!=null){
+						//there is no resourcepath set for the article if it's about to be created
+						categoriesUI.setResourcePath(resourcePath);
+					}
+					
 				}
 				catch (Exception e) {
 					// TODO Auto-generated catch block
@@ -694,25 +720,25 @@ public class EditArticleView extends IWBaseComponent implements ManagedContentBe
 				}
 			}
 			
-			WebDAVCategories categoriesUI = (WebDAVCategories)getCategoryEditor();
-			//Update the categoriesUI with the resourcePath given:
-			if(!isInCreateMode()&& categoriesUI!=null){
-				//there is no resourcepath set for the article if it's about to be created
-				categoriesUI.setResourcePath(resourcePath);
-			}
 			
-		}
+		//}
+		//else{
+			
+		//}
 //		if(((Boolean)WFUtil.invoke(ARTICLE_ITEM_BEAN_ID,"getLanguageChange")).booleanValue()) {
-		String languageChange=(String)WFUtil.invoke(ARTICLE_ITEM_BEAN_ID,"getLanguageChange");
+		//String languageChange=(String)WFUtil.invoke(ARTICLE_ITEM_BEAN_ID,"getLanguageChange");
+		String languageChange = getArticleItemBean().getLanguageChange();
 		if(languageChange!=null) {
-			String articlePath = (String)WFUtil.invoke(ARTICLE_ITEM_BEAN_ID, "getArticlePath");
+			/*String articlePath = (String)WFUtil.invoke(ARTICLE_ITEM_BEAN_ID, "getArticlePath");
 			if(null!=articlePath && articlePath.length()>0) {
-				boolean result = ((Boolean)WFUtil.invoke(ARTICLE_ITEM_BEAN_ID, "load",articlePath+"/"+languageChange+ArticleItemBean.ARTICLE_SUFFIX)).booleanValue();
+				boolean result = ((Boolean)WFUtil.invoke(ARTICLE_ITEM_BEAN_ID, "load",articlePath+"/"+languageChange+ArticleItemBean.ARTICLE_FILE_SUFFIX)).booleanValue();
 				if(!result) {
 					System.out.println("Warning loading new language did not work!");
 				}
 			}
 			WFUtil.invoke(ARTICLE_ITEM_BEAN_ID, "setLanguageChange","");
+			*/
+			getArticleItemBean().setLanguageChange(languageChange);
 		}
 	}
 
@@ -725,23 +751,33 @@ public class EditArticleView extends IWBaseComponent implements ManagedContentBe
 		}
 		System.out.println("Language value has changed from "+arg0.getOldValue()+" to "+arg0.getNewValue());
 		
-		String articlePath = (String)WFUtil.invoke(ARTICLE_ITEM_BEAN_ID, "getArticlePath");
-		String language = (String)WFUtil.invoke(ARTICLE_ITEM_BEAN_ID, "getContentLanguage");
+		ArticleItemBean bean = getArticleItemBean();
+		//String articlePath = (String)WFUtil.invoke(ARTICLE_ITEM_BEAN_ID, "getArticlePath");
+		String articlePath = bean.getResourcePath();
+		//String language = (String)WFUtil.invoke(ARTICLE_ITEM_BEAN_ID, "getContentLanguage");
+		String language = bean.getContentLanguage();
 		if(null==articlePath) {
 			//Article has not been stored previousley, so nothing have to be done
 			return;
 		}
-		System.out.println("Article path"+articlePath);
-		boolean result = ((Boolean)WFUtil.invoke(ARTICLE_ITEM_BEAN_ID, "load",articlePath+"/"+arg0.getNewValue()+ArticleItemBean.ARTICLE_SUFFIX)).booleanValue();
-		System.out.println("loading other language "+result);
-		if(result) {
-			WFUtil.invoke(ARTICLE_ITEM_BEAN_ID, "setLanguageChange",arg0.getNewValue().toString());
-		}else {
-			if(null!=language) {
-				result = ((Boolean)WFUtil.invoke(ARTICLE_ITEM_BEAN_ID, "load",articlePath+"/"+language+ArticleItemBean.ARTICLE_SUFFIX)).booleanValue();
-				System.out.println("loading other language "+result);
-			}
-		}
+		System.out.println("processValueChange: Article path: "+articlePath);
+		//boolean result = ((Boolean)WFUtil.invoke(ARTICLE_ITEM_BEAN_ID, "load",articlePath+"/"+arg0.getNewValue()+ArticleItemBean.ARTICLE_SUFFIX)).booleanValue();
+		//System.out.println("loading other language "+result);
+		//if(result) {
+			//WFUtil.invoke(ARTICLE_ITEM_BEAN_ID, "setLanguageChange",arg0.getNewValue().toString());
+			String langChange = arg0.getNewValue().toString();
+			bean.setLanguageChange(langChange);
+			Locale locale = new Locale(langChange);
+			bean.setLocale(locale);
+			System.out.println("processValueChange: changint to other language "+langChange);
+		//}else {
+			//if(null!=language) {
+				//result = ((Boolean)WFUtil.invoke(ARTICLE_ITEM_BEAN_ID, "load",articlePath+"/"+language+ArticleItemBean.ARTICLE_SUFFIX)).booleanValue();
+				//bean.setLanguageChange(language);
+				//bean.setLocale(new Locale(language));
+				//System.out.println("loading other language "+result);
+			//}
+		//}
 	}
 	
 	/**

@@ -1,5 +1,5 @@
 /*
- * $Id: ArticleListViewer.java,v 1.2 2005/11/03 16:06:26 tryggvil Exp $
+ * $Id: ArticleListViewer.java,v 1.3 2005/12/20 16:40:41 tryggvil Exp $
  * Created on 24.1.2005
  *
  * Copyright (C) 2005 Idega Software hf. All Rights Reserved.
@@ -11,6 +11,7 @@ package com.idega.block.article.component;
 
 import javax.faces.context.FacesContext;
 import com.idega.block.article.bean.ArticleListManagedBean;
+import com.idega.block.article.business.ArticleUtil;
 import com.idega.content.presentation.ContentItemListViewer;
 
 
@@ -20,16 +21,16 @@ import com.idega.content.presentation.ContentItemListViewer;
  * for the article module.
  * </p>
  * 
- *  Last modified: $Date: 2005/11/03 16:06:26 $ by $Author: tryggvil $
+ *  Last modified: $Date: 2005/12/20 16:40:41 $ by $Author: tryggvil $
  * 
  * @author <a href="mailto:tryggvi@idega.com">Tryggvi Larusson</a>
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 public class ArticleListViewer extends ContentItemListViewer {
 
 	//constants:
 	final static String ARTICLE_LIST_BEAN="articleItemListBean";
-	final static String DEFAULT_RESOURCE_PATH="/files/cms/articles";
+	final static String DEFAULT_RESOURCE_PATH=ArticleUtil.getArticleBaseFolderPath();
 	//instance variables:
 	boolean headlineAsLink=false;
 	
@@ -39,7 +40,7 @@ public class ArticleListViewer extends ContentItemListViewer {
 	public ArticleListViewer() {
 		super();
 		setBeanIdentifier(ARTICLE_LIST_BEAN);
-		setResourcePath(DEFAULT_RESOURCE_PATH);
+		setBaseFolderPath(DEFAULT_RESOURCE_PATH);
 	}
 	
 	/**

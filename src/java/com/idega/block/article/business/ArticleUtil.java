@@ -1,5 +1,5 @@
 /*
- * $Id: ArticleUtil.java,v 1.5 2005/02/21 16:16:19 gummi Exp $
+ * $Id: ArticleUtil.java,v 1.6 2005/12/20 16:40:42 tryggvil Exp $
  * Created on 7.2.2005
  *
  * Copyright (C) 2005 Idega Software hf. All Rights Reserved.
@@ -19,10 +19,10 @@ import com.idega.util.IWTimestamp;
 
 /**
  * 
- *  Last modified: $Date: 2005/02/21 16:16:19 $ by $Author: gummi $
+ *  Last modified: $Date: 2005/12/20 16:40:42 $ by $Author: tryggvil $
  * 
  * @author <a href="mailto:gummi@idega.com">Gudmundur Agust Saemundsson</a>
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
  */
 public class ArticleUtil {
 	
@@ -48,22 +48,38 @@ public class ArticleUtil {
 	}
 	
 	public static String getContentRootPath(){
-		return ContentUtil.getContentRootPath();
+		return ContentUtil.getContentBaseFolderPath();
 	}
 
-	
-	public static String getArticleRootPath(){
-		return ContentUtil.getContentRootPath()+ARTICLE_CONTENT_PATH;
+	/**
+	 * <p>
+	 * This article returns the standard root or 'baseFolderPath' for articles.<br/>
+	 * By default this is /files/cms/article
+	 * </p>
+	 * @return
+	 */
+	public static String getArticleBaseFolderPath(){
+		return ContentUtil.getContentBaseFolderPath()+ARTICLE_CONTENT_PATH;
 	}
 
 	/**
 	 * @return the path where a new article by default should be created
 	 */
-	public static String getArticleYearMonthPath() {
+	public static String getDefaultArticleYearMonthPath() {
+		String folderString = ArticleUtil.getArticleBaseFolderPath();
+		return getArticleYearMonthPath(folderString);
+	}
+	
+	/**
+	 * @return Appends to the path where a new article by default should be created
+	 */
+	public static String getArticleYearMonthPath(String basePath) {
 		IWTimestamp now = new IWTimestamp();
-		String folderString = ArticleUtil.getArticleRootPath()+"/"+now.getYear()+"/"+now.getDateString("MM");
+		String folderString = basePath+"/"+now.getYear()+"/"+now.getDateString("MM");
 		return folderString;
 	}
+	
+	
 	
 	public static String getFilenameFromPath(String path) {
 		File file = new File(path);
