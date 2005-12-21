@@ -1,5 +1,5 @@
 /*
- * $Id: EditArticleView.java,v 1.11 2005/12/20 16:40:41 tryggvil Exp $
+ * $Id: EditArticleView.java,v 1.12 2005/12/21 16:33:18 laddi Exp $
  *
  * Copyright (C) 2004 Idega. All Rights Reserved.
  *
@@ -56,10 +56,10 @@ import com.idega.webface.htmlarea.HTMLArea;
  * <p>
  * This is the part for the editor of article is inside the admin interface
  * </p>
- * Last modified: $Date: 2005/12/20 16:40:41 $ by $Author: tryggvil $
+ * Last modified: $Date: 2005/12/21 16:33:18 $ by $Author: laddi $
  *
  * @author Joakim,Tryggvi Larusson
- * @version $Revision: 1.11 $
+ * @version $Revision: 1.12 $
  */
 public class EditArticleView extends IWBaseComponent implements ManagedContentBeans, ActionListener, ValueChangeListener {
 	public final static String EDIT_ARTICLE_BLOCK_ID = "edit_articles_block";
@@ -755,7 +755,7 @@ public class EditArticleView extends IWBaseComponent implements ManagedContentBe
 		//String articlePath = (String)WFUtil.invoke(ARTICLE_ITEM_BEAN_ID, "getArticlePath");
 		String articlePath = bean.getResourcePath();
 		//String language = (String)WFUtil.invoke(ARTICLE_ITEM_BEAN_ID, "getContentLanguage");
-		String language = bean.getContentLanguage();
+		bean.getContentLanguage();
 		if(null==articlePath) {
 			//Article has not been stored previousley, so nothing have to be done
 			return;

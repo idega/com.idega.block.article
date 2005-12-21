@@ -1,5 +1,5 @@
 /*
- * $Id: ArticleItemBean.java,v 1.57 2005/12/20 16:40:42 tryggvil Exp $
+ * $Id: ArticleItemBean.java,v 1.58 2005/12/21 16:33:18 laddi Exp $
  *
  * Copyright (C) 2004-2005 Idega. All Rights Reserved.
  *
@@ -12,7 +12,6 @@ package com.idega.block.article.bean;
 import java.io.IOException;
 import java.io.Serializable;
 import java.sql.Timestamp;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -49,10 +48,10 @@ import com.idega.xml.XMLException;
  * This is a JSF managed bean that manages each article instance and delegates 
  * all calls to the correct localized instance.
  * <p>
- * Last modified: $Date: 2005/12/20 16:40:42 $ by $Author: tryggvil $
+ * Last modified: $Date: 2005/12/21 16:33:18 $ by $Author: laddi $
  *
  * @author Anders Lindman,<a href="mailto:tryggvi@idega.com">Tryggvi Larusson</a>
- * @version $Revision: 1.57 $
+ * @version $Revision: 1.58 $
  */
 public class ArticleItemBean extends ContentItemBean implements Serializable, ContentItem {
 	
