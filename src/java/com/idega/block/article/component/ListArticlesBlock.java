@@ -1,5 +1,5 @@
 /*
- * $Id: ListArticlesBlock.java,v 1.12 2005/12/20 16:40:41 tryggvil Exp $
+ * $Id: ListArticlesBlock.java,v 1.13 2006/01/04 14:32:52 tryggvil Exp $
  *
  * Copyright (C) 2004 Idega. All Rights Reserved.
  *
@@ -25,7 +25,7 @@ import com.idega.content.data.ContentItemCase;
 import com.idega.presentation.IWBaseComponent;
 import com.idega.webface.WFComponentSelector;
 import com.idega.webface.WFContainer;
-import com.idega.webface.WFErrorMessages;
+import com.idega.webface.WFMessages;
 import com.idega.webface.WFList;
 import com.idega.webface.WFPage;
 import com.idega.webface.WFPanelUtil;
@@ -36,10 +36,10 @@ import com.idega.webface.convert.WFDateConverter;
 /**
  * Block for listing articles.   
  * <p>
- * Last modified: $Date: 2005/12/20 16:40:41 $ by $Author: tryggvil $
+ * Last modified: $Date: 2006/01/04 14:32:52 $ by $Author: tryggvil $
  *
  * @author Anders Lindman
- * @version $Revision: 1.12 $
+ * @version $Revision: 1.13 $
  */
 public class ListArticlesBlock extends 
 IWBaseComponent
@@ -102,9 +102,9 @@ implements ManagedContentBeans, ActionListener, Serializable {
 
 		WFContainer mainContainer = new WFContainer();
 		
-		WFErrorMessages em = new WFErrorMessages();
-		em.addErrorMessage(SEARCH_PUBLISHED_FROM_ID);
-		em.addErrorMessage(SEARCH_PUBLISHED_TO_ID);
+		WFMessages em = new WFMessages();
+		em.addMessageToDisplay(SEARCH_PUBLISHED_FROM_ID);
+		em.addMessageToDisplay(SEARCH_PUBLISHED_TO_ID);
 		
 		mainContainer.add(em);
 		

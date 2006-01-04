@@ -1,5 +1,5 @@
 /*
- * $Id: ArticleItemBean.java,v 1.58 2005/12/21 16:33:18 laddi Exp $
+ * $Id: ArticleItemBean.java,v 1.59 2006/01/04 14:32:52 tryggvil Exp $
  *
  * Copyright (C) 2004-2005 Idega. All Rights Reserved.
  *
@@ -22,8 +22,6 @@ import org.apache.webdav.lib.Privilege;
 import org.apache.webdav.lib.PropertyName;
 import org.apache.webdav.lib.WebdavResources;
 import com.idega.block.article.business.ArticleUtil;
-import com.idega.business.IBOLookup;
-import com.idega.business.IBOLookupException;
 import com.idega.content.bean.ContentItem;
 import com.idega.content.bean.ContentItemBean;
 import com.idega.content.bean.ContentItemCase;
@@ -48,10 +46,10 @@ import com.idega.xml.XMLException;
  * This is a JSF managed bean that manages each article instance and delegates 
  * all calls to the correct localized instance.
  * <p>
- * Last modified: $Date: 2005/12/21 16:33:18 $ by $Author: laddi $
+ * Last modified: $Date: 2006/01/04 14:32:52 $ by $Author: tryggvil $
  *
  * @author Anders Lindman,<a href="mailto:tryggvi@idega.com">Tryggvi Larusson</a>
- * @version $Revision: 1.58 $
+ * @version $Revision: 1.59 $
  */
 public class ArticleItemBean extends ContentItemBean implements Serializable, ContentItem {
 	
@@ -102,6 +100,8 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 	public void clear() {
 		// TODO Auto-generated method stub
 		getLocalizedArticle().clear();
+		resourcePath=null;
+		avilableInRequestedLanguage=false;
 	}
 	/* (non-Javadoc)
 	 * @see com.idega.block.article.bean.ArticleLocalizedItemBean#getAsXML()
@@ -1281,10 +1281,6 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 	private String calculateLocalizedResourcePath(String resourcePath) {
 		return calculateLocalizedResourcePath(resourcePath,getLanguage());
 	}
-	
-	private String getArticleDefaultLocalizedFileName(){
-		return getArticleDefaultLocalizedFileName(getLanguage());
-	}
 
 	private String getArticleDefaultLocalizedFileName(String language){
 		return language+ARTICLE_FILE_SUFFIX;
@@ -1446,40 +1442,6 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 		}
 		
 	}
-	/**
-	 * <p>
-	 * TODO tryggvil describe method getIWSlideService
-	 * </p>
-	 * @param iwuc
-	 * @return
-	 */
-	private IWSlideService getIWSlideService(IWUserContext iwuc) {
-		try {
-			IWSlideService slideService = (IWSlideService) IBOLookup.getServiceInstance(iwuc.getApplicationContext(),IWSlideService.class);
-			return slideService;
-		}
-		catch (IBOLookupException e) {
-			throw new RuntimeException(e);
-		}
-	}
-	
-	
-	/**
-	 * <p>
-	 * TODO tryggvil describe method getIWSlideService
-	 * </p>
-	 * @param iwuc
-	 * @return
-	 */
-	private IWSlideSession getIWSlideSession(IWUserContext iwuc) {
-		try {
-			IWSlideSession slideSession = (IWSlideSession) IBOLookup.getSessionInstance(iwuc,IWSlideSession.class);
-			return slideSession;
-		}
-		catch (IBOLookupException e) {
-			throw new RuntimeException(e);
-		}
-	}
 	
 	/**
 	 * Loads the article (folder)
@@ -1623,6 +1585,15 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 	 */
 	public boolean getAvilableInRequestedLanguage() {
 		return avilableInRequestedLanguage;
+	}
+
+	/* (non-Javadoc)
+	 * @see com.idega.content.bean.ContentItemBean#delete()
+	 */
+	public void delete() {
+		getLocalizedArticle().delete();
+		localizedArticle=null;
+		super.delete();
 	}
 
 }

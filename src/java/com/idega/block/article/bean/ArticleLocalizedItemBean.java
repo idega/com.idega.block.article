@@ -1,5 +1,5 @@
 /*
- * $Id: ArticleLocalizedItemBean.java,v 1.1 2005/12/20 16:40:42 tryggvil Exp $
+ * $Id: ArticleLocalizedItemBean.java,v 1.2 2006/01/04 14:32:52 tryggvil Exp $
  *
  * Copyright (C) 2004 Idega. All Rights Reserved.
  *
@@ -20,8 +20,6 @@ import java.util.logging.Logger;
 import org.apache.webdav.lib.WebdavResource;
 import org.w3c.tidy.Configuration;
 import org.w3c.tidy.Tidy;
-import com.idega.business.IBOLookup;
-import com.idega.business.IBOLookupException;
 import com.idega.content.bean.ContentItem;
 import com.idega.content.bean.ContentItemBean;
 import com.idega.content.bean.ContentItemCase;
@@ -30,7 +28,6 @@ import com.idega.content.bean.ContentItemFieldBean;
 import com.idega.data.IDOStoreException;
 import com.idega.idegaweb.IWUserContext;
 import com.idega.presentation.IWContext;
-import com.idega.slide.business.IWSlideService;
 import com.idega.slide.business.IWSlideSession;
 import com.idega.slide.util.WebdavExtendedResource;
 import com.idega.slide.util.WebdavRootResource;
@@ -46,10 +43,10 @@ import com.idega.xml.XMLParser;
  * This is a JSF managed bean that manages each article xml document 
  * instance per language/locale.
  * <p>
- * Last modified: $Date: 2005/12/20 16:40:42 $ by $Author: tryggvil $
+ * Last modified: $Date: 2006/01/04 14:32:52 $ by $Author: tryggvil $
  *
  * @author Anders Lindman,<a href="mailto:tryggvi@idega.com">Tryggvi Larusson</a>
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public class ArticleLocalizedItemBean extends ContentItemBean implements Serializable, ContentItem {
 	
@@ -59,7 +56,6 @@ public class ArticleLocalizedItemBean extends ContentItemBean implements Seriali
 	private static final long serialVersionUID = -7871069835129148485L;
 
 	private boolean _isUpdated = false;
-	private List _errorKeys = null;
 	
 	public final static String FIELDNAME_AUTHOR = "author";
 	public final static String FIELDNAME_HEADLINE = "headline";
@@ -109,41 +105,6 @@ public class ArticleLocalizedItemBean extends ContentItemBean implements Seriali
 	public List getImages() { return getItemFields(FIELDNAME_IMAGES); }
 	//public String getFilename() { return (String)getValue(FIELDNAME_FILENAME); }
 	
-
-	
-	/**
-	 * <p>
-	 * TODO tryggvil describe method getIWSlideService
-	 * </p>
-	 * @param iwuc
-	 * @return
-	 */
-	private IWSlideService getIWSlideService(IWUserContext iwuc) {
-		try {
-			IWSlideService slideService = (IWSlideService) IBOLookup.getServiceInstance(iwuc.getApplicationContext(),IWSlideService.class);
-			return slideService;
-		}
-		catch (IBOLookupException e) {
-			throw new RuntimeException(e);
-		}
-	}
-	
-	/**
-	 * <p>
-	 * TODO tryggvil describe method getIWSlideService
-	 * </p>
-	 * @param iwuc
-	 * @return
-	 */
-	private IWSlideSession getIWSlideSession(IWUserContext iwuc) {
-		try {
-			IWSlideSession slideService = (IWSlideSession) IBOLookup.getSessionInstance(iwuc,IWSlideSession.class);
-			return slideService;
-		}
-		catch (IBOLookupException e) {
-			throw new RuntimeException(e);
-		}
-	}
 
 //	public void setArticleResourcePath(String path) {
 //		if(path!=null){

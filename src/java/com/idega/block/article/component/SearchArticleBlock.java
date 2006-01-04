@@ -1,5 +1,5 @@
 /*
- * $Id: SearchArticleBlock.java,v 1.12 2005/10/26 11:44:04 tryggvil Exp $
+ * $Id: SearchArticleBlock.java,v 1.13 2006/01/04 14:32:52 tryggvil Exp $
  *
  * Copyright (C) 2004 Idega. All Rights Reserved.
  *
@@ -25,7 +25,7 @@ import com.idega.idegaweb.IWMainApplication;
 import com.idega.presentation.Script;
 import com.idega.webface.WFBlock;
 import com.idega.webface.WFContainer;
-import com.idega.webface.WFErrorMessages;
+import com.idega.webface.WFMessages;
 import com.idega.webface.WFList;
 import com.idega.webface.WFPanelUtil;
 import com.idega.webface.WFUtil;
@@ -33,10 +33,10 @@ import com.idega.webface.WFUtil;
 /**
  * Block for searching articles.   
  * <p>
- * Last modified: $Date: 2005/10/26 11:44:04 $ by $Author: tryggvil $
+ * Last modified: $Date: 2006/01/04 14:32:52 $ by $Author: tryggvil $
  *
  * @author Anders Lindman
- * @version $Revision: 1.12 $
+ * @version $Revision: 1.13 $
  */
 public class SearchArticleBlock extends WFBlock implements ManagedContentBeans, ActionListener, Serializable {
 
@@ -85,9 +85,9 @@ public class SearchArticleBlock extends WFBlock implements ManagedContentBeans, 
 
 		WFContainer mainContainer = new WFContainer();
 
-		WFErrorMessages em = new WFErrorMessages();
-		em.addErrorMessage(SEARCH_PUBLISHED_FROM_ID);
-		em.addErrorMessage(SEARCH_PUBLISHED_TO_ID);		
+		WFMessages em = new WFMessages();
+		em.addMessageToDisplay(SEARCH_PUBLISHED_FROM_ID);
+		em.addMessageToDisplay(SEARCH_PUBLISHED_TO_ID);		
 
 		mainContainer.add(em);
 

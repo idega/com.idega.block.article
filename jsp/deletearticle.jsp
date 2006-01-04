@@ -7,9 +7,9 @@
 version="1.2">
 <jsp:directive.page contentType="text/html" pageEncoding="UTF-8"/>
 <jsf:view>
-        <ws:page id="createarticle1">
-                <html:form id="createarticleform1">
-                        <article:articleAdminBlock mode="create"/>
+        <ws:page id="deletearticle1">
+                <html:form id="deletearticleform1">
+                        <article:articleAdminBlock mode="delete"/>
                 </html:form>
         </ws:page>
 </jsf:view>

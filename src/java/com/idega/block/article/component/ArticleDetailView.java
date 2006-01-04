@@ -1,5 +1,5 @@
 /*
- * $Id: ArticleDetailView.java,v 1.19 2005/11/30 09:34:52 laddi Exp $
+ * $Id: ArticleDetailView.java,v 1.20 2006/01/04 14:32:52 tryggvil Exp $
  * 
  * Copyright (C) 2004 Idega. All Rights Reserved.
  * 
@@ -24,12 +24,12 @@ import com.idega.webface.WFUtil;
 import com.idega.webface.convert.WFCommaSeparatedListConverter;
 
 /**
- * Last modified: $Date: 2005/11/30 09:34:52 $ by $Author: laddi $
+ * Last modified: $Date: 2006/01/04 14:32:52 $ by $Author: tryggvil $
  * 
  * Displays detailed info about the article
  * 
  * @author Joakim
- * @version $Revision: 1.19 $
+ * @version $Revision: 1.20 $
  */
 public class ArticleDetailView extends IWBaseComponent implements ManagedContentBeans {
 
@@ -127,12 +127,12 @@ public class ArticleDetailView extends IWBaseComponent implements ManagedContent
 		g = WFUtil.group(localizer.getHeaderTextVB("status"), WFUtil.getHeaderText(": "));
 		g.getChildren().add(WFUtil.getTextVB(ref + "status"));
 		p.getChildren().add(g);
-		p.getChildren().add(WFUtil.getText(" "));
-		HtmlOutputText t = WFUtil.getTextVB(ref + "categoryNames");
-		t.setConverter(new WFCommaSeparatedListConverter());
-		g = WFUtil.group(localizer.getHeaderTextVB("categories"), WFUtil.getHeaderText(": "));
-		g.getChildren().add(t);
-		p.getChildren().add(g);
+		//p.getChildren().add(WFUtil.getText(" "));
+		//HtmlOutputText t = WFUtil.getTextVB(ref + "categoryNames");
+		//t.setConverter(new WFCommaSeparatedListConverter());
+		//g = WFUtil.group(localizer.getHeaderTextVB("categories"), WFUtil.getHeaderText(": "));
+		//g.getChildren().add(t);
+		//p.getChildren().add(g);
 		p.getChildren().add(WFUtil.getText(" "));
 		g = WFUtil.group(localizer.getHeaderTextVB("current_version"), WFUtil.getHeaderText(": "));
 //		g.getChildren().add(WFUtil.getTextVB(ref + "versionId"));

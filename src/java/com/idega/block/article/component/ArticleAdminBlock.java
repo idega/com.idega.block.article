@@ -1,5 +1,5 @@
 /*
- * $Id: ArticleAdminBlock.java,v 1.3 2005/10/26 11:44:04 tryggvil Exp $
+ * $Id: ArticleAdminBlock.java,v 1.4 2006/01/04 14:32:52 tryggvil Exp $
  *
  * Copyright (C) 2004 Idega. All Rights Reserved.
  *
@@ -8,16 +8,17 @@
  */
 package com.idega.block.article.component;
 
-import java.util.Collection;
-import java.util.Iterator;
 import javax.faces.context.FacesContext;
+import javax.faces.el.ValueBinding;
 import javax.faces.event.AbortProcessingException;
 import javax.faces.event.ActionEvent;
 import javax.faces.event.ActionListener;
+import org.apache.myfaces.custom.savestate.UISaveState;
 import com.idega.content.bean.ManagedContentBeans;
-import com.idega.webface.WFBlock;
+import com.idega.webface.WFBlockTabbed;
 import com.idega.webface.WFPage;
 import com.idega.webface.WFTabbedPane;
+import com.idega.webface.WFUtil;
 import com.idega.webface.event.WFTabListener;
 
 
@@ -25,17 +26,15 @@ import com.idega.webface.event.WFTabListener;
  * <p>
  * This is the main block for administering articles (creating,editing)
  * </p>
- * Last modified: $Date: 2005/10/26 11:44:04 $ by $Author: tryggvil $
+ * Last modified: $Date: 2006/01/04 14:32:52 $ by $Author: tryggvil $
  *
  * @author Joakim, Tryggvi Larusson
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
-public class ArticleAdminBlock extends WFBlock implements ActionListener, ManagedContentBeans {
+public class ArticleAdminBlock extends WFBlockTabbed implements ActionListener, ManagedContentBeans {
 
-	
-	private static final String STYLE_CLASS = "wf_block BlockStretch";
-	public final static String ARTICLE_BLOCK_ID = "article_bar_block";
-	private final static String P = "article_bar_block_"; // Id prefix
+	public final static String ARTICLE_BLOCK_ID = "article_admin_block";
+	private final static String P = "article_admin_block_"; // Id prefix
 	
 	private final static String TASKBAR_ID = P + "taskbar";
 	public final static String TASK_ID_EDIT = P + "t_edit";
@@ -57,24 +56,22 @@ public class ArticleAdminBlock extends WFBlock implements ActionListener, Manage
 	}
 	public ArticleAdminBlock(String titleKey, WFTabListener taskbarListener) {
 		super(titleKey, true);
-		setStyleClass(STYLE_CLASS);
+		//setStyleClass(STYLE_CLASS);
+		super.setMaximizedVertically(true);
 		setId(ARTICLE_BLOCK_ID);
 		//setMainAreaStyleClass(null);
 
 	}
 
-	
-	public void initializeComponent(FacesContext context){
-		//TODO Remove this and use newer localization system:
-		WFPage.loadResourceBundles(context);
-		
-		super.initializeComponent(context);
-
+	/* (non-Javadoc)
+	 * @see com.idega.webface.WFBlockTabbed#initializeTabbedPane(javax.faces.context.FacesContext)
+	 */
+	protected WFTabbedPane initializeTabbedPane(FacesContext context) {
 		String bref = WFPage.CONTENT_BUNDLE + ".";
 		WFTabbedPane tb = new WFTabbedPane();
 		//tb.setMainAreaStyleClass(WFContainer.DEFAULT_STYLE_CLASS);
 		tb.setId(TASKBAR_ID);
-		add(tb);
+		//add(tb);
 		EditArticleView editArticleBlock = new EditArticleView();
 		tb.addTabVB(TASK_ID_EDIT, bref + "edit", editArticleBlock);
 		tb.addTabVB(TASK_ID_DETAILS, bref + "details", new ArticleDetailView());
@@ -85,26 +82,33 @@ public class ArticleAdminBlock extends WFBlock implements ActionListener, Manage
 		//	tb.addTabListener(taskbarListener);
 		//}
 		String editMode = getEditMode();
-		if(editMode!=null){
+ 		if(editMode!=null){
 			editArticleBlock.setEditMode(editMode);
 		}
+		return tb;
 	}
-
-	protected WFTabbedPane getWFTabbedPane(){
+	
+	
+	public void initializeComponent(FacesContext context){
+		//TODO: Remove this and use newer localization system:
+		WFPage.loadResourceBundles(context);
+		super.initializeComponent(context);
 		
-		Collection children = getChildren();
-		Iterator iter = children.iterator();
-		if(iter.hasNext()){
-			return (WFTabbedPane)iter.next();
-		}
-		return null;
-	}
+		//Saving the state of the articleItemBean specially because the scpoe
+		//of this bean now is 'request' not 'session'
+		UISaveState beanSaveState = new UISaveState();
+		ValueBinding binding = WFUtil.createValueBinding("#{"+ARTICLE_ITEM_BEAN_ID+"}");
+		beanSaveState.setId("articleItemBeanSaveState");
+		beanSaveState.setValueBinding("value",binding);
+		add(beanSaveState);
+		
 
+	}
 	
 	protected EditArticleView getEditArticleView(){
-		WFTabbedPane tab = getWFTabbedPane();
+		WFTabbedPane tab = getTabbedPane();
 		if(tab!=null){
-			return (EditArticleView) tab.getPerspective(TASK_ID_EDIT);
+			return (EditArticleView) tab.getTabView(TASK_ID_EDIT);
 		}
 		return null;
 	}
@@ -152,5 +156,6 @@ public class ArticleAdminBlock extends WFBlock implements ActionListener, Manage
 		mode = (String)values[1];
 		//super.restoreState(ctx,state);
 	}
+
 	
 }

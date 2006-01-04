@@ -7,7 +7,7 @@
         xmlns:article="http://xmlns.idega.com/com.idega.block.article"
         xmlns:co="http://xmlns.idega.com/com.idega.content"  
 version="1.2">
-<jsp:directive.page contentType="text/html;charset=UTF-8" pageEncoding="UTF-8"/>
+<jsp:directive.page contentType="text/html" pageEncoding="UTF-8"/>
 	<jsf:view>
 		<ws:page id="listarticles1">
 			<h:form id="listarticlesform1">
