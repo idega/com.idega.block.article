@@ -1,5 +1,5 @@
 /*
- * $Id: ArticleDetailView.java,v 1.20 2006/01/04 14:32:52 tryggvil Exp $
+ * $Id: ArticleDetailView.java,v 1.21 2006/01/05 15:52:12 laddi Exp $
  * 
  * Copyright (C) 2004 Idega. All Rights Reserved.
  * 
@@ -10,7 +10,6 @@ package com.idega.block.article.component;
 
 import java.io.IOException;
 import javax.faces.component.UIComponent;
-import javax.faces.component.html.HtmlOutputText;
 import javax.faces.component.html.HtmlPanelGrid;
 import javax.faces.context.FacesContext;
 import com.idega.content.bean.ManagedContentBeans;
@@ -21,15 +20,14 @@ import com.idega.webface.WFPanelUtil;
 import com.idega.webface.WFPlainOutputText;
 import com.idega.webface.WFResourceUtil;
 import com.idega.webface.WFUtil;
-import com.idega.webface.convert.WFCommaSeparatedListConverter;
 
 /**
- * Last modified: $Date: 2006/01/04 14:32:52 $ by $Author: tryggvil $
+ * Last modified: $Date: 2006/01/05 15:52:12 $ by $Author: laddi $
  * 
  * Displays detailed info about the article
  * 
  * @author Joakim
- * @version $Revision: 1.20 $
+ * @version $Revision: 1.21 $
  */
 public class ArticleDetailView extends IWBaseComponent implements ManagedContentBeans {
 

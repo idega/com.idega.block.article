@@ -1,5 +1,5 @@
 /*
- * $Id: EditArticleView.java,v 1.13 2006/01/04 14:32:52 tryggvil Exp $
+ * $Id: EditArticleView.java,v 1.14 2006/01/05 15:52:41 laddi Exp $
  *
  * Copyright (C) 2004 Idega. All Rights Reserved.
  *
@@ -57,10 +57,10 @@ import com.idega.webface.htmlarea.HTMLArea;
  * <p>
  * This is the part for the editor of article is inside the admin interface
  * </p>
- * Last modified: $Date: 2006/01/04 14:32:52 $ by $Author: tryggvil $
+ * Last modified: $Date: 2006/01/05 15:52:41 $ by $Author: laddi $
  *
  * @author Joakim,Tryggvi Larusson
- * @version $Revision: 1.13 $
+ * @version $Revision: 1.14 $
  */
 public class EditArticleView extends IWBaseComponent implements ManagedContentBeans, ActionListener, ValueChangeListener {
 	public final static String EDIT_ARTICLE_BLOCK_ID = "edit_article_view";
@@ -655,7 +655,7 @@ public class EditArticleView extends IWBaseComponent implements ManagedContentBe
 	 * Sets this block to message mode. 
 	 */
 	public void setMessageMode() {
-		WFTabbedPane tb = (WFTabbedPane) findComponent(TASKBAR_ID);
+		/*WFTabbedPane tb = (WFTabbedPane)*/ findComponent(TASKBAR_ID);
 		//tb.setSelectedMenuItemId(TASK_ID_MESSAGES);
 	}
 	
