@@ -1,5 +1,5 @@
 /*
- * $Id: EditArticleView.java,v 1.14 2006/01/05 15:52:41 laddi Exp $
+ * $Id: EditArticleView.java,v 1.15 2006/01/06 13:46:11 tryggvil Exp $
  *
  * Copyright (C) 2004 Idega. All Rights Reserved.
  *
@@ -57,10 +57,10 @@ import com.idega.webface.htmlarea.HTMLArea;
  * <p>
  * This is the part for the editor of article is inside the admin interface
  * </p>
- * Last modified: $Date: 2006/01/05 15:52:41 $ by $Author: laddi $
+ * Last modified: $Date: 2006/01/06 13:46:11 $ by $Author: tryggvil $
  *
  * @author Joakim,Tryggvi Larusson
- * @version $Revision: 1.14 $
+ * @version $Revision: 1.15 $
  */
 public class EditArticleView extends IWBaseComponent implements ManagedContentBeans, ActionListener, ValueChangeListener {
 	public final static String EDIT_ARTICLE_BLOCK_ID = "edit_article_view";
@@ -433,8 +433,13 @@ public class EditArticleView extends IWBaseComponent implements ManagedContentBe
 //		cs.setSelectedId(CANCEL_ID, true);
 //		p.getChildren().add(cs);
 
+		FieldSet buttons = new FieldSet();
+		buttons.setStyleClass("buttons");
+		
 		HtmlCommandButton saveButton = localizer.getButtonVB(SAVE_ID, "save", this);
-		mainContainer.getChildren().add(saveButton);
+		buttons.getChildren().add(saveButton);
+		
+		mainContainer.getChildren().add(buttons);
 		
 		return mainContainer;
 	}
