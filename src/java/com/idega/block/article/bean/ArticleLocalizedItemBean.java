@@ -1,5 +1,5 @@
 /*
- * $Id: ArticleLocalizedItemBean.java,v 1.2 2006/01/04 14:32:52 tryggvil Exp $
+ * $Id: ArticleLocalizedItemBean.java,v 1.3 2006/01/16 16:32:36 tryggvil Exp $
  *
  * Copyright (C) 2004 Idega. All Rights Reserved.
  *
@@ -12,6 +12,7 @@ package com.idega.block.article.bean;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.Serializable;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
@@ -43,10 +44,10 @@ import com.idega.xml.XMLParser;
  * This is a JSF managed bean that manages each article xml document 
  * instance per language/locale.
  * <p>
- * Last modified: $Date: 2006/01/04 14:32:52 $ by $Author: tryggvil $
+ * Last modified: $Date: 2006/01/16 16:32:36 $ by $Author: tryggvil $
  *
  * @author Anders Lindman,<a href="mailto:tryggvi@idega.com">Tryggvi Larusson</a>
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 public class ArticleLocalizedItemBean extends ContentItemBean implements Serializable, ContentItem {
 	
@@ -411,7 +412,11 @@ public class ArticleLocalizedItemBean extends ContentItemBean implements Seriali
 			if(theArticle!=null && !theArticle.isCollection()){
 				//setArticleResourcePath(theArticle.getPath());
 				setResourcePath(theArticle.getPath());
-				bodyDoc = builder.parse(new ByteArrayInputStream(theArticle.getMethodDataAsString().getBytes("UTF-8")));
+				//String inStr = theArticle.getMethodDataAsString();
+				//byte[] bytes = inStr.getBytes("UTF-8");
+				//InputStream inStream = new ByteArrayInputStream(bytes);
+				InputStream inStream = theArticle.getMethodData();
+				bodyDoc = builder.parse(inStream);
 			} else {
 				bodyDoc = null;
 			}
