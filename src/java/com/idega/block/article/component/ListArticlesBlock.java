@@ -1,5 +1,5 @@
 /*
- * $Id: ListArticlesBlock.java,v 1.13 2006/01/04 14:32:52 tryggvil Exp $
+ * $Id: ListArticlesBlock.java,v 1.14 2006/02/22 20:58:28 laddi Exp $
  *
  * Copyright (C) 2004 Idega. All Rights Reserved.
  *
@@ -36,10 +36,10 @@ import com.idega.webface.convert.WFDateConverter;
 /**
  * Block for listing articles.   
  * <p>
- * Last modified: $Date: 2006/01/04 14:32:52 $ by $Author: tryggvil $
+ * Last modified: $Date: 2006/02/22 20:58:28 $ by $Author: laddi $
  *
  * @author Anders Lindman
- * @version $Revision: 1.13 $
+ * @version $Revision: 1.14 $
  */
 public class ListArticlesBlock extends 
 IWBaseComponent
@@ -242,26 +242,23 @@ implements ManagedContentBeans, ActionListener, Serializable {
 			cs.setSelectedId(VIEW_ARTICLE_PANEL_ID, true);
 		}
 		catch (XmlException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		catch (Exception e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		
 	}
 	
-	private String notNull(String str) {
+	/*private String notNull(String str) {
 		if(null==str) {
 			return "<Empty>";
 		}
 		return str;
-	}
+	}*/
 	
 	public ArticleItemBean getArticleItemBean(){
 		return (ArticleItemBean) WFUtil.getBeanInstance(ARTICLE_ITEM_BEAN_ID);
