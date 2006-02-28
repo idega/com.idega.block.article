@@ -1,5 +1,5 @@
 /*
- * $Id: ArticleListViewer.java,v 1.3 2005/12/20 16:40:41 tryggvil Exp $
+ * $Id: ArticleListViewer.java,v 1.4 2006/02/28 14:50:15 tryggvil Exp $
  * Created on 24.1.2005
  *
  * Copyright (C) 2005 Idega Software hf. All Rights Reserved.
@@ -10,9 +10,12 @@
 package com.idega.block.article.component;
 
 import javax.faces.context.FacesContext;
+import com.idega.block.article.ArticleCacher;
 import com.idega.block.article.bean.ArticleListManagedBean;
 import com.idega.block.article.business.ArticleUtil;
 import com.idega.content.presentation.ContentItemListViewer;
+import com.idega.core.cache.UIComponentCacher;
+import com.idega.idegaweb.IWMainApplication;
 
 
 /**
@@ -21,10 +24,10 @@ import com.idega.content.presentation.ContentItemListViewer;
  * for the article module.
  * </p>
  * 
- *  Last modified: $Date: 2005/12/20 16:40:41 $ by $Author: tryggvil $
+ *  Last modified: $Date: 2006/02/28 14:50:15 $ by $Author: tryggvil $
  * 
  * @author <a href="mailto:tryggvi@idega.com">Tryggvi Larusson</a>
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
 public class ArticleListViewer extends ContentItemListViewer {
 
@@ -78,5 +81,13 @@ public class ArticleListViewer extends ContentItemListViewer {
 	
 	public ArticleListManagedBean getArticleListBean(){
 		return (ArticleListManagedBean)super.getManagedBean();
+	}
+
+	/* (non-Javadoc)
+	 * @see com.idega.content.presentation.ContentItemListViewer#getCacher(javax.faces.context.FacesContext)
+	 */
+	public UIComponentCacher getCacher(FacesContext context) {
+		IWMainApplication iwma = IWMainApplication.getIWMainApplication(context);
+		return ArticleCacher.getInstance(iwma);
 	}
 }

@@ -1,5 +1,5 @@
 /*
- * $Id: ArticleItemViewer.java,v 1.10 2005/12/20 16:40:41 tryggvil Exp $
+ * $Id: ArticleItemViewer.java,v 1.11 2006/02/28 14:50:15 tryggvil Exp $
  *
  * Copyright (C) 2004 Idega. All Rights Reserved.
  *
@@ -12,21 +12,24 @@ import java.sql.Timestamp;
 import javax.faces.component.UIComponent;
 import javax.faces.component.html.HtmlOutputText;
 import javax.faces.context.FacesContext;
+import com.idega.block.article.ArticleCacher;
 import com.idega.block.article.bean.ArticleItemBean;
 import com.idega.block.article.business.ArticleActionURIHandler;
 import com.idega.content.bean.ContentItem;
 import com.idega.content.presentation.ContentItemToolbar;
 import com.idega.content.presentation.ContentItemViewer;
+import com.idega.core.cache.UIComponentCacher;
+import com.idega.idegaweb.IWMainApplication;
 import com.idega.webface.WFHtml;
 import com.idega.webface.convert.WFTimestampConverter;
 
 /**
- * Last modified: $Date: 2005/12/20 16:40:41 $ by $Author: tryggvil $
+ * Last modified: $Date: 2006/02/28 14:50:15 $ by $Author: tryggvil $
  *
  * Displays the article item
  *
  * @author <a href="mailto:gummi@idega.com">Gudmundur Agust Saemundsson</a>
- * @version $Revision: 1.10 $
+ * @version $Revision: 1.11 $
  */
 public class ArticleItemViewer extends ContentItemViewer {
 	
@@ -209,6 +212,14 @@ public class ArticleItemViewer extends ContentItemViewer {
 			toolbar.setActionHandlerIdentifier(ArticleActionURIHandler.HANDLER_IDENTIFIER);
 		}
 		super.updateToolbar();
+	}
+	
+	/* (non-Javadoc)
+	 * @see com.idega.content.presentation.ContentItemListViewer#getCacher(javax.faces.context.FacesContext)
+	 */
+	public UIComponentCacher getCacher(FacesContext context) {
+		IWMainApplication iwma = IWMainApplication.getIWMainApplication(context);
+		return ArticleCacher.getInstance(iwma);
 	}
 	
 }

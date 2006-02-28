@@ -1,5 +1,5 @@
 /*
- * $Id: ArticleItemBean.java,v 1.59 2006/01/04 14:32:52 tryggvil Exp $
+ * $Id: ArticleItemBean.java,v 1.60 2006/02/28 14:50:15 tryggvil Exp $
  *
  * Copyright (C) 2004-2005 Idega. All Rights Reserved.
  *
@@ -21,12 +21,14 @@ import org.apache.webdav.lib.Ace;
 import org.apache.webdav.lib.Privilege;
 import org.apache.webdav.lib.PropertyName;
 import org.apache.webdav.lib.WebdavResources;
+import com.idega.block.article.ArticleCacher;
 import com.idega.block.article.business.ArticleUtil;
 import com.idega.content.bean.ContentItem;
 import com.idega.content.bean.ContentItemBean;
 import com.idega.content.bean.ContentItemCase;
 import com.idega.core.accesscontrol.business.StandardRoles;
 import com.idega.data.IDOStoreException;
+import com.idega.idegaweb.IWMainApplication;
 import com.idega.idegaweb.IWUserContext;
 import com.idega.idegaweb.UnavailableIWContext;
 import com.idega.presentation.IWContext;
@@ -46,10 +48,10 @@ import com.idega.xml.XMLException;
  * This is a JSF managed bean that manages each article instance and delegates 
  * all calls to the correct localized instance.
  * <p>
- * Last modified: $Date: 2006/01/04 14:32:52 $ by $Author: tryggvil $
+ * Last modified: $Date: 2006/02/28 14:50:15 $ by $Author: tryggvil $
  *
  * @author Anders Lindman,<a href="mailto:tryggvi@idega.com">Tryggvi Larusson</a>
- * @version $Revision: 1.59 $
+ * @version $Revision: 1.60 $
  */
 public class ArticleItemBean extends ContentItemBean implements Serializable, ContentItem {
 	
@@ -348,8 +350,10 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 			}
 			
 			rootResource.close();
-
 			getLocalizedArticle().store();
+			
+			ArticleCacher cacher = ArticleCacher.getInstance(IWMainApplication.getDefaultIWMainApplication());
+			cacher.getCacheMap().clear();
 			
 		}
 		catch(ArticleStoreException ase){
@@ -1594,6 +1598,9 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 		getLocalizedArticle().delete();
 		localizedArticle=null;
 		super.delete();
+		
+		ArticleCacher cacher = ArticleCacher.getInstance(IWMainApplication.getDefaultIWMainApplication());
+		cacher.getCacheMap().clear();
 	}
 
 }
