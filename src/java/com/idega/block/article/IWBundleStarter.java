@@ -1,5 +1,5 @@
 /*
- * $Id: IWBundleStarter.java,v 1.19 2006/01/04 14:32:52 tryggvil Exp $
+ * $Id: IWBundleStarter.java,v 1.20 2006/03/08 11:35:07 tryggvil Exp $
  * Created on 2.11.2004
  *
  * Copyright (C) 2004 Idega Software hf. All Rights Reserved.
@@ -22,10 +22,10 @@ import com.idega.idegaweb.include.GlobalIncludeManager;
 
 /**
  * 
- *  Last modified: $Date: 2006/01/04 14:32:52 $ by $Author: tryggvil $
+ *  Last modified: $Date: 2006/03/08 11:35:07 $ by $Author: tryggvil $
  * 
  * @author <a href="mailto:tryggvil@idega.com">Tryggvi Larusson</a>
- * @version $Revision: 1.19 $
+ * @version $Revision: 1.20 $
  */
 public class IWBundleStarter implements IWBundleStartable {
 	private static final String STYLE_SHEET_URL = "/style/article.css";
@@ -98,9 +98,10 @@ public class IWBundleStarter implements IWBundleStartable {
 		previewArticlesNode.setVisibleInMenus(false);
 		previewArticlesNode.setName("#{localizedStrings['com.idega.block.article']['preview']}");
 
-		DefaultViewNode searchArticlesNode = new DefaultViewNode("search",articleNode);
+		/*DefaultViewNode searchArticlesNode = new DefaultViewNode("search",articleNode);
 		searchArticlesNode.setJspUri(bundle.getJSPURI("searcharticle.jsp"));
 		searchArticlesNode.setName("#{localizedStrings['com.idega.block.article']['search_articles']}");
 		//searchArticlesNode.setVisibleInMenus(false);
+		*/
 	}
 }
