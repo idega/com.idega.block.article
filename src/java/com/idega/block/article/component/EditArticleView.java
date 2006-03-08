@@ -1,5 +1,5 @@
 /*
- * $Id: EditArticleView.java,v 1.15 2006/01/06 13:46:11 tryggvil Exp $
+ * $Id: EditArticleView.java,v 1.16 2006/03/08 09:17:12 tryggvil Exp $
  *
  * Copyright (C) 2004 Idega. All Rights Reserved.
  *
@@ -57,10 +57,10 @@ import com.idega.webface.htmlarea.HTMLArea;
  * <p>
  * This is the part for the editor of article is inside the admin interface
  * </p>
- * Last modified: $Date: 2006/01/06 13:46:11 $ by $Author: tryggvil $
+ * Last modified: $Date: 2006/03/08 09:17:12 $ by $Author: tryggvil $
  *
  * @author Joakim,Tryggvi Larusson
- * @version $Revision: 1.15 $
+ * @version $Revision: 1.16 $
  */
 public class EditArticleView extends IWBaseComponent implements ManagedContentBeans, ActionListener, ValueChangeListener {
 	public final static String EDIT_ARTICLE_BLOCK_ID = "edit_article_view";
@@ -117,12 +117,12 @@ public class EditArticleView extends IWBaseComponent implements ManagedContentBe
 
 	protected void initializeComponent(FacesContext context) {
 		setId(EDIT_ARTICLE_BLOCK_ID);
-		if(clearOnInit){
+		/*if(clearOnInit){
 			ArticleItemBean bean = getArticleItemBean();
 			if(bean!=null){
 				bean.clear();
 			}
-		}
+		}*/
 //		WFUtil.invoke(EDIT_ARTICLES_BEAN_ID, "setArticleLinkListener", this, ActionListener.class);
 		if(isInCreateMode()||isInEditMode()){
 			add(getEditContainer());
@@ -749,13 +749,12 @@ public class EditArticleView extends IWBaseComponent implements ManagedContentBe
 	 * @see javax.faces.component.UIComponent#encodeBegin(javax.faces.context.FacesContext)
 	 */
 	public void encodeBegin(FacesContext context) throws IOException {
-		if(clearOnInit) {
-			//WFUtil.invoke(ARTICLE_ITEM_BEAN_ID, "clear");
+		/*if(clearOnInit) {
 			ArticleItemBean bean = getArticleItemBean();
 			if(bean!=null){
 				bean.clear();
 			}
-		}
+		}*/
 
 		IWContext iwc = IWContext.getIWContext(context);
 		String resourcePath = iwc.getParameter(ContentViewer.PARAMETER_CONTENT_RESOURCE);
