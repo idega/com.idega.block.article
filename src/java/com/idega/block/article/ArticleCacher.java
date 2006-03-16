@@ -6,6 +6,7 @@ package com.idega.block.article;
 import java.util.Map;
 import javax.faces.component.UIComponent;
 import javax.faces.context.FacesContext;
+import com.idega.block.article.component.ArticleItemViewer;
 import com.idega.core.cache.IWCacheManager2;
 import com.idega.core.cache.UIComponentCacher;
 import com.idega.idegaweb.IWMainApplication;
@@ -15,10 +16,10 @@ import com.idega.idegaweb.IWMainApplication;
  * <p>
  * TODO tryggvil Describe Type ArticleCacher
  * </p>
- *  Last modified: $Date: 2006/02/28 14:50:15 $ by $Author: tryggvil $
+ *  Last modified: $Date: 2006/03/16 15:36:02 $ by $Author: tryggvil $
  * 
  * @author <a href="mailto:tryggvil@idega.com">tryggvil</a>
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public class ArticleCacher extends UIComponentCacher {
 	
@@ -57,10 +58,28 @@ public class ArticleCacher extends UIComponentCacher {
 	 * @see com.idega.core.cache.UIComponentCacher#isCacheEnbled(javax.faces.component.UIComponent, javax.faces.context.FacesContext)
 	 */
 	public boolean isCacheEnbled(UIComponent component, FacesContext context) {
-		if(component.getId()==null){
+		
+		IWMainApplication iwma = IWMainApplication.getIWMainApplication(context);
+		String prop = iwma.getSettings().getProperty("article.cache.enabled");
+		boolean defaultEnabled = true;
+		if(prop!=null){
+			defaultEnabled = Boolean.valueOf(prop).booleanValue();
+		}
+		if(defaultEnabled){
+			if(component.getId()==null){
+				return false;
+			}
+			
+			if(component instanceof ArticleItemViewer){
+				ArticleItemViewer viewer = (ArticleItemViewer)component;
+				return viewer.isCacheEnabled();
+			}
+			
+			return true;
+		}
+		else{
 			return false;
 		}
-		return true;
 	}
 	
 	

@@ -1,5 +1,5 @@
 /*
- * $Id: ArticleAdminBlock.java,v 1.4 2006/01/04 14:32:52 tryggvil Exp $
+ * $Id: ArticleAdminBlock.java,v 1.5 2006/03/16 15:36:02 tryggvil Exp $
  *
  * Copyright (C) 2004 Idega. All Rights Reserved.
  *
@@ -26,10 +26,10 @@ import com.idega.webface.event.WFTabListener;
  * <p>
  * This is the main block for administering articles (creating,editing)
  * </p>
- * Last modified: $Date: 2006/01/04 14:32:52 $ by $Author: tryggvil $
+ * Last modified: $Date: 2006/03/16 15:36:02 $ by $Author: tryggvil $
  *
  * @author Joakim, Tryggvi Larusson
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  */
 public class ArticleAdminBlock extends WFBlockTabbed implements ActionListener, ManagedContentBeans {
 
@@ -157,5 +157,21 @@ public class ArticleAdminBlock extends WFBlockTabbed implements ActionListener, 
 		//super.restoreState(ctx,state);
 	}
 
+
+	/* (non-Javadoc)
+	 * @see javax.faces.component.UIComponentBase#processUpdates(javax.faces.context.FacesContext)
+	 */
+	public void processUpdates(FacesContext context) {
+		// TODO Auto-generated method stub
+		super.processUpdates(context);
+	}
+	
+	/* (non-Javadoc)
+	 * @see javax.faces.component.UIComponentBase#processUpdates(javax.faces.context.FacesContext)
+	 */
+	public void processValidators(FacesContext context) {
+		// TODO Auto-generated method stub
+		super.processValidators(context);
+	}
 	
 }

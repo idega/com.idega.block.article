@@ -1,5 +1,5 @@
 /*
- * $Id: ArticleDetailView.java,v 1.21 2006/01/05 15:52:12 laddi Exp $
+ * $Id: ArticleDetailView.java,v 1.22 2006/03/16 15:36:02 tryggvil Exp $
  * 
  * Copyright (C) 2004 Idega. All Rights Reserved.
  * 
@@ -12,6 +12,7 @@ import java.io.IOException;
 import javax.faces.component.UIComponent;
 import javax.faces.component.html.HtmlPanelGrid;
 import javax.faces.context.FacesContext;
+import com.idega.block.article.bean.ArticleItemBean;
 import com.idega.content.bean.ManagedContentBeans;
 import com.idega.content.presentation.WebDAVFileDetails;
 import com.idega.presentation.IWBaseComponent;
@@ -22,12 +23,12 @@ import com.idega.webface.WFResourceUtil;
 import com.idega.webface.WFUtil;
 
 /**
- * Last modified: $Date: 2006/01/05 15:52:12 $ by $Author: laddi $
+ * Last modified: $Date: 2006/03/16 15:36:02 $ by $Author: tryggvil $
  * 
  * Displays detailed info about the article
  * 
  * @author Joakim
- * @version $Revision: 1.21 $
+ * @version $Revision: 1.22 $
  */
 public class ArticleDetailView extends IWBaseComponent implements ManagedContentBeans {
 
@@ -160,10 +161,13 @@ public class ArticleDetailView extends IWBaseComponent implements ManagedContent
 	 */
 	private void selectComponent() {
 		WFComponentSelector componentSelector = (WFComponentSelector) findComponent(COMPONENT_SELECTOR_ID);
-
-		String headline = WFUtil.getStringValue(ARTICLE_ITEM_BEAN_ID, "headline");
+		
+		ArticleItemBean articleBean = (ArticleItemBean) WFUtil.getBeanInstance(ARTICLE_ITEM_BEAN_ID);
+		
+		String resourcePath = articleBean.getResourcePath();
+		
 		if (componentSelector != null) {
-			if (headline == null || headline.length() == 0) {
+			if (resourcePath == null || resourcePath.length() == 0) {
 				componentSelector.setSelectedId(NO_ARTICLE_ID, true);
 				componentSelector.setSelectedId(ARTICLE_LIST_ID, false);
 			}

@@ -1,5 +1,5 @@
 /*
- * $Id: ArticleItemBean.java,v 1.60 2006/02/28 14:50:15 tryggvil Exp $
+ * $Id: ArticleItemBean.java,v 1.61 2006/03/16 15:36:02 tryggvil Exp $
  *
  * Copyright (C) 2004-2005 Idega. All Rights Reserved.
  *
@@ -17,6 +17,9 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.logging.Logger;
 import javax.faces.context.FacesContext;
+import javax.faces.event.AbortProcessingException;
+import javax.faces.event.ValueChangeEvent;
+import javax.faces.event.ValueChangeListener;
 import org.apache.webdav.lib.Ace;
 import org.apache.webdav.lib.Privilege;
 import org.apache.webdav.lib.PropertyName;
@@ -48,12 +51,12 @@ import com.idega.xml.XMLException;
  * This is a JSF managed bean that manages each article instance and delegates 
  * all calls to the correct localized instance.
  * <p>
- * Last modified: $Date: 2006/02/28 14:50:15 $ by $Author: tryggvil $
+ * Last modified: $Date: 2006/03/16 15:36:02 $ by $Author: tryggvil $
  *
  * @author Anders Lindman,<a href="mailto:tryggvi@idega.com">Tryggvi Larusson</a>
- * @version $Revision: 1.60 $
+ * @version $Revision: 1.61 $
  */
-public class ArticleItemBean extends ContentItemBean implements Serializable, ContentItem {
+public class ArticleItemBean extends ContentItemBean implements Serializable, ContentItem, ValueChangeListener {
 	
 	/**
 	 * Comment for <code>serialVersionUID</code>
@@ -1601,6 +1604,13 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 		
 		ArticleCacher cacher = ArticleCacher.getInstance(IWMainApplication.getDefaultIWMainApplication());
 		cacher.getCacheMap().clear();
+	}
+
+	/* (non-Javadoc)
+	 * @see javax.faces.event.ValueChangeListener#processValueChange(javax.faces.event.ValueChangeEvent)
+	 */
+	public void processValueChange(ValueChangeEvent event) throws AbortProcessingException {
+		// TODO Auto-generated method stub
 	}
 
 }

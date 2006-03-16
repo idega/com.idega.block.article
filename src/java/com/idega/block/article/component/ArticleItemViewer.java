@@ -1,5 +1,5 @@
 /*
- * $Id: ArticleItemViewer.java,v 1.11 2006/02/28 14:50:15 tryggvil Exp $
+ * $Id: ArticleItemViewer.java,v 1.12 2006/03/16 15:36:02 tryggvil Exp $
  *
  * Copyright (C) 2004 Idega. All Rights Reserved.
  *
@@ -24,12 +24,12 @@ import com.idega.webface.WFHtml;
 import com.idega.webface.convert.WFTimestampConverter;
 
 /**
- * Last modified: $Date: 2006/02/28 14:50:15 $ by $Author: tryggvil $
+ * Last modified: $Date: 2006/03/16 15:36:02 $ by $Author: tryggvil $
  *
  * Displays the article item
  *
  * @author <a href="mailto:gummi@idega.com">Gudmundur Agust Saemundsson</a>
- * @version $Revision: 1.11 $
+ * @version $Revision: 1.12 $
  */
 public class ArticleItemViewer extends ContentItemViewer {
 	
@@ -45,8 +45,26 @@ public class ArticleItemViewer extends ContentItemViewer {
 	public final static String DEFAULT_STYLE_CLASS = styleClassPrefix + "item";
 	//instance variables:
 	private boolean headlineAsLink;
+	private boolean cacheEnabled=true;
 	
 	
+	
+	/**
+	 * @return Returns the cacheEnabled.
+	 */
+	public boolean isCacheEnabled() {
+		return cacheEnabled;
+	}
+
+	/**
+	 * @param cacheEnabled The cacheEnabled to set.
+	 */
+	public void setCacheEnabled(boolean cacheEnabled) {
+		this.cacheEnabled = cacheEnabled;
+	}
+
+
+
 	public ArticleItemViewer() {
 		super();
 		this.setStyleClass(DEFAULT_STYLE_CLASS);
@@ -187,9 +205,10 @@ public class ArticleItemViewer extends ContentItemViewer {
 	 * @see javax.faces.component.UIComponentBase#saveState(javax.faces.context.FacesContext)
 	 */
 	public Object saveState(FacesContext ctx) {
-		Object values[] = new Object[2];
+		Object values[] = new Object[3];
 		values[0] = super.saveState(ctx);
 		values[1] = Boolean.valueOf(headlineAsLink);
+		values[2] = Boolean.valueOf(cacheEnabled);
 		return values;
 	}
 
@@ -201,6 +220,7 @@ public class ArticleItemViewer extends ContentItemViewer {
 		Object values[] = (Object[]) state;
 		super.restoreState(ctx, values[0]);
 		headlineAsLink=((Boolean)values[1]).booleanValue();
+		cacheEnabled=((Boolean)values[2]).booleanValue();
 	}
 	
 	/**

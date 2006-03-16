@@ -1,5 +1,5 @@
 /*
- * $Id: ArticlePreview.java,v 1.4 2005/11/30 09:34:52 laddi Exp $
+ * $Id: ArticlePreview.java,v 1.5 2006/03/16 15:36:02 tryggvil Exp $
  *
  * Copyright (C) 2004 Idega. All Rights Reserved.
  *
@@ -15,6 +15,7 @@ import javax.faces.context.FacesContext;
 import javax.faces.event.AbortProcessingException;
 import javax.faces.event.ActionEvent;
 import javax.faces.event.ActionListener;
+import com.idega.block.article.bean.ArticleItemBean;
 import com.idega.content.bean.ManagedContentBeans;
 import com.idega.presentation.IWBaseComponent;
 import com.idega.webface.WFComponentSelector;
@@ -23,12 +24,12 @@ import com.idega.webface.WFResourceUtil;
 import com.idega.webface.WFUtil;
 
 /**
- * Last modified: $Date: 2005/11/30 09:34:52 $ by $Author: laddi $
+ * Last modified: $Date: 2006/03/16 15:36:02 $ by $Author: tryggvil $
  *
  * Displays the article item
  *
  * @author Joakim
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  */
 public class ArticlePreview extends IWBaseComponent implements ManagedContentBeans, ActionListener{
 	public final static String EDIT_ARTICLE_BLOCK_ID = "edit_articles_block";
@@ -62,6 +63,7 @@ public class ArticlePreview extends IWBaseComponent implements ManagedContentBea
 
 		ArticleItemViewer item = new ArticleItemViewer();
 		item.setId(ARTICLE_VIEW_ID);
+		item.setCacheEnabled(false);
 		
 		WFUtil.setValueBinding(item, "author", ref+"author");
 		WFUtil.setValueBinding(item, "creation_date", ref+"creationDate");
@@ -85,7 +87,9 @@ public class ArticlePreview extends IWBaseComponent implements ManagedContentBea
  	private void selectComponent() {
 		WFComponentSelector cs = (WFComponentSelector) findComponent(COMPONENT_SELECTOR_ID);
 
-		String headline = WFUtil.getStringValue(ARTICLE_ITEM_BEAN_ID, "headline");
+		ArticleItemBean articleBean = (ArticleItemBean) WFUtil.getBeanInstance(ARTICLE_ITEM_BEAN_ID);
+		String headline = articleBean.getHeadline();
+		//String headline = WFUtil.getStringValue(ARTICLE_ITEM_BEAN_ID, "headline");
 		if (cs != null) {
 			if (headline == null || headline.length() == 0) {
 				cs.setSelectedId(NO_ARTICLE_ID, true);
