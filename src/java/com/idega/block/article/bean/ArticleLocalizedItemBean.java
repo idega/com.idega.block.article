@@ -1,5 +1,5 @@
 /*
- * $Id: ArticleLocalizedItemBean.java,v 1.4 2006/04/07 09:38:42 gimmi Exp $
+ * $Id: ArticleLocalizedItemBean.java,v 1.5 2006/04/07 10:46:31 gimmi Exp $
  *
  * Copyright (C) 2004 Idega. All Rights Reserved.
  *
@@ -44,10 +44,10 @@ import com.idega.xml.XMLParser;
  * This is a JSF managed bean that manages each article xml document 
  * instance per language/locale.
  * <p>
- * Last modified: $Date: 2006/04/07 09:38:42 $ by $Author: gimmi $
+ * Last modified: $Date: 2006/04/07 10:46:31 $ by $Author: gimmi $
  *
  * @author Anders Lindman,<a href="mailto:tryggvi@idega.com">Tryggvi Larusson</a>
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  */
 public class ArticleLocalizedItemBean extends ContentItemBean implements Serializable, ContentItem {
 	
@@ -476,14 +476,18 @@ public class ArticleLocalizedItemBean extends ContentItemBean implements Seriali
 					XMLNamespace htmlNamespace = new XMLNamespace("http://www.w3.org/1999/xhtml");
 					XMLElement bodyElement = rootElement.getChild(FIELDNAME_TEASER,getIdegaXMLNameSpace());
 					XMLElement htmlElement = bodyElement.getChild("html",htmlNamespace);
-					XMLElement htmlBodyElement = htmlElement.getChild("body",htmlNamespace);
-					
-					String bodyValue = htmlBodyElement.getContentAsString();
-					setTeaser(bodyValue);
+					if (htmlElement == null) {
+						setTeaser(bodyElement.getText());
+					} else {
+						XMLElement htmlBodyElement = htmlElement.getChild("body",htmlNamespace);
+						
+						String bodyValue = htmlBodyElement.getContentAsString();
+						setTeaser(bodyValue);
+					}
 				}catch(Exception e) {		//Nullpointer could occur if field isn't used
 		//			e.printStackTrace();
 					Logger log = Logger.getLogger(this.getClass().toString());
-					log.warning("Body of article is empty");
+					log.warning("Teaser of article is empty");
 					setTeaser("");
 				}
 				}catch(Exception e) {		//Nullpointer could occur if field isn't used
