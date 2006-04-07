@@ -1,5 +1,5 @@
 /*
- * $Id: EditArticleView.java,v 1.17 2006/03/16 15:36:02 tryggvil Exp $
+ * $Id: EditArticleView.java,v 1.18 2006/04/07 09:38:43 gimmi Exp $
  *
  * Copyright (C) 2004 Idega. All Rights Reserved.
  *
@@ -57,10 +57,10 @@ import com.idega.webface.htmlarea.HTMLArea;
  * <p>
  * This is the part for the editor of article is inside the admin interface
  * </p>
- * Last modified: $Date: 2006/03/16 15:36:02 $ by $Author: tryggvil $
+ * Last modified: $Date: 2006/04/07 09:38:43 $ by $Author: gimmi $
  *
  * @author Joakim,Tryggvi Larusson
- * @version $Revision: 1.17 $
+ * @version $Revision: 1.18 $
  */
 public class EditArticleView extends IWBaseComponent implements ManagedContentBeans, ActionListener, ValueChangeListener {
 	public final static String EDIT_ARTICLE_BLOCK_ID = "edit_article_view";
@@ -301,7 +301,10 @@ public class EditArticleView extends IWBaseComponent implements ManagedContentBe
 		mainContainer.add(bodyItem);
 		
 		//Teaser input
-		HtmlInputTextarea teaserArea = WFUtil.getTextArea(TEASER_ID, ref + "teaser", "500px", "60px");
+		HTMLArea teaserArea = WFUtil.getHtmlAreaTextArea(TEASER_ID, ref + "teaser", "500px", "150px");
+		teaserArea.addValueChangeListener(this);
+		teaserArea.setImmediate(true);
+		teaserArea.setAllowFontSelection(false);
 		UIComponent teaserText = WFUtil.group(localizer.getTextVB("teaser"), WFUtil.getText(":"));
 		HtmlOutputLabel teaserLabel = new HtmlOutputLabel();
 		teaserLabel.getChildren().add(teaserText);
@@ -892,6 +895,10 @@ public class EditArticleView extends IWBaseComponent implements ManagedContentBe
 		else if(event.getComponent().getId().equals(AUTHOR_ID)){
 			String newValue = event.getNewValue().toString();
 			getArticleItemBean().setAuthor(newValue);
+		}
+		else if(event.getComponent().getId().equals(TEASER_ID)){
+			String newValue = event.getNewValue().toString();
+			getArticleItemBean().setTeaser(newValue);
 		}
 		
 		//}else {

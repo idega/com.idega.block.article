@@ -1,5 +1,5 @@
 /*
- * $Id: ArticleLocalizedItemBean.java,v 1.3 2006/01/16 16:32:36 tryggvil Exp $
+ * $Id: ArticleLocalizedItemBean.java,v 1.4 2006/04/07 09:38:42 gimmi Exp $
  *
  * Copyright (C) 2004 Idega. All Rights Reserved.
  *
@@ -44,10 +44,10 @@ import com.idega.xml.XMLParser;
  * This is a JSF managed bean that manages each article xml document 
  * instance per language/locale.
  * <p>
- * Last modified: $Date: 2006/01/16 16:32:36 $ by $Author: tryggvil $
+ * Last modified: $Date: 2006/04/07 09:38:42 $ by $Author: gimmi $
  *
  * @author Anders Lindman,<a href="mailto:tryggvi@idega.com">Tryggvi Larusson</a>
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
 public class ArticleLocalizedItemBean extends ContentItemBean implements Serializable, ContentItem {
 	
@@ -247,8 +247,10 @@ public class ArticleLocalizedItemBean extends ContentItemBean implements Seriali
 		XMLParser builder = new XMLParser();
 		
 		XMLElement bodyElement = null;
+		XMLElement teaserElement = null;
 		
 		prettifyBody();
+		prettifyTeaser();
 		
 		String bodyString = getBody();
 		if(bodyString != null && !bodyString.trim().equals("")){
@@ -256,13 +258,17 @@ public class ArticleLocalizedItemBean extends ContentItemBean implements Seriali
 			bodyElement = bodyDoc.getRootElement();
 		}
 		
+		String teaserString = getTeaser();
+		if(teaserString != null && !teaserString.trim().equals("")){
+			XMLDocument bodyDoc = builder.parse(new ByteArrayInputStream(teaserString.getBytes("UTF-8")));
+			teaserElement = bodyDoc.getRootElement();
+		}
 
 		
 		
 		XMLElement root = new XMLElement("article",getIdegaXMLNameSpace());
 		XMLElement contentLanguage = new XMLElement(FIELDNAME_CONTENT_LANGUAGE,getIdegaXMLNameSpace()).setText(getContentLanguage());
 		XMLElement headline = new XMLElement(FIELDNAME_HEADLINE,getIdegaXMLNameSpace()).setText(getHeadline());
-		XMLElement teaser = new XMLElement(FIELDNAME_TEASER,getIdegaXMLNameSpace()).setText(getTeaser());
 		XMLElement author = new XMLElement(FIELDNAME_AUTHOR,getIdegaXMLNameSpace()).setText(getAuthor());
 		XMLElement source = new XMLElement(FIELDNAME_SOURCE,getIdegaXMLNameSpace()).setText(getSource());
 		XMLElement articleComment = new XMLElement("article_comment",getIdegaXMLNameSpace()).setText(getComment());
@@ -270,6 +276,11 @@ public class ArticleLocalizedItemBean extends ContentItemBean implements Seriali
 		XMLElement body = new XMLElement(FIELDNAME_BODY,getIdegaXMLNameSpace());
 		if(bodyElement != null){
 			body.addContent(bodyElement);
+		}
+
+		XMLElement teaser = new XMLElement(FIELDNAME_TEASER,getIdegaXMLNameSpace());
+		if(teaserElement != null){
+			teaser.addContent(teaserElement);
 		}
 
 		root.addContent(contentLanguage);
@@ -369,31 +380,43 @@ public class ArticleLocalizedItemBean extends ContentItemBean implements Seriali
 	 * 
 	 */
 	protected void prettifyBody() {
-		String body = getBody();
-		if(body!=null){
-//		System.out.println("ArticleIn = "+articleIn);
+		String s = prettify(getBody());
+		if (s != null) {
+			setBody(s);
+		}
+	}
+
+	protected void prettifyTeaser() {
+		String s = prettify(getTeaser());
+		if (s != null) {
+			setTeaser(s);
+		}
+	}
+	
+	protected String prettify(String toPrettify) {
+		String text = toPrettify;
+		if(text!=null){
 			//Use JTidy to clean up the html
 			Tidy tidy = new Tidy();
 			tidy.setXHTML(true);
 			tidy.setXmlOut(true);
+			tidy.setShowWarnings(false);
 			tidy.setCharEncoding(Configuration.UTF8);
 			ByteArrayInputStream bais;
 			try {
-				bais = new ByteArrayInputStream(body.getBytes("UTF-8"));
+				bais = new ByteArrayInputStream(text.getBytes("UTF-8"));
 				ByteArrayOutputStream baos = new ByteArrayOutputStream();
 				
 				tidy.parse(bais, baos);
-				body = baos.toString("UTF-8");
+				text = baos.toString("UTF-8");
 			}
 			catch (UnsupportedEncodingException e) {
 				e.printStackTrace();
 			}
-			
-//			System.out.println("ArticleOut = "+articleOut);
-			setBody(body);
 		}
+		return text;
 	}
-
+	
 	/**
 	 * Loads an xml file specified by the webdav resource
 	 * The beans atributes are then set according to the information in the XML file
@@ -448,16 +471,25 @@ public class ArticleLocalizedItemBean extends ContentItemBean implements Seriali
 				setHeadline("");
 			}
 			try {
-				XMLElement teaser = rootElement.getChild(FIELDNAME_TEASER,getIdegaXMLNameSpace());
-				if(teaser != null){
-					setTeaser(teaser.getText());
-				} else {
+				//Parse out the teaser
+				try {
+					XMLNamespace htmlNamespace = new XMLNamespace("http://www.w3.org/1999/xhtml");
+					XMLElement bodyElement = rootElement.getChild(FIELDNAME_TEASER,getIdegaXMLNameSpace());
+					XMLElement htmlElement = bodyElement.getChild("html",htmlNamespace);
+					XMLElement htmlBodyElement = htmlElement.getChild("body",htmlNamespace);
+					
+					String bodyValue = htmlBodyElement.getContentAsString();
+					setTeaser(bodyValue);
+				}catch(Exception e) {		//Nullpointer could occur if field isn't used
+		//			e.printStackTrace();
+					Logger log = Logger.getLogger(this.getClass().toString());
+					log.warning("Body of article is empty");
 					setTeaser("");
 				}
-			}catch(Exception e) {		//Nullpointer could occur if field isn't used
-				e.printStackTrace();
-				setTeaser("");
-			}
+				}catch(Exception e) {		//Nullpointer could occur if field isn't used
+					e.printStackTrace();
+					setTeaser("");
+				}
 			try {
 				XMLElement author = rootElement.getChild(FIELDNAME_AUTHOR,getIdegaXMLNameSpace());
 				if(author != null){
