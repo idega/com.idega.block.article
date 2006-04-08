@@ -1,5 +1,5 @@
 /*
- * $Id: EditArticleView.java,v 1.18 2006/04/07 09:38:43 gimmi Exp $
+ * $Id: EditArticleView.java,v 1.19 2006/04/08 10:47:30 laddi Exp $
  *
  * Copyright (C) 2004 Idega. All Rights Reserved.
  *
@@ -57,10 +57,10 @@ import com.idega.webface.htmlarea.HTMLArea;
  * <p>
  * This is the part for the editor of article is inside the admin interface
  * </p>
- * Last modified: $Date: 2006/04/07 09:38:43 $ by $Author: gimmi $
+ * Last modified: $Date: 2006/04/08 10:47:30 $ by $Author: laddi $
  *
  * @author Joakim,Tryggvi Larusson
- * @version $Revision: 1.18 $
+ * @version $Revision: 1.19 $
  */
 public class EditArticleView extends IWBaseComponent implements ManagedContentBeans, ActionListener, ValueChangeListener {
 	public final static String EDIT_ARTICLE_BLOCK_ID = "edit_article_view";
@@ -574,7 +574,7 @@ public class EditArticleView extends IWBaseComponent implements ManagedContentBe
 	 */
 	public void processAction(ActionEvent event) {
 		String id = event.getComponent().getId();
-		UIComponent rootParent = rootParent = event.getComponent().getParent().getParent().getParent();
+		UIComponent rootParent = event.getComponent().getParent().getParent().getParent();
 		EditArticleView ab = (EditArticleView) rootParent.findComponent(EDIT_ARTICLE_BLOCK_ID);
 		if (id.equals(SAVE_ID)) {
 			//We have the save button pressed
