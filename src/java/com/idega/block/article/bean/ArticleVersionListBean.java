@@ -1,5 +1,5 @@
 /*
- * $Id: ArticleVersionListBean.java,v 1.2 2006/04/09 11:57:56 laddi Exp $
+ * $Id: ArticleVersionListBean.java,v 1.3 2006/04/09 12:32:00 laddi Exp $
  *
  * Copyright (C) 2004 Idega. All Rights Reserved.
  *
@@ -26,10 +26,10 @@ import com.idega.webface.model.WFDataModel;
 /**
  * Bean for article version list rows.   
  * <p>
- * Last modified: $Date: 2006/04/09 11:57:56 $ by $Author: laddi $
+ * Last modified: $Date: 2006/04/09 12:32:00 $ by $Author: laddi $
  *
  * @author Anders Lindman
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 
 public class ArticleVersionListBean implements WFListBean, Serializable {
@@ -97,7 +97,9 @@ public class ArticleVersionListBean implements WFListBean, Serializable {
 	/**
 	 * Default constructor.
 	 */
-	public ArticleVersionListBean() {}
+	public ArticleVersionListBean() {
+		//No action...
+	}
 
 	/**
 	 * Constructs a new article version list bean with the specified article link listener.

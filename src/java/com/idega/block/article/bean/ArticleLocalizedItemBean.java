@@ -1,5 +1,5 @@
 /*
- * $Id: ArticleLocalizedItemBean.java,v 1.6 2006/04/09 11:57:56 laddi Exp $
+ * $Id: ArticleLocalizedItemBean.java,v 1.7 2006/04/09 12:32:00 laddi Exp $
  *
  * Copyright (C) 2004 Idega. All Rights Reserved.
  *
@@ -44,10 +44,10 @@ import com.idega.xml.XMLParser;
  * This is a JSF managed bean that manages each article xml document 
  * instance per language/locale.
  * <p>
- * Last modified: $Date: 2006/04/09 11:57:56 $ by $Author: laddi $
+ * Last modified: $Date: 2006/04/09 12:32:00 $ by $Author: laddi $
  *
  * @author Anders Lindman,<a href="mailto:tryggvi@idega.com">Tryggvi Larusson</a>
- * @version $Revision: 1.6 $
+ * @version $Revision: 1.7 $
  */
 public class ArticleLocalizedItemBean extends ContentItemBean implements Serializable, ContentItem {
 	
@@ -218,7 +218,9 @@ public class ArticleLocalizedItemBean extends ContentItemBean implements Seriali
 				ContentItemField field = (ContentItemField) l.get(i);
 				field.setOrderNo(i);
 			}
-		} catch (Exception e) {}
+		} catch (Exception e) {
+			//No action...
+		}
 	}
 	
 	/**

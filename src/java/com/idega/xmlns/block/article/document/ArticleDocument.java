@@ -235,7 +235,9 @@ public interface ArticleDocument extends org.apache.xmlbeans.XmlObject
             public static com.idega.xmlns.block.article.document.ArticleDocument.Article newInstance(org.apache.xmlbeans.XmlOptions options) {
               return (com.idega.xmlns.block.article.document.ArticleDocument.Article) org.apache.xmlbeans.XmlBeans.getContextTypeLoader().newInstance( type, options ); }
             
-            private Factory() { } // No instance of this class allowed
+            private Factory() {
+          		//No action...
+            } // No instance of this class allowed
         }
     }
     
@@ -300,6 +302,8 @@ public interface ArticleDocument extends org.apache.xmlbeans.XmlObject
         public static org.apache.xmlbeans.xml.stream.XMLInputStream newValidatingXMLInputStream(org.apache.xmlbeans.xml.stream.XMLInputStream xis, org.apache.xmlbeans.XmlOptions options) throws org.apache.xmlbeans.XmlException, org.apache.xmlbeans.xml.stream.XMLStreamException {
           return org.apache.xmlbeans.XmlBeans.getContextTypeLoader().newValidatingXMLInputStream( xis, type, options ); }
         
-        private Factory() { } // No instance of this class allowed
+        private Factory() {
+      		//No action...
+        } // No instance of this class allowed
     }
 }

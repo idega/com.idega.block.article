@@ -1,5 +1,5 @@
 /*
- * $Id: IWBundleStarter.java,v 1.20 2006/03/08 11:35:07 tryggvil Exp $
+ * $Id: IWBundleStarter.java,v 1.21 2006/04/09 12:32:00 laddi Exp $
  * Created on 2.11.2004
  *
  * Copyright (C) 2004 Idega Software hf. All Rights Reserved.
@@ -22,20 +22,14 @@ import com.idega.idegaweb.include.GlobalIncludeManager;
 
 /**
  * 
- *  Last modified: $Date: 2006/03/08 11:35:07 $ by $Author: tryggvil $
+ *  Last modified: $Date: 2006/04/09 12:32:00 $ by $Author: laddi $
  * 
  * @author <a href="mailto:tryggvil@idega.com">Tryggvi Larusson</a>
- * @version $Revision: 1.20 $
+ * @version $Revision: 1.21 $
  */
 public class IWBundleStarter implements IWBundleStartable {
 	private static final String STYLE_SHEET_URL = "/style/article.css";
 	private static final String BUNDLE_IDENTIFIER="com.idega.block.article";
-
-	/**
-	 * 
-	 */
-	public IWBundleStarter() {
-	}
 
 	/* (non-Javadoc)
 	 * @see com.idega.idegaweb.IWBundleStartable#start(com.idega.idegaweb.IWBundle)
@@ -62,6 +56,7 @@ public class IWBundleStarter implements IWBundleStartable {
 	 * @see com.idega.idegaweb.IWBundleStartable#stop(com.idega.idegaweb.IWBundle)
 	 */
 	public void stop(IWBundle starterBundle) {
+		//No action...
 	}
 	
 	public void addArticleViews(IWBundle bundle){

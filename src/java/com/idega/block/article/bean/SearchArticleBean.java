@@ -1,5 +1,5 @@
 /*
- * $Id: SearchArticleBean.java,v 1.18 2006/04/09 11:57:56 laddi Exp $
+ * $Id: SearchArticleBean.java,v 1.19 2006/04/09 12:32:00 laddi Exp $
  *
  * Copyright (C) 2004 Idega. All Rights Reserved.
  *
@@ -50,10 +50,10 @@ import com.idega.webface.bean.WFListBean;
 /**
  * Bean for searching articles.   
  * <p>
- * Last modified: $Date: 2006/04/09 11:57:56 $ by $Author: laddi $
+ * Last modified: $Date: 2006/04/09 12:32:00 $ by $Author: laddi $
  *
  * @author Anders Lindman
- * @version $Revision: 1.18 $
+ * @version $Revision: 1.19 $
  */
 
 public class SearchArticleBean extends AbstractWFEditableListManagedBean implements WFListBean, Serializable {
@@ -85,6 +85,7 @@ public class SearchArticleBean extends AbstractWFEditableListManagedBean impleme
 	 * Default constructor.
 	 */
 	public SearchArticleBean() { 
+		//No action...
 	}
 
 	/**
