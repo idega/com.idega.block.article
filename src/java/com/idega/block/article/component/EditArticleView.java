@@ -1,5 +1,5 @@
 /*
- * $Id: EditArticleView.java,v 1.19 2006/04/08 10:47:30 laddi Exp $
+ * $Id: EditArticleView.java,v 1.20 2006/04/09 11:57:56 laddi Exp $
  *
  * Copyright (C) 2004 Idega. All Rights Reserved.
  *
@@ -57,10 +57,10 @@ import com.idega.webface.htmlarea.HTMLArea;
  * <p>
  * This is the part for the editor of article is inside the admin interface
  * </p>
- * Last modified: $Date: 2006/04/08 10:47:30 $ by $Author: laddi $
+ * Last modified: $Date: 2006/04/09 11:57:56 $ by $Author: laddi $
  *
  * @author Joakim,Tryggvi Larusson
- * @version $Revision: 1.19 $
+ * @version $Revision: 1.20 $
  */
 public class EditArticleView extends IWBaseComponent implements ManagedContentBeans, ActionListener, ValueChangeListener {
 	public final static String EDIT_ARTICLE_BLOCK_ID = "edit_article_view";
@@ -590,7 +590,7 @@ public class EditArticleView extends IWBaseComponent implements ManagedContentBe
 					categoriesUI.saveCategoriesSettings();
 				}
 			}
-			clearOnInit=false;
+			this.clearOnInit=false;
 		}
 		else if (id.equals(DELETE_ID)) {
 			//we are deleting
@@ -915,12 +915,12 @@ public class EditArticleView extends IWBaseComponent implements ManagedContentBe
 	 * @param mode
 	 */
 	public void setEditMode(String mode) {
-		clearOnInit = mode.equalsIgnoreCase("create");
+		this.clearOnInit = mode.equalsIgnoreCase("create");
 		this.editMode=mode;
 	}
 	
 	public String getEditMode(){
-		return editMode;
+		return this.editMode;
 	}
 	
 	protected ArticleItemBean getArticleItemBean(){
@@ -981,7 +981,7 @@ public class EditArticleView extends IWBaseComponent implements ManagedContentBe
 	public Object saveState(FacesContext ctx) {
 		Object values[] = new Object[2];
 		values[0] = super.saveState(ctx);
-		values[1] = editMode;
+		values[1] = this.editMode;
 		return values;
 	}
 
@@ -992,7 +992,7 @@ public class EditArticleView extends IWBaseComponent implements ManagedContentBe
 	public void restoreState(FacesContext ctx, Object state) {
 		Object values[] = (Object[]) state;
 		super.restoreState(ctx, values[0]);
-		editMode = (String)values[1];
+		this.editMode = (String)values[1];
 		//super.restoreState(ctx,state);
 	}
 

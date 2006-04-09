@@ -1,5 +1,5 @@
 /*
- * $Id: WFUtilArticle.java,v 1.6 2005/01/10 10:25:30 joakim Exp $
+ * $Id: WFUtilArticle.java,v 1.7 2006/04/09 11:57:56 laddi Exp $
  *
  * Copyright (C) 2004 Idega. All Rights Reserved.
  *
@@ -19,10 +19,10 @@ import com.idega.webface.WFUtil;
 /**
  * Util class to set the bundle for the localization 
  * <p>
- * Last modified: $Date: 2005/01/10 10:25:30 $ by $Author: joakim $
+ * Last modified: $Date: 2006/04/09 11:57:56 $ by $Author: laddi $
  *
  * @author Joakim Johnson
- * @version $Revision: 1.6 $
+ * @version $Revision: 1.7 $
  */
 public class WFUtilArticle{
 	private static final String ARTICLE_BUNDLE = "com.idega.block.article";
@@ -31,7 +31,7 @@ public class WFUtilArticle{
 	private String bundle = "com.idega.block.article";
 
 	private WFUtilArticle(String s) {
-		bundle = s;
+		this.bundle = s;
 	}
 	
 	public static WFUtilArticle getWFUtilArticle() {
@@ -43,48 +43,48 @@ public class WFUtilArticle{
 	}
 
 	public String getBundleString() {
-		return bundle;
+		return this.bundle;
 	}
 
 	/**
 	 * Returns a localized HtmlOutputText as a header
 	 */
 	public HtmlOutputText getHeaderTextVB(String localizationKey) {
-		return WFUtil.getHeaderTextVB(bundle, localizationKey);
+		return WFUtil.getHeaderTextVB(this.bundle, localizationKey);
 	}
 
 	/**
 	 * Returns a localized HtmlOutputText
 	 */
 	public HtmlOutputText getTextVB(String localizationKey) {
-		return WFUtil.getTextVB(bundle, localizationKey);
+		return WFUtil.getTextVB(this.bundle, localizationKey);
 	}
 
 	/**
 	 * Returns an html list text with value binding.
 	 */
 	public HtmlOutputText getListTextVB(String localizationKey) {
-		return WFUtil.getListTextVB(bundle, localizationKey);
+		return WFUtil.getListTextVB(this.bundle, localizationKey);
 	}
 
 	/**
 	 * Returns a localized HtmlCommand Button
 	 */
 	public HtmlCommandButton getButtonVB(String id, String localizationKey, ActionListener actionListener) {
-		return WFUtil.getButtonVB(id, bundle, localizationKey, actionListener);
+		return WFUtil.getButtonVB(id, this.bundle, localizationKey, actionListener);
 	}
 	
 	/**
 	 * Adds a UIParameter with value binding to the specified component. 
 	 */
 	public void addParameterVB(UIComponent component, String name, String localizationKey) {
-		WFUtil.addParameterVB(component, name, bundle, localizationKey);
+		WFUtil.addParameterVB(component, name, this.bundle, localizationKey);
 	}
 	
 	/**
 	 * Adds a message with value binding for the specified component. 
 	 */
 	public void addMessageVB(UIComponent component, String localizationKey) {
-		WFUtil.addMessageVB(component, bundle, localizationKey);
+		WFUtil.addMessageVB(component, this.bundle, localizationKey);
 	}
 }

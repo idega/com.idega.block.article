@@ -1,5 +1,5 @@
 /*
- * $Id: ArticleAdminBlock.java,v 1.5 2006/03/16 15:36:02 tryggvil Exp $
+ * $Id: ArticleAdminBlock.java,v 1.6 2006/04/09 11:57:56 laddi Exp $
  *
  * Copyright (C) 2004 Idega. All Rights Reserved.
  *
@@ -26,10 +26,10 @@ import com.idega.webface.event.WFTabListener;
  * <p>
  * This is the main block for administering articles (creating,editing)
  * </p>
- * Last modified: $Date: 2006/03/16 15:36:02 $ by $Author: tryggvil $
+ * Last modified: $Date: 2006/04/09 11:57:56 $ by $Author: laddi $
  *
  * @author Joakim, Tryggvi Larusson
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
  */
 public class ArticleAdminBlock extends WFBlockTabbed implements ActionListener, ManagedContentBeans {
 
@@ -126,7 +126,7 @@ public class ArticleAdminBlock extends WFBlockTabbed implements ActionListener, 
 	public String getEditMode(){
 		//String sReturn = (String) getAttributes().get(KEY_EDITMODE);
 		//return sReturn;
-		return mode;
+		return this.mode;
 	}
 	
 	/* (non-Javadoc)
@@ -142,7 +142,7 @@ public class ArticleAdminBlock extends WFBlockTabbed implements ActionListener, 
 	public Object saveState(FacesContext ctx) {
 		Object values[] = new Object[2];
 		values[0] = super.saveState(ctx);
-		values[1] = mode;
+		values[1] = this.mode;
 		return values;
 	}
 
@@ -153,7 +153,7 @@ public class ArticleAdminBlock extends WFBlockTabbed implements ActionListener, 
 	public void restoreState(FacesContext ctx, Object state) {
 		Object values[] = (Object[]) state;
 		super.restoreState(ctx, values[0]);
-		mode = (String)values[1];
+		this.mode = (String)values[1];
 		//super.restoreState(ctx,state);
 	}
 

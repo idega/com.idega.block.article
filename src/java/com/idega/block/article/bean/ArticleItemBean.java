@@ -1,5 +1,5 @@
 /*
- * $Id: ArticleItemBean.java,v 1.61 2006/03/16 15:36:02 tryggvil Exp $
+ * $Id: ArticleItemBean.java,v 1.62 2006/04/09 11:57:56 laddi Exp $
  *
  * Copyright (C) 2004-2005 Idega. All Rights Reserved.
  *
@@ -51,10 +51,10 @@ import com.idega.xml.XMLException;
  * This is a JSF managed bean that manages each article instance and delegates 
  * all calls to the correct localized instance.
  * <p>
- * Last modified: $Date: 2006/03/16 15:36:02 $ by $Author: tryggvil $
+ * Last modified: $Date: 2006/04/09 11:57:56 $ by $Author: laddi $
  *
  * @author Anders Lindman,<a href="mailto:tryggvi@idega.com">Tryggvi Larusson</a>
- * @version $Revision: 1.61 $
+ * @version $Revision: 1.62 $
  */
 public class ArticleItemBean extends ContentItemBean implements Serializable, ContentItem, ValueChangeListener {
 	
@@ -76,19 +76,19 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 	private boolean avilableInRequestedLanguage=false;
 	
 	public ArticleLocalizedItemBean getLocalizedArticle(){
-		if(localizedArticle==null){
-			localizedArticle=new ArticleLocalizedItemBean();
-			localizedArticle.setLocale(getLocale());
-			localizedArticle.setArticleItem(this);
+		if(this.localizedArticle==null){
+			this.localizedArticle=new ArticleLocalizedItemBean();
+			this.localizedArticle.setLocale(getLocale());
+			this.localizedArticle.setArticleItem(this);
 		}
 		else{
 			String thisLanguage = getLanguage();
-			String fileLanguage = localizedArticle.getLanguage();
+			String fileLanguage = this.localizedArticle.getLanguage();
 			if(!thisLanguage.equals(fileLanguage)){
-				throw new RuntimeException("Locale inconsistency for article: "+getResourcePath()+" and localizedArticle: "+localizedArticle.getResourcePath());
+				throw new RuntimeException("Locale inconsistency for article: "+getResourcePath()+" and localizedArticle: "+this.localizedArticle.getResourcePath());
 			}
 		}
-		return localizedArticle;
+		return this.localizedArticle;
 	}
 
 	/* (non-Javadoc)
@@ -105,8 +105,8 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 	public void clear() {
 		// TODO Auto-generated method stub
 		getLocalizedArticle().clear();
-		resourcePath=null;
-		avilableInRequestedLanguage=false;
+		this.resourcePath=null;
+		this.avilableInRequestedLanguage=false;
 	}
 	/* (non-Javadoc)
 	 * @see com.idega.block.article.bean.ArticleLocalizedItemBean#getAsXML()
@@ -1229,8 +1229,8 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 	 * By default it is '/files/cms/article'
 	 */
 	public String getBaseFolderLocation() {
-		if(baseFolderLocation!=null){
-			return baseFolderLocation;
+		if(this.baseFolderLocation!=null){
+			return this.baseFolderLocation;
 		}
 		else{
 			return ArticleUtil.getArticleBaseFolderPath();
@@ -1247,7 +1247,7 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 	 * something like '/files/cms/article'
 	 */
 	public void setBaseFolderLocation(String path) {
-		baseFolderLocation = path;
+		this.baseFolderLocation = path;
 	}
 	
 	public Locale getLocale(){
@@ -1388,14 +1388,14 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 	 * @see com.idega.block.article.bean.ArticleLocalizedItemBean#setLanguageChange(java.lang.String)
 	 */
 	public void setLanguageChange(String s) {
-		languageChange=s;
+		this.languageChange=s;
 	}
 	
 	/* (non-Javadoc)
 	 * @see com.idega.block.article.bean.ArticleLocalizedItemBean#getLanguageChange()
 	 */
 	public String getLanguageChange() {
-		return languageChange;
+		return this.languageChange;
 	}
 	
 	/**
@@ -1560,19 +1560,19 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 	}
 	
 	public boolean getAllowFallbackToSystemLanguage(){
-		return allowFallbackToSystemLanguage;
+		return this.allowFallbackToSystemLanguage;
 	}
 	
 	public void setAllowFallbackToSystemLanguage(boolean allow){
-		allowFallbackToSystemLanguage=allow;
+		this.allowFallbackToSystemLanguage=allow;
 	}
 	
 	public void setAvilableInSelectedLanguage(){
-		avilableInRequestedLanguage=true;
+		this.avilableInRequestedLanguage=true;
 	}
 	
 	public void setNotAvilableInSelectedLanguage(){
-		avilableInRequestedLanguage=false;
+		this.avilableInRequestedLanguage=false;
 		if(!getAllowFallbackToSystemLanguage()){
 			getLocalizedArticle().setHeadline("Article not avilable");
 			getLocalizedArticle().setBody("The article you have chosen is not available in the selected language");
@@ -1591,7 +1591,7 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 	 * @return
 	 */
 	public boolean getAvilableInRequestedLanguage() {
-		return avilableInRequestedLanguage;
+		return this.avilableInRequestedLanguage;
 	}
 
 	/* (non-Javadoc)
@@ -1599,7 +1599,7 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 	 */
 	public void delete() {
 		getLocalizedArticle().delete();
-		localizedArticle=null;
+		this.localizedArticle=null;
 		super.delete();
 		
 		ArticleCacher cacher = ArticleCacher.getInstance(IWMainApplication.getDefaultIWMainApplication());

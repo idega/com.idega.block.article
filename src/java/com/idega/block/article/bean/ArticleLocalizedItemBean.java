@@ -1,5 +1,5 @@
 /*
- * $Id: ArticleLocalizedItemBean.java,v 1.5 2006/04/07 10:46:31 gimmi Exp $
+ * $Id: ArticleLocalizedItemBean.java,v 1.6 2006/04/09 11:57:56 laddi Exp $
  *
  * Copyright (C) 2004 Idega. All Rights Reserved.
  *
@@ -44,10 +44,10 @@ import com.idega.xml.XMLParser;
  * This is a JSF managed bean that manages each article xml document 
  * instance per language/locale.
  * <p>
- * Last modified: $Date: 2006/04/07 10:46:31 $ by $Author: gimmi $
+ * Last modified: $Date: 2006/04/09 11:57:56 $ by $Author: laddi $
  *
  * @author Anders Lindman,<a href="mailto:tryggvi@idega.com">Tryggvi Larusson</a>
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
  */
 public class ArticleLocalizedItemBean extends ContentItemBean implements Serializable, ContentItem {
 	
@@ -167,9 +167,9 @@ public class ArticleLocalizedItemBean extends ContentItemBean implements Seriali
 	}
 	//public void setLanguageChange(String s) { setValue(FIELDNAME_LANGUAGE_CHANGE, s); }
 
-	public boolean isUpdated() { return _isUpdated; }
-	public void setUpdated(boolean b) { _isUpdated = b; }
-	public void setUpdated(Boolean b) { _isUpdated = b.booleanValue(); }
+	public boolean isUpdated() { return this._isUpdated; }
+	public void setUpdated(boolean b) { this._isUpdated = b; }
+	public void setUpdated(Boolean b) { this._isUpdated = b.booleanValue(); }
 	
 	/**
 	 * Clears all all attributes for this bean. 
@@ -186,7 +186,7 @@ public class ArticleLocalizedItemBean extends ContentItemBean implements Seriali
 		setImages(null);
 		//setFilename(null);
 //		setFolderLocation(null);
-		_isUpdated = false;
+		this._isUpdated = false;
 		//setBaseFolderLocation(null);
 	}
 	
@@ -580,7 +580,7 @@ public class ArticleLocalizedItemBean extends ContentItemBean implements Seriali
 	
 	
 	ArticleItemBean getArticleItem(){
-		return articleItem;
+		return this.articleItem;
 	}
 	
 	
@@ -590,10 +590,10 @@ public class ArticleLocalizedItemBean extends ContentItemBean implements Seriali
 	
 	
 	protected XMLNamespace getIdegaXMLNameSpace(){
-		if(idegaXMLName==null){
-			idegaXMLName = new XMLNamespace(xIdegaXMLNameSpace);
+		if(this.idegaXMLName==null){
+			this.idegaXMLName = new XMLNamespace(this.xIdegaXMLNameSpace);
 		}
-		return idegaXMLName;
+		return this.idegaXMLName;
 	}
 	
 }

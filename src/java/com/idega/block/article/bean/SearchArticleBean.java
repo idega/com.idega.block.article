@@ -1,5 +1,5 @@
 /*
- * $Id: SearchArticleBean.java,v 1.17 2005/12/20 16:40:42 tryggvil Exp $
+ * $Id: SearchArticleBean.java,v 1.18 2006/04/09 11:57:56 laddi Exp $
  *
  * Copyright (C) 2004 Idega. All Rights Reserved.
  *
@@ -50,10 +50,10 @@ import com.idega.webface.bean.WFListBean;
 /**
  * Bean for searching articles.   
  * <p>
- * Last modified: $Date: 2005/12/20 16:40:42 $ by $Author: tryggvil $
+ * Last modified: $Date: 2006/04/09 11:57:56 $ by $Author: laddi $
  *
  * @author Anders Lindman
- * @version $Revision: 1.17 $
+ * @version $Revision: 1.18 $
  */
 
 public class SearchArticleBean extends AbstractWFEditableListManagedBean implements WFListBean, Serializable {
@@ -96,55 +96,55 @@ public class SearchArticleBean extends AbstractWFEditableListManagedBean impleme
 	}
 	
 
-	public String getSearchText() { return _searchText; }
-	public String getSearchAuthor() { return _searchAuthor; }
-	public String getSearchCategory() { return _searchCategory; }
-	public Date getSearchPublishedFrom() { return _searchPublishedFrom; }
-	public Date getSearchPublishedTo() { return _searchPublishedTo; }
+	public String getSearchText() { return this._searchText; }
+	public String getSearchAuthor() { return this._searchAuthor; }
+	public String getSearchCategory() { return this._searchCategory; }
+	public Date getSearchPublishedFrom() { return this._searchPublishedFrom; }
+	public Date getSearchPublishedTo() { return this._searchPublishedTo; }
 
-	public void setSearchText(String s) { _searchText = s; }
-	public void setSearchAuthor(String s) { _searchAuthor = s; }
-	public void setSearchCategoryId(String s) { _searchCategory = s; }
-	public void setSearchPublishedFrom(Date d) { _searchPublishedFrom = d; }
-	public void setSearchPublishedTo(Date d) { _searchPublishedTo = d; }
+	public void setSearchText(String s) { this._searchText = s; }
+	public void setSearchAuthor(String s) { this._searchAuthor = s; }
+	public void setSearchCategoryId(String s) { this._searchCategory = s; }
+	public void setSearchPublishedFrom(Date d) { this._searchPublishedFrom = d; }
+	public void setSearchPublishedTo(Date d) { this._searchPublishedTo = d; }
 	
-	public ActionListener getArticleLinkListener() { return _articleLinkListener; }
-	public void setArticleLinkListener(ActionListener l) { _articleLinkListener = l; }
+	public ActionListener getArticleLinkListener() { return this._articleLinkListener; }
+	public void setArticleLinkListener(ActionListener l) { this._articleLinkListener = l; }
 	
 	/**
 	 * Returns all categories available for articles.
 	 */
 	public Map getCategories() {
-		if (_allCategories == null) {
+		if (this._allCategories == null) {
 			Collection cats = CategoryBean.getInstance().getCategories();
 			if(cats!=null && !cats.isEmpty()){
-				_allCategories = new LinkedHashMap();
-				_allCategories.put(ArticleUtil.getBundle().getLocalizedText("All categories"), "-1");
+				this._allCategories = new LinkedHashMap();
+				this._allCategories.put(ArticleUtil.getBundle().getLocalizedText("All categories"), "-1");
 				
 				Iterator cat = cats.iterator();
 				while (cat.hasNext()) {
 					String category = (String) cat.next();
 					
-					_allCategories.put(ArticleUtil.getBundle().getLocalizedText(category),category);
+					this._allCategories.put(ArticleUtil.getBundle().getLocalizedText(category),category);
 					
 				}
 			}	
 		}
 		
-		if(_allCategories==null){
+		if(this._allCategories==null){
 			return new LinkedHashMap();
 		}
-		return _allCategories;
+		return this._allCategories;
 	}
 	
 	/**
 	 * Generates a search result from the current bean search values. 
 	 */
 	public void search() {
-		searching = true;
-		showResults = true;
+		this.searching = true;
+		this.showResults = true;
 		updateDataModel(new Integer(0),new Integer(0));
-		searching = false;
+		this.searching = false;
 	}
 
 	/* (non-Javadoc)
@@ -196,7 +196,7 @@ public class SearchArticleBean extends AbstractWFEditableListManagedBean impleme
 	 * @see com.idega.webface.bean.AbstractWFEditableListManagedBean#getHeader(int)
 	 */
 	public UIComponent getHeader(int columnIndex) {
-		return ArticleUtil.getBundle().getLocalizedText(localizationKey[columnIndex]);
+		return ArticleUtil.getBundle().getLocalizedText(this.localizationKey[columnIndex]);
 	}
 	
 	
@@ -204,7 +204,7 @@ public class SearchArticleBean extends AbstractWFEditableListManagedBean impleme
 	 * @see com.idega.content.bean.ContentListViewerManagedBean#getContentItems()
 	 */
 	public List getContentItems() {
-		if(searching){
+		if(this.searching){
 			try {
 				List l = listArticles();
 				ContentItemBeanComparator c = new ContentItemBeanComparator();
@@ -336,6 +336,6 @@ public class SearchArticleBean extends AbstractWFEditableListManagedBean impleme
 	
 	
 	public boolean getShowSearchResults(){
-		return showResults;
+		return this.showResults;
 	}
 }

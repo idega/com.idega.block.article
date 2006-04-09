@@ -1,5 +1,5 @@
 /*
- * $Id: ArticleListManagedBean.java,v 1.7 2005/12/20 16:40:42 tryggvil Exp $
+ * $Id: ArticleListManagedBean.java,v 1.8 2006/04/09 11:57:56 laddi Exp $
  * Created on 27.1.2005
  *
  * Copyright (C) 2005 Idega Software hf. All Rights Reserved.
@@ -42,10 +42,10 @@ import com.idega.util.IWTimestamp;
 
 /**
  * 
- *  Last modified: $Date: 2005/12/20 16:40:42 $ by $Author: tryggvil $
+ *  Last modified: $Date: 2006/04/09 11:57:56 $ by $Author: laddi $
  * 
  * @author <a href="mailto:gummi@idega.com">Gudmundur Agust Saemundsson</a>
- * @version $Revision: 1.7 $
+ * @version $Revision: 1.8 $
  */
 public class ArticleListManagedBean implements ContentListViewerManagedBean {
 
@@ -102,9 +102,9 @@ public class ArticleListManagedBean implements ContentListViewerManagedBean {
 		
 		IWTimestamp oldest = null;
 		
-		if(numberOfDaysDisplayed > 0){
+		if(this.numberOfDaysDisplayed > 0){
 			oldest = IWTimestamp.RightNow();
-			oldest.addDays(-numberOfDaysDisplayed);
+			oldest.addDays(-this.numberOfDaysDisplayed);
 		}
 		
 		
@@ -121,7 +121,7 @@ public class ArticleListManagedBean implements ContentListViewerManagedBean {
 			}
 			ContentSearch searchBusiness = new ContentSearch(iwc.getIWMainApplication());
 			Locale requestedLocale = iwc.getCurrentLocale();
-			Search search = searchBusiness.createSearch(getSearchRequest(scope, requestedLocale, oldest,categories));
+			Search search = searchBusiness.createSearch(getSearchRequest(scope, requestedLocale, oldest,this.categories));
 			Collection results = search.getSearchResults();
 			int count=0;
 			if(results!=null){				
@@ -204,10 +204,10 @@ public class ArticleListManagedBean implements ContentListViewerManagedBean {
 	public ContentItemViewer getContentViewer() {
 		ArticleItemViewer viewer = new ArticleItemViewer();
 		
-		if(detailsViewerPath != null){
-			viewer.setDetailsViewerPath(detailsViewerPath);
+		if(this.detailsViewerPath != null){
+			viewer.setDetailsViewerPath(this.detailsViewerPath);
 			HtmlOutputLink moreLink = viewer.getEmptyMoreLink();
-			moreLink.getChildren().add(ArticleUtil.getBundle().getLocalizedText(LOCALIZEDKEY_MORE));
+			moreLink.getChildren().add(ArticleUtil.getBundle().getLocalizedText(this.LOCALIZEDKEY_MORE));
 			viewer.setDetailsCommand(moreLink);
 			viewer.setHeadlineAsLink(getHeadlineAsLink());
 		}
@@ -226,14 +226,14 @@ public class ArticleListManagedBean implements ContentListViewerManagedBean {
 	 * @see com.idega.content.bean.ContentListViewerManagedBean#setDetailsViewerPath(java.lang.String)
 	 */
 	public void setDetailsViewerPath(String path) {
-		detailsViewerPath = path;
+		this.detailsViewerPath = path;
 	}
 	
 	/**
 	 * @return Returns the categories.
 	 */
 	public List getCategories() {
-		return categories;
+		return this.categories;
 	}
 	/**
 	 * @param categories The categories to set.
@@ -260,7 +260,7 @@ public class ArticleListManagedBean implements ContentListViewerManagedBean {
 	}
 	
 	public boolean getHeadlineAsLink(){
-		return headlineAsLink;
+		return this.headlineAsLink;
 	}
 
 	/* (non-Javadoc)
@@ -274,7 +274,7 @@ public class ArticleListManagedBean implements ContentListViewerManagedBean {
 	 * @see com.idega.content.bean.ContentListViewerManagedBean#getResourcePath()
 	 */
 	public String getBaseFolderPath() {
-		return resourcePath;
+		return this.resourcePath;
 	}
 
 	/* (non-Javadoc)
@@ -288,7 +288,7 @@ public class ArticleListManagedBean implements ContentListViewerManagedBean {
 	 * @see com.idega.content.bean.ContentListViewerManagedBean#getMaxNumberOfDisplayed()
 	 */
 	public int getMaxNumberOfDisplayed() {
-		return maxNumberOfDisplayed;
+		return this.maxNumberOfDisplayed;
 	}
 	
 	

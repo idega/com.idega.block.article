@@ -1,5 +1,5 @@
 /*
- * $Id: ArticleItemViewer.java,v 1.13 2006/04/07 09:38:42 gimmi Exp $
+ * $Id: ArticleItemViewer.java,v 1.14 2006/04/09 11:57:56 laddi Exp $
  *
  * Copyright (C) 2004 Idega. All Rights Reserved.
  *
@@ -24,12 +24,12 @@ import com.idega.webface.WFHtml;
 import com.idega.webface.convert.WFTimestampConverter;
 
 /**
- * Last modified: $Date: 2006/04/07 09:38:42 $ by $Author: gimmi $
+ * Last modified: $Date: 2006/04/09 11:57:56 $ by $Author: laddi $
  *
  * Displays the article item
  *
  * @author <a href="mailto:gummi@idega.com">Gudmundur Agust Saemundsson</a>
- * @version $Revision: 1.13 $
+ * @version $Revision: 1.14 $
  */
 public class ArticleItemViewer extends ContentItemViewer {
 	
@@ -53,7 +53,7 @@ public class ArticleItemViewer extends ContentItemViewer {
 	 * @return Returns the cacheEnabled.
 	 */
 	public boolean isCacheEnabled() {
-		return cacheEnabled;
+		return this.cacheEnabled;
 	}
 
 	/**
@@ -210,8 +210,8 @@ public class ArticleItemViewer extends ContentItemViewer {
 	public Object saveState(FacesContext ctx) {
 		Object values[] = new Object[3];
 		values[0] = super.saveState(ctx);
-		values[1] = Boolean.valueOf(headlineAsLink);
-		values[2] = Boolean.valueOf(cacheEnabled);
+		values[1] = Boolean.valueOf(this.headlineAsLink);
+		values[2] = Boolean.valueOf(this.cacheEnabled);
 		return values;
 	}
 
@@ -222,8 +222,8 @@ public class ArticleItemViewer extends ContentItemViewer {
 	public void restoreState(FacesContext ctx, Object state) {
 		Object values[] = (Object[]) state;
 		super.restoreState(ctx, values[0]);
-		headlineAsLink=((Boolean)values[1]).booleanValue();
-		cacheEnabled=((Boolean)values[2]).booleanValue();
+		this.headlineAsLink=((Boolean)values[1]).booleanValue();
+		this.cacheEnabled=((Boolean)values[2]).booleanValue();
 	}
 	
 	/**

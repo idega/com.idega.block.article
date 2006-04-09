@@ -16,10 +16,10 @@ import com.idega.idegaweb.IWMainApplication;
  * <p>
  * TODO tryggvil Describe Type ArticleCacher
  * </p>
- *  Last modified: $Date: 2006/03/16 15:36:02 $ by $Author: tryggvil $
+ *  Last modified: $Date: 2006/04/09 11:57:56 $ by $Author: laddi $
  * 
  * @author <a href="mailto:tryggvil@idega.com">tryggvil</a>
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 public class ArticleCacher extends UIComponentCacher {
 	
@@ -37,7 +37,7 @@ public class ArticleCacher extends UIComponentCacher {
 	}
 	
 	public Map getCacheMap() {
-		IWCacheManager2 iwcm = IWCacheManager2.getInstance(iwma);
+		IWCacheManager2 iwcm = IWCacheManager2.getInstance(this.iwma);
 		
 		return iwcm.getCache("article");
 		

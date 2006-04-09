@@ -38,7 +38,7 @@ public class ArticleStoreException extends RuntimeException{
 	 * @return Returns the errorKey.
 	 */
 	public String getErrorKey() {
-		return errorKey;
+		return this.errorKey;
 	}
 	/**
 	 * @param errorKey The errorKey to set.
