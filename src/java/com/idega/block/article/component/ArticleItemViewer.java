@@ -1,5 +1,5 @@
 /*
- * $Id: ArticleItemViewer.java,v 1.14 2006/04/09 11:57:56 laddi Exp $
+ * $Id: ArticleItemViewer.java,v 1.15 2006/05/08 13:53:31 laddi Exp $
  *
  * Copyright (C) 2004 Idega. All Rights Reserved.
  *
@@ -24,12 +24,12 @@ import com.idega.webface.WFHtml;
 import com.idega.webface.convert.WFTimestampConverter;
 
 /**
- * Last modified: $Date: 2006/04/09 11:57:56 $ by $Author: laddi $
+ * Last modified: $Date: 2006/05/08 13:53:31 $ by $Author: laddi $
  *
  * Displays the article item
  *
  * @author <a href="mailto:gummi@idega.com">Gudmundur Agust Saemundsson</a>
- * @version $Revision: 1.14 $
+ * @version $Revision: 1.15 $
  */
 public class ArticleItemViewer extends ContentItemViewer {
 	
@@ -42,7 +42,7 @@ public class ArticleItemViewer extends ContentItemViewer {
 	private final static String[] ATTRIBUTE_ARRAY = new String[] {ATTRIBUTE_AUTHOR,ATTRIBUTE_CREATION_DATE,ATTRIBUTE_HEADLINE,ATTRIBUTE_TEASER,ATTRIBUTE_BODY};
 	private final static String facetIdPrefix = "article_";
 	private final static String styleClassPrefix = "article_";
-	public final static String DEFAULT_STYLE_CLASS = styleClassPrefix + "item";
+	private final static String DEFAULT_STYLE_CLASS = styleClassPrefix + "item";
 	//instance variables:
 	private boolean headlineAsLink;
 	private boolean cacheEnabled=true;

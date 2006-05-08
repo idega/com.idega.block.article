@@ -40,7 +40,7 @@ public interface ArticleDocument extends org.apache.xmlbeans.XmlObject
      */
     public interface Article extends org.apache.xmlbeans.XmlObject
     {
-        public static final org.apache.xmlbeans.SchemaType type = (org.apache.xmlbeans.SchemaType)schema.system.sD476AFB62C28EC9C6E8B3794CEE51FAD.TypeSystemHolder.typeSystem.resolveHandle("articleb9b1elemtype");
+        public static final org.apache.xmlbeans.SchemaType schemaType = (org.apache.xmlbeans.SchemaType)schema.system.sD476AFB62C28EC9C6E8B3794CEE51FAD.TypeSystemHolder.typeSystem.resolveHandle("articleb9b1elemtype");
         
         /**
          * Gets the "headline" element
@@ -230,10 +230,10 @@ public interface ArticleDocument extends org.apache.xmlbeans.XmlObject
         public static final class Factory
         {
             public static com.idega.xmlns.block.article.document.ArticleDocument.Article newInstance() {
-              return (com.idega.xmlns.block.article.document.ArticleDocument.Article) org.apache.xmlbeans.XmlBeans.getContextTypeLoader().newInstance( type, null ); }
+              return (com.idega.xmlns.block.article.document.ArticleDocument.Article) org.apache.xmlbeans.XmlBeans.getContextTypeLoader().newInstance( schemaType, null ); }
             
             public static com.idega.xmlns.block.article.document.ArticleDocument.Article newInstance(org.apache.xmlbeans.XmlOptions options) {
-              return (com.idega.xmlns.block.article.document.ArticleDocument.Article) org.apache.xmlbeans.XmlBeans.getContextTypeLoader().newInstance( type, options ); }
+              return (com.idega.xmlns.block.article.document.ArticleDocument.Article) org.apache.xmlbeans.XmlBeans.getContextTypeLoader().newInstance( schemaType, options ); }
             
             private Factory() {
           		//No action...
