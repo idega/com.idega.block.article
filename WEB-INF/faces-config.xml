@@ -15,6 +15,21 @@
 	<component>
 		<component-type>ArticleItemView</component-type>
 		<component-class>com.idega.block.article.component.ArticleItemViewer</component-class>
+		<property>
+			<display-name>Item Resource Path</display-name>
+			<property-name>resourcePath</property-name>
+			<property-class>java.lang.String</property-class>
+		</property>
+		<property>
+			<display-name>Details Viewer Page (Path)</display-name>
+			<property-name>detailsViewerPath</property-name>
+			<property-class>java.lang.String</property-class>
+		</property>
+		<property>
+			<display-name>Style Class</display-name>
+			<property-name>styleClass</property-name>
+			<property-class>java.lang.String</property-class>
+		</property>
 	</component>
 	<component>
 		<component-type>ArticleSearch</component-type>
@@ -24,6 +39,16 @@
 	<component>
 		<component-type>ArticleListViewer</component-type>
 		<component-class>com.idega.block.article.component.ArticleListViewer</component-class>
+		<property>
+			<display-name>Base Folder Path</display-name>
+			<property-name>baseFolderPath</property-name>
+			<property-class>java.lang.String</property-class>
+		</property>
+		<property>
+			<display-name>Categories</display-name>
+			<property-name>categories</property-name>
+			<property-class>java.lang.String</property-class>
+		</property>
 	</component>
 
 	<component>
