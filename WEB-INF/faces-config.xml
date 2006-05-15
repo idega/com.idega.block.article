@@ -49,6 +49,21 @@
 			<property-name>categories</property-name>
 			<property-class>java.lang.String</property-class>
 		</property>
+		<property>
+			<display-name>Max number of displayed articles</display-name>
+			<property-name>maxNumberOfDisplayed</property-name>
+			<property-class>int</property-class>
+		</property>
+		<property>
+			<display-name>Display headline as a link</display-name>
+			<property-name>headlineAsLink</property-name>
+			<property-class>boolean</property-class>
+		</property>
+		<property>
+			<display-name>URI to details viewer page</display-name>
+			<property-name>DetailsViewerPath</property-name>
+			<property-class>java.lang.String</property-class>
+		</property>
 	</component>
 
 	<component>
