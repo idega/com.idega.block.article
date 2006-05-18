@@ -1,5 +1,5 @@
 /*
- * $Id: EditArticleView.java,v 1.21 2006/04/09 12:32:00 laddi Exp $
+ * $Id: EditArticleView.java,v 1.22 2006/05/18 18:32:33 eiki Exp $
  *
  * Copyright (C) 2004 Idega. All Rights Reserved.
  *
@@ -57,10 +57,10 @@ import com.idega.webface.htmlarea.HTMLArea;
  * <p>
  * This is the part for the editor of article is inside the admin interface
  * </p>
- * Last modified: $Date: 2006/04/09 12:32:00 $ by $Author: laddi $
+ * Last modified: $Date: 2006/05/18 18:32:33 $ by $Author: eiki $
  *
  * @author Joakim,Tryggvi Larusson
- * @version $Revision: 1.21 $
+ * @version $Revision: 1.22 $
  */
 public class EditArticleView extends IWBaseComponent implements ManagedContentBeans, ActionListener, ValueChangeListener {
 	public final static String EDIT_ARTICLE_BLOCK_ID = "edit_article_view";
@@ -260,16 +260,18 @@ public class EditArticleView extends IWBaseComponent implements ManagedContentBe
 		
 
 		//Article body
-		HTMLArea bodyArea = WFUtil.getHtmlAreaTextArea(BODY_ID, ref + "body", "500px", "400px");
+		HTMLArea bodyArea = WFUtil.getHtmlAreaTextArea(BODY_ID, ref + "body", "640px", "480px");
 		bodyArea.addValueChangeListener(this);
 		bodyArea.setImmediate(true);
 		//HTMLArea bodyArea = WFUtil.getHtmlAreaTextArea(BODY_ID, ref + "body");
 		
 		bodyArea.setAllowFontSelection(false);
-//		bodyArea.addPlugin(HTMLArea.PLUGIN_TABLE_OPERATIONS);
-//		bodyArea.addPlugin(HTMLArea.PLUGIN_DYNAMIC_CSS, "3");
+		bodyArea.addPlugin(HTMLArea.PLUGIN_TABLE_OPERATIONS,"3");
+		bodyArea.addPlugin(HTMLArea.PLUGIN_CONTEXT_MENU);
+		bodyArea.addPlugin(HTMLArea.PLUGIN_FULL_SCREEN);
+		bodyArea.addPlugin(HTMLArea.PLUGIN_STYLIST);
 //		bodyArea.addPlugin(HTMLArea.PLUGIN_CSS, "3");
-//		bodyArea.addPlugin(HTMLArea.PLUGIN_CONTEXT_MENU);
+		
 //		bodyArea.addPlugin(HTMLArea.PLUGIN_LIST_TYPE);
 //		bodyArea.addPlugin(HTMLArea.PLUGIN_CHARACTER_MAP);
 //		bodyArea.addPlugin("TableOperations");
@@ -302,7 +304,7 @@ public class EditArticleView extends IWBaseComponent implements ManagedContentBe
 		mainContainer.add(bodyItem);
 		
 		//Teaser input
-		HTMLArea teaserArea = WFUtil.getHtmlAreaTextArea(TEASER_ID, ref + "teaser", "500px", "150px");
+		HTMLArea teaserArea = WFUtil.getHtmlAreaTextArea(TEASER_ID, ref + "teaser", "640px", "150px");
 		teaserArea.addValueChangeListener(this);
 		teaserArea.setImmediate(true);
 		teaserArea.setAllowFontSelection(false);
