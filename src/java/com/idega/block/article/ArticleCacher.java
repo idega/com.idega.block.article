@@ -16,15 +16,20 @@ import com.idega.idegaweb.IWMainApplication;
  * <p>
  * TODO tryggvil Describe Type ArticleCacher
  * </p>
- *  Last modified: $Date: 2006/06/08 15:43:40 $ by $Author: tryggvil $
+ *  Last modified: $Date: 2006/06/08 15:50:05 $ by $Author: tryggvil $
  * 
  * @author <a href="mailto:tryggvil@idega.com">tryggvil</a>
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  */
 public class ArticleCacher extends UIComponentCacher {
 	
 	public static final String BEAN_ID="articleCacher";
 	private IWMainApplication iwma;
+	//sets the time-to-live, set to 24 hours
+	protected static final int defaultTTLSeconds = 24*60*60;
+	protected static final int defaultCacheSize = 10000;
+	protected static final boolean eternal=false;
+	protected static final boolean overFlowToDisk=true;
 	
 	public static ArticleCacher getInstance(IWMainApplication iwma){
 		ArticleCacher instance = (ArticleCacher) iwma.getAttribute(BEAN_ID);
@@ -39,7 +44,7 @@ public class ArticleCacher extends UIComponentCacher {
 	public Map getCacheMap() {
 		IWCacheManager2 iwcm = IWCacheManager2.getInstance(this.iwma);
 		
-		return iwcm.getCache("article");
+		return iwcm.getCache("article",defaultCacheSize,overFlowToDisk,eternal,defaultTTLSeconds,defaultTTLSeconds);
 		
 		//IWCacheManager cm = IWCacheManager.getInstance(IWMainApplication.getDefaultIWMainApplication());
 		//return cm.getCacheMap();
