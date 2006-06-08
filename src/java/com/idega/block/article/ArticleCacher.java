@@ -16,14 +16,15 @@ import com.idega.idegaweb.IWMainApplication;
  * <p>
  * TODO tryggvil Describe Type ArticleCacher
  * </p>
- *  Last modified: $Date: 2006/06/08 15:50:05 $ by $Author: tryggvil $
+ *  Last modified: $Date: 2006/06/08 15:51:44 $ by $Author: tryggvil $
  * 
  * @author <a href="mailto:tryggvil@idega.com">tryggvil</a>
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
  */
 public class ArticleCacher extends UIComponentCacher {
 	
 	public static final String BEAN_ID="articleCacher";
+	protected static final String CACHE_ENABLE_KEY="article.cache.enabled";
 	private IWMainApplication iwma;
 	//sets the time-to-live, set to 24 hours
 	protected static final int defaultTTLSeconds = 24*60*60;
@@ -78,7 +79,7 @@ public class ArticleCacher extends UIComponentCacher {
 	public boolean isCacheEnbled(UIComponent component, FacesContext context) {
 		
 		IWMainApplication iwma = IWMainApplication.getIWMainApplication(context);
-		String prop = iwma.getSettings().getProperty("article.cache.enabled");
+		String prop = iwma.getSettings().getProperty(CACHE_ENABLE_KEY);
 		boolean defaultEnabled = true;
 		if(prop!=null){
 			defaultEnabled = Boolean.valueOf(prop).booleanValue();
