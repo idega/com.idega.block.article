@@ -16,10 +16,10 @@ import com.idega.idegaweb.IWMainApplication;
  * <p>
  * TODO tryggvil Describe Type ArticleCacher
  * </p>
- *  Last modified: $Date: 2006/04/09 11:57:56 $ by $Author: laddi $
+ *  Last modified: $Date: 2006/06/08 15:43:40 $ by $Author: tryggvil $
  * 
  * @author <a href="mailto:tryggvil@idega.com">tryggvil</a>
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
 public class ArticleCacher extends UIComponentCacher {
 	
@@ -48,10 +48,23 @@ public class ArticleCacher extends UIComponentCacher {
 	/* (non-Javadoc)
 	 * @see com.idega.core.cache.UIComponentCacher#getCacheKey(javax.faces.component.UIComponent, javax.faces.context.FacesContext)
 	 */
-	protected String getCacheKey(UIComponent component, FacesContext context) {
-		String cacheKey = super.getCacheKey(component, context);
-		
-		return cacheKey;
+	protected StringBuffer getCacheKeyStringBuffer(UIComponent component, FacesContext context) {
+		StringBuffer keyBuffer = super.getCacheKeyStringBuffer(component, context);
+		/*if(component instanceof ArticleItemViewer){
+			ArticleItemViewer itemViewer = (ArticleItemViewer)component;
+			String resourcePath = itemViewer.getResourcePath();
+			if(resourcePath!=null){
+				keyBuffer.append(resourcePath);
+			}
+		}
+		else if(component instanceof ArticleListViewer){
+			ArticleListViewer listViewer = (ArticleListViewer)component;
+			String categories = listViewer.getCategories();
+			if(categories!=null){
+				keyBuffer.append(categories);
+			}
+		}*/
+		return keyBuffer;
 	}
 
 	/* (non-Javadoc)
