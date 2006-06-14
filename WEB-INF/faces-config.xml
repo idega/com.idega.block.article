@@ -61,7 +61,7 @@
 		</property>
 		<property>
 			<display-name>URI to details viewer page</display-name>
-			<property-name>DetailsViewerPath</property-name>
+			<property-name>detailsViewerPath</property-name>
 			<property-class>java.lang.String</property-class>
 		</property>
 	</component>
