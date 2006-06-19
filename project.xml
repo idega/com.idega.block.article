@@ -34,6 +34,11 @@
       <name>1.0</name>
       <tag>ARTICLE_1_0</tag>
     </version>
+    <version>
+      <id>3.1.0</id>
+      <name>3.1.0</name>
+      <tag>ARTICLE_3_1_0</tag>
+    </version>
   </versions>
   <developers>
     <developer>
@@ -67,8 +72,10 @@
       <url>http://www.idega.com/</url>
       <properties>
         <!--j:if test="${idegaweb.project.source.dependent}=='true'}"-->
+
         <eclipse.dependency>true</eclipse.dependency>
         <!--/j:if-->
+
       </properties>
     </dependency>
     <dependency>
@@ -79,8 +86,10 @@
       <url>http://www.idega.com/</url>
       <properties>
         <!--j:if test="${idegaweb.project.source.dependent}=='true'}"-->
+
         <eclipse.dependency>true</eclipse.dependency>
         <!--/j:if-->
+
       </properties>
     </dependency>
     <dependency>
@@ -91,8 +100,10 @@
       <url>http://www.idega.com/</url>
       <properties>
         <!--j:if test="${idegaweb.project.source.dependent}=='true'}"-->
+
         <eclipse.dependency>true</eclipse.dependency>
         <!--/j:if-->
+
       </properties>
     </dependency>
     <dependency>
@@ -103,8 +114,10 @@
       <url>http://www.idega.com/</url>
       <properties>
         <!--j:if test="${idegaweb.project.source.dependent}=='true'}"-->
+
         <eclipse.dependency>true</eclipse.dependency>
         <!--/j:if-->
+
       </properties>
     </dependency>
     <dependency>
@@ -118,6 +131,7 @@
       </properties>
     </dependency>
     <!-- already included in core -->
+
     <dependency>
       <groupId>slide</groupId>
       <artifactId>jakarta-slide-webdavlib</artifactId>
