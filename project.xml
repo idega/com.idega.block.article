@@ -4,9 +4,7 @@
   <extend>${base.project.dir}/block-dependencies.xml</extend>
   <name>idegaWeb Article</name>
   <artifactId>com.idega.block.article</artifactId>
-  <!--currentVersion>1.0</currentVersion-->
-  <currentVersion>1.0.1-SNAPSHOT</currentVersion>
-
+  <currentVersion>3.1.0</currentVersion>
   <inceptionYear>2003</inceptionYear>
   <shortDescription>Articles</shortDescription>
   <description>idegaWeb article is a component for content management of articles</description>
@@ -64,66 +62,49 @@
     <dependency>
       <groupId>bundles</groupId>
       <artifactId>com.idega.core</artifactId>
-      <!--version>3.0.6</version-->
-      <version>SNAPSHOT</version>
-
+      <version>3.1.0</version>
       <type>jar</type>
       <url>http://www.idega.com/</url>
       <properties>
         <!--j:if test="${idegaweb.project.source.dependent}=='true'}"-->
-
         <eclipse.dependency>true</eclipse.dependency>
         <!--/j:if-->
-
       </properties>
     </dependency>
     <dependency>
       <groupId>bundles</groupId>
       <artifactId>com.idega.webface</artifactId>
-      <!--version>1.0</version-->
-      <version>SNAPSHOT</version>
-
+      <version>3.1.0</version>
       <type>jar</type>
       <url>http://www.idega.com/</url>
       <properties>
         <!--j:if test="${idegaweb.project.source.dependent}=='true'}"-->
-
         <eclipse.dependency>true</eclipse.dependency>
         <!--/j:if-->
-
       </properties>
     </dependency>
     <dependency>
       <groupId>bundles</groupId>
       <artifactId>com.idega.content</artifactId>
-      <!--version>1.0</version-->
-      <version>SNAPSHOT</version>
-
+      <version>3.1.0</version>
       <type>jar</type>
       <url>http://www.idega.com/</url>
       <properties>
         <!--j:if test="${idegaweb.project.source.dependent}=='true'}"-->
-
         <eclipse.dependency>true</eclipse.dependency>
         <!--/j:if-->
-
       </properties>
     </dependency>
     <dependency>
       <groupId>bundles</groupId>
       <artifactId>com.idega.slide</artifactId>
-      <!--version>1.0</version-->
-      
-      <version>SNAPSHOT</version>
-
+      <version>3.1.0</version>
       <type>jar</type>
       <url>http://www.idega.com/</url>
       <properties>
         <!--j:if test="${idegaweb.project.source.dependent}=='true'}"-->
-
         <eclipse.dependency>true</eclipse.dependency>
         <!--/j:if-->
-
       </properties>
     </dependency>
     <dependency>
@@ -137,7 +118,6 @@
       </properties>
     </dependency>
     <!-- already included in core -->
-
     <dependency>
       <groupId>slide</groupId>
       <artifactId>jakarta-slide-webdavlib</artifactId>
@@ -146,8 +126,6 @@
       <url>http://jakarta.apache.org/slide/</url>
     </dependency>
     <dependency>
-      <!-- already included in core -->
-
       <groupId>commons-httpclient</groupId>
       <artifactId>commons-httpclient</artifactId>
       <version>2.0.2</version>

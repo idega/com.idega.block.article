@@ -4,7 +4,31 @@
     <author email="tryggvi@idega.com">Tryggvi Larusson</author>
   </properties>
   <body>
-        	<release version="1.0" date="2005-09-15">
+
+	<release version="3.1.0" date="2006-06-19">
+      <action dev="tryggvil" type="update">
+      	New version to be included in ePlatform 3.1 Release.
+      </action>
+      <action dev="tryggvil" type="update">
+      	Article(ItemViewer) and ArticleList(Viewer) are now registered JSF UIComponents for use
+      	in the Builder as Builder now supports JSF UIComponents.
+      </action>
+      <action dev="tryggvil" type="update">
+      	Article(ItemViewer) and ArticleList(Viewer) are now usable in Builder and registered 
+      	JSF UIComponents for use in the Builder as Builder now supports JSF UIComponents.
+      </action>
+      <action dev="tryggvil" type="update">
+      	UI updates. Article Admin window now opens by default in a pop-up window. Version update and 
+      	addition of a few admin buttons to the Xinha/HTMLArea WYSIWYG editor.
+      </action>
+      <action dev="tryggvil" type="update">
+      	UI updates. Article Admin window now opens by default in a pop-up window. Version update and 
+      	addition of a few admin buttons to the Xinha/HTMLArea WYSIWYG editor.
+      </action>
+    </release>
+	
+	
+	<release version="1.0" date="2005-09-15">
       <action dev="tryggvil" type="update">
         Declaration of version for use with 3.0.6 core.
       </action>              
