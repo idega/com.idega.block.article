@@ -29,8 +29,7 @@
  <!ELEMENT property-editor  (#PCDATA)>
  <!ELEMENT short-description  (#PCDATA)>
  <!ELEMENT writable  (#PCDATA)> 
-]
-> 
+]> 
 <faces-config>
 
 

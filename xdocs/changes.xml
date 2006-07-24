@@ -5,6 +5,13 @@
   </properties>
   <body>
 
+	<release version="3.1.1" date="2006-07-24">
+      <action dev="tryggvil" type="fix">
+      	Bugfix of syntax of doctype declaration in faces-config.xml file that occurred on Oracle Application Server (Reykjavik).
+      	This caused the error of the application not starting up successfully.
+      </action>
+    </release>
+
 	<release version="3.1.0" date="2006-06-19">
       <action dev="tryggvil" type="update">
       	New version to be included in ePlatform 3.1 Release.
