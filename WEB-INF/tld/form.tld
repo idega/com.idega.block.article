@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="ISO-8859-1" ?>
+<!DOCTYPE taglib
+  PUBLIC "-//Sun Microsystems, Inc.//DTD JSP Tag Library 1.2//EN"
+  "http://java.sun.com/dtd/web-jsptaglibrary_1_2.dtd">
+  
+<taglib>
+
+    <tlib-version>0.9.0</tlib-version>
+    <jsp-version>1.2</jsp-version>
+    <short-name>IdegaWeb Form Block Tag Library</short-name>
+    <uri>http://xmlns.idega.com/com.idega.block.form</uri>
+    <description>idegaweb Form block Tag Library</description>
+
+	<tag>
+		<name>FormViewer</name>
+		<tag-class>com.idega.block.form.component.FormViewerTag</tag-class>
+		<attribute>
+			<name>uri</name>
+			<required>false</required>
+			<rtexprvalue>false</rtexprvalue>
+		</attribute>
+	</tag>
+	
+</taglib>
