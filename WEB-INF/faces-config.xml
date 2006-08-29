@@ -33,14 +33,68 @@
 > 
 <faces-config>
 
-	<!-- TODO: write faces-config.xml -->
 
 	<component>
-		<component-type>FormViewer</component-type>
-		<component-class>com.idega.block.form.component.FormViewer</component-class>
+		<component-type>ListArticlesBlock</component-type>
+		<component-class>com.idega.block.article.component.ListArticlesBlock</component-class>
+	</component>
+
+	<component>
+		<component-type>ArticleItemView</component-type>
+		<component-class>com.idega.block.article.component.ArticleItemViewer</component-class>
 		<property>
-			<display-name>URI of XForms document</display-name>
-			<property-name>uri</property-name>
+			<display-name>Item Resource Path</display-name>
+			<property-name>resourcePath</property-name>
+			<property-class>java.lang.String</property-class>
+		</property>
+		<property>
+			<display-name>Details Viewer Page (Path)</display-name>
+			<property-name>detailsViewerPath</property-name>
+			<property-class>java.lang.String</property-class>
+		</property>
+		<property>
+			<display-name>Style Class</display-name>
+			<property-name>styleClass</property-name>
+			<property-class>java.lang.String</property-class>
+		</property>
+		<component-extension>
+			<idegaweb-info>
+				<builder-visible>true</builder-visible>
+				<object-type>jsf.uicomponent</object-type>
+			</idegaweb-info>
+		</component-extension>
+	</component>
+	<component>
+		<component-type>ArticleSearch</component-type>
+		<component-class>com.idega.block.article.component.SearchArticleBlock</component-class>
+	</component>
+
+	<component>
+		<component-type>ArticleListViewer</component-type>
+		<component-class>com.idega.block.article.component.ArticleListViewer</component-class>
+		<property>
+			<display-name>Base Folder Path</display-name>
+			<property-name>baseFolderPath</property-name>
+			<property-class>java.lang.String</property-class>
+		</property>
+		<property>
+			<display-name>Categories</display-name>
+			<property-name>categories</property-name>
+			<property-class>java.lang.String</property-class>
+		</property>
+		<property>
+			<display-name>Max number of displayed articles</display-name>
+			<property-name>maxNumberOfDisplayed</property-name>
+			<property-class>int</property-class>
+		</property>
+		<property>
+			<display-name>Display headline as a link</display-name>
+			<property-name>headlineAsLink</property-name>
+			<property-class>boolean</property-class>
+		</property>
+		<property>
+			<display-name>URI to details viewer page</display-name>
+			<property-name>detailsViewerPath</property-name>
 			<property-class>java.lang.String</property-class>
 		</property>
 		<component-extension>
@@ -51,9 +105,45 @@
 		</component-extension>
 	</component>
 
+	<component>
+		<component-type>ArticleAdminBlock</component-type>
+		<component-class>com.idega.block.article.component.ArticleAdminBlock</component-class>
+	</component>
+
 	<managed-bean>
-		<managed-bean-name>FormBean</managed-bean-name>
-		<managed-bean-class>com.idega.block.form.bean.FormBean</managed-bean-class>
+		<managed-bean-name>articleItemBean</managed-bean-name>
+		<managed-bean-class>com.idega.block.article.bean.ArticleItemBean</managed-bean-class>
+		<managed-bean-scope>request</managed-bean-scope>
+	</managed-bean>
+
+	<managed-bean>
+		<managed-bean-name>articleVersionItemBean</managed-bean-name>
+		<managed-bean-class>com.idega.block.article.bean.ArticleItemBean</managed-bean-class>
+		<managed-bean-scope>request</managed-bean-scope>
+	</managed-bean>
+
+	<managed-bean>
+		<managed-bean-name>previewArticleBean</managed-bean-name>
+		<managed-bean-class>com.idega.block.article.bean.ArticleItemBean</managed-bean-class>
+		<managed-bean-scope>request</managed-bean-scope>
+	</managed-bean>
+
+	<managed-bean>
+		<managed-bean-name>articleVersionListBean</managed-bean-name>
+		<managed-bean-class>com.idega.block.article.bean.ArticleVersionListBean</managed-bean-class>
+		<managed-bean-scope>request</managed-bean-scope>
+	</managed-bean>
+	
+	<managed-bean>
+		<managed-bean-name>searchArticleBean</managed-bean-name>
+		<managed-bean-class>com.idega.block.article.bean.SearchArticleBean</managed-bean-class>
+		<managed-bean-scope>request</managed-bean-scope>
+	</managed-bean>
+	
+	
+	<managed-bean>
+		<managed-bean-name>articleItemListBean</managed-bean-name>
+		<managed-bean-class>com.idega.block.article.bean.ArticleListManagedBean</managed-bean-class>
 		<managed-bean-scope>request</managed-bean-scope>
 	</managed-bean>
 	
