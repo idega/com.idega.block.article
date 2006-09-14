@@ -1,29 +1,32 @@
-<?xml version="1.0" encoding="ISO-8859-1" ?>
-<!DOCTYPE taglib
-  PUBLIC "-//Sun Microsystems, Inc.//DTD JSP Tag Library 1.2//EN"
-  "http://java.sun.com/dtd/web-jsptaglibrary_1_2.dtd">
-  
-<taglib>
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<!DOCTYPE taglib PUBLIC "-//Sun Microsystems, Inc.//DTD JSP Tag Library 1.2//EN" "http://java.sun.com/dtd/web-jsptaglibrary_1_2.dtd">
 
-    <tlib-version>0.9.0</tlib-version>
-    <jsp-version>1.2</jsp-version>
-    <short-name>IdegaWeb Article Block Tag Library</short-name>
-    <description>idegaweb Article block Tag Library</description>
-    <uri>http://xmlns.idega.com/com.idega.block.article</uri>
+<taglib xmlns="http://java.sun.com/JSP/TagLibraryDescriptor">
+
+	<tlib-version>0.9.0</tlib-version>
+	<jsp-version>1.2</jsp-version>
+	<short-name>a</short-name>
+	<uri>http://xmlns.idega.com/com.idega.block.article</uri>
+	<display-name>Article Block Tag Library</display-name>
+	<description>idegaweb Article block Tag Library</description>
 
 	<tag>
 		<name>listarticlesblock</name>
-		<tag-class>com.idega.block.article.taglib.ListArticlesBlockTag</tag-class>
+		<tag-class>
+			com.idega.block.article.taglib.ListArticlesBlockTag
+		</tag-class>
 		<attribute>
 			<name>id</name>
 			<required>false</required>
 			<rtexprvalue>false</rtexprvalue>
 		</attribute>
 	</tag>
-	
+
 	<tag>
 		<name>articleAdminBlock</name>
-		<tag-class>com.idega.block.article.taglib.ArticleAdminBlockTag</tag-class>
+		<tag-class>
+			com.idega.block.article.taglib.ArticleAdminBlockTag
+		</tag-class>
 		<attribute>
 			<name>id</name>
 			<required>false</required>
@@ -35,40 +38,48 @@
 			<rtexprvalue>false</rtexprvalue>
 		</attribute>
 	</tag>
-	
+
 	<tag>
 		<name>search_article_page</name>
-		<tag-class>com.idega.block.article.taglib.SearchArticlePageTag</tag-class>
+		<tag-class>
+			com.idega.block.article.taglib.SearchArticlePageTag
+		</tag-class>
 		<attribute>
 			<name>id</name>
 			<required>false</required>
 			<rtexprvalue>false</rtexprvalue>
 		</attribute>
 	</tag>
-	
+
 	<tag>
 		<name>list_articles_page</name>
-		<tag-class>com.idega.block.article.taglib.ListArticlesPageTag</tag-class>
+		<tag-class>
+			com.idega.block.article.taglib.ListArticlesPageTag
+		</tag-class>
 		<attribute>
 			<name>id</name>
 			<required>false</required>
 			<rtexprvalue>false</rtexprvalue>
 		</attribute>
 	</tag>
-	
+
 	<tag>
 		<name>preview_article_page</name>
-		<tag-class>com.idega.block.article.taglib.PreviewArticlePageTag</tag-class>
+		<tag-class>
+			com.idega.block.article.taglib.PreviewArticlePageTag
+		</tag-class>
 		<attribute>
 			<name>id</name>
 			<required>false</required>
 			<rtexprvalue>false</rtexprvalue>
 		</attribute>
 	</tag>
-	
+
 	<tag>
 		<name>ArticleItemViewer</name>
-		<tag-class>com.idega.block.article.component.ArticleItemViewerTag</tag-class>
+		<tag-class>
+			com.idega.block.article.component.ArticleItemViewerTag
+		</tag-class>
 		<attribute>
 			<name>id</name>
 			<required>false</required>
@@ -88,17 +99,21 @@
 
 	<tag>
 		<name>ArticleSearch</name>
-		<tag-class>com.idega.block.article.taglib.SearchArticleBlockTag</tag-class>
+		<tag-class>
+			com.idega.block.article.taglib.SearchArticleBlockTag
+		</tag-class>
 		<attribute>
 			<name>id</name>
 			<required>false</required>
 			<rtexprvalue>false</rtexprvalue>
 		</attribute>
 	</tag>
-	
+
 	<tag>
 		<name>ArticleListViewer</name>
-		<tag-class>com.idega.block.article.taglib.ArticleListViewerTag</tag-class>
+		<tag-class>
+			com.idega.block.article.taglib.ArticleListViewerTag
+		</tag-class>
 		<attribute>
 			<name>id</name>
 			<required>true</required>
