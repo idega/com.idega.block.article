@@ -1,5 +1,5 @@
 /*
- * $Id: ListArticlesBlock.java,v 1.15 2006/10/10 11:55:08 tryggvil Exp $
+ * $Id: ListArticlesBlock.java,v 1.16 2006/10/12 12:48:23 gediminas Exp $
  *
  * Copyright (C) 2004 Idega. All Rights Reserved.
  *
@@ -18,7 +18,6 @@ import javax.faces.component.html.HtmlPanelGrid;
 import javax.faces.context.FacesContext;
 import javax.faces.event.ActionEvent;
 import javax.faces.event.ActionListener;
-import org.apache.xmlbeans.XmlException;
 import com.idega.block.article.bean.ArticleItemBean;
 import com.idega.content.bean.ManagedContentBeans;
 import com.idega.content.data.ContentItemCase;
@@ -36,10 +35,10 @@ import com.idega.webface.convert.WFDateConverter;
 /**
  * Block for listing articles.   
  * <p>
- * Last modified: $Date: 2006/10/10 11:55:08 $ by $Author: tryggvil $
+ * Last modified: $Date: 2006/10/12 12:48:23 $ by $Author: gediminas $
  *
  * @author Anders Lindman
- * @version $Revision: 1.15 $
+ * @version $Revision: 1.16 $
  */
 public class ListArticlesBlock extends 
 IWBaseComponent
@@ -241,9 +240,6 @@ implements ManagedContentBeans, ActionListener, Serializable {
 			cs.setSelectedId(LIST_PANEL_ID, false);
 			cs.setSelectedId(VIEW_ARTICLE_PANEL_ID, true);
 		}
-		/*catch (XmlException e) {
-			e.printStackTrace();
-		}*/
 		catch (IOException e) {
 			e.printStackTrace();
 		}
