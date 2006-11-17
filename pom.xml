@@ -73,7 +73,7 @@
     <dependency>
       <groupId>jtidy</groupId>
       <artifactId>jtidy</artifactId>
-      <version>4aug2000r7-dev</version>
+      <version>4aug2000r7-dev-m1.0</version>
       <type>jar</type>
     </dependency>
 
