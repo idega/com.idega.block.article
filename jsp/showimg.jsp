@@ -1,9 +1,6 @@
-<%@ page import="java.io.File,
-                 java.io.InputStream,
-                 java.io.FileInputStream,
-                 java.io.OutputStream,
-                 java.util.List,
-                 com.idega.webface.test.*"
+<%@ page import="java.util.List,
+                 com.idega.block.article.bean.*,
+                 com.idega.content.bean.*"
 %>
 <%@ page session="false"%>
 <%
