@@ -5,6 +5,13 @@
   </properties>
   <body>
 
+	<release version="3.1.2" date="2006-12-05">
+      <action dev="tryggvil" type="fix">
+      	Saving URLs for links and images without the servername for the current server.
+      	Added doubleclick feature to the edtior
+      </action>
+    </release>
+
 	<release version="3.1.1" date="2006-07-24">
       <action dev="tryggvil" type="fix">
       	Bugfix of syntax of doctype declaration in faces-config.xml file that occurred on Oracle Application Server (Reykjavik).
