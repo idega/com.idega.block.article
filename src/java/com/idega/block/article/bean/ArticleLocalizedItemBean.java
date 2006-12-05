@@ -1,5 +1,5 @@
 /*
- * $Id: ArticleLocalizedItemBean.java,v 1.7 2006/04/09 12:32:00 laddi Exp $
+ * $Id: ArticleLocalizedItemBean.java,v 1.8 2006/12/05 15:53:52 gimmi Exp $
  *
  * Copyright (C) 2004 Idega. All Rights Reserved.
  *
@@ -16,11 +16,16 @@ import java.io.InputStream;
 import java.io.Serializable;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.logging.Logger;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 import org.apache.webdav.lib.WebdavResource;
 import org.w3c.tidy.Configuration;
 import org.w3c.tidy.Tidy;
+
 import com.idega.content.bean.ContentItem;
 import com.idega.content.bean.ContentItemBean;
 import com.idega.content.bean.ContentItemCase;
@@ -44,10 +49,10 @@ import com.idega.xml.XMLParser;
  * This is a JSF managed bean that manages each article xml document 
  * instance per language/locale.
  * <p>
- * Last modified: $Date: 2006/04/09 12:32:00 $ by $Author: laddi $
+ * Last modified: $Date: 2006/12/05 15:53:52 $ by $Author: gimmi $
  *
  * @author Anders Lindman,<a href="mailto:tryggvi@idega.com">Tryggvi Larusson</a>
- * @version $Revision: 1.7 $
+ * @version $Revision: 1.8 $
  */
 public class ArticleLocalizedItemBean extends ContentItemBean implements Serializable, ContentItem {
 	
@@ -415,7 +420,44 @@ public class ArticleLocalizedItemBean extends ContentItemBean implements Seriali
 			catch (UnsupportedEncodingException e) {
 				e.printStackTrace();
 			}
+			
+			
+			text = removeAbsoluteReferences(text);
 		}
+		return text;
+	}
+
+	private String removeAbsoluteReferences(String text) {
+		StringBuffer replaceBuffer = new StringBuffer(text);
+		ArrayList patterns = new ArrayList();
+		Pattern p1 = Pattern.compile("(<a[^>]+href=\")([^#][^\"]+)([^>]+>)",Pattern.CASE_INSENSITIVE);
+		Pattern p2 = Pattern.compile("(<img[^>]+src=\")([^#][^\"]+)([^>]+>)",Pattern.CASE_INSENSITIVE);
+		patterns.add(p1);
+		patterns.add(p2);
+		
+		StringBuffer outString;
+
+		Iterator patternIter = patterns.iterator();
+		while (patternIter.hasNext()) {
+			Pattern p = (Pattern) patternIter.next();
+			Matcher m = p.matcher(replaceBuffer);
+			outString = new StringBuffer();
+
+			while (m.find()) {
+
+				String url = m.group(2);
+				if (url.startsWith("http") && url.indexOf(IWContext.getInstance().getServerName()) > 0) {
+					url = url.substring(url.indexOf("//")+2);
+					url = url.substring(url.indexOf("/"));
+
+					m.appendReplacement(outString,"$1"+url+"$3");
+				}
+			}
+			m.appendTail(outString);
+			replaceBuffer=new StringBuffer(outString.toString());
+
+		}
+		text = replaceBuffer.toString();
 		return text;
 	}
 	
