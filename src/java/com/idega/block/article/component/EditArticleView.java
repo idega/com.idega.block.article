@@ -1,5 +1,5 @@
 /*
- * $Id: EditArticleView.java,v 1.22 2006/05/18 18:32:33 eiki Exp $
+ * $Id: EditArticleView.java,v 1.23 2006/12/05 15:54:04 gimmi Exp $
  *
  * Copyright (C) 2004 Idega. All Rights Reserved.
  *
@@ -57,10 +57,10 @@ import com.idega.webface.htmlarea.HTMLArea;
  * <p>
  * This is the part for the editor of article is inside the admin interface
  * </p>
- * Last modified: $Date: 2006/05/18 18:32:33 $ by $Author: eiki $
+ * Last modified: $Date: 2006/12/05 15:54:04 $ by $Author: gimmi $
  *
  * @author Joakim,Tryggvi Larusson
- * @version $Revision: 1.22 $
+ * @version $Revision: 1.23 $
  */
 public class EditArticleView extends IWBaseComponent implements ManagedContentBeans, ActionListener, ValueChangeListener {
 	public final static String EDIT_ARTICLE_BLOCK_ID = "edit_article_view";
@@ -289,7 +289,7 @@ public class EditArticleView extends IWBaseComponent implements ManagedContentBe
 //		bodyArea.addPlugin("InsertWords");
 //		bodyArea.addPlugin("ContextMenu");
 //		bodyArea.addPlugin("LangMarks");
-//		bodyArea.addPlugin("DoubleClick");
+		bodyArea.addPlugin("DoubleClick");
 //		bodyArea.addPlugin("ListType");
 //		bodyArea.addPlugin("ImageManager");
 		
