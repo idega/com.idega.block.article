@@ -1,5 +1,5 @@
 /*
- * $Id: ArticleItemBean.java,v 1.63 2006/10/03 15:58:52 gediminas Exp $
+ * $Id: ArticleItemBean.java,v 1.64 2007/01/03 14:46:26 valdas Exp $
  *
  * Copyright (C) 2004-2005 Idega. All Rights Reserved.
  *
@@ -29,6 +29,7 @@ import com.idega.block.article.business.ArticleUtil;
 import com.idega.content.bean.ContentItem;
 import com.idega.content.bean.ContentItemBean;
 import com.idega.content.bean.ContentItemCase;
+import com.idega.content.themes.helpers.ThemesConstants;
 import com.idega.core.accesscontrol.business.StandardRoles;
 import com.idega.data.IDOStoreException;
 import com.idega.idegaweb.IWMainApplication;
@@ -51,10 +52,10 @@ import com.idega.xml.XMLException;
  * This is a JSF managed bean that manages each article instance and delegates 
  * all calls to the correct localized instance.
  * <p>
- * Last modified: $Date: 2006/10/03 15:58:52 $ by $Author: gediminas $
+ * Last modified: $Date: 2007/01/03 14:46:26 $ by $Author: valdas $
  *
  * @author Anders Lindman,<a href="mailto:tryggvi@idega.com">Tryggvi Larusson</a>
- * @version $Revision: 1.63 $
+ * @version $Revision: 1.64 $
  */
 public class ArticleItemBean extends ContentItemBean implements Serializable, ContentItem, ValueChangeListener {
 	
@@ -128,8 +129,29 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 	 * @see com.idega.block.article.bean.ArticleLocalizedItemBean#getBody()
 	 */
 	public String getBody() {
-		// TODO Auto-generated method stub
-		return getLocalizedArticle().getBody();
+		boolean isDummyArticle = false;
+		String path = getResourcePath();
+		String body = getLocalizedArticle().getBody();
+		if (path == null) {
+			return body;
+		}
+		if (path.indexOf(ThemesConstants.IDEGA_THEME) != -1) {
+			if (body == null) {
+				return body;
+			}
+			/*for (int i = 0; (i < ThemesConstants.DUMMY_ARTICLES.size() && !isDummyArticle); i++) {
+				if (body.indexOf(ThemesConstants.DUMMY_ARTICLES.get(i)) != -1) {
+					isDummyArticle = true;
+				}
+			}*/
+			if (body.indexOf("In congue dignissim quam") != -1) {
+				isDummyArticle = true;
+			}
+		}
+		if (isDummyArticle) {
+			return "";
+		}
+		return body;
 	}
 
 	/* (non-Javadoc)
