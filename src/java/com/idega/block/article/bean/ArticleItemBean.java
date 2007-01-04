@@ -1,5 +1,5 @@
 /*
- * $Id: ArticleItemBean.java,v 1.64 2007/01/03 14:46:26 valdas Exp $
+ * $Id: ArticleItemBean.java,v 1.65 2007/01/04 12:32:39 valdas Exp $
  *
  * Copyright (C) 2004-2005 Idega. All Rights Reserved.
  *
@@ -52,10 +52,10 @@ import com.idega.xml.XMLException;
  * This is a JSF managed bean that manages each article instance and delegates 
  * all calls to the correct localized instance.
  * <p>
- * Last modified: $Date: 2007/01/03 14:46:26 $ by $Author: valdas $
+ * Last modified: $Date: 2007/01/04 12:32:39 $ by $Author: valdas $
  *
  * @author Anders Lindman,<a href="mailto:tryggvi@idega.com">Tryggvi Larusson</a>
- * @version $Revision: 1.64 $
+ * @version $Revision: 1.65 $
  */
 public class ArticleItemBean extends ContentItemBean implements Serializable, ContentItem, ValueChangeListener {
 	
@@ -125,8 +125,8 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 		return getLocalizedArticle().getAuthor();
 	}
 
-	/* (non-Javadoc)
-	 * @see com.idega.block.article.bean.ArticleLocalizedItemBean#getBody()
+	/* 
+	 * Method is modified to resolve if dummy article is being edited
 	 */
 	public String getBody() {
 		boolean isDummyArticle = false;
@@ -139,17 +139,21 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 			if (body == null) {
 				return body;
 			}
-			/*for (int i = 0; (i < ThemesConstants.DUMMY_ARTICLES.size() && !isDummyArticle); i++) {
-				if (body.indexOf(ThemesConstants.DUMMY_ARTICLES.get(i)) != -1) {
+			String tempValue = body;
+			// Removing needless characters
+			tempValue = tempValue.replaceAll("\b", ThemesConstants.EMPTY);
+			tempValue = tempValue.replaceAll("\t", ThemesConstants.EMPTY);
+			tempValue = tempValue.replaceAll("\f", ThemesConstants.EMPTY);
+			tempValue = tempValue.replaceAll("\r", ThemesConstants.SPACE);
+			tempValue = tempValue.replaceAll("\n", ThemesConstants.EMPTY);
+			for (int i = 0; (i < ThemesConstants.DUMMY_ARTICLES.size() && !isDummyArticle); i++) {
+				if (tempValue.indexOf(ThemesConstants.DUMMY_ARTICLES.get(i)) != -1) {
 					isDummyArticle = true;
 				}
-			}*/
-			if (body.indexOf("In congue dignissim quam") != -1) {
-				isDummyArticle = true;
 			}
 		}
 		if (isDummyArticle) {
-			return "";
+			return ThemesConstants.EMPTY;
 		}
 		return body;
 	}
