@@ -1,5 +1,5 @@
 /*
- * $Id: ArticleListManagedBean.java,v 1.8 2006/04/09 11:57:56 laddi Exp $
+ * $Id: ArticleListManagedBean.java,v 1.9 2007/01/15 17:47:41 gediminas Exp $
  * Created on 27.1.2005
  *
  * Copyright (C) 2005 Idega Software hf. All Rights Reserved.
@@ -42,10 +42,10 @@ import com.idega.util.IWTimestamp;
 
 /**
  * 
- *  Last modified: $Date: 2006/04/09 11:57:56 $ by $Author: laddi $
+ *  Last modified: $Date: 2007/01/15 17:47:41 $ by $Author: gediminas $
  * 
  * @author <a href="mailto:gummi@idega.com">Gudmundur Agust Saemundsson</a>
- * @version $Revision: 1.8 $
+ * @version $Revision: 1.9 $
  */
 public class ArticleListManagedBean implements ContentListViewerManagedBean {
 
@@ -121,6 +121,7 @@ public class ArticleListManagedBean implements ContentListViewerManagedBean {
 			}
 			ContentSearch searchBusiness = new ContentSearch(iwc.getIWMainApplication());
 			Locale requestedLocale = iwc.getCurrentLocale();
+			searchBusiness.setToUseDescendingOrder(true);
 			Search search = searchBusiness.createSearch(getSearchRequest(scope, requestedLocale, oldest,this.categories));
 			Collection results = search.getSearchResults();
 			int count=0;
@@ -137,6 +138,9 @@ public class ArticleListManagedBean implements ContentListViewerManagedBean {
 							if(maxNumber==-1 || count<maxNumber){
 								list.add(article);
 								count++;
+								if (count == maxNumber) {
+									break;
+								}
 							}
 						}
 					}catch(Exception e) {
@@ -161,7 +165,9 @@ public class ArticleListManagedBean implements ContentListViewerManagedBean {
 	 */
 	public SearchRequest getSearchRequest(String scope, Locale locale, IWTimestamp oldest, List categoryList) throws SearchException {
 		SearchRequest s = new SearchRequest();
-		s.addSelection(IWSlideConstants.PROPERTY_CONTENT_LENGTH);
+		s.addSelection(IWSlideConstants.PROPERTY_DISPLAY_NAME);
+		s.addSelection(IWSlideConstants.PROPERTY_CREATION_DATE);
+		s.addSelection(IWSlideConstants.PROPERTY_CATEGORY);
 		s.addScope(new SearchScope(scope));
 		SearchExpression expression = null;
 		
