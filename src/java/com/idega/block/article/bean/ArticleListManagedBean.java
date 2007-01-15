@@ -1,5 +1,5 @@
 /*
- * $Id: ArticleListManagedBean.java,v 1.8.2.1 2007/01/15 14:55:35 gediminas Exp $
+ * $Id: ArticleListManagedBean.java,v 1.8.2.2 2007/01/15 17:09:16 gediminas Exp $
  * Created on 27.1.2005
  *
  * Copyright (C) 2005 Idega Software hf. All Rights Reserved.
@@ -42,10 +42,10 @@ import com.idega.util.IWTimestamp;
 
 /**
  * 
- *  Last modified: $Date: 2007/01/15 14:55:35 $ by $Author: gediminas $
+ *  Last modified: $Date: 2007/01/15 17:09:16 $ by $Author: gediminas $
  * 
  * @author <a href="mailto:gummi@idega.com">Gudmundur Agust Saemundsson</a>
- * @version $Revision: 1.8.2.1 $
+ * @version $Revision: 1.8.2.2 $
  */
 public class ArticleListManagedBean implements ContentListViewerManagedBean {
 
@@ -165,7 +165,9 @@ public class ArticleListManagedBean implements ContentListViewerManagedBean {
 	 */
 	public SearchRequest getSearchRequest(String scope, Locale locale, IWTimestamp oldest, List categoryList) throws SearchException {
 		SearchRequest s = new SearchRequest();
-		s.addSelection(IWSlideConstants.PROPERTY_CONTENT_LENGTH);
+		s.addSelection(IWSlideConstants.PROPERTY_DISPLAY_NAME);
+		s.addSelection(IWSlideConstants.PROPERTY_CREATION_DATE);
+		s.addSelection(IWSlideConstants.PROPERTY_CATEGORY);
 		s.addScope(new SearchScope(scope));
 		SearchExpression expression = null;
 		
