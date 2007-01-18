@@ -11,7 +11,7 @@ version="1.2">
 	<jsf:view>
 		<ws:page id="listarticles1">
 			<h:form id="listarticlesform1">
-				<wf:wfblock id="article_list_block" title="#{localizedStrings['com.idega.block.article']['list_articles']}">
+				<wf:wfblock id="article_list_block" title="#{localizedStrings['com.idega.block.article']['list_articles']}" maximizedVertically="true">
 					<article:ArticleListViewer id="article_list" resourcePath="/files/cms/article" detailsViewerPath="/workspace/content/article/preview" />
 				</wf:wfblock>
 			</h:form>
