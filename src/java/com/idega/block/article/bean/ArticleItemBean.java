@@ -1,5 +1,5 @@
 /*
- * $Id: ArticleItemBean.java,v 1.65 2007/01/04 12:32:39 valdas Exp $
+ * $Id: ArticleItemBean.java,v 1.66 2007/01/19 11:39:32 valdas Exp $
  *
  * Copyright (C) 2004-2005 Idega. All Rights Reserved.
  *
@@ -52,10 +52,10 @@ import com.idega.xml.XMLException;
  * This is a JSF managed bean that manages each article instance and delegates 
  * all calls to the correct localized instance.
  * <p>
- * Last modified: $Date: 2007/01/04 12:32:39 $ by $Author: valdas $
+ * Last modified: $Date: 2007/01/19 11:39:32 $ by $Author: valdas $
  *
  * @author Anders Lindman,<a href="mailto:tryggvi@idega.com">Tryggvi Larusson</a>
- * @version $Revision: 1.65 $
+ * @version $Revision: 1.66 $
  */
 public class ArticleItemBean extends ContentItemBean implements Serializable, ContentItem, ValueChangeListener {
 	
@@ -96,7 +96,6 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 	 * @see com.idega.block.article.bean.ArticleLocalizedItemBean#addImage(byte[], java.lang.String)
 	 */
 	public void addImage(byte[] imageData, String contentType) {
-		// TODO Auto-generated method stub
 		getLocalizedArticle().addImage(imageData, contentType);
 	}
 
@@ -104,7 +103,6 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 	 * @see com.idega.block.article.bean.ArticleLocalizedItemBean#clear()
 	 */
 	public void clear() {
-		// TODO Auto-generated method stub
 		getLocalizedArticle().clear();
 		this.resourcePath=null;
 		this.avilableInRequestedLanguage=false;
@@ -113,7 +111,6 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 	 * @see com.idega.block.article.bean.ArticleLocalizedItemBean#getAsXML()
 	 */
 	public String getAsXML() throws IOException, XMLException {
-		// TODO Auto-generated method stub
 		return getLocalizedArticle().getAsXML();
 	}
 
@@ -121,7 +118,9 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 	 * @see com.idega.block.article.bean.ArticleLocalizedItemBean#getAuthor()
 	 */
 	public String getAuthor() {
-		// TODO Auto-generated method stub
+		if (isDummyArticle()) {
+			return ThemesConstants.EMPTY;
+		}
 		return getLocalizedArticle().getAuthor();
 	}
 
@@ -129,40 +128,16 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 	 * Method is modified to resolve if dummy article is being edited
 	 */
 	public String getBody() {
-		boolean isDummyArticle = false;
-		String path = getResourcePath();
-		String body = getLocalizedArticle().getBody();
-		if (path == null) {
-			return body;
-		}
-		if (path.indexOf(ThemesConstants.IDEGA_THEME) != -1) {
-			if (body == null) {
-				return body;
-			}
-			String tempValue = body;
-			// Removing needless characters
-			tempValue = tempValue.replaceAll("\b", ThemesConstants.EMPTY);
-			tempValue = tempValue.replaceAll("\t", ThemesConstants.EMPTY);
-			tempValue = tempValue.replaceAll("\f", ThemesConstants.EMPTY);
-			tempValue = tempValue.replaceAll("\r", ThemesConstants.SPACE);
-			tempValue = tempValue.replaceAll("\n", ThemesConstants.EMPTY);
-			for (int i = 0; (i < ThemesConstants.DUMMY_ARTICLES.size() && !isDummyArticle); i++) {
-				if (tempValue.indexOf(ThemesConstants.DUMMY_ARTICLES.get(i)) != -1) {
-					isDummyArticle = true;
-				}
-			}
-		}
-		if (isDummyArticle) {
+		if (isDummyArticle()) {
 			return ThemesConstants.EMPTY;
 		}
-		return body;
+		return getLocalizedArticle().getBody();
 	}
 
 	/* (non-Javadoc)
 	 * @see com.idega.block.article.bean.ArticleLocalizedItemBean#getComment()
 	 */
 	public String getComment() {
-		// TODO Auto-generated method stub
 		return getLocalizedArticle().getComment();
 	}
 
@@ -170,7 +145,6 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 	 * @see com.idega.block.article.bean.ArticleLocalizedItemBean#getContentFieldNames()
 	 */
 	public String[] getContentFieldNames() {
-		// TODO Auto-generated method stub
 		return getLocalizedArticle().getContentFieldNames();
 	}
 
@@ -178,7 +152,6 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 	 * @see com.idega.block.article.bean.ArticleLocalizedItemBean#getContentItemPrefix()
 	 */
 	public String getContentItemPrefix() {
-		// TODO Auto-generated method stub
 		return getLocalizedArticle().getContentItemPrefix();
 	}
 
@@ -186,7 +159,6 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 	 * @see com.idega.block.article.bean.ArticleLocalizedItemBean#getContentLanguage()
 	 */
 	public String getContentLanguage() {
-		// TODO Auto-generated method stub
 		return getLocalizedArticle().getContentLanguage();
 	}
 
@@ -194,7 +166,9 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 	 * @see com.idega.block.article.bean.ArticleLocalizedItemBean#getHeadline()
 	 */
 	public String getHeadline() {
-		// TODO Auto-generated method stub
+		if (isDummyArticle()) {
+			return ThemesConstants.EMPTY;
+		}
 		return getLocalizedArticle().getHeadline();
 	}
 
@@ -202,7 +176,6 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 	 * @see com.idega.block.article.bean.ArticleLocalizedItemBean#getImages()
 	 */
 	public List getImages() {
-		// TODO Auto-generated method stub
 		return getLocalizedArticle().getImages();
 	}
 
@@ -210,7 +183,6 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 	 * @see com.idega.block.article.bean.ArticleLocalizedItemBean#getSource()
 	 */
 	public String getSource() {
-		// TODO Auto-generated method stub
 		return getLocalizedArticle().getSource();
 	}
 
@@ -218,7 +190,6 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 	 * @see com.idega.block.article.bean.ArticleLocalizedItemBean#getTeaser()
 	 */
 	public String getTeaser() {
-		// TODO Auto-generated method stub
 		return getLocalizedArticle().getTeaser();
 	}
 
@@ -226,7 +197,6 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 	 * @see com.idega.block.article.bean.ArticleLocalizedItemBean#getToolbarActions()
 	 */
 	public String[] getToolbarActions() {
-		// TODO Auto-generated method stub
 		return getLocalizedArticle().getToolbarActions();
 	}
 
@@ -234,7 +204,6 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 	 * @see com.idega.block.article.bean.ArticleLocalizedItemBean#isUpdated()
 	 */
 	public boolean isUpdated() {
-		// TODO Auto-generated method stub
 		return getLocalizedArticle().isUpdated();
 	}
 
@@ -242,7 +211,6 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 	 * @see com.idega.block.article.bean.ArticleLocalizedItemBean#prettifyBody()
 	 */
 	protected void prettifyBody() {
-		// TODO Auto-generated method stub
 		getLocalizedArticle().prettifyBody();
 	}
 
@@ -250,7 +218,6 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 	 * @see com.idega.block.article.bean.ArticleLocalizedItemBean#removeImage(java.lang.Integer)
 	 */
 	public void removeImage(Integer imageNumber) {
-		// TODO Auto-generated method stub
 		getLocalizedArticle().removeImage(imageNumber);
 	}
 
@@ -258,7 +225,6 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 	 * @see com.idega.block.article.bean.ArticleLocalizedItemBean#setAuthor(java.lang.String)
 	 */
 	public void setAuthor(String s) {
-		// TODO Auto-generated method stub
 		getLocalizedArticle().setAuthor(s);
 	}
 
@@ -266,7 +232,6 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 	 * @see com.idega.block.article.bean.ArticleLocalizedItemBean#setBody(java.lang.String)
 	 */
 	public void setBody(String body) {
-		// TODO Auto-generated method stub
 		getLocalizedArticle().setBody(body);
 	}
 
@@ -274,7 +239,6 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 	 * @see com.idega.block.article.bean.ArticleLocalizedItemBean#setComment(java.lang.String)
 	 */
 	public void setComment(String s) {
-		// TODO Auto-generated method stub
 		getLocalizedArticle().setComment(s);
 	}
 
@@ -282,7 +246,6 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 	 * @see com.idega.block.article.bean.ArticleLocalizedItemBean#setHeadline(java.lang.Object)
 	 */
 	public void setHeadline(Object o) {
-		// TODO Auto-generated method stub
 		getLocalizedArticle().setHeadline(o);
 	}
 
@@ -290,7 +253,6 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 	 * @see com.idega.block.article.bean.ArticleLocalizedItemBean#setHeadline(java.lang.String)
 	 */
 	public void setHeadline(String s) {
-		// TODO Auto-generated method stub
 		getLocalizedArticle().setHeadline(s);
 	}
 
@@ -298,7 +260,6 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 	 * @see com.idega.block.article.bean.ArticleLocalizedItemBean#setImages(java.util.List)
 	 */
 	public void setImages(List l) {
-		// TODO Auto-generated method stub
 		getLocalizedArticle().setImages(l);
 	}
 
@@ -306,7 +267,6 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 	 * @see com.idega.block.article.bean.ArticleLocalizedItemBean#setPublished()
 	 */
 	protected void setPublished() {
-		// TODO Auto-generated method stub
 		getLocalizedArticle().setPublished();
 	}
 
@@ -314,7 +274,6 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 	 * @see com.idega.block.article.bean.ArticleLocalizedItemBean#setSource(java.lang.String)
 	 */
 	public void setSource(String s) {
-		// TODO Auto-generated method stub
 		getLocalizedArticle().setSource(s);
 	}
 
@@ -322,7 +281,6 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 	 * @see com.idega.block.article.bean.ArticleLocalizedItemBean#setTeaser(java.lang.String)
 	 */
 	public void setTeaser(String s) {
-		// TODO Auto-generated method stub
 		getLocalizedArticle().setTeaser(s);
 	}
 
@@ -330,7 +288,6 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 	 * @see com.idega.block.article.bean.ArticleLocalizedItemBean#setUpdated(boolean)
 	 */
 	public void setUpdated(boolean b) {
-		// TODO Auto-generated method stub
 		getLocalizedArticle().setUpdated(b);
 	}
 
@@ -338,7 +295,6 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 	 * @see com.idega.block.article.bean.ArticleLocalizedItemBean#setUpdated(java.lang.Boolean)
 	 */
 	public void setUpdated(Boolean b) {
-		// TODO Auto-generated method stub
 		getLocalizedArticle().setUpdated(b);
 	}
 
@@ -397,7 +353,6 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 	 * @see com.idega.block.article.bean.ArticleLocalizedItemBean#tryPublish()
 	 */
 	protected void tryPublish() {
-		// TODO Auto-generated method stub
 		getLocalizedArticle().tryPublish();
 	}
 
@@ -405,7 +360,6 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 	 * @see com.idega.content.bean.ContentItemBean#getName()
 	 */
 	public String getName() {
-		// TODO Auto-generated method stub
 		return getLocalizedArticle().getName();
 	}
 
@@ -413,7 +367,6 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 	 * @see com.idega.content.bean.ContentItemBean#getDescription()
 	 */
 	public String getDescription() {
-		// TODO Auto-generated method stub
 		return getLocalizedArticle().getDescription();
 	}
 
@@ -421,7 +374,6 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 	 * @see com.idega.content.bean.ContentItemBean#getItemType()
 	 */
 	public String getItemType() {
-		// TODO Auto-generated method stub
 		return getLocalizedArticle().getItemType();
 	}
 
@@ -429,7 +381,6 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 	 * @see com.idega.content.bean.ContentItemBean#getCreatedByUserId()
 	 */
 	public int getCreatedByUserId() {
-		// TODO Auto-generated method stub
 		return getLocalizedArticle().getCreatedByUserId();
 	}
 
@@ -437,7 +388,6 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 	 * @see com.idega.content.bean.ContentItemBean#setName(java.lang.String)
 	 */
 	public void setName(String s) {
-		// TODO Auto-generated method stub
 		getLocalizedArticle().setName(s);
 	}
 
@@ -445,7 +395,6 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 	 * @see com.idega.content.bean.ContentItemBean#setDescription(java.lang.String)
 	 */
 	public void setDescription(String s) {
-		// TODO Auto-generated method stub
 		getLocalizedArticle().setDescription(s);
 	}
 
@@ -453,7 +402,6 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 	 * @see com.idega.content.bean.ContentItemBean#setItemType(java.lang.String)
 	 */
 	public void setItemType(String s) {
-		// TODO Auto-generated method stub
 		getLocalizedArticle().setItemType(s);
 	}
 
@@ -461,7 +409,6 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 	 * @see com.idega.content.bean.ContentItemBean#setCreatedByUserId(int)
 	 */
 	public void setCreatedByUserId(int id) {
-		// TODO Auto-generated method stub
 		getLocalizedArticle().setCreatedByUserId(id);
 	}
 
@@ -469,7 +416,6 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 	 * @see com.idega.content.bean.ContentItemBean#getLocales()
 	 */
 	public Map getLocales() {
-		// TODO Auto-generated method stub
 		return getLocalizedArticle().getLocales();
 	}
 
@@ -477,7 +423,6 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 	 * @see com.idega.content.bean.ContentItemBean#getPendingLocaleId()
 	 */
 	public String getPendingLocaleId() {
-		// TODO Auto-generated method stub
 		return getLocalizedArticle().getPendingLocaleId();
 	}
 
@@ -485,7 +430,6 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 	 * @see com.idega.content.bean.ContentItemBean#setPendingLocaleId(java.lang.String)
 	 */
 	public void setPendingLocaleId(String localeId) {
-		// TODO Auto-generated method stub
 		getLocalizedArticle().setPendingLocaleId(localeId);
 	}
 
@@ -493,7 +437,6 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 	 * @see com.idega.content.bean.ContentItemBean#getRequestedStatus()
 	 */
 	public String getRequestedStatus() {
-		// TODO Auto-generated method stub
 		return getLocalizedArticle().getRequestedStatus();
 	}
 
@@ -501,7 +444,6 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 	 * @see com.idega.content.bean.ContentItemBean#setRequestedStatus(java.lang.String)
 	 */
 	public void setRequestedStatus(String requestedStatus) {
-		// TODO Auto-generated method stub
 		getLocalizedArticle().setRequestedStatus(requestedStatus);
 	}
 
@@ -509,7 +451,6 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 	 * @see com.idega.content.bean.ContentItemBean#getAttachments()
 	 */
 	public List getAttachments() {
-		// TODO Auto-generated method stub
 		return getLocalizedArticle().getAttachments();
 	}
 
@@ -517,7 +458,6 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 	 * @see com.idega.content.bean.ContentItemBean#setAttachment(java.util.List)
 	 */
 	public void setAttachment(List l) {
-		// TODO Auto-generated method stub
 		getLocalizedArticle().setAttachment(l);
 	}
 
@@ -525,7 +465,6 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 	 * @see com.idega.content.bean.ContentItemBean#getCase()
 	 */
 	public ContentItemCase getCase() {
-		// TODO Auto-generated method stub
 		return getLocalizedArticle().getCase();
 	}
 
@@ -533,7 +472,6 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 	 * @see com.idega.content.bean.ContentItemBean#setCase(com.idega.content.bean.ContentItemCase)
 	 */
 	public void setCase(ContentItemCase caseBean) {
-		// TODO Auto-generated method stub
 		getLocalizedArticle().setCase(caseBean);
 	}
 
@@ -541,7 +479,6 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 	 * @see com.idega.content.bean.ContentItemBean#getStatus()
 	 */
 	public String getStatus() {
-		// TODO Auto-generated method stub
 		return getLocalizedArticle().getStatus();
 	}
 
@@ -549,7 +486,6 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 	 * @see com.idega.content.bean.ContentItemBean#setStatus(java.lang.String)
 	 */
 	public void setStatus(String status) {
-		// TODO Auto-generated method stub
 		getLocalizedArticle().setStatus(status);
 	}
 
@@ -557,7 +493,6 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 	 * @see com.idega.content.bean.ContentItemBean#updateLocale()
 	 */
 	public void updateLocale() {
-		// TODO Auto-generated method stub
 		getLocalizedArticle().updateLocale();
 	}
 
@@ -565,7 +500,6 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 	 * @see com.idega.content.bean.ContentItemBean#getCreationDate()
 	 */
 	public Timestamp getCreationDate() {
-		// TODO Auto-generated method stub
 		return getLocalizedArticle().getCreationDate();
 	}
 
@@ -573,7 +507,6 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 	 * @see com.idega.content.bean.ContentItemBean#getVersionName()
 	 */
 	public String getVersionName() {
-		// TODO Auto-generated method stub
 		return getLocalizedArticle().getVersionName();
 	}
 
@@ -581,7 +514,6 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 	 * @see com.idega.content.bean.ContentItemBean#setVersionName(java.lang.String)
 	 */
 	public void setVersionName(String name) {
-		// TODO Auto-generated method stub
 		getLocalizedArticle().setVersionName(name);
 	}
 
@@ -589,7 +521,6 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 	 * @see com.idega.content.bean.ContentItemBean#getRendered()
 	 */
 	public Boolean getRendered() {
-		// TODO Auto-generated method stub
 		return getLocalizedArticle().getRendered();
 	}
 
@@ -597,7 +528,6 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 	 * @see com.idega.content.bean.ContentItemBean#setRendered(boolean)
 	 */
 	public void setRendered(boolean render) {
-		// TODO Auto-generated method stub
 		getLocalizedArticle().setRendered(render);
 	}
 
@@ -605,7 +535,6 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 	 * @see com.idega.content.bean.ContentItemBean#setRendered(java.lang.Boolean)
 	 */
 	public void setRendered(Boolean render) {
-		// TODO Auto-generated method stub
 		getLocalizedArticle().setRendered(render);
 	}
 //
@@ -613,7 +542,6 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 //	 * @see com.idega.content.bean.ContentItemBean#getDeleted()
 //	 */
 //	public boolean getDeleted() {
-//		// TODO Auto-generated method stub
 //		return getLocalizedArticle().getDeleted();
 //	}
 //
@@ -621,7 +549,6 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 //	 * @see com.idega.content.bean.ContentItemBean#getDeletedByUserId()
 //	 */
 //	public int getDeletedByUserId() {
-//		// TODO Auto-generated method stub
 //		return getLocalizedArticle().getDeletedByUserId();
 //	}
 //
@@ -629,7 +556,6 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 //	 * @see com.idega.content.bean.ContentItemBean#getDeletedWhen()
 //	 */
 //	public Timestamp getDeletedWhen() {
-//		// TODO Auto-generated method stub
 //		return getLocalizedArticle().getDeletedWhen();
 //	}
 //
@@ -637,7 +563,6 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 //	 * @see com.idega.content.bean.ContentItemBean#getFileSize()
 //	 */
 //	public Integer getFileSize() {
-//		// TODO Auto-generated method stub
 //		return getLocalizedArticle().getFileSize();
 //	}
 //
@@ -645,7 +570,6 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 //	 * @see com.idega.content.bean.ContentItemBean#getFileValue()
 //	 */
 //	public InputStream getFileValue() {
-//		// TODO Auto-generated method stub
 //		return getLocalizedArticle().getFileValue();
 //	}
 //
@@ -653,7 +577,6 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 //	 * @see com.idega.content.bean.ContentItemBean#getFileValueForWrite()
 //	 */
 //	public OutputStream getFileValueForWrite() {
-//		// TODO Auto-generated method stub
 //		return getLocalizedArticle().getFileValueForWrite();
 //	}
 //
@@ -661,7 +584,6 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 //	 * @see com.idega.content.bean.ContentItemBean#getICLocale()
 //	 */
 //	public ICLocale getICLocale() {
-//		// TODO Auto-generated method stub
 //		return getLocalizedArticle().getICLocale();
 //	}
 //
@@ -669,7 +591,6 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 //	 * @see com.idega.content.bean.ContentItemBean#getLanguage()
 //	 */
 //	public int getLanguage() {
-//		// TODO Auto-generated method stub
 //		return getLocalizedArticle().getLanguage();
 //	}
 //
@@ -677,7 +598,6 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 //	 * @see com.idega.content.bean.ContentItemBean#getMimeType()
 //	 */
 //	public String getMimeType() {
-//		// TODO Auto-generated method stub
 //		return getLocalizedArticle().getMimeType();
 //	}
 //
@@ -685,7 +605,6 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 //	 * @see com.idega.content.bean.ContentItemBean#getModificationDate()
 //	 */
 //	public Timestamp getModificationDate() {
-//		// TODO Auto-generated method stub
 //		return getLocalizedArticle().getModificationDate();
 //	}
 //
@@ -693,7 +612,6 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 //	 * @see com.idega.content.bean.ContentItemBean#initializeAttributes()
 //	 */
 //	public void initializeAttributes() {
-//		// TODO Auto-generated method stub
 //		getLocalizedArticle().initializeAttributes();
 //	}
 //
@@ -701,7 +619,6 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 //	 * @see com.idega.content.bean.ContentItemBean#isLeaf()
 //	 */
 //	public boolean isLeaf() {
-//		// TODO Auto-generated method stub
 //		return getLocalizedArticle().isLeaf();
 //	}
 //
@@ -709,7 +626,6 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 //	 * @see com.idega.content.bean.ContentItemBean#setCreationDate(java.sql.Timestamp)
 //	 */
 //	public void setCreationDate(Timestamp date) {
-//		// TODO Auto-generated method stub
 //		getLocalizedArticle().setCreationDate(date);
 //	}
 //
@@ -717,7 +633,6 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 //	 * @see com.idega.content.bean.ContentItemBean#setResourcePath(java.lang.String)
 //	 */
 //	public void setResourcePath(String path) {
-//		// TODO Auto-generated method stub
 //		getLocalizedArticle().setResourcePath(path);
 //	}
 //
@@ -725,7 +640,6 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 //	 * @see com.idega.content.bean.ContentItemBean#setDeleted(boolean)
 //	 */
 //	public void setDeleted(boolean p0) {
-//		// TODO Auto-generated method stub
 //		getLocalizedArticle().setDeleted(p0);
 //	}
 //
@@ -733,7 +647,7 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 //	 * @see com.idega.content.bean.ContentItemBean#setFileSize(java.lang.Integer)
 //	 */
 //	public void setFileSize(Integer p0) {
-//		// TODO Auto-generated method stub
+//		
 //		getLocalizedArticle().setFileSize(p0);
 //	}
 //
@@ -741,7 +655,7 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 //	 * @see com.idega.content.bean.ContentItemBean#setFileSize(int)
 //	 */
 //	public void setFileSize(int p0) {
-//		// TODO Auto-generated method stub
+//		
 //		getLocalizedArticle().setFileSize(p0);
 //	}
 //
@@ -749,7 +663,7 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 //	 * @see com.idega.content.bean.ContentItemBean#setFileValue(java.io.InputStream)
 //	 */
 //	public void setFileValue(InputStream p0) {
-//		// TODO Auto-generated method stub
+//		
 //		getLocalizedArticle().setFileValue(p0);
 //	}
 //
@@ -757,7 +671,7 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 //	 * @see com.idega.content.bean.ContentItemBean#setLanguage(int)
 //	 */
 //	public void setLanguage(int p0) {
-//		// TODO Auto-generated method stub
+//		
 //		getLocalizedArticle().setLanguage(p0);
 //	}
 //
@@ -765,7 +679,7 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 //	 * @see com.idega.content.bean.ContentItemBean#setLocale()
 //	 */
 //	public void setLocale() {
-//		// TODO Auto-generated method stub
+//		
 //		getLocalizedArticle().setLocale();
 //	}
 //
@@ -773,7 +687,7 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 //	 * @see com.idega.content.bean.ContentItemBean#setMimeType(java.lang.String)
 //	 */
 //	public void setMimeType(String p0) {
-//		// TODO Auto-generated method stub
+//		
 //		getLocalizedArticle().setMimeType(p0);
 //	}
 //
@@ -781,7 +695,7 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 //	 * @see com.idega.content.bean.ContentItemBean#setModificationDate(java.sql.Timestamp)
 //	 */
 //	public void setModificationDate(Timestamp p0) {
-//		// TODO Auto-generated method stub
+//		
 //		getLocalizedArticle().setModificationDate(p0);
 //	}
 //
@@ -789,7 +703,7 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 //	 * @see com.idega.content.bean.ContentItemBean#superDelete()
 //	 */
 //	public void superDelete() throws SQLException {
-//		// TODO Auto-generated method stub
+//		
 //		getLocalizedArticle().superDelete();
 //	}
 //
@@ -797,7 +711,7 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 //	 * @see com.idega.content.bean.ContentItemBean#unDelete(boolean)
 //	 */
 //	public void unDelete(boolean p0) throws SQLException {
-//		// TODO Auto-generated method stub
+//		
 //		getLocalizedArticle().unDelete(p0);
 //	}
 //
@@ -805,7 +719,7 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 //	 * @see com.idega.content.bean.ContentItemBean#delete()
 //	 */
 //	public void delete() throws SQLException {
-//		// TODO Auto-generated method stub
+//		
 //		getLocalizedArticle().delete();
 //	}
 //
@@ -813,7 +727,7 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 //	 * @see com.idega.content.bean.ContentItemBean#isFolder()
 //	 */
 //	public boolean isFolder() {
-//		// TODO Auto-generated method stub
+//		
 //		return getLocalizedArticle().isFolder();
 //	}
 //
@@ -821,7 +735,7 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 //	 * @see com.idega.content.bean.ContentItemBean#isEmpty()
 //	 */
 //	public boolean isEmpty() {
-//		// TODO Auto-generated method stub
+//		
 //		return getLocalizedArticle().isEmpty();
 //	}
 //
@@ -829,7 +743,7 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 //	 * @see com.idega.content.bean.ContentItemBean#getLocalizationKey()
 //	 */
 //	public String getLocalizationKey() {
-//		// TODO Auto-generated method stub
+//		
 //		return getLocalizedArticle().getLocalizationKey();
 //	}
 //
@@ -837,7 +751,7 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 //	 * @see com.idega.content.bean.ContentItemBean#setLocalizationKey(java.lang.String)
 //	 */
 //	public void setLocalizationKey(String key) {
-//		// TODO Auto-generated method stub
+//		
 //		getLocalizedArticle().setLocalizationKey(key);
 //	}
 //
@@ -845,7 +759,7 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 //	 * @see com.idega.content.bean.ContentItemBean#getEntityDefinition()
 //	 */
 //	public IDOEntityDefinition getEntityDefinition() {
-//		// TODO Auto-generated method stub
+//		
 //		return getLocalizedArticle().getEntityDefinition();
 //	}
 //
@@ -853,7 +767,7 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 //	 * @see com.idega.content.bean.ContentItemBean#decode(java.lang.String)
 //	 */
 //	public Object decode(String pkString) {
-//		// TODO Auto-generated method stub
+//		
 //		return getLocalizedArticle().decode(pkString);
 //	}
 //
@@ -861,7 +775,7 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 //	 * @see com.idega.content.bean.ContentItemBean#decode(java.lang.String[])
 //	 */
 //	public Collection decode(String[] pkString) {
-//		// TODO Auto-generated method stub
+//		
 //		return getLocalizedArticle().decode(pkString);
 //	}
 //
@@ -869,7 +783,7 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 //	 * @see com.idega.content.bean.ContentItemBean#getEJBLocalHome()
 //	 */
 //	public EJBLocalHome getEJBLocalHome() throws EJBException {
-//		// TODO Auto-generated method stub
+//		
 //		return getLocalizedArticle().getEJBLocalHome();
 //	}
 //
@@ -877,7 +791,7 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 //	 * @see com.idega.content.bean.ContentItemBean#getPrimaryKey()
 //	 */
 //	public Object getPrimaryKey() throws EJBException {
-//		// TODO Auto-generated method stub
+//		
 //		return getLocalizedArticle().getPrimaryKey();
 //	}
 //
@@ -885,7 +799,7 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 //	 * @see com.idega.content.bean.ContentItemBean#remove()
 //	 */
 //	public void remove() throws RemoveException, EJBException {
-//		// TODO Auto-generated method stub
+//		
 //		getLocalizedArticle().remove();
 //	}
 //
@@ -893,7 +807,7 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 //	 * @see com.idega.content.bean.ContentItemBean#isIdentical(javax.ejb.EJBLocalObject)
 //	 */
 //	public boolean isIdentical(EJBLocalObject arg0) throws EJBException {
-//		// TODO Auto-generated method stub
+//		
 //		return getLocalizedArticle().isIdentical(arg0);
 //	}
 //
@@ -901,7 +815,7 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 //	 * @see com.idega.content.bean.ContentItemBean#compareTo(java.lang.Object)
 //	 */
 //	public int compareTo(Object o) {
-//		// TODO Auto-generated method stub
+//		
 //		return getLocalizedArticle().compareTo(o);
 //	}
 //
@@ -909,7 +823,7 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 //	 * @see com.idega.content.bean.ContentItemBean#addChild(com.idega.data.TreeableEntity)
 //	 */
 //	public void addChild(TreeableEntity p0) throws SQLException {
-//		// TODO Auto-generated method stub
+//		
 //		getLocalizedArticle().addChild(p0);
 //	}
 //
@@ -917,7 +831,7 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 //	 * @see com.idega.content.bean.ContentItemBean#getChildrenIterator(java.lang.String)
 //	 */
 //	public Iterator getChildrenIterator(String p0) {
-//		// TODO Auto-generated method stub
+//		
 //		return getLocalizedArticle().getChildrenIterator(p0);
 //	}
 //
@@ -925,7 +839,7 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 //	 * @see com.idega.content.bean.ContentItemBean#getChildrenIterator(java.lang.String, boolean)
 //	 */
 //	public Iterator getChildrenIterator(String p0, boolean p1) {
-//		// TODO Auto-generated method stub
+//		
 //		return getLocalizedArticle().getChildrenIterator(p0, p1);
 //	}
 //
@@ -933,7 +847,7 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 //	 * @see com.idega.content.bean.ContentItemBean#getIndex(com.idega.core.data.ICTreeNode)
 //	 */
 //	public int getIndex(ICTreeNode p0) {
-//		// TODO Auto-generated method stub
+//		
 //		return getLocalizedArticle().getIndex(p0);
 //	}
 //
@@ -941,7 +855,7 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 //	 * @see com.idega.content.bean.ContentItemBean#getParentEntity()
 //	 */
 //	public TreeableEntity getParentEntity() {
-//		// TODO Auto-generated method stub
+//		
 //		return getLocalizedArticle().getParentEntity();
 //	}
 //
@@ -949,7 +863,7 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 //	 * @see com.idega.content.bean.ContentItemBean#getTreeRelationshipChildColumnName(com.idega.data.TreeableEntity)
 //	 */
 //	public String getTreeRelationshipChildColumnName(TreeableEntity p0) {
-//		// TODO Auto-generated method stub
+//		
 //		return getLocalizedArticle().getTreeRelationshipChildColumnName(p0);
 //	}
 //
@@ -957,7 +871,7 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 //	 * @see com.idega.content.bean.ContentItemBean#getTreeRelationshipTableName(com.idega.data.TreeableEntity)
 //	 */
 //	public String getTreeRelationshipTableName(TreeableEntity p0) {
-//		// TODO Auto-generated method stub
+//		
 //		return getLocalizedArticle().getTreeRelationshipTableName(p0);
 //	}
 //
@@ -965,7 +879,7 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 //	 * @see com.idega.content.bean.ContentItemBean#moveChildrenFrom(com.idega.data.TreeableEntity)
 //	 */
 //	public void moveChildrenFrom(TreeableEntity p0) throws SQLException {
-//		// TODO Auto-generated method stub
+//		
 //		getLocalizedArticle().moveChildrenFrom(p0);
 //	}
 //
@@ -973,7 +887,7 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 //	 * @see com.idega.content.bean.ContentItemBean#removeChild(com.idega.data.TreeableEntity)
 //	 */
 //	public void removeChild(TreeableEntity p0) throws SQLException {
-//		// TODO Auto-generated method stub
+//		
 //		getLocalizedArticle().removeChild(p0);
 //	}
 //
@@ -981,7 +895,7 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 //	 * @see com.idega.content.bean.ContentItemBean#leafsFirst()
 //	 */
 //	public boolean leafsFirst() {
-//		// TODO Auto-generated method stub
+//		
 //		return getLocalizedArticle().leafsFirst();
 //	}
 //
@@ -989,7 +903,7 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 //	 * @see com.idega.content.bean.ContentItemBean#sortLeafs()
 //	 */
 //	public boolean sortLeafs() {
-//		// TODO Auto-generated method stub
+//		
 //		return getLocalizedArticle().sortLeafs();
 //	}
 //
@@ -997,7 +911,7 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 //	 * @see com.idega.content.bean.ContentItemBean#setLeafsFirst(boolean)
 //	 */
 //	public void setLeafsFirst(boolean b) {
-//		// TODO Auto-generated method stub
+//		
 //		getLocalizedArticle().setLeafsFirst(b);
 //	}
 //
@@ -1005,7 +919,7 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 //	 * @see com.idega.content.bean.ContentItemBean#setToSortLeafs(boolean)
 //	 */
 //	public void setToSortLeafs(boolean b) {
-//		// TODO Auto-generated method stub
+//		
 //		getLocalizedArticle().setToSortLeafs(b);
 //	}
 //
@@ -1013,7 +927,7 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 //	 * @see com.idega.content.bean.ContentItemBean#getChildren()
 //	 */
 //	public Collection getChildren() {
-//		// TODO Auto-generated method stub
+//		
 //		return getLocalizedArticle().getChildren();
 //	}
 //
@@ -1021,7 +935,7 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 //	 * @see com.idega.content.bean.ContentItemBean#getChildrenIterator()
 //	 */
 //	public Iterator getChildrenIterator() {
-//		// TODO Auto-generated method stub
+//		
 //		return getLocalizedArticle().getChildrenIterator();
 //	}
 //
@@ -1029,7 +943,7 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 //	 * @see com.idega.content.bean.ContentItemBean#getAllowsChildren()
 //	 */
 //	public boolean getAllowsChildren() {
-//		// TODO Auto-generated method stub
+//		
 //		return getLocalizedArticle().getAllowsChildren();
 //	}
 //
@@ -1037,7 +951,7 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 //	 * @see com.idega.content.bean.ContentItemBean#getChildAtIndex(int)
 //	 */
 //	public ICTreeNode getChildAtIndex(int childIndex) {
-//		// TODO Auto-generated method stub
+//		
 //		return getLocalizedArticle().getChildAtIndex(childIndex);
 //	}
 //
@@ -1045,7 +959,7 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 //	 * @see com.idega.content.bean.ContentItemBean#getChildCount()
 //	 */
 //	public int getChildCount() {
-//		// TODO Auto-generated method stub
+//		
 //		return getLocalizedArticle().getChildCount();
 //	}
 //
@@ -1053,7 +967,7 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 //	 * @see com.idega.content.bean.ContentItemBean#getParentNode()
 //	 */
 //	public ICTreeNode getParentNode() {
-//		// TODO Auto-generated method stub
+//		
 //		return getLocalizedArticle().getParentNode();
 //	}
 //
@@ -1061,7 +975,7 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 //	 * @see com.idega.content.bean.ContentItemBean#getNodeName()
 //	 */
 //	public String getNodeName() {
-//		// TODO Auto-generated method stub
+//		
 //		return getLocalizedArticle().getNodeName();
 //	}
 //
@@ -1069,7 +983,7 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 //	 * @see com.idega.content.bean.ContentItemBean#getNodeName(java.util.Locale)
 //	 */
 //	public String getNodeName(Locale locale) {
-//		// TODO Auto-generated method stub
+//		
 //		return getLocalizedArticle().getNodeName(locale);
 //	}
 //
@@ -1077,7 +991,7 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 //	 * @see com.idega.content.bean.ContentItemBean#getNodeName(java.util.Locale, com.idega.idegaweb.IWApplicationContext)
 //	 */
 //	public String getNodeName(Locale locale, IWApplicationContext iwac) {
-//		// TODO Auto-generated method stub
+//		
 //		return getLocalizedArticle().getNodeName(locale, iwac);
 //	}
 //
@@ -1085,7 +999,7 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 //	 * @see com.idega.content.bean.ContentItemBean#getNodeID()
 //	 */
 //	public int getNodeID() {
-//		// TODO Auto-generated method stub
+//		
 //		return getLocalizedArticle().getNodeID();
 //	}
 //
@@ -1093,7 +1007,7 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 //	 * @see com.idega.content.bean.ContentItemBean#getSiblingCount()
 //	 */
 //	public int getSiblingCount() {
-//		// TODO Auto-generated method stub
+//		
 //		return getLocalizedArticle().getSiblingCount();
 //	}
 //
@@ -1101,7 +1015,7 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 //	 * @see com.idega.content.bean.ContentItemBean#setMetaDataAttributes(java.util.Map)
 //	 */
 //	public void setMetaDataAttributes(Map map) {
-//		// TODO Auto-generated method stub
+//		
 //		getLocalizedArticle().setMetaDataAttributes(map);
 //	}
 //
@@ -1109,7 +1023,7 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 //	 * @see com.idega.content.bean.ContentItemBean#getMetaDataAttributes()
 //	 */
 //	public Map getMetaDataAttributes() {
-//		// TODO Auto-generated method stub
+//		
 //		return getLocalizedArticle().getMetaDataAttributes();
 //	}
 //
@@ -1117,7 +1031,7 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 //	 * @see com.idega.content.bean.ContentItemBean#getMetaDataTypes()
 //	 */
 //	public Map getMetaDataTypes() {
-//		// TODO Auto-generated method stub
+//		
 //		return getLocalizedArticle().getMetaDataTypes();
 //	}
 //
@@ -1125,7 +1039,7 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 //	 * @see com.idega.content.bean.ContentItemBean#setMetaData(java.lang.String, java.lang.String)
 //	 */
 //	public void setMetaData(String metaDataKey, String value) {
-//		// TODO Auto-generated method stub
+//		
 //		getLocalizedArticle().setMetaData(metaDataKey, value);
 //	}
 //
@@ -1133,7 +1047,7 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 //	 * @see com.idega.content.bean.ContentItemBean#setMetaData(java.lang.String, java.lang.String, java.lang.String)
 //	 */
 //	public void setMetaData(String metaDataKey, String value, String type) {
-//		// TODO Auto-generated method stub
+//		
 //		getLocalizedArticle().setMetaData(metaDataKey, value, type);
 //	}
 //
@@ -1141,7 +1055,7 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 //	 * @see com.idega.content.bean.ContentItemBean#getMetaData(java.lang.String)
 //	 */
 //	public String getMetaData(String metaDataKey) {
-//		// TODO Auto-generated method stub
+//		
 //		return getLocalizedArticle().getMetaData(metaDataKey);
 //	}
 //
@@ -1149,7 +1063,7 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 //	 * @see com.idega.content.bean.ContentItemBean#renameMetaData(java.lang.String, java.lang.String)
 //	 */
 //	public void renameMetaData(String oldKeyName, String newKeyName) {
-//		// TODO Auto-generated method stub
+//		
 //		getLocalizedArticle().renameMetaData(oldKeyName, newKeyName);
 //	}
 //
@@ -1157,7 +1071,7 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 //	 * @see com.idega.content.bean.ContentItemBean#renameMetaData(java.lang.String, java.lang.String, java.lang.String)
 //	 */
 //	public void renameMetaData(String oldKeyName, String newKeyName, String value) {
-//		// TODO Auto-generated method stub
+//		
 //		getLocalizedArticle().renameMetaData(oldKeyName, newKeyName, value);
 //	}
 //
@@ -1165,7 +1079,7 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 //	 * @see com.idega.content.bean.ContentItemBean#removeMetaData(java.lang.String)
 //	 */
 //	public boolean removeMetaData(String metaDataKey) {
-//		// TODO Auto-generated method stub
+//		
 //		return getLocalizedArticle().removeMetaData(metaDataKey);
 //	}
 //
@@ -1173,7 +1087,7 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 //	 * @see com.idega.content.bean.ContentItemBean#updateMetaData()
 //	 */
 //	public void updateMetaData() throws SQLException {
-//		// TODO Auto-generated method stub
+//		
 //		getLocalizedArticle().updateMetaData();
 //	}
 //
@@ -1181,7 +1095,7 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 //	 * @see com.idega.content.bean.ContentItemBean#getLocaleId()
 //	 */
 //	public int getLocaleId() {
-//		// TODO Auto-generated method stub
+//		
 //		return getLocalizedArticle().getLocaleId();
 //	}
 //
@@ -1189,7 +1103,7 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 //	 * @see com.idega.content.bean.ContentItemBean#getDatasource()
 //	 */
 //	public String getDatasource() {
-//		// TODO Auto-generated method stub
+//		
 //		return getLocalizedArticle().getDatasource();
 //	}
 //
@@ -1197,7 +1111,7 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 //	 * @see com.idega.content.bean.ContentItemBean#write(com.idega.io.serialization.ObjectWriter, com.idega.presentation.IWContext)
 //	 */
 //	public Object write(ObjectWriter writer, IWContext iwc) throws RemoteException {
-//		// TODO Auto-generated method stub
+//		
 //		return getLocalizedArticle().write(writer, iwc);
 //	}
 //
@@ -1205,7 +1119,7 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 //	 * @see com.idega.content.bean.ContentItemBean#read(com.idega.io.serialization.ObjectReader, com.idega.presentation.IWContext)
 //	 */
 //	public Object read(ObjectReader reader, IWContext iwc) throws RemoteException {
-//		// TODO Auto-generated method stub
+//		
 //		return getLocalizedArticle().read(reader, iwc);
 //	}
 
@@ -1213,7 +1127,7 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 	 * @see com.idega.content.bean.ContentItemBean#isAutoCreateResource()
 	 */
 	public boolean isAutoCreateResource() {
-		// TODO Auto-generated method stub
+		
 		return getLocalizedArticle().isAutoCreateResource();
 	}
 
@@ -1221,7 +1135,7 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 	 * @see com.idega.content.bean.ContentItemBean#setAutoCreateResource(boolean)
 	 */
 	public void setAutoCreateResource(boolean autoCreateResource) {
-		// TODO Auto-generated method stub
+		
 		getLocalizedArticle().setAutoCreateResource(autoCreateResource);
 	}
 
@@ -1229,7 +1143,7 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 	 * @see com.idega.content.bean.ContentItemBean#getExists()
 	 */
 	public boolean getExists() {
-		// TODO Auto-generated method stub
+		
 		return getLocalizedArticle().getExists();
 	}
 
@@ -1237,7 +1151,7 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 	 * @see com.idega.content.bean.ContentItemBean#setExists(boolean)
 	 */
 	public void setExists(boolean exists) {
-		// TODO Auto-generated method stub
+		
 		getLocalizedArticle().setExists(exists);
 	}
 	
@@ -1470,7 +1384,6 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 			
 		}
 		catch (Exception e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		
@@ -1636,7 +1549,34 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 	 * @see javax.faces.event.ValueChangeListener#processValueChange(javax.faces.event.ValueChangeEvent)
 	 */
 	public void processValueChange(ValueChangeEvent event) throws AbortProcessingException {
-		// TODO Auto-generated method stub
+		
+	}
+	
+	private boolean isDummyArticle() {
+		boolean isDummyArticle = false;
+		String path = getResourcePath();
+		String body = getLocalizedArticle().getBody();
+		if (path == null) {
+			return isDummyArticle;
+		}
+		if (path.indexOf(ThemesConstants.IDEGA_THEME) != -1) {
+			if (body == null) {
+				return isDummyArticle;
+			}
+			String tempValue = body;
+			// Removing needless characters
+			tempValue = tempValue.replaceAll("\b", ThemesConstants.EMPTY);
+			tempValue = tempValue.replaceAll("\t", ThemesConstants.EMPTY);
+			tempValue = tempValue.replaceAll("\f", ThemesConstants.EMPTY);
+			tempValue = tempValue.replaceAll("\r", ThemesConstants.SPACE);
+			tempValue = tempValue.replaceAll("\n", ThemesConstants.EMPTY);
+			for (int i = 0; (i < ThemesConstants.DUMMY_ARTICLES.size() && !isDummyArticle); i++) {
+				if (tempValue.indexOf(ThemesConstants.DUMMY_ARTICLES.get(i)) != -1) {
+					isDummyArticle = true;
+				}
+			}
+		}
+		return isDummyArticle;
 	}
 
 }

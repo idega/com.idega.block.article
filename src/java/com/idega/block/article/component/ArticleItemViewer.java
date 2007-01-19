@@ -1,5 +1,5 @@
 /*
- * $Id: ArticleItemViewer.java,v 1.15 2006/05/08 13:53:31 laddi Exp $
+ * $Id: ArticleItemViewer.java,v 1.16 2007/01/19 11:39:32 valdas Exp $
  *
  * Copyright (C) 2004 Idega. All Rights Reserved.
  *
@@ -24,12 +24,12 @@ import com.idega.webface.WFHtml;
 import com.idega.webface.convert.WFTimestampConverter;
 
 /**
- * Last modified: $Date: 2006/05/08 13:53:31 $ by $Author: laddi $
+ * Last modified: $Date: 2007/01/19 11:39:32 $ by $Author: valdas $
  *
  * Displays the article item
  *
  * @author <a href="mailto:gummi@idega.com">Gudmundur Agust Saemundsson</a>
- * @version $Revision: 1.15 $
+ * @version $Revision: 1.16 $
  */
 public class ArticleItemViewer extends ContentItemViewer {
 	
@@ -47,7 +47,8 @@ public class ArticleItemViewer extends ContentItemViewer {
 	private boolean headlineAsLink;
 	private boolean cacheEnabled=true;
 	
-	
+	private boolean showAuthor = true;
+	private boolean showCreationDate = true;
 	
 	/**
 	 * @return Returns the cacheEnabled.
@@ -108,12 +109,35 @@ public class ArticleItemViewer extends ContentItemViewer {
 		}
 	}
 	
-	protected void initializeComponent(FacesContext context) {	
-		super.initializeComponent(context);
-		((HtmlOutputText)getFieldViewerComponent(ATTRIBUTE_CREATION_DATE)).setConverter(new WFTimestampConverter());
+	protected void initializeComponent(FacesContext context) {
+		String attr[] = getViewerFieldNames();
+		if (attr == null) {
+			return;
+		}
+		for (int i = 0; i < attr.length; i++) {
+			if (canInitField(attr[i])) {
+				initializeComponent(attr[i]);
+			}
+		}
+		initializeToolbar();
+		if (isShowCreationDate()) {
+			((HtmlOutputText)getFieldViewerComponent(ATTRIBUTE_CREATION_DATE)).setConverter(new WFTimestampConverter());
+		}
 	}
 
-
+	private boolean canInitField(String attribute) {
+		if (attribute == null) {
+			return false;
+		}
+		if (ATTRIBUTE_AUTHOR.equals(attribute) && !isShowAuthor()) {
+			return false;
+		}
+		if (ATTRIBUTE_CREATION_DATE.equals(attribute) && !isShowCreationDate()) {
+			return false;
+		}
+		return true;
+	}
+	
 	/**
 	 * @return Returns the author.
 	 */
@@ -243,6 +267,22 @@ public class ArticleItemViewer extends ContentItemViewer {
 	public UIComponentCacher getCacher(FacesContext context) {
 		IWMainApplication iwma = IWMainApplication.getIWMainApplication(context);
 		return ArticleCacher.getInstance(iwma);
+	}
+
+	public boolean isShowAuthor() {
+		return showAuthor;
+	}
+
+	public void setShowAuthor(boolean showAuthor) {
+		this.showAuthor = showAuthor;
+	}
+
+	public boolean isShowCreationDate() {
+		return showCreationDate;
+	}
+
+	public void setShowCreationDate(boolean showCreationDate) {
+		this.showCreationDate = showCreationDate;
 	}
 	
 }
