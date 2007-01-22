@@ -4,7 +4,7 @@
   <extend>${base.project.dir}/block-dependencies.xml</extend>
   <name>idegaWeb Article</name>
   <artifactId>com.idega.block.article</artifactId>
-  <currentVersion>3.1.3</currentVersion>
+  <currentVersion>3.1.4</currentVersion>
   <inceptionYear>2003</inceptionYear>
   <shortDescription>Articles</shortDescription>
   <description>idegaWeb article is a component for content management of articles</description>
@@ -53,6 +53,11 @@
       <id>3.1.3</id>
       <name>3.1.3</name>
       <tag>ARTICLE_3_1_3</tag>
+    </version>
+    <version>
+      <id>3.1.4</id>
+      <name>3.1.4</name>
+      <tag>ARTICLE_3_1_4</tag>
     </version>
   </versions>
   <developers>
