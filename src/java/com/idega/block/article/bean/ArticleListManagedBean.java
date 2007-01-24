@@ -1,5 +1,5 @@
 /*
- * $Id: ArticleListManagedBean.java,v 1.9 2007/01/15 17:47:41 gediminas Exp $
+ * $Id: ArticleListManagedBean.java,v 1.10 2007/01/24 11:01:01 valdas Exp $
  * Created on 27.1.2005
  *
  * Copyright (C) 2005 Idega Software hf. All Rights Reserved.
@@ -10,6 +10,7 @@
 package com.idega.block.article.bean;
 
 import java.io.IOException;
+import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -22,11 +23,13 @@ import org.apache.webdav.lib.search.SearchException;
 import org.apache.webdav.lib.search.SearchExpression;
 import org.apache.webdav.lib.search.SearchRequest;
 import org.apache.webdav.lib.search.SearchScope;
+import org.apache.webdav.lib.search.expressions.CompareExpression;
 import org.apache.xmlbeans.XmlException;
 import com.idega.block.article.business.ArticleActionURIHandler;
 import com.idega.block.article.business.ArticleUtil;
 import com.idega.block.article.component.ArticleItemViewer;
 import com.idega.business.IBOLookup;
+import com.idega.business.IBOLookupException;
 import com.idega.content.bean.ContentItemBeanComparator;
 import com.idega.content.bean.ContentListViewerManagedBean;
 import com.idega.content.business.ContentSearch;
@@ -42,10 +45,10 @@ import com.idega.util.IWTimestamp;
 
 /**
  * 
- *  Last modified: $Date: 2007/01/15 17:47:41 $ by $Author: gediminas $
+ *  Last modified: $Date: 2007/01/24 11:01:01 $ by $Author: valdas $
  * 
  * @author <a href="mailto:gummi@idega.com">Gudmundur Agust Saemundsson</a>
- * @version $Revision: 1.9 $
+ * @version $Revision: 1.10 $
  */
 public class ArticleListManagedBean implements ContentListViewerManagedBean {
 
@@ -69,9 +72,9 @@ public class ArticleListManagedBean implements ContentListViewerManagedBean {
 	/* (non-Javadoc)
 	 * @see com.idega.content.bean.ContentListViewerManagedBean#getContentItems()
 	 */
-	public List getContentItems() {
+	public List<ArticleItemBean> getContentItems() {
 		try {
-			List l = loadAllArticlesInFolder(ArticleUtil.getArticleBaseFolderPath());
+			List<ArticleItemBean> l = loadAllArticlesInFolder(ArticleUtil.getArticleBaseFolderPath());
 			ContentItemBeanComparator c = new ContentItemBeanComparator();
 			c.setReverseOrder(true);
 			Collections.sort(l,c);
@@ -83,7 +86,7 @@ public class ArticleListManagedBean implements ContentListViewerManagedBean {
 		catch (IOException e) {
 			e.printStackTrace();
 		}
-		return new ArrayList();
+		return new ArrayList<ArticleItemBean>();
 	}
 	
 	
@@ -95,20 +98,20 @@ public class ArticleListManagedBean implements ContentListViewerManagedBean {
 	 * @throws XmlException
 	 * @throws IOException
 	 */
-	public List loadAllArticlesInFolder(String folder) throws XmlException, IOException{
-		List list = new ArrayList();		
+	public List<ArticleItemBean> loadAllArticlesInFolder(String folder) throws XmlException, IOException{
+		List<ArticleItemBean> list = new ArrayList<ArticleItemBean>();		
 			
 		IWContext iwc = IWContext.getInstance();		
 		
-		IWTimestamp oldest = null;
+		/*IWTimestamp oldest = null;
 		
 		if(this.numberOfDaysDisplayed > 0){
 			oldest = IWTimestamp.RightNow();
 			oldest.addDays(-this.numberOfDaysDisplayed);
-		}
+		}*/
 		
 		
-		try {
+		/*try {
 			String scope = folder;
 			IWSlideSession session = (IWSlideSession)IBOLookup.getSessionInstance(iwc,IWSlideSession.class);
 			if(scope != null){
@@ -123,36 +126,39 @@ public class ArticleListManagedBean implements ContentListViewerManagedBean {
 			Locale requestedLocale = iwc.getCurrentLocale();
 			searchBusiness.setToUseDescendingOrder(true);
 			Search search = searchBusiness.createSearch(getSearchRequest(scope, requestedLocale, oldest,this.categories));
-			Collection results = search.getSearchResults();
+			Collection results = search.getSearchResults();*/
+			Collection results = getArticleSearcResults(folder, this.categories, iwc);
 			int count=0;
-			if(results!=null){				
-				for (Iterator iter = results.iterator(); iter.hasNext();) {
-					SearchResult result = (SearchResult) iter.next();
-					try {
-						System.out.println("ArticleListManagedBean: Attempting to load "+result.getSearchResultURI());
-						ArticleItemBean article = new ArticleItemBean();
-						article.setResourcePath(result.getSearchResultURI());
-						article.load();
-						if(article.getAvilableInRequestedLanguage()){
-							int maxNumber = getMaxNumberOfDisplayed();
-							if(maxNumber==-1 || count<maxNumber){
-								list.add(article);
-								count++;
-								if (count == maxNumber) {
-									break;
-								}
+			if (results == null) {
+				return list;
+			}
+			ArticleItemBean article = null;
+			for (Iterator iter = results.iterator(); iter.hasNext();) {
+				SearchResult result = (SearchResult) iter.next();
+				try {
+					System.out.println("ArticleListManagedBean: Attempting to load "+result.getSearchResultURI());
+					article = new ArticleItemBean();
+					article.setResourcePath(result.getSearchResultURI());
+					article.load();
+					if(article.getAvilableInRequestedLanguage()){
+						int maxNumber = getMaxNumberOfDisplayed();
+						if(maxNumber==-1 || count<maxNumber){
+							list.add(article);
+							count++;
+							if (count == maxNumber) {
+								break;
 							}
 						}
-					}catch(Exception e) {
-						e.printStackTrace();
 					}
+				}catch(Exception e) {
+					e.printStackTrace();
 				}
 			}
-		}
+		/*}
 		catch (SearchException e1) {
 			e1.printStackTrace();
-		}
-		
+		}*/
+			
 		return list;
 	}
 
@@ -182,7 +188,7 @@ public class ArticleListManagedBean implements ContentListViewerManagedBean {
 			expression = s.and(expression,creationDateExpression);
 		}
 		
-		List categoryExpressions = new ArrayList();
+		List<CompareExpression> categoryExpressions = new ArrayList<CompareExpression>();
 		if(categoryList != null){
 			for (Iterator iter = categoryList.iterator(); iter.hasNext();) {
 				String categoryName = (String) iter.next();
@@ -297,5 +303,56 @@ public class ArticleListManagedBean implements ContentListViewerManagedBean {
 		return this.maxNumberOfDisplayed;
 	}
 	
+	public Collection getArticleSearcResults(String folder, List categories, IWContext iwc) {
+		if (folder == null) {
+			return null;
+		}
+		if (iwc == null) {
+			iwc = IWContext.getInstance();
+			if (iwc == null) {
+				return null;
+			}
+		}
+		
+		IWTimestamp oldest = null;
+		
+		if (this.numberOfDaysDisplayed > 0) {
+			oldest = IWTimestamp.RightNow();
+			oldest.addDays(-this.numberOfDaysDisplayed);
+		}
+		
+		IWSlideSession session = null;
+		try {
+			session = (IWSlideSession) IBOLookup.getSessionInstance(iwc,IWSlideSession.class);
+		} catch (IBOLookupException e) {
+			e.printStackTrace();
+			return null;
+		}
+		String webDavUri = null;
+		try {
+			webDavUri = session.getWebdavServerURI();
+		} catch (RemoteException e) {
+			e.printStackTrace();
+		}
+		if (webDavUri != null) {
+			if(folder.startsWith(webDavUri)){
+				folder = folder.substring(webDavUri.length());
+			}
+			if(folder.startsWith("/")){
+				folder = folder.substring(1);
+			}
+		}
+		SearchRequest articleSearch = null;
+		try {
+			articleSearch = getSearchRequest(folder, iwc.getCurrentLocale(), oldest, categories);
+		} catch (SearchException e) {
+			e.printStackTrace();
+			return null;
+		}
+		ContentSearch searchBusiness = new ContentSearch(iwc.getIWMainApplication());
+		searchBusiness.setToUseDescendingOrder(true);
+		Search search = searchBusiness.createSearch(articleSearch);
+		return search.getSearchResults();
+	}
 	
 }
