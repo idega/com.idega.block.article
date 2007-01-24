@@ -2,11 +2,11 @@ package com.idega.block.article.component;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Enumeration;
-import java.util.HashMap;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.TreeMap;
 
 import javax.faces.context.FacesContext;
 
@@ -33,7 +33,7 @@ public class ArticleCategoriesViewer extends Block {
 	private Map<String, Integer> countedCategories = null;
 	
 	public ArticleCategoriesViewer() {
-		countedCategories = new HashMap<String, Integer>();
+		countedCategories = Collections.synchronizedMap(new TreeMap<String, Integer>());
 	}
 	
 	public void main(IWContext iwc) {
@@ -45,14 +45,14 @@ public class ArticleCategoriesViewer extends Block {
 		List <String> categories = new ArrayList<String>(availableCategories);
 		initCategories(categories);
 		
-		Div container = new Div();
-		container.setId(BLOG_CATEGORIES);
-		
 		ArticleListViewer articles = new ArticleListViewer();
 		articles.setCategoriesList(null);
 		countCategories(articles.getArticleListBean().getContentItems());
 		
+		Div container = new Div();
+		container.setId(BLOG_CATEGORIES);
 		Div disabledCategoryContainer = null;
+		
 		StringBuffer value = null;
 		Text text = null;
 		Link link = null;
@@ -82,11 +82,13 @@ public class ArticleCategoriesViewer extends Block {
 	public void restoreState(FacesContext context, Object state) {
 		Object values[] = (Object[]) state;
 		super.restoreState(context, values[0]);
+		this.countedCategories = (Map<String, Integer>) values[1];
 	}
 
 	public Object saveState(FacesContext context) {
-		Object values[] = new Object[1];
+		Object values[] = new Object[2];
 		values[0] = super.saveState(context);
+		values[1] = this.countedCategories;
 		return values;
 	}
 	
@@ -95,7 +97,7 @@ public class ArticleCategoriesViewer extends Block {
 			return;
 		}
 		if (countedCategories == null) {
-			countedCategories = new HashMap<String, Integer>();
+			countedCategories = Collections.synchronizedMap(new TreeMap<String, Integer>());
 		}
 		for (int i = 0; i < categories.size(); i++) {
 			countedCategories.put(categories.get(i), 0);
@@ -108,29 +110,22 @@ public class ArticleCategoriesViewer extends Block {
 		}
 		Object o = null;
 		ArticleItemBean article = null;
-		Enumeration allCategories = null;
+		String categories = null;
 		for (int i = 0; i < articles.size(); i++) {
 			o = articles.get(i);
 			if (o instanceof ArticleItemBean) {
 				article = (ArticleItemBean) o;
-				allCategories = article.getWebDavResourceCategories();
-				if (allCategories != null) {
-					String categories = null;
-					while (allCategories.hasMoreElements()) {
-						categories = allCategories.nextElement().toString();
-						String[] entries = null;
-						if (categories != null) {
-							entries = categories.split(CategoryBean.CATEGORY_DELIMETER);
-							Integer value = null;
-							for (int j = 0; j < entries.length; j++) {
-								value = countedCategories.get(entries[j]);
-								if (value != null) {
-									value++;
-									countedCategories.put(entries[j], value);
-								}
-							}
+				categories = article.getWebDavResourceCategories();
+				if (categories != null) {
+					String[] entries = categories.split(CategoryBean.CATEGORY_DELIMETER);
+					Integer value = null;
+					for (int j = 0; j < entries.length; j++) {
+						value = countedCategories.get(entries[j]);
+						if (value != null) {
+							value++;
+							countedCategories.put(entries[j], value);
 						}
-				     }
+					}
 				}
 			}
 		}
