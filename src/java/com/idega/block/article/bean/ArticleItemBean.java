@@ -1,5 +1,5 @@
 /*
- * $Id: ArticleItemBean.java,v 1.62 2006/04/09 11:57:56 laddi Exp $
+ * $Id: ArticleItemBean.java,v 1.62.2.1 2007/01/24 10:27:46 gediminas Exp $
  *
  * Copyright (C) 2004-2005 Idega. All Rights Reserved.
  *
@@ -51,10 +51,10 @@ import com.idega.xml.XMLException;
  * This is a JSF managed bean that manages each article instance and delegates 
  * all calls to the correct localized instance.
  * <p>
- * Last modified: $Date: 2006/04/09 11:57:56 $ by $Author: laddi $
+ * Last modified: $Date: 2007/01/24 10:27:46 $ by $Author: gediminas $
  *
  * @author Anders Lindman,<a href="mailto:tryggvi@idega.com">Tryggvi Larusson</a>
- * @version $Revision: 1.62 $
+ * @version $Revision: 1.62.2.1 $
  */
 public class ArticleItemBean extends ContentItemBean implements Serializable, ContentItem, ValueChangeListener {
 	
@@ -1453,7 +1453,7 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 	/**
 	 * Loads the article (folder)
 	 */
-	protected boolean load(String path) throws Exception {
+	protected boolean load(String path) throws IOException {
 		return super.load(path);
 	}
 	
@@ -1473,7 +1473,7 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 	/**
 	 * Loads the article (folder)
 	 */
-	protected boolean load(WebdavExtendedResource webdavResource) throws Exception {
+	protected boolean load(WebdavExtendedResource webdavResource) throws IOException {
 		WebdavExtendedResource localizedArticleFile = null;
 		//First check if the resource is a folder, as it should be
 		if(webdavResource.isCollection()){
