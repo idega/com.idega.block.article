@@ -5,6 +5,12 @@
   </properties>
   <body>
 
+	<release version="3.1.5" date="2007-01-25">
+      <action dev="gediminas" type="fix">
+		This has to be updated because of a change in content.
+      </action>
+    </release>
+
 	<release version="3.1.4" date="2007-01-22">
       <action dev="gediminas" type="fix">
       	Fixed scrolling problem in articlelist in workspace.
