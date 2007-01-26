@@ -1,10 +1,12 @@
 package com.idega.block.article.component;
 
+import java.rmi.RemoteException;
 import java.text.Collator;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -18,8 +20,12 @@ import com.idega.content.business.CategoryBean;
 import com.idega.content.business.ContentUtil;
 import com.idega.content.presentation.ContentItemListViewer;
 import com.idega.content.themes.helpers.ThemesConstants;
+import com.idega.core.builder.business.BuilderService;
 import com.idega.presentation.Block;
 import com.idega.presentation.IWContext;
+import com.idega.presentation.Page;
+import com.idega.presentation.PresentationObjectUtil;
+import com.idega.presentation.Script;
 import com.idega.presentation.text.Break;
 import com.idega.presentation.text.Link;
 import com.idega.presentation.text.Text;
@@ -36,21 +42,43 @@ public class ArticleCategoriesViewer extends Block {
 	private static final String CLOSER = ")";
 	
 	private Map<String, Integer> countedCategories = null;
+	private Map<String, Boolean> availableCategories = null;
+	
+	private Boolean isFirstTime = Boolean.TRUE;
+	private Boolean hasUserValidRights = Boolean.FALSE;
 	
 	public ArticleCategoriesViewer() {
 		countedCategories = new HashMap<String, Integer>();
+		availableCategories = new HashMap<String, Boolean>();
 	}
 	
 	public void main(IWContext iwc) {
+		hasUserValidRights = ContentUtil.hasContentEditorRoles(iwc);
+		
 		CategoryBean categoriesBean = CategoryBean.getInstance();
-		Collection<String> availableCategories = categoriesBean.getCategories();
-		if (availableCategories == null) {
+		Collection<String> allCategories = categoriesBean.getCategories();
+		if (allCategories == null) {
 			return;
 		}
-		List <String> categories = new ArrayList<String>(availableCategories);
+		List <String> categories = new ArrayList<String>(allCategories);
 		initCategories(categories, iwc);
 
 		countCategories(categories, iwc);
+		
+		String pageKey = getThisPageKey(iwc);
+		BuilderService service = null;
+		try {
+			service = getBuilderService(iwc);
+		} catch (RemoteException e) {
+			e.printStackTrace();
+			return;
+		}
+		List<String> moduleIds = service.getModuleId(pageKey, ArticleListViewer.class.getName());
+		if (moduleIds != null) {
+			if (moduleIds.size() > 0) {
+				markAvailableCategories(categories, pageKey, moduleIds.get(0), service);
+			}
+		}
 		
 		Div container = new Div();
 		container.setId(BLOG_CATEGORIES);
@@ -58,8 +86,9 @@ public class ArticleCategoriesViewer extends Block {
 		
 		StringBuffer value = null;
 		Text text = null;
-		Link link = null;
 		Integer count = null;
+		Boolean enabledCategoryForCommonUser = null;
+		boolean isCheckedAnyCategory = isCheckedAnyCategory();
 		for (int i = 0; i < categories.size(); i++) {
 			count = countedCategories.get(categories.get(i));
 			if (count == null) {
@@ -68,20 +97,32 @@ public class ArticleCategoriesViewer extends Block {
 			value = new StringBuffer();
 			value.append(categories.get(i)).append(ThemesConstants.SPACE).append(OPENER).append(count).append(CLOSER);
 			if (count > 0) {
-				addCheckBox(container, iwc, categories.get(i), false);
-				link = new Link(value.toString());
-				link.setStyleClass(BLOG_LINK_ENABLED);
-				link.addFirstParameter(ContentItemListViewer.ITEMS_CATEGORY_VIEW, categories.get(i));
-				container.getChildren().add(link);
-				container.getChildren().add(new Break());
+				if (hasUserValidRights) {
+					addLinkToCategory(pageKey, moduleIds, container, iwc, categories.get(i), false, value.toString());
+				}
+				else {
+					if (isCheckedAnyCategory) {
+						enabledCategoryForCommonUser = availableCategories.get(categories.get(i));
+						if (enabledCategoryForCommonUser != null) {
+							if (enabledCategoryForCommonUser.booleanValue()) {
+								addLinkToCategory(pageKey, moduleIds, container, iwc, categories.get(i), false, value.toString());
+							}
+						}
+					}
+					else {
+						addLinkToCategory(pageKey, moduleIds, container, iwc, categories.get(i), false, value.toString());
+					}
+				}
 			}
 			else {
-				text = new Text(value.toString());
-				disabledCategoryContainer = new Div();
-				addCheckBox(disabledCategoryContainer, iwc, categories.get(i), true);
-				disabledCategoryContainer.setStyleClass(BLOG_LINK_DISABLED);
-				disabledCategoryContainer.getChildren().add(text);
-				container.getChildren().add(disabledCategoryContainer);
+				if (hasUserValidRights) {
+					text = new Text(value.toString());
+					disabledCategoryContainer = new Div();
+					addCheckBox(pageKey, moduleIds, disabledCategoryContainer, iwc, categories.get(i), true);
+					disabledCategoryContainer.setStyleClass(BLOG_LINK_DISABLED);
+					disabledCategoryContainer.getChildren().add(text);
+					container.getChildren().add(disabledCategoryContainer);
+				}
 			}
 		}
 		this.add(container);
@@ -91,12 +132,18 @@ public class ArticleCategoriesViewer extends Block {
 		Object values[] = (Object[]) state;
 		super.restoreState(context, values[0]);
 		this.countedCategories = (Map<String, Integer>) values[1];
+		this.isFirstTime = (Boolean) values[2];
+		this.hasUserValidRights = (Boolean) values[3];
+		this.availableCategories = (Map<String, Boolean>) values[4];
 	}
 
 	public Object saveState(FacesContext context) {
-		Object values[] = new Object[2];
+		Object values[] = new Object[5];
 		values[0] = super.saveState(context);
 		values[1] = this.countedCategories;
+		values[2] = this.isFirstTime;
+		values[3] = this.hasUserValidRights;
+		values[4] = this.availableCategories;
 		return values;
 	}
 	
@@ -106,6 +153,9 @@ public class ArticleCategoriesViewer extends Block {
 		}
 		if (countedCategories == null) {
 			countedCategories = new HashMap<String, Integer>();
+		}
+		if (availableCategories == null) {
+			availableCategories = new HashMap<String, Boolean>();
 		}
 		Collator collator = null;
 		if (iwc.getCurrentLocale() != null) {
@@ -117,6 +167,7 @@ public class ArticleCategoriesViewer extends Block {
 		Collections.sort(categories, collator);
 		for (int i = 0; i < categories.size(); i++) {
 			countedCategories.put(categories.get(i), 0);
+			availableCategories.put(categories.get(i), Boolean.FALSE);
 		}
 	}
 	
@@ -143,13 +194,23 @@ public class ArticleCategoriesViewer extends Block {
 		}
 	}
 	
-	private void addCheckBox(Div container, IWContext iwc, String category, boolean setDisabled) {
+	private void markAvailableCategories(List<String> categories, String pageKey, String moduleId, BuilderService service) {
+		if (categories == null) {
+			return;
+		}
+		for (int i = 0; i < categories.size(); i++) {
+			availableCategories.put(categories.get(i), service.isPropertyValueSet(pageKey, moduleId, "categories", categories.get(i)));
+		}
+	}
+	
+	private void addCheckBox(String pageKey, List<String> moduleIds, Div container, IWContext iwc, String category, boolean setDisabled) {
 		if (container == null || iwc == null) {
 			return;
 		}
-		if (!ContentUtil.hasContentEditorRoles(iwc)) {
+		if (!hasUserValidRights) {
 			return;
 		}
+		addDwrScript();
 		CheckBox box = new CheckBox(category);
 		if (setDisabled) {
 			box.setStyleClass(BLOG_CHECKBOX_DISABLED);
@@ -158,7 +219,71 @@ public class ArticleCategoriesViewer extends Block {
 			box.setStyleClass(BLOG_CHECKBOX_ENABLED);
 		}
 		box.setDisabled(setDisabled);
+		
+		if (pageKey != null && moduleIds != null) {
+			if (moduleIds.size() > 0) {
+				Boolean enabled = availableCategories.get(category);
+				if (enabled != null) {
+					box.setChecked(enabled.booleanValue());
+				}
+				
+				StringBuffer action = new StringBuffer();
+				action.append("setDisplayArticleCategory(this, '").append(pageKey).append("', '").append(moduleIds.get(0)).append("')");
+				box.setOnClick(action.toString());
+			}
+		}
 		container.getChildren().add(box);
+	}
+	
+	private void addDwrScript() {
+		if (!isFirstTime) {
+			return;
+		}
+		Page parent = PresentationObjectUtil.getParentPage(this);
+		if (parent == null) {
+			return;
+		}
+		Script script = parent.getAssociatedScript();
+		if (script == null) {
+			return;
+		}
+		isFirstTime = false;
+		script.addScriptSource("/dwr/engine.js");
+		script.addScriptSource("/dwr/interface/BuilderService.js");
+		script.addScriptSource(ArticleUtil.getBundle().getResourcesPath() + "/javascript/ArticleCategoriesHelper.js");
+	}
+	
+	private String getThisPageKey(IWContext iwc) {
+		if (iwc == null) {
+			return null;
+		}
+		int id = iwc.getCurrentIBPageID();
+		String pageKey = null;
+		try {
+			pageKey = String.valueOf(id);
+		} catch (NumberFormatException e) {
+			e.printStackTrace();
+			return null;
+		}
+		return pageKey;
+	}
+	
+	private boolean isCheckedAnyCategory() {
+		for (Iterator<Boolean> it = availableCategories.values().iterator(); it.hasNext();) {
+			if (it.next().booleanValue()) {
+				return true;
+			}
+		}
+		return false;
+	}
+	
+	private void addLinkToCategory(String pageKey, List<String> moduleIds, Div container, IWContext iwc, String category, boolean setDisabled, String linkValue) {
+		addCheckBox(pageKey, moduleIds, container, iwc, category, setDisabled);
+		Link link = new Link(linkValue);
+		link.setStyleClass(BLOG_LINK_ENABLED);
+		link.addFirstParameter(ContentItemListViewer.ITEMS_CATEGORY_VIEW, category);
+		container.getChildren().add(link);
+		container.getChildren().add(new Break());
 	}
 
 }
