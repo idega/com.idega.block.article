@@ -21,5 +21,5 @@ function setDisplayArticleCategoryCallback(result) {
 
 function refreshArticlePageFrame() {
 	window.location.href = window.location.href;
-	closeLoadingMessage();
+	window.onload = closeLoadingMessage;
 }
