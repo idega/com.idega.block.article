@@ -1,5 +1,5 @@
 /*
- * $Id: ArticleItemBean.java,v 1.66 2007/01/19 11:39:32 valdas Exp $
+ * $Id: ArticleItemBean.java,v 1.67 2007/02/01 01:19:30 valdas Exp $
  *
  * Copyright (C) 2004-2005 Idega. All Rights Reserved.
  *
@@ -52,10 +52,10 @@ import com.idega.xml.XMLException;
  * This is a JSF managed bean that manages each article instance and delegates 
  * all calls to the correct localized instance.
  * <p>
- * Last modified: $Date: 2007/01/19 11:39:32 $ by $Author: valdas $
+ * Last modified: $Date: 2007/02/01 01:19:30 $ by $Author: valdas $
  *
  * @author Anders Lindman,<a href="mailto:tryggvi@idega.com">Tryggvi Larusson</a>
- * @version $Revision: 1.66 $
+ * @version $Revision: 1.67 $
  */
 public class ArticleItemBean extends ContentItemBean implements Serializable, ContentItem, ValueChangeListener {
 	
@@ -1577,6 +1577,14 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 			}
 		}
 		return isDummyArticle;
+	}
+
+	public Timestamp getPublishedDate() {
+		return getLocalizedArticle().getPublishedDate();
+	}
+
+	public void setPublishedDate(Timestamp date) {
+		getLocalizedArticle().setPublishedDate(date);
 	}
 
 }

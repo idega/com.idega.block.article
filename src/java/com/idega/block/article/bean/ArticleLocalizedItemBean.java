@@ -1,5 +1,5 @@
 /*
- * $Id: ArticleLocalizedItemBean.java,v 1.8 2006/12/05 15:53:52 gimmi Exp $
+ * $Id: ArticleLocalizedItemBean.java,v 1.9 2007/02/01 01:19:29 valdas Exp $
  *
  * Copyright (C) 2004 Idega. All Rights Reserved.
  *
@@ -15,12 +15,15 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.Serializable;
 import java.io.UnsupportedEncodingException;
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import javax.faces.context.FacesContext;
 
 import org.apache.webdav.lib.WebdavResource;
 import org.w3c.tidy.Configuration;
@@ -32,7 +35,6 @@ import com.idega.content.bean.ContentItemCase;
 import com.idega.content.bean.ContentItemField;
 import com.idega.content.bean.ContentItemFieldBean;
 import com.idega.data.IDOStoreException;
-import com.idega.idegaweb.IWUserContext;
 import com.idega.presentation.IWContext;
 import com.idega.slide.business.IWSlideSession;
 import com.idega.slide.util.WebdavExtendedResource;
@@ -41,7 +43,6 @@ import com.idega.xml.XMLDocument;
 import com.idega.xml.XMLElement;
 import com.idega.xml.XMLException;
 import com.idega.xml.XMLNamespace;
-import com.idega.xml.XMLOutput;
 import com.idega.xml.XMLParser;
 
 /**
@@ -49,10 +50,10 @@ import com.idega.xml.XMLParser;
  * This is a JSF managed bean that manages each article xml document 
  * instance per language/locale.
  * <p>
- * Last modified: $Date: 2006/12/05 15:53:52 $ by $Author: gimmi $
+ * Last modified: $Date: 2007/02/01 01:19:29 $ by $Author: valdas $
  *
  * @author Anders Lindman,<a href="mailto:tryggvi@idega.com">Tryggvi Larusson</a>
- * @version $Revision: 1.8 $
+ * @version $Revision: 1.9 $
  */
 public class ArticleLocalizedItemBean extends ContentItemBean implements Serializable, ContentItem {
 	
@@ -62,6 +63,8 @@ public class ArticleLocalizedItemBean extends ContentItemBean implements Seriali
 	private static final long serialVersionUID = -7871069835129148485L;
 
 	private boolean _isUpdated = false;
+	
+	private static final String ROOT_ELEMENT_NAME_ARTICLE = "article";
 	
 	public final static String FIELDNAME_AUTHOR = "author";
 	public final static String FIELDNAME_HEADLINE = "headline";
@@ -85,6 +88,9 @@ public class ArticleLocalizedItemBean extends ContentItemBean implements Seriali
 	String xIdegaXMLNameSpace = "http://xmlns.idega.com/block/article/xml";
 	//private String baseFolderLocation = null;
 	private ArticleItemBean articleItem;
+	
+	private XMLNamespace atomNamespace = new XMLNamespace("http://www.w3.org/2005/Atom");
+	private XMLNamespace dcNamespace = new XMLNamespace("http://purl.org/dc/elements/1.1/");
 	
 	/**
 	 * Default constructor.
@@ -165,6 +171,10 @@ public class ArticleLocalizedItemBean extends ContentItemBean implements Seriali
 		//setValue(FIELDNAME_CONTENT_LANGUAGE, lang); 
 	//	setLanguage(lang);
 	//}
+	
+	public void setPublishedDate(Timestamp date) { super.setPublishedDate(date); }
+	
+	public Timestamp getPublishedDate() { return super.getPublishedDate(); }
 	
 	public void setLanguage(String lang){
 		super.setLanguage(lang);
@@ -250,8 +260,17 @@ public class ArticleLocalizedItemBean extends ContentItemBean implements Seriali
 	 * @throws XMLException
 	 */
 	public String getAsXML() throws IOException, XMLException {
+		
+		String bodyString = getBody();
+		
+		FacesContext context = FacesContext.getCurrentInstance();
+		IWContext iwc = null;
+		if (context != null) {
+			iwc = IWContext.getIWContext(context);
+		}
+		return getFeedEntryAsXML(iwc, getHeadline(), null, getHeadline(), bodyString.trim(), getAuthor(), null);
 
-		XMLParser builder = new XMLParser();
+		/*XMLParser builder = new XMLParser();
 		
 		XMLElement bodyElement = null;
 		XMLElement teaserElement = null;
@@ -299,7 +318,7 @@ public class ArticleLocalizedItemBean extends ContentItemBean implements Seriali
 		root.addContent(articleComment);
 		XMLDocument doc = new XMLDocument(root);
 		XMLOutput outputter = new XMLOutput();
-		return outputter.outputString(doc);		
+		return outputter.outputString(doc);*/
 	}
 
 	/**
@@ -327,15 +346,18 @@ public class ArticleLocalizedItemBean extends ContentItemBean implements Seriali
 	public void store() throws IDOStoreException{
 
 			try {
-				IWUserContext iwuc = IWContext.getInstance();
+				IWContext iwc = IWContext.getInstance();
 				//IWSlideSession session = (IWSlideSession)IBOLookup.getSessionInstance(iwuc,IWSlideSession.class);
-				IWSlideSession session = getIWSlideSession(iwuc);
+				IWSlideSession session = getIWSlideSession(iwc);
 				WebdavRootResource rootResource = session.getWebdavRootResource();
 	
 				//Setting the path for creating new file/creating localized version/updating existing file
 				String filePath=getResourcePath();
 				
 				String article = getAsXML();
+				if (article == null) {
+					return;
+				}
 				
 				ByteArrayInputStream utf8stream = new ByteArrayInputStream(article.getBytes("UTF-8"));
 				
@@ -358,6 +380,7 @@ public class ArticleLocalizedItemBean extends ContentItemBean implements Seriali
 				}
 				
 				rootResource.close();
+				//createFeedEntry(iwc, "Articles of " + iwc.getDomain().getDomainName(), "articles.atom", "atom_1.0", "All articles lies here", getHeadline(), getBody());
 				try {
 					//load(filePath);
 					ArticleLocalizedItemBean newBean = new ArticleLocalizedItemBean();
@@ -490,113 +513,170 @@ public class ArticleLocalizedItemBean extends ContentItemBean implements Seriali
 		} catch (XMLException e) {
 			e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
 		}
-		if(bodyDoc!=null){
-			XMLElement rootElement = bodyDoc.getRootElement();
-	
-			try {
-				XMLElement language  = rootElement.getChild(FIELDNAME_CONTENT_LANGUAGE,getIdegaXMLNameSpace());
-				if(language != null){
-					setLanguage(language.getText());
-				} else {
-					setLanguage(null);
-				}
-			}catch(Exception e) {	
-				setLanguage(null);
-			}
-			try {
-				XMLElement headline = rootElement.getChild(FIELDNAME_HEADLINE,getIdegaXMLNameSpace());
-				if(headline != null){
-					setHeadline(headline.getText());
-				} else {
-					setHeadline("");
-				}
-			}catch(Exception e) {		//Nullpointer could occur if field isn't used
-				e.printStackTrace();
-				setHeadline("");
-			}
-			try {
-				//Parse out the teaser
-				try {
-					XMLNamespace htmlNamespace = new XMLNamespace("http://www.w3.org/1999/xhtml");
-					XMLElement bodyElement = rootElement.getChild(FIELDNAME_TEASER,getIdegaXMLNameSpace());
-					XMLElement htmlElement = bodyElement.getChild("html",htmlNamespace);
-					if (htmlElement == null) {
-						setTeaser(bodyElement.getText());
-					} else {
-						XMLElement htmlBodyElement = htmlElement.getChild("body",htmlNamespace);
-						
-						String bodyValue = htmlBodyElement.getContentAsString();
-						setTeaser(bodyValue);
-					}
-				}catch(Exception e) {		//Nullpointer could occur if field isn't used
-		//			e.printStackTrace();
-					Logger log = Logger.getLogger(this.getClass().toString());
-					log.warning("Teaser of article is empty");
-					setTeaser("");
-				}
-				}catch(Exception e) {		//Nullpointer could occur if field isn't used
-					e.printStackTrace();
-					setTeaser("");
-				}
-			try {
-				XMLElement author = rootElement.getChild(FIELDNAME_AUTHOR,getIdegaXMLNameSpace());
-				if(author != null){
-					setAuthor(author.getText());
-				} else {
-					setAuthor("");
-				}
-			}catch(Exception e) {		//Nullpointer could occur if field isn't used
-				e.printStackTrace();
-				setAuthor("");
-			}
-	
-			//Parse out the body
-			try {
-				XMLNamespace htmlNamespace = new XMLNamespace("http://www.w3.org/1999/xhtml");
-				XMLElement bodyElement = rootElement.getChild(FIELDNAME_BODY,getIdegaXMLNameSpace());
-				XMLElement htmlElement = bodyElement.getChild("html",htmlNamespace);
-				XMLElement htmlBodyElement = htmlElement.getChild("body",htmlNamespace);
-				
-				String bodyValue = htmlBodyElement.getContentAsString();
-				setBody(bodyValue);
-			}catch(Exception e) {		//Nullpointer could occur if field isn't used
-	//			e.printStackTrace();
-				Logger log = Logger.getLogger(this.getClass().toString());
-				log.warning("Body of article is empty");
-				setBody("");
-			}
-			
-			try {
-				XMLElement source = rootElement.getChild(FIELDNAME_SOURCE,getIdegaXMLNameSpace());
-				if(source != null){
-					setSource(source.getText());
-				} else {
-					setSource("");
-				}
-			}catch(Exception e) {		//Nullpointer could occur if field isn't used
-				setSource("");
-			}
-			try {
-				XMLElement comment = rootElement.getChild(FIELDNAME_ARTICLE_COMMENT,getIdegaXMLNameSpace());
-				if(comment != null){
-					setComment(comment.getText());
-				} else {
-					setComment("");
-				}
-			}catch(Exception e) {		//Nullpointer could occur if field isn't used
-				e.printStackTrace();
-				setComment("");
-			}
-		} else {
-			//article not found
+		if(bodyDoc==null){
+//			article not found
 			Logger log = Logger.getLogger(this.getClass().toString());
 			log.warning("Article xml file was not found");
 			setRendered(false);
 			return false;
 		}
+		XMLElement rootElement = bodyDoc.getRootElement();
+		
+		boolean isOldArticleXMLFile = true;
+		if (!ROOT_ELEMENT_NAME_ARTICLE.equals(rootElement.getName())) {
+			isOldArticleXMLFile = false;
+		}
+		
+		if (!isOldArticleXMLFile) {
+			return loadArticleFromFeed(rootElement);
+		}
+	
+		try {
+			XMLElement language  = rootElement.getChild(FIELDNAME_CONTENT_LANGUAGE,getIdegaXMLNameSpace());
+			if(language != null){
+				setLanguage(language.getText());
+			} else {
+				setLanguage(null);
+			}
+		}catch(Exception e) {	
+			setLanguage(null);
+		}
+		try {
+			XMLElement headline = rootElement.getChild(FIELDNAME_HEADLINE,getIdegaXMLNameSpace());
+			if(headline != null){
+				setHeadline(headline.getText());
+			} else {
+				setHeadline("");
+			}
+		}catch(Exception e) {		//Nullpointer could occur if field isn't used
+			e.printStackTrace();
+			setHeadline("");
+		}
+		try {
+			//Parse out the teaser
+			try {
+				XMLNamespace htmlNamespace = new XMLNamespace("http://www.w3.org/1999/xhtml");
+				XMLElement bodyElement = rootElement.getChild(FIELDNAME_TEASER,getIdegaXMLNameSpace());
+				XMLElement htmlElement = bodyElement.getChild("html",htmlNamespace);
+				if (htmlElement == null) {
+					setTeaser(bodyElement.getText());
+				} else {
+					XMLElement htmlBodyElement = htmlElement.getChild("body",htmlNamespace);
+					
+					String bodyValue = htmlBodyElement.getContentAsString();
+					setTeaser(bodyValue);
+				}
+			}catch(Exception e) {		//Nullpointer could occur if field isn't used
+	//			e.printStackTrace();
+				Logger log = Logger.getLogger(this.getClass().toString());
+				log.warning("Teaser of article is empty");
+				setTeaser("");
+			}
+			}catch(Exception e) {		//Nullpointer could occur if field isn't used
+				e.printStackTrace();
+				setTeaser("");
+			}
+		try {
+			XMLElement author = rootElement.getChild(FIELDNAME_AUTHOR,getIdegaXMLNameSpace());
+			if(author != null){
+				setAuthor(author.getText());
+			} else {
+				setAuthor("");
+			}
+		}catch(Exception e) {		//Nullpointer could occur if field isn't used
+			e.printStackTrace();
+			setAuthor("");
+		}
+
+		//Parse out the body
+		try {
+			XMLNamespace htmlNamespace = new XMLNamespace("http://www.w3.org/1999/xhtml");
+			XMLElement bodyElement = rootElement.getChild(FIELDNAME_BODY,getIdegaXMLNameSpace());
+			XMLElement htmlElement = bodyElement.getChild("html",htmlNamespace);
+			XMLElement htmlBodyElement = htmlElement.getChild("body",htmlNamespace);
+			
+			String bodyValue = htmlBodyElement.getContentAsString();
+			setBody(bodyValue);
+		}catch(Exception e) {		//Nullpointer could occur if field isn't used
+//			e.printStackTrace();
+			Logger log = Logger.getLogger(this.getClass().toString());
+			log.warning("Body of article is empty");
+			setBody("");
+		}
+		
+		try {
+			XMLElement source = rootElement.getChild(FIELDNAME_SOURCE,getIdegaXMLNameSpace());
+			if(source != null){
+				setSource(source.getText());
+			} else {
+				setSource("");
+			}
+		}catch(Exception e) {		//Nullpointer could occur if field isn't used
+			setSource("");
+		}
+		try {
+			XMLElement comment = rootElement.getChild(FIELDNAME_ARTICLE_COMMENT,getIdegaXMLNameSpace());
+			if(comment != null){
+				setComment(comment.getText());
+			} else {
+				setComment("");
+			}
+		}catch(Exception e) {		//Nullpointer could occur if field isn't used
+			e.printStackTrace();
+			setComment("");
+		}
 		return true;
 //	    setFilename();
 //		setFolderLocation(bodyElement.getChild(FIELDNAME_FOLDER_LOCATION,idegans).getText());
+	}
+	
+	private boolean loadArticleFromFeed(XMLElement root) {
+		if (root == null) {
+			return false;
+		}
+		
+		XMLElement entry =  root.getChild("entry", atomNamespace);
+		if (entry == null) {
+			return false;
+		}
+		
+		XMLElement headline = entry.getChild("title", atomNamespace);
+		if (headline != null) {
+			if (headline.getValue() != null) {
+				setHeadline(headline.getValue());
+			}
+		}
+		
+		XMLElement description = entry.getChild("description", dcNamespace);
+		if (description != null) {
+			if (description.getValue() != null) {
+				setBody(description.getValue());
+			}
+		}
+		
+		XMLElement author = entry.getChild("creator", dcNamespace);
+		if (author != null) {
+			if (author.getValue() != null) {
+				setAuthor(author.getValue());
+			}
+		}
+		
+		XMLElement language = entry.getChild("language", dcNamespace);
+		if (language != null) {
+			if (language.getValue() != null) {
+				setLanguage(language.getValue());
+			}
+		}
+		
+		XMLElement published = entry.getChild("published", atomNamespace);
+		if (published != null) {
+			if (published.getValue() != null) {
+				// TODO: need converter from string to timestamp
+//				setPublishedDate(Timestamp.valueOf(published.getValue()));
+			}
+		}
+		
+		return true;
 	}
 	
 /*

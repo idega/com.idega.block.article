@@ -1,5 +1,5 @@
 /*
- * $Id: EditArticleView.java,v 1.23 2006/12/05 15:54:04 gimmi Exp $
+ * $Id: EditArticleView.java,v 1.24 2007/02/01 01:19:30 valdas Exp $
  *
  * Copyright (C) 2004 Idega. All Rights Reserved.
  *
@@ -45,6 +45,7 @@ import com.idega.presentation.ui.FieldSet;
 import com.idega.user.data.User;
 import com.idega.webface.WFComponentSelector;
 import com.idega.webface.WFContainer;
+import com.idega.webface.WFDateInput;
 import com.idega.webface.WFFormItem;
 import com.idega.webface.WFMessages;
 import com.idega.webface.WFPage;
@@ -57,10 +58,10 @@ import com.idega.webface.htmlarea.HTMLArea;
  * <p>
  * This is the part for the editor of article is inside the admin interface
  * </p>
- * Last modified: $Date: 2006/12/05 15:54:04 $ by $Author: gimmi $
+ * Last modified: $Date: 2007/02/01 01:19:30 $ by $Author: valdas $
  *
  * @author Joakim,Tryggvi Larusson
- * @version $Revision: 1.23 $
+ * @version $Revision: 1.24 $
  */
 public class EditArticleView extends IWBaseComponent implements ManagedContentBeans, ActionListener, ValueChangeListener {
 	public final static String EDIT_ARTICLE_BLOCK_ID = "edit_article_view";
@@ -85,7 +86,7 @@ public class EditArticleView extends IWBaseComponent implements ManagedContentBe
 	private final static String AUTHOR_ID = P + "author";
 	private final static String SOURCE_ID = P + "source";
 	private final static String COMMENT_ID = P + "comment";
-	//private final static String PUBLISHED_FROM_DATE_ID = P + "published_from_date";
+	private final static String PUBLISHED_FROM_DATE_ID = P + "published_from_date";
 	//private final static String PUBLISHED_TO_DATE_ID = P + "published_to_date";
 	
 	private final static String USER_MESSAGE_ID = P + "user_message";
@@ -162,8 +163,8 @@ public class EditArticleView extends IWBaseComponent implements ManagedContentBe
 		headline = " "+headline+"?";
 		HtmlOutputText hText= new HtmlOutputText();
 		hText.setValue(headline);
-		message.getChildren().add(confirmationText1);
-		message.getChildren().add(hText);
+		message.add(confirmationText1);
+		message.add(hText);
 		
 		FieldSet buttonFieldSet = new FieldSet();
 		buttonFieldSet.setStyleClass("buttons");
@@ -184,7 +185,7 @@ public class EditArticleView extends IWBaseComponent implements ManagedContentBe
 		WFMessages em = new WFMessages();
 		em.addMessageToDisplay(HEADLINE_ID);
 		em.addMessageToDisplay(TEASER_ID);
-//		em.addErrorMessage(PUBLISHED_FROM_DATE_ID);
+		em.addMessageToDisplay(PUBLISHED_FROM_DATE_ID);
 //		em.addErrorMessage(PUBLISHED_TO_DATE_ID);
 		em.addMessageToDisplay(SAVE_ID);
 		em.addMessageToDisplay(DELETE_ID);
@@ -203,7 +204,7 @@ public class EditArticleView extends IWBaseComponent implements ManagedContentBe
 		FacesContext context = FacesContext.getCurrentInstance();
 		IWContext iwc = IWContext.getIWContext(context);
 		WFResourceUtil localizer = WFResourceUtil.getResourceUtilArticle();
-//		String bref = WFPage.CONTENT_BUNDLE + ".";
+		String bref = WFPage.CONTENT_BUNDLE + ".";
 
 		WFContainer mainContainer = getMainContainer();
 		
@@ -334,7 +335,7 @@ public class EditArticleView extends IWBaseComponent implements ManagedContentBe
 		//Status field
 		HtmlOutputText statusValue = WFUtil.getTextVB(ref + "status");
 		WFContainer statusContainer = new WFContainer();
-		statusContainer.getChildren().add(statusValue);
+		statusContainer.add(statusValue);
 		UIComponent statusText = WFUtil.group(localizer.getTextVB("status"), WFUtil.getText(":"));
 		HtmlOutputLabel statusLabel = new HtmlOutputLabel();
 		statusLabel.getChildren().add(statusText);
@@ -385,10 +386,15 @@ public class EditArticleView extends IWBaseComponent implements ManagedContentBe
 //		contentItemContainer.add(WFUtil.getBreak());
 //		contentItemContainer.add(getRelatedContentItemsList());
 //		p.getChildren().add(contentItemContainer);
-//		p.getChildren().add(WFUtil.group(WFUtil.getTextVB(bref + "publishing_date"), WFUtil.getText(":")));		
+		//p.getChildren().add(WFUtil.group(WFUtil.getTextVB(bref + "publishing_date"), WFUtil.getText(":")));
+		mainContainer.add(WFUtil.group(WFUtil.getTextVB(bref + "publishing_date"), WFUtil.getText(":")));
+		WFDateInput publishedInput = WFUtil.getDateInput("PUBLISHED_ARTICLE_DATE", ref + "publishedDate");
+		publishedInput.setShowTime(true);
+		mainContainer.add(publishedInput);
 //		WFDateInput publishedFromInput = WFUtil.getDateInput(PUBLISHED_FROM_DATE_ID, ref + "case.publishedFromDate");
 //		publishedFromInput.setShowTime(true);
-//		p.getChildren().add(publishedFromInput);
+//		mainContainer.add(publishedFromInput);
+		//p.getChildren().add(publishedFromInput);
 //		p.getChildren().add(WFUtil.group(WFUtil.getTextVB(bref + "expiration_date"), WFUtil.getText(":")));		
 //		WFDateInput publishedToInput = WFUtil.getDateInput(PUBLISHED_TO_DATE_ID, ref + "case.publishedToDate");
 //		publishedToInput.setShowTime(true);
@@ -467,7 +473,7 @@ public class EditArticleView extends IWBaseComponent implements ManagedContentBe
 		
 		Iterator iter = ICLocaleBusiness.getListOfLocalesJAVA().iterator();
 		HtmlSelectOneMenu langDropdown = new HtmlSelectOneMenu();
-		List arrayList = new ArrayList();
+		List<SelectItem> arrayList = new ArrayList<SelectItem>();
 		while(iter.hasNext()) {
 			Locale locale = (Locale)iter.next();
 			String keyStr = locale.getLanguage();
@@ -788,7 +794,6 @@ public class EditArticleView extends IWBaseComponent implements ManagedContentBe
 				getArticleItemBean().load();
 			}
 			catch (Exception e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 		}
@@ -824,7 +829,6 @@ public class EditArticleView extends IWBaseComponent implements ManagedContentBe
 					
 				}
 				catch (Exception e) {
-					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
 			}
@@ -1003,7 +1007,6 @@ public class EditArticleView extends IWBaseComponent implements ManagedContentBe
 	 * @see javax.faces.component.UIComponentBase#processUpdates(javax.faces.context.FacesContext)
 	 */
 	public void processUpdates(FacesContext context) {
-		// TODO Auto-generated method stub
 		super.processUpdates(context);
 	}
 	
@@ -1011,7 +1014,6 @@ public class EditArticleView extends IWBaseComponent implements ManagedContentBe
 	 * @see javax.faces.component.UIComponentBase#processUpdates(javax.faces.context.FacesContext)
 	 */
 	public void processValidators(FacesContext context) {
-		// TODO Auto-generated method stub
 		super.processValidators(context);
 	}
 	
