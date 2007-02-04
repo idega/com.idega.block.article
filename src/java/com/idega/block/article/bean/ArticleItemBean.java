@@ -1,5 +1,5 @@
 /*
- * $Id: ArticleItemBean.java,v 1.67 2007/02/01 01:19:30 valdas Exp $
+ * $Id: ArticleItemBean.java,v 1.68 2007/02/04 20:45:10 valdas Exp $
  *
  * Copyright (C) 2004-2005 Idega. All Rights Reserved.
  *
@@ -52,10 +52,10 @@ import com.idega.xml.XMLException;
  * This is a JSF managed bean that manages each article instance and delegates 
  * all calls to the correct localized instance.
  * <p>
- * Last modified: $Date: 2007/02/01 01:19:30 $ by $Author: valdas $
+ * Last modified: $Date: 2007/02/04 20:45:10 $ by $Author: valdas $
  *
  * @author Anders Lindman,<a href="mailto:tryggvi@idega.com">Tryggvi Larusson</a>
- * @version $Revision: 1.67 $
+ * @version $Revision: 1.68 $
  */
 public class ArticleItemBean extends ContentItemBean implements Serializable, ContentItem, ValueChangeListener {
 	
@@ -103,6 +103,7 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 	 * @see com.idega.block.article.bean.ArticleLocalizedItemBean#clear()
 	 */
 	public void clear() {
+		//isDummyArticleSet = false;
 		getLocalizedArticle().clear();
 		this.resourcePath=null;
 		this.avilableInRequestedLanguage=false;
@@ -190,6 +191,9 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 	 * @see com.idega.block.article.bean.ArticleLocalizedItemBean#getTeaser()
 	 */
 	public String getTeaser() {
+		if (isDummyArticle()) {
+			return ThemesConstants.EMPTY;
+		}
 		return getLocalizedArticle().getTeaser();
 	}
 
@@ -1205,6 +1209,7 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 	}
 	
 	protected void updateLocalizedArticleBean(){
+		//isDummyArticleSet = false;
 		String resourcePath = getResourcePath();
 		String localizedResourcePath = calculateLocalizedResourcePath(resourcePath);
 		getLocalizedArticle().setResourcePath(localizedResourcePath);
@@ -1393,6 +1398,7 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 	 * Loads the article (folder)
 	 */
 	protected boolean load(String path) throws IOException {
+		//isDummyArticleSet = false;
 		return super.load(path);
 	}
 	
@@ -1413,6 +1419,7 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 	 * Loads the article (folder)
 	 */
 	protected boolean load(WebdavExtendedResource webdavResource) throws IOException {
+		//isDummyArticleSet = false;
 		WebdavExtendedResource localizedArticleFile = null;
 		//First check if the resource is a folder, as it should be
 		if(webdavResource.isCollection()){
@@ -1557,11 +1564,11 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 		String path = getResourcePath();
 		String body = getLocalizedArticle().getBody();
 		if (path == null) {
-			return isDummyArticle;
+			return false;
 		}
 		if (path.indexOf(ThemesConstants.IDEGA_THEME) != -1) {
 			if (body == null) {
-				return isDummyArticle;
+				return false;
 			}
 			String tempValue = body;
 			// Removing needless characters
@@ -1585,6 +1592,10 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 
 	public void setPublishedDate(Timestamp date) {
 		getLocalizedArticle().setPublishedDate(date);
+	}
+	
+	public void setArticleCategories(String articleCategories) {
+		getLocalizedArticle().setArticleCategories(articleCategories);
 	}
 
 }

@@ -1,5 +1,5 @@
 /*
- * $Id: ArticleUtil.java,v 1.6 2005/12/20 16:40:42 tryggvil Exp $
+ * $Id: ArticleUtil.java,v 1.7 2007/02/04 20:45:10 valdas Exp $
  * Created on 7.2.2005
  *
  * Copyright (C) 2005 Idega Software hf. All Rights Reserved.
@@ -19,18 +19,12 @@ import com.idega.util.IWTimestamp;
 
 /**
  * 
- *  Last modified: $Date: 2005/12/20 16:40:42 $ by $Author: tryggvil $
+ *  Last modified: $Date: 2007/02/04 20:45:10 $ by $Author: valdas $
  * 
  * @author <a href="mailto:gummi@idega.com">Gudmundur Agust Saemundsson</a>
- * @version $Revision: 1.6 $
+ * @version $Revision: 1.7 $
  */
 public class ArticleUtil {
-	
-
-	protected static final String ARTICLE_CONTENT_PATH = "/article";
-
-	public static final String IW_BUNDLE_IDENTIFIER = "com.idega.block.article";
-	public static final String MODULE_PREFIX = "article_";
 
 	private static IWBundle bundle = null;
 	
@@ -44,7 +38,7 @@ public class ArticleUtil {
 	private static void setupBundle() {
 		FacesContext context = FacesContext.getCurrentInstance();
 		IWContext iwContext = IWContext.getIWContext(context);
-		bundle = iwContext.getIWMainApplication().getBundle(IW_BUNDLE_IDENTIFIER);
+		bundle = iwContext.getIWMainApplication().getBundle(ArticleConstants.IW_BUNDLE_IDENTIFIER);
 	}
 	
 	public static String getContentRootPath(){
@@ -59,7 +53,7 @@ public class ArticleUtil {
 	 * @return
 	 */
 	public static String getArticleBaseFolderPath(){
-		return ContentUtil.getContentBaseFolderPath()+ARTICLE_CONTENT_PATH;
+		return ContentUtil.getContentBaseFolderPath() + ArticleConstants.ARTICLE_CONTENT_PATH;
 	}
 
 	/**

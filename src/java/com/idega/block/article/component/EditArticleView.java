@@ -1,5 +1,5 @@
 /*
- * $Id: EditArticleView.java,v 1.24 2007/02/01 01:19:30 valdas Exp $
+ * $Id: EditArticleView.java,v 1.25 2007/02/04 20:45:10 valdas Exp $
  *
  * Copyright (C) 2004 Idega. All Rights Reserved.
  *
@@ -31,7 +31,7 @@ import javax.faces.event.ValueChangeListener;
 import javax.faces.model.SelectItem;
 import com.idega.block.article.bean.ArticleItemBean;
 import com.idega.block.article.bean.ArticleStoreException;
-import com.idega.block.article.business.ArticleUtil;
+import com.idega.block.article.business.ArticleConstants;
 import com.idega.content.bean.ManagedContentBeans;
 import com.idega.content.data.ContentItemCase;
 import com.idega.content.presentation.ContentItemToolbar;
@@ -58,10 +58,10 @@ import com.idega.webface.htmlarea.HTMLArea;
  * <p>
  * This is the part for the editor of article is inside the admin interface
  * </p>
- * Last modified: $Date: 2007/02/01 01:19:30 $ by $Author: valdas $
+ * Last modified: $Date: 2007/02/04 20:45:10 $ by $Author: valdas $
  *
  * @author Joakim,Tryggvi Larusson
- * @version $Revision: 1.24 $
+ * @version $Revision: 1.25 $
  */
 public class EditArticleView extends IWBaseComponent implements ManagedContentBeans, ActionListener, ValueChangeListener {
 	public final static String EDIT_ARTICLE_BLOCK_ID = "edit_article_view";
@@ -86,8 +86,8 @@ public class EditArticleView extends IWBaseComponent implements ManagedContentBe
 	private final static String AUTHOR_ID = P + "author";
 	private final static String SOURCE_ID = P + "source";
 	private final static String COMMENT_ID = P + "comment";
-	private final static String PUBLISHED_FROM_DATE_ID = P + "published_from_date";
-	//private final static String PUBLISHED_TO_DATE_ID = P + "published_to_date";
+//	private final static String PUBLISHED_FROM_DATE_ID = P + "published_from_date";
+//	private final static String PUBLISHED_TO_DATE_ID = P + "published_to_date";
 	
 	private final static String USER_MESSAGE_ID = P + "user_message";
 	
@@ -185,7 +185,7 @@ public class EditArticleView extends IWBaseComponent implements ManagedContentBe
 		WFMessages em = new WFMessages();
 		em.addMessageToDisplay(HEADLINE_ID);
 		em.addMessageToDisplay(TEASER_ID);
-		em.addMessageToDisplay(PUBLISHED_FROM_DATE_ID);
+//		em.addMessageToDisplay(PUBLISHED_FROM_DATE_ID);
 //		em.addErrorMessage(PUBLISHED_TO_DATE_ID);
 		em.addMessageToDisplay(SAVE_ID);
 		em.addMessageToDisplay(DELETE_ID);
@@ -584,18 +584,19 @@ public class EditArticleView extends IWBaseComponent implements ManagedContentBe
 	public void processAction(ActionEvent event) {
 		String id = event.getComponent().getId();
 		UIComponent rootParent = event.getComponent().getParent().getParent().getParent();
-		EditArticleView ab = (EditArticleView) rootParent.findComponent(EDIT_ARTICLE_BLOCK_ID);
+		EditArticleView editArticle = (EditArticleView) rootParent.findComponent(EDIT_ARTICLE_BLOCK_ID);
 		if (id.equals(SAVE_ID)) {
 			//We have the save button pressed
-			boolean saveSuccessful=false;
-			saveSuccessful = ab.storeArticle();
-			if(saveSuccessful){
-				ArticleItemBean articleItemBean = getArticleItemBean();
-				String fileResourcePath = articleItemBean.getLocalizedArticle().getResourcePath();
-				WebDAVCategories categoriesUI = (WebDAVCategories) ab.getCategoryEditor();
-				if(categoriesUI!=null){
-					categoriesUI.setResourcePath(fileResourcePath);
-					//WebDAVCategories.saveCategoriesSettings(fileResourcePath, categoriesUI);
+			boolean saveSuccessful = false;
+			WebDAVCategories categoriesUI = (WebDAVCategories) editArticle.getCategoryEditor();
+			ArticleItemBean articleItemBean = getArticleItemBean();
+			if (categoriesUI != null) {
+				categoriesUI.setResourcePath(articleItemBean.getLocalizedArticle().getResourcePath());
+				articleItemBean.setArticleCategories(WebDAVCategories.getEnabledCategories(categoriesUI));
+			}
+			saveSuccessful = editArticle.storeArticle();
+			if (saveSuccessful) {
+				if (categoriesUI != null) {
 					categoriesUI.saveCategoriesSettings();
 				}
 			}
@@ -605,7 +606,7 @@ public class EditArticleView extends IWBaseComponent implements ManagedContentBe
 			//we are deleting
 			ArticleItemBean articleItemBean = getArticleItemBean();
 			articleItemBean.delete();
-			WFUtil.addMessageVB(ab.findComponent(DELETE_ID),ArticleUtil.IW_BUNDLE_IDENTIFIER, "delete_successful");
+			WFUtil.addMessageVB(editArticle.findComponent(DELETE_ID),ArticleConstants.IW_BUNDLE_IDENTIFIER, "delete_successful");
 		}
 		
 /*		else if (id.equals(FOR_REVIEW_ID)) {
@@ -651,11 +652,11 @@ public class EditArticleView extends IWBaseComponent implements ManagedContentBe
 		}
 		catch(ArticleStoreException ae){
 			String errorKey = ae.getErrorKey();
-			WFUtil.addErrorMessageVB(findComponent(SAVE_ID),ArticleUtil.IW_BUNDLE_IDENTIFIER, errorKey);
+			WFUtil.addErrorMessageVB(findComponent(SAVE_ID),ArticleConstants.IW_BUNDLE_IDENTIFIER, errorKey);
 		}
 		catch(Exception e){
 			String errorKey = ArticleStoreException.KEY_ERROR_ON_STORE;
-			WFUtil.addErrorMessageVB(findComponent(SAVE_ID),ArticleUtil.IW_BUNDLE_IDENTIFIER, errorKey);
+			WFUtil.addErrorMessageVB(findComponent(SAVE_ID),ArticleConstants.IW_BUNDLE_IDENTIFIER, errorKey);
 			//WFUtil.addErrorMessageVB(findComponent(SAVE_ID),e.getClass().getName()+" : "+e.getMessage());
 			e.printStackTrace();
 		}

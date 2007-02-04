@@ -1,5 +1,5 @@
 /*
- * $Id: ArticleLocalizedItemBean.java,v 1.9 2007/02/01 01:19:29 valdas Exp $
+ * $Id: ArticleLocalizedItemBean.java,v 1.10 2007/02/04 20:45:10 valdas Exp $
  *
  * Copyright (C) 2004 Idega. All Rights Reserved.
  *
@@ -29,11 +29,13 @@ import org.apache.webdav.lib.WebdavResource;
 import org.w3c.tidy.Configuration;
 import org.w3c.tidy.Tidy;
 
+import com.idega.block.article.business.ArticleConstants;
 import com.idega.content.bean.ContentItem;
 import com.idega.content.bean.ContentItemBean;
 import com.idega.content.bean.ContentItemCase;
 import com.idega.content.bean.ContentItemField;
 import com.idega.content.bean.ContentItemFieldBean;
+import com.idega.content.business.CategoryBean;
 import com.idega.data.IDOStoreException;
 import com.idega.presentation.IWContext;
 import com.idega.slide.business.IWSlideSession;
@@ -44,16 +46,17 @@ import com.idega.xml.XMLElement;
 import com.idega.xml.XMLException;
 import com.idega.xml.XMLNamespace;
 import com.idega.xml.XMLParser;
+import com.sun.syndication.io.impl.DateParser;
 
 /**
  * <p>
  * This is a JSF managed bean that manages each article xml document 
  * instance per language/locale.
  * <p>
- * Last modified: $Date: 2007/02/01 01:19:29 $ by $Author: valdas $
+ * Last modified: $Date: 2007/02/04 20:45:10 $ by $Author: valdas $
  *
  * @author Anders Lindman,<a href="mailto:tryggvi@idega.com">Tryggvi Larusson</a>
- * @version $Revision: 1.9 $
+ * @version $Revision: 1.10 $
  */
 public class ArticleLocalizedItemBean extends ContentItemBean implements Serializable, ContentItem {
 	
@@ -91,6 +94,8 @@ public class ArticleLocalizedItemBean extends ContentItemBean implements Seriali
 	
 	private XMLNamespace atomNamespace = new XMLNamespace("http://www.w3.org/2005/Atom");
 	private XMLNamespace dcNamespace = new XMLNamespace("http://purl.org/dc/elements/1.1/");
+	
+	private String articleCategories = null; // This string should be set in EditArticleView, parsing submitted categories
 	
 	/**
 	 * Default constructor.
@@ -261,14 +266,27 @@ public class ArticleLocalizedItemBean extends ContentItemBean implements Seriali
 	 */
 	public String getAsXML() throws IOException, XMLException {
 		
-		String bodyString = getBody();
+		String body = getBody();
+		if (body == null) {
+			body = ArticleConstants.EMPTY;
+		}
+		else {
+			body = body.trim();
+		}
+		String teaser = getTeaser();
+		if (teaser == null) {
+			teaser = ArticleConstants.EMPTY;
+		}
+		else {
+			teaser = teaser.trim();
+		}
 		
 		FacesContext context = FacesContext.getCurrentInstance();
 		IWContext iwc = null;
 		if (context != null) {
 			iwc = IWContext.getIWContext(context);
 		}
-		return getFeedEntryAsXML(iwc, getHeadline(), null, getHeadline(), bodyString.trim(), getAuthor(), null);
+		return getFeedEntryAsXML(iwc, getHeadline(), null, getHeadline(), teaser.toString(), body, getAuthor(), getCategories());
 
 		/*XMLParser builder = new XMLParser();
 		
@@ -647,10 +665,17 @@ public class ArticleLocalizedItemBean extends ContentItemBean implements Seriali
 			}
 		}
 		
-		XMLElement description = entry.getChild("description", dcNamespace);
-		if (description != null) {
-			if (description.getValue() != null) {
-				setBody(description.getValue());
+		XMLElement summary = entry.getChild("summary", atomNamespace);
+		if (summary != null) {
+			if (summary.getValue() != null) {
+				setTeaser(summary.getValue());
+			}
+		}
+		
+		XMLElement content = entry.getChild("content", atomNamespace);
+		if (content != null) {
+			if (content.getValue() != null) {
+				setBody(content.getValue());
 			}
 		}
 		
@@ -671,8 +696,13 @@ public class ArticleLocalizedItemBean extends ContentItemBean implements Seriali
 		XMLElement published = entry.getChild("published", atomNamespace);
 		if (published != null) {
 			if (published.getValue() != null) {
-				// TODO: need converter from string to timestamp
-//				setPublishedDate(Timestamp.valueOf(published.getValue()));
+				Timestamp t = null;
+				try {
+					t = new Timestamp(DateParser.parseW3CDateTime(published.getValue()).getTime());
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+				setPublishedDate(t);
 			}
 		}
 		
@@ -719,5 +749,32 @@ public class ArticleLocalizedItemBean extends ContentItemBean implements Seriali
 		}
 		return this.idegaXMLName;
 	}
+
+	protected String getArticleCategories() {
+		return articleCategories;
+	}
+
+	protected void setArticleCategories(String articleCategories) {
+		this.articleCategories = articleCategories;
+	}
 	
+	private List<String> getCategories() {
+		if (articleCategories == null) {
+			return null;
+		}
+		String[] entries = articleCategories.split(CategoryBean.CATEGORY_DELIMETER);
+		if (entries == null) {
+			return null;
+		}
+		if (entries.length == 0) {
+			return null;
+		}
+		List<String> categories = new ArrayList<String>();
+		for (int i = 0; i < entries.length; i++) {
+			if (!entries[i].equals(ArticleConstants.EMPTY)) {
+				categories.add(entries[i]);
+			}
+		}
+		return categories;
+	}
 }
