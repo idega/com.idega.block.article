@@ -1,5 +1,5 @@
 /*
- * $Id: ArticleLocalizedItemBean.java,v 1.10 2007/02/04 20:45:10 valdas Exp $
+ * $Id: ArticleLocalizedItemBean.java,v 1.11 2007/02/06 01:34:01 valdas Exp $
  *
  * Copyright (C) 2004 Idega. All Rights Reserved.
  *
@@ -46,17 +46,16 @@ import com.idega.xml.XMLElement;
 import com.idega.xml.XMLException;
 import com.idega.xml.XMLNamespace;
 import com.idega.xml.XMLParser;
-import com.sun.syndication.io.impl.DateParser;
 
 /**
  * <p>
  * This is a JSF managed bean that manages each article xml document 
  * instance per language/locale.
  * <p>
- * Last modified: $Date: 2007/02/04 20:45:10 $ by $Author: valdas $
+ * Last modified: $Date: 2007/02/06 01:34:01 $ by $Author: valdas $
  *
  * @author Anders Lindman,<a href="mailto:tryggvi@idega.com">Tryggvi Larusson</a>
- * @version $Revision: 1.10 $
+ * @version $Revision: 1.11 $
  */
 public class ArticleLocalizedItemBean extends ContentItemBean implements Serializable, ContentItem {
 	
@@ -94,6 +93,7 @@ public class ArticleLocalizedItemBean extends ContentItemBean implements Seriali
 	
 	private XMLNamespace atomNamespace = new XMLNamespace("http://www.w3.org/2005/Atom");
 	private XMLNamespace dcNamespace = new XMLNamespace("http://purl.org/dc/elements/1.1/");
+	private XMLNamespace commentNamespace = new XMLNamespace("http://wellformedweb.org/CommentAPI/");
 	
 	private String articleCategories = null; // This string should be set in EditArticleView, parsing submitted categories
 	
@@ -273,6 +273,7 @@ public class ArticleLocalizedItemBean extends ContentItemBean implements Seriali
 		else {
 			body = body.trim();
 		}
+		
 		String teaser = getTeaser();
 		if (teaser == null) {
 			teaser = ArticleConstants.EMPTY;
@@ -286,7 +287,8 @@ public class ArticleLocalizedItemBean extends ContentItemBean implements Seriali
 		if (context != null) {
 			iwc = IWContext.getIWContext(context);
 		}
-		return getFeedEntryAsXML(iwc, getHeadline(), null, getHeadline(), teaser.toString(), body, getAuthor(), getCategories());
+		return getFeedEntryAsXML(iwc, getHeadline(), null, getHeadline(), teaser, body, getAuthor(), getCategories(), getSource(),
+				getComment());
 
 		/*XMLParser builder = new XMLParser();
 		
@@ -696,13 +698,28 @@ public class ArticleLocalizedItemBean extends ContentItemBean implements Seriali
 		XMLElement published = entry.getChild("published", atomNamespace);
 		if (published != null) {
 			if (published.getValue() != null) {
-				Timestamp t = null;
-				try {
-					t = new Timestamp(DateParser.parseW3CDateTime(published.getValue()).getTime());
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
-				setPublishedDate(t);
+				setPublishedDate(getParsedDateFromFeed(published.getValue()));
+			}
+		}
+		
+		XMLElement updated = entry.getChild("updated", atomNamespace);
+		if (updated != null) {
+			if (updated.getValue() != null) {
+				setLastModifiedDate(getParsedDateFromFeed(updated.getValue()));
+			}
+		}
+		
+		XMLElement source = entry.getChild("source", dcNamespace);
+		if (source != null) {
+			if (source.getValue() != null) {
+				setSource(source.getValue());
+			}
+		}
+		
+		XMLElement comment = entry.getChild("comment", commentNamespace);
+		if (comment != null) {
+			if (comment.getValue() != null) {
+				setComment(comment.getValue());
 			}
 		}
 		
