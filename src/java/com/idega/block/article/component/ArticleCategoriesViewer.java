@@ -15,12 +15,14 @@ import javax.faces.context.FacesContext;
 import org.apache.myfaces.custom.div.Div;
 
 import com.idega.block.article.bean.ArticleListManagedBean;
+import com.idega.block.article.business.ArticleConstants;
 import com.idega.block.article.business.ArticleUtil;
 import com.idega.content.business.CategoryBean;
 import com.idega.content.business.ContentUtil;
 import com.idega.content.presentation.ContentItemListViewer;
 import com.idega.content.themes.helpers.ThemesConstants;
 import com.idega.core.builder.business.BuilderService;
+import com.idega.idegaweb.IWUserContext;
 import com.idega.presentation.Block;
 import com.idega.presentation.IWContext;
 import com.idega.presentation.Page;
@@ -284,6 +286,14 @@ public class ArticleCategoriesViewer extends Block {
 		link.addFirstParameter(ContentItemListViewer.ITEMS_CATEGORY_VIEW, category);
 		container.getChildren().add(link);
 		container.getChildren().add(new Break());
+	}
+	
+	public String getBuilderName(IWUserContext iwuc) {
+		String name = ArticleUtil.getBundle().getComponentName(ArticleCategoriesViewer.class);
+		if (name == null || ArticleConstants.EMPTY.equals(name)){
+			return "ArticleCategories";
+		}
+		return name;
 	}
 
 }
