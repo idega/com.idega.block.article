@@ -8,5 +8,6 @@ public class ArticleConstants {
 	public static final String MODULE_PREFIX = "article_";
 	
 	public static final String EMPTY = "";
+	public static final String SPACE = " ";
 
 }

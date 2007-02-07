@@ -1,5 +1,5 @@
 /*
- * $Id: EditArticleView.java,v 1.25 2007/02/04 20:45:10 valdas Exp $
+ * $Id: EditArticleView.java,v 1.26 2007/02/07 20:44:39 valdas Exp $
  *
  * Copyright (C) 2004 Idega. All Rights Reserved.
  *
@@ -58,10 +58,10 @@ import com.idega.webface.htmlarea.HTMLArea;
  * <p>
  * This is the part for the editor of article is inside the admin interface
  * </p>
- * Last modified: $Date: 2007/02/04 20:45:10 $ by $Author: valdas $
+ * Last modified: $Date: 2007/02/07 20:44:39 $ by $Author: valdas $
  *
  * @author Joakim,Tryggvi Larusson
- * @version $Revision: 1.25 $
+ * @version $Revision: 1.26 $
  */
 public class EditArticleView extends IWBaseComponent implements ManagedContentBeans, ActionListener, ValueChangeListener {
 	public final static String EDIT_ARTICLE_BLOCK_ID = "edit_article_view";
@@ -597,7 +597,11 @@ public class EditArticleView extends IWBaseComponent implements ManagedContentBe
 			saveSuccessful = editArticle.storeArticle();
 			if (saveSuccessful) {
 				if (categoriesUI != null) {
-					categoriesUI.saveCategoriesSettings();
+					try {
+						categoriesUI.saveCategoriesSettings();
+					} catch (RuntimeException re) {
+						re.printStackTrace();
+					}
 				}
 			}
 			this.clearOnInit=false;

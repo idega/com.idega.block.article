@@ -1,5 +1,5 @@
 /*
- * $Id: ArticleItemBean.java,v 1.68 2007/02/04 20:45:10 valdas Exp $
+ * $Id: ArticleItemBean.java,v 1.69 2007/02/07 20:44:39 valdas Exp $
  *
  * Copyright (C) 2004-2005 Idega. All Rights Reserved.
  *
@@ -25,6 +25,7 @@ import org.apache.webdav.lib.Privilege;
 import org.apache.webdav.lib.PropertyName;
 import org.apache.webdav.lib.WebdavResources;
 import com.idega.block.article.ArticleCacher;
+import com.idega.block.article.business.ArticleConstants;
 import com.idega.block.article.business.ArticleUtil;
 import com.idega.content.bean.ContentItem;
 import com.idega.content.bean.ContentItemBean;
@@ -52,10 +53,10 @@ import com.idega.xml.XMLException;
  * This is a JSF managed bean that manages each article instance and delegates 
  * all calls to the correct localized instance.
  * <p>
- * Last modified: $Date: 2007/02/04 20:45:10 $ by $Author: valdas $
+ * Last modified: $Date: 2007/02/07 20:44:39 $ by $Author: valdas $
  *
  * @author Anders Lindman,<a href="mailto:tryggvi@idega.com">Tryggvi Larusson</a>
- * @version $Revision: 1.68 $
+ * @version $Revision: 1.69 $
  */
 public class ArticleItemBean extends ContentItemBean implements Serializable, ContentItem, ValueChangeListener {
 	
@@ -120,7 +121,7 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 	 */
 	public String getAuthor() {
 		if (isDummyArticle()) {
-			return ThemesConstants.EMPTY;
+			return ArticleConstants.EMPTY;
 		}
 		return getLocalizedArticle().getAuthor();
 	}
@@ -130,7 +131,7 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 	 */
 	public String getBody() {
 		if (isDummyArticle()) {
-			return ThemesConstants.EMPTY;
+			return ArticleConstants.EMPTY;
 		}
 		return getLocalizedArticle().getBody();
 	}
@@ -168,7 +169,7 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 	 */
 	public String getHeadline() {
 		if (isDummyArticle()) {
-			return ThemesConstants.EMPTY;
+			return ArticleConstants.EMPTY;
 		}
 		return getLocalizedArticle().getHeadline();
 	}
@@ -192,7 +193,7 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 	 */
 	public String getTeaser() {
 		if (isDummyArticle()) {
-			return ThemesConstants.EMPTY;
+			return ArticleConstants.EMPTY;
 		}
 		return getLocalizedArticle().getTeaser();
 	}
@@ -1561,26 +1562,20 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 	
 	private boolean isDummyArticle() {
 		boolean isDummyArticle = false;
-		String path = getResourcePath();
 		String body = getLocalizedArticle().getBody();
-		if (path == null) {
+		if (body == null) {
 			return false;
 		}
-		if (path.indexOf(ThemesConstants.IDEGA_THEME) != -1) {
-			if (body == null) {
-				return false;
-			}
-			String tempValue = body;
-			// Removing needless characters
-			tempValue = tempValue.replaceAll("\b", ThemesConstants.EMPTY);
-			tempValue = tempValue.replaceAll("\t", ThemesConstants.EMPTY);
-			tempValue = tempValue.replaceAll("\f", ThemesConstants.EMPTY);
-			tempValue = tempValue.replaceAll("\r", ThemesConstants.SPACE);
-			tempValue = tempValue.replaceAll("\n", ThemesConstants.EMPTY);
-			for (int i = 0; (i < ThemesConstants.DUMMY_ARTICLES.size() && !isDummyArticle); i++) {
-				if (tempValue.indexOf(ThemesConstants.DUMMY_ARTICLES.get(i)) != -1) {
-					isDummyArticle = true;
-				}
+		String tempValue = body;
+		// Removing needless characters
+		tempValue = tempValue.replaceAll("\b", ArticleConstants.EMPTY);
+		tempValue = tempValue.replaceAll("\t", ArticleConstants.EMPTY);
+		tempValue = tempValue.replaceAll("\f", ArticleConstants.EMPTY);
+		tempValue = tempValue.replaceAll("\r", ArticleConstants.SPACE);
+		tempValue = tempValue.replaceAll("\n", ArticleConstants.EMPTY);
+		for (int i = 0; (i < ThemesConstants.DUMMY_ARTICLES.size() && !isDummyArticle); i++) {
+			if (tempValue.indexOf(ThemesConstants.DUMMY_ARTICLES.get(i)) != -1) {
+				isDummyArticle = true;
 			}
 		}
 		return isDummyArticle;
