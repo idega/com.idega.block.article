@@ -97,7 +97,7 @@ public class ArticleCategoriesViewer extends Block {
 				break;
 			}
 			value = new StringBuffer();
-			value.append(categoriesBean.getCategoryName(categories.get(i))).append(ThemesConstants.SPACE).append(OPENER).append(count).append(CLOSER);
+			value.append(categoriesBean.getCategoryName(categories.get(i))).append(ArticleConstants.SPACE).append(OPENER).append(count).append(CLOSER);
 			if (count > 0) {
 				if (hasUserValidRights) {
 					addLinkToCategory(pageKey, moduleIds, container, iwc, categories.get(i), false, value.toString());
