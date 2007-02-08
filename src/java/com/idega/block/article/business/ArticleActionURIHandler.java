@@ -1,5 +1,5 @@
 /*
- * $Id: ArticleActionURIHandler.java,v 1.8 2005/12/20 16:40:42 tryggvil Exp $
+ * $Id: ArticleActionURIHandler.java,v 1.9 2007/02/08 19:40:07 valdas Exp $
  * Created on Jan 31, 2005
  *
  * Copyright (C) 2005 Idega Software hf. All Rights Reserved.
@@ -9,6 +9,7 @@
  */
 package com.idega.block.article.business;
 
+import com.idega.content.business.ContentConstants;
 import com.idega.content.presentation.ContentViewer;
 import com.idega.core.uri.DefaultIWActionURIHandler;
 import com.idega.core.uri.IWActionURI;
@@ -21,11 +22,11 @@ import com.idega.core.uri.IWActionURIHandler;
  * <p>
  * An IWActionURIHandler handler that handles the actions for the article module (edit/delete).
  * </p>
- *  Last modified: $Date: 2005/12/20 16:40:42 $ by $Author: tryggvil $
+ *  Last modified: $Date: 2007/02/08 19:40:07 $ by $Author: valdas $
  * 
  * 
  * @author <a href="mailto:eiki@idega.com">eiki</a>
- * @version $Revision: 1.8 $
+ * @version $Revision: 1.9 $
  */
 public class ArticleActionURIHandler extends DefaultIWActionURIHandler implements IWActionURIHandler {
 
@@ -63,9 +64,15 @@ public class ArticleActionURIHandler extends DefaultIWActionURIHandler implement
 		
 		StringBuffer redirectURI = new StringBuffer();
 		redirectURI.append(uri.getContextURI());
-		redirectURI.append("workspace/content/article/");
-		redirectURI.append(action);
-		redirectURI.append("/?");
+		if ("preview".equals(action)) {
+			redirectURI.append(ContentConstants.PAGES_START_URI_WITHOUT_FIRST_SLASH).append(ContentConstants.ARTICLE_VIEWER_URI);
+			redirectURI.append("?");
+		}
+		else {
+			redirectURI.append("workspace/content/article/");
+			redirectURI.append(action);
+			redirectURI.append("/?");
+		}
 		String pathPart = uri.getPathPart();
 		if(pathPart!=null && !pathPart.equals("")){
 			redirectURI.append(subjectParameterName);
