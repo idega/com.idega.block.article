@@ -1,5 +1,5 @@
 /*
- * $Id: ArticleListViewer.java,v 1.5 2006/04/09 11:57:56 laddi Exp $
+ * $Id: ArticleListViewer.java,v 1.6 2007/02/13 19:05:39 valdas Exp $
  * Created on 24.1.2005
  *
  * Copyright (C) 2005 Idega Software hf. All Rights Reserved.
@@ -24,10 +24,10 @@ import com.idega.idegaweb.IWMainApplication;
  * for the article module.
  * </p>
  * 
- *  Last modified: $Date: 2006/04/09 11:57:56 $ by $Author: laddi $
+ *  Last modified: $Date: 2007/02/13 19:05:39 $ by $Author: valdas $
  * 
  * @author <a href="mailto:tryggvi@idega.com">Tryggvi Larusson</a>
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
  */
 public class ArticleListViewer extends ContentItemListViewer {
 
@@ -36,6 +36,8 @@ public class ArticleListViewer extends ContentItemListViewer {
 	final static String DEFAULT_RESOURCE_PATH=ArticleUtil.getArticleBaseFolderPath();
 	//instance variables:
 	boolean headlineAsLink=false;
+	
+	boolean showComments = false;
 	
 	/**
 	 * 
@@ -90,4 +92,13 @@ public class ArticleListViewer extends ContentItemListViewer {
 		IWMainApplication iwma = IWMainApplication.getIWMainApplication(context);
 		return ArticleCacher.getInstance(iwma);
 	}
+
+	public boolean isShowComments() {
+		return showComments;
+	}
+
+	public void setShowComments(boolean showComments) {
+		this.showComments = showComments;
+	}
+
 }

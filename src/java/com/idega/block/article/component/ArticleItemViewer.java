@@ -1,5 +1,5 @@
 /*
- * $Id: ArticleItemViewer.java,v 1.16 2007/01/19 11:39:32 valdas Exp $
+ * $Id: ArticleItemViewer.java,v 1.17 2007/02/13 19:05:39 valdas Exp $
  *
  * Copyright (C) 2004 Idega. All Rights Reserved.
  *
@@ -12,24 +12,29 @@ import java.sql.Timestamp;
 import javax.faces.component.UIComponent;
 import javax.faces.component.html.HtmlOutputText;
 import javax.faces.context.FacesContext;
+
 import com.idega.block.article.ArticleCacher;
 import com.idega.block.article.bean.ArticleItemBean;
+import com.idega.block.article.bean.ArticleLocalizedItemBean;
 import com.idega.block.article.business.ArticleActionURIHandler;
+import com.idega.block.article.business.ArticleUtil;
 import com.idega.content.bean.ContentItem;
+import com.idega.content.presentation.ContentItemComments;
 import com.idega.content.presentation.ContentItemToolbar;
 import com.idega.content.presentation.ContentItemViewer;
 import com.idega.core.cache.UIComponentCacher;
 import com.idega.idegaweb.IWMainApplication;
+import com.idega.presentation.Script;
 import com.idega.webface.WFHtml;
 import com.idega.webface.convert.WFTimestampConverter;
 
 /**
- * Last modified: $Date: 2007/01/19 11:39:32 $ by $Author: valdas $
+ * Last modified: $Date: 2007/02/13 19:05:39 $ by $Author: valdas $
  *
  * Displays the article item
  *
  * @author <a href="mailto:gummi@idega.com">Gudmundur Agust Saemundsson</a>
- * @version $Revision: 1.16 $
+ * @version $Revision: 1.17 $
  */
 public class ArticleItemViewer extends ContentItemViewer {
 	
@@ -49,6 +54,7 @@ public class ArticleItemViewer extends ContentItemViewer {
 	
 	private boolean showAuthor = true;
 	private boolean showCreationDate = true;
+	private boolean showComments = false;
 	
 	/**
 	 * @return Returns the cacheEnabled.
@@ -120,6 +126,7 @@ public class ArticleItemViewer extends ContentItemViewer {
 			}
 		}
 		initializeToolbar();
+		initializeComments();
 		if (isShowCreationDate()) {
 			((HtmlOutputText)getFieldViewerComponent(ATTRIBUTE_CREATION_DATE)).setConverter(new WFTimestampConverter());
 		}
@@ -284,5 +291,54 @@ public class ArticleItemViewer extends ContentItemViewer {
 	public void setShowCreationDate(boolean showCreationDate) {
 		this.showCreationDate = showCreationDate;
 	}
+
+	public boolean isShowComments() {
+		return showComments;
+	}
+
+	public void setShowComments(boolean showComments) {
+		this.showComments = showComments;
+	}
 	
+	protected void initializeComments() {
+		if (!isShowComments()) {
+			return;
+		}
+		super.initializeComments();
+//		System.out.println("Adding comments");
+		if (!addJavaScript()) {
+			return;
+		}
+		ContentItemComments comments = new ContentItemComments(getLinkToComments());
+		comments.setId(this.getId() + "_article_comments");
+		getFacets().put(FACET_ITEM_COMMENTS, comments);
+	}
+	
+	protected void updateComments() {
+		if (!isShowComments()) {
+			return;
+		}
+		super.updateComments();
+//		System.out.println("Updating comments");
+//		Object o = getFacets().get(FACET_ITEM_COMMENTS);
+//		System.out.println(o);
+	}
+	
+	public String getLinkToComments() {
+		return (String) getValue(ArticleLocalizedItemBean.FIELDNAME_LINK_TO_COMMENT);
+	}
+	
+	public void setLinkToComments(String linkToComments) {
+		setValue(ArticleLocalizedItemBean.FIELDNAME_LINK_TO_COMMENT, linkToComments);
+	}
+	
+	private boolean addJavaScript() {
+		Script script = new Script();
+		script.addScriptSource("/dwr/engine.js");
+		script.addScriptSource("/dwr/interface/CommentsEngine.js");
+		script.addScriptSource(ArticleUtil.getBundle().getResourcesPath() + "/javascript/CommentsHelper.js");
+		
+		getFacets().put(ContentItemViewer.FACET_COMMENTS_SCRIPTS, script);
+		return true;
+	}
 }

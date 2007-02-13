@@ -1,5 +1,5 @@
 /*
- * $Id: ArticleUtil.java,v 1.7 2007/02/04 20:45:10 valdas Exp $
+ * $Id: ArticleUtil.java,v 1.8 2007/02/13 19:05:38 valdas Exp $
  * Created on 7.2.2005
  *
  * Copyright (C) 2005 Idega Software hf. All Rights Reserved.
@@ -19,10 +19,10 @@ import com.idega.util.IWTimestamp;
 
 /**
  * 
- *  Last modified: $Date: 2007/02/04 20:45:10 $ by $Author: valdas $
+ *  Last modified: $Date: 2007/02/13 19:05:38 $ by $Author: valdas $
  * 
  * @author <a href="mailto:gummi@idega.com">Gudmundur Agust Saemundsson</a>
- * @version $Revision: 1.7 $
+ * @version $Revision: 1.8 $
  */
 public class ArticleUtil {
 
@@ -68,9 +68,8 @@ public class ArticleUtil {
 	 * @return Appends to the path where a new article by default should be created
 	 */
 	public static String getArticleYearMonthPath(String basePath) {
-		IWTimestamp now = new IWTimestamp();
-		String folderString = basePath+"/"+now.getYear()+"/"+now.getDateString("MM");
-		return folderString;
+		StringBuffer folderString = new StringBuffer(basePath).append(ArticleConstants.SLASH).append(ContentUtil.getYearMonthPath());
+		return folderString.toString();
 	}
 	
 	

@@ -1,5 +1,5 @@
 /*
- * $Id: ArticleLocalizedItemBean.java,v 1.12 2007/02/07 20:44:38 valdas Exp $
+ * $Id: ArticleLocalizedItemBean.java,v 1.13 2007/02/13 19:05:38 valdas Exp $
  *
  * Copyright (C) 2004 Idega. All Rights Reserved.
  *
@@ -53,10 +53,10 @@ import com.idega.xml.XMLParser;
  * This is a JSF managed bean that manages each article xml document 
  * instance per language/locale.
  * <p>
- * Last modified: $Date: 2007/02/07 20:44:38 $ by $Author: valdas $
+ * Last modified: $Date: 2007/02/13 19:05:38 $ by $Author: valdas $
  *
  * @author Anders Lindman,<a href="mailto:tryggvi@idega.com">Tryggvi Larusson</a>
- * @version $Revision: 1.12 $
+ * @version $Revision: 1.13 $
  */
 public class ArticleLocalizedItemBean extends ContentItemBean implements Serializable, ContentItem {
 	
@@ -75,6 +75,7 @@ public class ArticleLocalizedItemBean extends ContentItemBean implements Seriali
 	public final static String FIELDNAME_BODY = "body";
 	public final static String FIELDNAME_SOURCE = "source";
 	public final static String FIELDNAME_COMMENT = "comment";
+	public final static String FIELDNAME_LINK_TO_COMMENT = "linkToComments";
 	//Note "comment" seems to be a reserved attribute in DAV so use "article_comment" for that!!!
 	public final static String FIELDNAME_ARTICLE_COMMENT = "article_comment";
 	public final static String FIELDNAME_IMAGES = "images";
@@ -120,6 +121,7 @@ public class ArticleLocalizedItemBean extends ContentItemBean implements Seriali
 	public String getAuthor() { return (String)getValue(FIELDNAME_AUTHOR); }
 	public String getSource() { return (String)getValue(FIELDNAME_SOURCE); }
 	public String getComment() { return (String)getValue(FIELDNAME_COMMENT); }
+	public String getLinkToComments() { return (String)getValue(FIELDNAME_LINK_TO_COMMENT); }
 	public List getImages() { return getItemFields(FIELDNAME_IMAGES); }
 	//public String getFilename() { return (String)getValue(FIELDNAME_FILENAME); }
 	
@@ -169,7 +171,15 @@ public class ArticleLocalizedItemBean extends ContentItemBean implements Seriali
 	} 
 	public void setAuthor(String s) { setValue(FIELDNAME_AUTHOR, s); } 
 	public void setSource(String s) { setValue(FIELDNAME_SOURCE, s); }
-	public void setComment(String s) { setValue(FIELDNAME_COMMENT, s); }
+	
+	public void setComment(String comment) {
+		setValue(FIELDNAME_COMMENT, comment);
+	}
+	
+	public void setLinkToComments(String linkToComments) {
+		setValue(FIELDNAME_LINK_TO_COMMENT, linkToComments);
+	}
+	
 	public void setImages(List l) { setItemFields(FIELDNAME_IMAGES, l); }
 	//public void setFilename(String l) { setValue(FIELDNAME_FILENAME, l); }
 //	public void setFolderLocation(String l) { setValue(FIELDNAME_FOLDER_LOCATION, l); }
@@ -289,7 +299,7 @@ public class ArticleLocalizedItemBean extends ContentItemBean implements Seriali
 			iwc = IWContext.getIWContext(context);
 		}
 		return getFeedEntryAsXML(iwc, getHeadline(), null, getHeadline(), teaser, body, getAuthor(), getCategories(), getSource(),
-				getComment(), ArticleItemViewer.class.getName());
+				getComment(), ArticleItemViewer.class.getName(), null);
 
 		/*XMLParser builder = new XMLParser();
 		
@@ -721,6 +731,13 @@ public class ArticleLocalizedItemBean extends ContentItemBean implements Seriali
 		if (comment != null) {
 			if (comment.getValue() != null) {
 				setComment(comment.getValue());
+			}
+		}
+		
+		XMLElement linkToComments = entry.getChild("commentRss", commentNamespace);
+		if (linkToComments != null) {
+			if (linkToComments.getValue() != null) {
+				setLinkToComments(linkToComments.getValue());
 			}
 		}
 		

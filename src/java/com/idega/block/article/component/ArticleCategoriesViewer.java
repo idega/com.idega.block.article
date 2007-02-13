@@ -20,7 +20,6 @@ import com.idega.block.article.business.ArticleUtil;
 import com.idega.content.business.CategoryBean;
 import com.idega.content.business.ContentUtil;
 import com.idega.content.presentation.ContentItemListViewer;
-import com.idega.content.themes.helpers.ThemesConstants;
 import com.idega.core.builder.business.BuilderService;
 import com.idega.idegaweb.IWUserContext;
 import com.idega.presentation.Block;
