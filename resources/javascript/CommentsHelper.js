@@ -18,6 +18,10 @@ var COMMENT_PANEL_ID = "comment_panel";
 var EXISTS_COMMENTS_FILE = false;
 var FIRST_TIME_ACTIVATION = true;
 
+var LINK_TO_COMMENTS = null;
+
+var COMMENTS_TIME_OUT = 60000; // One minute
+
 function setCommentValues(user, subject, body) {
 	USER = user;
 	SUBJECT = subject;
@@ -26,6 +30,7 @@ function setCommentValues(user, subject, body) {
 
 function addCommentPanel(id, linkToComments, lblUser, lblSubject, lblComment, lblPosted, lblSend, lblSending, loggedUser, existsFile) {
 	setCommentValues("", "", "");
+	
 	LABEL_USER = lblUser;
 	LABEL_SUBJECT = lblSubject;
 	LABEL_COMMENT = lblComment;
@@ -33,6 +38,8 @@ function addCommentPanel(id, linkToComments, lblUser, lblSubject, lblComment, lb
 	LABEL_SEND = lblSend;
 	LABEL_SENDING = lblSending;
 	LOGGED_USER = loggedUser;
+	LINK_TO_COMMENTS = linkToComments;
+	
 	if (FIRST_TIME_ACTIVATION) {
 		FIRST_TIME_ACTIVATION = false;
 		EXISTS_COMMENTS_FILE = existsFile;
@@ -41,7 +48,7 @@ function addCommentPanel(id, linkToComments, lblUser, lblSubject, lblComment, lb
 		closeCommentsPanel();
 		return;
 	}
-	if (id == null || linkToComments == null) {
+	if (id == null || LINK_TO_COMMENTS == null) {
 		return;
 	}
 	var container = document.getElementById(id);
@@ -113,7 +120,6 @@ function closeCommentPanelAndSendComment(userId, subjectId, bodyId, linkToCommen
 	}
 	var subject = document.getElementById(subjectId);
 	if (subject == null) {
-		alert("subject");
 		return;
 	}
 	var body = document.getElementById(bodyId);
@@ -126,15 +132,15 @@ function closeCommentPanelAndSendComment(userId, subjectId, bodyId, linkToCommen
 	CommentsEngine.addComment(USER, SUBJECT, BODY, linkToComments, EXISTS_COMMENTS_FILE, addCommentCallback);
 }
 
-function addCommentCallback(date) {
-	if (date != null) {
-		addCommentToPage(date);
-		EXISTS_COMMENTS_FILE = true;
-	}
+function addCommentCallback(result) {
 	closeLoadingMessage();
+	if (result) {
+		EXISTS_COMMENTS_FILE = true;
+		getComments(LINK_TO_COMMENTS, COMMENTS_LOADING_MESSAGE);
+	}
 }
 
-function addCommentToPage(date) {
+function addComment(articleComment) {
 	var commentIndex = 0;
 	var counter = document.getElementById("contentItemCount");
 	if (counter != null) {
@@ -163,25 +169,25 @@ function addCommentToPage(date) {
 	
 	var user = document.createElement("dt");
 	var userValue = document.createElement("span");
-	userValue.appendChild(document.createTextNode(USER + ":"));
+	userValue.appendChild(document.createTextNode(articleComment.user + ":"));
 	user.appendChild(userValue);
 	commentValue.appendChild(user);
 	
 	var subject = document.createElement("dd");
 	var subjectValue = document.createElement("span");
-	subjectValue.appendChild(document.createTextNode(SUBJECT));
+	subjectValue.appendChild(document.createTextNode(articleComment.subject));
 	subject.appendChild(subjectValue);
 	commentValue.appendChild(subject);
 	
 	var body = document.createElement("dd");
 	var bodyValue = document.createElement("p");
-	bodyValue.appendChild(document.createTextNode(BODY));
+	bodyValue.appendChild(document.createTextNode(articleComment.comment));
 	body.appendChild(bodyValue);
 	commentValue.appendChild(body);
 	
 	var posted = document.createElement("dd");
 	var postedValue = document.createElement("span");
-	postedValue.appendChild(document.createTextNode(LABEL_POSTED + ": " + date));
+	postedValue.appendChild(document.createTextNode(LABEL_POSTED + ": " + articleComment.posted));
 	posted.appendChild(postedValue);
 	commentValue.appendChild(posted);
 	
@@ -200,6 +206,29 @@ function closeCommentsPanel() {
 	}
 	parentContainer.removeChild(commentPanel);
 	IS_COMMENT_PANEL_ADDED = false;
+}
+
+function getCommentsPeriodically(linkToComments) {
+	var t = null;
+	getComments(linkToComments, COMMENTS_LOADING_MESSAGE);
+	t = setTimeout("getCommentsPeriodically('"+linkToComments+"')", COMMENTS_TIME_OUT);
+}
+
+function getComments(linkToComments, loadingMessage) {
+	showLoadingMessage(loadingMessage);
+	CommentsEngine.getComments(linkToComments, getCommentsCallback);
+}
+
+function getCommentsCallback(comments) {
+	if (comments == null) {
+		closeLoadingMessage();
+		return;
+	}
+	removeCommentsList();
+	for (var i = 0; i < comments.length; i++) {
+		addComment(comments[i]);
+	}
+	closeLoadingMessage();
 }
 
 function createLabel(value, id, style) {
@@ -232,4 +261,37 @@ function createTableLine(cellLabel, inputId, inputType, inputValue, inputStyle) 
 	inputCell.appendChild(createInput(inputId, inputType, inputValue, inputStyle));
 	line.appendChild(inputCell);
 	return line;
+}
+
+function removeCommentsList() {
+	var counter = document.getElementById("contentItemCount");
+	if (counter != null) {
+		var children = counter.childNodes;
+		if (children != null) {
+			var countValue = counter.childNodes[0];
+			countValue.nodeValue = 0;
+		}
+	}
+	
+	var commentsList = document.getElementById("comments_block_list");
+	if (commentsList == null) {
+		return;
+	}
+	var parentContainer = commentsList.parentNode;
+	if (parentContainer == null) {
+		return;
+	}
+	parentContainer.removeChild(commentsList);
+}
+
+function setPostedLabel(postedLabel) {
+	LABEL_POSTED = postedLabel;
+}
+
+function setCommentsTimeOut(time) {
+	COMMENTS_TIME_OUT = time;
+}
+
+function setCommentsLoadingMessage(message) {
+	COMMENTS_LOADING_MESSAGE = message;
 }
