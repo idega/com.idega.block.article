@@ -1,5 +1,5 @@
 /*
- * $Id: ArticleItemViewer.java,v 1.17 2007/02/13 19:05:39 valdas Exp $
+ * $Id: ArticleItemViewer.java,v 1.18 2007/02/15 15:00:32 valdas Exp $
  *
  * Copyright (C) 2004 Idega. All Rights Reserved.
  *
@@ -29,12 +29,12 @@ import com.idega.webface.WFHtml;
 import com.idega.webface.convert.WFTimestampConverter;
 
 /**
- * Last modified: $Date: 2007/02/13 19:05:39 $ by $Author: valdas $
+ * Last modified: $Date: 2007/02/15 15:00:32 $ by $Author: valdas $
  *
  * Displays the article item
  *
  * @author <a href="mailto:gummi@idega.com">Gudmundur Agust Saemundsson</a>
- * @version $Revision: 1.17 $
+ * @version $Revision: 1.18 $
  */
 public class ArticleItemViewer extends ContentItemViewer {
 	
@@ -55,6 +55,7 @@ public class ArticleItemViewer extends ContentItemViewer {
 	private boolean showAuthor = true;
 	private boolean showCreationDate = true;
 	private boolean showComments = false;
+	private boolean showCommentsList = false;
 	
 	/**
 	 * @return Returns the cacheEnabled.
@@ -309,7 +310,7 @@ public class ArticleItemViewer extends ContentItemViewer {
 		if (!addJavaScript()) {
 			return;
 		}
-		ContentItemComments comments = new ContentItemComments(getLinkToComments());
+		ContentItemComments comments = new ContentItemComments(getLinkToComments(), isShowCommentsList());
 		comments.setId(this.getId() + "_article_comments");
 		getFacets().put(FACET_ITEM_COMMENTS, comments);
 	}
@@ -334,11 +335,20 @@ public class ArticleItemViewer extends ContentItemViewer {
 	
 	private boolean addJavaScript() {
 		Script script = new Script();
-		script.addScriptSource("/dwr/engine.js");
 		script.addScriptSource("/dwr/interface/CommentsEngine.js");
+		script.addScriptSource("/dwr/engine.js");
 		script.addScriptSource(ArticleUtil.getBundle().getResourcesPath() + "/javascript/CommentsHelper.js");
 		
 		getFacets().put(ContentItemViewer.FACET_COMMENTS_SCRIPTS, script);
 		return true;
 	}
+
+	public boolean isShowCommentsList() {
+		return showCommentsList;
+	}
+
+	public void setShowCommentsList(boolean showCommentsList) {
+		this.showCommentsList = showCommentsList;
+	}
+
 }

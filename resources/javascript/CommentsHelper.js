@@ -1,26 +1,24 @@
 var IS_COMMENT_PANEL_ADDED = false;
 
-var USER = null;
-var SUBJECT = null;
-var BODY = null;
+var USER = "";
+var SUBJECT = "";
+var BODY = "";
 
-var LABEL_USER = null;
-var LABEL_SUBJECT = null;
-var LABEL_COMMENT = null;
-var LABEL_POSTED = null;
-var LABEL_SEND = null;
-var LABEL_SENDING = null;
+var LABEL_USER = "User";
+var LABEL_SUBJECT = "Subject";
+var LABEL_COMMENT = "Comment";
+var LABEL_POSTED = "Posted";
+var LABEL_SEND = "Send";
+var LABEL_SENDING = "Sending...";
 
-var LOGGED_USER = null;
+var LOGGED_USER = "Anonymous";
 
 var COMMENT_PANEL_ID = "comment_panel";
 
-var EXISTS_COMMENTS_FILE = false;
-var FIRST_TIME_ACTIVATION = true;
-
-var LINK_TO_COMMENTS = null;
+var LINK_TO_COMMENTS = "/files";
 
 var COMMENTS_TIME_OUT = 60000; // One minute
+var COMMENTS_LOADING_MESSAGE = "Loading comments...";
 
 function setCommentValues(user, subject, body) {
 	USER = user;
@@ -28,7 +26,7 @@ function setCommentValues(user, subject, body) {
 	BODY = body;
 }
 
-function addCommentPanel(id, linkToComments, lblUser, lblSubject, lblComment, lblPosted, lblSend, lblSending, loggedUser, existsFile) {
+function addCommentPanel(id, linkToComments, lblUser, lblSubject, lblComment, lblPosted, lblSend, lblSending, loggedUser) {
 	setCommentValues("", "", "");
 	
 	LABEL_USER = lblUser;
@@ -40,10 +38,6 @@ function addCommentPanel(id, linkToComments, lblUser, lblSubject, lblComment, lb
 	LOGGED_USER = loggedUser;
 	LINK_TO_COMMENTS = linkToComments;
 	
-	if (FIRST_TIME_ACTIVATION) {
-		FIRST_TIME_ACTIVATION = false;
-		EXISTS_COMMENTS_FILE = existsFile;
-	}
 	if (IS_COMMENT_PANEL_ADDED) {
 		closeCommentsPanel();
 		return;
@@ -129,15 +123,18 @@ function closeCommentPanelAndSendComment(userId, subjectId, bodyId, linkToCommen
 	showLoadingMessage(LABEL_SENDING);
 	closeCommentsPanel();
 	setCommentValues(user.value, subject.value, body.value);
-	CommentsEngine.addComment(USER, SUBJECT, BODY, linkToComments, EXISTS_COMMENTS_FILE, addCommentCallback);
+	CommentsEngine.addComment(USER, SUBJECT, BODY, linkToComments, addCommentCallback);
 }
 
 function addCommentCallback(result) {
 	closeLoadingMessage();
 	if (result) {
-		EXISTS_COMMENTS_FILE = true;
-		getComments(LINK_TO_COMMENTS, COMMENTS_LOADING_MESSAGE);
+		CommentsEngine.getCommentsForAllPages(LINK_TO_COMMENTS, getCommentsForAllPagesCallback);
 	}
+}
+
+function getCommentsForAllPagesCallback(result) {
+	closeLoadingMessage();
 }
 
 function addComment(articleComment) {
@@ -210,12 +207,12 @@ function closeCommentsPanel() {
 
 function getCommentsPeriodically(linkToComments) {
 	var t = null;
-	getComments(linkToComments, COMMENTS_LOADING_MESSAGE);
+	getComments(linkToComments);
 	t = setTimeout("getCommentsPeriodically('"+linkToComments+"')", COMMENTS_TIME_OUT);
 }
 
-function getComments(linkToComments, loadingMessage) {
-	showLoadingMessage(loadingMessage);
+function getComments(linkToComments) {
+	showLoadingMessage(COMMENTS_LOADING_MESSAGE);
 	CommentsEngine.getComments(linkToComments, getCommentsCallback);
 }
 
@@ -294,4 +291,12 @@ function setCommentsTimeOut(time) {
 
 function setCommentsLoadingMessage(message) {
 	COMMENTS_LOADING_MESSAGE = message;
+}
+
+function showCommentsList() {
+	getComments(LINK_TO_COMMENTS);
+}
+
+function setLinkToComments(linkToComments) {
+	LINK_TO_COMMENTS = linkToComments;
 }
