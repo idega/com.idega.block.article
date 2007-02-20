@@ -7,18 +7,12 @@ var BODY = "";
 var LABEL_USER = "User";
 var LABEL_SUBJECT = "Subject";
 var LABEL_COMMENT = "Comment";
-var LABEL_POSTED = "Posted";
 var LABEL_SEND = "Send";
 var LABEL_SENDING = "Sending...";
-
 var LOGGED_USER = "Anonymous";
 
 var COMMENT_PANEL_ID = "comment_panel";
-
-var LINK_TO_COMMENTS = "/files";
-
-var COMMENTS_TIME_OUT = 60000; // One minute
-var COMMENTS_LOADING_MESSAGE = "Loading comments...";
+var COMMENTS_BLOCK_LIST_ID = "comments_block_list";
 
 function setCommentValues(user, subject, body) {
 	USER = user;
@@ -32,17 +26,17 @@ function addCommentPanel(id, linkToComments, lblUser, lblSubject, lblComment, lb
 	LABEL_USER = lblUser;
 	LABEL_SUBJECT = lblSubject;
 	LABEL_COMMENT = lblComment;
-	LABEL_POSTED = lblPosted;
+	setPostedLabel(lblPosted);
 	LABEL_SEND = lblSend;
 	LABEL_SENDING = lblSending;
 	LOGGED_USER = loggedUser;
-	LINK_TO_COMMENTS = linkToComments;
+	setLinkToComments(linkToComments);
 	
 	if (IS_COMMENT_PANEL_ADDED) {
 		closeCommentsPanel();
 		return;
 	}
-	if (id == null || LINK_TO_COMMENTS == null) {
+	if (id == null || getLinkToComments() == null) {
 		return;
 	}
 	var container = document.getElementById(id);
@@ -123,13 +117,14 @@ function closeCommentPanelAndSendComment(userId, subjectId, bodyId, linkToCommen
 	showLoadingMessage(LABEL_SENDING);
 	closeCommentsPanel();
 	setCommentValues(user.value, subject.value, body.value);
+	setShowCommentsList(true);
 	CommentsEngine.addComment(USER, SUBJECT, BODY, linkToComments, addCommentCallback);
 }
 
 function addCommentCallback(result) {
 	closeLoadingMessage();
 	if (result) {
-		CommentsEngine.getCommentsForAllPages(LINK_TO_COMMENTS, getCommentsForAllPagesCallback);
+		CommentsEngine.getCommentsForAllPages(getLinkToComments(), getCommentsForAllPagesCallback);
 	}
 }
 
@@ -153,10 +148,10 @@ function addComment(articleComment) {
 	if (commentsContainer == null) {
 		return;
 	}
-	var commentsList = document.getElementById("comments_block_list");
+	var commentsList = document.getElementById(COMMENTS_BLOCK_LIST_ID);
 	if (commentsList == null) {
 		commentsList = document.createElement("ol");
-		commentsList.setAttribute("id", "comments_block_list");
+		commentsList.setAttribute("id", COMMENTS_BLOCK_LIST_ID);
 		commentsContainer.appendChild(commentsList);
 	}
 	
@@ -184,7 +179,7 @@ function addComment(articleComment) {
 	
 	var posted = document.createElement("dd");
 	var postedValue = document.createElement("span");
-	postedValue.appendChild(document.createTextNode(LABEL_POSTED + ": " + articleComment.posted));
+	postedValue.appendChild(document.createTextNode(getPostedLabel() + ": " + articleComment.posted));
 	posted.appendChild(postedValue);
 	commentValue.appendChild(posted);
 	
@@ -205,14 +200,8 @@ function closeCommentsPanel() {
 	IS_COMMENT_PANEL_ADDED = false;
 }
 
-function getCommentsPeriodically(linkToComments) {
-	var t = null;
-	getComments(linkToComments);
-	t = setTimeout("getCommentsPeriodically('"+linkToComments+"')", COMMENTS_TIME_OUT);
-}
-
 function getComments(linkToComments) {
-	showLoadingMessage(COMMENTS_LOADING_MESSAGE);
+	showLoadingMessage(getCommentsLoadingMessage());
 	CommentsEngine.getComments(linkToComments, getCommentsCallback);
 }
 
@@ -224,6 +213,18 @@ function getCommentsCallback(comments) {
 	removeCommentsList();
 	for (var i = 0; i < comments.length; i++) {
 		addComment(comments[i]);
+	}
+	if (isShowCommentsList()) {
+		var list = document.getElementById(COMMENTS_BLOCK_LIST_ID);
+		if (list != null) {
+			list.style.display = "block";
+		}
+	}
+	else {
+		var list = document.getElementById(COMMENTS_BLOCK_LIST_ID);
+		if (list != null) {
+			list.style.display = "none";
+		}
 	}
 	closeLoadingMessage();
 }
@@ -270,7 +271,7 @@ function removeCommentsList() {
 		}
 	}
 	
-	var commentsList = document.getElementById("comments_block_list");
+	var commentsList = document.getElementById(COMMENTS_BLOCK_LIST_ID);
 	if (commentsList == null) {
 		return;
 	}
@@ -281,22 +282,6 @@ function removeCommentsList() {
 	parentContainer.removeChild(commentsList);
 }
 
-function setPostedLabel(postedLabel) {
-	LABEL_POSTED = postedLabel;
-}
-
-function setCommentsTimeOut(time) {
-	COMMENTS_TIME_OUT = time;
-}
-
-function setCommentsLoadingMessage(message) {
-	COMMENTS_LOADING_MESSAGE = message;
-}
-
 function showCommentsList() {
-	getComments(LINK_TO_COMMENTS);
-}
-
-function setLinkToComments(linkToComments) {
-	LINK_TO_COMMENTS = linkToComments;
+	getComments(getLinkToComments());
 }
