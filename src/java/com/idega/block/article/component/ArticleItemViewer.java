@@ -1,5 +1,5 @@
 /*
- * $Id: ArticleItemViewer.java,v 1.19 2007/02/20 11:33:11 valdas Exp $
+ * $Id: ArticleItemViewer.java,v 1.20 2007/02/22 15:37:20 valdas Exp $
  *
  * Copyright (C) 2004 Idega. All Rights Reserved.
  *
@@ -29,12 +29,12 @@ import com.idega.webface.WFHtml;
 import com.idega.webface.convert.WFTimestampConverter;
 
 /**
- * Last modified: $Date: 2007/02/20 11:33:11 $ by $Author: valdas $
+ * Last modified: $Date: 2007/02/22 15:37:20 $ by $Author: valdas $
  *
  * Displays the article item
  *
  * @author <a href="mailto:gummi@idega.com">Gudmundur Agust Saemundsson</a>
- * @version $Revision: 1.19 $
+ * @version $Revision: 1.20 $
  */
 public class ArticleItemViewer extends ContentItemViewer {
 	
@@ -56,6 +56,7 @@ public class ArticleItemViewer extends ContentItemViewer {
 	private boolean showCreationDate = true;
 	private boolean showComments = false;
 	private boolean showCommentsList = false;
+	private boolean isForumPage = false;
 	
 	/**
 	 * @return Returns the cacheEnabled.
@@ -309,7 +310,7 @@ public class ArticleItemViewer extends ContentItemViewer {
 		if (!addJavaScript()) {
 			return;
 		}
-		ContentItemComments comments = new ContentItemComments(getLinkToComments(), isShowCommentsList());
+		ContentItemComments comments = new ContentItemComments(getLinkToComments(), isShowCommentsList(), isForumPage());
 		comments.setId(this.getId() + "_article_comments");
 		getFacets().put(FACET_ITEM_COMMENTS, comments);
 	}
@@ -345,6 +346,14 @@ public class ArticleItemViewer extends ContentItemViewer {
 
 	public void setShowCommentsList(boolean showCommentsList) {
 		this.showCommentsList = showCommentsList;
+	}
+
+	public boolean isForumPage() {
+		return isForumPage;
+	}
+
+	public void setForumPage(boolean isForumPage) {
+		this.isForumPage = isForumPage;
 	}
 
 }

@@ -78,3 +78,80 @@ div.ws_main div.wf_block ul li .article_bar_block_t_list{
 div.ws_main div.wf_block ul li .article_bar_block_t_preview{
 	background-image: url(images/srch_16.gif);
 }
+
+.comment_fieldset {
+	border-style:solid;
+	border-width:1px;
+	margin:20px 0pt 10px;
+	padding:10px 15px;
+	border-color:#ABABAB;
+}
+
+.comment_legend {
+	font-weight:bold;
+	margin:0pt 5px;
+	border-color:#ABABAB;
+	color:#444444;
+}
+
+.comment_input_style {
+	border-style:solid;
+	border-width:1px;
+	width:100%;
+	border-color:#ABABAB;
+}
+
+.comment_comment_style {
+	border-style:solid;
+	border-width:1px;
+	width:100%;
+	border-color:#ABABAB;
+}
+
+.add_comment_table {
+	width:100%;
+}
+
+.add_comment_table td {
+	width:auto;
+}
+
+.add_comment_table td[colspan="2"] {
+	text-align:right;
+}
+
+.send_comment_button {
+	border:1px solid #ABABAB;
+	color:#444444;
+	font-family:inherit;
+	font-size:1.1em;
+	text-align:justify;
+	font-weight:bold;
+}
+
+.comments_table_cell {
+	color:#444444;
+	text-align:left;
+	font-weight:bold;
+}
+
+.comment_author_text {
+	font-weight:bold;
+	color:#222222;
+}
+
+.comment_list_item {
+	margin-top:5px;
+	border-style:solid;
+	border-width:1px;
+	border-color:#ABABAB;
+	list-style-position:inside;
+}
+
+.commens_list_all_items {
+	border-style:solid;
+	border-width:1px;
+	margin-left:0pt;
+	padding:10px;
+	border-color:#ABABAB;
+}

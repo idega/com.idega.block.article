@@ -1,7 +1,11 @@
 var IS_COMMENT_PANEL_ADDED = false;
+var SHOW_COMMENTS_LIST = false;
+var SET_REVERSE_AJAX = false;
+var NEED_TO_CHECK_COMMENTS_SIZE = true;
 
 var USER = "";
 var SUBJECT = "";
+var EMAIL = "";
 var BODY = "";
 
 var LABEL_USER = "User";
@@ -10,18 +14,23 @@ var LABEL_COMMENT = "Comment";
 var LABEL_SEND = "Send";
 var LABEL_SENDING = "Sending...";
 var LOGGED_USER = "Anonymous";
+var LABEL_EMAIL = "E-mail";
+var LABEL_COMMENT_FORM = "Comment form";
 
 var COMMENT_PANEL_ID = "comment_panel";
 var COMMENTS_BLOCK_LIST_ID = "comments_block_list";
 
-function setCommentValues(user, subject, body) {
+function setCommentValues(user, subject, email, body) {
 	USER = user;
 	SUBJECT = subject;
+	EMAIL = email;
 	BODY = body;
 }
 
-function addCommentPanel(id, linkToComments, lblUser, lblSubject, lblComment, lblPosted, lblSend, lblSending, loggedUser) {
-	setCommentValues("", "", "");
+function addCommentPanel(id, linkToComments, lblUser, lblSubject, lblComment, lblPosted, lblSend, lblSending, loggedUser, lblEmail,
+	lblCommentForm, addEmail) {
+	enableReverseAjax();
+	setCommentValues("", "", "", "");
 	
 	LABEL_USER = lblUser;
 	LABEL_SUBJECT = lblSubject;
@@ -31,6 +40,8 @@ function addCommentPanel(id, linkToComments, lblUser, lblSubject, lblComment, lb
 	LABEL_SENDING = lblSending;
 	LOGGED_USER = loggedUser;
 	setLinkToComments(linkToComments);
+	LABEL_EMAIL = lblEmail;
+	LABEL_COMMENT_FORM = lblCommentForm;
 	
 	if (IS_COMMENT_PANEL_ADDED) {
 		closeCommentsPanel();
@@ -43,62 +54,80 @@ function addCommentPanel(id, linkToComments, lblUser, lblSubject, lblComment, lb
 	if (container == null) {
 		return;
 	}
-	container.appendChild(getCommentPane(linkToComments));
+	container.appendChild(getCommentPane(linkToComments, addEmail));
 }
 
-function getCommentPane(linkToComments) {
+function getCommentPane(linkToComments, addEmail) {
 	var userId = "comment_user_value";
 	var subjectId = "comment_subject_value";
+	var emailId = "comment_email_value";
 	var bodyId = "comment_comment_value";
 	
 	var container = document.createElement("div");
 	container.setAttribute("id", COMMENT_PANEL_ID);
+	
+	var fieldset = document.createElement("fieldset");
+	fieldset.setAttribute("class", "comment_fieldset");
+	container.appendChild(fieldset);
+	
+	var legend = document.createElement("legend");
+	legend.setAttribute("class", "comment_legend");
+	legend.appendChild(document.createTextNode("Comment form"));
+	fieldset.appendChild(legend);
 	
 	var table = document.createElement("table");
 	table.setAttribute("class", "add_comment_table");
 	var tbBody = document.createElement("tbody");
 	
 	// User
-	tbBody.appendChild(createTableLine(LABEL_USER + ": ", userId, "text", LOGGED_USER, "comment_input_style"));
+	tbBody.appendChild(createTableLine(LABEL_USER + ":", userId, "text", LOGGED_USER, "comment_input_style"));
 
 	// Subject
-	tbBody.appendChild(createTableLine(LABEL_SUBJECT + ": ", subjectId, "text", "", "comment_input_style"));
+	tbBody.appendChild(createTableLine(LABEL_SUBJECT + ":", subjectId, "text", "", "comment_input_style"));
+	
+	//Email
+	if (addEmail) {
+		tbBody.appendChild(createTableLine(LABEL_EMAIL + ":", emailId, "text", "", "comment_input_style"));
+	}
 	
 	// Comment
 	var bodyLine = document.createElement("tr");
 	var bodyLabel = document.createElement("td");
-	bodyLabel.appendChild(document.createTextNode(LABEL_COMMENT + ": "));
+	bodyLabel.setAttribute("class", "comments_table_cell");
+	bodyLabel.appendChild(document.createTextNode(LABEL_COMMENT + ":"));
 	bodyLine.appendChild(bodyLabel);
 	var bodyInput = document.createElement("td");
 	var bodyValue = document.createElement("textarea");
 	bodyValue.setAttribute("id", bodyId);
-	bodyValue.setAttribute("style", "comment_comment_style");
+	bodyValue.setAttribute("class", "comment_comment_style");
+	bodyValue.setAttribute("rows", "10");
+	bodyValue.setAttribute("cols", "40");
 	bodyInput.appendChild(bodyValue);
 	bodyLine.appendChild(bodyInput);
 	tbBody.appendChild(bodyLine);
 	
 	// Send button
 	var sendLine = document.createElement("tr");
-	sendLine.setAttribute("cells", "2");
 	var sendCell = document.createElement("td");
+	sendCell.setAttribute("colspan", "2");
 	var send = createInput("send_comment", "button", LABEL_SEND, "send_comment_button");
 	if (typeof container.attachEvent != "undefined") {
-		send.attachEvent('onclick', function(e){closeCommentPanelAndSendComment(userId, subjectId, bodyId, linkToComments);});
+		send.attachEvent('onclick', function(e){closeCommentPanelAndSendComment(userId, subjectId, emailId, bodyId, linkToComments);});
 	} else {
-		send.addEventListener('click', function(e){closeCommentPanelAndSendComment(userId, subjectId, bodyId, linkToComments);},false);
+		send.addEventListener('click', function(e){closeCommentPanelAndSendComment(userId, subjectId, emailId, bodyId, linkToComments);},false);
 	}
 	sendCell.appendChild(send);
 	sendLine.appendChild(sendCell);
 	tbBody.appendChild(sendLine);
 	
 	table.appendChild(tbBody);
-	container.appendChild(table);
+	fieldset.appendChild(table);
 	
 	IS_COMMENT_PANEL_ADDED = true;
 	return container;
 }
 
-function closeCommentPanelAndSendComment(userId, subjectId, bodyId, linkToComments) {
+function closeCommentPanelAndSendComment(userId, subjectId, emailId, bodyId, linkToComments) {
 	if (userId == null || subjectId == null || bodyId == null || linkToComments == null) {
 		return;
 	}
@@ -110,20 +139,25 @@ function closeCommentPanelAndSendComment(userId, subjectId, bodyId, linkToCommen
 	if (subject == null) {
 		return;
 	}
+	var emailValue = "";
+	var email = document.getElementById(emailId);
+	if (email != null) {
+		emailValue = email.value;
+	}
 	var body = document.getElementById(bodyId);
 	if (body == null) {
 		return;
 	}
 	showLoadingMessage(LABEL_SENDING);
 	closeCommentsPanel();
-	setCommentValues(user.value, subject.value, body.value);
-	setShowCommentsList(true);
-	CommentsEngine.addComment(USER, SUBJECT, BODY, linkToComments, addCommentCallback);
+	setCommentValues(user.value, subject.value, emailValue, body.value);
+	CommentsEngine.addComment(USER, SUBJECT, EMAIL, BODY, linkToComments, addCommentCallback);
 }
 
 function addCommentCallback(result) {
 	closeLoadingMessage();
 	if (result) {
+		addAtomButtonForComments();
 		CommentsEngine.getCommentsForAllPages(getLinkToComments(), getCommentsForAllPagesCallback);
 	}
 }
@@ -153,20 +187,32 @@ function addComment(articleComment) {
 		commentsList = document.createElement("ol");
 		commentsList.setAttribute("id", COMMENTS_BLOCK_LIST_ID);
 		commentsContainer.appendChild(commentsList);
+		if (SHOW_COMMENTS_LIST) {
+			showCommentsList();
+		}
+		else {
+			hideCommentsList();
+		}
 	}
+	commentsList.setAttribute("class", "commens_list_all_items");
 	
 	var commentContainer = document.createElement("li");
+	commentContainer.setAttribute("class", "comment_list_item");
 	commentContainer.setAttribute("id", "cmnt_" + commentIndex);
+	if (commentIndex == 1) {
+		commentContainer.setAttribute("style", "margin: 0px;");
+	}
 	var commentValue = document.createElement("dl");
 	
 	var user = document.createElement("dt");
-	var userValue = document.createElement("span");
+	var userValue = document.createElement("p");
+	userValue.setAttribute("class", "comment_author_text");
 	userValue.appendChild(document.createTextNode(articleComment.user + ":"));
 	user.appendChild(userValue);
 	commentValue.appendChild(user);
 	
 	var subject = document.createElement("dd");
-	var subjectValue = document.createElement("span");
+	var subjectValue = document.createElement("p");
 	subjectValue.appendChild(document.createTextNode(articleComment.subject));
 	subject.appendChild(subjectValue);
 	commentValue.appendChild(subject);
@@ -178,7 +224,7 @@ function addComment(articleComment) {
 	commentValue.appendChild(body);
 	
 	var posted = document.createElement("dd");
-	var postedValue = document.createElement("span");
+	var postedValue = document.createElement("p");
 	postedValue.appendChild(document.createTextNode(getPostedLabel() + ": " + articleComment.posted));
 	posted.appendChild(postedValue);
 	commentValue.appendChild(posted);
@@ -198,6 +244,7 @@ function closeCommentsPanel() {
 	}
 	parentContainer.removeChild(commentPanel);
 	IS_COMMENT_PANEL_ADDED = false;
+	NEED_TO_CHECK_COMMENTS_SIZE = false;
 }
 
 function getComments(linkToComments) {
@@ -213,18 +260,6 @@ function getCommentsCallback(comments) {
 	removeCommentsList();
 	for (var i = 0; i < comments.length; i++) {
 		addComment(comments[i]);
-	}
-	if (isShowCommentsList()) {
-		var list = document.getElementById(COMMENTS_BLOCK_LIST_ID);
-		if (list != null) {
-			list.style.display = "block";
-		}
-	}
-	else {
-		var list = document.getElementById(COMMENTS_BLOCK_LIST_ID);
-		if (list != null) {
-			list.style.display = "none";
-		}
 	}
 	closeLoadingMessage();
 }
@@ -253,6 +288,7 @@ function createInput(id, type, value, style) {
 function createTableLine(cellLabel, inputId, inputType, inputValue, inputStyle) {
 	var line = document.createElement("tr");
 	var labelCell = document.createElement("td");
+	labelCell.setAttribute("class", "comments_table_cell");
 	labelCell.appendChild(document.createTextNode(cellLabel));
 	line.appendChild(labelCell);
 	var inputCell = document.createElement("td");
@@ -282,6 +318,61 @@ function removeCommentsList() {
 	parentContainer.removeChild(commentsList);
 }
 
+function hideCommentsList() {
+	var list = document.getElementById(COMMENTS_BLOCK_LIST_ID);
+	if (list != null) {
+		list.style.display = "none";
+	}
+}
+
 function showCommentsList() {
-	getComments(getLinkToComments());
+	var list = document.getElementById(COMMENTS_BLOCK_LIST_ID);
+	if (list != null) {
+		list.style.display = "block";
+	}
+}
+
+function enableReverseAjax() {
+	if (!SET_REVERSE_AJAX) {
+		SET_REVERSE_AJAX = true;
+		DWREngine.setActiveReverseAjax(true);
+	}
+}
+
+function getCommentsList() {
+	enableReverseAjax();
+	if (SHOW_COMMENTS_LIST) {
+		SHOW_COMMENTS_LIST = false;
+		hideCommentsList();
+	}
+	else {
+		SHOW_COMMENTS_LIST = true;
+		getComments(getLinkToComments());
+	}
+}
+
+function getCommentsSize() {
+	if (NEED_TO_CHECK_COMMENTS_SIZE) {
+		CommentsEngine.getCommentsCount(getLinkToComments(), getCommentsCountCallback);
+	}
+}
+
+function getCommentsCountCallback(count) {
+	if (count > 0) {
+		addAtomButtonForComments();
+	}
+	setCommentsCount(count);
+}
+
+function setCommentsCount(count) {
+	var counter = document.getElementById("contentItemCount");
+	if (counter == null) {
+		return;
+	}
+	var children = counter.childNodes;
+	if (children == null) {
+		return;
+	}
+	counter.removeChild(counter.childNodes[0]);
+	counter.appendChild(document.createTextNode(count));
 }

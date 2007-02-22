@@ -1,5 +1,5 @@
 /*
- * $Id: EditArticleView.java,v 1.26 2007/02/07 20:44:39 valdas Exp $
+ * $Id: EditArticleView.java,v 1.27 2007/02/22 15:37:20 valdas Exp $
  *
  * Copyright (C) 2004 Idega. All Rights Reserved.
  *
@@ -58,10 +58,10 @@ import com.idega.webface.htmlarea.HTMLArea;
  * <p>
  * This is the part for the editor of article is inside the admin interface
  * </p>
- * Last modified: $Date: 2007/02/07 20:44:39 $ by $Author: valdas $
+ * Last modified: $Date: 2007/02/22 15:37:20 $ by $Author: valdas $
  *
  * @author Joakim,Tryggvi Larusson
- * @version $Revision: 1.26 $
+ * @version $Revision: 1.27 $
  */
 public class EditArticleView extends IWBaseComponent implements ManagedContentBeans, ActionListener, ValueChangeListener {
 	public final static String EDIT_ARTICLE_BLOCK_ID = "edit_article_view";
@@ -86,6 +86,7 @@ public class EditArticleView extends IWBaseComponent implements ManagedContentBe
 	private final static String AUTHOR_ID = P + "author";
 	private final static String SOURCE_ID = P + "source";
 	private final static String COMMENT_ID = P + "comment";
+	private final static String PUBLISHED_DATE_ID = P + "published_date";
 //	private final static String PUBLISHED_FROM_DATE_ID = P + "published_from_date";
 //	private final static String PUBLISHED_TO_DATE_ID = P + "published_to_date";
 	
@@ -387,10 +388,29 @@ public class EditArticleView extends IWBaseComponent implements ManagedContentBe
 //		contentItemContainer.add(getRelatedContentItemsList());
 //		p.getChildren().add(contentItemContainer);
 		//p.getChildren().add(WFUtil.group(WFUtil.getTextVB(bref + "publishing_date"), WFUtil.getText(":")));
-		mainContainer.add(WFUtil.group(WFUtil.getTextVB(bref + "publishing_date"), WFUtil.getText(":")));
-		WFDateInput publishedInput = WFUtil.getDateInput("PUBLISHED_ARTICLE_DATE", ref + "publishedDate");
+		
+		// Published date
+		WFDateInput publishedInput = WFUtil.getDateInput(PUBLISHED_DATE_ID, ref + "publishedDate");
 		publishedInput.setShowTime(true);
-		mainContainer.add(publishedInput);
+		UIComponent publishedText = WFUtil.group(localizer.getTextVB("publishing_date"), WFUtil.getText(":"));
+		HtmlOutputLabel publishedLabel = new HtmlOutputLabel();
+		publishedLabel.getChildren().add(publishedText);
+		WFFormItem publisheDateItem = new WFFormItem();
+		publisheDateItem.add(publishedLabel);
+		publisheDateItem.add(publishedInput);
+		mainContainer.add(publisheDateItem);
+		
+		/*WFDateInput publishedInput = WFUtil.getDateInput(PUBLISHED_DATE_ID, ref + "publishedDate");
+		publishedInput.setShowTime(true);
+		
+		UIComponent publishedText = WFUtil.group(WFUtil.getTextVB(bref + "publishing_date"), WFUtil.getText(":"));
+		HtmlOutputLabel publishedLabel = new HtmlOutputLabel();
+		publishedLabel.getChildren().add(publishedText);
+		//publishedLabel.setFor(publishedInput.getClientId(context));
+		mainContainer.add(publishedLabel);
+		mainContainer.add(publishedInput);*/
+		//mainContainer.add(WFUtil.group(WFUtil.getTextVB(bref + "publishing_date"), WFUtil.getText(":")));
+		
 //		WFDateInput publishedFromInput = WFUtil.getDateInput(PUBLISHED_FROM_DATE_ID, ref + "case.publishedFromDate");
 //		publishedFromInput.setShowTime(true);
 //		mainContainer.add(publishedFromInput);
