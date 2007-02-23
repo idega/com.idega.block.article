@@ -1,5 +1,5 @@
 /*
- * $Id: ArticleDetailView.java,v 1.23 2006/04/09 12:32:00 laddi Exp $
+ * $Id: ArticleDetailView.java,v 1.24 2007/02/23 14:28:46 gediminas Exp $
  * 
  * Copyright (C) 2004 Idega. All Rights Reserved.
  * 
@@ -23,12 +23,12 @@ import com.idega.webface.WFResourceUtil;
 import com.idega.webface.WFUtil;
 
 /**
- * Last modified: $Date: 2006/04/09 12:32:00 $ by $Author: laddi $
+ * Last modified: $Date: 2007/02/23 14:28:46 $ by $Author: gediminas $
  * 
  * Displays detailed info about the article
  * 
  * @author Joakim
- * @version $Revision: 1.23 $
+ * @version $Revision: 1.24 $
  */
 public class ArticleDetailView extends IWBaseComponent implements ManagedContentBeans {
 
@@ -178,8 +178,6 @@ public class ArticleDetailView extends IWBaseComponent implements ManagedContent
 			}
 		}
 		else {
-			componentSelector.setSelectedId(NO_ARTICLE_ID, false);
-			componentSelector.setSelectedId(ARTICLE_LIST_ID, true);
 			System.out.println("Could not find the Component selector!!!");
 		}
 	}
