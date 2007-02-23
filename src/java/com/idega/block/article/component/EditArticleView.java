@@ -1,5 +1,5 @@
 /*
- * $Id: EditArticleView.java,v 1.27 2007/02/22 15:37:20 valdas Exp $
+ * $Id: EditArticleView.java,v 1.28 2007/02/23 14:35:44 gediminas Exp $
  *
  * Copyright (C) 2004 Idega. All Rights Reserved.
  *
@@ -29,6 +29,8 @@ import javax.faces.event.ActionListener;
 import javax.faces.event.ValueChangeEvent;
 import javax.faces.event.ValueChangeListener;
 import javax.faces.model.SelectItem;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import com.idega.block.article.bean.ArticleItemBean;
 import com.idega.block.article.bean.ArticleStoreException;
 import com.idega.block.article.business.ArticleConstants;
@@ -58,12 +60,14 @@ import com.idega.webface.htmlarea.HTMLArea;
  * <p>
  * This is the part for the editor of article is inside the admin interface
  * </p>
- * Last modified: $Date: 2007/02/22 15:37:20 $ by $Author: valdas $
+ * Last modified: $Date: 2007/02/23 14:35:44 $ by $Author: gediminas $
  *
  * @author Joakim,Tryggvi Larusson
- * @version $Revision: 1.27 $
+ * @version $Revision: 1.28 $
  */
 public class EditArticleView extends IWBaseComponent implements ManagedContentBeans, ActionListener, ValueChangeListener {
+	private static final Log log = LogFactory.getLog(EditArticleView.class);
+	
 	public final static String EDIT_ARTICLE_BLOCK_ID = "edit_article_view";
 	private final static String P = EDIT_ARTICLE_BLOCK_ID+"_"; // Id prefix
 	
@@ -205,7 +209,6 @@ public class EditArticleView extends IWBaseComponent implements ManagedContentBe
 		FacesContext context = FacesContext.getCurrentInstance();
 		IWContext iwc = IWContext.getIWContext(context);
 		WFResourceUtil localizer = WFResourceUtil.getResourceUtilArticle();
-		String bref = WFPage.CONTENT_BUNDLE + ".";
 
 		WFContainer mainContainer = getMainContainer();
 		
@@ -387,7 +390,6 @@ public class EditArticleView extends IWBaseComponent implements ManagedContentBe
 //		contentItemContainer.add(WFUtil.getBreak());
 //		contentItemContainer.add(getRelatedContentItemsList());
 //		p.getChildren().add(contentItemContainer);
-		//p.getChildren().add(WFUtil.group(WFUtil.getTextVB(bref + "publishing_date"), WFUtil.getText(":")));
 		
 		// Published date
 		WFDateInput publishedInput = WFUtil.getDateInput(PUBLISHED_DATE_ID, ref + "publishedDate");
@@ -395,21 +397,12 @@ public class EditArticleView extends IWBaseComponent implements ManagedContentBe
 		UIComponent publishedText = WFUtil.group(localizer.getTextVB("publishing_date"), WFUtil.getText(":"));
 		HtmlOutputLabel publishedLabel = new HtmlOutputLabel();
 		publishedLabel.getChildren().add(publishedText);
+		publishedLabel.setFor(publishedInput.getClientId(context));
+
 		WFFormItem publisheDateItem = new WFFormItem();
 		publisheDateItem.add(publishedLabel);
 		publisheDateItem.add(publishedInput);
 		mainContainer.add(publisheDateItem);
-		
-		/*WFDateInput publishedInput = WFUtil.getDateInput(PUBLISHED_DATE_ID, ref + "publishedDate");
-		publishedInput.setShowTime(true);
-		
-		UIComponent publishedText = WFUtil.group(WFUtil.getTextVB(bref + "publishing_date"), WFUtil.getText(":"));
-		HtmlOutputLabel publishedLabel = new HtmlOutputLabel();
-		publishedLabel.getChildren().add(publishedText);
-		//publishedLabel.setFor(publishedInput.getClientId(context));
-		mainContainer.add(publishedLabel);
-		mainContainer.add(publishedInput);*/
-		//mainContainer.add(WFUtil.group(WFUtil.getTextVB(bref + "publishing_date"), WFUtil.getText(":")));
 		
 //		WFDateInput publishedFromInput = WFUtil.getDateInput(PUBLISHED_FROM_DATE_ID, ref + "case.publishedFromDate");
 //		publishedFromInput.setShowTime(true);
@@ -603,21 +596,24 @@ public class EditArticleView extends IWBaseComponent implements ManagedContentBe
 	 */
 	public void processAction(ActionEvent event) {
 		String id = event.getComponent().getId();
-		UIComponent rootParent = event.getComponent().getParent().getParent().getParent();
-		EditArticleView editArticle = (EditArticleView) rootParent.findComponent(EDIT_ARTICLE_BLOCK_ID);
+		UIComponent comp = event.getComponent();
+		EditArticleView editArticle = (EditArticleView) comp.findComponent(EDIT_ARTICLE_BLOCK_ID);
 		if (id.equals(SAVE_ID)) {
 			//We have the save button pressed
 			boolean saveSuccessful = false;
-			WebDAVCategories categoriesUI = (WebDAVCategories) editArticle.getCategoryEditor();
+			WebDAVCategories categoriesUI = (WebDAVCategories) editArticle.findComponent(CATEGORY_EDITOR_ID);
 			ArticleItemBean articleItemBean = getArticleItemBean();
 			if (categoriesUI != null) {
-				categoriesUI.setResourcePath(articleItemBean.getLocalizedArticle().getResourcePath());
-				articleItemBean.setArticleCategories(WebDAVCategories.getEnabledCategories(categoriesUI));
+				articleItemBean.setArticleCategories(categoriesUI.getEnabledCategories());
+			}
+			else {
+				log.warn("categoriesUI == null");
 			}
 			saveSuccessful = editArticle.storeArticle();
 			if (saveSuccessful) {
 				if (categoriesUI != null) {
 					try {
+						categoriesUI.setResourcePath(articleItemBean.getLocalizedArticle().getResourcePath());
 						categoriesUI.saveCategoriesSettings();
 					} catch (RuntimeException re) {
 						re.printStackTrace();
@@ -697,7 +693,7 @@ public class EditArticleView extends IWBaseComponent implements ManagedContentBe
 			setMessageMode();
 		}
 		else{
-			System.out.println("AtricleBlock: t==null: Message out: "+bref + ref);
+			log.info("user_message component is null. Message out: "+bref + ref);
 		}
 	}
 	
@@ -894,7 +890,7 @@ public class EditArticleView extends IWBaseComponent implements ManagedContentBe
 				return;
 			}
 			
-			System.out.println("Language value has changed from "+event.getOldValue()+" to "+event.getNewValue());
+			log.debug("Language value has changed from "+event.getOldValue()+" to "+event.getNewValue());
 			
 			ArticleItemBean bean = getArticleItemBean();
 			//String articlePath = (String)WFUtil.invoke(ARTICLE_ITEM_BEAN_ID, "getArticlePath");
@@ -905,7 +901,7 @@ public class EditArticleView extends IWBaseComponent implements ManagedContentBe
 				//Article has not been stored previously, so nothing has to be done
 				return;
 			}
-			System.out.println("processValueChange: Article path: "+articlePath);
+			log.info("Article path: "+articlePath);
 			//boolean result = ((Boolean)WFUtil.invoke(ARTICLE_ITEM_BEAN_ID, "load",articlePath+"/"+arg0.getNewValue()+ArticleItemBean.ARTICLE_SUFFIX)).booleanValue();
 			//System.out.println("loading other language "+result);
 			//if(result) {
@@ -914,7 +910,7 @@ public class EditArticleView extends IWBaseComponent implements ManagedContentBe
 			bean.setLanguageChange(langChange);
 			Locale locale = new Locale(langChange);
 			bean.setLocale(locale);
-			System.out.println("processValueChange: changint to other language "+langChange);
+			log.info("Changed to other language "+langChange);
 		}
 		else if(event.getComponent().getId().equals(BODY_ID)){
 			String newBodyValue = event.getNewValue().toString();
