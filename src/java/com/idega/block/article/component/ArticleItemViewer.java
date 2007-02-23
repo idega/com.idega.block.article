@@ -1,5 +1,5 @@
 /*
- * $Id: ArticleItemViewer.java,v 1.20 2007/02/22 15:37:20 valdas Exp $
+ * $Id: ArticleItemViewer.java,v 1.21 2007/02/23 17:25:52 valdas Exp $
  *
  * Copyright (C) 2004 Idega. All Rights Reserved.
  *
@@ -29,12 +29,12 @@ import com.idega.webface.WFHtml;
 import com.idega.webface.convert.WFTimestampConverter;
 
 /**
- * Last modified: $Date: 2007/02/22 15:37:20 $ by $Author: valdas $
+ * Last modified: $Date: 2007/02/23 17:25:52 $ by $Author: valdas $
  *
  * Displays the article item
  *
  * @author <a href="mailto:gummi@idega.com">Gudmundur Agust Saemundsson</a>
- * @version $Revision: 1.20 $
+ * @version $Revision: 1.21 $
  */
 public class ArticleItemViewer extends ContentItemViewer {
 	
@@ -128,7 +128,7 @@ public class ArticleItemViewer extends ContentItemViewer {
 			}
 		}
 		initializeToolbar();
-		initializeComments();
+		initializeComments(context);
 		if (isShowCreationDate()) {
 			((HtmlOutputText)getFieldViewerComponent(ATTRIBUTE_CREATION_DATE)).setConverter(new WFTimestampConverter());
 		}
@@ -302,15 +302,17 @@ public class ArticleItemViewer extends ContentItemViewer {
 		this.showComments = showComments;
 	}
 	
-	protected void initializeComments() {
+	protected void initializeComments(FacesContext context) {
 		if (!isShowComments()) {
 			return;
 		}
-		super.initializeComments();
+		super.initializeComments(context);
 		if (!addJavaScript()) {
 			return;
 		}
-		ContentItemComments comments = new ContentItemComments(getLinkToComments(), isShowCommentsList(), isForumPage());
+		UIComponentCacher cacher = UIComponentCacher.getDefaultCacher(context);
+		ContentItemComments comments = new ContentItemComments(cacher.getCacheKey(this, context), getLinkToComments(),
+				isShowCommentsList(), /*isForumPage()*/ true);
 		comments.setId(this.getId() + "_article_comments");
 		getFacets().put(FACET_ITEM_COMMENTS, comments);
 	}

@@ -2,6 +2,7 @@ var IS_COMMENT_PANEL_ADDED = false;
 var SHOW_COMMENTS_LIST = false;
 var SET_REVERSE_AJAX = false;
 var NEED_TO_CHECK_COMMENTS_SIZE = true;
+var NEED_TO_NOTIFY = false;
 
 var USER = "";
 var SUBJECT = "";
@@ -62,6 +63,7 @@ function getCommentPane(linkToComments, addEmail) {
 	var subjectId = "comment_subject_value";
 	var emailId = "comment_email_value";
 	var bodyId = "comment_comment_value";
+	var secretInputId= "secretCommentsInput";
 	
 	var container = document.createElement("div");
 	container.setAttribute("id", COMMENT_PANEL_ID);
@@ -78,6 +80,13 @@ function getCommentPane(linkToComments, addEmail) {
 	var table = document.createElement("table");
 	table.setAttribute("class", "add_comment_table");
 	var tbBody = document.createElement("tbody");
+	
+	var secretInput = document.createElement("input");
+	secretInput.setAttribute("id", secretInputId);
+	secretInput.setAttribute("class", "secretCommentsInputStyle");
+	secretInput.setAttribute("value", "");
+	secretInput.setAttribute("type", "text");
+	fieldset.appendChild(secretInput);
 	
 	// User
 	tbBody.appendChild(createTableLine(LABEL_USER + ":", userId, "text", LOGGED_USER, "comment_input_style"));
@@ -106,15 +115,64 @@ function getCommentPane(linkToComments, addEmail) {
 	bodyLine.appendChild(bodyInput);
 	tbBody.appendChild(bodyLine);
 	
+	if (addEmail) {
+		NEED_TO_NOTIFY = false;
+		
+		var notifyLine = document.createElement("tr");
+		var notifyCell = document.createElement("td");
+		notifyCell.setAttribute("colspan", "2");
+		
+		var text = document.createElement("p");
+		text.appendChild(document.createTextNode(getAddNotificationText()));
+		text.appendChild(document.createElement("br"));
+
+		var sendNotification = document.createElement("input");
+		sendNotification.setAttribute("id", "comments_send_notifications");
+		sendNotification.setAttribute("type", "radio");
+		sendNotification.setAttribute("name", "comments_confirm_want_notifications");
+		if (typeof container.attachEvent != "undefined") {
+			sendNotification.attachEvent('onclick', function(e){setNeedToNotify(this);});
+		} else {
+			sendNotification.addEventListener('click', function(e){setNeedToNotify(this);},false);
+		}
+		text.appendChild(sendNotification);
+		
+		var sendNotificationLabel = document.createElement("label");
+		sendNotificationLabel.setAttribute("for", "comments_send_notifications");
+		sendNotificationLabel.appendChild(document.createTextNode(getYesText()));
+		text.appendChild(sendNotificationLabel);
+		
+		var notSendNotification = document.createElement("input");
+		notSendNotification.setAttribute("id", "comments_not_send_notifications");
+		notSendNotification.setAttribute("type", "radio");
+		notSendNotification.setAttribute("name", "comments_confirm_want_notifications");
+		notSendNotification.setAttribute("checked", true);
+		if (typeof container.attachEvent != "undefined") {
+			notSendNotification.attachEvent('onclick', function(e){setNeedToNotify(this);});
+		} else {
+			notSendNotification.addEventListener('click', function(e){setNeedToNotify(this);},false);
+		}
+		text.appendChild(notSendNotification);
+		
+		var notSendNotificationLabel = document.createElement("label");
+		notSendNotificationLabel.setAttribute("for", "comments_not_send_notifications");
+		notSendNotificationLabel.appendChild(document.createTextNode(getNoText()));
+		text.appendChild(notSendNotificationLabel);
+		
+		notifyCell.appendChild(text);
+		notifyLine.appendChild(notifyCell);
+		tbBody.appendChild(notifyLine);
+	}
+	
 	// Send button
 	var sendLine = document.createElement("tr");
 	var sendCell = document.createElement("td");
 	sendCell.setAttribute("colspan", "2");
 	var send = createInput("send_comment", "button", LABEL_SEND, "send_comment_button");
 	if (typeof container.attachEvent != "undefined") {
-		send.attachEvent('onclick', function(e){closeCommentPanelAndSendComment(userId, subjectId, emailId, bodyId, linkToComments);});
+		send.attachEvent('onclick', function(e){closeCommentPanelAndSendComment(userId, subjectId, emailId, bodyId, linkToComments, secretInputId);});
 	} else {
-		send.addEventListener('click', function(e){closeCommentPanelAndSendComment(userId, subjectId, emailId, bodyId, linkToComments);},false);
+		send.addEventListener('click', function(e){closeCommentPanelAndSendComment(userId, subjectId, emailId, bodyId, linkToComments, secretInputId);},false);
 	}
 	sendCell.appendChild(send);
 	sendLine.appendChild(sendCell);
@@ -127,9 +185,15 @@ function getCommentPane(linkToComments, addEmail) {
 	return container;
 }
 
-function closeCommentPanelAndSendComment(userId, subjectId, emailId, bodyId, linkToComments) {
+function closeCommentPanelAndSendComment(userId, subjectId, emailId, bodyId, linkToComments, secretInputId) {
 	if (userId == null || subjectId == null || bodyId == null || linkToComments == null) {
 		return;
+	}
+	var secretInput = document.getElementById(secretInputId);
+	if (secretInput != null) {
+		if (secretInput.value != "") { // Spam
+			return;
+		}
 	}
 	var user = document.getElementById(userId);
 	if (user == null) {
@@ -148,10 +212,16 @@ function closeCommentPanelAndSendComment(userId, subjectId, emailId, bodyId, lin
 	if (body == null) {
 		return;
 	}
+	if (NEED_TO_NOTIFY) {
+		if (emailValue == "") {
+			alert(getEnterEmailText());
+			return;
+		}
+	}
 	showLoadingMessage(LABEL_SENDING);
 	closeCommentsPanel();
 	setCommentValues(user.value, subject.value, emailValue, body.value);
-	CommentsEngine.addComment(USER, SUBJECT, EMAIL, BODY, linkToComments, addCommentCallback);
+	CommentsEngine.addComment(getComponentCacheKey(), USER, SUBJECT, EMAIL, BODY, linkToComments, NEED_TO_NOTIFY, addCommentCallback);
 }
 
 function addCommentCallback(result) {
@@ -375,4 +445,13 @@ function setCommentsCount(count) {
 	}
 	counter.removeChild(counter.childNodes[0]);
 	counter.appendChild(document.createTextNode(count));
+}
+
+function setNeedToNotify(object) {
+	if ("comments_send_notifications" == object.id) {
+		NEED_TO_NOTIFY = true;
+	}
+	else {
+		NEED_TO_NOTIFY = false;
+	}
 }
