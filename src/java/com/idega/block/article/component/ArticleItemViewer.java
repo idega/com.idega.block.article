@@ -1,5 +1,5 @@
 /*
- * $Id: ArticleItemViewer.java,v 1.21 2007/02/23 17:25:52 valdas Exp $
+ * $Id: ArticleItemViewer.java,v 1.22 2007/02/27 10:27:14 valdas Exp $
  *
  * Copyright (C) 2004 Idega. All Rights Reserved.
  *
@@ -29,12 +29,12 @@ import com.idega.webface.WFHtml;
 import com.idega.webface.convert.WFTimestampConverter;
 
 /**
- * Last modified: $Date: 2007/02/23 17:25:52 $ by $Author: valdas $
+ * Last modified: $Date: 2007/02/27 10:27:14 $ by $Author: valdas $
  *
  * Displays the article item
  *
  * @author <a href="mailto:gummi@idega.com">Gudmundur Agust Saemundsson</a>
- * @version $Revision: 1.21 $
+ * @version $Revision: 1.22 $
  */
 public class ArticleItemViewer extends ContentItemViewer {
 	
@@ -56,7 +56,7 @@ public class ArticleItemViewer extends ContentItemViewer {
 	private boolean showCreationDate = true;
 	private boolean showComments = false;
 	private boolean showCommentsList = false;
-	private boolean isForumPage = false;
+	private boolean forumPage = false;
 	
 	/**
 	 * @return Returns the cacheEnabled.
@@ -312,7 +312,7 @@ public class ArticleItemViewer extends ContentItemViewer {
 		}
 		UIComponentCacher cacher = UIComponentCacher.getDefaultCacher(context);
 		ContentItemComments comments = new ContentItemComments(cacher.getCacheKey(this, context), getLinkToComments(),
-				isShowCommentsList(), /*isForumPage()*/ true);
+				isShowCommentsList(), isForumPage());
 		comments.setId(this.getId() + "_article_comments");
 		getFacets().put(FACET_ITEM_COMMENTS, comments);
 	}
@@ -351,11 +351,11 @@ public class ArticleItemViewer extends ContentItemViewer {
 	}
 
 	public boolean isForumPage() {
-		return isForumPage;
+		return forumPage;
 	}
 
-	public void setForumPage(boolean isForumPage) {
-		this.isForumPage = isForumPage;
+	public void setForumPage(boolean forumPage) {
+		this.forumPage = forumPage;
 	}
 
 }
