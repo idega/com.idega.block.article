@@ -1,5 +1,5 @@
 /*
- * $Id: ArticleItemViewer.java,v 1.22 2007/02/27 10:27:14 valdas Exp $
+ * $Id: ArticleItemViewer.java,v 1.23 2007/02/28 16:34:11 valdas Exp $
  *
  * Copyright (C) 2004 Idega. All Rights Reserved.
  *
@@ -9,6 +9,7 @@
 package com.idega.block.article.component;
 
 import java.sql.Timestamp;
+
 import javax.faces.component.UIComponent;
 import javax.faces.component.html.HtmlOutputText;
 import javax.faces.context.FacesContext;
@@ -19,22 +20,24 @@ import com.idega.block.article.bean.ArticleLocalizedItemBean;
 import com.idega.block.article.business.ArticleActionURIHandler;
 import com.idega.block.article.business.ArticleUtil;
 import com.idega.content.bean.ContentItem;
+import com.idega.content.business.ContentUtil;
 import com.idega.content.presentation.ContentItemComments;
 import com.idega.content.presentation.ContentItemToolbar;
 import com.idega.content.presentation.ContentItemViewer;
 import com.idega.core.cache.UIComponentCacher;
 import com.idega.idegaweb.IWMainApplication;
+import com.idega.presentation.IWContext;
 import com.idega.presentation.Script;
 import com.idega.webface.WFHtml;
 import com.idega.webface.convert.WFTimestampConverter;
 
 /**
- * Last modified: $Date: 2007/02/27 10:27:14 $ by $Author: valdas $
+ * Last modified: $Date: 2007/02/28 16:34:11 $ by $Author: valdas $
  *
  * Displays the article item
  *
  * @author <a href="mailto:gummi@idega.com">Gudmundur Agust Saemundsson</a>
- * @version $Revision: 1.22 $
+ * @version $Revision: 1.23 $
  */
 public class ArticleItemViewer extends ContentItemViewer {
 	
@@ -57,6 +60,7 @@ public class ArticleItemViewer extends ContentItemViewer {
 	private boolean showComments = false;
 	private boolean showCommentsList = false;
 	private boolean forumPage = false;
+	private boolean showCommentsForAllUsers = true;
 	
 	/**
 	 * @return Returns the cacheEnabled.
@@ -99,6 +103,7 @@ public class ArticleItemViewer extends ContentItemViewer {
 		return styleClassPrefix;
 	}
 	
+	@SuppressWarnings("unchecked")
 	protected UIComponent createFieldComponent(String attribute){
 		if(ATTRIBUTE_BODY.equals(attribute)){
 			return new WFHtml();
@@ -302,8 +307,12 @@ public class ArticleItemViewer extends ContentItemViewer {
 		this.showComments = showComments;
 	}
 	
+	@SuppressWarnings("unchecked")
 	protected void initializeComments(FacesContext context) {
 		if (!isShowComments()) {
+			return;
+		}
+		if (!ContentUtil.hasContentEditorRoles(IWContext.getIWContext(context)) && !isShowCommentsForAllUsers()) {
 			return;
 		}
 		super.initializeComments(context);
@@ -312,7 +321,7 @@ public class ArticleItemViewer extends ContentItemViewer {
 		}
 		UIComponentCacher cacher = UIComponentCacher.getDefaultCacher(context);
 		ContentItemComments comments = new ContentItemComments(cacher.getCacheKey(this, context), getLinkToComments(),
-				isShowCommentsList(), isForumPage());
+				ArticleItemViewer.class.getName(), isShowCommentsList(), isForumPage(), isShowCommentsForAllUsers());
 		comments.setId(this.getId() + "_article_comments");
 		getFacets().put(FACET_ITEM_COMMENTS, comments);
 	}
@@ -332,12 +341,12 @@ public class ArticleItemViewer extends ContentItemViewer {
 		setValue(ArticleLocalizedItemBean.FIELDNAME_LINK_TO_COMMENT, linkToComments);
 	}
 	
+	@SuppressWarnings("unchecked")
 	private boolean addJavaScript() {
 		Script script = new Script();
-		script.addScriptSource(ArticleUtil.getBundle().getResourcesPath() + "/javascript/CommentsHelper.js");
 		script.addScriptSource("/dwr/interface/CommentsEngine.js");
 		script.addScriptSource("/dwr/engine.js");
-		
+		script.addScriptSource(ArticleUtil.getBundle().getResourcesPath() + "/javascript/CommentsHelper.js");
 		getFacets().put(ContentItemViewer.FACET_COMMENTS_SCRIPTS, script);
 		return true;
 	}
@@ -356,6 +365,14 @@ public class ArticleItemViewer extends ContentItemViewer {
 
 	public void setForumPage(boolean forumPage) {
 		this.forumPage = forumPage;
+	}
+
+	public boolean isShowCommentsForAllUsers() {
+		return showCommentsForAllUsers;
+	}
+
+	public void setShowCommentsForAllUsers(boolean showCommentsForAllUsers) {
+		this.showCommentsForAllUsers = showCommentsForAllUsers;
 	}
 
 }

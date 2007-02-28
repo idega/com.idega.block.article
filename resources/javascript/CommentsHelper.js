@@ -455,3 +455,13 @@ function setNeedToNotify(object) {
 		NEED_TO_NOTIFY = false;
 	}
 }
+
+function enableComments(enable, pageKey, moduleId, propName) {
+	showLoadingMessage("Saving...");
+	CommentsEngine.setModuleProperty(pageKey, moduleId, propName, enable, getComponentCacheKey(), setModulePropertyCallback);
+}
+
+function setModulePropertyCallback(result) {
+	window.location.href=window.location.href;
+	closeLoadingMessage();
+}
