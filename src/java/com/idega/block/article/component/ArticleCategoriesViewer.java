@@ -12,8 +12,6 @@ import java.util.Map;
 
 import javax.faces.context.FacesContext;
 
-import org.apache.myfaces.custom.div.Div;
-
 import com.idega.block.article.bean.ArticleListManagedBean;
 import com.idega.block.article.business.ArticleConstants;
 import com.idega.block.article.business.ArticleUtil;
@@ -26,11 +24,11 @@ import com.idega.presentation.Block;
 import com.idega.presentation.IWContext;
 import com.idega.presentation.Page;
 import com.idega.presentation.PresentationObjectUtil;
-import com.idega.presentation.Script;
 import com.idega.presentation.text.Break;
 import com.idega.presentation.text.Link;
 import com.idega.presentation.text.Text;
 import com.idega.presentation.ui.CheckBox;
+import com.idega.webface.WFDivision;
 
 public class ArticleCategoriesViewer extends Block {
 	
@@ -53,6 +51,7 @@ public class ArticleCategoriesViewer extends Block {
 		availableCategories = new HashMap<String, Boolean>();
 	}
 	
+	@SuppressWarnings("unchecked")
 	public void main(IWContext iwc) {
 		hasUserValidRights = ContentUtil.hasContentEditorRoles(iwc);
 		
@@ -81,9 +80,9 @@ public class ArticleCategoriesViewer extends Block {
 			}
 		}
 		
-		Div container = new Div();
+		WFDivision container = new WFDivision();
 		container.setId(BLOG_CATEGORIES);
-		Div disabledCategoryContainer = null;
+		WFDivision disabledCategoryContainer = null;
 		
 		StringBuffer value = null;
 		Text text = null;
@@ -118,17 +117,18 @@ public class ArticleCategoriesViewer extends Block {
 			else {
 				if (hasUserValidRights) {
 					text = new Text(value.toString());
-					disabledCategoryContainer = new Div();
+					disabledCategoryContainer = new WFDivision();
 					addCheckBox(pageKey, moduleIds, disabledCategoryContainer, iwc, categories.get(i), true);
 					disabledCategoryContainer.setStyleClass(BLOG_LINK_DISABLED);
-					disabledCategoryContainer.getChildren().add(text);
-					container.getChildren().add(disabledCategoryContainer);
+					disabledCategoryContainer.add(text);
+					container.add(disabledCategoryContainer);
 				}
 			}
 		}
 		this.add(container);
 	}
 	
+	@SuppressWarnings("unchecked")
 	public void restoreState(FacesContext context, Object state) {
 		Object values[] = (Object[]) state;
 		super.restoreState(context, values[0]);
@@ -204,7 +204,7 @@ public class ArticleCategoriesViewer extends Block {
 		}
 	}
 	
-	private void addCheckBox(String pageKey, List<String> moduleIds, Div container, IWContext iwc, String category, boolean setDisabled) {
+	private void addCheckBox(String pageKey, List<String> moduleIds, WFDivision container, IWContext iwc, String category, boolean setDisabled) {
 		if (container == null || iwc == null) {
 			return;
 		}
@@ -233,7 +233,7 @@ public class ArticleCategoriesViewer extends Block {
 				box.setOnClick(action.toString());
 			}
 		}
-		container.getChildren().add(box);
+		container.add(box);
 	}
 	
 	private void addDwrScript() {
@@ -244,14 +244,10 @@ public class ArticleCategoriesViewer extends Block {
 		if (parent == null) {
 			return;
 		}
-		Script script = parent.getAssociatedScript();
-		if (script == null) {
-			return;
-		}
 		isFirstTime = false;
-		script.addScriptSource("/dwr/engine.js");
-		script.addScriptSource("/dwr/interface/BuilderService.js");
-		script.addScriptSource(ArticleUtil.getBundle().getResourcesPath() + "/javascript/ArticleCategoriesHelper.js");
+		parent.addJavascriptURL("/dwr/interface/BuilderService.js");
+		parent.addJavascriptURL("/dwr/engine.js");
+		parent.addJavascriptURL(ArticleUtil.getBundle().getResourcesPath() + "/javascript/ArticleCategoriesHelper.js");
 	}
 	
 	private String getThisPageKey(IWContext iwc) {
@@ -278,13 +274,13 @@ public class ArticleCategoriesViewer extends Block {
 		return false;
 	}
 	
-	private void addLinkToCategory(String pageKey, List<String> moduleIds, Div container, IWContext iwc, String category, boolean setDisabled, String linkValue) {
+	private void addLinkToCategory(String pageKey, List<String> moduleIds, WFDivision container, IWContext iwc, String category, boolean setDisabled, String linkValue) {
 		addCheckBox(pageKey, moduleIds, container, iwc, category, setDisabled);
 		Link link = new Link(linkValue);
 		link.setStyleClass(BLOG_LINK_ENABLED);
 		link.addFirstParameter(ContentItemListViewer.ITEMS_CATEGORY_VIEW, category);
-		container.getChildren().add(link);
-		container.getChildren().add(new Break());
+		container.add(link);
+		container.add(new Break());
 	}
 	
 	public String getBuilderName(IWUserContext iwuc) {
