@@ -1,5 +1,5 @@
 /*
- * $Id: ArticleLocalizedItemBean.java,v 1.13 2007/02/13 19:05:38 valdas Exp $
+ * $Id: ArticleLocalizedItemBean.java,v 1.14 2007/03/05 11:24:02 valdas Exp $
  *
  * Copyright (C) 2004 Idega. All Rights Reserved.
  *
@@ -53,10 +53,10 @@ import com.idega.xml.XMLParser;
  * This is a JSF managed bean that manages each article xml document 
  * instance per language/locale.
  * <p>
- * Last modified: $Date: 2007/02/13 19:05:38 $ by $Author: valdas $
+ * Last modified: $Date: 2007/03/05 11:24:02 $ by $Author: valdas $
  *
  * @author Anders Lindman,<a href="mailto:tryggvi@idega.com">Tryggvi Larusson</a>
- * @version $Revision: 1.13 $
+ * @version $Revision: 1.14 $
  */
 public class ArticleLocalizedItemBean extends ContentItemBean implements Serializable, ContentItem {
 	
@@ -299,7 +299,7 @@ public class ArticleLocalizedItemBean extends ContentItemBean implements Seriali
 			iwc = IWContext.getIWContext(context);
 		}
 		return getFeedEntryAsXML(iwc, getHeadline(), null, getHeadline(), teaser, body, getAuthor(), getCategories(), getSource(),
-				getComment(), ArticleItemViewer.class.getName(), null);
+				getComment(), ArticleItemViewer.class.getName(), getLinkToComments());
 
 		/*XMLParser builder = new XMLParser();
 		
