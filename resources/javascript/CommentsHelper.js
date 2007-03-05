@@ -3,6 +3,7 @@ var SHOW_COMMENTS_LIST = false;
 var SET_REVERSE_AJAX = false;
 var NEED_TO_CHECK_COMMENTS_SIZE = true;
 var NEED_TO_NOTIFY = false;
+var CHECKED_BOX_MANUALY = false;
 
 var USER = "";
 var SUBJECT = "";
@@ -20,6 +21,125 @@ var LABEL_COMMENT_FORM = "Comment form";
 
 var COMMENT_PANEL_ID = "comment_panel";
 var COMMENTS_BLOCK_LIST_ID = "comments_block_list";
+
+var COMMENTS_POSTED_LABEL = "Posted";
+var COMMENTS_MESSAGE = "Loading comments...";
+var COMMENTS_ATOM_LINK_TITLE = "Atom Feed";
+var COMMENTS_ATOMS_SERVER = "127.0.0.1";
+var ADD_NOTIFICATION_TEXT = "Do You wish to receive notifications about new comments?";
+var COMMENTS_YES = "Yes";
+var COMMENTS_NO = "No";
+var COMMENTS_ENTER_EMAIL = "Please enter Your e-mail!";
+var COMMENTS_SAVING_TEXT = "Saving...";
+var LINK_TO_ATOM_FEED_IMAGE = "/idegaweb/bundles/com.idega.content.bundle/resources/images/feed.png";
+
+var HAS_COMMENT_VIEWER_VALID_RIGHTS = false;
+var ADDED_LINK_TO_ATOM_IN_BODY = false;
+var ADDED_LINK_TO_ATOM_IN_HEAD = false;
+
+var COMPONENT_CACHE_KEY = "";
+var COMMENTS_LINK_TO_FILE = "/files";
+var SHOW_COMMENTS_LIST_ON_LOAD = false;
+
+/** Setters - getters  begins**/
+function setPostedLabel(postedLabel) {
+	COMMENTS_POSTED_LABEL = postedLabel;
+}
+function getPostedLabel() {
+	return COMMENTS_POSTED_LABEL;
+}
+
+function setCommentsLoadingMessage(message) {
+	COMMENTS_MESSAGE = message;
+}
+function getCommentsLoadingMessage() {
+	return COMMENTS_MESSAGE;
+}
+
+function setCommentsAtomLinkTitle(title) {
+	COMMENTS_ATOM_LINK_TITLE = title;
+}
+function getCommentsAtomLinkTitle() {
+	return COMMENTS_ATOM_LINK_TITLE;
+}
+
+function setCommentsAtomsServer(atomServer) {
+	COMMENTS_ATOMS_SERVER = atomServer;
+}
+function getCommentsAtomsServer() {
+	return COMMENTS_ATOMS_SERVER;
+}
+
+function getAddNotificationText() {
+	return ADD_NOTIFICATION_TEXT;
+}
+function setAddNotificationText(text) {
+	ADD_NOTIFICATION_TEXT = text;
+}
+
+function getYesText() {
+	return COMMENTS_YES;
+}
+function setYesText(text) {
+	COMMENTS_YES = text;
+}
+
+function getNoText() {
+	return COMMENTS_NO;
+}
+function setNoText(text) {
+	COMMENTS_NO = text;
+}
+
+function getEnterEmailText() {
+	return COMMENTS_ENTER_EMAIL;
+}
+function setEnterEmailText(text) {
+	COMMENTS_ENTER_EMAIL = text;
+}
+
+function setCommentsSavingText(text) {
+	COMMENTS_SAVING_TEXT = text;
+}
+function getCommentsSavingText() {
+	return COMMENTS_SAVING_TEXT;
+}
+
+function setHasCommentViewerValidRights(rights) {
+	HAS_COMMENT_VIEWER_VALID_RIGHTS = rights;
+}
+function getHasCommentViewerValidRights() {
+	return HAS_COMMENT_VIEWER_VALID_RIGHTS;
+}
+
+function setLinkToAtomFeedImage(link) {
+	LINK_TO_ATOM_FEED_IMAGE = link;
+}
+function getLinkToAtomFeedImage() {
+	return LINK_TO_ATOM_FEED_IMAGE;
+}
+
+function setLinkToComments(link) {
+	COMMENTS_LINK_TO_FILE = link;
+}
+function getLinkToComments() {
+	return COMMENTS_LINK_TO_FILE;
+}
+
+function getComponentCacheKey() {
+	return COMPONENT_CACHE_KEY;
+}
+
+function isShowCommentsListOnLoad() {
+	return SHOW_COMMENTS_LIST_ON_LOAD;
+}
+
+function setCommentStartInfo(linkToComments, showCommentsList) {
+	//COMPONENT_CACHE_KEY = cacheKey;
+	COMMENTS_LINK_TO_FILE = linkToComments;
+	SHOW_COMMENTS_LIST_ON_LOAD = showCommentsList;
+}
+/** Setters - getters ends**/
 
 function setCommentValues(user, subject, email, body) {
 	USER = user;
@@ -221,19 +341,7 @@ function closeCommentPanelAndSendComment(userId, subjectId, emailId, bodyId, lin
 	showLoadingMessage(LABEL_SENDING);
 	closeCommentsPanel();
 	setCommentValues(user.value, subject.value, emailValue, body.value);
-	CommentsEngine.addComment(getComponentCacheKey(), USER, SUBJECT, EMAIL, BODY, linkToComments, NEED_TO_NOTIFY, addCommentCallback);
-}
-
-function addCommentCallback(result) {
-	closeLoadingMessage();
-	if (result) {
-		addAtomButtonForComments();
-		CommentsEngine.getCommentsForAllPages(getLinkToComments(), getCommentsForAllPagesCallback);
-	}
-}
-
-function getCommentsForAllPagesCallback(result) {
-	closeLoadingMessage();
+	CommentsEngine.addComment(getComponentCacheKey(), USER, SUBJECT, EMAIL, BODY, linkToComments, NEED_TO_NOTIFY);
 }
 
 function addComment(articleComment) {
@@ -323,15 +431,16 @@ function getComments(linkToComments) {
 }
 
 function getCommentsCallback(comments) {
+	closeLoadingMessage();
 	if (comments == null) {
 		closeLoadingMessage();
 		return;
 	}
+	addAtomButtonForComments();
 	removeCommentsList();
 	for (var i = 0; i < comments.length; i++) {
 		addComment(comments[i]);
 	}
-	closeLoadingMessage();
 }
 
 function createLabel(value, id, style) {
@@ -447,6 +556,22 @@ function setCommentsCount(count) {
 	counter.appendChild(document.createTextNode(count));
 }
 
+function getCommentsCount() {
+	var counter = document.getElementById("contentItemCount");
+	if (counter == null) {
+		return 0;
+	}
+	var children = counter.childNodes;
+	if (children == null) {
+		return 0;
+	}
+	var count = children[0].nodeValue;
+	if (count == null) {
+		return 0;
+	}
+	return count;
+}
+
 function setNeedToNotify(object) {
 	if ("comments_send_notifications" == object.id) {
 		NEED_TO_NOTIFY = true;
@@ -457,11 +582,126 @@ function setNeedToNotify(object) {
 }
 
 function enableComments(enable, pageKey, moduleId, propName) {
-	showLoadingMessage("Saving...");
-	CommentsEngine.setModuleProperty(pageKey, moduleId, propName, enable, getComponentCacheKey(), setModulePropertyCallback);
+	CHECKED_BOX_MANUALY = true;
+	showLoadingMessage(getCommentsSavingText());
+	CommentsEngine.setModuleProperty(pageKey, moduleId, propName, enable, getComponentCacheKey());
 }
 
-function setModulePropertyCallback(result) {
-	window.location.href=window.location.href;
+function clearArticleCaches() {
+	CommentsEngine.clearArticleCaches(getComponentCacheKey(), clearArticleCachesCallback);
+}
+
+function clearArticleCachesCallback(needToReload) {
+	if (needToReload) {
+		window.location.href = window.location.href;
+	}
 	closeLoadingMessage();
+	if (getHasCommentViewerValidRights()) {
+		if (CHECKED_BOX_MANUALY) {
+			CHECKED_BOX_MANUALY = false; // Original page, no actions to perform
+		}
+		else {
+			var checkBox = document.getElementById("manageCommentsBlockCheckBox"); // Marking as checked/unchecked
+			if (checkBox != null) {
+				checkBox.checked = !checkBox.checked;
+			}
+		}
+	}
+}
+
+window.onload = initComments;
+
+function initComments() {
+	enableReverseAjax();
+	CommentsEngine.getInitInfoForComments(getInitInfoForCommentsCallback);
+}
+
+function getInitInfoForCommentsCallback(list) {
+	if (list != null) {
+		if (list.length == 10) {
+			setPostedLabel(list[0]);
+			setCommentsLoadingMessage(list[1]);
+			setCommentsAtomLinkTitle(list[2]);
+			setCommentsAtomsServer(list[3]);
+			setAddNotificationText(list[4]);
+			setYesText(list[5]);
+			setNoText(list[6]);
+			setEnterEmailText(list[7]);
+			setCommentsSavingText(list[8]);
+			setLinkToAtomFeedImage(list[9]);
+		}
+	}
+	
+	if (getCommentsCount() > 0) {
+		setAddedLinkToAtomInBody(true);
+		addAtomLinkInHeader();
+	}
+	
+	if (isShowCommentsListOnLoad()) {
+		SHOW_COMMENTS_LIST = true;
+		getComments(getLinkToComments());
+	}
+	
+	CommentsEngine.getUserRights(getUserRightsCallback);
+}
+
+function getUserRightsCallback(rights) {
+	setHasCommentViewerValidRights(rights);
+}
+
+function addAtomButtonForComments() {
+	addAtomLinkInHeader();
+	if (ADDED_LINK_TO_ATOM_IN_BODY) {
+		return;
+	}
+	var atomLinkId = "article_comments_link_to_feed";
+	var temp = document.getElementById(atomLinkId);
+	if (temp != null) {
+		var tempParent = temp.parentNode;
+		if (tempParent != null) {
+			tempParent.removeChild(temp);
+		}
+	}
+	
+	// Container
+	var container = document.getElementById("article_comments_link_label_container");
+	if (container == null) {
+		return;
+	}
+	
+	// Link
+	var linkToFeed = document.createElement("a");
+	linkToFeed.setAttribute("id", atomLinkId);
+	linkToFeed.setAttribute("href", getCommentsAtomsServer() + getLinkToComments());
+	linkToFeed.setAttribute("rel", "alternate");
+	linkToFeed.setAttribute("type", "application/atom+xml");
+		
+	linkToFeed.appendChild(document.createTextNode(" "));
+		
+	// Image
+	var image = document.createElement("img");
+	image.setAttribute("src", getLinkToAtomFeedImage());
+	image.setAttribute("title", getCommentsAtomLinkTitle());
+	image.setAttribute("alt", getCommentsAtomLinkTitle());
+	image.setAttribute("name", getCommentsAtomLinkTitle());
+	linkToFeed.appendChild(image);
+		
+	container.appendChild(linkToFeed);
+}
+
+function addAtomLinkInHeader() {
+	if (ADDED_LINK_TO_ATOM_IN_HEAD) {
+		return;
+	}
+	var linkToAtomInHeader = document.createElement("link");
+	linkToAtomInHeader.setAttribute("href", getCommentsAtomsServer() + getLinkToComments());
+	linkToAtomInHeader.setAttribute("title", "Atom 1.0");
+	linkToAtomInHeader.setAttribute("type", "application/atom+xml");
+	linkToAtomInHeader.setAttribute("rel", "alternate");
+	document.getElementsByTagName("head")[0].appendChild(linkToAtomInHeader);
+	ADDED_LINK_TO_ATOM_IN_HEAD = true;
+}
+
+function setAddedLinkToAtomInBody(added) {
+	ADDED_LINK_TO_ATOM_IN_BODY = added;
 }

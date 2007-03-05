@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE dwr PUBLIC "-//GetAhead Limited//DTD Direct Web Remoting 2.0//EN" "http://www.getahead.ltd.uk/dwr//dwr20.dtd">
+
+<dwr>
+  <allow>
+    <create creator="ibo" javascript="CommentsEngine" scope="application">
+      <param name="class" value="com.idega.block.article.business.CommentsEngine"/>
+    </create>
+    <convert converter="bean" match="com.idega.block.article.bean.ContentItemComment" />
+  </allow>
+  
+	<signatures>
+		<![CDATA[
+  			import java.util.List;
+			import com.idega.block.article.bean.ContentItemComment;
+
+  			CommentsEngine.getComments(String);
+  		]]>
+	</signatures>
+</dwr>

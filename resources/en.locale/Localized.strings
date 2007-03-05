@@ -88,3 +88,24 @@ onclick_remove_related_content_item=return confirm('Are you sure you want to rem
 no_article_selected=No article selected
 
 itemviewer.more=More
+
+new_comment=New comment
+new_comment_message=New comment was entered. You can read all comments at 
+posted=Posted
+loading_comments=Loading comments...
+atom_feed=Atom Feed
+need_send_notification=Do You wish to receive notifications about new comments?
+yes=Yes
+no=No
+enter_email_text=Please enter Your e-mail!
+saving=Saving...
+comments=Comments
+enable_comments=Enable comments
+add_your_comment=Add your comment
+name=Name
+subject=Subject
+send=Send
+sending=Sending...
+anonymous=Anonymous
+email=E-mail
+comment_form=Comment form
