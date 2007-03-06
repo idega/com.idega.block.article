@@ -37,7 +37,6 @@ var HAS_COMMENT_VIEWER_VALID_RIGHTS = false;
 var ADDED_LINK_TO_ATOM_IN_BODY = false;
 var ADDED_LINK_TO_ATOM_IN_HEAD = false;
 
-var COMPONENT_CACHE_KEY = "";
 var COMMENTS_LINK_TO_FILE = "/files";
 var SHOW_COMMENTS_LIST_ON_LOAD = false;
 
@@ -126,16 +125,11 @@ function getLinkToComments() {
 	return COMMENTS_LINK_TO_FILE;
 }
 
-function getComponentCacheKey() {
-	return COMPONENT_CACHE_KEY;
-}
-
 function isShowCommentsListOnLoad() {
 	return SHOW_COMMENTS_LIST_ON_LOAD;
 }
 
 function setCommentStartInfo(linkToComments, showCommentsList) {
-	//COMPONENT_CACHE_KEY = cacheKey;
 	COMMENTS_LINK_TO_FILE = linkToComments;
 	SHOW_COMMENTS_LIST_ON_LOAD = showCommentsList;
 }
@@ -341,7 +335,7 @@ function closeCommentPanelAndSendComment(userId, subjectId, emailId, bodyId, lin
 	showLoadingMessage(LABEL_SENDING);
 	closeCommentsPanel();
 	setCommentValues(user.value, subject.value, emailValue, body.value);
-	CommentsEngine.addComment(getComponentCacheKey(), USER, SUBJECT, EMAIL, BODY, linkToComments, NEED_TO_NOTIFY);
+	CommentsEngine.addComment(USER, SUBJECT, EMAIL, BODY, linkToComments, NEED_TO_NOTIFY);
 }
 
 function addComment(articleComment) {
@@ -584,14 +578,14 @@ function setNeedToNotify(object) {
 function enableComments(enable, pageKey, moduleId, propName) {
 	CHECKED_BOX_MANUALY = true;
 	showLoadingMessage(getCommentsSavingText());
-	CommentsEngine.setModuleProperty(pageKey, moduleId, propName, enable, getComponentCacheKey());
+	CommentsEngine.setModuleProperty(pageKey, moduleId, propName, enable);
 }
 
-function clearArticleCaches() {
-	CommentsEngine.clearArticleCaches(getComponentCacheKey(), clearArticleCachesCallback);
+function hideOrShowComments() {
+	CommentsEngine.hideOrShowComments(hideOrShowCommentsCallback);
 }
 
-function clearArticleCachesCallback(needToReload) {
+function hideOrShowCommentsCallback(needToReload) {
 	if (needToReload) {
 		window.location.href = window.location.href;
 	}
@@ -608,8 +602,6 @@ function clearArticleCachesCallback(needToReload) {
 		}
 	}
 }
-
-window.onload = initComments;
 
 function initComments() {
 	enableReverseAjax();

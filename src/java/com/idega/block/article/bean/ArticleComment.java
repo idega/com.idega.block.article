@@ -1,6 +1,6 @@
 package com.idega.block.article.bean;
 
-public class ContentItemComment {
+public class ArticleComment {
 	
 	private String user = null;
 	private String subject = null;

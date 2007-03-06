@@ -21,7 +21,7 @@ import org.directwebremoting.impl.DefaultScriptSession;
 import sun.misc.BASE64Decoder;
 import sun.misc.BASE64Encoder;
 
-import com.idega.block.article.bean.ContentItemComment;
+import com.idega.block.article.bean.ArticleComment;
 import com.idega.block.article.component.CommentsViewer;
 import com.idega.block.rss.business.RSSBusiness;
 import com.idega.business.IBOLookup;
@@ -51,7 +51,6 @@ public class CommentsEngineBean extends IBOServiceBean implements CommentsEngine
 	private static final Log log = LogFactory.getLog(CommentsEngineBean.class);
 	
 	private static final String COMMENTS_CACHE_NAME = "article_comments_feeds_cache";
-	private static final String ARTICLE_CACHE_NAME = "article";
 	
 	private RSSBusiness rss = getRSSBusiness();
 	private WireFeedOutput wfo = new WireFeedOutput();
@@ -60,13 +59,15 @@ public class CommentsEngineBean extends IBOServiceBean implements CommentsEngine
 	
 	private String newComment = ArticleUtil.getBundle().getLocalizedString("new_comment");
 	private String newCommentMessage = ArticleUtil.getBundle().getLocalizedString("new_comment_message");
+	private String articeComments = ArticleUtil.getBundle().getLocalizedString("article_comments");
+	private String allArticleComments = ArticleUtil.getBundle().getLocalizedString("all_article_comments");
 	
-	private List<String> commentsInitInfo = initInfo();
+	private List<String> commentsInitInfo = initCommentsInfo();
 	private List<String> parsedEmails = new ArrayList<String>();
 	
 	private volatile BuilderService builder = null;
 
-	public boolean addComment(String cacheKey, String user, String subject, String email, String body, String uri, boolean notify) {
+	public boolean addComment(String user, String subject, String email, String body, String uri, boolean notify) {
 		if (uri == null) {
 			closeLoadingMessage();
 			return false;
@@ -104,13 +105,6 @@ public class CommentsEngineBean extends IBOServiceBean implements CommentsEngine
 			}
 			
 			putFeedToCache(comments, uri, iwc);
-//			String splitter = "view";
-//			String newValue = "edit";
-//			if (ContentUtil.hasContentEditorRoles(iwc)) {
-//				splitter = "edit";
-//				newValue = "view";
-//			}
-//			removeArticleFromCache(iwc, getAllCacheKeysFromClient(cacheKey, splitter, newValue));
 			
 			String commentsXml = null;
 			try {
@@ -122,6 +116,11 @@ public class CommentsEngineBean extends IBOServiceBean implements CommentsEngine
 			} catch (FeedException e) {
 				log.error(e);
 				closeLoadingMessage();
+				return false;
+			}
+			
+			if (iwc == null) {
+				log.error("IWContext is null");
 				return false;
 			}
 			
@@ -138,7 +137,7 @@ public class CommentsEngineBean extends IBOServiceBean implements CommentsEngine
 			try {
 				if (service.uploadFileAndCreateFoldersFromStringAsRoot(base, file, commentsXml, ContentConstants.XML_MIME_TYPE,
 						true)) {				
-					return getCommentsForAllPages(uri, cacheKey);
+					return getCommentsForAllPages(uri);
 				}
 			} catch (RemoteException e) {
 				log.error(e);
@@ -148,58 +147,6 @@ public class CommentsEngineBean extends IBOServiceBean implements CommentsEngine
 			closeLoadingMessage();
 			return false;
 		}
-	}
-	
-	private boolean removeArticleFromCache(IWContext iwc, List<String> cacheKeys) {
-		if (cacheKeys == null) {
-			return false;
-		}
-		if (iwc == null) {
-			iwc = ThemesHelper.getInstance().getIWContext();
-		}
-		if (iwc == null) {
-			return false;
-		}
-		IWCacheManager2 cache = IWCacheManager2.getInstance(iwc.getIWMainApplication());
-		if (cache == null) {
-			return false;
-		}
-		Map articles = cache.getCache(ARTICLE_CACHE_NAME);
-		if (articles == null) {
-			return false;
-		}
-		for (int i = 0; i < cacheKeys.size(); i++) {
-//			removeArticleFromCache(iwc, articles, cacheKeys.get(i));
-		}
-
-		return true;
-	}
-	
-	private boolean removeArticleFromCache(IWContext iwc, Map articles, String cacheKey) {
-		if (cacheKey == null) {
-			return false;
-		}
-		if (articles == null) {
-			if (iwc == null) {
-				iwc = ThemesHelper.getInstance().getIWContext();
-			}
-			if (iwc == null) {
-				return false;
-			}
-			IWCacheManager2 cache = IWCacheManager2.getInstance(iwc.getIWMainApplication());
-			if (cache == null) {
-				return false;
-			}
-			articles = cache.getCache(ARTICLE_CACHE_NAME);
-			if (articles == null) {
-				return false;
-			}
-		}
-		if (articles.containsKey(cacheKey)) {
-			articles.remove(cacheKey);
-			return true;
-		}
-		return false;
 	}
 	
 	private boolean sendNotification(Feed comments, String email, IWContext iwc) {
@@ -349,11 +296,11 @@ public class CommentsEngineBean extends IBOServiceBean implements CommentsEngine
 		comments.setFeedType(ContentItemFeedBean.FEED_TYPE_ATOM_1);
 		
 		// Title
-		comments.setTitle("Comments of Article");
+		comments.setTitle(articeComments);
 		
 		// Subtitle
 		Content subtitle = new Content();
-		subtitle.setValue("All comments");
+		subtitle.setValue(allArticleComments);
 		comments.setSubtitle(subtitle);
 		
 		// Language
@@ -411,9 +358,7 @@ public class CommentsEngineBean extends IBOServiceBean implements CommentsEngine
 		return rss;
 	}
 	
-	private boolean getCommentsForAllPages(String uri, String cacheKey) {
-//		removeArticleFromCache(null, null, cacheKey);
-		
+	private boolean getCommentsForAllPages(String uri) {
 		ScriptBuffer script = new ScriptBuffer();
 		script = new ScriptBuffer("getCommentsCallback(").appendData(getComments(uri)).appendScript(");");
 		return executeScriptForAllPages(script);
@@ -428,14 +373,12 @@ public class CommentsEngineBean extends IBOServiceBean implements CommentsEngine
 		if (pages == null) {
 			return null;
 		}
-//		log.info("Found JavaScript sessions on same page ('"+wctx.getCurrentPage()+"'): " + pages.size());
-		System.out.println("Found JavaScript sessions on same page ('"+wctx.getCurrentPage()+"'): " + pages.size());
+		log.info("Found JavaScript sessions on same page ('"+wctx.getCurrentPage()+"'): " + pages.size());
 
 		return pages;
 	}
 	
-	public List<ContentItemComment> getComments(String uri) {
-		System.out.println("Executing method 'getComments', uri: " + uri);
+	public List<ArticleComment> getComments(String uri) {
 		Feed comments = getCommentsFeed(uri, null);
 		if (comments == null) {
 			return null;
@@ -444,8 +387,8 @@ public class CommentsEngineBean extends IBOServiceBean implements CommentsEngine
 		if (entries == null) {
 			return null;
 		}
-		List<ContentItemComment> items = new ArrayList<ContentItemComment>();
-		ContentItemComment comment = null;
+		List<ArticleComment> items = new ArrayList<ArticleComment>();
+		ArticleComment comment = null;
 		Object o = null;
 		Entry entry = null;
 		Content content = null;
@@ -453,7 +396,7 @@ public class CommentsEngineBean extends IBOServiceBean implements CommentsEngine
 		for (int i = 0; i < entries.size(); i++) {
 			o = entries.get(i);
 			if (o instanceof Entry) {
-				comment = new ContentItemComment();
+				comment = new ArticleComment();
 				entry = (Entry) o;
 				
 				// ID
@@ -623,7 +566,7 @@ public class CommentsEngineBean extends IBOServiceBean implements CommentsEngine
 		return builder;
 	}
 	
-	public boolean setModuleProperty(String pageKey, String moduleId, String propName, String propValue, String cacheKey) {
+	public boolean setModuleProperty(String pageKey, String moduleId, String propName, String propValue) {
 		BuilderService builder = getBuilderService();
 		if (builder == null) {
 			closeLoadingMessage();
@@ -636,45 +579,14 @@ public class CommentsEngineBean extends IBOServiceBean implements CommentsEngine
 		}
 		String[] property = new String[1];
 		property[0] = propValue;
-		if (builder.setProperty(pageKey, moduleId, propName, property, iwc.getIWMainApplication())) {
-//			removeArticleFromCache(iwc, getAllCacheKeysFromClient(cacheKey, "edit", "view"));
-		}
+		builder.setProperty(pageKey, moduleId, propName, property, iwc.getIWMainApplication());
 		
-		ScriptBuffer script = new ScriptBuffer("clearArticleCaches();");
+		ScriptBuffer script = new ScriptBuffer("hideOrShowComments();");
 		return executeScriptForAllPages(script);
 	}
 	
-	private List<String> getAllCacheKeysFromClient(String originalKey, String splitter, String newValue) {
-		List<String> keys = new ArrayList<String>();
-		keys.add(originalKey);
-		if (originalKey.indexOf(splitter) == -1) {
-			return keys;
-		}
-		String[] keyParts = originalKey.split(splitter);
-		if (keyParts == null) {
-			return keys;
-		}
-		if (keyParts.length != 2) {
-			return keys;
-		}
-		StringBuffer newKey = new StringBuffer(keyParts[0]);
-		newKey.append(newValue).append(keyParts[1]);
-		keys.add(newKey.toString());
-		return keys;
-	}
-	
-	public boolean manageArticleCache(String methodName) {
-		ScriptBuffer script = new ScriptBuffer(methodName);
-		return executeScriptForAllPages(script);
-	}
-	
-	public boolean clearArticleCaches(String cacheKey) {
-		System.out.println("Executing method 'clearArticleCaches', cacheKey: " + cacheKey);
-		if (cacheKey == null) {
-			return false;
-		}
+	public boolean hideOrShowComments() {
 		IWContext iwc = ThemesHelper.getInstance().getIWContext();
-//		removeArticleFromCache(iwc, null, cacheKey);
 		if (ContentUtil.hasContentEditorRoles(iwc)) {
 			return false; // Do not need reload page
 		}
@@ -703,7 +615,7 @@ public class CommentsEngineBean extends IBOServiceBean implements CommentsEngine
 		executeScriptForAllPages(script);
 	}
 	
-	private List<String> initInfo() {
+	private List<String> initCommentsInfo() {
 		List<String> info = new ArrayList<String>();
 		IWContext iwc = ThemesHelper.getInstance().getIWContext();
 		if (iwc == null) {
@@ -733,10 +645,7 @@ public class CommentsEngineBean extends IBOServiceBean implements CommentsEngine
 		if (iwc == null) {
 			return false;
 		}
-		if (ContentUtil.hasContentEditorRoles(iwc)) {
-			return true;
-		}
-		return false;
+		return ContentUtil.hasContentEditorRoles(iwc);
 	}
 	
 }

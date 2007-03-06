@@ -6,13 +6,13 @@
     <create creator="ibo" javascript="CommentsEngine" scope="application">
       <param name="class" value="com.idega.block.article.business.CommentsEngine"/>
     </create>
-    <convert converter="bean" match="com.idega.block.article.bean.ContentItemComment" />
+    <convert converter="bean" match="com.idega.block.article.bean.ArticleComment" />
   </allow>
   
 	<signatures>
 		<![CDATA[
   			import java.util.List;
-			import com.idega.block.article.bean.ContentItemComment;
+			import com.idega.block.article.bean.ArticleComment;
 
   			CommentsEngine.getComments(String);
   		]]>

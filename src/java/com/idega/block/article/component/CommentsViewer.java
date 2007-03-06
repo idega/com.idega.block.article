@@ -14,7 +14,6 @@ import com.idega.content.business.ContentConstants;
 import com.idega.content.business.ContentUtil;
 import com.idega.content.themes.helpers.ThemesHelper;
 import com.idega.core.accesscontrol.business.NotLoggedOnException;
-import com.idega.core.builder.business.BuilderService;
 import com.idega.presentation.Block;
 import com.idega.presentation.IWContext;
 import com.idega.presentation.Image;
@@ -30,6 +29,7 @@ public class CommentsViewer extends Block {
 	
 	public static final String FEED_IMAGE = "/images/feed.png";
 	private static final String COMMENTS_BLOCK_ID = "comments_block";
+	private static final String SHOW_COMMENTS_PROPERTY = "showCommentsForAllUsers";
 	
 	private String styleClass = "content_item_comments_style";
 	private String linkToComments = null;
@@ -53,16 +53,20 @@ public class CommentsViewer extends Block {
 		page.addJavascriptURL("/dwr/engine.js");
 		page.addJavascriptURL(ArticleUtil.getBundle().getResourcesPath() + "/javascript/CommentsHelper.js");
 		
+		WFDivision container = new WFDivision();
+		container.setId(COMMENTS_BLOCK_ID);
+		container.setStyleClass(styleClass);
+		this.add(container);
+		
+		Script onLoadScript = new Script();
+		onLoadScript.addScriptLine("addEvent(window, 'load', initComments);");
+		container.add(onLoadScript);
+		
 		boolean hasValidRights = ContentUtil.hasContentEditorRoles(iwc);
 		
 		if (!hasValidRights && !showCommentsForAllUsers) {
 			return;
 		}
-		
-		WFDivision container = new WFDivision();
-		container.setId(COMMENTS_BLOCK_ID);
-		container.setStyleClass(styleClass);
-		this.add(container);
 		
 		int commentsCount = getCommentsCount(iwc);
 		StringBuffer linkToAtomFeedImage = new StringBuffer(ArticleUtil.getBundle().getResourcesPath());
@@ -150,30 +154,27 @@ public class CommentsViewer extends Block {
 		if (!hasValidRights) {
 			return;
 		}
-		BuilderService service = null;
-		try {
-			service = this.getBuilderService(iwc);
-		} catch (RemoteException e) {
-			e.printStackTrace();
-			return;
-		}
 		String pageKey = getThisPageKey(iwc);
 		if (pageKey == null) {
 			return;
 		}
-		List<String> moduleIds = service.getModuleId(pageKey, CommentsViewer.class.getName());
-		if (moduleIds == null) {
-			return;
-		}
-		if (moduleIds.size() == 0) {
+		String moduleId = this.getClientId(iwc);
+		if (moduleId == null) {
 			return;
 		}
 		WFDivision showCommentsContainer = new WFDivision();
+		
 		CheckBox enableCheckBox = new CheckBox("enableComments");
 		enableCheckBox.setId("manageCommentsBlockCheckBox");
-		enableCheckBox.setOnClick("enableComments(this.checked, '"+pageKey+"', '"+moduleIds.get(0)+"', 'showCommentsForAllUsers');");
+		String separator = "', '";
+		StringBuffer action = new StringBuffer("enableComments(this.checked, '");
+		action.append(pageKey).append(separator).append(moduleId).append(separator).append(SHOW_COMMENTS_PROPERTY);
+		action.append("');");
+		enableCheckBox.setOnClick(action.toString());
 		enableCheckBox.setChecked(isShowCommentsForAllUsers());
+		
 		Text enableText = new Text(ArticleUtil.getBundle().getLocalizedString("enable_comments"));
+		
 		showCommentsContainer.add(enableText);
 		showCommentsContainer.add(enableCheckBox);
 		container.add(showCommentsContainer);
