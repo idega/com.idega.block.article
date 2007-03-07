@@ -1,5 +1,5 @@
 /*
- * $Id: IWBundleStarter.java,v 1.21 2006/04/09 12:32:00 laddi Exp $
+ * $Id: IWBundleStarter.java,v 1.22 2007/03/07 08:46:03 justinas Exp $
  * Created on 2.11.2004
  *
  * Copyright (C) 2004 Idega Software hf. All Rights Reserved.
@@ -9,23 +9,32 @@
  */
 package com.idega.block.article;
 
+import java.rmi.RemoteException;
+
 import com.idega.block.article.business.ArticleActionURIHandler;
+import com.idega.block.article.business.ArticleRSSProducer;
+import com.idega.block.rss.business.RSSProducerRegistry;
+import com.idega.business.IBOLookup;
+import com.idega.business.IBOLookupException;
+import com.idega.content.business.ContentRSSProducer;
 import com.idega.content.view.ContentViewManager;
 import com.idega.core.uri.IWActionURIManager;
 import com.idega.core.view.DefaultViewNode;
 import com.idega.core.view.KeyboardShortcut;
 import com.idega.core.view.ViewNode;
+import com.idega.idegaweb.IWApplicationContext;
 import com.idega.idegaweb.IWBundle;
 import com.idega.idegaweb.IWBundleStartable;
 import com.idega.idegaweb.include.GlobalIncludeManager;
+import com.idega.slide.business.IWSlideService;
 
 
 /**
  * 
- *  Last modified: $Date: 2006/04/09 12:32:00 $ by $Author: laddi $
+ *  Last modified: $Date: 2007/03/07 08:46:03 $ by $Author: justinas $
  * 
  * @author <a href="mailto:tryggvil@idega.com">Tryggvi Larusson</a>
- * @version $Revision: 1.21 $
+ * @version $Revision: 1.22 $
  */
 public class IWBundleStarter implements IWBundleStartable {
 	private static final String STYLE_SHEET_URL = "/style/article.css";
@@ -37,6 +46,7 @@ public class IWBundleStarter implements IWBundleStartable {
 	public void start(IWBundle starterBundle) {
 		addArticleIWActionURIHandler();
 		addArticleViews(starterBundle);
+		addRSSProducers(starterBundle);
 		//Add the stylesheet:
 		GlobalIncludeManager.getInstance().addBundleStyleSheet(BUNDLE_IDENTIFIER,STYLE_SHEET_URL);
 	}
@@ -99,4 +109,22 @@ public class IWBundleStarter implements IWBundleStartable {
 		//searchArticlesNode.setVisibleInMenus(false);
 		*/
 	}
+	private void addRSSProducers(IWBundle starterBundle) {
+		RSSProducerRegistry registry = RSSProducerRegistry.getInstance();
+		
+		//ContentRSSProducer, also a IWSlideChangeListener
+		
+		ArticleRSSProducer articleProducer = new ArticleRSSProducer();
+		registry.addRSSProducer("article", articleProducer);
+		
+		 IWApplicationContext iwac = starterBundle.getApplication().getIWApplicationContext();
+	        try {
+	            IWSlideService service = (IWSlideService) IBOLookup.getServiceInstance(iwac,IWSlideService.class);
+	            service.addIWSlideChangeListeners(articleProducer);
+	        } catch (IBOLookupException e) {
+	            e.printStackTrace();
+	        } catch (RemoteException e) {
+	            e.printStackTrace();
+	        }
+	}	
 }
