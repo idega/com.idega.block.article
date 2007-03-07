@@ -1,5 +1,5 @@
 /*
- * $Id: ArticleItemViewer.java,v 1.24 2007/03/05 11:24:45 valdas Exp $
+ * $Id: ArticleItemViewer.java,v 1.25 2007/03/07 15:39:07 valdas Exp $
  *
  * Copyright (C) 2004 Idega. All Rights Reserved.
  *
@@ -18,24 +18,21 @@ import com.idega.block.article.ArticleCacher;
 import com.idega.block.article.bean.ArticleItemBean;
 import com.idega.block.article.bean.ArticleLocalizedItemBean;
 import com.idega.block.article.business.ArticleActionURIHandler;
-import com.idega.block.article.business.ArticleUtil;
 import com.idega.content.bean.ContentItem;
-import com.idega.content.presentation.ContentItemComments;
 import com.idega.content.presentation.ContentItemToolbar;
 import com.idega.content.presentation.ContentItemViewer;
 import com.idega.core.cache.UIComponentCacher;
 import com.idega.idegaweb.IWMainApplication;
-import com.idega.presentation.Script;
 import com.idega.webface.WFHtml;
 import com.idega.webface.convert.WFTimestampConverter;
 
 /**
- * Last modified: $Date: 2007/03/05 11:24:45 $ by $Author: valdas $
+ * Last modified: $Date: 2007/03/07 15:39:07 $ by $Author: valdas $
  *
  * Displays the article item
  *
  * @author <a href="mailto:gummi@idega.com">Gudmundur Agust Saemundsson</a>
- * @version $Revision: 1.24 $
+ * @version $Revision: 1.25 $
  */
 public class ArticleItemViewer extends ContentItemViewer {
 	
@@ -296,36 +293,13 @@ public class ArticleItemViewer extends ContentItemViewer {
 	public void setShowCreationDate(boolean showCreationDate) {
 		this.showCreationDate = showCreationDate;
 	}
-
-//	public boolean isShowComments() {
-//		return showComments;
-//	}
-//
-//	public void setShowComments(boolean showComments) {
-//		this.showComments = showComments;
-//	}
 	
 	@SuppressWarnings("unchecked")
 	protected void initializeComments(FacesContext context) {
-		/*if (!isShowComments()) {
-			return;
-		}
-		super.initializeComments(context);
-		if (!addJavaScript()) {
-			return;
-		}
-		UIComponentCacher cacher = UIComponentCacher.getDefaultCacher(context);
-		ContentItemComments comments = new ContentItemComments(cacher.getCacheKey(this, context), getLinkToComments(),
-				ArticleItemViewer.class.getName(), isShowCommentsList(), isForumPage(), isShowCommentsForAllUsers());
-		comments.setId(this.getId() + "_article_comments");
-		getFacets().put(FACET_ITEM_COMMENTS, comments);*/
 	}
 	
 	protected void updateComments() {
-//		if (!isShowComments()) {
-//			return;
-//		}
-//		super.updateComments();
+		super.updateComments();
 	}
 	
 	public String getLinkToComments() {
@@ -335,39 +309,5 @@ public class ArticleItemViewer extends ContentItemViewer {
 	public void setLinkToComments(String linkToComments) {
 		setValue(ArticleLocalizedItemBean.FIELDNAME_LINK_TO_COMMENT, linkToComments);
 	}
-	
-	@SuppressWarnings("unchecked")
-	private boolean addJavaScript() {
-//		Script script = new Script();
-//		script.addScriptSource("/dwr/engine.js");
-//		script.addScriptSource("/dwr/interface/CommentsEngine.js");
-//		script.addScriptSource(ArticleUtil.getBundle().getResourcesPath() + "/javascript/CommentsHelper.js");
-//		getFacets().put(ContentItemViewer.FACET_COMMENTS_SCRIPTS, script);
-		return true;
-	}
-
-//	public boolean isShowCommentsList() {
-//		return showCommentsList;
-//	}
-//
-//	public void setShowCommentsList(boolean showCommentsList) {
-//		this.showCommentsList = showCommentsList;
-//	}
-//
-//	public boolean isForumPage() {
-//		return forumPage;
-//	}
-//
-//	public void setForumPage(boolean forumPage) {
-//		this.forumPage = forumPage;
-//	}
-//
-//	public boolean isShowCommentsForAllUsers() {
-//		return showCommentsForAllUsers;
-//	}
-//
-//	public void setShowCommentsForAllUsers(boolean showCommentsForAllUsers) {
-//		this.showCommentsForAllUsers = showCommentsForAllUsers;
-//	}
 
 }
