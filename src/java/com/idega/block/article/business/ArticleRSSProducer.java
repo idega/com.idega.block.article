@@ -62,9 +62,6 @@ public class ArticleRSSProducer extends RSSAbstractProducer implements RSSProduc
 	protected static final String ARTICLE_SEARCH_KEY = "*.xml*";
 	public static final String RSS_FOLDER_NAME = "rss";
 	public static final String RSS_FILE_NAME = "articlefeed.xml";
-//	public static final String RSS_FILE_NAME_ALL = "all";
-//	public static final String RSS_FILE_NAME_CATEGORY = "feed";
-	
 
 	public static final String PATH = ContentConstants.CONTENT + ContentUtil.getContentBaseFolderPath() + "/article/";//"/files/cms/article";
 	private List rssFileURIsCacheList = new ArrayList();
@@ -80,7 +77,6 @@ public class ArticleRSSProducer extends RSSAbstractProducer implements RSSProduc
 		String feedParentFolder = null;
 		String feedFile = null;
 		String category = getCategory(rssRequest.getExtraUri());
-//		String extraURI = getPageURI(rssRequest.getExtraUri());
 		String extraURI = rssRequest.getExtraUri();
 		if(extraURI == null){
 			extraURI = "";
@@ -89,28 +85,12 @@ public class ArticleRSSProducer extends RSSAbstractProducer implements RSSProduc
 				extraURI = extraURI.concat("/");
 			}
 		
-//		String pageURI = getPageURI(rssRequest.getExtraUri());
-		
 		List<String> categories = new ArrayList<String>();
 		List<String> articles = new ArrayList<String>();
 		if (category != null)
 			categories.add(category);
 		IWContext iwc = getIWContext(rssRequest);
-//		if(!pageURI.endsWith("/")){
-//			pageURI = pageURI.concat("/");
-//		}
-//		if(category != null){		
-//			feedParentFolder = "/files/cms/article/rss/category/"+category+"/";
-//			feedFile = "feed_"+iwc.getLocale().toString()+".xml";			
-//		}
-//		else{
-//			feedParentFolder = "/files/cms/article/rss"+rssRequest.getExtraUri()+"/";
-//			feedFile = "all_"+iwc.getLocale().toString()+".xml";						
-//		}
-//		if(rssRequest.getExtraUri().length() ==0){
 		if(extraURI.length() ==0){
-//			feedParentFolder = "/files/cms/article/rss"+rssRequest.getExtraUri()+"/";
-//			feedParentFolder = "/files/cms/article/rss"+extraURI;
 			feedParentFolder = "/files/cms/article/rss/";
 			feedFile = "all_"+iwc.getLocale().toString()+".xml";			
 		}
@@ -119,83 +99,43 @@ public class ArticleRSSProducer extends RSSAbstractProducer implements RSSProduc
 			feedFile = "feed_"+iwc.getLocale().toString()+".xml";			
 		}
 		else{	//have page URI
-//			feedParentFolder = "/files/cms/article/rss/page/"+pageURI;
 			feedParentFolder = "/files/cms/article/rss/page/"+extraURI;
 			feedFile = "feed_"+iwc.getLocale().toString()+".xml";
-//			categories = getCategoriesByURI(rssRequest.getExtraUri(), iwc);
 			categories = getCategoriesByURI(extraURI, iwc);
 			if (categories != null)
 				articles = getArticlesByURI(extraURI, iwc);
 		}
 		String realURI = "/content"+feedParentFolder+feedFile;		
 		
-		//for testing
-//			if(this.existsInSlide(feedFile,rssRequest) && false ){
-			//Both check if the file has been created and if the uri is cached.
-			//The uri is decached when something in the folder changes so the rss file gets regenerated
-//			if(rssFileURIsCacheList.contains(feedFile)){
-			if(false){		
-				try {
-					this.dispatch(realURI, rssRequest);
-				} catch (ServletException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
+		if(rssFileURIsCacheList.contains(feedFile)){
+			try {
+				this.dispatch(realURI, rssRequest);
+			} catch (ServletException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
 			}
-			else{
-				//generate rss and store and the dispatch to it
-				//and add a listener to that directory
-				try {
-					//todo code the 3 different cases (see description)
-//					searchForArticles(rssRequest,feedParentFolder,RSS_FILE_NAME, categories);
-					searchForArticles(rssRequest,feedParentFolder,feedFile, categories, articles);
-					rssFileURIsCacheList.add(feedFile);
+		}
+		else{
+			//generate rss and store and the dispatch to it
+			//and add a listener to that directory
+			try {
+				//todo code the 3 different cases (see description)
+				searchForArticles(rssRequest,feedParentFolder,feedFile, categories, articles);
+				rssFileURIsCacheList.add(feedFile);
 					
-					this.dispatch(realURI, rssRequest);
-//					this.dispatch(feedFile, rssRequest);
-				} catch (Exception e) {
-					throw new IOException(e.getMessage());
-				}
+				this.dispatch(realURI, rssRequest);
+			} catch (Exception e) {
+				throw new IOException(e.getMessage());
 			}
-	
-		
-//		if (existsInSlide(rssRequest.getURI(), rssRequest) == true){
-//		if(this.isAFolderInSlide(uri,rssRequest)){
-//			try {
-//				dispatch(rssRequest.getURI(), rssRequest);
-//			} catch (ServletException e) {
-//				// TODO Auto-generated catch block
-//				e.printStackTrace();
-//			}
-//		}
-//		else{
-//			//create a file and dispatch the request to it
-////			createRSSFile(rssRequest, uri);
-//			searchForArticles(rssRequest);
-//			try {
-//				dispatch(rssRequest.getURI(), rssRequest);
-//			} catch (ServletException e) {
-//				// TODO Auto-generated catch block
-//				e.printStackTrace();
-//			}
-//			
-//		}
+		}
 	}
 	public void searchForArticles(RSSRequest rssRequest, String feedParentPath, String feedFileName, List categories, List<String> articles) {
-//		ContentSearch search = new ContentSearch(IWMainApplication.getDefaultIWMainApplication());
-		
-//		List<String> categories = null;
-//		if (rssRequest.getCategory() != null){
-//			categories = new ArrayList<String>();
-//			categories.add(rssRequest.getCategory());
-//		}
 		IWContext iwc = getIWContext(rssRequest);
 		//TODO fix serverName
 		String serverName = iwc.getServerURL();
 		serverName = serverName.substring(0, serverName.length()-1);
 		
 		Collection results = getArticleSearchResults(PATH, categories, iwc);
-//		search.
 		if (results == null) {
 			log.error("ContentSearch.doSimpleDASLSearch returned results Collection, which is null: " + results);
 			return;
@@ -208,9 +148,7 @@ public class ArticleRSSProducer extends RSSAbstractProducer implements RSSProduc
 			o = it.next();
 			if (o instanceof SearchResult) {
 				uri = ((SearchResult) o).getSearchResultURI();
-//				if (isCorrectFile(uri)) {
 				urisToArticles.add(uri);
-//				}
 			}
 		}
 		if(!articles.isEmpty()){
@@ -231,50 +169,21 @@ public class ArticleRSSProducer extends RSSAbstractProducer implements RSSProduc
 		Date now = new Date();
 		long time = now.getTime();
 		try {
-//			rss = (RSSBusiness) IBOLookup.getServiceInstance(IWMainApplication.getDefaultIWApplicationContext(),
-//					RSSBusiness.class);
 			rss = (RSSBusiness) IBOLookup.getServiceInstance(iwc,RSSBusiness.class);			
 		} catch (IBOLookupException e1) {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
 		}
-//		SyndFeed allArticles = rss.createNewFeed("title", "Todo get servername" , "description", "atom_1.0", iwc.getCurrentLocale().toString(), new Timestamp(time));
 		SyndFeed allArticles = rss.createNewFeed("title", serverName , "File feed generated by IdegaWeb ePlatform, <a href'http://www.idega.com'/>. This feed lists the latest documents from the folder: "+uri, "atom_1.0", iwc.getCurrentLocale().toString(), new Timestamp(time));
 			
 		List<SyndEntry> allEntries = new ArrayList<SyndEntry>();
-//		SyndEntry articleEntry = null;
 		for (int i = 0; i < urisToArticles.size(); i++) {
-//			System.out.println(ThemesHelper.getInstance().getWebRootWithoutContent());
-//			System.out.println(ThemesHelper.getInstance().getWebRootWithoutContent() + urisToArticles.get(i));
 			String lang = iwc.getCurrentLocale().toString();
-//			articleFeed = rss.getFeed(ThemesHelper.getInstance().getWebRootWithoutContent() + urisToArticles.get(i)+"/"+lang+".xml");
 	
 			String articleURL = serverName + urisToArticles.get(i)+"/"+lang+".xml";
 			articleFeed = rss.getFeed(articleURL);
 			allEntries.addAll(articleFeed.getEntries());
-
-//			for (Iterator iter = articleFeed.getEntries().iterator(); iter.hasNext();) {
-//				SyndEntry element = (SyndEntry) iter.next();
-////				element.setLink(ThemesHelper.getInstance().getWebRootWithoutContent() + "/rss" +urisToArticles.get(i));
-////				element.setUri(ThemesHelper.getInstance().getWebRootWithoutContent() + "/rss" +urisToArticles.get(i));
-////				element.setLink(serverName + "/rss" +urisToArticles.get(i));
-////				element.setUri(serverName + "/rss" +urisToArticles.get(i));				
-////				List <SyndLink>links = element.getLinks();
-////				SyndLink link = links.get(0);
-////				link.setHref(ThemesHelper.getInstance().getWebRootWithoutContent() + "/rss" +urisToArticles.get(i));
-////				link.setHreflang(ThemesHelper.getInstance().getWebRootWithoutContent() + "/rss" +urisToArticles.get(i));
-////				link.setHref(serverName + "/rss" +urisToArticles.get(i));
-////				link.setHreflang(serverName + "/rss" +urisToArticles.get(i));				
-////				element.getLinks().set(0, link);
-////				element.
-////				 links.get(0)
-////				
-////				element.setLinks(arg0)
-////				System.out.println("Link "+element.getLink());				
-//				allEntries.add(element);
-//			}			
 		}
-//		allEntries = allArticles.getEntries();
 		
 		allArticles.setEntries(allEntries);
 		String allArticlesContent = null;
@@ -323,7 +232,6 @@ public class ArticleRSSProducer extends RSSAbstractProducer implements RSSProduc
 	}
 
 	public Collection getArticleSearchResults(String folder, List categories, IWContext iwc) {
-//		IWContext iwc = IWContext.getInstance();
 		if (folder == null) {
 			return null;
 		}
@@ -437,15 +345,6 @@ public class ArticleRSSProducer extends RSSAbstractProducer implements RSSProduc
 			return extraURI.substring(0, extraURI.length()-1);
 		else 
 			return extraURI;
-
-//		String category = null;
-//		if(extraURI.length() == 0)
-//			return null;
-//		if(extraURI.startsWith("category/"))
-//			category = extraURI.substring("category/".length(), extraURI.length());
-//		if(category.endsWith("/"))
-//			category = category.substring(0, category.length()-1);
-//		return category;
 	}
 
 	public List<String> getCategoriesByURI(String URI, IWContext iwc){
@@ -458,7 +357,6 @@ public class ArticleRSSProducer extends RSSAbstractProducer implements RSSProduc
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-//		String pageKey = bservice.getExistingPageKeyByURI("/"+URI+"/");
 		String pageKey = bservice.getExistingPageKeyByURI("/"+URI);		
 		List<String> moduleId = bservice.getModuleId(pageKey, ArticleListViewer.class.getName());
 		if (moduleId != null){
@@ -471,7 +369,6 @@ public class ArticleRSSProducer extends RSSAbstractProducer implements RSSProduc
 					//Article list viewer without property - displaying all pages
 					categories = null;
 				}
-//				categories.add(bservice.getProperty(pageKey, moduleId.get(0), "categories"));
 			}
 		}	
 		return categories;
@@ -486,7 +383,6 @@ public class ArticleRSSProducer extends RSSAbstractProducer implements RSSProduc
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-//		String pageKey = bservice.getExistingPageKeyByURI("/"+URI+"/");
 		String pageKey = bservice.getExistingPageKeyByURI("/"+URI);
 		List<String> moduleId = bservice.getModuleId(pageKey, ArticleItemViewer.class.getName());
 
