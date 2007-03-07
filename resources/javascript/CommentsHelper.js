@@ -35,7 +35,6 @@ var LINK_TO_ATOM_FEED_IMAGE = "/idegaweb/bundles/com.idega.content.bundle/resour
 
 var HAS_COMMENT_VIEWER_VALID_RIGHTS = false;
 var ADDED_LINK_TO_ATOM_IN_BODY = false;
-var ADDED_LINK_TO_ATOM_IN_HEAD = false;
 
 var COMMENTS_LINK_TO_FILE = "/files";
 var SHOW_COMMENTS_LIST_ON_LOAD = false;
@@ -626,7 +625,6 @@ function getInitInfoForCommentsCallback(list) {
 	
 	if (getCommentsCount() > 0) {
 		setAddedLinkToAtomInBody(true);
-		addAtomLinkInHeader();
 	}
 	
 	if (isShowCommentsListOnLoad()) {
@@ -642,7 +640,6 @@ function getUserRightsCallback(rights) {
 }
 
 function addAtomButtonForComments() {
-	addAtomLinkInHeader();
 	if (ADDED_LINK_TO_ATOM_IN_BODY) {
 		return;
 	}
@@ -679,19 +676,6 @@ function addAtomButtonForComments() {
 	linkToFeed.appendChild(image);
 		
 	container.appendChild(linkToFeed);
-}
-
-function addAtomLinkInHeader() {
-	if (ADDED_LINK_TO_ATOM_IN_HEAD) {
-		return;
-	}
-	var linkToAtomInHeader = document.createElement("link");
-	linkToAtomInHeader.setAttribute("href", getCommentsAtomsServer() + getLinkToComments());
-	linkToAtomInHeader.setAttribute("title", "Atom 1.0");
-	linkToAtomInHeader.setAttribute("type", "application/atom+xml");
-	linkToAtomInHeader.setAttribute("rel", "alternate");
-	document.getElementsByTagName("head")[0].appendChild(linkToAtomInHeader);
-	ADDED_LINK_TO_ATOM_IN_HEAD = true;
 }
 
 function setAddedLinkToAtomInBody(added) {
