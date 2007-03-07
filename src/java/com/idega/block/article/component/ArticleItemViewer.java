@@ -1,5 +1,5 @@
 /*
- * $Id: ArticleItemViewer.java,v 1.25 2007/03/07 15:39:07 valdas Exp $
+ * $Id: ArticleItemViewer.java,v 1.26 2007/03/07 17:14:48 justinas Exp $
  *
  * Copyright (C) 2004 Idega. All Rights Reserved.
  *
@@ -8,6 +8,7 @@
  */
 package com.idega.block.article.component;
 
+import java.rmi.RemoteException;
 import java.sql.Timestamp;
 
 import javax.faces.component.UIComponent;
@@ -21,18 +22,22 @@ import com.idega.block.article.business.ArticleActionURIHandler;
 import com.idega.content.bean.ContentItem;
 import com.idega.content.presentation.ContentItemToolbar;
 import com.idega.content.presentation.ContentItemViewer;
+import com.idega.core.builder.business.BuilderService;
+import com.idega.core.builder.business.BuilderServiceFactory;
 import com.idega.core.cache.UIComponentCacher;
 import com.idega.idegaweb.IWMainApplication;
+import com.idega.presentation.IWContext;
+import com.idega.presentation.Script;
 import com.idega.webface.WFHtml;
 import com.idega.webface.convert.WFTimestampConverter;
 
 /**
- * Last modified: $Date: 2007/03/07 15:39:07 $ by $Author: valdas $
+ * Last modified: $Date: 2007/03/07 17:14:48 $ by $Author: justinas $
  *
  * Displays the article item
  *
  * @author <a href="mailto:gummi@idega.com">Gudmundur Agust Saemundsson</a>
- * @version $Revision: 1.25 $
+ * @version $Revision: 1.26 $
  */
 public class ArticleItemViewer extends ContentItemViewer {
 	
@@ -132,6 +137,7 @@ public class ArticleItemViewer extends ContentItemViewer {
 		if (isShowCreationDate()) {
 			((HtmlOutputText)getFieldViewerComponent(ATTRIBUTE_CREATION_DATE)).setConverter(new WFTimestampConverter());
 		}
+		addFeed(context);
 	}
 
 	private boolean canInitField(String attribute) {
@@ -309,5 +315,59 @@ public class ArticleItemViewer extends ContentItemViewer {
 	public void setLinkToComments(String linkToComments) {
 		setValue(ArticleLocalizedItemBean.FIELDNAME_LINK_TO_COMMENT, linkToComments);
 	}
+	
+	@SuppressWarnings("unchecked")
+	private boolean addFeedJavaScript(String linkToFeed, String feedType, String feedTitle) {
+		Script script = new Script();
+		script.addScriptLine("addFeedSymbolInHeader('"+linkToFeed+"', '"+feedType+"', '"+feedTitle+"');");
+		getFacets().put(ContentItemViewer.FACET_FEED_SCRIPT, script);
+		return true;
+	}
+
+	private void addFeed(FacesContext context){
+		IWContext iwc = IWContext.getIWContext(context);
+		BuilderService bservice = null;
+		try {
+			bservice = BuilderServiceFactory.getBuilderService(iwc);
+		} catch (RemoteException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		try {
+			String serverName = iwc.getServerURL();
+			serverName.substring(0, serverName.length()-1);
+			String feedUri = bservice.getCurrentPageURI(iwc);
+			feedUri.substring(1);
+			String linkToFeed = serverName+"rss/article"+feedUri;
+			addFeedJavaScript(linkToFeed, "atom", "Atom 1.0");
+		} catch (RemoteException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+	
+//	public boolean isShowCommentsList() {
+//		return showCommentsList;
+//	}
+//
+//	public void setShowCommentsList(boolean showCommentsList) {
+//		this.showCommentsList = showCommentsList;
+//	}
+//
+//	public boolean isForumPage() {
+//		return forumPage;
+//	}
+//
+//	public void setForumPage(boolean forumPage) {
+//		this.forumPage = forumPage;
+//	}
+//
+//	public boolean isShowCommentsForAllUsers() {
+//		return showCommentsForAllUsers;
+//	}
+//
+//	public void setShowCommentsForAllUsers(boolean showCommentsForAllUsers) {
+//		this.showCommentsForAllUsers = showCommentsForAllUsers;
+//	}
 
 }
