@@ -1,5 +1,5 @@
 /*
- * $Id: ArticleListManagedBean.java,v 1.10 2007/01/24 11:01:01 valdas Exp $
+ * $Id: ArticleListManagedBean.java,v 1.11 2007/03/07 08:46:24 justinas Exp $
  * Created on 27.1.2005
  *
  * Copyright (C) 2005 Idega Software hf. All Rights Reserved.
@@ -45,10 +45,10 @@ import com.idega.util.IWTimestamp;
 
 /**
  * 
- *  Last modified: $Date: 2007/01/24 11:01:01 $ by $Author: valdas $
+ *  Last modified: $Date: 2007/03/07 08:46:24 $ by $Author: justinas $
  * 
  * @author <a href="mailto:gummi@idega.com">Gudmundur Agust Saemundsson</a>
- * @version $Revision: 1.10 $
+ * @version $Revision: 1.11 $
  */
 public class ArticleListManagedBean implements ContentListViewerManagedBean {
 
@@ -350,6 +350,7 @@ public class ArticleListManagedBean implements ContentListViewerManagedBean {
 			return null;
 		}
 		ContentSearch searchBusiness = new ContentSearch(iwc.getIWMainApplication());
+		searchBusiness.setToUseRootAccessForSearch(true);
 		searchBusiness.setToUseDescendingOrder(true);
 		Search search = searchBusiness.createSearch(articleSearch);
 		return search.getSearchResults();
