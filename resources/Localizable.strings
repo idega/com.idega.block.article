@@ -64,6 +64,7 @@ itemviewer.more=More
 iw.component.com.idega.block.article.component.ArticleItemViewer.name=Article
 iw.component.com.idega.block.article.component.ArticleListViewer.name=ArticleList
 iw.component.com.idega.block.article.component.ArticleCategoriesViewer.name=ArticleCategories
+iw.component.com.idega.block.article.component.CommentsViewer.name=CommentsViewer
 language=Language
 last_modified=Last modified
 list=List

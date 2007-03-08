@@ -6,6 +6,7 @@ import java.util.List;
 import javax.faces.component.UIComponent;
 import javax.faces.context.FacesContext;
 
+import com.idega.block.article.business.ArticleConstants;
 import com.idega.block.article.business.ArticleUtil;
 import com.idega.block.article.business.CommentsEngine;
 import com.idega.business.IBOLookup;
@@ -14,6 +15,7 @@ import com.idega.content.business.ContentConstants;
 import com.idega.content.business.ContentUtil;
 import com.idega.content.themes.helpers.ThemesHelper;
 import com.idega.core.accesscontrol.business.NotLoggedOnException;
+import com.idega.idegaweb.IWUserContext;
 import com.idega.presentation.Block;
 import com.idega.presentation.IWContext;
 import com.idega.presentation.Image;
@@ -283,5 +285,13 @@ public class CommentsViewer extends Block {
 
 	public void setLinkToComments(String linkToComments) {
 		this.linkToComments = linkToComments;
+	}
+	
+	public String getBuilderName(IWUserContext iwuc) {
+		String name = ArticleUtil.getBundle().getComponentName(CommentsViewer.class);
+		if (name == null || ArticleConstants.EMPTY.equals(name)) {
+			return "CommentsViewer";
+		}
+		return name;
 	}
 }
