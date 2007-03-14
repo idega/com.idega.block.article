@@ -1,5 +1,5 @@
 /*
- * $Id: EditArticleView.java,v 1.28 2007/02/23 14:35:44 gediminas Exp $
+ * $Id: EditArticleView.java,v 1.29 2007/03/14 18:06:29 valdas Exp $
  *
  * Copyright (C) 2004 Idega. All Rights Reserved.
  *
@@ -60,10 +60,10 @@ import com.idega.webface.htmlarea.HTMLArea;
  * <p>
  * This is the part for the editor of article is inside the admin interface
  * </p>
- * Last modified: $Date: 2007/02/23 14:35:44 $ by $Author: gediminas $
+ * Last modified: $Date: 2007/03/14 18:06:29 $ by $Author: valdas $
  *
  * @author Joakim,Tryggvi Larusson
- * @version $Revision: 1.28 $
+ * @version $Revision: 1.29 $
  */
 public class EditArticleView extends IWBaseComponent implements ManagedContentBeans, ActionListener, ValueChangeListener {
 	private static final Log log = LogFactory.getLog(EditArticleView.class);
@@ -397,7 +397,7 @@ public class EditArticleView extends IWBaseComponent implements ManagedContentBe
 		UIComponent publishedText = WFUtil.group(localizer.getTextVB("publishing_date"), WFUtil.getText(":"));
 		HtmlOutputLabel publishedLabel = new HtmlOutputLabel();
 		publishedLabel.getChildren().add(publishedText);
-		publishedLabel.setFor(publishedInput.getClientId(context));
+		//publishedLabel.setFor(publishedInput.getClientId(context)); Don't set that!!!
 
 		WFFormItem publisheDateItem = new WFFormItem();
 		publisheDateItem.add(publishedLabel);
