@@ -20,7 +20,7 @@ import org.apache.webdav.lib.search.SearchExpression;
 import org.apache.webdav.lib.search.SearchRequest;
 import org.apache.webdav.lib.search.SearchScope;
 import org.apache.webdav.lib.search.expressions.CompareExpression;
-import org.w3.x2001.xmlSchema.LengthDocument;
+//import org.w3.x2001.xmlSchema.LengthDocument;
 
 import com.idega.block.article.component.ArticleItemViewer;
 import com.idega.block.article.component.ArticleListViewer;
@@ -40,7 +40,7 @@ import com.idega.core.builder.data.ICPage;
 import com.idega.core.search.business.Search;
 import com.idega.core.search.business.SearchResult;
 import com.idega.presentation.IWContext;
-import com.idega.presentation.Page;
+//import com.idega.presentation.Page;
 import com.idega.slide.business.IWContentEvent;
 import com.idega.slide.business.IWSlideChangeListener;
 import com.idega.slide.business.IWSlideService;
@@ -49,7 +49,7 @@ import com.idega.slide.util.IWSlideConstants;
 import com.idega.util.IWTimestamp;
 import com.sun.syndication.feed.synd.SyndEntry;
 import com.sun.syndication.feed.synd.SyndFeed;
-import com.sun.syndication.feed.synd.SyndLink;
+//import com.sun.syndication.feed.synd.SyndLink;
 
 /**
  * Generates 3 types of rss files for articles.
