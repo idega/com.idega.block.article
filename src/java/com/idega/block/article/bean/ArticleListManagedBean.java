@@ -1,5 +1,5 @@
 /*
- * $Id: ArticleListManagedBean.java,v 1.11 2007/03/07 08:46:24 justinas Exp $
+ * $Id: ArticleListManagedBean.java,v 1.12 2007/03/19 08:43:48 valdas Exp $
  * Created on 27.1.2005
  *
  * Copyright (C) 2005 Idega Software hf. All Rights Reserved.
@@ -45,10 +45,10 @@ import com.idega.util.IWTimestamp;
 
 /**
  * 
- *  Last modified: $Date: 2007/03/07 08:46:24 $ by $Author: justinas $
+ *  Last modified: $Date: 2007/03/19 08:43:48 $ by $Author: valdas $
  * 
  * @author <a href="mailto:gummi@idega.com">Gudmundur Agust Saemundsson</a>
- * @version $Revision: 1.11 $
+ * @version $Revision: 1.12 $
  */
 public class ArticleListManagedBean implements ContentListViewerManagedBean {
 
@@ -140,13 +140,15 @@ public class ArticleListManagedBean implements ContentListViewerManagedBean {
 					article = new ArticleItemBean();
 					article.setResourcePath(result.getSearchResultURI());
 					article.load();
-					if(article.getAvilableInRequestedLanguage()){
-						int maxNumber = getMaxNumberOfDisplayed();
-						if(maxNumber==-1 || count<maxNumber){
-							list.add(article);
-							count++;
-							if (count == maxNumber) {
-								break;
+					if (!article.isDummyArticle()) {
+						if(article.getAvilableInRequestedLanguage()){
+							int maxNumber = getMaxNumberOfDisplayed();
+							if(maxNumber==-1 || count<maxNumber){
+								list.add(article);
+								count++;
+								if (count == maxNumber) {
+									break;
+								}
 							}
 						}
 					}
