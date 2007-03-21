@@ -60,7 +60,7 @@ public class CommentsViewer extends Block {
 										.append(ThemesHelper.getInstance().getUniqueIdByNumberAndDate(ARTICLE_COMMENT_SCOPE)).toString();
 		
 		WFDivision container = new WFDivision();
-		container.setId(COMMENTS_BLOCK_ID);
+		container.setId(new StringBuffer(commentsId).append(COMMENTS_BLOCK_ID).toString());
 		container.setStyleClass(styleClass);
 		this.add(container);
 		
@@ -219,7 +219,7 @@ public class CommentsViewer extends Block {
 	
 	private UIComponent getAddCommentBlock(IWContext iwc, String commentsId) {
 		WFDivision addComments = new WFDivision();
-		addComments.setId("add_comment_block");
+		addComments.setId(new StringBuffer(commentsId).append("add_comment_block").toString());
 		Link label = new Link(ArticleUtil.getBundle().getLocalizedString("add_your_comment"), "#" + addComments.getId());
 		String user = ArticleUtil.getBundle().getLocalizedString("name");
 		String subject = ArticleUtil.getBundle().getLocalizedString("subject");

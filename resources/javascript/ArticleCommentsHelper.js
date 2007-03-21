@@ -185,8 +185,7 @@ function addCommentPanel(id, linkToComments, lblUser, lblSubject, lblComment, lb
 	LABEL_EMAIL = lblEmail;
 	LABEL_COMMENT_FORM = lblCommentForm;
 	
-	if (IS_COMMENT_PANEL_ADDED) {
-		closeCommentsPanel();
+	if (closeCommentsPanel(commentsId)) {
 		return;
 	}
 	if (id == null || getLinkToComments() == null) {
@@ -207,7 +206,7 @@ function getCommentPane(linkToComments, addEmail, commentsId) {
 	var secretInputId= "secretCommentsInput";
 	
 	var container = document.createElement("div");
-	container.setAttribute("id", COMMENT_PANEL_ID);
+	container.setAttribute("id", commentsId + COMMENT_PANEL_ID);
 	
 	var fieldset = document.createElement("fieldset");
 	fieldset.setAttribute("class", "comment_fieldset");
@@ -360,7 +359,7 @@ function closeCommentPanelAndSendComment(userId, subjectId, emailId, bodyId, lin
 		}
 	}
 	showLoadingMessage(LABEL_SENDING);
-	closeCommentsPanel();
+	closeCommentsPanel(commentsId);
 	setCommentValues(user.value, subject.value, emailValue, body.value);
 	CommentsEngine.addComment(USER, SUBJECT, EMAIL, BODY, linkToComments, NEED_TO_NOTIFY, commentsId);
 }
@@ -377,20 +376,20 @@ function addComment(articleComment, commentsId, linkToComments) {
 		}
 	}
 	
-	var commentsContainer = document.getElementById("comments_block");
+	var commentsContainer = document.getElementById(commentsId + "comments_block");
 	if (commentsContainer == null) {
 		return;
 	}
-	var commentsList = document.getElementById(COMMENTS_BLOCK_LIST_ID);
+	var commentsList = document.getElementById(commentsId + COMMENTS_BLOCK_LIST_ID);
 	if (commentsList == null) {
 		commentsList = document.createElement("ol");
-		commentsList.setAttribute("id", COMMENTS_BLOCK_LIST_ID);
+		commentsList.setAttribute("id", commentsId + COMMENTS_BLOCK_LIST_ID);
 		commentsContainer.appendChild(commentsList);
-		if (SHOW_COMMENTS_LIST) {
-			showCommentsList();
+		if (needToShowCommentsList(commentsId)) {
+			showCommentsList(commentsId);
 		}
 		else {
-			hideCommentsList();
+			hideCommentsList(commentsId);
 		}
 	}
 	commentsList.setAttribute("class", "commens_list_all_items");
@@ -448,28 +447,28 @@ function addComment(articleComment, commentsId, linkToComments) {
 	commentsList.appendChild(commentContainer);
 }
 
-function closeCommentsPanel() {
-	var commentPanel = document.getElementById(COMMENT_PANEL_ID);
+function closeCommentsPanel(commentId) {
+	var commentPanel = document.getElementById(commentId + COMMENT_PANEL_ID);
 	if (commentPanel == null) {
-		return;
+		return false;
 	}
 	var parentContainer = commentPanel.parentNode;
 	if (parentContainer == null) {
-		return;
+		return false;
 	}
 	parentContainer.removeChild(commentPanel);
 	IS_COMMENT_PANEL_ADDED = false;
 	NEED_TO_CHECK_COMMENTS_SIZE = false;
+	return true;
 }
 
 function getComments(linkToComments, commentsId) {
 	showLoadingMessage(getCommentsLoadingMessage());
 	CommentsEngine.getComments(linkToComments, {
-  		callback:function(comments) { // Passing parameters to callback
+  		callback:function(comments) { // Passing extra parameters to callback
     		getCommentsCallback(comments, commentsId, linkToComments);
   		}
 	});
-	//CommentsEngine.getCommentsForCurrentPage(linkToComments, commentsId);
 }
 
 function getCommentsCallback(comments, id, linkToComments) {
@@ -540,7 +539,7 @@ function removeCommentsList(commentId) {
 		}
 	}
 	
-	var commentsList = document.getElementById(COMMENTS_BLOCK_LIST_ID);
+	var commentsList = document.getElementById(commentId + COMMENTS_BLOCK_LIST_ID);
 	if (commentsList == null) {
 		return;
 	}
@@ -551,15 +550,15 @@ function removeCommentsList(commentId) {
 	parentContainer.removeChild(commentsList);
 }
 
-function hideCommentsList() {
-	var list = document.getElementById(COMMENTS_BLOCK_LIST_ID);
+function hideCommentsList(commentsId) {
+	var list = document.getElementById(commentsId + COMMENTS_BLOCK_LIST_ID);
 	if (list != null) {
 		list.style.display = "none";
 	}
 }
 
-function showCommentsList() {
-	var list = document.getElementById(COMMENTS_BLOCK_LIST_ID);
+function showCommentsList(commentsId) {
+	var list = document.getElementById(commentsId + COMMENTS_BLOCK_LIST_ID);
 	if (list != null) {
 		list.style.display = "block";
 	}
@@ -574,13 +573,11 @@ function enableReverseAjax() {
 
 function getCommentsList(linkToComments, commentsId) {
 	enableReverseAjax();
-	if (SHOW_COMMENTS_LIST) {
-		SHOW_COMMENTS_LIST = false;
-		hideCommentsList();
+	if (needToShowCommentsList(commentsId)) {
+		getComments(linkToComments, commentsId);
 	}
 	else {
-		SHOW_COMMENTS_LIST = true;
-		getComments(linkToComments, commentsId);
+		hideCommentsList(commentsId);
 	}
 }
 
@@ -785,4 +782,15 @@ function deleteCommentsCallback(result) {
 	if (result.length == 2) {
 		CommentsEngine.getCommentsForAllPages(result[1], result[0]);
 	}
+}
+
+function needToShowCommentsList(commentsId) {
+	var list = document.getElementById(commentsId + COMMENTS_BLOCK_LIST_ID);
+	if (list == null) {
+		return true;
+	}
+	if (list.style.display == "block") {
+		return false;
+	}
+	return true;
 }
