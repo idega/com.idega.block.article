@@ -160,3 +160,10 @@ div.ws_main div.wf_block ul li .article_bar_block_t_preview{
 	display: none;
 	visibility: hide;
 }
+
+.deleteCommentsImage {
+}
+
+.deleteCommentsImage:hover {
+	cursor: pointer;
+}

@@ -8,12 +8,12 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.directwebremoting.ScriptBuffer;
+import org.directwebremoting.ScriptSession;
 import org.directwebremoting.WebContext;
 import org.directwebremoting.WebContextFactory;
 import org.directwebremoting.impl.DefaultScriptSession;
@@ -67,7 +67,7 @@ public class CommentsEngineBean extends IBOServiceBean implements CommentsEngine
 	
 	private volatile BuilderService builder = null;
 
-	public boolean addComment(String user, String subject, String email, String body, String uri, boolean notify) {
+	public boolean addComment(String user, String subject, String email, String body, String uri, boolean notify, String id) {
 		if (uri == null) {
 			closeLoadingMessage();
 			return false;
@@ -79,12 +79,7 @@ public class CommentsEngineBean extends IBOServiceBean implements CommentsEngine
 		
 		IWContext iwc = ThemesHelper.getInstance().getIWContext();
 		
-		String language = Locale.ENGLISH.getLanguage();
-		if (iwc != null) {
-			if (iwc.getLocale() != null) {
-				language = iwc.getLocale().getLanguage();
-			}
-		}
+		String language = ThemesHelper.getInstance().getCurrentLanguage(iwc);
 		
 		Timestamp date = new Timestamp(System.currentTimeMillis());
 		
@@ -106,46 +101,17 @@ public class CommentsEngineBean extends IBOServiceBean implements CommentsEngine
 			
 			putFeedToCache(comments, uri, iwc);
 			
-			String commentsXml = null;
-			try {
-				commentsXml = wfo.outputString(comments);
-			} catch (IllegalArgumentException e) {
-				log.error(e);
-				closeLoadingMessage();
-				return false;
-			} catch (FeedException e) {
-				log.error(e);
-				closeLoadingMessage();
-				return false;
-			}
-			
 			if (iwc == null) {
 				log.error("IWContext is null");
 				return false;
 			}
 			
 			sendNotification(comments, email, iwc);
-			
-			String base = uri;
-			String file = uri;
-			int index = uri.lastIndexOf(ContentConstants.SLASH);
-			if (index != -1) {
-				base = uri.substring(0, index);
-				file = uri.substring(index);
-			}
-			IWSlideService service = ThemesHelper.getInstance().getSlideService(iwc);
-			try {
-				if (service.uploadFileAndCreateFoldersFromStringAsRoot(base, file, commentsXml, ContentConstants.XML_MIME_TYPE,
-						true)) {				
-					return getCommentsForAllPages(uri);
-				}
-			} catch (RemoteException e) {
-				log.error(e);
+			if (!uploadFeed(uri, comments, iwc)) {
 				closeLoadingMessage();
-				return false;
 			}
-			closeLoadingMessage();
-			return false;
+			
+			return getCommentsForAllPages(uri, id);
 		}
 	}
 	
@@ -358,10 +324,21 @@ public class CommentsEngineBean extends IBOServiceBean implements CommentsEngine
 		return rss;
 	}
 	
-	private boolean getCommentsForAllPages(String uri) {
+	/**
+	 * Updates particular comments block in client's browser(s)
+	 * @param uri - link to comments
+	 * @param id - comments group id
+	 * @return
+	 */
+	private boolean getCommentsForAllPages(String uri, String id) {
+		return executeScriptForAllPages(getScriptForCommentsList(uri, id));
+	}
+	
+	private ScriptBuffer getScriptForCommentsList(String uri, String id) {
 		ScriptBuffer script = new ScriptBuffer();
-		script = new ScriptBuffer("getCommentsCallback(").appendData(getComments(uri)).appendScript(");");
-		return executeScriptForAllPages(script);
+		script = new ScriptBuffer("getCommentsCallback(").appendData(getComments(uri)).appendScript(", ").appendData(id);
+		script.appendScript(", ").appendData(uri).appendScript(");");
+		return script;
 	}
 	
 	private Collection getAllCurrentPageSessions() {
@@ -378,7 +355,7 @@ public class CommentsEngineBean extends IBOServiceBean implements CommentsEngine
 		return pages;
 	}
 	
-	public List<ArticleComment> getComments(String uri) {
+	private List<ArticleComment> getComments(String uri) {
 		Feed comments = getCommentsFeed(uri, null);
 		if (comments == null) {
 			return null;
@@ -441,6 +418,19 @@ public class CommentsEngineBean extends IBOServiceBean implements CommentsEngine
 			}
 		}
 		return items;
+	}
+	
+	public boolean getCommentsForCurrentPage(String uri, String id) {
+		WebContext wctx = WebContextFactory.get();
+		if (wctx == null) {
+			return false;
+		}
+		ScriptSession ss = wctx.getScriptSession();
+		if (ss == null) {
+			return false;
+		}
+		ss.addScript(getScriptForCommentsList(uri, id));
+		return true;
 	}
 	
 	public int getCommentsCount(String uri) {
@@ -610,6 +600,9 @@ public class CommentsEngineBean extends IBOServiceBean implements CommentsEngine
 		return true;
 	}
 	
+	/**
+	 * Closes loading layer in client's browser
+	 */
 	private void closeLoadingMessage() {
 		ScriptBuffer script = new ScriptBuffer("closeLoadingMessage();");
 		executeScriptForAllPages(script);
@@ -622,16 +615,21 @@ public class CommentsEngineBean extends IBOServiceBean implements CommentsEngine
 			return info;
 		}
 		
-		info.add(ArticleUtil.getBundle().getLocalizedString("posted"));							// 0
-		info.add(ArticleUtil.getBundle().getLocalizedString("loading_comments"));				// 1
-		info.add(ArticleUtil.getBundle().getLocalizedString("atom_feed"));						// 2
-		info.add(ThemesHelper.getInstance().getFullServerName(iwc) + ContentConstants.CONTENT);	// 3
-		info.add(ArticleUtil.getBundle().getLocalizedString("need_send_notification"));			// 4
-		info.add(ArticleUtil.getBundle().getLocalizedString("yes"));							// 5
-		info.add(ArticleUtil.getBundle().getLocalizedString("no"));								// 6
-		info.add(ArticleUtil.getBundle().getLocalizedString("enter_email_text"));				// 7
-		info.add(ArticleUtil.getBundle().getLocalizedString("saving"));							// 8
-		info.add(ArticleUtil.getBundle().getResourcesPath() + CommentsViewer.FEED_IMAGE);		// 9
+		info.add(ArticleUtil.getBundle().getLocalizedString("posted"));								// 0
+		info.add(ArticleUtil.getBundle().getLocalizedString("loading_comments"));					// 1
+		info.add(ArticleUtil.getBundle().getLocalizedString("atom_feed"));							// 2
+		info.add(ThemesHelper.getInstance().getFullServerName(iwc) + ContentConstants.CONTENT);		// 3
+		info.add(ArticleUtil.getBundle().getLocalizedString("need_send_notification"));				// 4
+		info.add(ArticleUtil.getBundle().getLocalizedString("yes"));								// 5
+		info.add(ArticleUtil.getBundle().getLocalizedString("no"));									// 6
+		info.add(ArticleUtil.getBundle().getLocalizedString("enter_email_text"));					// 7
+		info.add(ArticleUtil.getBundle().getLocalizedString("saving"));								// 8
+		info.add(ArticleUtil.getBundle().getResourcesPath() + CommentsViewer.FEED_IMAGE);	// 9
+		info.add(ArticleUtil.getBundle().getResourcesPath() + CommentsViewer.DELETE_IMAGE);	// 10
+		info.add(ArticleUtil.getBundle().getLocalizedString("deleting"));							// 11
+		info.add(ArticleUtil.getBundle().getLocalizedString("are_you_sure"));						// 12
+		info.add(ArticleUtil.getBundle().getLocalizedString("delete_all_comments"));				// 13
+		info.add(ArticleUtil.getBundle().getLocalizedString("delete_comment"));						// 14
 				
 		return info;
 	}
@@ -646,6 +644,84 @@ public class CommentsEngineBean extends IBOServiceBean implements CommentsEngine
 			return false;
 		}
 		return ContentUtil.hasContentEditorRoles(iwc);
+	}
+	
+	public boolean deleteComments(String id, String commentId, String linkToComments) {
+		if (id == null || linkToComments == null) {
+			closeLoadingMessage();
+			return false;
+		}
+		IWContext iwc = ThemesHelper.getInstance().getIWContext();
+		Feed comments = null;
+		synchronized(CommentsEngineBean.class) {
+			comments = getCommentsFeed(linkToComments, iwc);
+			if (comments == null) {
+				closeLoadingMessage();
+				return false;
+			}
+			if (commentId == null) { //	Delete all comments
+				comments.setEntries(new ArrayList<Entry>());
+			}
+			else { // Delete one comment
+				comments.setEntries(getUpdatedEntries(initEntries(comments.getEntries()), commentId));
+			}
+			putFeedToCache(comments, linkToComments, iwc);
+		}
+		if (!uploadFeed(linkToComments, comments, iwc)) {
+			closeLoadingMessage();
+		}
+		getCommentsForAllPages(linkToComments, id);
+		
+		return true;
+	}
+	
+	private List<Entry> getUpdatedEntries(List<Entry> entries, String commentId) {
+		if (entries == null) {
+			return null;
+		}
+		if (commentId == null) {
+			return entries;
+		}
+		Entry e = null;
+		boolean found = false;
+		for (int i = 0; (i < entries.size() && !found); i++) {
+			e = entries.get(i);
+			if (commentId.equals(e.getId())) {
+				entries.remove(e);
+				found = true;
+			}
+		}
+		return entries;
+	}
+	
+	private boolean uploadFeed(String uri, Feed comments, IWContext iwc) {
+		if (uri == null || comments == null || iwc == null) {
+			return false;
+		}
+		
+		String commentsContent = null;
+		try {
+			commentsContent = wfo.outputString(comments);
+		} catch (IllegalArgumentException e) {
+			log.error(e);
+			return false;
+		} catch (FeedException e) {
+			log.error(e);
+			return false;
+		}
+		
+		String fileBase = uri;
+		String fileName = uri;
+		int index = uri.lastIndexOf(ContentConstants.SLASH);
+		if (index != -1) {
+			fileBase = uri.substring(0, index);
+			fileName = uri.substring(index);
+		}
+		IWSlideService service = ThemesHelper.getInstance().getSlideService(iwc);
+		Thread uploader = new Thread(new CommentsFeedUploader(service, fileBase, fileName, commentsContent));
+		uploader.start();
+		
+		return true;
 	}
 	
 }

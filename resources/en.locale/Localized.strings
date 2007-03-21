@@ -111,3 +111,7 @@ email=E-mail
 comment_form=Comment form
 article_comments=Comments of Article
 all_article_comments=All comments
+delete_all_comments=Delete comments
+delete_comment=Delete this comment
+deleting=Deleting...
+are_you_sure=Are You sure?

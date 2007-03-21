@@ -31,13 +31,20 @@ var COMMENTS_YES = "Yes";
 var COMMENTS_NO = "No";
 var COMMENTS_ENTER_EMAIL = "Please enter Your e-mail!";
 var COMMENTS_SAVING_TEXT = "Saving...";
-var LINK_TO_ATOM_FEED_IMAGE = "/idegaweb/bundles/com.idega.content.bundle/resources/images/feed.png";
+var LINK_TO_ATOM_FEED_IMAGE = "/idegaweb/bundles/com.idega.block.article.bundle/resources/images/feed.png";
+var LINK_TO_DELETE_IMAGE = "/idegaweb/bundles/com.idega.block.article.bundle/resources/images/delete.png";
+var DELETING_MESSAGE_TEXT = "Deleting...";
+var ARE_YOU_SURE_FOR_DELETING = "Are You sure?";
+var DELETE_COMMENTS_LABEL = "Delete comments";
+var DELETE_COMMENT_LABEL = "Delete this comment";
 
 var HAS_COMMENT_VIEWER_VALID_RIGHTS = false;
 var ADDED_LINK_TO_ATOM_IN_BODY = false;
 
 var COMMENTS_LINK_TO_FILE = "/files";
 var SHOW_COMMENTS_LIST_ON_LOAD = false;
+
+var GLOBAL_COMMENTS_MARK_ID = null;
 
 /** Setters - getters  begins**/
 function setPostedLabel(postedLabel) {
@@ -128,9 +135,30 @@ function isShowCommentsListOnLoad() {
 	return SHOW_COMMENTS_LIST_ON_LOAD;
 }
 
-function setCommentStartInfo(linkToComments, showCommentsList) {
+function setCommentStartInfo(linkToComments, commentsId, showCommentsList) {
 	COMMENTS_LINK_TO_FILE = linkToComments;
+	GLOBAL_COMMENTS_MARK_ID = commentsId;
 	SHOW_COMMENTS_LIST_ON_LOAD = showCommentsList;
+}
+
+function setLinkToDeleteImage(deleteImage) {
+	LINK_TO_DELETE_IMAGE = deleteImage;
+}
+
+function setDeletingCommentMessageText(text) {
+	DELETING_MESSAGE_TEXT = text;
+}
+
+function setAreYouSureForDeletingComments(text) {
+	ARE_YOU_SURE_FOR_DELETING = text;
+}
+
+function setDeleteCommentsLabel(text) {
+	DELETE_COMMENTS_LABEL = text;
+}
+
+function setDeleteCommentLabel(text) {
+	DELETE_COMMENT_LABEL = text;
 }
 /** Setters - getters ends**/
 
@@ -142,7 +170,7 @@ function setCommentValues(user, subject, email, body) {
 }
 
 function addCommentPanel(id, linkToComments, lblUser, lblSubject, lblComment, lblPosted, lblSend, lblSending, loggedUser, lblEmail,
-	lblCommentForm, addEmail) {
+	lblCommentForm, addEmail, commentsId) {
 	enableReverseAjax();
 	setCommentValues("", "", "", "");
 	
@@ -168,10 +196,10 @@ function addCommentPanel(id, linkToComments, lblUser, lblSubject, lblComment, lb
 	if (container == null) {
 		return;
 	}
-	container.appendChild(getCommentPane(linkToComments, addEmail));
+	container.appendChild(getCommentPane(linkToComments, addEmail, commentsId));
 }
 
-function getCommentPane(linkToComments, addEmail) {
+function getCommentPane(linkToComments, addEmail, commentsId) {
 	var userId = "comment_user_value";
 	var subjectId = "comment_subject_value";
 	var emailId = "comment_email_value";
@@ -283,9 +311,9 @@ function getCommentPane(linkToComments, addEmail) {
 	sendCell.setAttribute("colspan", "2");
 	var send = createInput("send_comment", "button", LABEL_SEND, "send_comment_button");
 	if (typeof container.attachEvent != "undefined") {
-		send.attachEvent('onclick', function(e){closeCommentPanelAndSendComment(userId, subjectId, emailId, bodyId, linkToComments, secretInputId);});
+		send.attachEvent('onclick', function(e){closeCommentPanelAndSendComment(userId, subjectId, emailId, bodyId, linkToComments, secretInputId, commentsId);});
 	} else {
-		send.addEventListener('click', function(e){closeCommentPanelAndSendComment(userId, subjectId, emailId, bodyId, linkToComments, secretInputId);},false);
+		send.addEventListener('click', function(e){closeCommentPanelAndSendComment(userId, subjectId, emailId, bodyId, linkToComments, secretInputId, commentsId);},false);
 	}
 	sendCell.appendChild(send);
 	sendLine.appendChild(sendCell);
@@ -298,7 +326,7 @@ function getCommentPane(linkToComments, addEmail) {
 	return container;
 }
 
-function closeCommentPanelAndSendComment(userId, subjectId, emailId, bodyId, linkToComments, secretInputId) {
+function closeCommentPanelAndSendComment(userId, subjectId, emailId, bodyId, linkToComments, secretInputId, commentsId) {
 	if (userId == null || subjectId == null || bodyId == null || linkToComments == null) {
 		return;
 	}
@@ -334,10 +362,10 @@ function closeCommentPanelAndSendComment(userId, subjectId, emailId, bodyId, lin
 	showLoadingMessage(LABEL_SENDING);
 	closeCommentsPanel();
 	setCommentValues(user.value, subject.value, emailValue, body.value);
-	CommentsEngine.addComment(USER, SUBJECT, EMAIL, BODY, linkToComments, NEED_TO_NOTIFY);
+	CommentsEngine.addComment(USER, SUBJECT, EMAIL, BODY, linkToComments, NEED_TO_NOTIFY, commentsId);
 }
 
-function addComment(articleComment) {
+function addComment(articleComment, commentsId, linkToComments) {
 	var commentIndex = 0;
 	var counter = document.getElementById("contentItemCount");
 	if (counter != null) {
@@ -374,6 +402,22 @@ function addComment(articleComment) {
 		commentContainer.setAttribute("style", "margin: 0px;");
 	}
 	var commentValue = document.createElement("dl");
+	
+	if (HAS_COMMENT_VIEWER_VALID_RIGHTS) {
+		var deleteImage = document.createElement("img");
+		deleteImage.setAttribute("id", commentsId + "delete_article_comment" + articleComment.id);
+		deleteImage.setAttribute("src", LINK_TO_DELETE_IMAGE);
+		deleteImage.setAttribute("title", DELETE_COMMENT_LABEL);
+		deleteImage.setAttribute("alt", DELETE_COMMENT_LABEL);
+		deleteImage.setAttribute("name", DELETE_COMMENT_LABEL);
+		deleteImage.setAttribute("class", "deleteCommentsImage");
+		if (typeof commentsContainer.attachEvent == "undefined") {
+			deleteImage.addEventListener("click", function(e){deleteComments(commentsId, articleComment.id, linkToComments);}, false);
+		} else {
+			deleteImage.attachEvent("onclick", function(e){deleteComments(commentsId, articleComment.id, linkToComments);});
+		}
+		commentContainer.appendChild(deleteImage);
+	}
 	
 	var user = document.createElement("dt");
 	var userValue = document.createElement("p");
@@ -418,21 +462,33 @@ function closeCommentsPanel() {
 	NEED_TO_CHECK_COMMENTS_SIZE = false;
 }
 
-function getComments(linkToComments) {
+function getComments(linkToComments, commentsId) {
 	showLoadingMessage(getCommentsLoadingMessage());
-	CommentsEngine.getComments(linkToComments, getCommentsCallback);
+	CommentsEngine.getCommentsForCurrentPage(linkToComments, commentsId);
 }
 
-function getCommentsCallback(comments) {
+function getCommentsCallback(comments, id, linkToComments) {
 	closeLoadingMessage();
 	if (comments == null) {
 		closeLoadingMessage();
 		return;
 	}
-	addAtomButtonForComments();
+	
+	if (GLOBAL_COMMENTS_MARK_ID != null) {
+		if (id != GLOBAL_COMMENTS_MARK_ID) {
+			id = GLOBAL_COMMENTS_MARK_ID;
+		}
+	}
+	
+	if (comments.length == 0) {
+		removeAtomAndDeleteButtonsForComments(id);
+	}
+	else {
+		addAtomButtonForComments(id, linkToComments);
+	}
 	removeCommentsList();
 	for (var i = 0; i < comments.length; i++) {
-		addComment(comments[i]);
+		addComment(comments[i], id, linkToComments);
 	}
 }
 
@@ -511,7 +567,7 @@ function enableReverseAjax() {
 	}
 }
 
-function getCommentsList() {
+function getCommentsList(linkToComments, commentsId) {
 	enableReverseAjax();
 	if (SHOW_COMMENTS_LIST) {
 		SHOW_COMMENTS_LIST = false;
@@ -519,21 +575,8 @@ function getCommentsList() {
 	}
 	else {
 		SHOW_COMMENTS_LIST = true;
-		getComments(getLinkToComments());
+		getComments(linkToComments, commentsId);
 	}
-}
-
-function getCommentsSize() {
-	if (NEED_TO_CHECK_COMMENTS_SIZE) {
-		CommentsEngine.getCommentsCount(getLinkToComments(), getCommentsCountCallback);
-	}
-}
-
-function getCommentsCountCallback(count) {
-	if (count > 0) {
-		addAtomButtonForComments();
-	}
-	setCommentsCount(count);
 }
 
 function setCommentsCount(count) {
@@ -602,14 +645,14 @@ function hideOrShowCommentsCallback(needToReload) {
 	}
 }
 
-function initComments() {
+/*function initComments() {
 	enableReverseAjax();
 	CommentsEngine.getInitInfoForComments(getInitInfoForCommentsCallback);
-}
+}*/
 
 function getInitInfoForCommentsCallback(list) {
 	if (list != null) {
-		if (list.length == 10) {
+		if (list.length == 15) {
 			setPostedLabel(list[0]);
 			setCommentsLoadingMessage(list[1]);
 			setCommentsAtomLinkTitle(list[2]);
@@ -620,6 +663,11 @@ function getInitInfoForCommentsCallback(list) {
 			setEnterEmailText(list[7]);
 			setCommentsSavingText(list[8]);
 			setLinkToAtomFeedImage(list[9]);
+			setLinkToDeleteImage(list[10]);
+			setDeletingCommentMessageText(list[11]);
+			setAreYouSureForDeletingComments(list[12]);
+			setDeleteCommentsLabel(list[13]);
+			setDeleteCommentLabel(list[14]);
 		}
 	}
 	
@@ -629,7 +677,7 @@ function getInitInfoForCommentsCallback(list) {
 	
 	if (isShowCommentsListOnLoad()) {
 		SHOW_COMMENTS_LIST = true;
-		getComments(getLinkToComments());
+		//getComments(getLinkToComments());
 	}
 	
 	CommentsEngine.getUserRights(getUserRightsCallback);
@@ -639,21 +687,39 @@ function getUserRightsCallback(rights) {
 	setHasCommentViewerValidRights(rights);
 }
 
-function addAtomButtonForComments() {
-	if (ADDED_LINK_TO_ATOM_IN_BODY) {
+function removeElementFromParent(element) {
+	if (element == null) {
 		return;
 	}
-	var atomLinkId = "article_comments_link_to_feed";
-	var temp = document.getElementById(atomLinkId);
-	if (temp != null) {
-		var tempParent = temp.parentNode;
-		if (tempParent != null) {
-			tempParent.removeChild(temp);
-		}
+	var elementParent = element.parentNode;
+	if (elementParent != null) {
+		elementParent.removeChild(element);
+	}
+}
+
+function removeAtomAndDeleteButtonsForComments(commentsId) {
+	if (commentsId == null) {
+		return;
+	}
+	var atomLinkId = commentsId + "article_comments_link_to_feed";
+	removeElementFromParent(document.getElementById(atomLinkId));
+	
+	var deleteImageId = commentsId + "delete_article_comments";
+	removeElementFromParent(document.getElementById(deleteImageId));
+}
+
+function addAtomButtonForComments(commentsId, linkToComments) {
+	if (commentsId == null || linkToComments == null) {
+		return;
+	}
+	var atomLinkId = commentsId + "article_comments_link_to_feed";
+	var atomLink = document.getElementById(atomLinkId);
+	if (atomLink != null) {
+		return;
 	}
 	
 	// Container
-	var container = document.getElementById("article_comments_link_label_container");
+	var container = document.getElementById(commentsId + "article_comments_link_label_container");
 	if (container == null) {
 		return;
 	}
@@ -661,7 +727,7 @@ function addAtomButtonForComments() {
 	// Link
 	var linkToFeed = document.createElement("a");
 	linkToFeed.setAttribute("id", atomLinkId);
-	linkToFeed.setAttribute("href", getCommentsAtomsServer() + getLinkToComments());
+	linkToFeed.setAttribute("href", getCommentsAtomsServer() + linkToComments);
 	linkToFeed.setAttribute("rel", "alternate");
 	linkToFeed.setAttribute("type", "application/atom+xml");
 		
@@ -676,8 +742,36 @@ function addAtomButtonForComments() {
 	linkToFeed.appendChild(image);
 		
 	container.appendChild(linkToFeed);
+	
+	if (HAS_COMMENT_VIEWER_VALID_RIGHTS) {
+		container.appendChild(document.createTextNode(" "));
+		
+		var deleteImage = document.createElement("img");
+		deleteImage.setAttribute("id", commentsId + "delete_article_comments");
+		deleteImage.setAttribute("src", LINK_TO_DELETE_IMAGE);
+		deleteImage.setAttribute("title", DELETE_COMMENTS_LABEL);
+		deleteImage.setAttribute("alt", DELETE_COMMENTS_LABEL);
+		deleteImage.setAttribute("name", DELETE_COMMENTS_LABEL);
+		deleteImage.setAttribute("class", "deleteCommentsImage");
+		if (typeof container.attachEvent == "undefined") {
+			deleteImage.addEventListener("click", function(e){deleteComments(commentsId, null, linkToComments);}, false);
+		} else {
+			deleteImage.attachEvent("onclick", function(e){deleteComments(commentsId, null, linkToComments);});
+		}
+	}
+	
+	container.appendChild(deleteImage);
 }
 
 function setAddedLinkToAtomInBody(added) {
 	ADDED_LINK_TO_ATOM_IN_BODY = added;
+}
+
+function deleteComments(id, commentId, linkToComments) {
+	var confirmed = confirm(ARE_YOU_SURE_FOR_DELETING);
+	if (!confirmed) {
+		return;
+	}
+	showLoadingMessage(DELETING_MESSAGE_TEXT);
+	CommentsEngine.deleteComments(id, commentId, linkToComments);
 }
