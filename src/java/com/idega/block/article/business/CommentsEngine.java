@@ -1,5 +1,6 @@
 package com.idega.block.article.business;
 
+import com.idega.block.article.bean.ArticleComment;
 import com.idega.business.IBOService;
 import java.util.List;
 import java.rmi.RemoteException;
@@ -38,10 +39,20 @@ public interface CommentsEngine extends IBOService {
 	/**
 	 * @see com.idega.block.article.business.CommentsEngineBean#deleteComments
 	 */
-	public boolean deleteComments(String id, String commentId, String linkToComments);
+	public List<String> deleteComments(String id, String commentId, String linkToComments);
 	
 	/**
-	 * @see com.idega.block.article.business.CommentsEngineBean#deleteComments
+	 * @see com.idega.block.article.business.CommentsEngineBean#getCommentsForCurrentPage
 	 */
 	public boolean getCommentsForCurrentPage(String uri, String id);
+	
+	/**
+	 * @see com.idega.block.article.business.CommentsEngineBean#getCommentsForAllPages
+	 */
+	public boolean getCommentsForAllPages(String uri, String id);
+	
+	/**
+	 * @see com.idega.block.article.business.CommentsEngineBean#getComments
+	 */
+	public List<ArticleComment> getComments(String uri);
 }

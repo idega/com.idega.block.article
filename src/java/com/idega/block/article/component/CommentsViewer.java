@@ -104,8 +104,8 @@ public class CommentsViewer extends Block {
 		WFDivision articleComments = new WFDivision();
 		articleComments.setId(new StringBuffer(commentsId).append("article_comments_link_label_container").toString());
 		StringBuffer comments = new StringBuffer(ArticleUtil.getBundle().getLocalizedString("comments"));
-		comments.append(ContentConstants.SPACE).append("(<span id='contentItemCount' class='contentItemCountStyle'>");
-		comments.append(commentsCount).append("</span>)");
+		comments.append(ContentConstants.SPACE).append("(<span id='").append(commentsId);
+		comments.append("contentItemCount' class='contentItemCountStyle'>").append(commentsCount).append("</span>)");
 		Link commentsLabel = new Link(comments.toString(), "#showCommentsList");
 		StringBuffer getCommentsAction = new StringBuffer("getCommentsList('").append(linkToComments).append(SEPARATOR);
 		getCommentsAction.append(commentsId).append("')");

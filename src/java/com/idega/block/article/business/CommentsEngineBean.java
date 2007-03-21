@@ -330,13 +330,13 @@ public class CommentsEngineBean extends IBOServiceBean implements CommentsEngine
 	 * @param id - comments group id
 	 * @return
 	 */
-	private boolean getCommentsForAllPages(String uri, String id) {
+	public boolean getCommentsForAllPages(String uri, String id) {
 		return executeScriptForAllPages(getScriptForCommentsList(uri, id));
 	}
 	
 	private ScriptBuffer getScriptForCommentsList(String uri, String id) {
 		ScriptBuffer script = new ScriptBuffer();
-		script = new ScriptBuffer("getCommentsCallback(").appendData(getComments(uri)).appendScript(", ").appendData(id);
+		script = new ScriptBuffer("getCommentsCallback(").appendData(getCommentsList(uri)).appendScript(", ").appendData(id);
 		script.appendScript(", ").appendData(uri).appendScript(");");
 		return script;
 	}
@@ -355,7 +355,14 @@ public class CommentsEngineBean extends IBOServiceBean implements CommentsEngine
 		return pages;
 	}
 	
-	private List<ArticleComment> getComments(String uri) {
+	public List<ArticleComment> getComments(String uri) {
+		return getCommentsList(uri);
+	}
+	
+	private List<ArticleComment> getCommentsList(String uri) {
+		if (uri == null) {
+			return null;
+		}
 		Feed comments = getCommentsFeed(uri, null);
 		if (comments == null) {
 			return null;
@@ -646,18 +653,16 @@ public class CommentsEngineBean extends IBOServiceBean implements CommentsEngine
 		return ContentUtil.hasContentEditorRoles(iwc);
 	}
 	
-	public boolean deleteComments(String id, String commentId, String linkToComments) {
+	public List<String> deleteComments(String id, String commentId, String linkToComments) {
 		if (id == null || linkToComments == null) {
-			closeLoadingMessage();
-			return false;
+			return null;
 		}
 		IWContext iwc = ThemesHelper.getInstance().getIWContext();
 		Feed comments = null;
 		synchronized(CommentsEngineBean.class) {
 			comments = getCommentsFeed(linkToComments, iwc);
 			if (comments == null) {
-				closeLoadingMessage();
-				return false;
+				return null;
 			}
 			if (commentId == null) { //	Delete all comments
 				comments.setEntries(new ArrayList<Entry>());
@@ -668,11 +673,13 @@ public class CommentsEngineBean extends IBOServiceBean implements CommentsEngine
 			putFeedToCache(comments, linkToComments, iwc);
 		}
 		if (!uploadFeed(linkToComments, comments, iwc)) {
-			closeLoadingMessage();
+			return null;
 		}
-		getCommentsForAllPages(linkToComments, id);
-		
-		return true;
+		//getCommentsForAllPages(linkToComments, id);
+		List<String> params = new ArrayList<String>();
+		params.add(id);
+		params.add(linkToComments);
+		return params;
 	}
 	
 	private List<Entry> getUpdatedEntries(List<Entry> entries, String commentId) {

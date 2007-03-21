@@ -367,7 +367,7 @@ function closeCommentPanelAndSendComment(userId, subjectId, emailId, bodyId, lin
 
 function addComment(articleComment, commentsId, linkToComments) {
 	var commentIndex = 0;
-	var counter = document.getElementById("contentItemCount");
+	var counter = document.getElementById(commentsId + "contentItemCount");
 	if (counter != null) {
 		var children = counter.childNodes;
 		if (children != null) {
@@ -464,7 +464,12 @@ function closeCommentsPanel() {
 
 function getComments(linkToComments, commentsId) {
 	showLoadingMessage(getCommentsLoadingMessage());
-	CommentsEngine.getCommentsForCurrentPage(linkToComments, commentsId);
+	CommentsEngine.getComments(linkToComments, {
+  		callback:function(comments) { // Passing parameters to callback
+    		getCommentsCallback(comments, commentsId, linkToComments);
+  		}
+	});
+	//CommentsEngine.getCommentsForCurrentPage(linkToComments, commentsId);
 }
 
 function getCommentsCallback(comments, id, linkToComments) {
@@ -486,7 +491,7 @@ function getCommentsCallback(comments, id, linkToComments) {
 	else {
 		addAtomButtonForComments(id, linkToComments);
 	}
-	removeCommentsList();
+	removeCommentsList(id);
 	for (var i = 0; i < comments.length; i++) {
 		addComment(comments[i], id, linkToComments);
 	}
@@ -525,8 +530,8 @@ function createTableLine(cellLabel, inputId, inputType, inputValue, inputStyle) 
 	return line;
 }
 
-function removeCommentsList() {
-	var counter = document.getElementById("contentItemCount");
+function removeCommentsList(commentId) {
+	var counter = document.getElementById(commentId + "contentItemCount");
 	if (counter != null) {
 		var children = counter.childNodes;
 		if (children != null) {
@@ -579,8 +584,8 @@ function getCommentsList(linkToComments, commentsId) {
 	}
 }
 
-function setCommentsCount(count) {
-	var counter = document.getElementById("contentItemCount");
+function setCommentsCount(count, commentId) {
+	var counter = document.getElementById(commentId + "contentItemCount");
 	if (counter == null) {
 		return;
 	}
@@ -592,8 +597,8 @@ function setCommentsCount(count) {
 	counter.appendChild(document.createTextNode(count));
 }
 
-function getCommentsCount() {
-	var counter = document.getElementById("contentItemCount");
+function getCommentsCount(commentId) {
+	var counter = document.getElementById(commentId + "contentItemCount");
 	if (counter == null) {
 		return 0;
 	}
@@ -669,10 +674,6 @@ function getInitInfoForCommentsCallback(list) {
 			setDeleteCommentsLabel(list[13]);
 			setDeleteCommentLabel(list[14]);
 		}
-	}
-	
-	if (getCommentsCount() > 0) {
-		setAddedLinkToAtomInBody(true);
 	}
 	
 	if (isShowCommentsListOnLoad()) {
@@ -773,5 +774,15 @@ function deleteComments(id, commentId, linkToComments) {
 		return;
 	}
 	showLoadingMessage(DELETING_MESSAGE_TEXT);
-	CommentsEngine.deleteComments(id, commentId, linkToComments);
+	CommentsEngine.deleteComments(id, commentId, linkToComments, deleteCommentsCallback);
+}
+
+function deleteCommentsCallback(result) {
+	closeLoadingMessage();
+	if (result == null) {
+		return;
+	}
+	if (result.length == 2) {
+		CommentsEngine.getCommentsForAllPages(result[1], result[0]);
+	}
 }
