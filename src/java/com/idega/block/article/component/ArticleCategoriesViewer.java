@@ -228,8 +228,10 @@ public class ArticleCategoriesViewer extends Block {
 					box.setChecked(enabled.booleanValue());
 				}
 				
+				String separator = "', '";
 				StringBuffer action = new StringBuffer();
-				action.append("setDisplayArticleCategory(this, '").append(pageKey).append("', '").append(moduleIds.get(0)).append("')");
+				action.append("setDisplayArticleCategory(this, '").append(pageKey).append(separator).append(moduleIds.get(0));
+				action.append(separator).append(ArticleUtil.getBundle().getLocalizedString("saving")).append("')");
 				box.setOnClick(action.toString());
 			}
 		}

@@ -1,4 +1,4 @@
-function setDisplayArticleCategory(element, pageKey, moduleId) {
+function setDisplayArticleCategory(element, pageKey, moduleId, savingMessage) {
 	if (element == null || pageKey == null || moduleId == null) {
 		return;
 	}
@@ -6,7 +6,7 @@ function setDisplayArticleCategory(element, pageKey, moduleId) {
 	if (category == null) {
 		return;
 	}
-	showLoadingMessage("Saving...");
+	showLoadingMessage(savingMessage);
 	if (element.checked) {
 		BuilderService.addPropertyToModule(pageKey, moduleId, "categories", category, setDisplayArticleCategoryCallback);
 	}
