@@ -192,6 +192,9 @@ public class CommentsViewer extends Block {
 		if (!hasValidRights) {
 			return;
 		}
+		if (isUsedInArticleList()) {
+			return;
+		}
 		String pageKey = getThisPageKey(iwc);
 		if (pageKey == null) {
 			return;

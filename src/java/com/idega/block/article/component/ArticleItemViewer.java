@@ -1,5 +1,5 @@
 /*
- * $Id: ArticleItemViewer.java,v 1.26 2007/03/07 17:14:48 justinas Exp $
+ * $Id: ArticleItemViewer.java,v 1.27 2007/03/23 14:52:06 valdas Exp $
  *
  * Copyright (C) 2004 Idega. All Rights Reserved.
  *
@@ -19,6 +19,7 @@ import com.idega.block.article.ArticleCacher;
 import com.idega.block.article.bean.ArticleItemBean;
 import com.idega.block.article.bean.ArticleLocalizedItemBean;
 import com.idega.block.article.business.ArticleActionURIHandler;
+import com.idega.block.article.business.ArticleUtil;
 import com.idega.content.bean.ContentItem;
 import com.idega.content.presentation.ContentItemToolbar;
 import com.idega.content.presentation.ContentItemViewer;
@@ -32,12 +33,12 @@ import com.idega.webface.WFHtml;
 import com.idega.webface.convert.WFTimestampConverter;
 
 /**
- * Last modified: $Date: 2007/03/07 17:14:48 $ by $Author: justinas $
+ * Last modified: $Date: 2007/03/23 14:52:06 $ by $Author: valdas $
  *
  * Displays the article item
  *
  * @author <a href="mailto:gummi@idega.com">Gudmundur Agust Saemundsson</a>
- * @version $Revision: 1.26 $
+ * @version $Revision: 1.27 $
  */
 public class ArticleItemViewer extends ContentItemViewer {
 	
@@ -57,10 +58,8 @@ public class ArticleItemViewer extends ContentItemViewer {
 	
 	private boolean showAuthor = true;
 	private boolean showCreationDate = true;
-//	private boolean showComments = false;
-//	private boolean showCommentsList = false;
-//	private boolean forumPage = false;
-//	private boolean showCommentsForAllUsers = true;
+	private boolean isJavaScriptForCommentsAdded = false;
+	private boolean addCommentsViewer = false;
 	
 	/**
 	 * @return Returns the cacheEnabled.
@@ -302,10 +301,39 @@ public class ArticleItemViewer extends ContentItemViewer {
 	
 	@SuppressWarnings("unchecked")
 	protected void initializeComments(FacesContext context) {
+		super.initializeComments(context);
 	}
 	
+	@SuppressWarnings("unchecked")
 	protected void updateComments() {
+		if (isAddCommentsViewer()) {
+			addCommentsScript();
+			CommentsViewer comments = new CommentsViewer();
+			comments.setUsedInArticleList(true);
+			comments.setShowCommentsForAllUsers(true);
+			comments.setLinkToComments(getLinkToComments());
+			getFacets().put(ContentItemViewer.FACET_ITEM_COMMENTS, comments);
+		}
 		super.updateComments();
+	}
+	
+	@SuppressWarnings("unchecked")
+	private void addCommentsScript() {
+		if (isJavaScriptForCommentsAdded) {
+			if (getFacets().get(FACET_COMMENTS_SCRIPTS) != null) {
+				getFacets().remove(FACET_COMMENTS_SCRIPTS);
+				return;
+			}
+		}
+		else {
+			Script onLoadScript = new Script();
+			onLoadScript.addScriptSource(CommentsViewer.COMMENTS_ENGINE);
+			onLoadScript.addScriptSource(CommentsViewer.DWR_ENGINE);
+			onLoadScript.addScriptSource(ArticleUtil.getBundle().getResourcesPath() + CommentsViewer.COMMENTS_HELPER);
+			onLoadScript.addScriptLine(CommentsViewer.INIT_SCRIPT_LINE);
+			getFacets().put(FACET_COMMENTS_SCRIPTS, onLoadScript);
+			isJavaScriptForCommentsAdded = true;
+		}
 	}
 	
 	public String getLinkToComments() {
@@ -330,7 +358,6 @@ public class ArticleItemViewer extends ContentItemViewer {
 		try {
 			bservice = BuilderServiceFactory.getBuilderService(iwc);
 		} catch (RemoteException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		try {
@@ -341,33 +368,16 @@ public class ArticleItemViewer extends ContentItemViewer {
 			String linkToFeed = serverName+"rss/article"+feedUri;
 			addFeedJavaScript(linkToFeed, "atom", "Atom 1.0");
 		} catch (RemoteException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
-	
-//	public boolean isShowCommentsList() {
-//		return showCommentsList;
-//	}
-//
-//	public void setShowCommentsList(boolean showCommentsList) {
-//		this.showCommentsList = showCommentsList;
-//	}
-//
-//	public boolean isForumPage() {
-//		return forumPage;
-//	}
-//
-//	public void setForumPage(boolean forumPage) {
-//		this.forumPage = forumPage;
-//	}
-//
-//	public boolean isShowCommentsForAllUsers() {
-//		return showCommentsForAllUsers;
-//	}
-//
-//	public void setShowCommentsForAllUsers(boolean showCommentsForAllUsers) {
-//		this.showCommentsForAllUsers = showCommentsForAllUsers;
-//	}
+
+	protected boolean isAddCommentsViewer() {
+		return addCommentsViewer;
+	}
+
+	protected void setAddCommentsViewer(boolean addCommentsViewer) {
+		this.addCommentsViewer = addCommentsViewer;
+	}
 
 }

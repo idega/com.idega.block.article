@@ -1,5 +1,5 @@
 /*
- * $Id: ArticleListViewer.java,v 1.7 2007/03/07 17:15:55 justinas Exp $
+ * $Id: ArticleListViewer.java,v 1.8 2007/03/23 14:52:06 valdas Exp $
  * Created on 24.1.2005
  *
  * Copyright (C) 2005 Idega Software hf. All Rights Reserved.
@@ -12,9 +12,7 @@ package com.idega.block.article.component;
 import java.io.IOException;
 import java.rmi.RemoteException;
 
-import javax.faces.component.html.HtmlOutputText;
 import javax.faces.context.FacesContext;
-import javax.faces.context.ResponseWriter;
 
 import com.idega.block.article.ArticleCacher;
 import com.idega.block.article.bean.ArticleListManagedBean;
@@ -27,7 +25,6 @@ import com.idega.core.cache.UIComponentCacher;
 import com.idega.idegaweb.IWMainApplication;
 import com.idega.presentation.IWContext;
 import com.idega.presentation.Script;
-import com.idega.webface.convert.WFTimestampConverter;
 
 
 /**
@@ -36,10 +33,10 @@ import com.idega.webface.convert.WFTimestampConverter;
  * for the article module.
  * </p>
  * 
- *  Last modified: $Date: 2007/03/07 17:15:55 $ by $Author: justinas $
+ *  Last modified: $Date: 2007/03/23 14:52:06 $ by $Author: valdas $
  * 
  * @author <a href="mailto:tryggvi@idega.com">Tryggvi Larusson</a>
- * @version $Revision: 1.7 $
+ * @version $Revision: 1.8 $
  */
 public class ArticleListViewer extends ContentItemListViewer {
 
@@ -49,8 +46,7 @@ public class ArticleListViewer extends ContentItemListViewer {
 	//instance variables:
 	boolean headlineAsLink=false;
 	
-	boolean showComments = false;
-	
+	private boolean showComments = false;
 	private String linkToRSS = null;
 	
 	/**
@@ -122,16 +118,17 @@ public class ArticleListViewer extends ContentItemListViewer {
 	public void setLinkToRSS(String linkToRSS) {
 		this.linkToRSS = linkToRSS;
 	}
+	
 	protected void initializeComponent(FacesContext context) {
 		addFeed(context);
-	}	
+	}
+	
 	private void addFeed(FacesContext context){
 		IWContext iwc = IWContext.getIWContext(context);
 		BuilderService bservice = null;
 		try {
 			bservice = BuilderServiceFactory.getBuilderService(iwc);
 		} catch (RemoteException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		try {
@@ -142,7 +139,6 @@ public class ArticleListViewer extends ContentItemListViewer {
 			String linkToFeed = serverName+"rss/article"+feedUri;
 			addFeedJavaScript(linkToFeed, "atom", "Atom 1.0");
 		} catch (RemoteException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
@@ -153,5 +149,28 @@ public class ArticleListViewer extends ContentItemListViewer {
 		script.addScriptLine("addFeedSymbolInHeader('"+linkToFeed+"', '"+feedType+"', '"+feedTitle+"');");
 		getFacets().put(ContentItemViewer.FACET_FEED_SCRIPT, script);
 		return true;
+	}
+		
+	public void encodeChildren(FacesContext context) throws IOException {
+		super.encodeChildren(context);
+	}
+	
+	protected void addContentItemViewer(ContentItemViewer viewer) {
+		if (isShowComments()) {
+			ArticleItemViewer article = null;
+			if (viewer instanceof ArticleItemViewer) {
+				article = (ArticleItemViewer) viewer;
+//				ContentItemHelper helper = new ContentItemHelper(article.getResourcePath());
+//				FacesContext context = FacesContext.getCurrentInstance();
+//				if (context != null) {
+//					if (helper.isCommentsEnabledInMainPage(IWContext.getIWContext(context), ArticleItemViewer.class.getName(), CommentsViewer.class.getName())) {
+						article.setAddCommentsViewer(true);
+						super.addContentItemViewer(article);
+						return;
+//					}
+//				}
+			}
+		}
+		super.addContentItemViewer(viewer);
 	}
 }
