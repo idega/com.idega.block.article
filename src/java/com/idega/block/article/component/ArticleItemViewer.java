@@ -1,5 +1,5 @@
 /*
- * $Id: ArticleItemViewer.java,v 1.27 2007/03/23 14:52:06 valdas Exp $
+ * $Id: ArticleItemViewer.java,v 1.28 2007/03/26 10:24:05 valdas Exp $
  *
  * Copyright (C) 2004 Idega. All Rights Reserved.
  *
@@ -19,7 +19,6 @@ import com.idega.block.article.ArticleCacher;
 import com.idega.block.article.bean.ArticleItemBean;
 import com.idega.block.article.bean.ArticleLocalizedItemBean;
 import com.idega.block.article.business.ArticleActionURIHandler;
-import com.idega.block.article.business.ArticleUtil;
 import com.idega.content.bean.ContentItem;
 import com.idega.content.presentation.ContentItemToolbar;
 import com.idega.content.presentation.ContentItemViewer;
@@ -33,12 +32,12 @@ import com.idega.webface.WFHtml;
 import com.idega.webface.convert.WFTimestampConverter;
 
 /**
- * Last modified: $Date: 2007/03/23 14:52:06 $ by $Author: valdas $
+ * Last modified: $Date: 2007/03/26 10:24:05 $ by $Author: valdas $
  *
  * Displays the article item
  *
  * @author <a href="mailto:gummi@idega.com">Gudmundur Agust Saemundsson</a>
- * @version $Revision: 1.27 $
+ * @version $Revision: 1.28 $
  */
 public class ArticleItemViewer extends ContentItemViewer {
 	
@@ -58,7 +57,6 @@ public class ArticleItemViewer extends ContentItemViewer {
 	
 	private boolean showAuthor = true;
 	private boolean showCreationDate = true;
-	private boolean isJavaScriptForCommentsAdded = false;
 	private boolean addCommentsViewer = false;
 	
 	/**
@@ -307,7 +305,6 @@ public class ArticleItemViewer extends ContentItemViewer {
 	@SuppressWarnings("unchecked")
 	protected void updateComments() {
 		if (isAddCommentsViewer()) {
-			addCommentsScript();
 			CommentsViewer comments = new CommentsViewer();
 			comments.setUsedInArticleList(true);
 			comments.setShowCommentsForAllUsers(true);
@@ -315,25 +312,6 @@ public class ArticleItemViewer extends ContentItemViewer {
 			getFacets().put(ContentItemViewer.FACET_ITEM_COMMENTS, comments);
 		}
 		super.updateComments();
-	}
-	
-	@SuppressWarnings("unchecked")
-	private void addCommentsScript() {
-		if (isJavaScriptForCommentsAdded) {
-			if (getFacets().get(FACET_COMMENTS_SCRIPTS) != null) {
-				getFacets().remove(FACET_COMMENTS_SCRIPTS);
-				return;
-			}
-		}
-		else {
-			Script onLoadScript = new Script();
-			onLoadScript.addScriptSource(CommentsViewer.COMMENTS_ENGINE);
-			onLoadScript.addScriptSource(CommentsViewer.DWR_ENGINE);
-			onLoadScript.addScriptSource(ArticleUtil.getBundle().getResourcesPath() + CommentsViewer.COMMENTS_HELPER);
-			onLoadScript.addScriptLine(CommentsViewer.INIT_SCRIPT_LINE);
-			getFacets().put(FACET_COMMENTS_SCRIPTS, onLoadScript);
-			isJavaScriptForCommentsAdded = true;
-		}
 	}
 	
 	public String getLinkToComments() {

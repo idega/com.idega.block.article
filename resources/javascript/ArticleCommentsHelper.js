@@ -619,10 +619,10 @@ function setNeedToNotify(object) {
 	}
 }
 
-function enableComments(enable, pageKey, moduleId, propName) {
+function enableComments(enable, pageKey, moduleId, propName, cacheKey) {
 	CHECKED_BOX_MANUALY = true;
 	showLoadingMessage(getCommentsSavingText());
-	CommentsEngine.setModuleProperty(pageKey, moduleId, propName, enable);
+	CommentsEngine.setModuleProperty(pageKey, moduleId, propName, enable, cacheKey);
 }
 
 function hideOrShowComments() {

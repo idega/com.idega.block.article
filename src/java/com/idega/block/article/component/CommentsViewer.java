@@ -98,7 +98,7 @@ public class CommentsViewer extends Block {
 		}
 		
 		// Enable comments container
-		addEnableCommentsCheckboxContainer(iwc, container, hasValidRights);
+		addEnableCommentsCheckboxContainer(iwc, container, hasValidRights, null);
 		
 		// Comments label
 		WFDivision articleComments = new WFDivision();
@@ -173,7 +173,7 @@ public class CommentsViewer extends Block {
 		return true;
 	}
 	
-	private String getThisPageKey(IWContext iwc) {
+	protected String getThisPageKey(IWContext iwc) {
 		if (iwc == null) {
 			return null;
 		}
@@ -188,36 +188,45 @@ public class CommentsViewer extends Block {
 		return pageKey;
 	}
 	
-	private void addEnableCommentsCheckboxContainer(IWContext iwc, WFDivision container, boolean hasValidRights) {
+	private void addEnableCommentsCheckboxContainer(IWContext iwc, WFDivision container, boolean hasValidRights, String cacheKey) {
 		if (!hasValidRights) {
 			return;
 		}
 		if (isUsedInArticleList()) {
 			return;
 		}
+		container.add(getCommentsController(iwc, cacheKey, getClientId(iwc), isShowCommentsForAllUsers(), SHOW_COMMENTS_PROPERTY));
+	}
+	
+	protected WFDivision getCommentsController(IWContext iwc, String cacheKey, String moduleId, boolean enabled, String propertyName) {
+		WFDivision commentsController = new WFDivision();
+		if (iwc == null || moduleId == null || propertyName == null) {
+			return commentsController;
+		}
 		String pageKey = getThisPageKey(iwc);
 		if (pageKey == null) {
-			return;
+			return commentsController;
 		}
-		String moduleId = this.getClientId(iwc);
-		if (moduleId == null) {
-			return;
-		}
-		WFDivision showCommentsContainer = new WFDivision();
 		
 		CheckBox enableCheckBox = new CheckBox("enableComments");
 		enableCheckBox.setId("manageCommentsBlockCheckBox");
 		StringBuffer action = new StringBuffer("enableComments(this.checked, '");
-		action.append(pageKey).append(SEPARATOR).append(moduleId).append(SEPARATOR).append(SHOW_COMMENTS_PROPERTY);
-		action.append("');");
+		action.append(pageKey).append(SEPARATOR).append(moduleId).append(SEPARATOR).append(propertyName).append("', ");
+		if (cacheKey == null) {
+			action.append("null);");
+		}
+		else {
+			action.append("'").append(cacheKey).append("');");
+		}
 		enableCheckBox.setOnClick(action.toString());
-		enableCheckBox.setChecked(isShowCommentsForAllUsers());
+		enableCheckBox.setChecked(enabled);
 		
 		Text enableText = new Text(ArticleUtil.getBundle().getLocalizedString("enable_comments"));
 		
-		showCommentsContainer.add(enableText);
-		showCommentsContainer.add(enableCheckBox);
-		container.add(showCommentsContainer);
+		commentsController.add(enableText);
+		commentsController.add(enableCheckBox);
+		
+		return commentsController;
 	}
 	
 	private UIComponent getAddCommentBlock(IWContext iwc, String commentsId) {

@@ -19,7 +19,7 @@ public interface CommentsEngine extends IBOService {
 	/**
 	 * @see com.idega.block.article.business.CommentsEngineBean#setModuleProperty
 	 */
-	public boolean setModuleProperty(String pageKey, String moduleId, String propName, String propValue) throws RemoteException;
+	public boolean setModuleProperty(String pageKey, String moduleId, String propName, String propValue, String cacheKey) throws RemoteException;
 
 	/**
 	 * @see com.idega.block.article.business.CommentsEngineBean#hideOrShowComments
