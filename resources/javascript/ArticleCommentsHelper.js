@@ -173,6 +173,7 @@ function addCommentPanel(id, linkToComments, lblUser, lblSubject, lblComment, lb
 	lblCommentForm, addEmail, commentsId) {
 	enableReverseAjax();
 	setCommentValues("", "", "", "");
+	refreshGlobalCommentsId(commentsId);
 	
 	LABEL_USER = lblUser;
 	LABEL_SUBJECT = lblSubject;
@@ -370,9 +371,11 @@ function addComment(articleComment, commentsId, linkToComments) {
 	if (counter != null) {
 		var children = counter.childNodes;
 		if (children != null) {
-			var countValue = counter.childNodes[0];
-			countValue.nodeValue++;
-			commentIndex = countValue.nodeValue;
+			if (children.length > 0) {
+				var countValue = counter.childNodes[0];
+				countValue.nodeValue++;
+				commentIndex = countValue.nodeValue;
+			}
 		}
 	}
 	
@@ -573,11 +576,18 @@ function enableReverseAjax() {
 
 function getCommentsList(linkToComments, commentsId) {
 	enableReverseAjax();
+	refreshGlobalCommentsId(commentsId);
 	if (needToShowCommentsList(commentsId)) {
 		getComments(linkToComments, commentsId);
 	}
 	else {
 		hideCommentsList(commentsId);
+	}
+}
+
+function refreshGlobalCommentsId(commentsId) {
+	if (GLOBAL_COMMENTS_MARK_ID != commentsId) {
+		GLOBAL_COMMENTS_MARK_ID = commentsId;
 	}
 }
 
@@ -756,9 +766,9 @@ function addAtomButtonForComments(commentsId, linkToComments) {
 		} else {
 			deleteImage.attachEvent("onclick", function(e){deleteComments(commentsId, null, linkToComments);});
 		}
+		
+		container.appendChild(deleteImage);
 	}
-	
-	container.appendChild(deleteImage);
 }
 
 function setAddedLinkToAtomInBody(added) {
