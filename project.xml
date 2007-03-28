@@ -92,15 +92,11 @@
     <dependency>
       <groupId>bundles</groupId>
       <artifactId>com.idega.core</artifactId>
-      <version>3.1.0</version>
+      <version>3.1.41</version>
       <type>jar</type>
       <url>http://www.idega.com/</url>
       <properties>
-        <!--j:if test="${idegaweb.project.source.dependent}=='true'}"-->
-
-        <eclipse.dependency>true</eclipse.dependency>
-        <!--/j:if-->
-
+     	 <eclipse.dependency>true</eclipse.dependency>
       </properties>
     </dependency>
     <dependency>
@@ -110,12 +106,8 @@
       <type>jar</type>
       <url>http://www.idega.com/</url>
       <properties>
-        <!--j:if test="${idegaweb.project.source.dependent}=='true'}"-->
-
-        <eclipse.dependency>true</eclipse.dependency>
-        <!--/j:if-->
-
-      </properties>
+      	<eclipse.dependency>true</eclipse.dependency>
+       </properties>
     </dependency>
     <dependency>
       <groupId>bundles</groupId>
