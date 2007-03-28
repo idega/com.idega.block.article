@@ -64,6 +64,11 @@
       <name>3.1.5</name>
       <tag>ARTICLE_3_1_5</tag>
     </version>
+    <version>
+      <id>3.1.6</id>
+      <name>3.1.6</name>
+      <tag>ARTICLE_3_1_6</tag>
+    </version>
   </versions>
   <developers>
     <developer>
@@ -96,7 +101,7 @@
       <type>jar</type>
       <url>http://www.idega.com/</url>
       <properties>
-     	 <eclipse.dependency>true</eclipse.dependency>
+        <eclipse.dependency>true</eclipse.dependency>
       </properties>
     </dependency>
     <dependency>
@@ -106,8 +111,8 @@
       <type>jar</type>
       <url>http://www.idega.com/</url>
       <properties>
-      	<eclipse.dependency>true</eclipse.dependency>
-       </properties>
+        <eclipse.dependency>true</eclipse.dependency>
+      </properties>
     </dependency>
     <dependency>
       <groupId>bundles</groupId>
