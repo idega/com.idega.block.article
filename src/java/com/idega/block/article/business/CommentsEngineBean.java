@@ -117,6 +117,9 @@ public class CommentsEngineBean extends IBOServiceBean implements CommentsEngine
 	
 	private boolean sendNotification(Feed comments, String email, IWContext iwc) {
 		List<String> emails = getEmails(comments, email);
+		newCommentMessage = getLocalizedString(iwc, "new_comment_message", "New comment was entered. You can read all comments at");
+		newComment = getLocalizedString(iwc, "new_comment", "New comment");
+
 		StringBuffer body = new StringBuffer(newCommentMessage);
 		WebContext wctx = WebContextFactory.get();
 		body.append(ThemesHelper.getInstance().getFullServerName(iwc)).append(wctx.getCurrentPage());
@@ -257,6 +260,9 @@ public class CommentsEngineBean extends IBOServiceBean implements CommentsEngine
 			IWContext iwc) {
 
 		String serverName = ThemesHelper.getInstance().getFullServerName(iwc);
+		
+		articeComments = getLocalizedString(iwc, "article_comments", "Comments of Article");
+		allArticleComments = getLocalizedString(iwc, "all_article_comments", "All comments");
 		
 		Feed comments = new Feed();
 		comments.setFeedType(ContentItemFeedBean.FEED_TYPE_ATOM_1);
@@ -661,12 +667,7 @@ public class CommentsEngineBean extends IBOServiceBean implements CommentsEngine
 			return info;
 		}
 		
-		try {
-			newComment = resourceBundle.getLocalizedString("new_comment", "New comment");
-			newCommentMessage = resourceBundle.getLocalizedString("new_comment_message", "New comment was entered. You can read all comments at");
-			articeComments = resourceBundle.getLocalizedString("article_comments", "Comments of Article");
-			allArticleComments = resourceBundle.getLocalizedString("all_article_comments", "All comments");
-			
+		try {		
 			String resourcePath = ArticleUtil.getBundle().getResourcesPath();
 			info.add(resourceBundle.getLocalizedString("posted", "Posted"));								// 0
 			info.add(resourceBundle.getLocalizedString("loading_comments", "Loading comments..."));			// 1
@@ -773,6 +774,19 @@ public class CommentsEngineBean extends IBOServiceBean implements CommentsEngine
 		uploader.start();
 		
 		return true;
+	}
+	
+	private String getLocalizedString(IWContext iwc, String key, String defaultValue) {
+		if (iwc == null) {
+			return defaultValue;
+		}
+		try {
+			IWResourceBundle iwrb = ArticleUtil.getBundle().getResourceBundle(iwc);
+			return iwrb.getLocalizedString(key, defaultValue);
+		} catch (Exception e) {
+			log.error(e);
+		}
+		return defaultValue;
 	}
 	
 }
