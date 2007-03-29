@@ -64,7 +64,6 @@ public class CommentsEngineBean extends IBOServiceBean implements CommentsEngine
 	private String articeComments = "Comments of Article";
 	private String allArticleComments = "All comments";
 	
-	private List<String> commentsInitInfo = initCommentsInfo();
 	private List<String> parsedEmails = new ArrayList<String>();
 	
 	private volatile BuilderService builder = null;
@@ -104,7 +103,6 @@ public class CommentsEngineBean extends IBOServiceBean implements CommentsEngine
 			putFeedToCache(comments, uri, iwc);
 			
 			if (iwc == null) {
-				log.error("IWContext is null");
 				return false;
 			}
 			
@@ -609,7 +607,6 @@ public class CommentsEngineBean extends IBOServiceBean implements CommentsEngine
 		}
 		for (int i = 0; i < keys.size(); i++) {
 			if (articles.get(keys.get(i)) != null) {
-				System.out.println("Removing: " + keys.get(i));
 				articles.remove(keys.get(i));
 			}
 		}
@@ -648,7 +645,7 @@ public class CommentsEngineBean extends IBOServiceBean implements CommentsEngine
 		executeScriptForAllPages(script);
 	}
 	
-	private List<String> initCommentsInfo() {
+	public List<String> getInitInfoForComments() {
 		List<String> info = new ArrayList<String>();
 		IWContext iwc = ThemesHelper.getInstance().getIWContext();
 		if (iwc == null) {
@@ -665,36 +662,32 @@ public class CommentsEngineBean extends IBOServiceBean implements CommentsEngine
 		}
 		
 		try {
-			newComment = resourceBundle.getLocalizedString("new_comment");
-			newCommentMessage = resourceBundle.getLocalizedString("new_comment_message");
-			articeComments = resourceBundle.getLocalizedString("article_comments");
-			allArticleComments = resourceBundle.getLocalizedString("all_article_comments");
+			newComment = resourceBundle.getLocalizedString("new_comment", "New comment");
+			newCommentMessage = resourceBundle.getLocalizedString("new_comment_message", "New comment was entered. You can read all comments at");
+			articeComments = resourceBundle.getLocalizedString("article_comments", "Comments of Article");
+			allArticleComments = resourceBundle.getLocalizedString("all_article_comments", "All comments");
 			
 			String resourcePath = ArticleUtil.getBundle().getResourcesPath();
-			info.add(resourceBundle.getLocalizedString("posted"));										// 0
-			info.add(resourceBundle.getLocalizedString("loading_comments"));							// 1
-			info.add(resourceBundle.getLocalizedString("atom_feed"));									// 2
-			info.add(ThemesHelper.getInstance().getFullServerName(iwc) + ContentConstants.CONTENT);		// 3
-			info.add(resourceBundle.getLocalizedString("need_send_notification"));						// 4
-			info.add(resourceBundle.getLocalizedString("yes"));											// 5
-			info.add(resourceBundle.getLocalizedString("no"));											// 6
-			info.add(resourceBundle.getLocalizedString("enter_email_text"));							// 7
-			info.add(resourceBundle.getLocalizedString("saving"));										// 8
-			info.add(new StringBuffer(resourcePath).append(CommentsViewer.FEED_IMAGE).toString());		// 9
-			info.add(new StringBuffer(resourcePath).append(CommentsViewer.DELETE_IMAGE).toString());	// 10
-			info.add(resourceBundle.getLocalizedString("deleting"));									// 11
-			info.add(resourceBundle.getLocalizedString("are_you_sure"));								// 12
-			info.add(resourceBundle.getLocalizedString("delete_all_comments"));							// 13
-			info.add(resourceBundle.getLocalizedString("delete_comment"));								// 14
+			info.add(resourceBundle.getLocalizedString("posted", "Posted"));								// 0
+			info.add(resourceBundle.getLocalizedString("loading_comments", "Loading comments..."));			// 1
+			info.add(resourceBundle.getLocalizedString("atom_feed", "Atom Feed"));							// 2
+			info.add(ThemesHelper.getInstance().getFullServerName(iwc) + ContentConstants.CONTENT);			// 3
+			info.add(resourceBundle.getLocalizedString("need_send_notification", "Do You wish to receive notifications about new comments?"));	// 4
+			info.add(resourceBundle.getLocalizedString("yes", "Yes"));										// 5
+			info.add(resourceBundle.getLocalizedString("no", "No"));										// 6
+			info.add(resourceBundle.getLocalizedString("enter_email_text", "Please enter Your e-mail!"));	// 7
+			info.add(resourceBundle.getLocalizedString("saving", "Saving..."));								// 8
+			info.add(new StringBuffer(resourcePath).append(CommentsViewer.FEED_IMAGE).toString());			// 9
+			info.add(new StringBuffer(resourcePath).append(CommentsViewer.DELETE_IMAGE).toString());		// 10
+			info.add(resourceBundle.getLocalizedString("deleting", "Deleting..."));							// 11
+			info.add(resourceBundle.getLocalizedString("are_you_sure", "Are You sure?"));					// 12
+			info.add(resourceBundle.getLocalizedString("delete_all_comments", "Delete comments"));			// 13
+			info.add(resourceBundle.getLocalizedString("delete_comment", "Delete this comment"));			// 14
 		} catch (Exception e) {
 			log.error(e);
 		}
-				
+		
 		return info;
-	}
-	
-	public List<String> getInitInfoForComments() {
-		return commentsInitInfo;
 	}
 	
 	public boolean getUserRights() {
@@ -727,7 +720,6 @@ public class CommentsEngineBean extends IBOServiceBean implements CommentsEngine
 		if (!uploadFeed(linkToComments, comments, iwc)) {
 			return null;
 		}
-		//getCommentsForAllPages(linkToComments, id);
 		List<String> params = new ArrayList<String>();
 		params.add(id);
 		params.add(linkToComments);
