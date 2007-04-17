@@ -44,7 +44,7 @@ public class CommentsViewer extends Block {
 	protected static final String DWR_ENGINE = "/dwr/engine.js";
 	protected static final String COMMENTS_ENGINE = "/dwr/interface/CommentsEngine.js";
 	protected static final String COMMENTS_HELPER = "/javascript/ArticleCommentsHelper.js";
-	protected static final String INIT_SCRIPT_LINE = "addEvent(window, 'load', initComments);";
+	protected static final String INIT_SCRIPT_LINE = "registerEvent(window, 'load', initComments);";
 	
 	private static final String ARTICLE_COMMENT_SCOPE = "article_comment";
 	private static final String SEPARATOR = "', '";
