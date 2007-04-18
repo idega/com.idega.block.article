@@ -80,7 +80,6 @@
         </exclusion>
       </exclusions>
     </dependency>
-    
     <dependency>
     <!-- new (and only) version dependency instead of old one(s)  -->
       <groupId>xerces</groupId>
@@ -88,7 +87,6 @@
       <version>2.8.1</version>
       <type>jar</type>
     </dependency>
-
     <dependency>
       <groupId>jtidy</groupId>
       <artifactId>jtidy</artifactId>
