@@ -236,9 +236,9 @@ function getCommentPane(linkToComments, addEmail, commentsId) {
 	tbBody.appendChild(createTableLine(LABEL_SUBJECT + ":", subjectId, "text", "", "comment_input_style"));
 	
 	//Email
-	if (addEmail) {
+	//if (addEmail) {
 		tbBody.appendChild(createTableLine(LABEL_EMAIL + ":", emailId, "text", "", "comment_input_style"));
-	}
+	//}
 	
 	// Comment
 	var bodyLine = document.createElement("tr");
@@ -256,7 +256,7 @@ function getCommentPane(linkToComments, addEmail, commentsId) {
 	bodyLine.appendChild(bodyInput);
 	tbBody.appendChild(bodyLine);
 	
-	if (addEmail) {
+	//if (addEmail) {
 		NEED_TO_NOTIFY = false;
 		
 		var notifyLine = document.createElement("tr");
@@ -303,7 +303,7 @@ function getCommentPane(linkToComments, addEmail, commentsId) {
 		notifyCell.appendChild(text);
 		notifyLine.appendChild(notifyCell);
 		tbBody.appendChild(notifyLine);
-	}
+	//}
 	
 	// Send button
 	var sendLine = document.createElement("tr");
@@ -656,11 +656,6 @@ function hideOrShowCommentsCallback(needToReload) {
 		}
 	}
 }
-
-/*function initComments() {
-	enableReverseAjax();
-	CommentsEngine.getInitInfoForComments(getInitInfoForCommentsCallback);
-}*/
 
 function getInitInfoForCommentsCallback(list) {
 	if (list != null) {
