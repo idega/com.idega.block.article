@@ -1,5 +1,5 @@
 /*
- * $Id: ArticleListViewer.java,v 1.9 2007/03/26 10:24:05 valdas Exp $
+ * $Id: ArticleListViewer.java,v 1.10 2007/04/24 12:12:09 justinas Exp $
  * Created on 24.1.2005
  *
  * Copyright (C) 2005 Idega Software hf. All Rights Reserved.
@@ -38,10 +38,10 @@ import com.idega.presentation.Script;
  * for the article module.
  * </p>
  * 
- *  Last modified: $Date: 2007/03/26 10:24:05 $ by $Author: valdas $
+ *  Last modified: $Date: 2007/04/24 12:12:09 $ by $Author: justinas $
  * 
  * @author <a href="mailto:tryggvi@idega.com">Tryggvi Larusson</a>
- * @version $Revision: 1.9 $
+ * @version $Revision: 1.10 $
  */
 public class ArticleListViewer extends ContentItemListViewer {
 
@@ -184,7 +184,8 @@ public class ArticleListViewer extends ContentItemListViewer {
 	@SuppressWarnings("unchecked")
 	private boolean addFeedJavaScript(String linkToFeed, String feedType, String feedTitle) {
 		Script script = new Script();		
-		script.addScriptLine("addFeedSymbolInHeader('"+linkToFeed+"', '"+feedType+"', '"+feedTitle+"');");
+//		script.addScriptLine("addFeedSymbolInHeader('"+linkToFeed+"', '"+feedType+"', '"+feedTitle+"');");
+		script.addScriptLine("registerEvent(window, 'load', function(){addFeedSymbolInHeader('"+linkToFeed+"', '"+feedType+"', '"+feedTitle+"');});");		
 		getFacets().put(ContentItemViewer.FACET_FEED_SCRIPT, script);
 		return true;
 	}
