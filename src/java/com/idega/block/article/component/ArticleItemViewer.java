@@ -1,5 +1,5 @@
 /*
- * $Id: ArticleItemViewer.java,v 1.28 2007/03/26 10:24:05 valdas Exp $
+ * $Id: ArticleItemViewer.java,v 1.29 2007/04/24 12:11:27 justinas Exp $
  *
  * Copyright (C) 2004 Idega. All Rights Reserved.
  *
@@ -32,12 +32,12 @@ import com.idega.webface.WFHtml;
 import com.idega.webface.convert.WFTimestampConverter;
 
 /**
- * Last modified: $Date: 2007/03/26 10:24:05 $ by $Author: valdas $
+ * Last modified: $Date: 2007/04/24 12:11:27 $ by $Author: justinas $
  *
  * Displays the article item
  *
  * @author <a href="mailto:gummi@idega.com">Gudmundur Agust Saemundsson</a>
- * @version $Revision: 1.28 $
+ * @version $Revision: 1.29 $
  */
 public class ArticleItemViewer extends ContentItemViewer {
 	
@@ -325,7 +325,7 @@ public class ArticleItemViewer extends ContentItemViewer {
 	@SuppressWarnings("unchecked")
 	private boolean addFeedJavaScript(String linkToFeed, String feedType, String feedTitle) {
 		Script script = new Script();
-		script.addScriptLine("addFeedSymbolInHeader('"+linkToFeed+"', '"+feedType+"', '"+feedTitle+"');");
+		script.addScriptLine("registerEvent(window, 'load', function(){addFeedSymbolInHeader('"+linkToFeed+"', '"+feedType+"', '"+feedTitle+"');});");
 		getFacets().put(ContentItemViewer.FACET_FEED_SCRIPT, script);
 		return true;
 	}
@@ -359,3 +359,4 @@ public class ArticleItemViewer extends ContentItemViewer {
 	}
 
 }
+//
