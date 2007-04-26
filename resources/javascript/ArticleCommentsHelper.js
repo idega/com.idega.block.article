@@ -45,6 +45,7 @@ var COMMENTS_LINK_TO_FILE = "/files";
 var SHOW_COMMENTS_LIST_ON_LOAD = false;
 
 var GLOBAL_COMMENTS_MARK_ID = null;
+var ENABLE_REVERSE_AJAX_TIME_OUT_ID = 0;
 
 /** Setters - getters  begins**/
 function setPostedLabel(postedLabel) {
@@ -567,7 +568,10 @@ function showCommentsList(commentsId) {
 	}
 }
 
-function enableReverseAjax() {
+function enableReverseAjax(isSafari) {
+	if (isSafari) {
+		window.clearTimeout(ENABLE_REVERSE_AJAX_TIME_OUT_ID);
+	}
 	if (!SET_REVERSE_AJAX) {
 		SET_REVERSE_AJAX = true;
 		DWREngine.setActiveReverseAjax(true);
@@ -688,6 +692,12 @@ function getInitInfoForCommentsCallback(list) {
 
 function getUserRightsCallback(rights) {
 	setHasCommentViewerValidRights(rights);
+	if (isSafariBrowser()) {
+		ENABLE_REVERSE_AJAX_TIME_OUT_ID = window.setTimeout("enableReverseAjax(true)", 2000);
+	}
+	else {
+		enableReverseAjax(false);
+	}
 }
 
 function removeElementFromParent(element) {

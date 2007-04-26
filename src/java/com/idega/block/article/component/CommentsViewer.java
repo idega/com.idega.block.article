@@ -91,8 +91,8 @@ public class CommentsViewer extends Block {
 		if (!isUsedInArticleList()) {
 			// JavaScript
 			Script script = new Script();
-			StringBuffer action = new StringBuffer("setCommentStartInfo('");
-			action.append(linkToComments).append(SEPARATOR).append(commentsId).append("', ").append(showCommentsList).append(");");
+			StringBuffer action = new StringBuffer("registerEvent(window, 'load', function(){setCommentStartInfo('");
+			action.append(linkToComments).append(SEPARATOR).append(commentsId).append("', ").append(showCommentsList).append(")});");
 			script.addScriptLine(action.toString());
 			container.add(script);
 		}
