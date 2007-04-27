@@ -433,7 +433,5 @@ public class ArticleRSSProducer extends RSSAbstractProducer implements RSSProduc
 		}		
 		return articles;
 	}
-	
-	public void clearRssCacheList(String[] parameters){}
 
 }
