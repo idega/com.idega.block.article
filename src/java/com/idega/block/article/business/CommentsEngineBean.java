@@ -38,6 +38,8 @@ import com.idega.core.cache.IWCacheManager2;
 import com.idega.idegaweb.IWResourceBundle;
 import com.idega.presentation.IWContext;
 import com.idega.slide.business.IWSlideService;
+import com.idega.util.CoreConstants;
+import com.idega.util.CoreUtil;
 import com.sun.syndication.feed.atom.Content;
 import com.sun.syndication.feed.atom.Entry;
 import com.sun.syndication.feed.atom.Feed;
@@ -78,7 +80,7 @@ public class CommentsEngineBean extends IBOServiceBean implements CommentsEngine
 			return false;
 		}
 		
-		IWContext iwc = ThemesHelper.getInstance().getIWContext();
+		IWContext iwc = CoreUtil.getIWContext();
 		
 		String language = ThemesHelper.getInstance().getCurrentLanguage(iwc);
 		
@@ -119,15 +121,15 @@ public class CommentsEngineBean extends IBOServiceBean implements CommentsEngine
 		List<String> emails = getEmails(comments, email);
 		newCommentMessage = getLocalizedString(iwc, "new_comment_message", "New comment was entered. You can read all comments at");
 		newComment = getLocalizedString(iwc, "new_comment", "New comment");
-
+		
 		StringBuffer body = new StringBuffer(newCommentMessage);
 		WebContext wctx = WebContextFactory.get();
 		body.append(ThemesHelper.getInstance().getFullServerName(iwc)).append(wctx.getCurrentPage());
-		String host = iwc.getApplicationSettings().getProperty("messagebox_smtp_mailserver");
+		String host = iwc.getApplicationSettings().getProperty(CoreConstants.PROP_SYSTEM_SMTP_MAILSERVER);
 //		if (host == null) {
 //			host = "mail.simnet.is";
 //		}
-		String from = iwc.getApplicationSettings().getProperty("messagebox_from_mailaddress");
+		String from = iwc.getApplicationSettings().getProperty(CoreConstants.PROP_SYSTEM_MAIL_FROM_ADDRESS);
 //		if (from == null) {
 //			from = "testing@formbuilder.idega.is";
 //		}
@@ -477,10 +479,13 @@ public class CommentsEngineBean extends IBOServiceBean implements CommentsEngine
 		if (comments == null) {
 			return null;
 		}
-		Feed realFeed = (Feed) comments.createWireFeed();
-		putFeedToCache(realFeed, uri, iwc);
-		
-		return realFeed;
+		Object abstractFeed = comments.createWireFeed();
+		if (abstractFeed instanceof Feed) {
+			Feed realFeed = (Feed) abstractFeed;
+			putFeedToCache(realFeed, uri, iwc);
+			return realFeed;
+		}
+		return null;
 	}
 	
 	@SuppressWarnings("unchecked")
@@ -489,7 +494,7 @@ public class CommentsEngineBean extends IBOServiceBean implements CommentsEngine
 			return;
 		}
 		if (iwc == null) {
-			iwc = ThemesHelper.getInstance().getIWContext();
+			iwc = CoreUtil.getIWContext();
 			if (iwc == null) {
 				return;
 			}
@@ -510,7 +515,7 @@ public class CommentsEngineBean extends IBOServiceBean implements CommentsEngine
 			return null;
 		}
 		if (iwc == null) {
-			iwc = ThemesHelper.getInstance().getIWContext();
+			iwc = CoreUtil.getIWContext();
 			if (iwc == null) {
 				return null;
 			}
@@ -575,7 +580,7 @@ public class CommentsEngineBean extends IBOServiceBean implements CommentsEngine
 			closeLoadingMessage();
 			return false;
 		}
-		IWContext iwc = ThemesHelper.getInstance().getIWContext();
+		IWContext iwc = CoreUtil.getIWContext();
 		if (iwc == null) {
 			closeLoadingMessage();
 			return false;
@@ -619,7 +624,7 @@ public class CommentsEngineBean extends IBOServiceBean implements CommentsEngine
 	}
 	
 	public boolean hideOrShowComments() {
-		IWContext iwc = ThemesHelper.getInstance().getIWContext();
+		IWContext iwc = CoreUtil.getIWContext();
 		if (ContentUtil.hasContentEditorRoles(iwc)) {
 			return false; // Do not need reload page
 		}
@@ -653,7 +658,7 @@ public class CommentsEngineBean extends IBOServiceBean implements CommentsEngine
 	
 	public List<String> getInitInfoForComments() {
 		List<String> info = new ArrayList<String>();
-		IWContext iwc = ThemesHelper.getInstance().getIWContext();
+		IWContext iwc = CoreUtil.getIWContext();
 		if (iwc == null) {
 			return info;
 		}
@@ -692,7 +697,7 @@ public class CommentsEngineBean extends IBOServiceBean implements CommentsEngine
 	}
 	
 	public boolean getUserRights() {
-		IWContext iwc = ThemesHelper.getInstance().getIWContext();
+		IWContext iwc = CoreUtil.getIWContext();
 		if (iwc == null) {
 			return false;
 		}
@@ -703,7 +708,7 @@ public class CommentsEngineBean extends IBOServiceBean implements CommentsEngine
 		if (id == null || linkToComments == null) {
 			return null;
 		}
-		IWContext iwc = ThemesHelper.getInstance().getIWContext();
+		IWContext iwc = CoreUtil.getIWContext();
 		Feed comments = null;
 		synchronized(CommentsEngineBean.class) {
 			comments = getCommentsFeed(linkToComments, iwc);
