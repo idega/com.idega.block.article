@@ -689,6 +689,7 @@ public class CommentsEngineBean extends IBOServiceBean implements CommentsEngine
 			info.add(resourceBundle.getLocalizedString("are_you_sure", "Are You sure?"));					// 12
 			info.add(resourceBundle.getLocalizedString("delete_all_comments", "Delete comments"));			// 13
 			info.add(resourceBundle.getLocalizedString("delete_comment", "Delete this comment"));			// 14
+			info.add(new StringBuffer(resourcePath).append("/images/comment_delete.png").toString());		// 15
 		} catch (Exception e) {
 			log.error(e);
 		}

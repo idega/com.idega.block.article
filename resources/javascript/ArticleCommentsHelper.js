@@ -32,7 +32,8 @@ var COMMENTS_NO = "No";
 var COMMENTS_ENTER_EMAIL = "Please enter Your e-mail!";
 var COMMENTS_SAVING_TEXT = "Saving...";
 var LINK_TO_ATOM_FEED_IMAGE = "/idegaweb/bundles/com.idega.block.article.bundle/resources/images/feed.png";
-var LINK_TO_DELETE_IMAGE = "/idegaweb/bundles/com.idega.block.article.bundle/resources/images/delete.png";
+var LINK_TO_DELETE_COMMENTS_IMAGE = "/idegaweb/bundles/com.idega.block.article.bundle/resources/images/comments_delete.png";
+var LINK_TO_DELETE_COMMENT_IMAGE = "/idegaweb/bundles/com.idega.block.article.bundle/resources/images/comment_delete.png";
 var DELETING_MESSAGE_TEXT = "Deleting...";
 var ARE_YOU_SURE_FOR_DELETING = "Are You sure?";
 var DELETE_COMMENTS_LABEL = "Delete comments";
@@ -143,7 +144,7 @@ function setCommentStartInfo(linkToComments, commentsId, showCommentsList) {
 }
 
 function setLinkToDeleteImage(deleteImage) {
-	LINK_TO_DELETE_IMAGE = deleteImage;
+	LINK_TO_DELETE_COMMENTS_IMAGE = deleteImage;
 }
 
 function setDeletingCommentMessageText(text) {
@@ -160,6 +161,10 @@ function setDeleteCommentsLabel(text) {
 
 function setDeleteCommentLabel(text) {
 	DELETE_COMMENT_LABEL = text;
+}
+
+function setDeleteCommentImage(link) {
+	LINK_TO_DELETE_COMMENT_IMAGE = link;
 }
 /** Setters - getters ends**/
 
@@ -409,7 +414,7 @@ function addComment(articleComment, commentsId, linkToComments) {
 	if (HAS_COMMENT_VIEWER_VALID_RIGHTS) {
 		var deleteImage = document.createElement("img");
 		deleteImage.setAttribute("id", commentsId + "delete_article_comment" + articleComment.id);
-		deleteImage.setAttribute("src", LINK_TO_DELETE_IMAGE);
+		deleteImage.setAttribute("src", LINK_TO_DELETE_COMMENT_IMAGE);
 		deleteImage.setAttribute("title", DELETE_COMMENT_LABEL);
 		deleteImage.setAttribute("alt", DELETE_COMMENT_LABEL);
 		deleteImage.setAttribute("name", DELETE_COMMENT_LABEL);
@@ -663,7 +668,7 @@ function hideOrShowCommentsCallback(needToReload) {
 
 function getInitInfoForCommentsCallback(list) {
 	if (list != null) {
-		if (list.length == 15) {
+		if (list.length == 16) {
 			setPostedLabel(list[0]);
 			setCommentsLoadingMessage(list[1]);
 			setCommentsAtomLinkTitle(list[2]);
@@ -679,6 +684,7 @@ function getInitInfoForCommentsCallback(list) {
 			setAreYouSureForDeletingComments(list[12]);
 			setDeleteCommentsLabel(list[13]);
 			setDeleteCommentLabel(list[14]);
+			setDeleteCommentImage(list[15]);
 		}
 	}
 	
@@ -761,7 +767,7 @@ function addAtomButtonForComments(commentsId, linkToComments) {
 		
 		var deleteImage = document.createElement("img");
 		deleteImage.setAttribute("id", commentsId + "delete_article_comments");
-		deleteImage.setAttribute("src", LINK_TO_DELETE_IMAGE);
+		deleteImage.setAttribute("src", LINK_TO_DELETE_COMMENTS_IMAGE);
 		deleteImage.setAttribute("title", DELETE_COMMENTS_LABEL);
 		deleteImage.setAttribute("alt", DELETE_COMMENTS_LABEL);
 		deleteImage.setAttribute("name", DELETE_COMMENTS_LABEL);

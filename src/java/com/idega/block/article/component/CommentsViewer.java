@@ -30,7 +30,7 @@ import com.idega.webface.WFDivision;
 public class CommentsViewer extends Block {
 	
 	public static final String FEED_IMAGE = "/images/feed.png";
-	public static final String DELETE_IMAGE = "/images/delete.png";
+	public static final String DELETE_IMAGE = "/images/comments_delete.png";
 	private static final String COMMENTS_BLOCK_ID = "comments_block";
 	private static final String SHOW_COMMENTS_PROPERTY = "showCommentsForAllUsers";
 	
