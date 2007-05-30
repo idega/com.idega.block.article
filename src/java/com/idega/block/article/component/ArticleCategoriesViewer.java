@@ -1,12 +1,9 @@
 package com.idega.block.article.component;
 
 import java.rmi.RemoteException;
-import java.text.Collator;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -17,6 +14,7 @@ import com.idega.block.article.business.ArticleConstants;
 import com.idega.block.article.business.ArticleUtil;
 import com.idega.content.business.CategoryBean;
 import com.idega.content.business.ContentUtil;
+import com.idega.content.data.ContentCategory;
 import com.idega.content.presentation.ContentItemListViewer;
 import com.idega.core.builder.business.BuilderService;
 import com.idega.idegaweb.IWUserContext;
@@ -56,12 +54,7 @@ public class ArticleCategoriesViewer extends Block {
 		hasUserValidRights = ContentUtil.hasContentEditorRoles(iwc);
 		
 		CategoryBean categoriesBean = CategoryBean.getInstance();
-		Collection<String> allCategories = categoriesBean.getCategories();
-		if (allCategories == null) {
-			return;
-		}
-		List <String> categories = new ArrayList<String>(allCategories);
-		initCategories(categories, iwc);
+		Collection<ContentCategory> categories = categoriesBean.getCategories(iwc.getCurrentLocale());
 
 		countCategories(categories, iwc);
 		
@@ -80,45 +73,43 @@ public class ArticleCategoriesViewer extends Block {
 			}
 		}
 		
+		String lang = iwc.getCurrentLocale().toString();
+		
 		WFDivision container = new WFDivision();
 		container.setId(BLOG_CATEGORIES);
 		WFDivision disabledCategoryContainer = null;
 		
-		StringBuffer value = null;
-		Text text = null;
-		Integer count = null;
-		Boolean enabledCategoryForCommonUser = null;
 		boolean isCheckedAnyCategory = isCheckedAnyCategory();
-		for (int i = 0; i < categories.size(); i++) {
-			count = countedCategories.get(categories.get(i));
+		for (ContentCategory category : categories) {
+			String categoryKey = category.getId();
+			Integer count = countedCategories.get(categoryKey);
 			if (count == null) {
 				break;
 			}
-			value = new StringBuffer();
-			value.append(categoriesBean.getCategoryName(categories.get(i))).append(ArticleConstants.SPACE).append(OPENER).append(count).append(CLOSER);
+			StringBuffer value = new StringBuffer();
+			value.append(category.getName(lang)).append(ArticleConstants.SPACE).append(OPENER).append(count).append(CLOSER);
+			String nameWithCount = value.toString();
 			if (count > 0) {
 				if (hasUserValidRights) {
-					addLinkToCategory(pageKey, moduleIds, container, iwc, categories.get(i), false, value.toString());
+					addLinkToCategory(pageKey, moduleIds, container, iwc, categoryKey, false, nameWithCount);
 				}
 				else {
 					if (isCheckedAnyCategory) {
-						enabledCategoryForCommonUser = availableCategories.get(categories.get(i));
-						if (enabledCategoryForCommonUser != null) {
-							if (enabledCategoryForCommonUser.booleanValue()) {
-								addLinkToCategory(pageKey, moduleIds, container, iwc, categories.get(i), false, value.toString());
-							}
+						if (isCheckedCategory(categoryKey)) {
+							addLinkToCategory(pageKey, moduleIds, container, iwc, categoryKey, false, nameWithCount);
 						}
+
 					}
 					else {
-						addLinkToCategory(pageKey, moduleIds, container, iwc, categories.get(i), false, value.toString());
+						addLinkToCategory(pageKey, moduleIds, container, iwc, categoryKey, false, nameWithCount);
 					}
 				}
 			}
 			else {
 				if (hasUserValidRights) {
-					text = new Text(value.toString());
+					Text text = new Text(nameWithCount);
 					disabledCategoryContainer = new WFDivision();
-					addCheckBox(pageKey, moduleIds, disabledCategoryContainer, iwc, categories.get(i), true);
+					addCheckBox(pageKey, moduleIds, disabledCategoryContainer, iwc, categoryKey, true);
 					disabledCategoryContainer.setStyleClass(BLOG_LINK_DISABLED);
 					disabledCategoryContainer.add(text);
 					container.add(disabledCategoryContainer);
@@ -127,7 +118,7 @@ public class ArticleCategoriesViewer extends Block {
 		}
 		this.add(container);
 	}
-	
+
 	@SuppressWarnings("unchecked")
 	public void restoreState(FacesContext context, Object state) {
 		Object values[] = (Object[]) state;
@@ -148,59 +139,35 @@ public class ArticleCategoriesViewer extends Block {
 		return values;
 	}
 	
-	private void initCategories(List <String> categories, IWContext iwc) {
+	private void countCategories(Collection<ContentCategory> categories, IWContext iwc) {
 		if (categories == null) {
 			return;
 		}
-		if (countedCategories == null) {
-			countedCategories = new HashMap<String, Integer>();
-		}
-		if (availableCategories == null) {
-			availableCategories = new HashMap<String, Boolean>();
-		}
-		Collator collator = null;
-		if (iwc.getCurrentLocale() != null) {
-			collator = Collator.getInstance(iwc.getCurrentLocale());
-		}
-		else {
-			collator = Collator.getInstance();
-		}
-		Collections.sort(categories, collator);
-		for (int i = 0; i < categories.size(); i++) {
-			countedCategories.put(categories.get(i), 0);
-			availableCategories.put(categories.get(i), Boolean.FALSE);
-		}
-	}
-	
-	private void countCategories(List<String> categories, IWContext iwc) {
-		if (categories == null || countedCategories == null) {
-			return;
-		}
+		countedCategories = new HashMap<String, Integer>();
+
 		ArticleListManagedBean bean = new ArticleListManagedBean();
 		List<String> categoriesList = null;
 		Collection results = null;
 		Integer value = null;
-		for (int i = 0; i < categories.size(); i++) {
+		for (ContentCategory category : categories) {
 			categoriesList = new ArrayList<String>();
-			categoriesList.add(categories.get(i));
+			categoriesList.add(category.getId());
 			results = bean.getArticleSearcResults(ArticleUtil.getArticleBaseFolderPath(), categoriesList, iwc);
 			if (results == null) {
 				break;
 			}
-			value = countedCategories.get(categories.get(i));
-			if (value != null) {
-				value = results.size();
-				countedCategories.put(categories.get(i), value);
-			}
+			value = results.size();
+			countedCategories.put(category.getId(), value);
 		}
 	}
 	
-	private void markAvailableCategories(List<String> categories, String pageKey, String moduleId, BuilderService service) {
+	private void markAvailableCategories(Collection<ContentCategory> categories, String pageKey, String moduleId, BuilderService service) {
 		if (categories == null) {
 			return;
 		}
-		for (int i = 0; i < categories.size(); i++) {
-			availableCategories.put(categories.get(i), service.isPropertyValueSet(pageKey, moduleId, "categories", categories.get(i)));
+		for (ContentCategory category : categories) {
+			boolean categoriesSet = service.isPropertyValueSet(pageKey, moduleId, "categories", category.getId());
+			availableCategories.put(category.getId(), Boolean.valueOf(categoriesSet));
 		}
 	}
 	
@@ -267,13 +234,18 @@ public class ArticleCategoriesViewer extends Block {
 		return pageKey;
 	}
 	
-	private boolean isCheckedAnyCategory() {
-		for (Iterator<Boolean> it = availableCategories.values().iterator(); it.hasNext();) {
-			if (it.next().booleanValue()) {
+	private boolean isCheckedCategory(String categoryKey) {
+		Boolean enabledCategoryForCommonUser = availableCategories.get(categoryKey);
+		if (enabledCategoryForCommonUser != null) {
+			if (enabledCategoryForCommonUser.booleanValue()) {
 				return true;
 			}
 		}
 		return false;
+	}
+	
+	private boolean isCheckedAnyCategory() {
+		return availableCategories.containsValue(Boolean.TRUE);
 	}
 	
 	private void addLinkToCategory(String pageKey, List<String> moduleIds, WFDivision container, IWContext iwc, String category, boolean setDisabled, String linkValue) {

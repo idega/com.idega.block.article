@@ -1,5 +1,5 @@
 /*
- * $Id: ArticleVersionBlock.java,v 1.5 2006/04/09 12:32:00 laddi Exp $
+ * $Id: ArticleVersionBlock.java,v 1.6 2007/05/30 15:03:03 gediminas Exp $
  *
  * Copyright (C) 2004 Idega. All Rights Reserved.
  *
@@ -14,12 +14,12 @@ import javax.faces.component.UIComponent;
 import javax.faces.component.html.HtmlOutputText;
 import javax.faces.event.ActionEvent;
 import javax.faces.event.ActionListener;
+import com.idega.block.article.IWBundleStarter;
 import com.idega.content.bean.ManagedContentBeans;
 import com.idega.content.data.ContentItemCase;
 import com.idega.webface.WFBlock;
 import com.idega.webface.WFContainer;
 import com.idega.webface.WFList;
-import com.idega.webface.WFPage;
 import com.idega.webface.WFPlainOutputText;
 import com.idega.webface.WFUtil;
 import com.idega.webface.convert.WFCommaSeparatedListConverter;
@@ -27,10 +27,10 @@ import com.idega.webface.convert.WFCommaSeparatedListConverter;
 /**
  * Block for listing article versions.   
  * <p>
- * Last modified: $Date: 2006/04/09 12:32:00 $ by $Author: laddi $
+ * Last modified: $Date: 2007/05/30 15:03:03 $ by $Author: gediminas $
  *
  * @author Anders Lindman
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
  */
 public class ArticleVersionBlock extends WFBlock implements ManagedContentBeans, ActionListener, Serializable {
 
@@ -45,14 +45,6 @@ public class ArticleVersionBlock extends WFBlock implements ManagedContentBeans,
 	 * Default contructor.
 	 */
 	public ArticleVersionBlock() {
-		//No action...
-	}
-	
-	/**
-	 * Constructs an ArticleVersionBlock with the specified title key. 
-	 */
-	public ArticleVersionBlock(String titleKey) {
-		super(titleKey, true);
 		setId(ARTICLE_VERSION_BLOCK_ID);
 		
 		WFUtil.invoke(ARTICLE_VERSION_LIST_BEAN_ID, "setArticleLinkListener", this, ActionListener.class);
@@ -81,8 +73,8 @@ public class ArticleVersionBlock extends WFBlock implements ManagedContentBeans,
 		c.setStyleAttribute("padding", "14px");
 
 		String ref = ARTICLE_VERSION_ITEM_BEAN_ID + ".";
-		String bref = WFPage.CONTENT_BUNDLE + ".";
-
+		String bid = IWBundleStarter.BUNDLE_IDENTIFIER;
+		
 		c.add(WFUtil.getHeaderTextVB(ref + "headline"));
 		c.add(WFUtil.getBreak(2));
 		c.add(WFUtil.getTextVB(ref + "teaser"));
@@ -92,33 +84,33 @@ public class ArticleVersionBlock extends WFBlock implements ManagedContentBeans,
 		c.add(bodyText);
 		c.add(WFUtil.getBreak(4));
 		
-		c.add(WFUtil.getHeaderTextVB(bref + "author"));
+		c.add(WFUtil.getHeaderTextVB(bid, "author"));
 		c.add(WFUtil.getHeaderText(": "));
 		c.add(WFUtil.getTextVB(ref + "author"));
 		c.add(WFUtil.getBreak(2));
-		c.add(WFUtil.getHeaderTextVB(bref + "created"));
+		c.add(WFUtil.getHeaderTextVB(bid, "created"));
 		c.add(WFUtil.getHeaderText(": "));
-		c.add(WFUtil.getText("4/20/04 3:04 PM"));
+		c.add(WFUtil.getText("4/20/04 3:04 PM"));
 		c.add(WFUtil.getBreak(2));
-		c.add(WFUtil.getHeaderTextVB(bref + "status"));
+		c.add(WFUtil.getHeaderTextVB(bid, "status"));
 		c.add(WFUtil.getHeaderText(": "));
 		c.add(WFUtil.getTextVB(ref + "status"));
 		c.add(WFUtil.getBreak(2));
-		c.add(WFUtil.getHeaderTextVB(bref + "categories"));
+		c.add(WFUtil.getHeaderTextVB(bid, "categories"));
 		c.add(WFUtil.getHeaderText(": "));
 		HtmlOutputText t = WFUtil.getTextVB(ref + "categoryNames");
 		t.setConverter(new WFCommaSeparatedListConverter());		
 		c.add(t);
 		c.add(WFUtil.getBreak(2));
-		c.add(WFUtil.getHeaderTextVB(bref + "current_version"));
+		c.add(WFUtil.getHeaderTextVB(bid, "current_version"));
 		c.add(WFUtil.getHeaderText(": "));
 		c.add(WFUtil.getText("1.5"));
 		c.add(WFUtil.getBreak(2));
-		c.add(WFUtil.getHeaderTextVB(bref + "comment"));
+		c.add(WFUtil.getHeaderTextVB(bid, "comment"));
 		c.add(WFUtil.getHeaderText(": "));
 		c.add(WFUtil.getTextVB(ref + "comment"));
 		c.add(WFUtil.getBreak(2));
-		c.add(WFUtil.getHeaderTextVB(bref + "source"));
+		c.add(WFUtil.getHeaderTextVB(bid, "source"));
 		c.add(WFUtil.getHeaderText(": "));
 		c.add(WFUtil.getTextVB(ref + "source"));
 		

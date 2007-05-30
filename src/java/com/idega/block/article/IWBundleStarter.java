@@ -1,5 +1,5 @@
 /*
- * $Id: IWBundleStarter.java,v 1.22 2007/03/07 08:46:03 justinas Exp $
+ * $Id: IWBundleStarter.java,v 1.23 2007/05/30 15:03:03 gediminas Exp $
  * Created on 2.11.2004
  *
  * Copyright (C) 2004 Idega Software hf. All Rights Reserved.
@@ -31,14 +31,14 @@ import com.idega.slide.business.IWSlideService;
 
 /**
  * 
- *  Last modified: $Date: 2007/03/07 08:46:03 $ by $Author: justinas $
+ *  Last modified: $Date: 2007/05/30 15:03:03 $ by $Author: gediminas $
  * 
  * @author <a href="mailto:tryggvil@idega.com">Tryggvi Larusson</a>
- * @version $Revision: 1.22 $
+ * @version $Revision: 1.23 $
  */
 public class IWBundleStarter implements IWBundleStartable {
 	private static final String STYLE_SHEET_URL = "/style/article.css";
-	private static final String BUNDLE_IDENTIFIER="com.idega.block.article";
+	public static final String BUNDLE_IDENTIFIER="com.idega.block.article";
 
 	/* (non-Javadoc)
 	 * @see com.idega.idegaweb.IWBundleStartable#start(com.idega.idegaweb.IWBundle)

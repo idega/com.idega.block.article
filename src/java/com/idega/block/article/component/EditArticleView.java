@@ -1,5 +1,5 @@
 /*
- * $Id: EditArticleView.java,v 1.29 2007/03/14 18:06:29 valdas Exp $
+ * $Id: EditArticleView.java,v 1.30 2007/05/30 15:03:03 gediminas Exp $
  *
  * Copyright (C) 2004 Idega. All Rights Reserved.
  *
@@ -31,6 +31,7 @@ import javax.faces.event.ValueChangeListener;
 import javax.faces.model.SelectItem;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import com.idega.block.article.IWBundleStarter;
 import com.idega.block.article.bean.ArticleItemBean;
 import com.idega.block.article.bean.ArticleStoreException;
 import com.idega.block.article.business.ArticleConstants;
@@ -50,7 +51,6 @@ import com.idega.webface.WFContainer;
 import com.idega.webface.WFDateInput;
 import com.idega.webface.WFFormItem;
 import com.idega.webface.WFMessages;
-import com.idega.webface.WFPage;
 import com.idega.webface.WFResourceUtil;
 import com.idega.webface.WFTabbedPane;
 import com.idega.webface.WFUtil;
@@ -60,10 +60,10 @@ import com.idega.webface.htmlarea.HTMLArea;
  * <p>
  * This is the part for the editor of article is inside the admin interface
  * </p>
- * Last modified: $Date: 2007/03/14 18:06:29 $ by $Author: valdas $
+ * Last modified: $Date: 2007/05/30 15:03:03 $ by $Author: gediminas $
  *
  * @author Joakim,Tryggvi Larusson
- * @version $Revision: 1.29 $
+ * @version $Revision: 1.30 $
  */
 public class EditArticleView extends IWBaseComponent implements ManagedContentBeans, ActionListener, ValueChangeListener {
 	private static final Log log = LogFactory.getLog(EditArticleView.class);
@@ -686,14 +686,13 @@ public class EditArticleView extends IWBaseComponent implements ManagedContentBe
 	 * Sets the text in the message task container. 
 	 */
 	private void setUserMessage(String ref) {
-		String bref = WFPage.CONTENT_BUNDLE + ".";
 		HtmlOutputText t = (HtmlOutputText) findComponent(USER_MESSAGE_ID);
 		if(t!=null){
-			t.setValueBinding("value", WFUtil.createValueBinding("#{" + bref + ref + "}"));
+			WFUtil.setLocalizedValue(t, IWBundleStarter.BUNDLE_IDENTIFIER, ref);
 			setMessageMode();
 		}
 		else{
-			log.info("user_message component is null. Message out: "+bref + ref);
+			log.info("user_message component is null. Message out: " + ref);
 		}
 	}
 	

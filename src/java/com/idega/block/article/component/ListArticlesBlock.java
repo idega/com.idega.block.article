@@ -1,5 +1,5 @@
 /*
- * $Id: ListArticlesBlock.java,v 1.16 2006/10/12 12:48:23 gediminas Exp $
+ * $Id: ListArticlesBlock.java,v 1.17 2007/05/30 15:03:03 gediminas Exp $
  *
  * Copyright (C) 2004 Idega. All Rights Reserved.
  *
@@ -18,6 +18,7 @@ import javax.faces.component.html.HtmlPanelGrid;
 import javax.faces.context.FacesContext;
 import javax.faces.event.ActionEvent;
 import javax.faces.event.ActionListener;
+import com.idega.block.article.IWBundleStarter;
 import com.idega.block.article.bean.ArticleItemBean;
 import com.idega.content.bean.ManagedContentBeans;
 import com.idega.content.data.ContentItemCase;
@@ -26,7 +27,6 @@ import com.idega.webface.WFComponentSelector;
 import com.idega.webface.WFContainer;
 import com.idega.webface.WFMessages;
 import com.idega.webface.WFList;
-import com.idega.webface.WFPage;
 import com.idega.webface.WFPanelUtil;
 import com.idega.webface.WFPlainOutputText;
 import com.idega.webface.WFUtil;
@@ -35,10 +35,10 @@ import com.idega.webface.convert.WFDateConverter;
 /**
  * Block for listing articles.   
  * <p>
- * Last modified: $Date: 2006/10/12 12:48:23 $ by $Author: gediminas $
+ * Last modified: $Date: 2007/05/30 15:03:03 $ by $Author: gediminas $
  *
  * @author Anders Lindman
- * @version $Revision: 1.16 $
+ * @version $Revision: 1.17 $
  */
 public class ListArticlesBlock extends 
 IWBaseComponent
@@ -97,7 +97,7 @@ implements ManagedContentBeans, ActionListener, Serializable {
 	 */
 	private UIComponent getSearchPanel() {
 		String ref = LIST_ARTICLES_BEAN_ID + ".";
-		String bref = WFPage.CONTENT_BUNDLE + ".";
+		String bid = IWBundleStarter.BUNDLE_IDENTIFIER;
 
 		WFContainer mainContainer = new WFContainer();
 		
@@ -108,9 +108,9 @@ implements ManagedContentBeans, ActionListener, Serializable {
 		mainContainer.add(em);
 		
 		HtmlPanelGrid p = WFPanelUtil.getFormPanel(3);		
-		p.getChildren().add(WFUtil.group(WFUtil.getTextVB(bref + "published_from"), WFUtil.getText(":")));		
-		p.getChildren().add(WFUtil.group(WFUtil.getTextVB(bref + "published_to"), WFUtil.getText(":")));		
-		p.getChildren().add(WFUtil.group(WFUtil.getTextVB(bref + "category"), WFUtil.getText(":")));		
+		p.getChildren().add(WFUtil.group(WFUtil.getTextVB(bid, "published_from"), WFUtil.getText(":")));		
+		p.getChildren().add(WFUtil.group(WFUtil.getTextVB(bid, "published_to"), WFUtil.getText(":")));		
+		p.getChildren().add(WFUtil.group(WFUtil.getTextVB(bid, "category"), WFUtil.getText(":")));		
 		HtmlInputText searchPublishedFromInput = WFUtil.getInputText(SEARCH_PUBLISHED_FROM_ID, ref + "searchPublishedFrom");		
 		searchPublishedFromInput.setSize(20);
 		searchPublishedFromInput.setConverter(new WFDateConverter());
@@ -127,7 +127,7 @@ implements ManagedContentBeans, ActionListener, Serializable {
 		mainContainer.add(WFUtil.getText(" "));
 
 		p = WFPanelUtil.getPlainFormPanel(1);
-		p.getChildren().add(WFUtil.getButtonVB(LIST_BUTTON_ID, bref + "list", this));
+		p.getChildren().add(WFUtil.getButtonVB(LIST_BUTTON_ID, bid, "list", this));
 		
 		mainContainer.add(p);
 		
@@ -150,7 +150,7 @@ implements ManagedContentBeans, ActionListener, Serializable {
 	 */
 	private UIComponent getViewArticlePanel() {
 		String ref = ARTICLE_ITEM_BEAN_ID + ".";
-		String bref = WFPage.CONTENT_BUNDLE + ".";
+		String bid = IWBundleStarter.BUNDLE_IDENTIFIER;
 		WFContainer c = new WFContainer();
 		c.setStyleAttribute("padding", "10px");
 		c.setId(VIEW_ARTICLE_PANEL_ID);
@@ -166,7 +166,7 @@ implements ManagedContentBeans, ActionListener, Serializable {
 		WFUtil.setValueBinding(t, "value", ref + "body");
 		c.add(t);
 		c.add(WFUtil.getBreak(2));
-		c.add(WFUtil.getButtonVB(VIEW_ARTICLE_BACK_BUTTON_ID, bref + "back", this));
+		c.add(WFUtil.getButtonVB(VIEW_ARTICLE_BACK_BUTTON_ID, bid, "back", this));
 		return c;
 	}
 	

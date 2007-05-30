@@ -11,7 +11,7 @@ version="1.2">
 	<jsf:view>
 		<ws:page>
 			<h:form>
-				<wf:wfblock id="article_item_block" title="Article Preview">
+				<wf:wfblock id="article_item_block" title="#{localizedStrings['com.idega.block.article']['preview_article']}">
 					<article:ArticleItemViewer id="article_item" renderDetailsCommand="false" showRequestedItem="true" />
 				</wf:wfblock>
 			</h:form>

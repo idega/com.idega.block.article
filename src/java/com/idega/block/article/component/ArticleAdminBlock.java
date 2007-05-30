@@ -1,5 +1,5 @@
 /*
- * $Id: ArticleAdminBlock.java,v 1.6 2006/04/09 11:57:56 laddi Exp $
+ * $Id: ArticleAdminBlock.java,v 1.7 2007/05/30 15:03:03 gediminas Exp $
  *
  * Copyright (C) 2004 Idega. All Rights Reserved.
  *
@@ -14,22 +14,20 @@ import javax.faces.event.AbortProcessingException;
 import javax.faces.event.ActionEvent;
 import javax.faces.event.ActionListener;
 import org.apache.myfaces.custom.savestate.UISaveState;
+import com.idega.block.article.IWBundleStarter;
 import com.idega.content.bean.ManagedContentBeans;
 import com.idega.webface.WFBlockTabbed;
-import com.idega.webface.WFPage;
 import com.idega.webface.WFTabbedPane;
 import com.idega.webface.WFUtil;
-import com.idega.webface.event.WFTabListener;
-
 
 /**
  * <p>
  * This is the main block for administering articles (creating,editing)
  * </p>
- * Last modified: $Date: 2006/04/09 11:57:56 $ by $Author: laddi $
+ * Last modified: $Date: 2007/05/30 15:03:03 $ by $Author: gediminas $
  *
  * @author Joakim, Tryggvi Larusson
- * @version $Revision: 1.6 $
+ * @version $Revision: 1.7 $
  */
 public class ArticleAdminBlock extends WFBlockTabbed implements ActionListener, ManagedContentBeans {
 
@@ -45,38 +43,24 @@ public class ArticleAdminBlock extends WFBlockTabbed implements ActionListener, 
 	private String mode;
 	
 	public ArticleAdminBlock() {
-		this( WFPage.CONTENT_BUNDLE + ".article");
+		super(_("article"));
+		setId(ARTICLE_BLOCK_ID);
+		setMaximizedVertically(true);
 	}
 	
-	/**
-	 * Constructs an ArticleBlock with the specified title key and taskbar listener. 
-	 */
-	public ArticleAdminBlock(String titleKey) {
-		this(titleKey, null);
-	}
-	public ArticleAdminBlock(String titleKey, WFTabListener taskbarListener) {
-		super(titleKey, true);
-		//setStyleClass(STYLE_CLASS);
-		super.setMaximizedVertically(true);
-		setId(ARTICLE_BLOCK_ID);
-		//setMainAreaStyleClass(null);
-
-	}
-
 	/* (non-Javadoc)
 	 * @see com.idega.webface.WFBlockTabbed#initializeTabbedPane(javax.faces.context.FacesContext)
 	 */
 	protected WFTabbedPane initializeTabbedPane(FacesContext context) {
-		String bref = WFPage.CONTENT_BUNDLE + ".";
 		WFTabbedPane tb = new WFTabbedPane();
 		//tb.setMainAreaStyleClass(WFContainer.DEFAULT_STYLE_CLASS);
 		tb.setId(TASKBAR_ID);
 		//add(tb);
 		EditArticleView editArticleBlock = new EditArticleView();
-		tb.addTabVB(TASK_ID_EDIT, bref + "edit", editArticleBlock);
-		tb.addTabVB(TASK_ID_DETAILS, bref + "details", new ArticleDetailView());
-//		tb.addTabVB(TASK_ID_LIST, bref + "list", new ListArticlesBlock());
-		tb.addTabVB(TASK_ID_PREVIEW, bref + "preview", new ArticlePreview());
+		tb.addTab(TASK_ID_EDIT, _("edit"), editArticleBlock);
+		tb.addTab(TASK_ID_DETAILS, _("details"), new ArticleDetailView());
+//		tb.addTab(TASK_ID_LIST, _("list"), new ListArticlesBlock());
+		tb.addTab(TASK_ID_PREVIEW, _("preview"), new ArticlePreview());
 		tb.setSelectedMenuItemId(TASK_ID_EDIT);
 		//if (taskbarListener != null) {
 		//	tb.addTabListener(taskbarListener);
@@ -90,8 +74,6 @@ public class ArticleAdminBlock extends WFBlockTabbed implements ActionListener, 
 	
 	
 	public void initializeComponent(FacesContext context){
-		//TODO: Remove this and use newer localization system:
-		WFPage.loadResourceBundles(context);
 		super.initializeComponent(context);
 		
 		//Saving the state of the articleItemBean specially because the scpoe
@@ -156,22 +138,9 @@ public class ArticleAdminBlock extends WFBlockTabbed implements ActionListener, 
 		this.mode = (String)values[1];
 		//super.restoreState(ctx,state);
 	}
-
-
-	/* (non-Javadoc)
-	 * @see javax.faces.component.UIComponentBase#processUpdates(javax.faces.context.FacesContext)
-	 */
-	public void processUpdates(FacesContext context) {
-		// TODO Auto-generated method stub
-		super.processUpdates(context);
-	}
 	
-	/* (non-Javadoc)
-	 * @see javax.faces.component.UIComponentBase#processUpdates(javax.faces.context.FacesContext)
-	 */
-	public void processValidators(FacesContext context) {
-		// TODO Auto-generated method stub
-		super.processValidators(context);
+	private static String _(String localizationKey) {
+		return WFUtil.getLocalizedStringExpr(IWBundleStarter.BUNDLE_IDENTIFIER, localizationKey);
 	}
-	
+
 }
