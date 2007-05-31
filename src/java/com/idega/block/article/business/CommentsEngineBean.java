@@ -1,6 +1,5 @@
 package com.idega.block.article.business;
 
-import java.io.IOException;
 import java.rmi.RemoteException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
@@ -17,9 +16,6 @@ import org.directwebremoting.ScriptSession;
 import org.directwebremoting.WebContext;
 import org.directwebremoting.WebContextFactory;
 import org.directwebremoting.impl.DefaultScriptSession;
-
-import sun.misc.BASE64Decoder;
-import sun.misc.BASE64Encoder;
 
 import com.idega.block.article.ArticleCacher;
 import com.idega.block.article.bean.ArticleComment;
@@ -58,8 +54,6 @@ public class CommentsEngineBean extends IBOServiceBean implements CommentsEngine
 	
 	private RSSBusiness rss = getRSSBusiness();
 	private WireFeedOutput wfo = new WireFeedOutput();
-	private BASE64Encoder encoder = new BASE64Encoder();
-	private BASE64Decoder decoder = new BASE64Decoder();
 	
 	private String newComment = "New comment";
 	private String newCommentMessage = "New comment was entered. You can read all comments at";
@@ -541,22 +535,11 @@ public class CommentsEngineBean extends IBOServiceBean implements CommentsEngine
 	}
 	
 	private String encodeMail(String email) {
-		if (email == null) {
-			return email;
-		}
-		return encoder.encode(email.getBytes());
+		return CoreUtil.getEncodedValue(email);
 	}
 	
 	private String decodeMail(String email) {
-		if (email == null) {
-			return email;
-		}
-		try {
-			return new String(decoder.decodeBuffer(email));
-		} catch (IOException e) {
-			log.error(e);
-			return null;
-		}
+		return CoreUtil.getDecodedValue(email);
 	}
 	
 	private BuilderService getBuilderService() {
