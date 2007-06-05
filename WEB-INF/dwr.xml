@@ -8,13 +8,4 @@
     </create>
     <convert converter="bean" match="com.idega.block.article.bean.ArticleComment" />
   </allow>
-  
-	<signatures>
-		<![CDATA[
-  			import java.util.List;
-			import com.idega.block.article.bean.ArticleComment;
-
-  			CommentsEngine.getComments(String);
-  		]]>
-	</signatures>
 </dwr>
