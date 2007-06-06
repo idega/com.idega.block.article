@@ -1,5 +1,5 @@
 /*
- * $Id: ArticleLocalizedItemBean.java,v 1.15 2007/03/26 11:51:33 eiki Exp $
+ * $Id: ArticleLocalizedItemBean.java,v 1.16 2007/06/06 12:08:04 valdas Exp $
  *
  * Copyright (C) 2004 Idega. All Rights Reserved.
  *
@@ -42,6 +42,7 @@ import com.idega.presentation.IWContext;
 import com.idega.slide.business.IWSlideSession;
 import com.idega.slide.util.WebdavExtendedResource;
 import com.idega.slide.util.WebdavRootResource;
+import com.idega.util.CoreConstants;
 import com.idega.xml.XMLDocument;
 import com.idega.xml.XMLElement;
 import com.idega.xml.XMLException;
@@ -53,10 +54,10 @@ import com.idega.xml.XMLParser;
  * This is a JSF managed bean that manages each article xml document 
  * instance per language/locale.
  * <p>
- * Last modified: $Date: 2007/03/26 11:51:33 $ by $Author: eiki $
+ * Last modified: $Date: 2007/06/06 12:08:04 $ by $Author: valdas $
  *
  * @author Anders Lindman,<a href="mailto:tryggvi@idega.com">Tryggvi Larusson</a>
- * @version $Revision: 1.15 $
+ * @version $Revision: 1.16 $
  */
 public class ArticleLocalizedItemBean extends ContentItemBean implements Serializable, ContentItem {
 	
@@ -407,13 +408,13 @@ public class ArticleLocalizedItemBean extends ContentItemBean implements Seriali
 				//not quite clear...
 				
 				if(rootResource.putMethod(filePath,utf8stream)){
-					rootResource.proppatchMethod(filePath,ArticleItemBean.PROPERTY_CONTENT_TYPE,ArticleItemBean.ARTICLE_FILENAME_SCOPE,true);
+					rootResource.proppatchMethod(filePath,ArticleItemBean.PROPERTY_CONTENT_TYPE,CoreConstants.ARTICLE_FILENAME_SCOPE,true);
 				}
 				else{
 					utf8stream = new ByteArrayInputStream(article.getBytes("UTF-8"));
 					String fixedURL = session.getURI(filePath);
 					rootResource.putMethod(fixedURL,utf8stream);
-					rootResource.proppatchMethod(fixedURL,ArticleItemBean.PROPERTY_CONTENT_TYPE,ArticleItemBean.ARTICLE_FILENAME_SCOPE,true);
+					rootResource.proppatchMethod(fixedURL,ArticleItemBean.PROPERTY_CONTENT_TYPE,CoreConstants.ARTICLE_FILENAME_SCOPE,true);
 				}
 				
 				rootResource.close();

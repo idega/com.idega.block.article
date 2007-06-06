@@ -1,5 +1,5 @@
 /*
- * $Id: ArticleUtil.java,v 1.8 2007/02/13 19:05:38 valdas Exp $
+ * $Id: ArticleUtil.java,v 1.9 2007/06/06 12:08:04 valdas Exp $
  * Created on 7.2.2005
  *
  * Copyright (C) 2005 Idega Software hf. All Rights Reserved.
@@ -14,15 +14,14 @@ import java.io.File;
 import com.idega.content.business.ContentUtil;
 import com.idega.idegaweb.IWBundle;
 import com.idega.presentation.IWContext;
-import com.idega.util.IWTimestamp;
-
+import com.idega.util.CoreConstants;
 
 /**
  * 
- *  Last modified: $Date: 2007/02/13 19:05:38 $ by $Author: valdas $
+ *  Last modified: $Date: 2007/06/06 12:08:04 $ by $Author: valdas $
  * 
  * @author <a href="mailto:gummi@idega.com">Gudmundur Agust Saemundsson</a>
- * @version $Revision: 1.8 $
+ * @version $Revision: 1.9 $
  */
 public class ArticleUtil {
 
@@ -53,26 +52,25 @@ public class ArticleUtil {
 	 * @return
 	 */
 	public static String getArticleBaseFolderPath(){
-		return ContentUtil.getContentBaseFolderPath() + ArticleConstants.ARTICLE_CONTENT_PATH;
+		return ContentUtil.getContentBaseFolderPath() + CoreConstants.ARTICLE_CONTENT_PATH;
 	}
 
 	/**
 	 * @return the path where a new article by default should be created
 	 */
-	public static String getDefaultArticleYearMonthPath() {
+	/*public static String getDefaultArticleYearMonthPath() {
 		String folderString = ArticleUtil.getArticleBaseFolderPath();
 		return getArticleYearMonthPath(folderString);
-	}
+	}*/
 	
 	/**
 	 * @return Appends to the path where a new article by default should be created
 	 */
-	public static String getArticleYearMonthPath(String basePath) {
-		StringBuffer folderString = new StringBuffer(basePath).append(ArticleConstants.SLASH).append(ContentUtil.getYearMonthPath());
+	/*public static String getArticleYearMonthPath(String basePath) {
+		StringBuffer folderString = new StringBuffer(basePath).append(ArticleConstants.SLASH);
+		folderString.append(ContentUtil.getYearMonthPath(CoreUtil.getIWContext()));
 		return folderString.toString();
-	}
-	
-	
+	}*/
 	
 	public static String getFilenameFromPath(String path) {
 		File file = new File(path);

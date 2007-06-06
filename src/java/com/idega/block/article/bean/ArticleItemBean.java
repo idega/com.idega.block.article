@@ -1,5 +1,5 @@
 /*
- * $Id: ArticleItemBean.java,v 1.71 2007/03/19 08:43:31 valdas Exp $
+ * $Id: ArticleItemBean.java,v 1.72 2007/06/06 12:08:05 valdas Exp $
  *
  * Copyright (C) 2004-2005 Idega. All Rights Reserved.
  *
@@ -11,6 +11,7 @@ package com.idega.block.article.bean;
 
 import java.io.IOException;
 import java.io.Serializable;
+import java.rmi.RemoteException;
 import java.sql.Timestamp;
 import java.util.List;
 import java.util.Locale;
@@ -32,6 +33,8 @@ import com.idega.content.bean.ContentItemBean;
 import com.idega.content.bean.ContentItemCase;
 import com.idega.content.themes.helpers.ThemesConstants;
 import com.idega.core.accesscontrol.business.StandardRoles;
+import com.idega.core.builder.business.BuilderService;
+import com.idega.core.builder.business.BuilderServiceFactory;
 import com.idega.data.IDOStoreException;
 import com.idega.idegaweb.IWMainApplication;
 import com.idega.idegaweb.IWUserContext;
@@ -45,6 +48,8 @@ import com.idega.slide.util.AccessControlEntry;
 import com.idega.slide.util.AccessControlList;
 import com.idega.slide.util.WebdavExtendedResource;
 import com.idega.slide.util.WebdavRootResource;
+import com.idega.util.CoreConstants;
+import com.idega.util.CoreUtil;
 import com.idega.util.StringHandler;
 import com.idega.xml.XMLException;
 
@@ -53,10 +58,10 @@ import com.idega.xml.XMLException;
  * This is a JSF managed bean that manages each article instance and delegates 
  * all calls to the correct localized instance.
  * <p>
- * Last modified: $Date: 2007/03/19 08:43:31 $ by $Author: valdas $
+ * Last modified: $Date: 2007/06/06 12:08:05 $ by $Author: valdas $
  *
  * @author Anders Lindman,<a href="mailto:tryggvi@idega.com">Tryggvi Larusson</a>
- * @version $Revision: 1.71 $
+ * @version $Revision: 1.72 $
  */
 public class ArticleItemBean extends ContentItemBean implements Serializable, ContentItem, ValueChangeListener {
 	
@@ -64,7 +69,6 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 	 * Comment for <code>serialVersionUID</code>
 	 */
 	private static final long serialVersionUID = 4514851565086272678L;
-	final static String ARTICLE_FILENAME_SCOPE = "article";
 	private final static String ARTICLE_FILE_SUFFIX = ".xml";
 	
 	public final static String CONTENT_TYPE = "ContentType";
@@ -1277,14 +1281,14 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 	
 	public synchronized String createArticlePath() {
 		String resourcePath = getGeneratedArticleResourcePath();
-		int index = resourcePath.indexOf("."+ARTICLE_FILENAME_SCOPE);
+		int index = resourcePath.indexOf("."+CoreConstants.ARTICLE_FILENAME_SCOPE);
 		if(index>-1){
-			String articlePath = resourcePath.substring(0,index+ARTICLE_FILENAME_SCOPE.length()+1);
+			String articlePath = resourcePath.substring(0,index+CoreConstants.ARTICLE_FILENAME_SCOPE.length()+1);
 			System.out.println("Article path returned: "+articlePath);
 			return articlePath;
 		}
 		Logger log = Logger.getLogger(this.getClass().toString());
-		log.warning("Resource path for article '"+resourcePath+"' does not contain article filename scope '."+ARTICLE_FILENAME_SCOPE+"'.  The resource path is returned unchanged.");
+		log.warning("Resource path for article '"+resourcePath+"' does not contain article filename scope '."+CoreConstants.ARTICLE_FILENAME_SCOPE+"'.  The resource path is returned unchanged.");
 		return resourcePath;
 	}
 	
@@ -1301,9 +1305,7 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 		//String path = (String)getValue(FIELDNAME_RESOURCE_PATH);
 		//if(path==null){
 			try {
-				IWUserContext iwc = getIWUserContext();
-				IWSlideService service = getIWSlideService(iwc);
-				path =  generateArticleResourcePath(service);
+				path =  generateArticleResourcePath(CoreUtil.getIWContext());
 				//setArticleResourcePath(path);
 			}
 			catch (UnavailableIWContext e) {
@@ -1322,20 +1324,25 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 	 * @param service
 	 * @return
 	 */
-	protected String generateArticleResourcePath(IWSlideService service){
-		String baseFolderLocation = getBaseFolderLocation();
-		/*if(null==folderLocation || "".equalsIgnoreCase(folderLocation)) {
-			folderLocation=ArticleUtil.getDefaultArticleYearMonthPath();
-		}*/
+	protected String generateArticleResourcePath(IWContext iwc) {
+		/*String baseFolderLocation = getBaseFolderLocation();
 		String dateFolderLocation = ArticleUtil.getArticleYearMonthPath(baseFolderLocation);
 		StringBuffer path = new StringBuffer(dateFolderLocation);
 		path.append("/");
 		path.append(service.createUniqueFileName(ARTICLE_FILENAME_SCOPE));
 		path.append(".");
 		path.append(ARTICLE_FILENAME_SCOPE);
-		//path.append("/");
-		//path.append(getArticleName());
-		return path.toString();
+		return path.toString();*/
+		
+		BuilderService service = null;
+		try {
+			service = BuilderServiceFactory.getBuilderService(iwc);
+		} catch (RemoteException e) {
+			e.printStackTrace();
+			return null;
+		}
+		
+		return service.generateResourcePath(getBaseFolderLocation(), CoreConstants.ARTICLE_FILENAME_SCOPE, CoreConstants.ARTICLE_FILENAME_SCOPE);
 	}
 	
 	/* (non-Javadoc)
@@ -1358,7 +1365,7 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 	 * </p>
 	 */
 	private void makesureStandardFolderisCreated() {
-		IWUserContext iwuc = getIWUserContext();
+		IWUserContext iwuc = CoreUtil.getIWContext();
 		IWSlideService slideService = getIWSlideService(iwuc);
 		String contentFolderPath = ArticleUtil.getContentRootPath();
 		String articlePath = ArticleUtil.getArticleBaseFolderPath();
@@ -1481,11 +1488,6 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 			return getLocalizedArticle().load(localizedArticleFile);
 		}
 		return false;
-	}
-
-	protected IWUserContext getIWUserContext(){
-		IWContext iwc = IWContext.getInstance();
-		return iwc;
 	}
 	
 	/*public boolean getShowOnlyArticleInSelectedLanguage(){
