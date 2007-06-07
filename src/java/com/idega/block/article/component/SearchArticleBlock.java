@@ -1,5 +1,5 @@
 /*
- * $Id: SearchArticleBlock.java,v 1.13 2006/01/04 14:32:52 tryggvil Exp $
+ * $Id: SearchArticleBlock.java,v 1.14 2007/06/07 10:15:44 eiki Exp $
  *
  * Copyright (C) 2004 Idega. All Rights Reserved.
  *
@@ -11,6 +11,7 @@ package com.idega.block.article.component;
 
 import java.io.Serializable;
 import javax.faces.component.UIComponent;
+import javax.faces.component.html.HtmlCommandButton;
 import javax.faces.component.html.HtmlInputText;
 import javax.faces.component.html.HtmlPanelGrid;
 import javax.faces.component.html.HtmlSelectOneMenu;
@@ -33,10 +34,10 @@ import com.idega.webface.WFUtil;
 /**
  * Block for searching articles.   
  * <p>
- * Last modified: $Date: 2006/01/04 14:32:52 $ by $Author: tryggvil $
+ * Last modified: $Date: 2007/06/07 10:15:44 $ by $Author: eiki $
  *
  * @author Anders Lindman
- * @version $Revision: 1.13 $
+ * @version $Revision: 1.14 $
  */
 public class SearchArticleBlock extends WFBlock implements ManagedContentBeans, ActionListener, Serializable {
 
@@ -159,11 +160,16 @@ public class SearchArticleBlock extends WFBlock implements ManagedContentBeans, 
 		
 		p = WFPanelUtil.getPlainFormPanel(1);
 		p.getChildren().add(WFUtil.getText(" "));
-		p.getChildren().add(WFUtil.getButton(SEARCH_BUTTON_ID, "Search", this));
+		
+		p.getChildren().add(getButton());
 		
 		mainContainer.add(p);
 				
 		return mainContainer;
+	}
+
+	protected HtmlCommandButton getButton() {
+		return WFUtil.getButton(SEARCH_BUTTON_ID, "Search", this);
 	}
 	
 	/**
