@@ -1,5 +1,5 @@
 /*
- * $Id: ArticleItemBean.java,v 1.72 2007/06/06 12:08:05 valdas Exp $
+ * $Id: ArticleItemBean.java,v 1.73 2007/06/07 10:38:14 eiki Exp $
  *
  * Copyright (C) 2004-2005 Idega. All Rights Reserved.
  *
@@ -17,14 +17,17 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.logging.Logger;
+
 import javax.faces.context.FacesContext;
 import javax.faces.event.AbortProcessingException;
 import javax.faces.event.ValueChangeEvent;
 import javax.faces.event.ValueChangeListener;
+
 import org.apache.webdav.lib.Ace;
 import org.apache.webdav.lib.Privilege;
 import org.apache.webdav.lib.PropertyName;
 import org.apache.webdav.lib.WebdavResources;
+
 import com.idega.block.article.ArticleCacher;
 import com.idega.block.article.business.ArticleConstants;
 import com.idega.block.article.business.ArticleUtil;
@@ -58,10 +61,10 @@ import com.idega.xml.XMLException;
  * This is a JSF managed bean that manages each article instance and delegates 
  * all calls to the correct localized instance.
  * <p>
- * Last modified: $Date: 2007/06/06 12:08:05 $ by $Author: valdas $
+ * Last modified: $Date: 2007/06/07 10:38:14 $ by $Author: eiki $
  *
  * @author Anders Lindman,<a href="mailto:tryggvi@idega.com">Tryggvi Larusson</a>
- * @version $Revision: 1.72 $
+ * @version $Revision: 1.73 $
  */
 public class ArticleItemBean extends ContentItemBean implements Serializable, ContentItem, ValueChangeListener {
 	
@@ -79,7 +82,7 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 	private String languageChange;
 	private boolean allowFallbackToSystemLanguage=false;
 	private String resourcePath;
-	private boolean avilableInRequestedLanguage=false;
+	private boolean availableInRequestedLanguage=false;
 	
 	public ArticleLocalizedItemBean getLocalizedArticle(){
 		if(this.localizedArticle==null){
@@ -111,7 +114,7 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 		//isDummyArticleSet = false;
 		getLocalizedArticle().clear();
 		this.resourcePath=null;
-		this.avilableInRequestedLanguage=false;
+		this.availableInRequestedLanguage=false;
 	}
 	/* (non-Javadoc)
 	 * @see com.idega.block.article.bean.ArticleLocalizedItemBean#getAsXML()
@@ -1445,7 +1448,7 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 			String userLanguageArticleResourcePath = getArticleDefaultLocalizedResourcePath();
 			if(resources.isThereResourceName(userLanguageArticleResourcePath)){ //the language that the user has selected
 				localizedArticleFile = (WebdavExtendedResource) resources.getResource(userLanguageArticleResourcePath);
-				setAvilableInSelectedLanguage();
+				setAvailableInSelectedLanguage();
 			}
 			else{
 				//selected language not available:
@@ -1453,14 +1456,14 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 					String systemLanguageArticleResourcePath = getArticleDefaultLocalizedResourcePath(getSystemLanguage());//getArticleName(iwc.getIWMainApplication().getDefaultLocale());
 					if(resources.isThereResourceName(systemLanguageArticleResourcePath)){ //the language default in the system.
 						localizedArticleFile = (WebdavExtendedResource) resources.getResource(systemLanguageArticleResourcePath);
-						setAvilableInSelectedLanguage();
+						setAvailableInSelectedLanguage();
 					}
 					else{
-						setNotAvilableInSelectedLanguage();
+						setNotAvailableInSelectedLanguage();
 					}
 				}
 				else{
-					setNotAvilableInSelectedLanguage();
+					setNotAvailableInSelectedLanguage();
 				}
 				
 			}
@@ -1524,14 +1527,14 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 		this.allowFallbackToSystemLanguage=allow;
 	}
 	
-	public void setAvilableInSelectedLanguage(){
-		this.avilableInRequestedLanguage=true;
+	public void setAvailableInSelectedLanguage(){
+		this.availableInRequestedLanguage=true;
 	}
 	
-	public void setNotAvilableInSelectedLanguage(){
-		this.avilableInRequestedLanguage=false;
+	public void setNotAvailableInSelectedLanguage(){
+		this.availableInRequestedLanguage=false;
 		if(!getAllowFallbackToSystemLanguage()){
-			getLocalizedArticle().setHeadline("Article not avilable");
+			getLocalizedArticle().setHeadline("Article not available");
 			getLocalizedArticle().setBody("The article you have chosen is not available in the selected language");
 			setExists(true);
 			setRendered(true);
@@ -1547,8 +1550,8 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 	 * </p>
 	 * @return
 	 */
-	public boolean getAvilableInRequestedLanguage() {
-		return this.avilableInRequestedLanguage;
+	public boolean getAvailableInRequestedLanguage() {
+		return this.availableInRequestedLanguage;
 	}
 
 	/* (non-Javadoc)
