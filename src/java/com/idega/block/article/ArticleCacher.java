@@ -4,8 +4,10 @@
 package com.idega.block.article;
 
 import java.util.Map;
+
 import javax.faces.component.UIComponent;
 import javax.faces.context.FacesContext;
+
 import com.idega.block.article.component.ArticleItemViewer;
 import com.idega.core.cache.IWCacheManager2;
 import com.idega.core.cache.UIComponentCacher;
@@ -16,10 +18,10 @@ import com.idega.idegaweb.IWMainApplication;
  * <p>
  * TODO tryggvil Describe Type ArticleCacher
  * </p>
- *  Last modified: $Date: 2006/06/08 15:51:44 $ by $Author: tryggvil $
+ *  Last modified: $Date: 2007/06/07 21:17:26 $ by $Author: palli $
  * 
  * @author <a href="mailto:tryggvil@idega.com">tryggvil</a>
- * @version $Revision: 1.6 $
+ * @version $Revision: 1.7 $
  */
 public class ArticleCacher extends UIComponentCacher {
 	

@@ -1,5 +1,5 @@
 /*
- * $Id: ArticleAdminBlockTag.java,v 1.3 2006/04/09 11:57:56 laddi Exp $
+ * $Id: ArticleAdminBlockTag.java,v 1.4 2007/06/07 21:17:26 palli Exp $
  *
  * Copyright (C) 2004 Idega. All Rights Reserved.
  *
@@ -11,15 +11,16 @@ package com.idega.block.article.taglib;
 
 import javax.faces.component.UIComponent;
 import javax.faces.webapp.UIComponentTag;
+
 import com.idega.block.article.component.ArticleAdminBlock;
 
 /**
  * JSP tag for create article test/demo page. 
  * <p>
- * Last modified: $Date: 2006/04/09 11:57:56 $ by $Author: laddi $
+ * Last modified: $Date: 2007/06/07 21:17:26 $ by $Author: palli $
  *
  * @author Anders Lindman
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
 public class ArticleAdminBlockTag extends UIComponentTag {
 	String mode=null;
