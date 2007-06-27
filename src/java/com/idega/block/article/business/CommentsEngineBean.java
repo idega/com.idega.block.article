@@ -279,7 +279,7 @@ public class CommentsEngineBean extends IBOServiceBean implements CommentsEngine
 		comments.setUpdated(date);
 		
 		// ID
-		comments.setId(serverName + ContentConstants.CONTENT + uri);
+		comments.setId(serverName + CoreConstants.CONTENT + uri);
 		
 		// Author
 		Person author = new Person();
@@ -660,7 +660,7 @@ public class CommentsEngineBean extends IBOServiceBean implements CommentsEngine
 			info.add(resourceBundle.getLocalizedString("posted", "Posted"));								// 0
 			info.add(resourceBundle.getLocalizedString("loading_comments", "Loading comments..."));			// 1
 			info.add(resourceBundle.getLocalizedString("atom_feed", "Atom Feed"));							// 2
-			info.add(ThemesHelper.getInstance().getFullServerName(iwc) + ContentConstants.CONTENT);			// 3
+			info.add(ThemesHelper.getInstance().getFullServerName(iwc) + CoreConstants.CONTENT);			// 3
 			info.add(resourceBundle.getLocalizedString("need_send_notification", "Do You wish to receive notifications about new comments?"));	// 4
 			info.add(resourceBundle.getLocalizedString("yes", "Yes"));										// 5
 			info.add(resourceBundle.getLocalizedString("no", "No"));										// 6

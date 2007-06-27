@@ -25,6 +25,7 @@ import com.idega.presentation.Script;
 import com.idega.presentation.text.Link;
 import com.idega.presentation.text.Text;
 import com.idega.presentation.ui.CheckBox;
+import com.idega.util.CoreConstants;
 import com.idega.webface.WFDivision;
 
 public class CommentsViewer extends Block {
@@ -121,7 +122,7 @@ public class CommentsViewer extends Block {
 			Link linkToFeed = new Link();
 			linkToFeed.setId(new StringBuffer(commentsId).append("article_comments_link_to_feed").toString());
 			linkToFeed.setImage(atom);
-			linkToFeed.setURL(ThemesHelper.getInstance().getFullServerName(iwc) + ContentConstants.CONTENT + linkToComments);
+			linkToFeed.setURL(ThemesHelper.getInstance().getFullServerName(iwc) + CoreConstants.CONTENT + linkToComments);
 			articleComments.add(linkToFeed);
 			
 			// Delete comments image

@@ -30,7 +30,6 @@ import com.idega.block.rss.business.RSSProducer;
 import com.idega.block.rss.data.RSSRequest;
 import com.idega.business.IBOLookup;
 import com.idega.business.IBOLookupException;
-import com.idega.content.business.ContentConstants;
 import com.idega.content.business.ContentItemRssProducer;
 import com.idega.content.business.ContentSearch;
 import com.idega.content.business.ContentUtil;
@@ -46,6 +45,7 @@ import com.idega.slide.business.IWSlideChangeListener;
 import com.idega.slide.business.IWSlideService;
 import com.idega.slide.business.IWSlideSession;
 import com.idega.slide.util.IWSlideConstants;
+import com.idega.util.CoreConstants;
 import com.idega.util.IWTimestamp;
 import com.sun.syndication.feed.synd.SyndEntry;
 import com.sun.syndication.feed.synd.SyndFeed;
@@ -65,7 +65,7 @@ public class ArticleRSSProducer extends RSSAbstractProducer implements RSSProduc
 	public static final String RSS_FOLDER_NAME = "rss";
 	public static final String RSS_FILE_NAME = "articlefeed.xml";
 
-	public static final String PATH = ContentConstants.CONTENT + ContentUtil.getContentBaseFolderPath() + "/article/";//"/files/cms/article";
+	public static final String PATH = CoreConstants.CONTENT + ContentUtil.getContentBaseFolderPath() + "/article/";//"/files/cms/article";
 	private List rssFileURIsCacheList = new ArrayList();
 	private static Log log = LogFactory.getLog(ContentItemRssProducer.class);
 	
