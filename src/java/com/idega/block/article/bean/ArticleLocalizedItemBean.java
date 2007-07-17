@@ -1,5 +1,5 @@
 /*
- * $Id: ArticleLocalizedItemBean.java,v 1.17 2007/07/17 15:57:50 valdas Exp $
+ * $Id: ArticleLocalizedItemBean.java,v 1.18 2007/07/17 16:35:47 valdas Exp $
  *
  * Copyright (C) 2004 Idega. All Rights Reserved.
  *
@@ -48,6 +48,7 @@ import com.idega.xml.XMLDocument;
 import com.idega.xml.XMLElement;
 import com.idega.xml.XMLException;
 import com.idega.xml.XMLNamespace;
+import com.idega.xml.XMLOutput;
 import com.idega.xml.XMLParser;
 
 /**
@@ -55,10 +56,10 @@ import com.idega.xml.XMLParser;
  * This is a JSF managed bean that manages each article xml document 
  * instance per language/locale.
  * <p>
- * Last modified: $Date: 2007/07/17 15:57:50 $ by $Author: valdas $
+ * Last modified: $Date: 2007/07/17 16:35:47 $ by $Author: valdas $
  *
  * @author Anders Lindman,<a href="mailto:tryggvi@idega.com">Tryggvi Larusson</a>
- * @version $Revision: 1.17 $
+ * @version $Revision: 1.18 $
  */
 public class ArticleLocalizedItemBean extends ContentItemBean implements Serializable, ContentItem {
 	
@@ -294,6 +295,7 @@ public class ArticleLocalizedItemBean extends ContentItemBean implements Seriali
 		}
 		
 		XMLParser builder = new XMLParser();
+		XMLOutput outputter = new XMLOutput();
 		
 		XMLElement bodyElement = null;
 		XMLElement teaserElement = null;
@@ -301,13 +303,13 @@ public class ArticleLocalizedItemBean extends ContentItemBean implements Seriali
 		if (body != null && !ContentConstants.EMPTY.equals(body.trim())) {
 			XMLDocument bodyDoc = builder.parse(new ByteArrayInputStream(body.getBytes("UTF-8")));
 			bodyElement = bodyDoc.getRootElement();
-			body = bodyElement.getValue();
+			body = outputter.outputString(bodyElement);
 		}
 		
 		if (teaser != null && !ContentConstants.EMPTY.equals(teaser.trim())) {
 			XMLDocument bodyDoc = builder.parse(new ByteArrayInputStream(teaser.getBytes("UTF-8")));
 			teaserElement = bodyDoc.getRootElement();
-			teaser = teaserElement.getValue();
+			teaser = outputter.outputString(teaserElement);
 		}
 		
 		FacesContext context = FacesContext.getCurrentInstance();
@@ -480,10 +482,11 @@ public class ArticleLocalizedItemBean extends ContentItemBean implements Seriali
 			tidy.setXmlOut(true);
 			tidy.setShowWarnings(false);
 			tidy.setCharEncoding(Configuration.UTF8);
-			ByteArrayInputStream bais;
+			ByteArrayInputStream bais = null;
+			ByteArrayOutputStream baos = null;
 			try {
 				bais = new ByteArrayInputStream(text.getBytes("UTF-8"));
-				ByteArrayOutputStream baos = new ByteArrayOutputStream();
+				baos = new ByteArrayOutputStream();
 				
 				tidy.parse(bais, baos);
 				text = baos.toString("UTF-8");
@@ -492,6 +495,20 @@ public class ArticleLocalizedItemBean extends ContentItemBean implements Seriali
 				e.printStackTrace();
 			}
 			
+			if (bais != null) {
+				try {
+					bais.close();
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			}
+			if (baos != null) {
+				try {
+					baos.close();
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			}
 			
 			text = removeAbsoluteReferences(text);
 		}
