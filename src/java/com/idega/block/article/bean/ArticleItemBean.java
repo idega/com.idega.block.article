@@ -1,5 +1,5 @@
 /*
- * $Id: ArticleItemBean.java,v 1.73 2007/06/07 10:38:14 eiki Exp $
+ * $Id: ArticleItemBean.java,v 1.74 2007/07/17 07:32:35 alexis Exp $
  *
  * Copyright (C) 2004-2005 Idega. All Rights Reserved.
  *
@@ -61,10 +61,10 @@ import com.idega.xml.XMLException;
  * This is a JSF managed bean that manages each article instance and delegates 
  * all calls to the correct localized instance.
  * <p>
- * Last modified: $Date: 2007/06/07 10:38:14 $ by $Author: eiki $
+ * Last modified: $Date: 2007/07/17 07:32:35 $ by $Author: alexis $
  *
  * @author Anders Lindman,<a href="mailto:tryggvi@idega.com">Tryggvi Larusson</a>
- * @version $Revision: 1.73 $
+ * @version $Revision: 1.74 $
  */
 public class ArticleItemBean extends ContentItemBean implements Serializable, ContentItem, ValueChangeListener {
 	
@@ -325,11 +325,11 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 		
 		//First validate headline and body:
 		
-		if ( (getHeadline()==null) || (getHeadline().trim().equals("")) ) {
-			ArticleStoreException exception = new ArticleStoreException();
-			exception.setErrorKey(ArticleStoreException.KEY_ERROR_HEADLINE_EMPTY);
-			throw exception;
-		}
+//		if ( (getHeadline()==null) || (getHeadline().trim().equals("")) ) {
+//			ArticleStoreException exception = new ArticleStoreException();
+//			exception.setErrorKey(ArticleStoreException.KEY_ERROR_HEADLINE_EMPTY);
+//			throw exception;
+//		}
 		if (getBody().trim().equals("")) {
 			ArticleStoreException exception = new ArticleStoreException();
 			exception.setErrorKey(ArticleStoreException.KEY_ERROR_BODY_EMPTY);
