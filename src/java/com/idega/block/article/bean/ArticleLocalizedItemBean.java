@@ -1,5 +1,5 @@
 /*
- * $Id: ArticleLocalizedItemBean.java,v 1.16 2007/06/06 12:08:04 valdas Exp $
+ * $Id: ArticleLocalizedItemBean.java,v 1.17 2007/07/17 15:57:50 valdas Exp $
  *
  * Copyright (C) 2004 Idega. All Rights Reserved.
  *
@@ -37,6 +37,7 @@ import com.idega.content.bean.ContentItemCase;
 import com.idega.content.bean.ContentItemField;
 import com.idega.content.bean.ContentItemFieldBean;
 import com.idega.content.business.CategoryBean;
+import com.idega.content.business.ContentConstants;
 import com.idega.data.IDOStoreException;
 import com.idega.presentation.IWContext;
 import com.idega.slide.business.IWSlideSession;
@@ -54,10 +55,10 @@ import com.idega.xml.XMLParser;
  * This is a JSF managed bean that manages each article xml document 
  * instance per language/locale.
  * <p>
- * Last modified: $Date: 2007/06/06 12:08:04 $ by $Author: valdas $
+ * Last modified: $Date: 2007/07/17 15:57:50 $ by $Author: valdas $
  *
  * @author Anders Lindman,<a href="mailto:tryggvi@idega.com">Tryggvi Larusson</a>
- * @version $Revision: 1.16 $
+ * @version $Revision: 1.17 $
  */
 public class ArticleLocalizedItemBean extends ContentItemBean implements Serializable, ContentItem {
 	
@@ -286,18 +287,27 @@ public class ArticleLocalizedItemBean extends ContentItemBean implements Seriali
 		if (body == null) {
 			body = ArticleConstants.EMPTY;
 		}
-		else {
-			//why is this done?
-			body = body.trim();
-		}
 		
 		String teaser = getTeaser();
 		if (teaser == null) {
 			teaser = ArticleConstants.EMPTY;
 		}
-		else {
-			//why is this done?
-			teaser = teaser.trim();
+		
+		XMLParser builder = new XMLParser();
+		
+		XMLElement bodyElement = null;
+		XMLElement teaserElement = null;
+		
+		if (body != null && !ContentConstants.EMPTY.equals(body.trim())) {
+			XMLDocument bodyDoc = builder.parse(new ByteArrayInputStream(body.getBytes("UTF-8")));
+			bodyElement = bodyDoc.getRootElement();
+			body = bodyElement.getValue();
+		}
+		
+		if (teaser != null && !ContentConstants.EMPTY.equals(teaser.trim())) {
+			XMLDocument bodyDoc = builder.parse(new ByteArrayInputStream(teaser.getBytes("UTF-8")));
+			teaserElement = bodyDoc.getRootElement();
+			teaser = teaserElement.getValue();
 		}
 		
 		FacesContext context = FacesContext.getCurrentInstance();
