@@ -1,5 +1,5 @@
 /*
- * $Id: ArticleLocalizedItemBean.java,v 1.18 2007/07/17 16:35:47 valdas Exp $
+ * $Id: ArticleLocalizedItemBean.java,v 1.19 2007/07/17 16:56:21 valdas Exp $
  *
  * Copyright (C) 2004 Idega. All Rights Reserved.
  *
@@ -56,10 +56,10 @@ import com.idega.xml.XMLParser;
  * This is a JSF managed bean that manages each article xml document 
  * instance per language/locale.
  * <p>
- * Last modified: $Date: 2007/07/17 16:35:47 $ by $Author: valdas $
+ * Last modified: $Date: 2007/07/17 16:56:21 $ by $Author: valdas $
  *
  * @author Anders Lindman,<a href="mailto:tryggvi@idega.com">Tryggvi Larusson</a>
- * @version $Revision: 1.18 $
+ * @version $Revision: 1.19 $
  */
 public class ArticleLocalizedItemBean extends ContentItemBean implements Serializable, ContentItem {
 	
@@ -295,21 +295,32 @@ public class ArticleLocalizedItemBean extends ContentItemBean implements Seriali
 		}
 		
 		XMLParser builder = new XMLParser();
-		XMLOutput outputter = new XMLOutput();
 		
+		XMLElement rootElement = null;
 		XMLElement bodyElement = null;
 		XMLElement teaserElement = null;
+		XMLNamespace jTidyNamespace = new XMLNamespace("http://www.w3.org/1999/xhtml");
 		
 		if (body != null && !ContentConstants.EMPTY.equals(body.trim())) {
 			XMLDocument bodyDoc = builder.parse(new ByteArrayInputStream(body.getBytes("UTF-8")));
-			bodyElement = bodyDoc.getRootElement();
-			body = outputter.outputString(bodyElement);
+			rootElement = bodyDoc.getRootElement();
+			if (rootElement != null) {
+				bodyElement = rootElement.getChild("body", jTidyNamespace);
+				if (bodyElement != null) {
+					body = bodyElement.getContentAsString();
+				}
+			}
 		}
 		
 		if (teaser != null && !ContentConstants.EMPTY.equals(teaser.trim())) {
 			XMLDocument bodyDoc = builder.parse(new ByteArrayInputStream(teaser.getBytes("UTF-8")));
-			teaserElement = bodyDoc.getRootElement();
-			teaser = outputter.outputString(teaserElement);
+			rootElement = bodyDoc.getRootElement();
+			if (rootElement != null) {
+				teaserElement = rootElement.getChild("body", jTidyNamespace);
+				if (teaserElement != null) {
+					teaser = teaserElement.getContentAsString();
+				}
+			}
 		}
 		
 		FacesContext context = FacesContext.getCurrentInstance();
