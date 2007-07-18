@@ -1,5 +1,5 @@
 /*
- * $Id: ArticleLocalizedItemBean.java,v 1.19 2007/07/17 16:56:21 valdas Exp $
+ * $Id: ArticleLocalizedItemBean.java,v 1.20 2007/07/18 08:40:04 valdas Exp $
  *
  * Copyright (C) 2004 Idega. All Rights Reserved.
  *
@@ -23,8 +23,6 @@ import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import javax.faces.context.FacesContext;
-
 import org.apache.webdav.lib.WebdavResource;
 import org.w3c.tidy.Configuration;
 import org.w3c.tidy.Tidy;
@@ -44,11 +42,11 @@ import com.idega.slide.business.IWSlideSession;
 import com.idega.slide.util.WebdavExtendedResource;
 import com.idega.slide.util.WebdavRootResource;
 import com.idega.util.CoreConstants;
+import com.idega.util.CoreUtil;
 import com.idega.xml.XMLDocument;
 import com.idega.xml.XMLElement;
 import com.idega.xml.XMLException;
 import com.idega.xml.XMLNamespace;
-import com.idega.xml.XMLOutput;
 import com.idega.xml.XMLParser;
 
 /**
@@ -56,10 +54,10 @@ import com.idega.xml.XMLParser;
  * This is a JSF managed bean that manages each article xml document 
  * instance per language/locale.
  * <p>
- * Last modified: $Date: 2007/07/17 16:56:21 $ by $Author: valdas $
+ * Last modified: $Date: 2007/07/18 08:40:04 $ by $Author: valdas $
  *
  * @author Anders Lindman,<a href="mailto:tryggvi@idega.com">Tryggvi Larusson</a>
- * @version $Revision: 1.19 $
+ * @version $Revision: 1.20 $
  */
 public class ArticleLocalizedItemBean extends ContentItemBean implements Serializable, ContentItem {
 	
@@ -323,11 +321,7 @@ public class ArticleLocalizedItemBean extends ContentItemBean implements Seriali
 			}
 		}
 		
-		FacesContext context = FacesContext.getCurrentInstance();
-		IWContext iwc = null;
-		if (context != null) {
-			iwc = IWContext.getIWContext(context);
-		}
+		IWContext iwc = CoreUtil.getIWContext();
 		return getFeedEntryAsXML(iwc, getHeadline(), null, getHeadline(), teaser, body, getAuthor(), getCategories(), getSource(),
 				getComment(), ArticleItemViewer.class.getName(), getLinkToComments());
 
@@ -485,44 +479,46 @@ public class ArticleLocalizedItemBean extends ContentItemBean implements Seriali
 	}
 	
 	protected String prettify(String toPrettify) {
+		if (toPrettify == null) {
+			return null;
+		}
+		
 		String text = toPrettify;
-		if(text!=null){
-			//Use JTidy to clean up the html
-			Tidy tidy = new Tidy();
-			tidy.setXHTML(true);
-			tidy.setXmlOut(true);
-			tidy.setShowWarnings(false);
-			tidy.setCharEncoding(Configuration.UTF8);
-			ByteArrayInputStream bais = null;
-			ByteArrayOutputStream baos = null;
+		//Use JTidy to clean up the html
+		Tidy tidy = new Tidy();
+		tidy.setXHTML(true);
+		tidy.setXmlOut(true);
+		tidy.setShowWarnings(false);
+		tidy.setCharEncoding(Configuration.UTF8);
+		ByteArrayInputStream bais = null;
+		ByteArrayOutputStream baos = null;
+		try {
+			bais = new ByteArrayInputStream(text.getBytes("UTF-8"));
+			baos = new ByteArrayOutputStream();
+			
+			tidy.parse(bais, baos);
+			text = baos.toString("UTF-8");
+		}
+		catch (UnsupportedEncodingException e) {
+			e.printStackTrace();
+		}
+			
+		if (bais != null) {
 			try {
-				bais = new ByteArrayInputStream(text.getBytes("UTF-8"));
-				baos = new ByteArrayOutputStream();
-				
-				tidy.parse(bais, baos);
-				text = baos.toString("UTF-8");
-			}
-			catch (UnsupportedEncodingException e) {
+				bais.close();
+			} catch (IOException e) {
 				e.printStackTrace();
 			}
-			
-			if (bais != null) {
-				try {
-					bais.close();
-				} catch (IOException e) {
-					e.printStackTrace();
-				}
-			}
-			if (baos != null) {
-				try {
-					baos.close();
-				} catch (IOException e) {
-					e.printStackTrace();
-				}
-			}
-			
-			text = removeAbsoluteReferences(text);
 		}
+		if (baos != null) {
+			try {
+				baos.close();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+	
+		text = removeAbsoluteReferences(text);
 		return text;
 	}
 
