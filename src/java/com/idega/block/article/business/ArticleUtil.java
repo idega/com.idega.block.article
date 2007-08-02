@@ -1,5 +1,5 @@
 /*
- * $Id: ArticleUtil.java,v 1.9 2007/06/06 12:08:04 valdas Exp $
+ * $Id: ArticleUtil.java,v 1.10 2007/08/02 13:35:11 valdas Exp $
  * Created on 7.2.2005
  *
  * Copyright (C) 2005 Idega Software hf. All Rights Reserved.
@@ -11,17 +11,22 @@ package com.idega.block.article.business;
 
 import javax.faces.context.FacesContext;
 import java.io.File;
+import java.rmi.RemoteException;
+
 import com.idega.content.business.ContentUtil;
+import com.idega.core.builder.business.BuilderService;
+import com.idega.core.builder.business.BuilderServiceFactory;
+import com.idega.core.builder.data.ICPage;
 import com.idega.idegaweb.IWBundle;
 import com.idega.presentation.IWContext;
 import com.idega.util.CoreConstants;
 
 /**
  * 
- *  Last modified: $Date: 2007/06/06 12:08:04 $ by $Author: valdas $
+ *  Last modified: $Date: 2007/08/02 13:35:11 $ by $Author: valdas $
  * 
  * @author <a href="mailto:gummi@idega.com">Gudmundur Agust Saemundsson</a>
- * @version $Revision: 1.9 $
+ * @version $Revision: 1.10 $
  */
 public class ArticleUtil {
 
@@ -54,26 +59,37 @@ public class ArticleUtil {
 	public static String getArticleBaseFolderPath(){
 		return ContentUtil.getContentBaseFolderPath() + CoreConstants.ARTICLE_CONTENT_PATH;
 	}
-
-	/**
-	 * @return the path where a new article by default should be created
-	 */
-	/*public static String getDefaultArticleYearMonthPath() {
-		String folderString = ArticleUtil.getArticleBaseFolderPath();
-		return getArticleYearMonthPath(folderString);
-	}*/
-	
-	/**
-	 * @return Appends to the path where a new article by default should be created
-	 */
-	/*public static String getArticleYearMonthPath(String basePath) {
-		StringBuffer folderString = new StringBuffer(basePath).append(ArticleConstants.SLASH);
-		folderString.append(ContentUtil.getYearMonthPath(CoreUtil.getIWContext()));
-		return folderString.toString();
-	}*/
 	
 	public static String getFilenameFromPath(String path) {
 		File file = new File(path);
 		return file.getName();
+	}
+	
+	public static boolean isPageTypeBlog(IWContext iwc) {
+		if (iwc == null) {
+			return false;
+		}
+		int id = iwc.getCurrentIBPageID();
+		if (id < 0) {
+			return false;
+		}
+		BuilderService builder = null;
+		try {
+			builder = BuilderServiceFactory.getBuilderService(iwc);
+		} catch (RemoteException e) {
+			e.printStackTrace();
+			return false;
+		}
+		return isPageTypeBlog(builder.getICPage(String.valueOf(id)));
+	}
+	
+	public static boolean isPageTypeBlog(ICPage page) {
+		if (page == null) {
+			return false;
+		}
+		if ("blog".equals(page.getSubType())) {
+			return true;
+		}
+		return false;
 	}
 }

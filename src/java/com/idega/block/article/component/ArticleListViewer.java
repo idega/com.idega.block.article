@@ -1,5 +1,5 @@
 /*
- * $Id: ArticleListViewer.java,v 1.10 2007/04/24 12:12:09 justinas Exp $
+ * $Id: ArticleListViewer.java,v 1.11 2007/08/02 13:35:11 valdas Exp $
  * Created on 24.1.2005
  *
  * Copyright (C) 2005 Idega Software hf. All Rights Reserved.
@@ -16,16 +16,20 @@ import java.util.List;
 import javax.faces.component.UIComponent;
 import javax.faces.context.FacesContext;
 
+import org.apache.myfaces.renderkit.html.util.AddResource;
+import org.apache.myfaces.renderkit.html.util.AddResourceFactory;
+
 import com.idega.block.article.ArticleCacher;
 import com.idega.block.article.bean.ArticleListManagedBean;
 import com.idega.block.article.business.ArticleUtil;
+import com.idega.block.web2.business.Web2Business;
+import com.idega.business.SpringBeanLookup;
 import com.idega.content.business.ContentUtil;
 import com.idega.content.presentation.ContentItemListViewer;
 import com.idega.content.presentation.ContentItemViewer;
 import com.idega.content.renderkit.ContentListViewerRenderer;
 import com.idega.core.builder.business.BuilderService;
 import com.idega.core.builder.business.BuilderServiceFactory;
-import com.idega.core.builder.data.ICPage;
 import com.idega.core.cache.UIComponentCacher;
 import com.idega.idegaweb.IWMainApplication;
 import com.idega.presentation.IWContext;
@@ -38,10 +42,10 @@ import com.idega.presentation.Script;
  * for the article module.
  * </p>
  * 
- *  Last modified: $Date: 2007/04/24 12:12:09 $ by $Author: justinas $
+ *  Last modified: $Date: 2007/08/02 13:35:11 $ by $Author: valdas $
  * 
  * @author <a href="mailto:tryggvi@idega.com">Tryggvi Larusson</a>
- * @version $Revision: 1.10 $
+ * @version $Revision: 1.11 $
  */
 public class ArticleListViewer extends ContentItemListViewer {
 
@@ -132,9 +136,10 @@ public class ArticleListViewer extends ContentItemListViewer {
 	
 	@SuppressWarnings("unchecked")
 	private void addCommentsController(IWContext iwc) {
-		if (!ContentUtil.hasContentEditorRoles(iwc)) {
+		if (!ContentUtil.hasContentEditorRoles(iwc) || !ArticleUtil.isPageTypeBlog(iwc)) {
 			return;
 		}
+		
 		BuilderService builder = null;
 		try {
 			builder = BuilderServiceFactory.getBuilderService(iwc);
@@ -183,8 +188,7 @@ public class ArticleListViewer extends ContentItemListViewer {
 	
 	@SuppressWarnings("unchecked")
 	private boolean addFeedJavaScript(String linkToFeed, String feedType, String feedTitle) {
-		Script script = new Script();		
-//		script.addScriptLine("addFeedSymbolInHeader('"+linkToFeed+"', '"+feedType+"', '"+feedTitle+"');");
+		Script script = new Script();
 		script.addScriptLine("registerEvent(window, 'load', function(){addFeedSymbolInHeader('"+linkToFeed+"', '"+feedType+"', '"+feedTitle+"');});");		
 		getFacets().put(ContentItemViewer.FACET_FEED_SCRIPT, script);
 		return true;
@@ -192,13 +196,29 @@ public class ArticleListViewer extends ContentItemListViewer {
 	
 	@SuppressWarnings("unchecked")
 	private void addCommentsScript(IWContext iwc) {
-		if (isPageTypeBlog(iwc)) {
-			Script onLoadScript = new Script();
-			onLoadScript.addScriptSource(CommentsViewer.COMMENTS_ENGINE);
-			onLoadScript.addScriptSource(CommentsViewer.DWR_ENGINE);
-			onLoadScript.addScriptSource(ArticleUtil.getBundle().getResourcesPath() + CommentsViewer.COMMENTS_HELPER);
-			onLoadScript.addScriptLine(CommentsViewer.INIT_SCRIPT_LINE);
-			getFacets().put(ContentItemViewer.FACET_COMMENTS_SCRIPTS, onLoadScript);
+		if (ArticleUtil.isPageTypeBlog(iwc)) {
+			AddResource adder = AddResourceFactory.getInstance(iwc);
+			
+			//	DWR
+			adder.addJavaScriptAtPosition(iwc, AddResource.HEADER_BEGIN, CommentsViewer.COMMENTS_ENGINE);
+			adder.addJavaScriptAtPosition(iwc, AddResource.HEADER_BEGIN, CommentsViewer.DWR_ENGINE);
+			
+			//	Helper
+			adder.addJavaScriptAtPosition(iwc, AddResource.HEADER_BEGIN, ArticleUtil.getBundle().getVirtualPathWithFileNameString(CommentsViewer.COMMENTS_HELPER));
+			
+			//	MooTools
+			Web2Business web2 = (Web2Business) SpringBeanLookup.getInstance().getSpringBean(iwc, Web2Business.class);
+			if (web2 != null) {
+				try {
+					adder.addJavaScriptAtPosition(iwc, AddResource.HEADER_BEGIN, web2.getBundleURIToMootoolsLib());
+				} catch (RemoteException e) {
+					e.printStackTrace();
+				}
+			}
+			
+			//	Init script
+			adder.addInlineScriptAtPosition(iwc, AddResource.BODY_END, CommentsViewer.INIT_SCRIPT_LINE);
+			adder.addInlineScriptAtPosition(iwc, AddResource.BODY_END, "window.addEvent('domready', enableReverseAjax);");
 		}
 	}
 	
@@ -217,7 +237,7 @@ public class ArticleListViewer extends ContentItemListViewer {
 		FacesContext context = FacesContext.getCurrentInstance();
 		IWContext iwc = IWContext.getIWContext(context);
 		boolean addComments = false;
-		if (isPageTypeBlog(iwc) && ContentUtil.hasContentEditorRoles(iwc)) {
+		if (ArticleUtil.isPageTypeBlog(iwc) && ContentUtil.hasContentEditorRoles(iwc)) {
 			addComments = true;
 		}
 		else {
@@ -234,29 +254,5 @@ public class ArticleListViewer extends ContentItemListViewer {
 		}
 		super.addContentItemViewer(viewer);
 	}
-	
-	private boolean isPageTypeBlog(IWContext iwc) {
-		if (iwc == null) {
-			return false;
-		}
-		int id = iwc.getCurrentIBPageID();
-		if (id < 0) {
-			return false;
-		}
-		BuilderService builder = null;
-		try {
-			builder = BuilderServiceFactory.getBuilderService(iwc);
-		} catch (RemoteException e) {
-			e.printStackTrace();
-			return false;
-		}
-		ICPage page = builder.getICPage(String.valueOf(id));
-		if (page == null) {
-			return false;
-		}
-		if ("blog".equals(page.getSubType())) {
-			return true;
-		}
-		return false;
-	}
+
 }

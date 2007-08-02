@@ -23,7 +23,7 @@ import com.idega.block.article.component.CommentsViewer;
 import com.idega.block.rss.business.RSSBusiness;
 import com.idega.business.IBOLookup;
 import com.idega.business.IBOLookupException;
-import com.idega.business.IBOServiceBean;
+import com.idega.business.IBOSessionBean;
 import com.idega.content.bean.ContentItemFeedBean;
 import com.idega.content.business.ContentConstants;
 import com.idega.content.business.ContentUtil;
@@ -45,7 +45,7 @@ import com.sun.syndication.feed.synd.SyndFeed;
 import com.sun.syndication.io.FeedException;
 import com.sun.syndication.io.WireFeedOutput;
 
-public class CommentsEngineBean extends IBOServiceBean implements CommentsEngine {
+public class CommentsEngineBean extends IBOSessionBean implements CommentsEngine {
 
 	private static final long serialVersionUID = 7299800648381936213L;
 	private static final Log log = LogFactory.getLog(CommentsEngineBean.class);
@@ -105,6 +105,20 @@ public class CommentsEngineBean extends IBOServiceBean implements CommentsEngine
 			sendNotification(comments, email, iwc);
 			if (!uploadFeed(uri, comments, iwc)) {
 				closeLoadingMessage();
+			}
+			
+			WebContext wctx = WebContextFactory.get();
+			if (wctx != null) {
+				BuilderService service = getBuilderService();
+				String pageKey  = service.getPageKeyByURI(wctx.getCurrentPage());
+				if (pageKey != null) {
+					if (ArticleUtil.isPageTypeBlog(service.getICPage(pageKey))) {
+						Map articles = getArticlesCache(iwc);
+						if (articles != null) {
+							articles.clear();
+						}
+					}
+				}
 			}
 			
 			return getCommentsForAllPages(uri, id);
@@ -578,15 +592,23 @@ public class CommentsEngineBean extends IBOServiceBean implements CommentsEngine
 		return executeScriptForAllPages(script);
 	}
 	
+	private Map getArticlesCache(IWContext iwc) {
+		if (iwc == null) {
+			return null;
+		}
+		ArticleCacher cache = ArticleCacher.getInstance(iwc.getIWMainApplication());
+		if (cache == null) {
+			return null;
+		}
+		return cache.getCacheMap();
+	}
+	
 	private void decacheComponent(String cacheKey, IWContext iwc) {
 		if (cacheKey == null || iwc == null) {
 			return;
 		}
-		ArticleCacher cache = ArticleCacher.getInstance(iwc.getIWMainApplication());
-		if (cache == null) {
-			return;
-		}
-		Map articles = cache.getCacheMap();
+		
+		Map articles = getArticlesCache(iwc);
 		if (articles == null) {
 			return;
 		}

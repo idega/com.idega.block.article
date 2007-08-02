@@ -5,44 +5,44 @@ var NEED_TO_CHECK_COMMENTS_SIZE = true;
 var NEED_TO_NOTIFY = false;
 var CHECKED_BOX_MANUALY = false;
 
-var USER = "";
-var SUBJECT = "";
-var EMAIL = "";
-var BODY = "";
+var USER = '';
+var SUBJECT = '';
+var EMAIL = '';
+var BODY = '';
 
-var LABEL_USER = "User";
-var LABEL_SUBJECT = "Subject";
-var LABEL_COMMENT = "Comment";
-var LABEL_SEND = "Send";
-var LABEL_SENDING = "Sending...";
-var LOGGED_USER = "Anonymous";
-var LABEL_EMAIL = "E-mail";
-var LABEL_COMMENT_FORM = "Comment form";
+var LABEL_USER = 'User';
+var LABEL_SUBJECT = 'Subject';
+var LABEL_COMMENT = 'Comment';
+var LABEL_SEND = 'Send';
+var LABEL_SENDING = 'Sending...';
+var LOGGED_USER = 'Anonymous';
+var LABEL_EMAIL = 'E-mail';
+var LABEL_COMMENT_FORM = 'Comment form';
 
-var COMMENT_PANEL_ID = "comment_panel";
-var COMMENTS_BLOCK_LIST_ID = "comments_block_list";
+var COMMENT_PANEL_ID = 'comment_panel';
+var COMMENTS_BLOCK_LIST_ID = 'comments_block_list';
 
-var COMMENTS_POSTED_LABEL = "Posted";
-var COMMENTS_MESSAGE = "Loading comments...";
-var COMMENTS_ATOM_LINK_TITLE = "Atom Feed";
-var COMMENTS_ATOMS_SERVER = "127.0.0.1";
-var ADD_NOTIFICATION_TEXT = "Do You wish to receive notifications about new comments?";
-var COMMENTS_YES = "Yes";
-var COMMENTS_NO = "No";
-var COMMENTS_ENTER_EMAIL = "Please enter Your e-mail!";
-var COMMENTS_SAVING_TEXT = "Saving...";
-var LINK_TO_ATOM_FEED_IMAGE = "/idegaweb/bundles/com.idega.block.article.bundle/resources/images/feed.png";
-var LINK_TO_DELETE_COMMENTS_IMAGE = "/idegaweb/bundles/com.idega.block.article.bundle/resources/images/comments_delete.png";
-var LINK_TO_DELETE_COMMENT_IMAGE = "/idegaweb/bundles/com.idega.block.article.bundle/resources/images/comment_delete.png";
-var DELETING_MESSAGE_TEXT = "Deleting...";
-var ARE_YOU_SURE_FOR_DELETING = "Are You sure?";
-var DELETE_COMMENTS_LABEL = "Delete comments";
-var DELETE_COMMENT_LABEL = "Delete this comment";
+var COMMENTS_POSTED_LABEL = 'Posted';
+var COMMENTS_MESSAGE = 'Loading comments...';
+var COMMENTS_ATOM_LINK_TITLE = 'Atom Feed';
+var COMMENTS_ATOMS_SERVER = '127.0.0.1';
+var ADD_NOTIFICATION_TEXT = 'Do You wish to receive notifications about new comments?';
+var COMMENTS_YES = 'Yes';
+var COMMENTS_NO = 'No';
+var COMMENTS_ENTER_EMAIL = 'Please enter Your e-mail!';
+var COMMENTS_SAVING_TEXT = 'Saving...';
+var LINK_TO_ATOM_FEED_IMAGE = '/idegaweb/bundles/com.idega.block.article.bundle/resources/images/feed.png';
+var LINK_TO_DELETE_COMMENTS_IMAGE = '/idegaweb/bundles/com.idega.block.article.bundle/resources/images/comments_delete.png';
+var LINK_TO_DELETE_COMMENT_IMAGE = '/idegaweb/bundles/com.idega.block.article.bundle/resources/images/comment_delete.png';
+var DELETING_MESSAGE_TEXT = 'Deleting...';
+var ARE_YOU_SURE_FOR_DELETING = 'Are You sure?';
+var DELETE_COMMENTS_LABEL = 'Delete comments';
+var DELETE_COMMENT_LABEL = 'Delete this comment';
 
 var HAS_COMMENT_VIEWER_VALID_RIGHTS = false;
 var ADDED_LINK_TO_ATOM_IN_BODY = false;
 
-var COMMENTS_LINK_TO_FILE = "/files";
+var COMMENTS_LINK_TO_FILE = '/files';
 var SHOW_COMMENTS_LIST_ON_LOAD = false;
 
 var GLOBAL_COMMENTS_MARK_ID = null;
@@ -178,7 +178,7 @@ function setCommentValues(user, subject, email, body) {
 function addCommentPanel(id, linkToComments, lblUser, lblSubject, lblComment, lblPosted, lblSend, lblSending, loggedUser, lblEmail,
 	lblCommentForm, addEmail, commentsId) {
 	enableReverseAjax();
-	setCommentValues("", "", "", "");
+	setCommentValues('', '', '', '');
 	refreshGlobalCommentsId(commentsId);
 	
 	LABEL_USER = lblUser;
@@ -193,71 +193,77 @@ function addCommentPanel(id, linkToComments, lblUser, lblSubject, lblComment, lb
 	LABEL_COMMENT_FORM = lblCommentForm;
 	
 	if (closeCommentsPanel(commentsId)) {
-		return;
+		return false;
 	}
 	if (id == null || getLinkToComments() == null) {
-		return;
+		return false;
 	}
-	var container = document.getElementById(id);
+	var container = $(id);
 	if (container == null) {
-		return;
+		return false;
 	}
 	container.appendChild(getCommentPane(linkToComments, addEmail, commentsId));
 }
 
 function getCommentPane(linkToComments, addEmail, commentsId) {
-	var userId = "comment_user_value";
-	var subjectId = "comment_subject_value";
-	var emailId = "comment_email_value";
-	var bodyId = "comment_comment_value";
-	var secretInputId= "secretCommentsInput";
+	var userId = 'comment_user_value';
+	var subjectId = 'comment_subject_value';
+	var emailId = 'comment_email_value';
+	var bodyId = 'comment_comment_value';
+	var secretInputId= 'secretCommentsInput';
 	
-	var container = document.createElement("div");
-	container.setAttribute("id", commentsId + COMMENT_PANEL_ID);
+	var container = new Element('div');
+	container.setProperty('id', commentsId + COMMENT_PANEL_ID);
 	
-	var fieldset = document.createElement("fieldset");
-	fieldset.setAttribute("class", "comment_fieldset");
+	var fieldset = new Element('fieldset');
+	fieldset.addClass('comment_fieldset');
 	container.appendChild(fieldset);
 	
-	var legend = document.createElement("legend");
-	legend.setAttribute("class", "comment_legend");
-	legend.appendChild(document.createTextNode("Comment form"));
+	var legend = new Element('legend');
+	legend.addClass('comment_legend');
+	legend.appendText('Comment form');
 	fieldset.appendChild(legend);
 	
-	var table = document.createElement("table");
-	table.setAttribute("class", "add_comment_table");
-	var tbBody = document.createElement("tbody");
+	var mainCommentContainer = new Element('div');
+	fieldset.appendChild(mainCommentContainer);
 	
-	var secretInput = document.createElement("input");
-	secretInput.setAttribute("id", secretInputId);
-	secretInput.setAttribute("class", "secretCommentsInputStyle");
-	secretInput.setAttribute("value", "");
-	secretInput.setAttribute("type", "text");
-	fieldset.appendChild(secretInput);
+	var table = new Element('table');
+	table.addClass('add_comment_table');
+	var tbBody = new Element('tbody');
+	
+	var secretInput = new Element('input');
+	secretInput.setProperty('id', secretInputId);
+	secretInput.addClass('secretCommentsInputStyle');
+	secretInput.setProperty('value', '');
+	secretInput.setProperty('type', 'text');
+	mainCommentContainer.appendChild(secretInput);
+	
+	table.appendChild(tbBody);
+	mainCommentContainer.appendChild(table);
 	
 	// User
-	tbBody.appendChild(createTableLine(LABEL_USER + ":", userId, "text", LOGGED_USER, "comment_input_style"));
+	tbBody.appendChild(createTableLine(LABEL_USER + ':', userId, 'text', LOGGED_USER, 'comment_input_style'));
 
 	// Subject
-	tbBody.appendChild(createTableLine(LABEL_SUBJECT + ":", subjectId, "text", "", "comment_input_style"));
+	tbBody.appendChild(createTableLine(LABEL_SUBJECT + ':', subjectId, 'text', '', 'comment_input_style'));
 	
 	//Email
 	//if (addEmail) {
-		tbBody.appendChild(createTableLine(LABEL_EMAIL + ":", emailId, "text", "", "comment_input_style"));
+		tbBody.appendChild(createTableLine(LABEL_EMAIL + ':', emailId, 'text', '', 'comment_input_style'));
 	//}
 	
 	// Comment
-	var bodyLine = document.createElement("tr");
-	var bodyLabel = document.createElement("td");
-	bodyLabel.setAttribute("class", "comments_table_cell");
-	bodyLabel.appendChild(document.createTextNode(LABEL_COMMENT + ":"));
+	var bodyLine = new Element('tr');
+	var bodyLabel = new Element('td');
+	bodyLabel.addClass('comments_table_cell');
+	bodyLabel.appendText(LABEL_COMMENT + ':');
 	bodyLine.appendChild(bodyLabel);
-	var bodyInput = document.createElement("td");
-	var bodyValue = document.createElement("textarea");
-	bodyValue.setAttribute("id", bodyId);
-	bodyValue.setAttribute("class", "comment_comment_style");
-	bodyValue.setAttribute("rows", "10");
-	bodyValue.setAttribute("cols", "40");
+	var bodyInput = new Element('td');
+	var bodyValue = new Element('textarea');
+	bodyValue.setProperty('id', bodyId);
+	bodyValue.addClass('comment_comment_style');
+	bodyValue.setProperty('rows', '10');
+	bodyValue.setProperty('cols', '40');
 	bodyInput.appendChild(bodyValue);
 	bodyLine.appendChild(bodyInput);
 	tbBody.appendChild(bodyLine);
@@ -265,68 +271,72 @@ function getCommentPane(linkToComments, addEmail, commentsId) {
 	//if (addEmail) {
 		NEED_TO_NOTIFY = false;
 		
-		var notifyLine = document.createElement("tr");
-		var notifyCell = document.createElement("td");
-		notifyCell.setAttribute("colspan", "2");
+		var needToNotifyContainer = new Element('div');
 		
-		var text = document.createElement("p");
-		text.appendChild(document.createTextNode(getAddNotificationText()));
-		text.appendChild(document.createElement("br"));
+		var notificationTextContainer = new Element('div');
+		notificationTextContainer.setStyle('float', 'right');
+		notificationTextContainer.appendText(getAddNotificationText());
+		needToNotifyContainer.appendChild(notificationTextContainer);
+		
+		needToNotifyContainer.appendChild(new Element('div').addClass('spacer'));
 
-		var sendNotification = document.createElement("input");
-		sendNotification.setAttribute("id", "comments_send_notifications");
-		sendNotification.setAttribute("type", "radio");
-		sendNotification.setAttribute("name", "comments_confirm_want_notifications");
-		if (typeof container.attachEvent != "undefined") {
-			sendNotification.attachEvent('onclick', function(e){setNeedToNotify(this);});
-		} else {
-			sendNotification.addEventListener('click', function(e){setNeedToNotify(this);},false);
+		var sendNotificationContainer = new Element('div');
+		sendNotificationContainer.setStyle('float', 'right');
+		var sendNotification = new Element('input');
+		sendNotification.setProperty('id', 'comments_send_notifications');
+		sendNotification.setProperty('type', 'radio');
+		sendNotification.setProperty('name', 'comments_confirm_want_notifications');
+		sendNotification.addEvent('click', function() {
+			setNeedToNotify('comments_send_notifications', 'comments_not_send_notifications');
+		});
+		sendNotificationContainer.appendChild(sendNotification);
+		
+		var sendNotificationLabel = new Element('label');
+		sendNotificationLabel.setProperty('for', 'comments_send_notifications');
+		sendNotificationLabel.appendText(getYesText());
+		sendNotificationContainer.appendChild(sendNotificationLabel);
+		
+		var notSendNotification = new Element('input');
+		notSendNotification.setProperty('id', 'comments_not_send_notifications');
+		notSendNotification.setProperty('type', 'radio');
+		notSendNotification.setProperty('name', 'comments_confirm_want_notifications');
+		if (IE) {
+			notSendNotification.setProperty('defaultChecked', true);
 		}
-		text.appendChild(sendNotification);
-		
-		var sendNotificationLabel = document.createElement("label");
-		sendNotificationLabel.setAttribute("for", "comments_send_notifications");
-		sendNotificationLabel.appendChild(document.createTextNode(getYesText()));
-		text.appendChild(sendNotificationLabel);
-		
-		var notSendNotification = document.createElement("input");
-		notSendNotification.setAttribute("id", "comments_not_send_notifications");
-		notSendNotification.setAttribute("type", "radio");
-		notSendNotification.setAttribute("name", "comments_confirm_want_notifications");
-		notSendNotification.setAttribute("checked", true);
-		if (typeof container.attachEvent != "undefined") {
-			notSendNotification.attachEvent('onclick', function(e){setNeedToNotify(this);});
-		} else {
-			notSendNotification.addEventListener('click', function(e){setNeedToNotify(this);},false);
+		else {
+			notSendNotification.setProperty('checked', true);
 		}
-		text.appendChild(notSendNotification);
+		notSendNotification.addEvent('click', function() {
+			setNeedToNotify('comments_not_send_notifications', 'comments_send_notifications');
+		});
+		sendNotificationContainer.appendChild(notSendNotification);
 		
-		var notSendNotificationLabel = document.createElement("label");
-		notSendNotificationLabel.setAttribute("for", "comments_not_send_notifications");
-		notSendNotificationLabel.appendChild(document.createTextNode(getNoText()));
-		text.appendChild(notSendNotificationLabel);
+		var notSendNotificationLabel = new Element('label');
+		notSendNotificationLabel.setProperty('for', 'comments_not_send_notifications');
+		notSendNotificationLabel.appendText(getNoText());
+		sendNotificationContainer.appendChild(notSendNotificationLabel);
 		
-		notifyCell.appendChild(text);
-		notifyLine.appendChild(notifyCell);
-		tbBody.appendChild(notifyLine);
+		needToNotifyContainer.appendChild(sendNotificationContainer);
+		mainCommentContainer.appendChild(needToNotifyContainer);
+		mainCommentContainer.appendChild(new Element('div').addClass('spacer'));
 	//}
 	
 	// Send button
-	var sendLine = document.createElement("tr");
-	var sendCell = document.createElement("td");
-	sendCell.setAttribute("colspan", "2");
-	var send = createInput("send_comment", "button", LABEL_SEND, "send_comment_button");
-	if (typeof container.attachEvent != "undefined") {
-		send.attachEvent('onclick', function(e){closeCommentPanelAndSendComment(userId, subjectId, emailId, bodyId, linkToComments, secretInputId, commentsId);});
-	} else {
-		send.addEventListener('click', function(e){closeCommentPanelAndSendComment(userId, subjectId, emailId, bodyId, linkToComments, secretInputId, commentsId);},false);
-	}
-	sendCell.appendChild(send);
-	sendLine.appendChild(sendCell);
-	tbBody.appendChild(sendLine);
+	var sendButtonContainer = new Element('div');
+	sendButtonContainer.setStyle('float', 'right');
+	var send = createInput('send_comment', 'button', LABEL_SEND, 'send_comment_button');
+	send.addEvent('click', function() {
+		closeCommentPanelAndSendComment(userId, subjectId, emailId, bodyId, linkToComments, secretInputId, commentsId);
+	});
+	sendButtonContainer.appendChild(send);
+	mainCommentContainer.appendChild(sendButtonContainer);
 	
-	table.appendChild(tbBody);
-	fieldset.appendChild(table);
+	if (isSafariBrowser()) {
+		var fakeInput = new Element('input');
+		fakeInput.setProperty('type', 'text');
+		fakeInput.setStyle('visibility', 'hidden');
+		fieldset.appendChild(fakeInput);
+	}
 	
 	IS_COMMENT_PANEL_ADDED = true;
 	return container;
@@ -334,35 +344,35 @@ function getCommentPane(linkToComments, addEmail, commentsId) {
 
 function closeCommentPanelAndSendComment(userId, subjectId, emailId, bodyId, linkToComments, secretInputId, commentsId) {
 	if (userId == null || subjectId == null || bodyId == null || linkToComments == null) {
-		return;
+		return false;
 	}
-	var secretInput = document.getElementById(secretInputId);
+	var secretInput = $(secretInputId);
 	if (secretInput != null) {
-		if (secretInput.value != "") { // Spam
-			return;
+		if (secretInput.value != '') { // Spam
+			return false;
 		}
 	}
-	var user = document.getElementById(userId);
+	var user = $(userId);
 	if (user == null) {
-		return;
+		return false;
 	}
-	var subject = document.getElementById(subjectId);
+	var subject = $(subjectId);
 	if (subject == null) {
-		return;
+		return false;
 	}
-	var emailValue = "";
-	var email = document.getElementById(emailId);
+	var emailValue = '';
+	var email = $(emailId);
 	if (email != null) {
 		emailValue = email.value;
 	}
-	var body = document.getElementById(bodyId);
+	var body = $(bodyId);
 	if (body == null) {
-		return;
+		return false;
 	}
 	if (NEED_TO_NOTIFY) {
-		if (emailValue == "") {
+		if (emailValue == '') {
 			alert(getEnterEmailText());
-			return;
+			return false;
 		}
 	}
 	showLoadingMessage(LABEL_SENDING);
@@ -373,7 +383,7 @@ function closeCommentPanelAndSendComment(userId, subjectId, emailId, bodyId, lin
 
 function addComment(articleComment, commentsId, linkToComments) {
 	var commentIndex = 0;
-	var counter = document.getElementById(commentsId + "contentItemCount");
+	var counter = $(commentsId + 'contentItemCount');
 	if (counter != null) {
 		var children = counter.childNodes;
 		if (children != null) {
@@ -385,14 +395,14 @@ function addComment(articleComment, commentsId, linkToComments) {
 		}
 	}
 	
-	var commentsContainer = document.getElementById(commentsId + "comments_block");
+	var commentsContainer = $(commentsId + 'comments_block');
 	if (commentsContainer == null) {
-		return;
+		return false;
 	}
-	var commentsList = document.getElementById(commentsId + COMMENTS_BLOCK_LIST_ID);
+	var commentsList = $(commentsId + COMMENTS_BLOCK_LIST_ID);
 	if (commentsList == null) {
-		commentsList = document.createElement("ol");
-		commentsList.setAttribute("id", commentsId + COMMENTS_BLOCK_LIST_ID);
+		commentsList = new Element('ol');
+		commentsList.setProperty('id', commentsId + COMMENTS_BLOCK_LIST_ID);
 		commentsContainer.appendChild(commentsList);
 		if (needToShowCommentsList(commentsId)) {
 			showCommentsList(commentsId);
@@ -401,54 +411,52 @@ function addComment(articleComment, commentsId, linkToComments) {
 			hideCommentsList(commentsId);
 		}
 	}
-	commentsList.setAttribute("class", "commens_list_all_items");
+	commentsList.addClass('commens_list_all_items');
 	
-	var commentContainer = document.createElement("li");
-	commentContainer.setAttribute("class", "comment_list_item");
-	commentContainer.setAttribute("id", "cmnt_" + commentIndex);
+	var commentContainer = new Element('li');
+	commentContainer.addClass('comment_list_item');
+	commentContainer.setProperty('id', 'cmnt_' + commentIndex);
 	if (commentIndex == 1) {
-		commentContainer.setAttribute("style", "margin: 0px;");
+		commentContainer.setProperty('style', 'margin: 0px;');
 	}
-	var commentValue = document.createElement("dl");
+	var commentValue = new Element('dl');
 	
 	if (HAS_COMMENT_VIEWER_VALID_RIGHTS) {
-		var deleteImage = document.createElement("img");
-		deleteImage.setAttribute("id", commentsId + "delete_article_comment" + articleComment.id);
-		deleteImage.setAttribute("src", LINK_TO_DELETE_COMMENT_IMAGE);
-		deleteImage.setAttribute("title", DELETE_COMMENT_LABEL);
-		deleteImage.setAttribute("alt", DELETE_COMMENT_LABEL);
-		deleteImage.setAttribute("name", DELETE_COMMENT_LABEL);
-		deleteImage.setAttribute("class", "deleteCommentsImage");
-		if (typeof commentsContainer.attachEvent == "undefined") {
-			deleteImage.addEventListener("click", function(e){deleteComments(commentsId, articleComment.id, linkToComments);}, false);
-		} else {
-			deleteImage.attachEvent("onclick", function(e){deleteComments(commentsId, articleComment.id, linkToComments);});
-		}
+		var deleteImage = new Element('img');
+		deleteImage.setProperty('id', commentsId + 'delete_article_comment' + articleComment.id);
+		deleteImage.setProperty('src', LINK_TO_DELETE_COMMENT_IMAGE);
+		deleteImage.setProperty('title', DELETE_COMMENT_LABEL);
+		deleteImage.setProperty('alt', DELETE_COMMENT_LABEL);
+		deleteImage.setProperty('name', DELETE_COMMENT_LABEL);
+		deleteImage.addClass('deleteCommentsImage');
+		deleteImage.addEvent('click', function() {
+			deleteComments(commentsId, articleComment.id, linkToComments);
+		});
 		commentContainer.appendChild(deleteImage);
 	}
 	
-	var user = document.createElement("dt");
-	var userValue = document.createElement("p");
-	userValue.setAttribute("class", "comment_author_text");
-	userValue.appendChild(document.createTextNode(articleComment.user + ":"));
+	var user = new Element('dt');
+	var userValue = new Element('p');
+	userValue.addClass('comment_author_text');
+	userValue.appendText(articleComment.user + ':');
 	user.appendChild(userValue);
 	commentValue.appendChild(user);
 	
-	var subject = document.createElement("dd");
-	var subjectValue = document.createElement("p");
-	subjectValue.appendChild(document.createTextNode(articleComment.subject));
+	var subject = new Element('dd');
+	var subjectValue = new Element('p');
+	subjectValue.appendText(articleComment.subject);
 	subject.appendChild(subjectValue);
 	commentValue.appendChild(subject);
 	
-	var body = document.createElement("dd");
-	var bodyValue = document.createElement("p");
-	bodyValue.appendChild(document.createTextNode(articleComment.comment));
+	var body = new Element('dd');
+	var bodyValue = new Element('p');
+	bodyValue.appendText(articleComment.comment);
 	body.appendChild(bodyValue);
 	commentValue.appendChild(body);
 	
-	var posted = document.createElement("dd");
-	var postedValue = document.createElement("p");
-	postedValue.appendChild(document.createTextNode(getPostedLabel() + ": " + articleComment.posted));
+	var posted = new Element('dd');
+	var postedValue = new Element('p');
+	postedValue.appendText(getPostedLabel() + ': ' + articleComment.posted);
 	posted.appendChild(postedValue);
 	commentValue.appendChild(posted);
 	
@@ -457,7 +465,7 @@ function addComment(articleComment, commentsId, linkToComments) {
 }
 
 function closeCommentsPanel(commentId) {
-	var commentPanel = document.getElementById(commentId + COMMENT_PANEL_ID);
+	var commentPanel = $(commentId + COMMENT_PANEL_ID);
 	if (commentPanel == null) {
 		return false;
 	}
@@ -484,7 +492,7 @@ function getCommentsCallback(comments, id, linkToComments) {
 	closeLoadingMessage();
 	if (comments == null) {
 		closeLoadingMessage();
-		return;
+		return false;
 	}
 	
 	if (GLOBAL_COMMENTS_MARK_ID != null) {
@@ -506,40 +514,40 @@ function getCommentsCallback(comments, id, linkToComments) {
 }
 
 function createLabel(value, id, style) {
-	var textLabel = document.createElement("label");
-	textLabel.setAttribute("id", id);
-	textLabel.setAttribute("class", style);
-	textLabel.appendChild(document.createTextNode(value));
+	var textLabel = new Element('label');
+	textLabel.setProperty('id', id);
+	textLabel.addClass(style);
+	textLabel.appendText(value);
 	return textLabel;
 }
 
 function createInput(id, type, value, style) {
-	var input = document.createElement("input");
-	input.setAttribute("id", id);
+	var input = new Element('input');
+	input.setProperty('id', id);
 	if (style != null) {
-		input.setAttribute("class", style);
+		input.addClass(style);
 	}
 	if (type != null) {
-		input.setAttribute("type", type);
+		input.setProperty('type', type);
 	}
-	input.setAttribute("value", value);
+	input.setProperty('value', value);
 	return input;
 }
 
 function createTableLine(cellLabel, inputId, inputType, inputValue, inputStyle) {
-	var line = document.createElement("tr");
-	var labelCell = document.createElement("td");
-	labelCell.setAttribute("class", "comments_table_cell");
-	labelCell.appendChild(document.createTextNode(cellLabel));
+	var line = new Element('tr');
+	var labelCell = new Element('td');
+	labelCell.addClass('comments_table_cell');
+	labelCell.appendText(cellLabel);
 	line.appendChild(labelCell);
-	var inputCell = document.createElement("td");
+	var inputCell = new Element('td');
 	inputCell.appendChild(createInput(inputId, inputType, inputValue, inputStyle));
 	line.appendChild(inputCell);
 	return line;
 }
 
 function removeCommentsList(commentId) {
-	var counter = document.getElementById(commentId + "contentItemCount");
+	var counter = $(commentId + 'contentItemCount');
 	if (counter != null) {
 		var children = counter.childNodes;
 		if (children != null) {
@@ -548,43 +556,53 @@ function removeCommentsList(commentId) {
 		}
 	}
 	
-	var commentsList = document.getElementById(commentId + COMMENTS_BLOCK_LIST_ID);
+	var commentsList = $(commentId + COMMENTS_BLOCK_LIST_ID);
 	if (commentsList == null) {
-		return;
+		return false;
 	}
 	var parentContainer = commentsList.parentNode;
 	if (parentContainer == null) {
-		return;
+		return false;
 	}
 	parentContainer.removeChild(commentsList);
 }
 
 function hideCommentsList(commentsId) {
-	var list = document.getElementById(commentsId + COMMENTS_BLOCK_LIST_ID);
+	var list = $(commentsId + COMMENTS_BLOCK_LIST_ID);
 	if (list != null) {
-		list.style.display = "none";
+		list.style.display = 'none';
 	}
 }
 
 function showCommentsList(commentsId) {
-	var list = document.getElementById(commentsId + COMMENTS_BLOCK_LIST_ID);
+	var list = $(commentsId + COMMENTS_BLOCK_LIST_ID);
 	if (list != null) {
-		list.style.display = "block";
+		list.style.display = 'block';
 	}
 }
 
-function enableReverseAjax(isSafari) {
-	if (isSafari) {
-		window.clearTimeout(ENABLE_REVERSE_AJAX_TIME_OUT_ID);
+function enableReverseAjax() {
+	if (!SET_REVERSE_AJAX) {
+		if (isSafariBrowser()) {
+			ENABLE_REVERSE_AJAX_TIME_OUT_ID = window.setTimeout(setReverseAjaxForComments, 2000);
+		}
+		else {
+			setReverseAjaxForComments();
+		}
 	}
+}
+
+function setReverseAjaxForComments() {
 	if (!SET_REVERSE_AJAX) {
 		SET_REVERSE_AJAX = true;
 		DWREngine.setActiveReverseAjax(true);
 	}
+	if (ENABLE_REVERSE_AJAX_TIME_OUT_ID != 0) {
+		window.clearTimeout(ENABLE_REVERSE_AJAX_TIME_OUT_ID);
+	}
 }
 
 function getCommentsList(linkToComments, commentsId) {
-	enableReverseAjax();
 	refreshGlobalCommentsId(commentsId);
 	if (needToShowCommentsList(commentsId)) {
 		getComments(linkToComments, commentsId);
@@ -601,20 +619,20 @@ function refreshGlobalCommentsId(commentsId) {
 }
 
 function setCommentsCount(count, commentId) {
-	var counter = document.getElementById(commentId + "contentItemCount");
+	var counter = $(commentId + 'contentItemCount');
 	if (counter == null) {
-		return;
+		return false;
 	}
 	var children = counter.childNodes;
 	if (children == null) {
-		return;
+		return false;
 	}
 	counter.removeChild(counter.childNodes[0]);
-	counter.appendChild(document.createTextNode(count));
+	counter.appendText(count);
 }
 
 function getCommentsCount(commentId) {
-	var counter = document.getElementById(commentId + "contentItemCount");
+	var counter = $(commentId + 'contentItemCount');
 	if (counter == null) {
 		return 0;
 	}
@@ -629,12 +647,18 @@ function getCommentsCount(commentId) {
 	return count;
 }
 
-function setNeedToNotify(object) {
-	if ("comments_send_notifications" == object.id) {
+function setNeedToNotify(id, otherId) {
+	if ('comments_send_notifications' == id) {
 		NEED_TO_NOTIFY = true;
 	}
 	else {
 		NEED_TO_NOTIFY = false;
+	}
+	if (IE) {
+		var element = $(id);
+		element.setProperty('checked', !element.getProperty('checked'));
+		var otherElement = $(otherId);
+		otherElement.setProperty('checked', !otherElement.getProperty('checked'));
 	}
 }
 
@@ -658,7 +682,7 @@ function hideOrShowCommentsCallback(needToReload) {
 			CHECKED_BOX_MANUALY = false; // Original page, no actions to perform
 		}
 		else {
-			var checkBox = document.getElementById("manageCommentsBlockCheckBox"); // Marking as checked/unchecked
+			var checkBox = $('manageCommentsBlockCheckBox'); // Marking as checked/unchecked
 			if (checkBox != null) {
 				checkBox.checked = !checkBox.checked;
 			}
@@ -698,17 +722,11 @@ function getInitInfoForCommentsCallback(list) {
 
 function getUserRightsCallback(rights) {
 	setHasCommentViewerValidRights(rights);
-	if (isSafariBrowser()) {
-		ENABLE_REVERSE_AJAX_TIME_OUT_ID = window.setTimeout("enableReverseAjax(true)", 2000);
-	}
-	else {
-		enableReverseAjax(false);
-	}
 }
 
 function removeElementFromParent(element) {
 	if (element == null) {
-		return;
+		return false;
 	}
 	var elementParent = element.parentNode;
 	if (elementParent != null) {
@@ -718,65 +736,64 @@ function removeElementFromParent(element) {
 
 function removeAtomAndDeleteButtonsForComments(commentsId) {
 	if (commentsId == null) {
-		return;
+		return false;
 	}
-	var atomLinkId = commentsId + "article_comments_link_to_feed";
-	removeElementFromParent(document.getElementById(atomLinkId));
+	var atomLinkId = commentsId + 'article_comments_link_to_feed';
+	removeElementFromParent($(atomLinkId));
 	
-	var deleteImageId = commentsId + "delete_article_comments";
-	removeElementFromParent(document.getElementById(deleteImageId));
+	var deleteImageId = commentsId + 'delete_article_comments';
+	removeElementFromParent($(deleteImageId));
 }
 
 function addAtomButtonForComments(commentsId, linkToComments) {
 	if (commentsId == null || linkToComments == null) {
-		return;
+		return false;
 	}
-	var atomLinkId = commentsId + "article_comments_link_to_feed";
-	var atomLink = document.getElementById(atomLinkId);
+	var atomLinkId = commentsId + 'article_comments_link_to_feed';
+	var atomLink = $(atomLinkId);
 	if (atomLink != null) {
-		return;
+		return false;
 	}
 	
 	// Container
-	var container = document.getElementById(commentsId + "article_comments_link_label_container");
+	var container = $(commentsId + 'article_comments_link_label_container');
 	if (container == null) {
-		return;
+		return false;
 	}
 	
 	// Link
-	var linkToFeed = document.createElement("a");
-	linkToFeed.setAttribute("id", atomLinkId);
-	linkToFeed.setAttribute("href", getCommentsAtomsServer() + linkToComments);
-	linkToFeed.setAttribute("rel", "alternate");
-	linkToFeed.setAttribute("type", "application/atom+xml");
+	var linkToFeed = new Element('a');
+	linkToFeed.setProperty('id', atomLinkId);
+	linkToFeed.setProperty('href', getCommentsAtomsServer() + linkToComments);
+	linkToFeed.setProperty('rel', 'alternate');
+	linkToFeed.setProperty('type', 'application/atom+xml');
 		
-	linkToFeed.appendChild(document.createTextNode(" "));
+	linkToFeed.appendText(' ');
 		
 	// Image
-	var image = document.createElement("img");
-	image.setAttribute("src", getLinkToAtomFeedImage());
-	image.setAttribute("title", getCommentsAtomLinkTitle());
-	image.setAttribute("alt", getCommentsAtomLinkTitle());
-	image.setAttribute("name", getCommentsAtomLinkTitle());
+	var image = new Element('img');
+	image.setProperty('src', getLinkToAtomFeedImage());
+	image.setProperty('title', getCommentsAtomLinkTitle());
+	image.setProperty('alt', getCommentsAtomLinkTitle());
+	image.setProperty('name', getCommentsAtomLinkTitle());
 	linkToFeed.appendChild(image);
 		
 	container.appendChild(linkToFeed);
 	
 	if (HAS_COMMENT_VIEWER_VALID_RIGHTS) {
-		container.appendChild(document.createTextNode(" "));
+		container.appendText(' ');
 		
-		var deleteImage = document.createElement("img");
-		deleteImage.setAttribute("id", commentsId + "delete_article_comments");
-		deleteImage.setAttribute("src", LINK_TO_DELETE_COMMENTS_IMAGE);
-		deleteImage.setAttribute("title", DELETE_COMMENTS_LABEL);
-		deleteImage.setAttribute("alt", DELETE_COMMENTS_LABEL);
-		deleteImage.setAttribute("name", DELETE_COMMENTS_LABEL);
-		deleteImage.setAttribute("class", "deleteCommentsImage");
-		if (typeof container.attachEvent == "undefined") {
-			deleteImage.addEventListener("click", function(e){deleteComments(commentsId, null, linkToComments);}, false);
-		} else {
-			deleteImage.attachEvent("onclick", function(e){deleteComments(commentsId, null, linkToComments);});
-		}
+		var deleteImage = new Element('img');
+		deleteImage.setProperty('id', commentsId + 'delete_article_comments');
+		deleteImage.setProperty('src', LINK_TO_DELETE_COMMENTS_IMAGE);
+		deleteImage.setProperty('title', DELETE_COMMENTS_LABEL);
+		deleteImage.setProperty('alt', DELETE_COMMENTS_LABEL);
+		deleteImage.setProperty('name', DELETE_COMMENTS_LABEL);
+		deleteImage.addClass('deleteCommentsImage');
+		
+		deleteImage.addEvent('click', function() {
+			deleteComments(commentsId, null, linkToComments);
+		});
 		
 		container.appendChild(deleteImage);
 	}
@@ -789,7 +806,7 @@ function setAddedLinkToAtomInBody(added) {
 function deleteComments(id, commentId, linkToComments) {
 	var confirmed = confirm(ARE_YOU_SURE_FOR_DELETING);
 	if (!confirmed) {
-		return;
+		return false;
 	}
 	showLoadingMessage(DELETING_MESSAGE_TEXT);
 	CommentsEngine.deleteComments(id, commentId, linkToComments, deleteCommentsCallback);
@@ -798,7 +815,7 @@ function deleteComments(id, commentId, linkToComments) {
 function deleteCommentsCallback(result) {
 	closeLoadingMessage();
 	if (result == null) {
-		return;
+		return false;
 	}
 	if (result.length == 2) {
 		CommentsEngine.getCommentsForAllPages(result[1], result[0]);
@@ -806,12 +823,16 @@ function deleteCommentsCallback(result) {
 }
 
 function needToShowCommentsList(commentsId) {
-	var list = document.getElementById(commentsId + COMMENTS_BLOCK_LIST_ID);
+	var list = $(commentsId + COMMENTS_BLOCK_LIST_ID);
 	if (list == null) {
 		return true;
 	}
-	if (list.style.display == "block") {
+	if (list.style.display == 'block') {
 		return false;
 	}
 	return true;
+}
+
+function initComments() {
+	CommentsEngine.getInitInfoForComments(getInitInfoForCommentsCallback);
 }

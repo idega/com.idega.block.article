@@ -6,27 +6,30 @@ import java.util.List;
 import javax.faces.component.UIComponent;
 import javax.faces.context.FacesContext;
 
+import org.apache.myfaces.renderkit.html.util.AddResource;
+import org.apache.myfaces.renderkit.html.util.AddResourceFactory;
+
 import com.idega.block.article.business.ArticleConstants;
-import com.idega.block.article.business.ArticleUtil;
 import com.idega.block.article.business.CommentsEngine;
+import com.idega.block.web2.business.Web2Business;
 import com.idega.business.IBOLookup;
 import com.idega.business.IBOLookupException;
+import com.idega.business.SpringBeanLookup;
 import com.idega.content.business.ContentConstants;
 import com.idega.content.business.ContentUtil;
 import com.idega.content.themes.helpers.ThemesHelper;
 import com.idega.core.accesscontrol.business.NotLoggedOnException;
+import com.idega.idegaweb.IWBundle;
 import com.idega.idegaweb.IWUserContext;
 import com.idega.presentation.Block;
 import com.idega.presentation.IWContext;
 import com.idega.presentation.Image;
-import com.idega.presentation.Page;
-import com.idega.presentation.PresentationObjectUtil;
+import com.idega.presentation.Layer;
 import com.idega.presentation.Script;
 import com.idega.presentation.text.Link;
 import com.idega.presentation.text.Text;
 import com.idega.presentation.ui.CheckBox;
 import com.idega.util.CoreConstants;
-import com.idega.webface.WFDivision;
 
 public class CommentsViewer extends Block {
 	
@@ -44,8 +47,8 @@ public class CommentsViewer extends Block {
 	
 	protected static final String DWR_ENGINE = "/dwr/engine.js";
 	protected static final String COMMENTS_ENGINE = "/dwr/interface/CommentsEngine.js";
-	protected static final String COMMENTS_HELPER = "/javascript/ArticleCommentsHelper.js";
-	protected static final String INIT_SCRIPT_LINE = "registerEvent(window, 'load', initComments);";
+	protected static final String COMMENTS_HELPER = "javascript/ArticleCommentsHelper.js";
+	protected static final String INIT_SCRIPT_LINE = "window.addEvent('domready', initComments);";
 	
 	private static final String ARTICLE_COMMENT_SCOPE = "article_comment";
 	private static final String SEPARATOR = "', '";
@@ -57,26 +60,39 @@ public class CommentsViewer extends Block {
 			}
 		}
 		
-		String commentsId = new StringBuffer("unique")
-										.append(ThemesHelper.getInstance().getUniqueIdByNumberAndDate(ARTICLE_COMMENT_SCOPE)).toString();
+		ThemesHelper helper = ThemesHelper.getInstance();
+		IWBundle bundle = getBundle(iwc);
 		
-		WFDivision container = new WFDivision();
+		String commentsId = new StringBuffer("unique").append(helper.getUniqueIdByNumberAndDate(ARTICLE_COMMENT_SCOPE)).toString();
+		
+		Layer container = new Layer();
 		container.setId(new StringBuffer(commentsId).append(COMMENTS_BLOCK_ID).toString());
 		container.setStyleClass(styleClass);
 		this.add(container);
 		
 		if (!isUsedInArticleList()) {
-			Page page = PresentationObjectUtil.getParentPage(this);
-			if (page == null) {
-				return;
-			}
-			page.addJavascriptURL(COMMENTS_ENGINE);
-			page.addJavascriptURL(DWR_ENGINE);
-			page.addJavascriptURL(ArticleUtil.getBundle().getResourcesPath() + COMMENTS_HELPER);
+			AddResource adder = AddResourceFactory.getInstance(iwc);
 			
-			Script onLoadScript = new Script();
-			onLoadScript.addScriptLine(INIT_SCRIPT_LINE);
-			container.add(onLoadScript);
+			//	DWR
+			adder.addJavaScriptAtPosition(iwc, AddResource.HEADER_BEGIN, COMMENTS_ENGINE);
+			adder.addJavaScriptAtPosition(iwc, AddResource.HEADER_BEGIN, DWR_ENGINE);
+			
+			//	Helper
+			adder.addJavaScriptAtPosition(iwc, AddResource.HEADER_BEGIN, bundle.getVirtualPathWithFileNameString(COMMENTS_HELPER));
+			
+			//	MooTools
+			Web2Business web2 = (Web2Business) SpringBeanLookup.getInstance().getSpringBean(iwc, Web2Business.class);
+			if (web2 != null) {
+				try {
+					adder.addJavaScriptAtPosition(iwc, AddResource.HEADER_BEGIN, web2.getBundleURIToMootoolsLib());
+				} catch (RemoteException e) {
+					e.printStackTrace();
+				}
+			}
+			
+			//	Init script
+			adder.addInlineScriptAtPosition(iwc, AddResource.BODY_END, INIT_SCRIPT_LINE);
+			adder.addInlineScriptAtPosition(iwc, AddResource.BODY_END, "window.addEvent('domready', enableReverseAjax);");
 		}
 		
 		boolean hasValidRights = ContentUtil.hasContentEditorRoles(iwc);
@@ -86,13 +102,13 @@ public class CommentsViewer extends Block {
 		}
 		
 		int commentsCount = getCommentsCount(iwc);
-		StringBuffer linkToAtomFeedImage = new StringBuffer(ArticleUtil.getBundle().getResourcesPath());
+		StringBuffer linkToAtomFeedImage = new StringBuffer(bundle.getResourcesPath());
 		linkToAtomFeedImage.append(FEED_IMAGE);
 		
 		if (!isUsedInArticleList()) {
 			// JavaScript
 			Script script = new Script();
-			StringBuffer action = new StringBuffer("registerEvent(window, 'load', function(){setCommentStartInfo('");
+			StringBuffer action = new StringBuffer("window.addEvent('domready', function(){setCommentStartInfo('");
 			action.append(linkToComments).append(SEPARATOR).append(commentsId).append("', ").append(showCommentsList).append(")});");
 			script.addScriptLine(action.toString());
 			container.add(script);
@@ -102,9 +118,9 @@ public class CommentsViewer extends Block {
 		addEnableCommentsCheckboxContainer(iwc, container, hasValidRights, null);
 		
 		// Comments label
-		WFDivision articleComments = new WFDivision();
+		Layer articleComments = new Layer();
 		articleComments.setId(new StringBuffer(commentsId).append("article_comments_link_label_container").toString());
-		StringBuffer comments = new StringBuffer(ArticleUtil.getBundle().getLocalizedString("comments"));
+		StringBuffer comments = new StringBuffer(bundle.getLocalizedString("comments"));
 		comments.append(ContentConstants.SPACE).append("(<span id='").append(commentsId);
 		comments.append("contentItemCount' class='contentItemCountStyle'>").append(commentsCount).append("</span>)");
 		Link commentsLabel = new Link(comments.toString(), "#showCommentsList");
@@ -118,18 +134,18 @@ public class CommentsViewer extends Block {
 		
 		// Link - Atom feed
 		if (commentsCount > 0) {
-			Image atom = new Image(linkToAtomFeedImage.toString(), ArticleUtil.getBundle().getLocalizedString("atom_feed"));
+			Image atom = new Image(linkToAtomFeedImage.toString(), bundle.getLocalizedString("atom_feed"));
 			Link linkToFeed = new Link();
 			linkToFeed.setId(new StringBuffer(commentsId).append("article_comments_link_to_feed").toString());
 			linkToFeed.setImage(atom);
-			linkToFeed.setURL(ThemesHelper.getInstance().getFullServerName(iwc) + CoreConstants.CONTENT + linkToComments);
+			linkToFeed.setURL(helper.getFullServerName(iwc) + CoreConstants.CONTENT + linkToComments);
 			articleComments.add(linkToFeed);
 			
 			// Delete comments image
 			if (hasValidRights) {
 				addSimpleSpace(articleComments);
-				String deleteImage = new StringBuffer(ArticleUtil.getBundle().getResourcesPath()).append(DELETE_IMAGE).toString();
-				Image delete = new Image(deleteImage, ArticleUtil.getBundle().getLocalizedString("delete_all_comments"));
+				String deleteImage = new StringBuffer(bundle.getResourcesPath()).append(DELETE_IMAGE).toString();
+				Image delete = new Image(deleteImage, bundle.getLocalizedString("delete_all_comments"));
 				delete.setStyleClass("deleteCommentsImage");
 				delete.setId(new StringBuffer(commentsId).append("delete_article_comments").toString());
 				StringBuffer deleteAction = new StringBuffer("deleteComments('").append(commentsId).append("', null, '");
@@ -145,7 +161,7 @@ public class CommentsViewer extends Block {
 		container.add(getAddCommentBlock(iwc, commentsId));
 	}
 		
-	private void addSimpleSpace(WFDivision container) {
+	private void addSimpleSpace(Layer container) {
 		//	Simple space
 		container.add(new Text(ContentConstants.SPACE));
 	}
@@ -189,7 +205,7 @@ public class CommentsViewer extends Block {
 		return pageKey;
 	}
 	
-	private void addEnableCommentsCheckboxContainer(IWContext iwc, WFDivision container, boolean hasValidRights, String cacheKey) {
+	private void addEnableCommentsCheckboxContainer(IWContext iwc, Layer container, boolean hasValidRights, String cacheKey) {
 		if (!hasValidRights) {
 			return;
 		}
@@ -199,8 +215,8 @@ public class CommentsViewer extends Block {
 		container.add(getCommentsController(iwc, cacheKey, getClientId(iwc), isShowCommentsForAllUsers(), SHOW_COMMENTS_PROPERTY));
 	}
 	
-	protected WFDivision getCommentsController(IWContext iwc, String cacheKey, String moduleId, boolean enabled, String propertyName) {
-		WFDivision commentsController = new WFDivision();
+	protected Layer getCommentsController(IWContext iwc, String cacheKey, String moduleId, boolean enabled, String propertyName) {
+		Layer commentsController = new Layer();
 		if (iwc == null || moduleId == null || propertyName == null) {
 			return commentsController;
 		}
@@ -222,7 +238,7 @@ public class CommentsViewer extends Block {
 		enableCheckBox.setOnClick(action.toString());
 		enableCheckBox.setChecked(enabled);
 		
-		Text enableText = new Text(ArticleUtil.getBundle().getLocalizedString("enable_comments"));
+		Text enableText = new Text(getBundle(iwc).getLocalizedString("enable_comments"));
 		
 		commentsController.add(enableText);
 		commentsController.add(enableCheckBox);
@@ -231,27 +247,29 @@ public class CommentsViewer extends Block {
 	}
 	
 	private UIComponent getAddCommentBlock(IWContext iwc, String commentsId) {
-		WFDivision addComments = new WFDivision();
+		IWBundle bundle = getBundle(iwc);
+		
+		Layer addComments = new Layer();
 		addComments.setId(new StringBuffer(commentsId).append("add_comment_block").toString());
-		Link label = new Link(ArticleUtil.getBundle().getLocalizedString("add_your_comment"), "#" + addComments.getId());
-		String user = ArticleUtil.getBundle().getLocalizedString("name");
-		String subject = ArticleUtil.getBundle().getLocalizedString("subject");
-		String comment = ArticleUtil.getBundle().getLocalizedString("comment");
-		String posted = ArticleUtil.getBundle().getLocalizedString("posted");
-		String send = ArticleUtil.getBundle().getLocalizedString("send");
-		String sending = ArticleUtil.getBundle().getLocalizedString("sending");
+		Link label = new Link(bundle.getLocalizedString("add_your_comment"), "#" + addComments.getId());
+		String user = bundle.getLocalizedString("name");
+		String subject = bundle.getLocalizedString("subject");
+		String comment = bundle.getLocalizedString("comment");
+		String posted = bundle.getLocalizedString("posted");
+		String send = bundle.getLocalizedString("send");
+		String sending = bundle.getLocalizedString("sending");
 		String loggedUser = null;
 		try {
 			loggedUser = iwc.getCurrentUser().getName();
 		} catch (NotLoggedOnException e) {
-			loggedUser = ArticleUtil.getBundle().getLocalizedString("anonymous");
+			loggedUser = bundle.getLocalizedString("anonymous");
 		}
 		StringBuffer action = new StringBuffer("addCommentPanel('").append(addComments.getId()).append(SEPARATOR);
 		action.append(linkToComments).append(SEPARATOR).append(user).append(SEPARATOR).append(subject).append(SEPARATOR);
 		action.append(comment).append(SEPARATOR).append(posted).append(SEPARATOR).append(send).append(SEPARATOR);
 		action.append(sending).append(SEPARATOR).append(loggedUser).append(SEPARATOR);
-		action.append(ArticleUtil.getBundle().getLocalizedString("email")).append(SEPARATOR);
-		action.append(ArticleUtil.getBundle().getLocalizedString("comment_form")).append("', ").append(isForumPage);
+		action.append(bundle.getLocalizedString("email")).append(SEPARATOR);
+		action.append(bundle.getLocalizedString("comment_form")).append("', ").append(isForumPage);
 		action.append(", '").append(commentsId).append("');");
 		label.setOnClick(action.toString());
 		addComments.add(label);
@@ -338,7 +356,7 @@ public class CommentsViewer extends Block {
 	}
 	
 	public String getBuilderName(IWUserContext iwuc) {
-		String name = ArticleUtil.getBundle().getComponentName(CommentsViewer.class);
+		String name = getBundle(iwuc).getComponentName(CommentsViewer.class);
 		if (name == null || ArticleConstants.EMPTY.equals(name)) {
 			return "CommentsViewer";
 		}
@@ -351,6 +369,10 @@ public class CommentsViewer extends Block {
 
 	public void setUsedInArticleList(boolean usedInArticleList) {
 		this.usedInArticleList = usedInArticleList;
+	}
+	
+	public String getBundleIdentifier() {
+		return ArticleConstants.IW_BUNDLE_IDENTIFIER;
 	}
 
 }

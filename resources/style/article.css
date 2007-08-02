@@ -157,8 +157,7 @@ div.ws_main div.wf_block ul li .article_bar_block_t_preview{
 }
 
 .secretCommentsInputStyle {
-	display: none;
-	visibility: hide;
+	visibility: hidden;
 }
 
 .deleteCommentsImage {
