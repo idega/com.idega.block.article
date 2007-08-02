@@ -3,7 +3,7 @@
 
 <dwr>
   <allow>
-    <create creator="ibo" javascript="CommentsEngine" scope="application">
+    <create creator="ibo" javascript="CommentsEngine" scope="session">
       <param name="class" value="com.idega.block.article.business.CommentsEngine"/>
     </create>
     <convert converter="bean" match="com.idega.block.article.bean.ArticleComment" />
