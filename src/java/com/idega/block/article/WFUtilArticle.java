@@ -1,5 +1,5 @@
 /*
- * $Id: WFUtilArticle.java,v 1.8 2007/06/08 16:01:54 valdas Exp $
+ * $Id: WFUtilArticle.java,v 1.9 2007/08/07 08:33:01 valdas Exp $
  *
  * Copyright (C) 2004 Idega. All Rights Reserved.
  *
@@ -21,10 +21,10 @@ import com.idega.webface.WFUtil;
 /**
  * Util class to set the bundle for the localization 
  * <p>
- * Last modified: $Date: 2007/06/08 16:01:54 $ by $Author: valdas $
+ * Last modified: $Date: 2007/08/07 08:33:01 $ by $Author: valdas $
  *
  * @author Joakim Johnson
- * @version $Revision: 1.8 $
+ * @version $Revision: 1.9 $
  */
 public class WFUtilArticle{
 	private static final String ARTICLE_BUNDLE = "com.idega.block.article";
@@ -40,7 +40,7 @@ public class WFUtilArticle{
 	}
 
 	public static WFUtilArticle getWFUtilContent() {
-		return new WFUtilArticle(ContentConstants.CONTENT_BUNDLE);
+		return new WFUtilArticle(ContentConstants.IW_BUNDLE_IDENTIFIER);
 	}
 
 	public String getBundleString() {
