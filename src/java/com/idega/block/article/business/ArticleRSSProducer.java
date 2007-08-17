@@ -262,8 +262,8 @@ public class ArticleRSSProducer extends RSSAbstractProducer implements RSSProduc
 			uri+="/";
 		}
 		
-		if(!uri.startsWith("/files")){
-			uri = "/files"+uri;
+		if(!uri.startsWith(CoreConstants.PATH_FILES_ROOT)){
+			uri = CoreConstants.PATH_FILES_ROOT+uri;
 		}
 		return uri;
 	}
