@@ -20,7 +20,6 @@ import org.apache.webdav.lib.search.SearchExpression;
 import org.apache.webdav.lib.search.SearchRequest;
 import org.apache.webdav.lib.search.SearchScope;
 import org.apache.webdav.lib.search.expressions.CompareExpression;
-//import org.w3.x2001.xmlSchema.LengthDocument;
 
 import com.idega.block.article.component.ArticleItemViewer;
 import com.idega.block.article.component.ArticleListViewer;
@@ -39,7 +38,6 @@ import com.idega.core.builder.data.ICPage;
 import com.idega.core.search.business.Search;
 import com.idega.core.search.business.SearchResult;
 import com.idega.presentation.IWContext;
-//import com.idega.presentation.Page;
 import com.idega.slide.business.IWContentEvent;
 import com.idega.slide.business.IWSlideChangeListener;
 import com.idega.slide.business.IWSlideService;
@@ -49,7 +47,6 @@ import com.idega.util.CoreConstants;
 import com.idega.util.IWTimestamp;
 import com.sun.syndication.feed.synd.SyndEntry;
 import com.sun.syndication.feed.synd.SyndFeed;
-//import com.sun.syndication.feed.synd.SyndLink;
 
 /**
  * Generates 3 types of rss files for articles.
@@ -65,7 +62,7 @@ public class ArticleRSSProducer extends RSSAbstractProducer implements RSSProduc
 	public static final String RSS_FOLDER_NAME = "rss";
 	public static final String RSS_FILE_NAME = "articlefeed.xml";
 
-	public static final String PATH = CoreConstants.CONTENT + ContentUtil.getContentBaseFolderPath() + "/article/";//"/files/cms/article";
+	public static final String PATH = CoreConstants.WEBDAV_SERVLET_URI + ContentUtil.getContentBaseFolderPath() + "/article/";//"/files/cms/article";
 	private List rssFileURIsCacheList = new ArrayList();
 	private static Log log = LogFactory.getLog(ContentItemRssProducer.class);
 	
@@ -107,7 +104,7 @@ public class ArticleRSSProducer extends RSSAbstractProducer implements RSSProduc
 			if (categories != null)
 				articles = getArticlesByURI(extraURI, iwc);
 		}
-		String realURI = "/content"+feedParentFolder+feedFile;		
+		String realURI = CoreConstants.WEBDAV_SERVLET_URI+feedParentFolder+feedFile;		
 		
 		if(rssFileURIsCacheList.contains(feedFile)){
 //		if(false){
@@ -428,7 +425,7 @@ public class ArticleRSSProducer extends RSSAbstractProducer implements RSSProduc
 			for (int i = 0; i < moduleId.size(); i++) {
 				String articleURI = bservice.getProperty(pageKey, moduleId.get(i), "resourcePath");
 				articleURI = articleURI.substring(0, articleURI.length());
-				articles.add("/content"+ articleURI);
+				articles.add(CoreConstants.WEBDAV_SERVLET_URI+ articleURI);
 			}
 		}		
 		return articles;

@@ -138,7 +138,7 @@ public class CommentsViewer extends Block {
 			Link linkToFeed = new Link();
 			linkToFeed.setId(new StringBuffer(commentsId).append("article_comments_link_to_feed").toString());
 			linkToFeed.setImage(atom);
-			linkToFeed.setURL(helper.getFullServerName(iwc) + CoreConstants.CONTENT + linkToComments);
+			linkToFeed.setURL(helper.getFullServerName(iwc) + CoreConstants.WEBDAV_SERVLET_URI + linkToComments);
 			articleComments.add(linkToFeed);
 			
 			// Delete comments image

@@ -1,5 +1,5 @@
 /*
- * $Id: ArticleLocalizedItemBean.java,v 1.20 2007/07/18 08:40:04 valdas Exp $
+ * $Id: ArticleLocalizedItemBean.java,v 1.21 2007/08/20 14:41:08 valdas Exp $
  *
  * Copyright (C) 2004 Idega. All Rights Reserved.
  *
@@ -43,6 +43,7 @@ import com.idega.slide.util.WebdavExtendedResource;
 import com.idega.slide.util.WebdavRootResource;
 import com.idega.util.CoreConstants;
 import com.idega.util.CoreUtil;
+import com.idega.util.StringHandler;
 import com.idega.xml.XMLDocument;
 import com.idega.xml.XMLElement;
 import com.idega.xml.XMLException;
@@ -54,10 +55,10 @@ import com.idega.xml.XMLParser;
  * This is a JSF managed bean that manages each article xml document 
  * instance per language/locale.
  * <p>
- * Last modified: $Date: 2007/07/18 08:40:04 $ by $Author: valdas $
+ * Last modified: $Date: 2007/08/20 14:41:08 $ by $Author: valdas $
  *
  * @author Anders Lindman,<a href="mailto:tryggvi@idega.com">Tryggvi Larusson</a>
- * @version $Revision: 1.20 $
+ * @version $Revision: 1.21 $
  */
 public class ArticleLocalizedItemBean extends ContentItemBean implements Serializable, ContentItem {
 	
@@ -523,37 +524,7 @@ public class ArticleLocalizedItemBean extends ContentItemBean implements Seriali
 	}
 
 	private String removeAbsoluteReferences(String text) {
-		StringBuffer replaceBuffer = new StringBuffer(text);
-		ArrayList patterns = new ArrayList();
-		Pattern p1 = Pattern.compile("(<a[^>]+href=\")([^#][^\"]+)([^>]+>)",Pattern.CASE_INSENSITIVE);
-		Pattern p2 = Pattern.compile("(<img[^>]+src=\")([^#][^\"]+)([^>]+>)",Pattern.CASE_INSENSITIVE);
-		patterns.add(p1);
-		patterns.add(p2);
-		
-		StringBuffer outString;
-
-		Iterator patternIter = patterns.iterator();
-		while (patternIter.hasNext()) {
-			Pattern p = (Pattern) patternIter.next();
-			Matcher m = p.matcher(replaceBuffer);
-			outString = new StringBuffer();
-
-			while (m.find()) {
-
-				String url = m.group(2);
-				if (url.startsWith("http") && url.indexOf(IWContext.getInstance().getServerName()) > 0) {
-					url = url.substring(url.indexOf("//")+2);
-					url = url.substring(url.indexOf("/"));
-
-					m.appendReplacement(outString,"$1"+url+"$3");
-				}
-			}
-			m.appendTail(outString);
-			replaceBuffer=new StringBuffer(outString.toString());
-
-		}
-		text = replaceBuffer.toString();
-		return text;
+		return StringHandler.removeAbsoluteReferencies(text);
 	}
 	
 	/**
