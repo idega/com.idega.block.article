@@ -1,5 +1,5 @@
 /*
- * $Id: ArticleLocalizedItemBean.java,v 1.21 2007/08/20 14:41:08 valdas Exp $
+ * $Id: ArticleLocalizedItemBean.java,v 1.22 2007/09/24 15:03:44 valdas Exp $
  *
  * Copyright (C) 2004 Idega. All Rights Reserved.
  *
@@ -34,8 +34,8 @@ import com.idega.content.bean.ContentItemBean;
 import com.idega.content.bean.ContentItemCase;
 import com.idega.content.bean.ContentItemField;
 import com.idega.content.bean.ContentItemFieldBean;
-import com.idega.content.business.CategoryBean;
 import com.idega.content.business.ContentConstants;
+import com.idega.content.business.categories.CategoryBean;
 import com.idega.data.IDOStoreException;
 import com.idega.presentation.IWContext;
 import com.idega.slide.business.IWSlideSession;
@@ -55,10 +55,10 @@ import com.idega.xml.XMLParser;
  * This is a JSF managed bean that manages each article xml document 
  * instance per language/locale.
  * <p>
- * Last modified: $Date: 2007/08/20 14:41:08 $ by $Author: valdas $
+ * Last modified: $Date: 2007/09/24 15:03:44 $ by $Author: valdas $
  *
  * @author Anders Lindman,<a href="mailto:tryggvi@idega.com">Tryggvi Larusson</a>
- * @version $Revision: 1.21 $
+ * @version $Revision: 1.22 $
  */
 public class ArticleLocalizedItemBean extends ContentItemBean implements Serializable, ContentItem {
 	

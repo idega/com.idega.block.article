@@ -1,5 +1,5 @@
 /*
- * $Id: SearchArticleBean.java,v 1.20 2007/05/30 15:03:03 gediminas Exp $
+ * $Id: SearchArticleBean.java,v 1.21 2007/09/24 15:03:44 valdas Exp $
  * 
  * Copyright (C) 2004 Idega. All Rights Reserved.
  * 
@@ -33,8 +33,8 @@ import org.apache.xmlbeans.XmlException;
 import com.idega.block.article.business.ArticleUtil;
 import com.idega.business.IBOLookup;
 import com.idega.content.bean.ContentItemBeanComparator;
-import com.idega.content.business.CategoryBean;
 import com.idega.content.business.ContentSearch;
+import com.idega.content.business.categories.CategoryBean;
 import com.idega.content.data.ContentCategory;
 import com.idega.core.search.business.Search;
 import com.idega.core.search.business.SearchResult;
@@ -51,10 +51,10 @@ import com.idega.webface.bean.WFListBean;
 /**
  * Bean for searching articles.
  * <p>
- * Last modified: $Date: 2007/05/30 15:03:03 $ by $Author: gediminas $
+ * Last modified: $Date: 2007/09/24 15:03:44 $ by $Author: valdas $
  * 
  * @author Anders Lindman
- * @version $Revision: 1.20 $
+ * @version $Revision: 1.21 $
  */
 public class SearchArticleBean extends AbstractWFEditableListManagedBean implements WFListBean, Serializable {
 
