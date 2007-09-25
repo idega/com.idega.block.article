@@ -19,7 +19,6 @@ import com.idega.content.business.categories.CategoryBean;
 import com.idega.content.data.ContentCategory;
 import com.idega.content.presentation.ContentItemListViewer;
 import com.idega.core.builder.business.BuilderService;
-import com.idega.idegaweb.IWMainApplication;
 import com.idega.idegaweb.IWResourceBundle;
 import com.idega.idegaweb.IWUserContext;
 import com.idega.presentation.Block;
@@ -58,7 +57,8 @@ public class ArticleCategoriesViewer extends Block {
 			addScript(iwc);
 		}
 		
-		Collection<ContentCategory> categories = CategoryBean.getInstance().getCategories(currentLocale);
+		CategoryBean bean = CategoryBean.getInstance();
+		Collection<ContentCategory> categories = bean.getCategories(currentLocale);
 		countCategories(categories, iwc);
 		
 		String pageKey = getThisPageKey(iwc);
@@ -89,7 +89,7 @@ public class ArticleCategoriesViewer extends Block {
 		Integer count = null;
 		for (ContentCategory category : categories) {
 			categoryKey = category.getId();
-			categoryName = getCategoryName(category, lang, iwc);
+			categoryName = bean.getCategoryName(category, lang, iwc);
 			count = countedCategories.get(categoryKey);
 			if (count != null && categoryName != null) {
 				nameWithCount = new StringBuilder(categoryName).append(ArticleConstants.SPACE).append(opener).append(count).append(closer).toString();
@@ -121,23 +121,6 @@ public class ArticleCategoriesViewer extends Block {
 				}
 			}
 		}
-	}
-	
-	private String getCategoryName(ContentCategory category, String language, IWContext iwc) {
-		if (category == null || language == null || iwc == null) {
-			return null;
-		}
-		String name = category.getName(language);
-		if (name != null) {
-			return name;
-		}
-		
-		//	Didn't find category's name by current locale, looking for by default locale
-		Locale defaultLocale = IWMainApplication.getIWMainApplication(iwc).getDefaultLocale();
-		if (defaultLocale == null) {
-			return null;
-		}
-		return category.getName(defaultLocale.toString());	//	Returning name by default locale or null if such doesn't exist
 	}
 
 	private void addScript(IWContext iwc) {
