@@ -1,25 +1,25 @@
-function setDisplayArticleCategory(element, pageKey, moduleId, savingMessage) {
-	if (element == null || pageKey == null || moduleId == null) {
-		return;
+function setDisplayArticleCategory(id, pageKey, moduleIds, savingMessage) {
+	if (id == null || pageKey == null || moduleIds == null) {
+		return false;
 	}
-	var category = element.name;
-	if (category == null) {
-		return;
+	var element = document.getElementById(id);
+	if (element == null) {
+		return false;
+	}
+	
+	var categoryKey = element.name;
+	if (categoryKey == null) {
+		return false;
 	}
 	showLoadingMessage(savingMessage);
 	if (element.checked) {
-		BuilderService.addPropertyToModule(pageKey, moduleId, "categories", category, setDisplayArticleCategoryCallback);
+		BuilderService.addPropertyToModules(pageKey, moduleIds, "categories", categoryKey, setDisplayArticleCategoryCallback);
 	}
 	else {
-		BuilderService.removeValueFromModuleProperty(pageKey, moduleId, "categories", category, setDisplayArticleCategoryCallback);
+		BuilderService.removeValueFromModuleProperty(pageKey, moduleIds, "categories", categoryKey, setDisplayArticleCategoryCallback);
 	}
 }
 
 function setDisplayArticleCategoryCallback(result) {
-	refreshArticlePageFrame();
-}
-
-function refreshArticlePageFrame() {
-	window.location.href = window.location.href;
-	window.onload = closeLoadingMessage;
+	reloadPage();
 }

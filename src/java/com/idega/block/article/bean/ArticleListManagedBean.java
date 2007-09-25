@@ -1,5 +1,5 @@
 /*
- * $Id: ArticleListManagedBean.java,v 1.13 2007/06/07 10:38:14 eiki Exp $
+ * $Id: ArticleListManagedBean.java,v 1.14 2007/09/25 12:04:30 valdas Exp $
  * Created on 27.1.2005
  *
  * Copyright (C) 2005 Idega Software hf. All Rights Reserved.
@@ -17,7 +17,9 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
+
 import javax.faces.component.html.HtmlOutputLink;
+
 import org.apache.webdav.lib.search.CompareOperator;
 import org.apache.webdav.lib.search.SearchException;
 import org.apache.webdav.lib.search.SearchExpression;
@@ -25,6 +27,7 @@ import org.apache.webdav.lib.search.SearchRequest;
 import org.apache.webdav.lib.search.SearchScope;
 import org.apache.webdav.lib.search.expressions.CompareExpression;
 import org.apache.xmlbeans.XmlException;
+
 import com.idega.block.article.business.ArticleActionURIHandler;
 import com.idega.block.article.business.ArticleUtil;
 import com.idega.block.article.component.ArticleItemViewer;
@@ -45,10 +48,10 @@ import com.idega.util.IWTimestamp;
 
 /**
  * 
- *  Last modified: $Date: 2007/06/07 10:38:14 $ by $Author: eiki $
+ *  Last modified: $Date: 2007/09/25 12:04:30 $ by $Author: valdas $
  * 
  * @author <a href="mailto:gummi@idega.com">Gudmundur Agust Saemundsson</a>
- * @version $Revision: 1.13 $
+ * @version $Revision: 1.14 $
  */
 public class ArticleListManagedBean implements ContentListViewerManagedBean {
 
@@ -171,7 +174,7 @@ public class ArticleListManagedBean implements ContentListViewerManagedBean {
 	 * @param categoryList
 	 * @throws SearchException
 	 */
-	public SearchRequest getSearchRequest(String scope, Locale locale, IWTimestamp oldest, List categoryList) throws SearchException {
+	public SearchRequest getSearchRequest(String scope, Locale locale, IWTimestamp oldest, List<String> categoryList) throws SearchException {
 		SearchRequest s = new SearchRequest();
 		s.addSelection(IWSlideConstants.PROPERTY_DISPLAY_NAME);
 		s.addSelection(IWSlideConstants.PROPERTY_CREATION_DATE);
@@ -191,22 +194,20 @@ public class ArticleListManagedBean implements ContentListViewerManagedBean {
 		}
 		
 		List<CompareExpression> categoryExpressions = new ArrayList<CompareExpression>();
-		if(categoryList != null){
-			for (Iterator iter = categoryList.iterator(); iter.hasNext();) {
+		if (categoryList != null) {
+			for (Iterator<String> iter = categoryList.iterator(); iter.hasNext();) {
 				String categoryName = (String) iter.next();
 				categoryExpressions.add(s.compare(CompareOperator.LIKE,IWSlideConstants.PROPERTY_CATEGORY,"%,"+categoryName+",%"));
 			}
-			Iterator expr = categoryExpressions.iterator();
+			Iterator<CompareExpression> expr = categoryExpressions.iterator();
 			if(expr.hasNext()){
-				SearchExpression categoryExpression = (SearchExpression)expr.next();
-				while(expr.hasNext()){
-					categoryExpression = s.or(categoryExpression,(SearchExpression)expr.next());
+				SearchExpression categoryExpression = expr.next();
+				while (expr.hasNext()) {
+					categoryExpression = s.or(categoryExpression, expr.next());
 				}
 				expression = s.and(expression,categoryExpression);
 			}
 		}
-		
-		
 		
 		s.setWhereExpression(expression);
 		return s;
@@ -305,7 +306,7 @@ public class ArticleListManagedBean implements ContentListViewerManagedBean {
 		return this.maxNumberOfDisplayed;
 	}
 	
-	public Collection getArticleSearcResults(String folder, List categories, IWContext iwc) {
+	public Collection getArticleSearcResults(String folder, List<String> categories, IWContext iwc) {
 		if (folder == null) {
 			return null;
 		}

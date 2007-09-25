@@ -116,3 +116,5 @@ delete_all_comments=Delete comments
 delete_comment=Delete this comment
 deleting=Deleting...
 are_you_sure=Are You sure?
+set_category_invisible=Set category invisible for common users
+set_category_visible=Set category visible for common users

@@ -1,5 +1,5 @@
 /*
- * $Id: EditArticleView.java,v 1.30 2007/05/30 15:03:03 gediminas Exp $
+ * $Id: EditArticleView.java,v 1.31 2007/09/25 12:04:30 valdas Exp $
  *
  * Copyright (C) 2004 Idega. All Rights Reserved.
  *
@@ -60,10 +60,10 @@ import com.idega.webface.htmlarea.HTMLArea;
  * <p>
  * This is the part for the editor of article is inside the admin interface
  * </p>
- * Last modified: $Date: 2007/05/30 15:03:03 $ by $Author: gediminas $
+ * Last modified: $Date: 2007/09/25 12:04:30 $ by $Author: valdas $
  *
  * @author Joakim,Tryggvi Larusson
- * @version $Revision: 1.30 $
+ * @version $Revision: 1.31 $
  */
 public class EditArticleView extends IWBaseComponent implements ManagedContentBeans, ActionListener, ValueChangeListener {
 	private static final Log log = LogFactory.getLog(EditArticleView.class);
@@ -438,7 +438,7 @@ public class EditArticleView extends IWBaseComponent implements ManagedContentBe
 		
 		
 		//Categories input
-		UIComponent categoriesContainer = getCategoryEditor();
+		UIComponent categoriesContainer = getCategoryEditor(iwc);	//	TODO: categories
 		UIComponent categoriesText = WFUtil.group(localizer.getTextVB("categories"), WFUtil.getText(":"));
 		HtmlOutputLabel categoriesLabel = new HtmlOutputLabel();
 		categoriesLabel.getChildren().add(categoriesText);
@@ -512,7 +512,7 @@ public class EditArticleView extends IWBaseComponent implements ManagedContentBe
 	/*
 	 * Returns container with form for editing categories.
 	 */
-	private UIComponent getCategoryEditor() {
+	private UIComponent getCategoryEditor(IWContext iwc) {
 		WebDAVCategories categoriesUI = (WebDAVCategories)findComponent(CATEGORY_EDITOR_ID);//WebDAVCategories.CATEGORIES_BLOCK_ID);
 		if(categoriesUI==null){
 			//id on the component is set implicitly
@@ -524,9 +524,7 @@ public class EditArticleView extends IWBaseComponent implements ManagedContentBe
 			categoriesUI.setDisplayHeader(false);
 			//categoriesUI.setId(CATEGORY_EDITOR_ID);
 			
-			FacesContext context = getFacesContext();
-			
-			String setCategories = (String) context.getExternalContext().getRequestParameterMap().get(ContentItemToolbar.PARAMETER_CATEGORIES);
+			String setCategories = (String) iwc.getExternalContext().getRequestParameterMap().get(ContentItemToolbar.PARAMETER_CATEGORIES);
 			if(setCategories!=null){
 				categoriesUI.setCategories(setCategories);
 			}
@@ -829,7 +827,7 @@ public class EditArticleView extends IWBaseComponent implements ManagedContentBe
 				//WFUtil.invoke(ARTICLE_ITEM_BEAN_ID,"setFolderLocation",resourcePath,String.class);
 				//getArticleItemBean().setFolderLocation(resourcePath);
 
-				WebDAVCategories categoriesUI = (WebDAVCategories)getCategoryEditor();
+				WebDAVCategories categoriesUI = (WebDAVCategories)getCategoryEditor(iwc);
 				categoriesUI.reset();
 				
 			} else {
@@ -840,7 +838,7 @@ public class EditArticleView extends IWBaseComponent implements ManagedContentBe
 					//getArticleItemBean().load(resourcePath);
 					getArticleItemBean().load();
 
-					WebDAVCategories categoriesUI = (WebDAVCategories)getCategoryEditor();
+					WebDAVCategories categoriesUI = (WebDAVCategories)getCategoryEditor(iwc);
 					//Update the categoriesUI with the resourcePath given:
 					if(categoriesUI!=null){
 						//there is no resourcepath set for the article if it's about to be created
