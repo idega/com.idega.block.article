@@ -674,7 +674,7 @@ function hideOrShowComments() {
 
 function hideOrShowCommentsCallback(needToReload) {
 	if (needToReload) {
-		window.location.href = window.location.href;
+		reloadPage();
 	}
 	closeLoadingMessage();
 	if (getHasCommentViewerValidRights()) {
