@@ -93,6 +93,11 @@
 			<property-class>boolean</property-class>
 		</property>
 		<property>
+			<display-name>Date pattern</display-name>
+			<property-name>datePattern</property-name>
+			<property-class>java.lang.String</property-class>
+		</property>
+		<property>
 			<display-name>URI to details viewer page</display-name>
 			<property-name>detailsViewerPath</property-name>
 			<property-class>java.lang.String</property-class>
