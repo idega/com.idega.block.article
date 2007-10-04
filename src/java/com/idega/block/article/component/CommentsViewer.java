@@ -123,7 +123,7 @@ public class CommentsViewer extends Block {
 		StringBuffer comments = new StringBuffer(bundle.getLocalizedString("comments"));
 		comments.append(ContentConstants.SPACE).append("(<span id='").append(commentsId);
 		comments.append("contentItemCount' class='contentItemCountStyle'>").append(commentsCount).append("</span>)");
-		Link commentsLabel = new Link(comments.toString(), "#showCommentsList");
+		Link commentsLabel = new Link(comments.toString(), "javascript:void(0)");
 		StringBuffer getCommentsAction = new StringBuffer("getCommentsList('").append(linkToComments).append(SEPARATOR);
 		getCommentsAction.append(commentsId).append("')");
 		commentsLabel.setOnClick(getCommentsAction.toString());
@@ -166,12 +166,13 @@ public class CommentsViewer extends Block {
 		container.add(new Text(ContentConstants.SPACE));
 	}
 	
+	@SuppressWarnings("unchecked")
 	private boolean findLinkToComments() {
 		UIComponent region = this.getParent();
 		if (region == null) {
 			return false;
 		}
-		List children = region.getChildren();
+		List<UIComponent> children = region.getChildren();
 		if (children == null) {
 			return false;
 		}
@@ -251,7 +252,7 @@ public class CommentsViewer extends Block {
 		
 		Layer addComments = new Layer();
 		addComments.setId(new StringBuffer(commentsId).append("add_comment_block").toString());
-		Link label = new Link(bundle.getLocalizedString("add_your_comment"), "#" + addComments.getId());
+		Link label = new Link(bundle.getLocalizedString("add_your_comment"), "javascript:void(0)");
 		String user = bundle.getLocalizedString("name");
 		String subject = bundle.getLocalizedString("subject");
 		String comment = bundle.getLocalizedString("comment");
