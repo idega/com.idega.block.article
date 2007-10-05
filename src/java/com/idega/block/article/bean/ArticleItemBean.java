@@ -1,5 +1,5 @@
 /*
- * $Id: ArticleItemBean.java,v 1.74 2007/07/17 07:32:35 alexis Exp $
+ * $Id: ArticleItemBean.java,v 1.75 2007/10/05 08:38:55 valdas Exp $
  *
  * Copyright (C) 2004-2005 Idega. All Rights Reserved.
  *
@@ -34,7 +34,6 @@ import com.idega.block.article.business.ArticleUtil;
 import com.idega.content.bean.ContentItem;
 import com.idega.content.bean.ContentItemBean;
 import com.idega.content.bean.ContentItemCase;
-import com.idega.content.themes.helpers.ThemesConstants;
 import com.idega.core.accesscontrol.business.StandardRoles;
 import com.idega.core.builder.business.BuilderService;
 import com.idega.core.builder.business.BuilderServiceFactory;
@@ -61,10 +60,10 @@ import com.idega.xml.XMLException;
  * This is a JSF managed bean that manages each article instance and delegates 
  * all calls to the correct localized instance.
  * <p>
- * Last modified: $Date: 2007/07/17 07:32:35 $ by $Author: alexis $
+ * Last modified: $Date: 2007/10/05 08:38:55 $ by $Author: valdas $
  *
  * @author Anders Lindman,<a href="mailto:tryggvi@idega.com">Tryggvi Larusson</a>
- * @version $Revision: 1.74 $
+ * @version $Revision: 1.75 $
  */
 public class ArticleItemBean extends ContentItemBean implements Serializable, ContentItem, ValueChangeListener {
 	
@@ -111,7 +110,6 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 	 * @see com.idega.block.article.bean.ArticleLocalizedItemBean#clear()
 	 */
 	public void clear() {
-		//isDummyArticleSet = false;
 		getLocalizedArticle().clear();
 		this.resourcePath=null;
 		this.availableInRequestedLanguage=false;
@@ -127,7 +125,7 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 	 * @see com.idega.block.article.bean.ArticleLocalizedItemBean#getAuthor()
 	 */
 	public String getAuthor() {
-		if (isDummyArticle()) {
+		if (isDummyContentItem()) {
 			return ArticleConstants.EMPTY;
 		}
 		return getLocalizedArticle().getAuthor();
@@ -137,7 +135,7 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 	 * Method is modified to resolve if dummy article is being edited
 	 */
 	public String getBody() {
-		if (isDummyArticle()) {
+		if (isDummyContentItem()) {
 			return ArticleConstants.EMPTY;
 		}
 		return getLocalizedArticle().getBody();
@@ -179,7 +177,7 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 	 * @see com.idega.block.article.bean.ArticleLocalizedItemBean#getHeadline()
 	 */
 	public String getHeadline() {
-		if (isDummyArticle()) {
+		if (isDummyContentItem()) {
 			return ArticleConstants.EMPTY;
 		}
 		return getLocalizedArticle().getHeadline();
@@ -203,7 +201,7 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 	 * @see com.idega.block.article.bean.ArticleLocalizedItemBean#getTeaser()
 	 */
 	public String getTeaser() {
-		if (isDummyArticle()) {
+		if (isDummyContentItem()) {
 			return ArticleConstants.EMPTY;
 		}
 		return getLocalizedArticle().getTeaser();
@@ -1225,7 +1223,6 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 	}
 	
 	protected void updateLocalizedArticleBean(){
-		//isDummyArticleSet = false;
 		String resourcePath = getResourcePath();
 		String localizedResourcePath = calculateLocalizedResourcePath(resourcePath);
 		getLocalizedArticle().setResourcePath(localizedResourcePath);
@@ -1417,7 +1414,6 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 	 * Loads the article (folder)
 	 */
 	protected boolean load(String path) throws IOException {
-		//isDummyArticleSet = false;
 		return super.load(path);
 	}
 	
@@ -1571,27 +1567,6 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 	 */
 	public void processValueChange(ValueChangeEvent event) throws AbortProcessingException {
 		
-	}
-	
-	protected boolean isDummyArticle() {
-		boolean isDummyArticle = false;
-		String body = getLocalizedArticle().getBody();
-		if (body == null) {
-			return false;
-		}
-		String tempValue = body;
-		// Removing needless characters
-		tempValue = tempValue.replaceAll("\b", ArticleConstants.EMPTY);
-		tempValue = tempValue.replaceAll("\t", ArticleConstants.EMPTY);
-		tempValue = tempValue.replaceAll("\f", ArticleConstants.EMPTY);
-		tempValue = tempValue.replaceAll("\r", ArticleConstants.SPACE);
-		tempValue = tempValue.replaceAll("\n", ArticleConstants.EMPTY);
-		for (int i = 0; (i < ThemesConstants.DUMMY_ARTICLES.size() && !isDummyArticle); i++) {
-			if (tempValue.indexOf(ThemesConstants.DUMMY_ARTICLES.get(i)) != -1) {
-				isDummyArticle = true;
-			}
-		}
-		return isDummyArticle;
 	}
 
 	public Timestamp getPublishedDate() {

@@ -1,5 +1,5 @@
 /*
- * $Id: ArticleLocalizedItemBean.java,v 1.22 2007/09/24 15:03:44 valdas Exp $
+ * $Id: ArticleLocalizedItemBean.java,v 1.23 2007/10/05 08:38:55 valdas Exp $
  *
  * Copyright (C) 2004 Idega. All Rights Reserved.
  *
@@ -55,10 +55,10 @@ import com.idega.xml.XMLParser;
  * This is a JSF managed bean that manages each article xml document 
  * instance per language/locale.
  * <p>
- * Last modified: $Date: 2007/09/24 15:03:44 $ by $Author: valdas $
+ * Last modified: $Date: 2007/10/05 08:38:55 $ by $Author: valdas $
  *
  * @author Anders Lindman,<a href="mailto:tryggvi@idega.com">Tryggvi Larusson</a>
- * @version $Revision: 1.22 $
+ * @version $Revision: 1.23 $
  */
 public class ArticleLocalizedItemBean extends ContentItemBean implements Serializable, ContentItem {
 	
@@ -74,7 +74,6 @@ public class ArticleLocalizedItemBean extends ContentItemBean implements Seriali
 	public final static String FIELDNAME_AUTHOR = "author";
 	public final static String FIELDNAME_HEADLINE = "headline";
 	public final static String FIELDNAME_TEASER = "teaser";
-	public final static String FIELDNAME_BODY = "body";
 	public final static String FIELDNAME_SOURCE = "source";
 	public final static String FIELDNAME_COMMENT = "comment";
 	public final static String FIELDNAME_LINK_TO_COMMENT = "linkToComments";
@@ -87,7 +86,7 @@ public class ArticleLocalizedItemBean extends ContentItemBean implements Seriali
 	//public final static String FIELDNAME_LANGUAGE_CHANGE = "language_change";
 	
 	
-	private final static String[] ATTRIBUTE_ARRAY = new String[] {FIELDNAME_AUTHOR,FIELDNAME_CREATION_DATE,FIELDNAME_HEADLINE,FIELDNAME_TEASER,FIELDNAME_BODY};
+	private final static String[] ATTRIBUTE_ARRAY = new String[] {FIELDNAME_AUTHOR,FIELDNAME_CREATION_DATE,FIELDNAME_HEADLINE,FIELDNAME_TEASER,ContentItemBean.FIELDNAME_BODY};
 	//private final static String[] ACTION_ARRAY = new String[] {"edit","delete"};
 
 	transient XMLNamespace idegaXMLName = new XMLNamespace("http://xmlns.idega.com/block/article/xml");
@@ -119,7 +118,7 @@ public class ArticleLocalizedItemBean extends ContentItemBean implements Seriali
 	
 	public String getHeadline() { return (String)getValue(FIELDNAME_HEADLINE); }
 	public String getTeaser() { return (String)getValue(FIELDNAME_TEASER); }
-	public String getBody() { return (String)getValue(FIELDNAME_BODY); }
+	public String getBody() { return (String)getValue(ContentItemBean.FIELDNAME_BODY); }
 	public String getAuthor() { return (String)getValue(FIELDNAME_AUTHOR); }
 	public String getSource() { return (String)getValue(FIELDNAME_SOURCE); }
 	public String getComment() { return (String)getValue(FIELDNAME_COMMENT); }
@@ -152,7 +151,7 @@ public class ArticleLocalizedItemBean extends ContentItemBean implements Seriali
 	public void setHeadline(Object o) { setValue(FIELDNAME_HEADLINE, o.toString()); } 
 	public void setTeaser(String s) { setValue(FIELDNAME_TEASER, s); } 
 	public void setBody(String body) {
-		setValue(FIELDNAME_BODY, body);
+		setValue(ContentItemBean.FIELDNAME_BODY, body);
 //		if (null != articleIn) {
 ////			System.out.println("ArticleIn = "+articleIn);
 //			//Use JTidy to clean up the html
@@ -634,7 +633,7 @@ public class ArticleLocalizedItemBean extends ContentItemBean implements Seriali
 		//Parse out the body
 		try {
 			XMLNamespace htmlNamespace = new XMLNamespace("http://www.w3.org/1999/xhtml");
-			XMLElement bodyElement = rootElement.getChild(FIELDNAME_BODY,getIdegaXMLNameSpace());
+			XMLElement bodyElement = rootElement.getChild(ContentItemBean.FIELDNAME_BODY,getIdegaXMLNameSpace());
 			XMLElement htmlElement = bodyElement.getChild("html",htmlNamespace);
 			XMLElement htmlBodyElement = htmlElement.getChild("body",htmlNamespace);
 			
