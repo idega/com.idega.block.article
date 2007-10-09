@@ -683,15 +683,15 @@ public class CommentsEngineBean extends IBOSessionBean implements CommentsEngine
 			info.add(resourceBundle.getLocalizedString("loading_comments", "Loading comments..."));			// 1
 			info.add(resourceBundle.getLocalizedString("atom_feed", "Atom Feed"));							// 2
 			info.add(ThemesHelper.getInstance().getFullServerName(iwc) + CoreConstants.WEBDAV_SERVLET_URI);	// 3
-			info.add(resourceBundle.getLocalizedString("need_send_notification", "Do You wish to receive notifications about new comments?"));	// 4
+			info.add(resourceBundle.getLocalizedString("need_send_notification", "Do you wish to receive notifications about new comments?"));	// 4
 			info.add(resourceBundle.getLocalizedString("yes", "Yes"));										// 5
 			info.add(resourceBundle.getLocalizedString("no", "No"));										// 6
-			info.add(resourceBundle.getLocalizedString("enter_email_text", "Please enter Your e-mail!"));	// 7
+			info.add(resourceBundle.getLocalizedString("enter_email_text", "Please enter your e-mail!"));	// 7
 			info.add(resourceBundle.getLocalizedString("saving", "Saving..."));								// 8
 			info.add(new StringBuffer(resourcePath).append(CommentsViewer.FEED_IMAGE).toString());			// 9
 			info.add(new StringBuffer(resourcePath).append(CommentsViewer.DELETE_IMAGE).toString());		// 10
 			info.add(resourceBundle.getLocalizedString("deleting", "Deleting..."));							// 11
-			info.add(resourceBundle.getLocalizedString("are_you_sure", "Are You sure?"));					// 12
+			info.add(resourceBundle.getLocalizedString("are_you_sure", "Are you sure?"));					// 12
 			info.add(resourceBundle.getLocalizedString("delete_all_comments", "Delete comments"));			// 13
 			info.add(resourceBundle.getLocalizedString("delete_comment", "Delete this comment"));			// 14
 			info.add(new StringBuffer(resourcePath).append("/images/comment_delete.png").toString());		// 15
