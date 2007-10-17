@@ -1,5 +1,5 @@
 /*
- * $Id: ArticleLocalizedItemBean.java,v 1.23 2007/10/05 08:38:55 valdas Exp $
+ * $Id: ArticleLocalizedItemBean.java,v 1.24 2007/10/17 15:09:18 valdas Exp $
  *
  * Copyright (C) 2004 Idega. All Rights Reserved.
  *
@@ -17,11 +17,8 @@ import java.io.Serializable;
 import java.io.UnsupportedEncodingException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 import java.util.logging.Logger;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import org.apache.webdav.lib.WebdavResource;
 import org.w3c.tidy.Configuration;
@@ -55,10 +52,10 @@ import com.idega.xml.XMLParser;
  * This is a JSF managed bean that manages each article xml document 
  * instance per language/locale.
  * <p>
- * Last modified: $Date: 2007/10/05 08:38:55 $ by $Author: valdas $
+ * Last modified: $Date: 2007/10/17 15:09:18 $ by $Author: valdas $
  *
  * @author Anders Lindman,<a href="mailto:tryggvi@idega.com">Tryggvi Larusson</a>
- * @version $Revision: 1.23 $
+ * @version $Revision: 1.24 $
  */
 public class ArticleLocalizedItemBean extends ContentItemBean implements Serializable, ContentItem {
 	
@@ -300,7 +297,7 @@ public class ArticleLocalizedItemBean extends ContentItemBean implements Seriali
 		XMLNamespace jTidyNamespace = new XMLNamespace("http://www.w3.org/1999/xhtml");
 		
 		if (body != null && !ContentConstants.EMPTY.equals(body.trim())) {
-			XMLDocument bodyDoc = builder.parse(new ByteArrayInputStream(body.getBytes("UTF-8")));
+			XMLDocument bodyDoc = builder.parse(new ByteArrayInputStream(body.getBytes(CoreConstants.ENCODING_UTF8)));
 			rootElement = bodyDoc.getRootElement();
 			if (rootElement != null) {
 				bodyElement = rootElement.getChild("body", jTidyNamespace);
@@ -311,7 +308,7 @@ public class ArticleLocalizedItemBean extends ContentItemBean implements Seriali
 		}
 		
 		if (teaser != null && !ContentConstants.EMPTY.equals(teaser.trim())) {
-			XMLDocument bodyDoc = builder.parse(new ByteArrayInputStream(teaser.getBytes("UTF-8")));
+			XMLDocument bodyDoc = builder.parse(new ByteArrayInputStream(teaser.getBytes(CoreConstants.ENCODING_UTF8)));
 			rootElement = bodyDoc.getRootElement();
 			if (rootElement != null) {
 				teaserElement = rootElement.getChild("body", jTidyNamespace);
@@ -335,13 +332,13 @@ public class ArticleLocalizedItemBean extends ContentItemBean implements Seriali
 		
 		String bodyString = getBody();
 		if(bodyString != null && !bodyString.trim().equals("")){
-			XMLDocument bodyDoc = builder.parse(new ByteArrayInputStream(bodyString.getBytes("UTF-8")));
+			XMLDocument bodyDoc = builder.parse(new ByteArrayInputStream(bodyString.getBytes(ENCODING_UTF8)));
 			bodyElement = bodyDoc.getRootElement();
 		}
 		
 		String teaserString = getTeaser();
 		if(teaserString != null && !teaserString.trim().equals("")){
-			XMLDocument bodyDoc = builder.parse(new ByteArrayInputStream(teaserString.getBytes("UTF-8")));
+			XMLDocument bodyDoc = builder.parse(new ByteArrayInputStream(teaserString.getBytes(ENCODING_UTF8)));
 			teaserElement = bodyDoc.getRootElement();
 		}
 
@@ -414,7 +411,7 @@ public class ArticleLocalizedItemBean extends ContentItemBean implements Seriali
 					return;
 				}
 				
-				ByteArrayInputStream utf8stream = new ByteArrayInputStream(article.getBytes("UTF-8"));
+				ByteArrayInputStream utf8stream = new ByteArrayInputStream(article.getBytes(CoreConstants.ENCODING_UTF8));
 				
 	//			System.out.println(article);
 				
@@ -428,7 +425,7 @@ public class ArticleLocalizedItemBean extends ContentItemBean implements Seriali
 					rootResource.proppatchMethod(filePath,ArticleItemBean.PROPERTY_CONTENT_TYPE,CoreConstants.ARTICLE_FILENAME_SCOPE,true);
 				}
 				else{
-					utf8stream = new ByteArrayInputStream(article.getBytes("UTF-8"));
+					utf8stream = new ByteArrayInputStream(article.getBytes(CoreConstants.ENCODING_UTF8));
 					String fixedURL = session.getURI(filePath);
 					rootResource.putMethod(fixedURL,utf8stream);
 					rootResource.proppatchMethod(fixedURL,ArticleItemBean.PROPERTY_CONTENT_TYPE,CoreConstants.ARTICLE_FILENAME_SCOPE,true);
@@ -493,11 +490,11 @@ public class ArticleLocalizedItemBean extends ContentItemBean implements Seriali
 		ByteArrayInputStream bais = null;
 		ByteArrayOutputStream baos = null;
 		try {
-			bais = new ByteArrayInputStream(text.getBytes("UTF-8"));
+			bais = new ByteArrayInputStream(text.getBytes(CoreConstants.ENCODING_UTF8));
 			baos = new ByteArrayOutputStream();
 			
 			tidy.parse(bais, baos);
-			text = baos.toString("UTF-8");
+			text = baos.toString(CoreConstants.ENCODING_UTF8);
 		}
 		catch (UnsupportedEncodingException e) {
 			e.printStackTrace();
@@ -545,7 +542,7 @@ public class ArticleLocalizedItemBean extends ContentItemBean implements Seriali
 				//setArticleResourcePath(theArticle.getPath());
 				setResourcePath(theArticle.getPath());
 				//String inStr = theArticle.getMethodDataAsString();
-				//byte[] bytes = inStr.getBytes("UTF-8");
+				//byte[] bytes = inStr.getBytes(ENCODING_UTF8);
 				//InputStream inStream = new ByteArrayInputStream(bytes);
 				InputStream inStream = theArticle.getMethodData();
 				bodyDoc = builder.parse(inStream);
