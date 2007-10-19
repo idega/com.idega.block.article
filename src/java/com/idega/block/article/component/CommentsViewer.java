@@ -142,7 +142,7 @@ public class CommentsViewer extends Block {
 		comments.append("contentItemCount' class='contentItemCountStyle'>").append(commentsCount).append("</span>)");
 		Link commentsLabel = new Link(comments.toString(), "javascript:void(0)");
 		StringBuffer getCommentsAction = new StringBuffer("getCommentsList('").append(linkToComments).append(SEPARATOR);
-		getCommentsAction.append(commentsId).append("')");
+		getCommentsAction.append(commentsId).append("'); return false;");
 		commentsLabel.setOnClick(getCommentsAction.toString());
 		articleComments.add(commentsLabel);
 		
@@ -166,7 +166,7 @@ public class CommentsViewer extends Block {
 				delete.setStyleClass("deleteCommentsImage");
 				delete.setId(new StringBuffer(commentsId).append("delete_article_comments").toString());
 				StringBuffer deleteAction = new StringBuffer("deleteComments('").append(commentsId).append("', null, '");
-				deleteAction.append(linkToComments).append("');");
+				deleteAction.append(linkToComments).append("'); return false;");
 				delete.setOnClick(deleteAction.toString());
 				articleComments.add(delete);
 			}
@@ -290,7 +290,7 @@ public class CommentsViewer extends Block {
 		action.append(sending).append(SEPARATOR).append(loggedUser).append(SEPARATOR);
 		action.append(bundle.getLocalizedString("email")).append(SEPARATOR);
 		action.append(bundle.getLocalizedString("comment_form")).append("', ").append(isForumPage);
-		action.append(", '").append(commentsId).append("', '").append(moduleId).append("');");
+		action.append(", '").append(commentsId).append("', '").append(moduleId).append("'); return false;");
 		label.setOnClick(action.toString());
 		addComments.add(label);
 		return addComments;
