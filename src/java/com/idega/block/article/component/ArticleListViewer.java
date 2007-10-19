@@ -1,5 +1,5 @@
 /*
- * $Id: ArticleListViewer.java,v 1.11 2007/08/02 13:35:11 valdas Exp $
+ * $Id: ArticleListViewer.java,v 1.12 2007/10/19 12:10:37 valdas Exp $
  * Created on 24.1.2005
  *
  * Copyright (C) 2005 Idega Software hf. All Rights Reserved.
@@ -11,7 +11,6 @@ package com.idega.block.article.component;
 
 import java.io.IOException;
 import java.rmi.RemoteException;
-import java.util.List;
 
 import javax.faces.component.UIComponent;
 import javax.faces.context.FacesContext;
@@ -42,10 +41,10 @@ import com.idega.presentation.Script;
  * for the article module.
  * </p>
  * 
- *  Last modified: $Date: 2007/08/02 13:35:11 $ by $Author: valdas $
+ *  Last modified: $Date: 2007/10/19 12:10:37 $ by $Author: valdas $
  * 
  * @author <a href="mailto:tryggvi@idega.com">Tryggvi Larusson</a>
- * @version $Revision: 1.11 $
+ * @version $Revision: 1.12 $
  */
 public class ArticleListViewer extends ContentItemListViewer {
 
@@ -149,12 +148,9 @@ public class ArticleListViewer extends ContentItemListViewer {
 		}
 		CommentsViewer comments = new CommentsViewer();
 		
-		List<String> ids = builder.getModuleId(comments.getThisPageKey(iwc), ArticleListViewer.class.getName());
-		if (ids == null) {
-			return;
-		}
-		if (ids.size() == 0) {
-			return;
+		String moduleId = builder.getInstanceId(this);
+		if (moduleId == null) {
+			moduleId = this.getId();
 		}
 		
 		ArticleCacher cacher = ArticleCacher.getInstance(iwc.getIWMainApplication());
@@ -162,7 +158,7 @@ public class ArticleListViewer extends ContentItemListViewer {
 			return;
 		}
 		
-		UIComponent commentsController = comments.getCommentsController(iwc, cacher.getCacheKey(this, iwc), ids.get(0), isShowComments(), SHOW_COMMENTS_PROPERTY);
+		UIComponent commentsController = comments.getCommentsController(iwc, cacher.getCacheKey(this, iwc), moduleId, isShowComments(), SHOW_COMMENTS_PROPERTY);
 		getFacets().put(ContentListViewerRenderer.FACET_ITEM_COMMENTS_CONTROLLER, commentsController);
 	}
 	

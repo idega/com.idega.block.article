@@ -4,6 +4,7 @@ import java.rmi.RemoteException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -36,6 +37,7 @@ import com.idega.presentation.IWContext;
 import com.idega.slide.business.IWSlideService;
 import com.idega.util.CoreConstants;
 import com.idega.util.CoreUtil;
+import com.idega.util.StringHandler;
 import com.sun.syndication.feed.atom.Content;
 import com.sun.syndication.feed.atom.Entry;
 import com.sun.syndication.feed.atom.Feed;
@@ -64,7 +66,8 @@ public class CommentsEngineBean extends IBOSessionBean implements CommentsEngine
 	
 	private volatile BuilderService builder = null;
 
-	public boolean addComment(String user, String subject, String email, String body, String uri, boolean notify, String id) {
+	@SuppressWarnings("unchecked")
+	public boolean addComment(String user, String subject, String email, String body, String uri, boolean notify, String id, String instanceId) {
 		if (uri == null) {
 			closeLoadingMessage();
 			return false;
@@ -75,6 +78,11 @@ public class CommentsEngineBean extends IBOSessionBean implements CommentsEngine
 		}
 		
 		IWContext iwc = CoreUtil.getIWContext();
+		if (iwc == null) {
+			return false;
+		}
+		
+		uri = getFixedCommentsUri(iwc, uri, instanceId);
 		
 		String language = ThemesHelper.getInstance().getCurrentLanguage(iwc);
 		
@@ -108,8 +116,8 @@ public class CommentsEngineBean extends IBOSessionBean implements CommentsEngine
 			}
 			
 			WebContext wctx = WebContextFactory.get();
-			if (wctx != null) {
-				BuilderService service = getBuilderService();
+			BuilderService service = getBuilderService();
+			if (wctx != null && service != null) {
 				String pageKey  = service.getPageKeyByURI(wctx.getCurrentPage());
 				if (pageKey != null) {
 					if (ArticleUtil.isPageTypeBlog(service.getICPage(pageKey))) {
@@ -248,6 +256,7 @@ public class CommentsEngineBean extends IBOSessionBean implements CommentsEngine
 		return true;
 	}
 	
+	@SuppressWarnings("unchecked")
 	private List<Entry> initEntries(List oldEntries) {
 		if (oldEntries == null) {
 			return new ArrayList<Entry>();
@@ -352,11 +361,12 @@ public class CommentsEngineBean extends IBOSessionBean implements CommentsEngine
 	
 	private ScriptBuffer getScriptForCommentsList(String uri, String id) {
 		ScriptBuffer script = new ScriptBuffer();
-		script = new ScriptBuffer("getCommentsCallback(").appendData(getCommentsList(uri)).appendScript(", ").appendData(id);
+		script = new ScriptBuffer("getCommentsCallback(").appendData(getCommentsList(uri, true)).appendScript(", ").appendData(id);
 		script.appendScript(", ").appendData(uri).appendScript(");");
 		return script;
 	}
 	
+	@SuppressWarnings("unchecked")
 	private Collection getAllCurrentPageSessions() {
 		WebContext wctx = WebContextFactory.get();
 		if (wctx == null) {
@@ -371,22 +381,48 @@ public class CommentsEngineBean extends IBOSessionBean implements CommentsEngine
 		return pages;
 	}
 	
-	public List<ArticleComment> getComments(String uri) {
-		return getCommentsList(uri);
+	public List<List<ArticleComment>> getCommentsFromUris(List<String> uris) {
+		if (uris == null) {
+			return null;
+		}
+		
+		List<List<ArticleComment>> allComments = new ArrayList<List<ArticleComment>>();
+		for (int i = 0; i < uris.size(); i++) {
+			allComments.add(getCommentsList(uris.get(i), false));
+		}
+		return allComments;
 	}
 	
-	private List<ArticleComment> getCommentsList(String uri) {
+	public List<ArticleComment> getComments(String uri) {
+		return getCommentsList(uri, true);
+	}
+	
+	@SuppressWarnings("unchecked")
+	private List<ArticleComment> getCommentsList(String uri, boolean addNulls) {
+		List<ArticleComment> fake = new ArrayList<ArticleComment>();
 		if (uri == null) {
-			return null;
+			if (addNulls) {
+				return null;
+			}
+			return fake;
 		}
+		
 		Feed comments = getCommentsFeed(uri, null);
 		if (comments == null) {
-			return null;
+			if (addNulls) {
+				return null;
+			}
+			return fake;
 		}
+		
 		List entries = comments.getEntries();
 		if (entries == null) {
-			return null;
+			if (addNulls) {
+				return null;
+			}
+			return fake;
 		}
+		
 		List<ArticleComment> items = new ArrayList<ArticleComment>();
 		ArticleComment comment = null;
 		Object o = null;
@@ -518,6 +554,7 @@ public class CommentsEngineBean extends IBOSessionBean implements CommentsEngine
 		commentsMap.put(uri, comments);
 	}
 	
+	@SuppressWarnings("unchecked")
 	private Feed getFeedFromCache(String uri, IWContext iwc) {
 		if (uri == null) {
 			return null;
@@ -588,10 +625,11 @@ public class CommentsEngineBean extends IBOSessionBean implements CommentsEngine
 		
 		decacheComponent(cacheKey, iwc);
 		
-		ScriptBuffer script = new ScriptBuffer("hideOrShowComments();");
+		ScriptBuffer script = new ScriptBuffer("hideOrShowComments('").appendData(moduleId).appendScript("');");
 		return executeScriptForAllPages(script);
 	}
 	
+	@SuppressWarnings("unchecked")
 	private Map getArticlesCache(IWContext iwc) {
 		if (iwc == null) {
 			return null;
@@ -603,6 +641,7 @@ public class CommentsEngineBean extends IBOSessionBean implements CommentsEngine
 		return cache.getCacheMap();
 	}
 	
+	@SuppressWarnings("unchecked")
 	private void decacheComponent(String cacheKey, IWContext iwc) {
 		if (cacheKey == null || iwc == null) {
 			return;
@@ -636,6 +675,7 @@ public class CommentsEngineBean extends IBOSessionBean implements CommentsEngine
 		return true; // Need to reload page (disable component)
 	}
 	
+	@SuppressWarnings("unchecked")
 	private boolean executeScriptForAllPages(ScriptBuffer script) {
 		Collection allPages = getAllCurrentPageSessions();
 		if (allPages == null) {
@@ -798,6 +838,43 @@ public class CommentsEngineBean extends IBOSessionBean implements CommentsEngine
 			log.error(e);
 		}
 		return defaultValue;
+	}
+	
+	public String getFixedCommentsUri(IWContext iwc, String uri, String instanceId) {
+		if (uri == null) {
+			uri = String.valueOf(new Date().getTime());
+		}
+		
+		BuilderService service = getBuilderService();
+		if (!uri.startsWith(CoreConstants.CONTENT_PATH)) {
+			if (!uri.startsWith(CoreConstants.SLASH)) {
+				uri = new StringBuffer(CoreConstants.SLASH).append(uri).toString();
+			}
+			
+			uri = new StringBuffer(CoreConstants.CONTENT_PATH).append(CoreConstants.SLASH).append(ContentConstants.COMMENT_SCOPE).append(uri).toString();
+			
+			String fileName = new StringBuffer(instanceId).append(CoreConstants.DOT).append("xml").toString();
+			if (!uri.endsWith(fileName)) {
+				if (!uri.endsWith(CoreConstants.SLASH)) {
+					uri = new StringBuffer(uri).append(CoreConstants.SLASH).toString();
+				}
+				
+				uri = new StringBuffer(uri).append(fileName).toString();
+			}
+			
+			char[] leaveAsIs = {'-', '_', '/', '.', '0','1','2','3','4','5','6','7','8','9'};
+			uri = StringHandler.stripNonRomanCharacters(uri, leaveAsIs);
+			
+			if (service != null) {
+				int pageId = iwc.getCurrentIBPageID();
+				if (pageId > -1) {
+					String pageKey = String.valueOf(pageId);
+					service.setModuleProperty(pageKey, instanceId, ":method:1:implied:void:setLinkToComments:java.lang.String:", new String[] {uri});
+				}
+			}
+		}
+		
+		return uri;
 	}
 	
 }

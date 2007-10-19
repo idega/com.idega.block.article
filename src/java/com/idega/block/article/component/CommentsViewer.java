@@ -19,6 +19,7 @@ import com.idega.content.business.ContentConstants;
 import com.idega.content.business.ContentUtil;
 import com.idega.content.themes.helpers.ThemesHelper;
 import com.idega.core.accesscontrol.business.NotLoggedOnException;
+import com.idega.core.builder.business.BuilderService;
 import com.idega.idegaweb.IWBundle;
 import com.idega.idegaweb.IWUserContext;
 import com.idega.presentation.Block;
@@ -40,8 +41,11 @@ public class CommentsViewer extends Block {
 	
 	private String styleClass = "content_item_comments_style";
 	private String linkToComments = null;
-	private boolean showCommentsForAllUsers = false;
-	private boolean showCommentsList = false; // If expand list on page load
+	
+	private String moduleId = null;
+	
+	private boolean showCommentsForAllUsers = true;
+	private boolean showCommentsList = true; // If expand list on page load
 	private boolean isForumPage = false;
 	private boolean usedInArticleList = false;
 	
@@ -50,20 +54,33 @@ public class CommentsViewer extends Block {
 	protected static final String COMMENTS_HELPER = "javascript/ArticleCommentsHelper.js";
 	protected static final String INIT_SCRIPT_LINE = "window.addEvent('domready', initComments);";
 	
-	private static final String ARTICLE_COMMENT_SCOPE = "article_comment";
 	private static final String SEPARATOR = "', '";
 	
 	public void main(IWContext iwc) {
+		getModuleId(iwc);
+		
 		if (linkToComments == null) {
 			if (!findLinkToComments()) {
-				return;
+				if (isStandAlone(iwc)) {
+					CommentsEngine engine = null;
+					try {
+						engine = (CommentsEngine) IBOLookup.getSessionInstance(iwc, CommentsEngine.class);
+					} catch (IBOLookupException e) {
+						e.printStackTrace();
+						return;
+					}
+					linkToComments = engine.getFixedCommentsUri(iwc, null, moduleId);
+				}
+				else {
+					return;
+				}
 			}
 		}
 		
 		ThemesHelper helper = ThemesHelper.getInstance();
 		IWBundle bundle = getBundle(iwc);
 		
-		String commentsId = new StringBuffer("unique").append(helper.getUniqueIdByNumberAndDate(ARTICLE_COMMENT_SCOPE)).toString();
+		String commentsId = moduleId;
 		
 		Layer container = new Layer();
 		container.setId(new StringBuffer(commentsId).append(COMMENTS_BLOCK_ID).toString());
@@ -90,7 +107,7 @@ public class CommentsViewer extends Block {
 				}
 			}
 			
-			//	Init script
+			//	Initialize script
 			adder.addInlineScriptAtPosition(iwc, AddResource.BODY_END, INIT_SCRIPT_LINE);
 			adder.addInlineScriptAtPosition(iwc, AddResource.BODY_END, "window.addEvent('domready', enableReverseAjax);");
 		}
@@ -213,21 +230,22 @@ public class CommentsViewer extends Block {
 		if (isUsedInArticleList()) {
 			return;
 		}
-		container.add(getCommentsController(iwc, cacheKey, getClientId(iwc), isShowCommentsForAllUsers(), SHOW_COMMENTS_PROPERTY));
+		container.add(getCommentsController(iwc, cacheKey, moduleId, isShowCommentsForAllUsers(), SHOW_COMMENTS_PROPERTY));
 	}
 	
 	protected Layer getCommentsController(IWContext iwc, String cacheKey, String moduleId, boolean enabled, String propertyName) {
 		Layer commentsController = new Layer();
-		if (iwc == null || moduleId == null || propertyName == null) {
+		if (iwc == null || propertyName == null) {
 			return commentsController;
 		}
+		
 		String pageKey = getThisPageKey(iwc);
 		if (pageKey == null) {
 			return commentsController;
 		}
 		
 		CheckBox enableCheckBox = new CheckBox("enableComments");
-		enableCheckBox.setId("manageCommentsBlockCheckBox");
+		enableCheckBox.setId(new StringBuffer(moduleId).append("manageCommentsBlockCheckBox").toString());
 		StringBuffer action = new StringBuffer("enableComments(this.checked, '");
 		action.append(pageKey).append(SEPARATOR).append(moduleId).append(SEPARATOR).append(propertyName).append("', ");
 		if (cacheKey == null) {
@@ -265,13 +283,14 @@ public class CommentsViewer extends Block {
 		} catch (NotLoggedOnException e) {
 			loggedUser = bundle.getLocalizedString("anonymous");
 		}
+		
 		StringBuffer action = new StringBuffer("addCommentPanel('").append(addComments.getId()).append(SEPARATOR);
 		action.append(linkToComments).append(SEPARATOR).append(user).append(SEPARATOR).append(subject).append(SEPARATOR);
 		action.append(comment).append(SEPARATOR).append(posted).append(SEPARATOR).append(send).append(SEPARATOR);
 		action.append(sending).append(SEPARATOR).append(loggedUser).append(SEPARATOR);
 		action.append(bundle.getLocalizedString("email")).append(SEPARATOR);
 		action.append(bundle.getLocalizedString("comment_form")).append("', ").append(isForumPage);
-		action.append(", '").append(commentsId).append("');");
+		action.append(", '").append(commentsId).append("', '").append(moduleId).append("');");
 		label.setOnClick(action.toString());
 		addComments.add(label);
 		return addComments;
@@ -374,6 +393,50 @@ public class CommentsViewer extends Block {
 	
 	public String getBundleIdentifier() {
 		return ArticleConstants.IW_BUNDLE_IDENTIFIER;
+	}
+	
+	private boolean isStandAlone(IWContext iwc) {
+		int id = iwc.getCurrentIBPageID();
+		if (id < 0) {
+			return false;
+		}
+		
+		String pageKey = String.valueOf(id);
+		BuilderService service = null;
+		try {
+			service = getBuilderService(iwc);
+		} catch (RemoteException e) {
+			e.printStackTrace();
+			return false;
+		}
+		
+		List<String> articleItems = service.getModuleId(pageKey, ArticleItemViewer.class.getName());
+		if (articleItems != null && articleItems.size() > 0) {
+			return false;
+		}
+		
+		List<String> articleViewers = service.getModuleId(pageKey, ArticleListViewer.class.getName());
+		if (articleViewers != null && articleViewers.size() > 0) {
+			return false;
+		}
+		
+		return true;
+	}
+	
+	private void getModuleId(IWContext iwc) {
+		BuilderService service = null;
+		try {
+			service = getBuilderService(iwc);
+		} catch (RemoteException e) {
+			e.printStackTrace();
+		}
+		
+		if (service != null) {
+			moduleId = service.getInstanceId(this);
+			if (moduleId == null) {
+					moduleId = this.getId();
+			}
+		}
 	}
 
 }

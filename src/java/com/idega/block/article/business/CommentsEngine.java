@@ -5,13 +5,15 @@ import java.util.List;
 
 import com.idega.block.article.bean.ArticleComment;
 import com.idega.business.IBOSession;
+import com.idega.presentation.IWContext;
+
 import java.rmi.RemoteException;
 
 public interface CommentsEngine extends IBOSession {
 	/**
 	 * @see com.idega.block.article.business.CommentsEngineBean#addComment
 	 */
-	public boolean addComment(String user, String subject, String email, String body, String uri, boolean notify, String id) throws RemoteException;
+	public boolean addComment(String user, String subject, String email, String body, String uri, boolean notify, String id, String instanceId) throws RemoteException;
 
 	/**
 	 * @see com.idega.block.article.business.CommentsEngineBean#getCommentsForAllPages
@@ -57,4 +59,14 @@ public interface CommentsEngine extends IBOSession {
 	 * @see com.idega.block.article.business.CommentsEngineBean#deleteComments
 	 */
 	public List<String> deleteComments(String id, String commentId, String linkToComments) throws RemoteException;
+	
+	/**
+	 * @see com.idega.block.article.business.CommentsEngineBean#getFixedCommentsUri
+	 */
+	public String getFixedCommentsUri(IWContext iwc, String uri, String instanceId);
+	
+	/**
+	 * @see com.idega.block.article.business.CommentsEngineBean#getCommentsFromUris
+	 */
+	public List<List<ArticleComment>> getCommentsFromUris(List<String> uris);
 }
