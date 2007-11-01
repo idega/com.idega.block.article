@@ -10,8 +10,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.directwebremoting.ScriptBuffer;
 import org.directwebremoting.ScriptSession;
 import org.directwebremoting.WebContext;
@@ -50,7 +48,6 @@ import com.sun.syndication.io.WireFeedOutput;
 public class CommentsEngineBean extends IBOSessionBean implements CommentsEngine {
 
 	private static final long serialVersionUID = 7299800648381936213L;
-	private static final Log log = LogFactory.getLog(CommentsEngineBean.class);
 	
 	private static final String COMMENTS_CACHE_NAME = "article_comments_feeds_cache";
 	
@@ -341,7 +338,7 @@ public class CommentsEngineBean extends IBOSessionBean implements CommentsEngine
 					try {
 						rss = (RSSBusiness) IBOLookup.getServiceInstance(IWContext.getInstance(), RSSBusiness.class);
 					} catch (IBOLookupException e) {
-						log.error(e);
+						e.printStackTrace();
 					}
 				}
 			}
@@ -376,7 +373,6 @@ public class CommentsEngineBean extends IBOSessionBean implements CommentsEngine
 		if (pages == null) {
 			return null;
 		}
-		log.info("Found JavaScript sessions on same page ('"+wctx.getCurrentPage()+"'): " + pages.size());
 
 		return pages;
 	}
@@ -580,7 +576,7 @@ public class CommentsEngineBean extends IBOSessionBean implements CommentsEngine
 		try {
 			return (Feed) o;
 		} catch (ClassCastException e) {
-			log.error(e);
+			e.printStackTrace();
 			return null;
 		}
 	}
@@ -600,7 +596,7 @@ public class CommentsEngineBean extends IBOSessionBean implements CommentsEngine
 					try {
 						builder = BuilderServiceFactory.getBuilderService(getIWApplicationContext());
 					} catch (RemoteException e) {
-						log.error(e);
+						e.printStackTrace();
 					}
 				}
 			}
@@ -711,7 +707,7 @@ public class CommentsEngineBean extends IBOSessionBean implements CommentsEngine
 		try {
 			resourceBundle = ArticleUtil.getBundle().getResourceBundle(iwc);
 		} catch (Exception e) {
-			log.error(e);
+			e.printStackTrace();
 		}
 		if (resourceBundle == null) {
 			return info;
@@ -736,7 +732,7 @@ public class CommentsEngineBean extends IBOSessionBean implements CommentsEngine
 			info.add(resourceBundle.getLocalizedString("delete_comment", "Delete this comment"));			// 14
 			info.add(new StringBuffer(resourcePath).append("/images/comment_delete.png").toString());		// 15
 		} catch (Exception e) {
-			log.error(e);
+			e.printStackTrace();
 		}
 		
 		return info;
@@ -806,10 +802,10 @@ public class CommentsEngineBean extends IBOSessionBean implements CommentsEngine
 		try {
 			commentsContent = wfo.outputString(comments);
 		} catch (IllegalArgumentException e) {
-			log.error(e);
+			e.printStackTrace();
 			return false;
 		} catch (FeedException e) {
-			log.error(e);
+			e.printStackTrace();
 			return false;
 		}
 		
@@ -835,7 +831,7 @@ public class CommentsEngineBean extends IBOSessionBean implements CommentsEngine
 			IWResourceBundle iwrb = ArticleUtil.getBundle().getResourceBundle(iwc);
 			return iwrb.getLocalizedString(key, defaultValue);
 		} catch (Exception e) {
-			log.error(e);
+			e.printStackTrace();
 		}
 		return defaultValue;
 	}
