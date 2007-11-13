@@ -1,5 +1,5 @@
 /*
- * $Id: IWBundleStarter.java,v 1.24 2007/06/02 19:28:23 eiki Exp $
+ * $Id: IWBundleStarter.java,v 1.25 2007/11/13 09:31:02 laddi Exp $
  * Created on 2.11.2004
  *
  * Copyright (C) 2004 Idega Software hf. All Rights Reserved.
@@ -30,10 +30,10 @@ import com.idega.slide.business.IWSlideService;
 
 /**
  * 
- *  Last modified: $Date: 2007/06/02 19:28:23 $ by $Author: eiki $
+ *  Last modified: $Date: 2007/11/13 09:31:02 $ by $Author: laddi $
  * 
  * @author <a href="mailto:tryggvil@idega.com">Tryggvi Larusson</a>
- * @version $Revision: 1.24 $
+ * @version $Revision: 1.25 $
  */
 public class IWBundleStarter implements IWBundleStartable {
 	private static final String STYLE_SHEET_URL = "/style/article.css";
@@ -73,13 +73,14 @@ public class IWBundleStarter implements IWBundleStartable {
 		ViewNode contentNode = cViewManager.getContentNode();
 		
 		DefaultViewNode articleNode = new DefaultViewNode("article",contentNode);
-		articleNode.setJspUri(bundle.getJSPURI("createarticle.jsp"));
+		articleNode.setJspUri(bundle.getJSPURI("listarticles.jsp"));
 		articleNode.setKeyboardShortcut(new KeyboardShortcut("a"));
 		articleNode.setName("#{localizedStrings['com.idega.block.article']['article']}");
 		
 		DefaultViewNode createNewArticleNode = new DefaultViewNode("create",articleNode);
 		String jspUri = bundle.getJSPURI("createarticle.jsp");
 		createNewArticleNode.setJspUri(jspUri);
+		createNewArticleNode.setVisibleInMenus(false);
 		createNewArticleNode.setName("#{localizedStrings['com.idega.block.article']['create_article']}");
 		
 		DefaultViewNode editNewArticleNode = new DefaultViewNode("edit",articleNode);
@@ -94,6 +95,7 @@ public class IWBundleStarter implements IWBundleStartable {
 		
 		DefaultViewNode listArticlesNode = new DefaultViewNode("list",articleNode);
 		listArticlesNode.setJspUri(bundle.getJSPURI("listarticles.jsp"));
+		listArticlesNode.setVisibleInMenus(false);
 		listArticlesNode.setName("#{localizedStrings['com.idega.block.article']['list_articles']}");
 		
 		
