@@ -1,5 +1,5 @@
 /*
- * $Id: ArticleListViewer.java,v 1.13 2007/12/12 10:41:01 civilis Exp $
+ * $Id: ArticleListViewer.java,v 1.14 2007/12/14 13:54:04 alexis Exp $
  * Created on 24.1.2005
  *
  * Copyright (C) 2005 Idega Software hf. All Rights Reserved.
@@ -41,10 +41,10 @@ import com.idega.presentation.Script;
  * for the article module.
  * </p>
  * 
- *  Last modified: $Date: 2007/12/12 10:41:01 $ by $Author: civilis $
+ *  Last modified: $Date: 2007/12/14 13:54:04 $ by $Author: alexis $
  * 
  * @author <a href="mailto:tryggvi@idega.com">Tryggvi Larusson</a>
- * @version $Revision: 1.13 $
+ * @version $Revision: 1.14 $
  */
 public class ArticleListViewer extends ContentItemListViewer {
 
@@ -203,7 +203,7 @@ public class ArticleListViewer extends ContentItemListViewer {
 			adder.addJavaScriptAtPosition(iwc, AddResource.HEADER_BEGIN, ArticleUtil.getBundle().getVirtualPathWithFileNameString(CommentsViewer.COMMENTS_HELPER));
 			
 			//	MooTools
-			Web2Business web2 = SpringBeanLookup.getInstance().getSpringBean(iwc, Web2Business.class);
+			Web2Business web2 = (Web2Business) SpringBeanLookup.getInstance().getSpringBean(iwc, Web2Business.class);
 			if (web2 != null) {
 				try {
 					adder.addJavaScriptAtPosition(iwc, AddResource.HEADER_BEGIN, web2.getBundleURIToMootoolsLib());
