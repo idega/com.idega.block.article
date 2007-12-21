@@ -26,7 +26,7 @@ import com.idega.business.IBOSessionBean;
 import com.idega.content.bean.ContentItemFeedBean;
 import com.idega.content.business.ContentConstants;
 import com.idega.content.business.ContentUtil;
-import com.idega.content.themes.helpers.ThemesHelper;
+import com.idega.content.themes.helpers.business.ThemesHelper;
 import com.idega.core.builder.business.BuilderService;
 import com.idega.core.builder.business.BuilderServiceFactory;
 import com.idega.core.cache.IWCacheManager2;

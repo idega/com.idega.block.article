@@ -17,7 +17,7 @@ import com.idega.business.IBOLookupException;
 import com.idega.business.SpringBeanLookup;
 import com.idega.content.business.ContentConstants;
 import com.idega.content.business.ContentUtil;
-import com.idega.content.themes.helpers.ThemesHelper;
+import com.idega.content.themes.helpers.business.ThemesHelper;
 import com.idega.core.accesscontrol.business.NotLoggedOnException;
 import com.idega.core.builder.business.BuilderService;
 import com.idega.idegaweb.IWBundle;
