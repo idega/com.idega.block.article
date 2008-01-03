@@ -5,6 +5,12 @@
   </properties>
   <body>
 
+	<release version="3.1.8" date="2008-01-03">
+      <action dev="civilis" type="fix">
+		Fixed ArticleItemViewer restore state method
+      </action>
+    </release>
+
 	<release version="3.1.7" date="2007-05-21">
       <action dev="laddi" type="update">
 		Added possibility to set date pattern to dates.

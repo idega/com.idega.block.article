@@ -1,5 +1,5 @@
 /*
- * $Id: ArticleItemViewer.java,v 1.15.2.1 2007/05/21 07:01:56 laddi Exp $
+ * $Id: ArticleItemViewer.java,v 1.15.2.2 2008/01/03 10:08:32 civilis Exp $
  * 
  * Copyright (C) 2004 Idega. All Rights Reserved.
  * 
@@ -23,12 +23,12 @@ import com.idega.webface.WFHtml;
 import com.idega.webface.convert.WFTimestampConverter;
 
 /**
- * Last modified: $Date: 2007/05/21 07:01:56 $ by $Author: laddi $
+ * Last modified: $Date: 2008/01/03 10:08:32 $ by $Author: civilis $
  * 
  * Displays the article item
  * 
  * @author <a href="mailto:gummi@idega.com">Gudmundur Agust Saemundsson</a>
- * @version $Revision: 1.15.2.1 $
+ * @version $Revision: 1.15.2.2 $
  */
 public class ArticleItemViewer extends ContentItemViewer {
 
@@ -231,9 +231,9 @@ public class ArticleItemViewer extends ContentItemViewer {
 	public void restoreState(FacesContext ctx, Object state) {
 		Object values[] = (Object[]) state;
 		super.restoreState(ctx, values[0]);
-		this.headlineAsLink = ((Boolean) values[1]).booleanValue();
-		this.datePattern = values[2].toString();
-		this.cacheEnabled = ((Boolean) values[2]).booleanValue();
+		this.headlineAsLink = values[1] == null ? false : ((Boolean) values[1]).booleanValue();
+		this.datePattern = (String)values[2];
+		this.cacheEnabled = values[3] == null ? true : ((Boolean) values[3]).booleanValue();
 	}
 
 	/**
