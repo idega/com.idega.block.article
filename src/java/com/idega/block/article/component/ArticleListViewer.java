@@ -1,5 +1,5 @@
 /*
- * $Id: ArticleListViewer.java,v 1.5.2.1 2007/05/21 07:01:56 laddi Exp $ Created on 24.1.2005
+ * $Id: ArticleListViewer.java,v 1.5.2.2 2008/01/03 10:44:20 civilis Exp $ Created on 24.1.2005
  * 
  * Copyright (C) 2005 Idega Software hf. All Rights Reserved.
  * 
@@ -20,10 +20,10 @@ import com.idega.idegaweb.IWMainApplication;
  * Specialized implementation of contentItemListViewer that sets a few default properties for the article module.
  * </p>
  * 
- * Last modified: $Date: 2007/05/21 07:01:56 $ by $Author: laddi $
+ * Last modified: $Date: 2008/01/03 10:44:20 $ by $Author: civilis $
  * 
  * @author <a href="mailto:tryggvi@idega.com">Tryggvi Larusson</a>
- * @version $Revision: 1.5.2.1 $
+ * @version $Revision: 1.5.2.2 $
  */
 public class ArticleListViewer extends ContentItemListViewer {
 
@@ -60,8 +60,8 @@ public class ArticleListViewer extends ContentItemListViewer {
 	public void restoreState(FacesContext ctx, Object state) {
 		Object values[] = (Object[]) state;
 		super.restoreState(ctx, values[0]);
-		this.headlineAsLink = ((Boolean) values[1]).booleanValue();
-		this.datePattern = values[2].toString();
+		this.headlineAsLink = values[1] == null ? false : ((Boolean) values[1]).booleanValue();
+		this.datePattern = (String)values[2];
 	}
 
 	public void setHeadlineAsLink(boolean asLink) {
