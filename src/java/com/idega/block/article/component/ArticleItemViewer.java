@@ -1,5 +1,5 @@
 /*
- * $Id: ArticleItemViewer.java,v 1.29 2007/04/24 12:11:27 justinas Exp $
+ * $Id: ArticleItemViewer.java,v 1.30 2008/01/09 13:45:29 valdas Exp $
  *
  * Copyright (C) 2004 Idega. All Rights Reserved.
  *
@@ -20,6 +20,7 @@ import com.idega.block.article.bean.ArticleItemBean;
 import com.idega.block.article.bean.ArticleLocalizedItemBean;
 import com.idega.block.article.business.ArticleActionURIHandler;
 import com.idega.content.bean.ContentItem;
+import com.idega.content.business.ContentConstants;
 import com.idega.content.presentation.ContentItemToolbar;
 import com.idega.content.presentation.ContentItemViewer;
 import com.idega.core.builder.business.BuilderService;
@@ -32,22 +33,20 @@ import com.idega.webface.WFHtml;
 import com.idega.webface.convert.WFTimestampConverter;
 
 /**
- * Last modified: $Date: 2007/04/24 12:11:27 $ by $Author: justinas $
+ * Last modified: $Date: 2008/01/09 13:45:29 $ by $Author: valdas $
  *
  * Displays the article item
  *
  * @author <a href="mailto:gummi@idega.com">Gudmundur Agust Saemundsson</a>
- * @version $Revision: 1.29 $
+ * @version $Revision: 1.30 $
  */
 public class ArticleItemViewer extends ContentItemViewer {
 	
 	//constants:
 	private final static String ATTRIBUTE_AUTHOR = "author";
-	private final static String ATTRIBUTE_CREATION_DATE = "creation_date";
-	private final static String ATTRIBUTE_HEADLINE = "headline";
 	private final static String ATTRIBUTE_TEASER = "teaser";
-	private final static String ATTRIBUTE_BODY = "body";
-	private final static String[] ATTRIBUTE_ARRAY = new String[] {ATTRIBUTE_AUTHOR,ATTRIBUTE_CREATION_DATE,ATTRIBUTE_HEADLINE,ATTRIBUTE_TEASER,ATTRIBUTE_BODY};
+	private final static String[] ATTRIBUTE_ARRAY = new String[] {ContentConstants.ATTRIBUTE_HEADLINE, ContentConstants.ATTRIBUTE_CREATION_DATE, ATTRIBUTE_AUTHOR,
+		ATTRIBUTE_TEASER, ContentConstants.ATTRIBUTE_BODY};
 	private final static String facetIdPrefix = "article_";
 	private final static String styleClassPrefix = "article_";
 	private final static String DEFAULT_STYLE_CLASS = styleClassPrefix + "item";
@@ -102,13 +101,13 @@ public class ArticleItemViewer extends ContentItemViewer {
 	
 	@SuppressWarnings("unchecked")
 	protected UIComponent createFieldComponent(String attribute){
-		if(ATTRIBUTE_BODY.equals(attribute)){
+		if(ContentConstants.ATTRIBUTE_BODY.equals(attribute)){
 			return new WFHtml();
 		}
 		else if(ATTRIBUTE_TEASER.equals(attribute)){
 			return new WFHtml();
 		}
-		else if(attribute.equals(ATTRIBUTE_HEADLINE)&&this.getHeadlineAsLink()){
+		else if(attribute.equals(ContentConstants.ATTRIBUTE_HEADLINE)&&this.getHeadlineAsLink()){
 			UIComponent link = getEmptyMoreLink();
 			HtmlOutputText text = new HtmlOutputText();
 			link.getChildren().add(text);
@@ -132,7 +131,7 @@ public class ArticleItemViewer extends ContentItemViewer {
 		initializeToolbar();
 		initializeComments(context);
 		if (isShowCreationDate()) {
-			((HtmlOutputText)getFieldViewerComponent(ATTRIBUTE_CREATION_DATE)).setConverter(new WFTimestampConverter());
+			((HtmlOutputText)getFieldViewerComponent(ContentConstants.ATTRIBUTE_CREATION_DATE)).setConverter(new WFTimestampConverter());
 		}
 		addFeed(context);
 	}
@@ -144,7 +143,7 @@ public class ArticleItemViewer extends ContentItemViewer {
 		if (ATTRIBUTE_AUTHOR.equals(attribute) && !isShowAuthor()) {
 			return false;
 		}
-		if (ATTRIBUTE_CREATION_DATE.equals(attribute) && !isShowCreationDate()) {
+		if (ContentConstants.ATTRIBUTE_CREATION_DATE.equals(attribute) && !isShowCreationDate()) {
 			return false;
 		}
 		return true;
@@ -167,39 +166,39 @@ public class ArticleItemViewer extends ContentItemViewer {
 	 * @return Returns the body.
 	 */
 	public String getBody() {
-		return (String)getValue(ATTRIBUTE_BODY);
+		return (String)getValue(ContentConstants.ATTRIBUTE_BODY);
 	}
 	/**
 	 * @param body The body to set.
 	 */
 	public void setBody(String body) {
-		setFieldLocalValue(ATTRIBUTE_BODY,body);
+		setFieldLocalValue(ContentConstants.ATTRIBUTE_BODY,body);
 	}
 
 	/**
 	 * @return Returns the creationDate.
 	 */
 	public Timestamp getCreationDate() {
-		return (Timestamp)getValue(ATTRIBUTE_CREATION_DATE);
+		return (Timestamp)getValue(ContentConstants.ATTRIBUTE_CREATION_DATE);
 	}
 	/**
 	 * @param creationDate The creationDate to set.
 	 */
 	public void setCreationDate(Timestamp creationDate) {
-		setFieldLocalValue(ATTRIBUTE_CREATION_DATE,creationDate);
+		setFieldLocalValue(ContentConstants.ATTRIBUTE_CREATION_DATE,creationDate);
 	}
 
 	/**
 	 * @return Returns the headline.
 	 */
 	public String getHeadline() {
-		return (String)getValue(ATTRIBUTE_HEADLINE);
+		return (String)getValue(ContentConstants.ATTRIBUTE_HEADLINE);
 	}
 	/**
 	 * @param headline The headline to set.
 	 */
 	public void setHeadline(String headline) {
-		setFieldLocalValue(ATTRIBUTE_HEADLINE,headline);
+		setFieldLocalValue(ContentConstants.ATTRIBUTE_HEADLINE,headline);
 	}
 
 	/**
