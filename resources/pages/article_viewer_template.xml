@@ -16,6 +16,25 @@
 				<property name="showCommentsList" value="false" />
 	    	</module>
 	    </region>
+	    <region id="toolbar" label="toolbar">
+	    	<module id="" class="com.idega.block.navigation.presentation.NavigationList">
+	    		<property>
+	    			<name>:method:1:implied:void:setAddStyleClassOnSelectedItem:boolean:</name>
+	    			<value>N</value>
+	    			<type>java.lang.String</type>
+	    		</property>
+	    		<property>
+					<name>:method:1:implied:void:setShowRoot:boolean:</name>
+					<value>Y</value>
+					<type>java.lang.String</type>
+				</property>
+				<property>
+					<name>:method:1:implied:void:setDisplaySelectedPageAsLink:boolean:</name>
+					<value>Y</value>
+					<type>java.lang.String</type>
+				</property>
+	    	</module>
+	    </region>
 	    <region id="sidebar" label="sidebar">
 	    	<module id="" class="com.idega.content.themes.presentation.ApplicationPropertyViewer">
 	      		<property>
@@ -66,15 +85,6 @@
 	      		<property>
 	        		<name>:method:1:implied:void:setApplicationPropertyKey:java.lang.String:</name>
 	        		<value>title</value>
-	        		<type>java.lang.String</type>
-	      		</property>
-	    	</module>
-	    </region>
-	    <region id="toolbar" label="toolbar">
-	    	<module id="" class="com.idega.content.themes.presentation.ApplicationPropertyViewer">
-	      		<property>
-	        		<name>:method:1:implied:void:setApplicationPropertyKey:java.lang.String:</name>
-	        		<value>toolbar</value>
 	        		<type>java.lang.String</type>
 	      		</property>
 	    	</module>
