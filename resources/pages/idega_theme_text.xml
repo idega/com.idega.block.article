@@ -20,7 +20,7 @@
 			<property name="showCommentsForAllUsers" value="true" />
 		</module>
     </region>
-    <region id="navcontainer" label="navcontainer">
+    <region id="toolbar" label="toolbar">
     	<module id="" class="com.idega.block.navigation.presentation.NavigationList">
     		<property>
     			<name>:method:1:implied:void:setAddStyleClassOnSelectedItem:boolean:</name>
