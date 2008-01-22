@@ -1,5 +1,5 @@
 /*
- * $Id: ArticleLocalizedItemBean.java,v 1.24 2007/10/17 15:09:18 valdas Exp $
+ * $Id: ArticleLocalizedItemBean.java,v 1.25 2008/01/22 16:43:28 valdas Exp $
  *
  * Copyright (C) 2004 Idega. All Rights Reserved.
  *
@@ -52,10 +52,10 @@ import com.idega.xml.XMLParser;
  * This is a JSF managed bean that manages each article xml document 
  * instance per language/locale.
  * <p>
- * Last modified: $Date: 2007/10/17 15:09:18 $ by $Author: valdas $
+ * Last modified: $Date: 2008/01/22 16:43:28 $ by $Author: valdas $
  *
  * @author Anders Lindman,<a href="mailto:tryggvi@idega.com">Tryggvi Larusson</a>
- * @version $Revision: 1.24 $
+ * @version $Revision: 1.25 $
  */
 public class ArticleLocalizedItemBean extends ContentItemBean implements Serializable, ContentItem {
 	
@@ -585,11 +585,11 @@ public class ArticleLocalizedItemBean extends ContentItemBean implements Seriali
 			if(headline != null){
 				setHeadline(headline.getText());
 			} else {
-				setHeadline("");
+				setHeadline(CoreConstants.EMPTY);
 			}
 		}catch(Exception e) {		//Nullpointer could occur if field isn't used
 			e.printStackTrace();
-			setHeadline("");
+			setHeadline(CoreConstants.EMPTY);
 		}
 		try {
 			//Parse out the teaser
@@ -609,22 +609,22 @@ public class ArticleLocalizedItemBean extends ContentItemBean implements Seriali
 	//			e.printStackTrace();
 				Logger log = Logger.getLogger(this.getClass().toString());
 				log.warning("Teaser of article is empty");
-				setTeaser("");
+				setTeaser(CoreConstants.EMPTY);
 			}
 			}catch(Exception e) {		//Nullpointer could occur if field isn't used
 				e.printStackTrace();
-				setTeaser("");
+				setTeaser(CoreConstants.EMPTY);
 			}
 		try {
 			XMLElement author = rootElement.getChild(FIELDNAME_AUTHOR,getIdegaXMLNameSpace());
 			if(author != null){
 				setAuthor(author.getText());
 			} else {
-				setAuthor("");
+				setAuthor(CoreConstants.EMPTY);
 			}
 		}catch(Exception e) {		//Nullpointer could occur if field isn't used
 			e.printStackTrace();
-			setAuthor("");
+			setAuthor(CoreConstants.EMPTY);
 		}
 
 		//Parse out the body
@@ -640,7 +640,7 @@ public class ArticleLocalizedItemBean extends ContentItemBean implements Seriali
 //			e.printStackTrace();
 			Logger log = Logger.getLogger(this.getClass().toString());
 			log.warning("Body of article is empty");
-			setBody("");
+			setBody(CoreConstants.EMPTY);
 		}
 		
 		try {
@@ -648,21 +648,21 @@ public class ArticleLocalizedItemBean extends ContentItemBean implements Seriali
 			if(source != null){
 				setSource(source.getText());
 			} else {
-				setSource("");
+				setSource(CoreConstants.EMPTY);
 			}
 		}catch(Exception e) {		//Nullpointer could occur if field isn't used
-			setSource("");
+			setSource(CoreConstants.EMPTY);
 		}
 		try {
 			XMLElement comment = rootElement.getChild(FIELDNAME_ARTICLE_COMMENT,getIdegaXMLNameSpace());
 			if(comment != null){
 				setComment(comment.getText());
 			} else {
-				setComment("");
+				setComment(CoreConstants.EMPTY);
 			}
 		}catch(Exception e) {		//Nullpointer could occur if field isn't used
 			e.printStackTrace();
-			setComment("");
+			setComment(CoreConstants.EMPTY);
 		}
 		return true;
 //	    setFilename();
