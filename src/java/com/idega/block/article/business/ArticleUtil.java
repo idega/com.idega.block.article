@@ -1,5 +1,5 @@
 /*
- * $Id: ArticleUtil.java,v 1.10 2007/08/02 13:35:11 valdas Exp $
+ * $Id: ArticleUtil.java,v 1.11 2008/01/23 12:12:05 valdas Exp $
  * Created on 7.2.2005
  *
  * Copyright (C) 2005 Idega Software hf. All Rights Reserved.
@@ -9,10 +9,18 @@
  */
 package com.idega.block.article.business;
 
-import javax.faces.context.FacesContext;
 import java.io.File;
 import java.rmi.RemoteException;
+import java.util.ArrayList;
+import java.util.List;
 
+import javax.faces.context.FacesContext;
+import javax.faces.el.ValueBinding;
+
+import org.apache.myfaces.custom.savestate.UISaveState;
+
+import com.idega.block.web2.business.Web2Business;
+import com.idega.business.SpringBeanLookup;
 import com.idega.content.business.ContentUtil;
 import com.idega.core.builder.business.BuilderService;
 import com.idega.core.builder.business.BuilderServiceFactory;
@@ -20,13 +28,14 @@ import com.idega.core.builder.data.ICPage;
 import com.idega.idegaweb.IWBundle;
 import com.idega.presentation.IWContext;
 import com.idega.util.CoreConstants;
+import com.idega.webface.WFUtil;
 
 /**
  * 
- *  Last modified: $Date: 2007/08/02 13:35:11 $ by $Author: valdas $
+ *  Last modified: $Date: 2008/01/23 12:12:05 $ by $Author: valdas $
  * 
  * @author <a href="mailto:gummi@idega.com">Gudmundur Agust Saemundsson</a>
- * @version $Revision: 1.10 $
+ * @version $Revision: 1.11 $
  */
 public class ArticleUtil {
 
@@ -91,5 +100,51 @@ public class ArticleUtil {
 			return true;
 		}
 		return false;
+	}
+	
+	public static List<String> getJavaScriptSourcesForArticleEditor(IWContext iwc, boolean needOnlyHelper) {
+		if (iwc == null) {
+			return null;
+		}
+		
+		List<String> sources = new ArrayList<String>();
+		
+		sources.add(iwc.getIWMainApplication().getBundle(ArticleConstants.IW_BUNDLE_IDENTIFIER).getVirtualPathWithFileNameString("javascript/ArticleEditorHelper.js"));
+		
+		if (!needOnlyHelper) {
+			Web2Business web2 = SpringBeanLookup.getInstance().getSpringBean(iwc.getApplicationContext(), Web2Business.class);
+			try {
+				sources.add(web2.getBundleURIToMootoolsLib());			//	MooTools
+				sources.add(web2.getMoodalboxScriptFilePath(false));	//	MOOdalBox
+			} catch (RemoteException e) {
+				e.printStackTrace();
+			}
+		}
+	
+		return sources;
+	}
+	
+	public static List<String> getStyleSheetsSourcesForArticleEditor(IWContext iwc) {
+		if (iwc == null) {
+			return null;
+		}
+		
+		List<String> styleSheets = new ArrayList<String>();
+		Web2Business web2 = SpringBeanLookup.getInstance().getSpringBean(iwc.getApplicationContext(), Web2Business.class);
+		try {
+			styleSheets.add(web2.getMoodalboxStyleFilePath());		//	MOOdalBox
+		} catch (RemoteException e) {
+			e.printStackTrace();
+		}
+	
+		return styleSheets;
+	}
+	
+	public static UISaveState getBeanSaveState(String beanId) {
+		UISaveState beanSaveState = new UISaveState();
+		ValueBinding binding = WFUtil.createValueBinding(new StringBuilder("#{").append(beanId).append("}").toString());
+		beanSaveState.setId(new StringBuilder(beanId).append("SaveState").toString());
+		beanSaveState.setValueBinding("value", binding);
+		return beanSaveState;
 	}
 }

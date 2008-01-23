@@ -1,5 +1,5 @@
 /*
- * $Id: ArticleItemBean.java,v 1.75 2007/10/05 08:38:55 valdas Exp $
+ * $Id: ArticleItemBean.java,v 1.76 2008/01/23 12:12:06 valdas Exp $
  *
  * Copyright (C) 2004-2005 Idega. All Rights Reserved.
  *
@@ -60,10 +60,10 @@ import com.idega.xml.XMLException;
  * This is a JSF managed bean that manages each article instance and delegates 
  * all calls to the correct localized instance.
  * <p>
- * Last modified: $Date: 2007/10/05 08:38:55 $ by $Author: valdas $
+ * Last modified: $Date: 2008/01/23 12:12:06 $ by $Author: valdas $
  *
  * @author Anders Lindman,<a href="mailto:tryggvi@idega.com">Tryggvi Larusson</a>
- * @version $Revision: 1.75 $
+ * @version $Revision: 1.76 $
  */
 public class ArticleItemBean extends ContentItemBean implements Serializable, ContentItem, ValueChangeListener {
 	
@@ -84,16 +84,16 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 	private boolean availableInRequestedLanguage=false;
 	
 	public ArticleLocalizedItemBean getLocalizedArticle(){
-		if(this.localizedArticle==null){
-			this.localizedArticle=new ArticleLocalizedItemBean();
+		if (this.localizedArticle == null || getLanguageChange() != null) {
+			this.localizedArticle = new ArticleLocalizedItemBean();
 			this.localizedArticle.setLocale(getLocale());
 			this.localizedArticle.setArticleItem(this);
 		}
-		else{
+		else {	
 			String thisLanguage = getLanguage();
 			String fileLanguage = this.localizedArticle.getLanguage();
-			if(!thisLanguage.equals(fileLanguage)){
-				throw new RuntimeException("Locale inconsistency for article: "+getResourcePath()+" and localizedArticle: "+this.localizedArticle.getResourcePath());
+			if (!thisLanguage.equals(fileLanguage)) {
+				throw new RuntimeException("Locale ("+getLocale()+") inconsistency for article: "+getResourcePath()+" and localizedArticle: "+this.localizedArticle.getResourcePath());
 			}
 		}
 		return this.localizedArticle;

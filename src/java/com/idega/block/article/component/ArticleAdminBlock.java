@@ -1,5 +1,5 @@
 /*
- * $Id: ArticleAdminBlock.java,v 1.7 2007/05/30 15:03:03 gediminas Exp $
+ * $Id: ArticleAdminBlock.java,v 1.8 2008/01/23 12:12:06 valdas Exp $
  *
  * Copyright (C) 2004 Idega. All Rights Reserved.
  *
@@ -15,6 +15,7 @@ import javax.faces.event.ActionEvent;
 import javax.faces.event.ActionListener;
 import org.apache.myfaces.custom.savestate.UISaveState;
 import com.idega.block.article.IWBundleStarter;
+import com.idega.block.article.business.ArticleUtil;
 import com.idega.content.bean.ManagedContentBeans;
 import com.idega.webface.WFBlockTabbed;
 import com.idega.webface.WFTabbedPane;
@@ -24,10 +25,10 @@ import com.idega.webface.WFUtil;
  * <p>
  * This is the main block for administering articles (creating,editing)
  * </p>
- * Last modified: $Date: 2007/05/30 15:03:03 $ by $Author: gediminas $
+ * Last modified: $Date: 2008/01/23 12:12:06 $ by $Author: valdas $
  *
  * @author Joakim, Tryggvi Larusson
- * @version $Revision: 1.7 $
+ * @version $Revision: 1.8 $
  */
 public class ArticleAdminBlock extends WFBlockTabbed implements ActionListener, ManagedContentBeans {
 
@@ -78,13 +79,7 @@ public class ArticleAdminBlock extends WFBlockTabbed implements ActionListener, 
 		
 		//Saving the state of the articleItemBean specially because the scpoe
 		//of this bean now is 'request' not 'session'
-		UISaveState beanSaveState = new UISaveState();
-		ValueBinding binding = WFUtil.createValueBinding("#{"+ARTICLE_ITEM_BEAN_ID+"}");
-		beanSaveState.setId("articleItemBeanSaveState");
-		beanSaveState.setValueBinding("value",binding);
-		add(beanSaveState);
-		
-
+		add(ArticleUtil.getBeanSaveState(ARTICLE_ITEM_BEAN_ID));
 	}
 	
 	protected EditArticleView getEditArticleView(){

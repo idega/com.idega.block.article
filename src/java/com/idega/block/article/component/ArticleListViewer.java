@@ -1,5 +1,5 @@
 /*
- * $Id: ArticleListViewer.java,v 1.14 2007/12/14 13:54:04 alexis Exp $
+ * $Id: ArticleListViewer.java,v 1.15 2008/01/23 12:12:06 valdas Exp $
  * Created on 24.1.2005
  *
  * Copyright (C) 2005 Idega Software hf. All Rights Reserved.
@@ -11,18 +11,15 @@ package com.idega.block.article.component;
 
 import java.io.IOException;
 import java.rmi.RemoteException;
+import java.util.List;
 
 import javax.faces.component.UIComponent;
 import javax.faces.context.FacesContext;
 
-import org.apache.myfaces.renderkit.html.util.AddResource;
-import org.apache.myfaces.renderkit.html.util.AddResourceFactory;
-
 import com.idega.block.article.ArticleCacher;
 import com.idega.block.article.bean.ArticleListManagedBean;
 import com.idega.block.article.business.ArticleUtil;
-import com.idega.block.web2.business.Web2Business;
-import com.idega.business.SpringBeanLookup;
+import com.idega.content.business.ContentConstants;
 import com.idega.content.business.ContentUtil;
 import com.idega.content.presentation.ContentItemListViewer;
 import com.idega.content.presentation.ContentItemViewer;
@@ -32,7 +29,10 @@ import com.idega.core.builder.business.BuilderServiceFactory;
 import com.idega.core.cache.UIComponentCacher;
 import com.idega.idegaweb.IWMainApplication;
 import com.idega.presentation.IWContext;
+import com.idega.presentation.Layer;
 import com.idega.presentation.Script;
+import com.idega.util.CoreUtil;
+import com.idega.util.PresentationUtil;
 
 
 /**
@@ -41,10 +41,10 @@ import com.idega.presentation.Script;
  * for the article module.
  * </p>
  * 
- *  Last modified: $Date: 2007/12/14 13:54:04 $ by $Author: alexis $
+ *  Last modified: $Date: 2008/01/23 12:12:06 $ by $Author: valdas $
  * 
  * @author <a href="mailto:tryggvi@idega.com">Tryggvi Larusson</a>
- * @version $Revision: 1.14 $
+ * @version $Revision: 1.15 $
  */
 public class ArticleListViewer extends ContentItemListViewer {
 
@@ -134,7 +134,7 @@ public class ArticleListViewer extends ContentItemListViewer {
 	}
 	
 	@SuppressWarnings("unchecked")
-	private void addCommentsController(IWContext iwc) {
+	private void addCommentsController(IWContext iwc, CommentsViewer comments) {
 		if (!ContentUtil.hasContentEditorRoles(iwc) || !ArticleUtil.isPageTypeBlog(iwc)) {
 			return;
 		}
@@ -146,7 +146,6 @@ public class ArticleListViewer extends ContentItemListViewer {
 			e.printStackTrace();
 			return;
 		}
-		CommentsViewer comments = new CommentsViewer();
 		
 		String moduleId = builder.getInstanceId(this);
 		if (moduleId == null) {
@@ -191,38 +190,57 @@ public class ArticleListViewer extends ContentItemListViewer {
 	}
 	
 	@SuppressWarnings("unchecked")
-	private void addCommentsScript(IWContext iwc) {
+	private void addCommentsScript(IWContext iwc, CommentsViewer comments) {
 		if (ArticleUtil.isPageTypeBlog(iwc)) {
-			AddResource adder = AddResourceFactory.getInstance(iwc);
-			
-			//	DWR
-			adder.addJavaScriptAtPosition(iwc, AddResource.HEADER_BEGIN, CommentsViewer.COMMENTS_ENGINE);
-			adder.addJavaScriptAtPosition(iwc, AddResource.HEADER_BEGIN, CommentsViewer.DWR_ENGINE);
-			
-			//	Helper
-			adder.addJavaScriptAtPosition(iwc, AddResource.HEADER_BEGIN, ArticleUtil.getBundle().getVirtualPathWithFileNameString(CommentsViewer.COMMENTS_HELPER));
-			
-			//	MooTools
-			Web2Business web2 = (Web2Business) SpringBeanLookup.getInstance().getSpringBean(iwc, Web2Business.class);
-			if (web2 != null) {
-				try {
-					adder.addJavaScriptAtPosition(iwc, AddResource.HEADER_BEGIN, web2.getBundleURIToMootoolsLib());
-				} catch (RemoteException e) {
-					e.printStackTrace();
-				}
+			List<String> sources = comments.getJavaScriptSources(iwc);
+			List<String> actions = comments.getJavaScriptActions();
+			if (CoreUtil.isSingleComponentRenderingProcess(iwc)) {
+				Layer script = new Layer();
+				script.add(PresentationUtil.getJavaScriptSourceLines(sources));
+				script.add(PresentationUtil.getJavaScriptActions(actions));
+				getFacets().put(ContentItemViewer.FACET_COMMENTS_SCRIPTS, script);
 			}
-			
-			//	Init script
-			adder.addInlineScriptAtPosition(iwc, AddResource.BODY_END, CommentsViewer.INIT_SCRIPT_LINE);
-			adder.addInlineScriptAtPosition(iwc, AddResource.BODY_END, "window.addEvent('domready', enableReverseAjax);");
+			else {
+				PresentationUtil.addJavaScriptSourcesLinesToHeader(iwc, sources);
+				PresentationUtil.addJavaScriptActionsToBody(iwc, actions);
+			}
 		}
 	}
 	
+	@SuppressWarnings("unchecked")
+	@Override
 	public void encodeBegin(FacesContext context) throws IOException {
 		IWContext iwc = IWContext.getIWContext(context);
-		addCommentsScript(iwc);
-		addCommentsController(iwc);
+		
+		CommentsViewer comments = new CommentsViewer();
+		addCommentsScript(iwc, comments);
+		addCommentsController(iwc, comments);
+		
+		if (ContentUtil.hasContentEditorRoles(iwc)) {
+			iwc.setSessionAttribute(ContentConstants.RENDERING_COMPONENT_OF_ARTICLE_LIST, Boolean.TRUE);
+
+			if (CoreUtil.isSingleComponentRenderingProcess(iwc)) {
+				Layer script = new Layer();
+				script.add(PresentationUtil.getJavaScriptSourceLines(ArticleUtil.getJavaScriptSourcesForArticleEditor(iwc, true)));
+				getFacets().put(ContentItemViewer.FACET_JAVA_SCRIPT, script);
+			}
+			else {
+				PresentationUtil.addJavaScriptSourcesLinesToHeader(iwc, ArticleUtil.getJavaScriptSourcesForArticleEditor(iwc, false));
+				PresentationUtil.addStyleSheetsToHeader(iwc, ArticleUtil.getStyleSheetsSourcesForArticleEditor(iwc));
+			}
+		}
+		
 		super.encodeBegin(context);
+	}
+	
+	@Override
+	public void encodeEnd(FacesContext context) throws IOException {
+		super.encodeEnd(context);
+		
+		IWContext iwc = IWContext.getIWContext(context);
+		if (ContentUtil.hasContentEditorRoles(iwc)) {
+			iwc.removeSessionAttribute(ContentConstants.RENDERING_COMPONENT_OF_ARTICLE_LIST);
+		}
 	}
 		
 	public void encodeChildren(FacesContext context) throws IOException {

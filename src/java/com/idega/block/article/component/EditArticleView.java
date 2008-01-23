@@ -1,5 +1,5 @@
 /*
- * $Id: EditArticleView.java,v 1.31 2007/09/25 12:04:30 valdas Exp $
+ * $Id: EditArticleView.java,v 1.32 2008/01/23 12:12:06 valdas Exp $
  *
  * Copyright (C) 2004 Idega. All Rights Reserved.
  *
@@ -13,11 +13,12 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
+
 import javax.faces.component.UIComponent;
 import javax.faces.component.UISelectItems;
 import javax.faces.component.html.HtmlCommandButton;
+import javax.faces.component.html.HtmlForm;
 import javax.faces.component.html.HtmlInputText;
-import javax.faces.component.html.HtmlInputTextarea;
 import javax.faces.component.html.HtmlOutputLabel;
 import javax.faces.component.html.HtmlOutputText;
 import javax.faces.component.html.HtmlSelectOneMenu;
@@ -29,23 +30,33 @@ import javax.faces.event.ActionListener;
 import javax.faces.event.ValueChangeEvent;
 import javax.faces.event.ValueChangeListener;
 import javax.faces.model.SelectItem;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
 import com.idega.block.article.IWBundleStarter;
 import com.idega.block.article.bean.ArticleItemBean;
 import com.idega.block.article.bean.ArticleStoreException;
 import com.idega.block.article.business.ArticleConstants;
+import com.idega.block.article.business.ArticleUtil;
 import com.idega.content.bean.ManagedContentBeans;
+import com.idega.content.business.ContentConstants;
 import com.idega.content.data.ContentItemCase;
 import com.idega.content.presentation.ContentItemToolbar;
 import com.idega.content.presentation.ContentViewer;
 import com.idega.content.presentation.WebDAVCategories;
 import com.idega.core.localisation.business.ICLocaleBusiness;
+import com.idega.idegaweb.IWResourceBundle;
 import com.idega.presentation.IWBaseComponent;
 import com.idega.presentation.IWContext;
+import com.idega.presentation.Script;
 import com.idega.presentation.text.Paragraph;
 import com.idega.presentation.ui.FieldSet;
+import com.idega.presentation.ui.HiddenInput;
 import com.idega.user.data.User;
+import com.idega.util.CoreConstants;
+import com.idega.util.CoreUtil;
+import com.idega.util.LocaleUtil;
 import com.idega.webface.WFComponentSelector;
 import com.idega.webface.WFContainer;
 import com.idega.webface.WFDateInput;
@@ -60,10 +71,10 @@ import com.idega.webface.htmlarea.HTMLArea;
  * <p>
  * This is the part for the editor of article is inside the admin interface
  * </p>
- * Last modified: $Date: 2007/09/25 12:04:30 $ by $Author: valdas $
+ * Last modified: $Date: 2008/01/23 12:12:06 $ by $Author: valdas $
  *
  * @author Joakim,Tryggvi Larusson
- * @version $Revision: 1.31 $
+ * @version $Revision: 1.32 $
  */
 public class EditArticleView extends IWBaseComponent implements ManagedContentBeans, ActionListener, ValueChangeListener {
 	private static final Log log = LogFactory.getLog(EditArticleView.class);
@@ -74,25 +85,14 @@ public class EditArticleView extends IWBaseComponent implements ManagedContentBe
 	public final static String EDIT_ARTICLES_BEAN_ID = "editArticlesBean";
 	public final static String ref = ARTICLE_ITEM_BEAN_ID + ".";
 	
-//	public final static String ARTICLE_BLOCK_ID = "article_block";
-	
-	//public final static String TASK_ID_EDIT = P + "t_edit";
-	//public final static String TASK_ID_PREVIEW = P + "t_preview";
-	//public final static String TASK_ID_LIST = P + "t_list";
-	//public final static String TASK_ID_DETAILS = P + "t_details";
-	//public final static String TASK_ID_MESSAGES = P + "t_messages";
-	
 	private final static String HEADLINE_ID = P + "headline";
 	private final static String LOCALE_ID = P + "locale";
 	private final static String TEASER_ID = P + "teaser";
 	public final static String BODY_ID = P + "body";
-	//private final static String FOLDER_ID = P + "folder_location";
 	private final static String AUTHOR_ID = P + "author";
-	private final static String SOURCE_ID = P + "source";
-	private final static String COMMENT_ID = P + "comment";
+//	private final static String SOURCE_ID = P + "source";
+//	private final static String COMMENT_ID = P + "comment";
 	private final static String PUBLISHED_DATE_ID = P + "published_date";
-//	private final static String PUBLISHED_FROM_DATE_ID = P + "published_from_date";
-//	private final static String PUBLISHED_TO_DATE_ID = P + "published_to_date";
 	
 	private final static String USER_MESSAGE_ID = P + "user_message";
 	
@@ -111,37 +111,62 @@ public class EditArticleView extends IWBaseComponent implements ManagedContentBe
 	private final static String CATEGORY_EDITOR_ID = P + "category_editor";
 	private final static String RELATED_CONTENT_ITEMS_EDITOR_ID = P + "related_items_editor";
 
-	private static final String EDIT_MODE_CREATE = "create";
-	private static final String EDIT_MODE_EDIT = "edit";
-	private static final String EDIT_MODE_DELETE = "delete";
-
-	boolean clearOnInit = false;
 	private String editMode;
+	private String resourcePath = null;
+	private String baseFolderPath = null;
+	private String editArticleCategoriesSelectionBlockId = "editArticleCategoriesSelectionBlockId";
+	
+	boolean clearOnInit = false;
+	private boolean fromArticleItemListViewer = false;
+	private boolean needsForm = false;
 
-	public EditArticleView() {
-		//No action...
-	}
+	public EditArticleView() {}
 
+	@SuppressWarnings("unchecked")
 	protected void initializeComponent(FacesContext context) {
-		setId(EDIT_ARTICLE_BLOCK_ID);
-		/*if(clearOnInit){
-			ArticleItemBean bean = getArticleItemBean();
-			if(bean!=null){
-				bean.clear();
+		IWContext iwc = IWContext.getIWContext(context);
+
+		UIComponent managementComponent = null;
+		if (isInCreateMode() || isInEditMode()) {
+			managementComponent = getEditContainer(iwc);
+		}
+		else if (isInDeleteMode()) {
+			managementComponent = getDeleteContainer();
+		}
+		this.setId(EDIT_ARTICLE_BLOCK_ID);
+		
+		if (needsForm) {
+			//	Form
+			HtmlForm f = new HtmlForm();
+			f.getChildren().add(managementComponent);
+			add(f);
+			
+			f.getChildren().add(new HiddenInput(ContentViewer.PARAMETER_CONTENT_RESOURCE, resourcePath));
+			f.getChildren().add(new HiddenInput(ContentViewer.PARAMETER_ACTION, editMode));
+			f.getChildren().add(new HiddenInput(ContentViewer.CONTENT_VIEWER_EDITOR_NEEDS_FORM, Boolean.TRUE.toString()));
+			if (baseFolderPath != null) {
+				f.getChildren().add(new HiddenInput(ContentItemToolbar.PARAMETER_BASE_FOLDER_PATH, baseFolderPath));
 			}
-		}*/
-//		WFUtil.invoke(EDIT_ARTICLES_BEAN_ID, "setArticleLinkListener", this, ActionListener.class);
-		if(isInCreateMode()||isInEditMode()){
-			add(getEditContainer());
+			
+			//	JavaScript
+			Script script = new Script();
+			script.addScriptLine("function addActionAfterArticleIsSavedAndEditorClosed() {window.parent.addActionAfterArticleIsSavedAndEditorClosed();}");
+			f.getChildren().add(script);
+			
+			//	Save state for bean
+			f.getChildren().add(ArticleUtil.getBeanSaveState(ARTICLE_ITEM_BEAN_ID));
 		}
-		else if (isInDeleteMode()){
-			add(getDeleteContainer());
+		else {
+			add(managementComponent);
 		}
+		
+		//	JavaScript
+		Script closeLoadingMessages = new Script();
+		closeLoadingMessages.addScriptLine("try {window.parent.closeAllLoadingMessages();} catch(e) {}");
+		managementComponent.getChildren().add(closeLoadingMessages);
 	}
 	
 	public ArticleAdminBlock getArticleAdminBlock(){
-		//return (ArticleAdminBlock) FacesContext.getCurrentInstance().getViewRoot().findComponent(ArticleAdminBlock.ARTICLE_BLOCK_ID);
-		//return (ArticleAdminBlock)findComponent(ArticleAdminBlock.ARTICLE_BLOCK_ID);
 		WFTabbedPane tabPane = (WFTabbedPane) getParent();
 		return (ArticleAdminBlock) tabPane.getParent();
 	}
@@ -149,6 +174,7 @@ public class EditArticleView extends IWBaseComponent implements ManagedContentBe
 	/*
 	 * Creates an edit container for the article.
 	 */
+	@SuppressWarnings("unchecked")
 	public UIComponent getDeleteContainer() {
 		
 		getArticleAdminBlock().setMaximizedVertically(false);
@@ -180,52 +206,44 @@ public class EditArticleView extends IWBaseComponent implements ManagedContentBe
 
 	}
 	
-	
 	protected WFContainer getMainContainer(){
-		
-
 		WFContainer mainContainer = new WFContainer();
 		mainContainer.setId(ARTICLE_EDITOR_ID);
 		
 		WFMessages em = new WFMessages();
 		em.addMessageToDisplay(HEADLINE_ID);
-		em.addMessageToDisplay(TEASER_ID);
-//		em.addMessageToDisplay(PUBLISHED_FROM_DATE_ID);
-//		em.addErrorMessage(PUBLISHED_TO_DATE_ID);
+		if (fromArticleItemListViewer) {
+			em.addMessageToDisplay(TEASER_ID);
+		}
 		em.addMessageToDisplay(SAVE_ID);
 		em.addMessageToDisplay(DELETE_ID);
 		
 		mainContainer.add(em);
 		
 		return mainContainer;
-		
 	}
 	
 	/*
 	 * Creates an edit container for the article.
 	 */
-	public UIComponent getEditContainer() {
-		
-		FacesContext context = FacesContext.getCurrentInstance();
-		IWContext iwc = IWContext.getIWContext(context);
+	@SuppressWarnings("unchecked")
+	public UIComponent getEditContainer(IWContext iwc) {
 		WFResourceUtil localizer = WFResourceUtil.getResourceUtilArticle();
-
 		WFContainer mainContainer = getMainContainer();
 		
-		//Language dropdown
-		UIComponent langDropdown = getLanguageDropdownMenu();
+		//	Languages menu
+		UIComponent langDropdown = getLanguageDropdownMenu(iwc);
 		UIComponent languageText = WFUtil.group(localizer.getTextVB("language"), WFUtil.getText(":"));
 		HtmlOutputLabel languageLabel = new HtmlOutputLabel();
 		languageLabel.getChildren().add(languageText);
-		languageLabel.setFor(langDropdown.getClientId(context));
-		
+		languageLabel.setFor(langDropdown.getClientId(iwc));
 		
 		WFFormItem languageItem = new WFFormItem();
 		languageItem.add(languageLabel);
 		languageItem.add(langDropdown);
 		mainContainer.add(languageItem);
 		
-		//Headline input
+		//	Headline input
 		HtmlInputText headlineInput = WFUtil.getInputText(HEADLINE_ID, ref + "headline");
 		headlineInput.setSize(70);
 		headlineInput.setImmediate(true);
@@ -233,98 +251,75 @@ public class EditArticleView extends IWBaseComponent implements ManagedContentBe
 		UIComponent headlineText = WFUtil.group(localizer.getTextVB("headline"), WFUtil.getText(":"));
 		HtmlOutputLabel headlineLabel = new HtmlOutputLabel();
 		headlineLabel.getChildren().add(headlineText);
-		headlineLabel.setFor(headlineInput.getClientId(context));
+		headlineLabel.setFor(headlineInput.getClientId(iwc));
 		
 		WFFormItem headlineItem = new WFFormItem();
 		headlineItem.add(headlineLabel);
 		headlineItem.add(headlineInput);
 		mainContainer.add(headlineItem);
-
-		//HtmlSelectOneMenu localeMenu = WFUtil.getSelectOneMenu(LOCALE_ID, ref + "allLocales", ref + "pendingLocaleId");
-		//localeMenu.setOnchange("document.forms[0].submit();");
-		//p.getChildren().add(localeMenu);
 		
-		//Author input
-		HtmlInputText authorInput = WFUtil.getInputText(AUTHOR_ID, ref + "author");
-		authorInput.setImmediate(true);
-		authorInput.addValueChangeListener(this);
-		User user = iwc.getCurrentUser();
-		if(user!=null){
-			String userName = user.getName();
-			getArticleItemBean().setAuthor(userName);
+		if (fromArticleItemListViewer) {
+			//	Author input
+			HtmlInputText authorInput = WFUtil.getInputText(AUTHOR_ID, ref + "author");
+			authorInput.setImmediate(true);
+			authorInput.addValueChangeListener(this);
+			User user = iwc.getCurrentUser();
+			if(user!=null){
+				String userName = user.getName();
+				getArticleItemBean().setAuthor(userName);
+			}
+			UIComponent authorText = WFUtil.group(localizer.getTextVB("author"), WFUtil.getText(":"));
+			HtmlOutputLabel authorLabel = new HtmlOutputLabel();
+			authorLabel.getChildren().add(authorText);
+			authorLabel.setFor(authorInput.getClientId(iwc));
+			
+			WFFormItem authorItem = new WFFormItem();
+			authorItem.add(authorLabel);
+			authorItem.add(authorInput);
+			mainContainer.add(authorItem);
 		}
-		UIComponent authorText = WFUtil.group(localizer.getTextVB("author"), WFUtil.getText(":"));
-		HtmlOutputLabel authorLabel = new HtmlOutputLabel();
-		authorLabel.getChildren().add(authorText);
-		authorLabel.setFor(authorInput.getClientId(context));
-		
-		WFFormItem authorItem = new WFFormItem();
-		authorItem.add(authorLabel);
-		authorItem.add(authorInput);
-		mainContainer.add(authorItem);
-		
 
-		//Article body
-		HTMLArea bodyArea = WFUtil.getHtmlAreaTextArea(BODY_ID, ref + "body", "640px", "480px");
+		//	Article body
+		HTMLArea bodyArea = WFUtil.getHtmlAreaTextArea(BODY_ID, ref + "body", "640px", "480px", needsForm);
 		bodyArea.addValueChangeListener(this);
 		bodyArea.setImmediate(true);
-		//HTMLArea bodyArea = WFUtil.getHtmlAreaTextArea(BODY_ID, ref + "body");
 		
 		bodyArea.setAllowFontSelection(false);
 		bodyArea.addPlugin(HTMLArea.PLUGIN_TABLE_OPERATIONS,"3");
 		bodyArea.addPlugin(HTMLArea.PLUGIN_CONTEXT_MENU);
 		bodyArea.addPlugin(HTMLArea.PLUGIN_FULL_SCREEN);
 		bodyArea.addPlugin(HTMLArea.PLUGIN_STYLIST);
-//		bodyArea.addPlugin(HTMLArea.PLUGIN_CSS, "3");
-		
-//		bodyArea.addPlugin(HTMLArea.PLUGIN_LIST_TYPE);
-//		bodyArea.addPlugin(HTMLArea.PLUGIN_CHARACTER_MAP);
-//		bodyArea.addPlugin("TableOperations");
-//		bodyArea.addPlugin("Template");
-//		bodyArea.addPlugin("Forms");
-//		bodyArea.addPlugin("FormOperations");
-//		bodyArea.addPlugin("EditTag");
-//		bodyArea.addPlugin("Stylist");
-//		bodyArea.addPlugin("CSS");
-//		bodyArea.addPlugin("DynamicCSS");
-//		bodyArea.addPlugin("FullPage");
-//		bodyArea.addPlugin("NoteServer");
-//		bodyArea.addPlugin("QuickTag");
-//		bodyArea.addPlugin("InsertSmiley");
-//		bodyArea.addPlugin("InsertWords");
-//		bodyArea.addPlugin("ContextMenu");
-//		bodyArea.addPlugin("LangMarks");
 		bodyArea.addPlugin("DoubleClick");
-//		bodyArea.addPlugin("ListType");
-//		bodyArea.addPlugin("ImageManager");
 		
 		UIComponent bodyText = WFUtil.group(localizer.getTextVB("body"), WFUtil.getText(":"));
 		HtmlOutputLabel bodyLabel = new HtmlOutputLabel();
 		bodyLabel.getChildren().add(bodyText);
-		bodyLabel.setFor(bodyArea.getClientId(context));
+		bodyLabel.setFor(bodyArea.getClientId(iwc));
 		
 		WFFormItem bodyItem = new WFFormItem();
 		bodyItem.add(bodyLabel);
 		bodyItem.add(bodyArea);
 		mainContainer.add(bodyItem);
 		
-		//Teaser input
-		HTMLArea teaserArea = WFUtil.getHtmlAreaTextArea(TEASER_ID, ref + "teaser", "640px", "150px");
-		teaserArea.addValueChangeListener(this);
-		teaserArea.setImmediate(true);
-		teaserArea.setAllowFontSelection(false);
-		UIComponent teaserText = WFUtil.group(localizer.getTextVB("teaser"), WFUtil.getText(":"));
-		HtmlOutputLabel teaserLabel = new HtmlOutputLabel();
-		teaserLabel.getChildren().add(teaserText);
-		teaserLabel.setFor(teaserArea.getClientId(context));
-		
-		WFFormItem teaserItem = new WFFormItem();
-		teaserItem.add(teaserLabel);
-		teaserItem.add(teaserArea);
-		mainContainer.add(teaserItem);
+		if (fromArticleItemListViewer) {
+			//	Teaser input
+			HTMLArea teaserArea = WFUtil.getHtmlAreaTextArea(TEASER_ID, ref + "teaser", "640px", "150px");
+			teaserArea.addValueChangeListener(this);
+			teaserArea.setImmediate(true);
+			teaserArea.setAllowFontSelection(false);
+			UIComponent teaserText = WFUtil.group(localizer.getTextVB("teaser"), WFUtil.getText(":"));
+			HtmlOutputLabel teaserLabel = new HtmlOutputLabel();
+			teaserLabel.getChildren().add(teaserText);
+			teaserLabel.setFor(teaserArea.getClientId(iwc));
+			
+			WFFormItem teaserItem = new WFFormItem();
+			teaserItem.add(teaserLabel);
+			teaserItem.add(teaserArea);
+			mainContainer.add(teaserItem);
+		}
 		
 		//Source input
-		HtmlInputText sourceInput = WFUtil.getInputText(SOURCE_ID, ref + "source");
+		/*HtmlInputText sourceInput = WFUtil.getInputText(SOURCE_ID, ref + "source");
 		UIComponent sourceText = WFUtil.group(localizer.getTextVB("source"), WFUtil.getText(":"));
 		HtmlOutputLabel sourceLabel = new HtmlOutputLabel();
 		sourceLabel.getChildren().add(sourceText);
@@ -333,11 +328,11 @@ public class EditArticleView extends IWBaseComponent implements ManagedContentBe
 		WFFormItem sourceItem = new WFFormItem();
 		sourceItem.add(sourceLabel);
 		sourceItem.add(sourceInput);
-		mainContainer.add(sourceItem);
+		mainContainer.add(sourceItem);*/
 		
 
 		//Status field
-		HtmlOutputText statusValue = WFUtil.getTextVB(ref + "status");
+		/*HtmlOutputText statusValue = WFUtil.getTextVB(ref + "status");
 		WFContainer statusContainer = new WFContainer();
 		statusContainer.add(statusValue);
 		UIComponent statusText = WFUtil.group(localizer.getTextVB("status"), WFUtil.getText(":"));
@@ -348,10 +343,10 @@ public class EditArticleView extends IWBaseComponent implements ManagedContentBe
 		WFFormItem statusItem = new WFFormItem();
 		statusItem.add(statusLabel);
 		statusItem.add(statusContainer);
-		mainContainer.add(statusItem);
+		mainContainer.add(statusItem);*/
 		
 		//Version field
-		HtmlOutputText versionValue = WFUtil.getTextVB(ref + "versionName");
+		/*HtmlOutputText versionValue = WFUtil.getTextVB(ref + "versionName");
 		WFContainer versionContainer = new WFContainer();
 		versionContainer.add(versionValue);
 		UIComponent versionText = WFUtil.group(localizer.getTextVB("current_version"), WFUtil.getText(":"));
@@ -362,10 +357,10 @@ public class EditArticleView extends IWBaseComponent implements ManagedContentBe
 		WFFormItem versionItem = new WFFormItem();
 		versionItem.add(versionLabel);
 		versionItem.add(versionContainer);
-		mainContainer.add(versionItem);
+		mainContainer.add(versionItem);*/
 		
 		//Comment input
-		HtmlInputTextarea commentArea = WFUtil.getTextArea(COMMENT_ID, ref + "comment", "500px", "60px");
+		/*HtmlInputTextarea commentArea = WFUtil.getTextArea(COMMENT_ID, ref + "comment", "500px", "60px");
 		UIComponent commentText = WFUtil.group(localizer.getTextVB("comment"), WFUtil.getText(":"));
 		HtmlOutputLabel commentLabel = new HtmlOutputLabel();
 		commentLabel.getChildren().add(commentText);
@@ -374,102 +369,49 @@ public class EditArticleView extends IWBaseComponent implements ManagedContentBe
 		WFFormItem commentItem = new WFFormItem();
 		commentItem.add(commentLabel);
 		commentItem.add(commentArea);
-		mainContainer.add(commentItem);
+		mainContainer.add(commentItem);*/
 		
-
-//		WFContainer attachmentContainer = new WFContainer();
-//		attachmentContainer.add(WFUtil.getButtonVB(ADD_ATTACHMENT_ID, bref + "add_attachment", this));
-//		attachmentContainer.add(WFUtil.getBreak());
-//		attachmentContainer.add(getAttachmentList());
-//		p.getChildren().add(attachmentContainer);		
-//		mainContainer.add(p);
-//		p = WFPanelUtil.getFormPanel(1);
-//		p.getChildren().add(WFUtil.group(WFUtil.getTextVB(bref + "related_content_items"), WFUtil.getText(":")));		
-//		WFContainer contentItemContainer = new WFContainer();		
-//		contentItemContainer.add(WFUtil.getButtonVB(ADD_RELATED_CONTENT_ITEM_ID, bref + "add_content_item", this));
-//		contentItemContainer.add(WFUtil.getBreak());
-//		contentItemContainer.add(getRelatedContentItemsList());
-//		p.getChildren().add(contentItemContainer);
+		if (fromArticleItemListViewer) {
+			//	Published date
+			WFDateInput publishedInput = WFUtil.getDateInput(PUBLISHED_DATE_ID, ref + "publishedDate");
+			publishedInput.setShowTime(true);
+			UIComponent publishedText = WFUtil.group(localizer.getTextVB("publishing_date"), WFUtil.getText(":"));
+			HtmlOutputLabel publishedLabel = new HtmlOutputLabel();
+			publishedLabel.getChildren().add(publishedText);
+	
+			WFFormItem publisheDateItem = new WFFormItem();
+			publisheDateItem.add(publishedLabel);
+			publisheDateItem.add(publishedInput);
+			mainContainer.add(publisheDateItem);
+		}
 		
-		// Published date
-		WFDateInput publishedInput = WFUtil.getDateInput(PUBLISHED_DATE_ID, ref + "publishedDate");
-		publishedInput.setShowTime(true);
-		UIComponent publishedText = WFUtil.group(localizer.getTextVB("publishing_date"), WFUtil.getText(":"));
-		HtmlOutputLabel publishedLabel = new HtmlOutputLabel();
-		publishedLabel.getChildren().add(publishedText);
-		//publishedLabel.setFor(publishedInput.getClientId(context)); Don't set that!!!
-
-		WFFormItem publisheDateItem = new WFFormItem();
-		publisheDateItem.add(publishedLabel);
-		publisheDateItem.add(publishedInput);
-		mainContainer.add(publisheDateItem);
-		
-//		WFDateInput publishedFromInput = WFUtil.getDateInput(PUBLISHED_FROM_DATE_ID, ref + "case.publishedFromDate");
-//		publishedFromInput.setShowTime(true);
-//		mainContainer.add(publishedFromInput);
-		//p.getChildren().add(publishedFromInput);
-//		p.getChildren().add(WFUtil.group(WFUtil.getTextVB(bref + "expiration_date"), WFUtil.getText(":")));		
-//		WFDateInput publishedToInput = WFUtil.getDateInput(PUBLISHED_TO_DATE_ID, ref + "case.publishedToDate");
-//		publishedToInput.setShowTime(true);
-//		p.getChildren().add(publishedToInput);
-//		mainContainer.add(p);
-//		mainContainer.add(WFUtil.getBreak());
-//		p = WFPanelUtil.getPlainFormPanel(1);
-//		HtmlCommandButton editCategoriesButton = WFUtil.getButtonVB(EDIT_CATEGORIES_ID, bref + "edit_categories", this);
-//		p.getChildren().add(editCategoriesButton);
-//		Temporary taking away folderr location
-//		p.getChildren().add(WFUtil.group(localizer.getTextVB("folder"), WFUtil.getText(":")));
-//		HtmlInputText folderInput = WFUtil.getInputText(FOLDER_ID, ref + "folderLocation");
-//		if(null==folderInput.getValue() || "".equals(folderInput.getValue())) {
-//			String FolderString = ArticleUtil.getArticleYearMonthPath();
-//		System.out.println("Folder "+FolderString);
-//			folderInput.setValue(FolderString);
-//		} else {
-//			File file = new File(folderInput.getValue().toString());
-//			folderInput.setValue(file.getParentFile().getParent());
-//		}
-//		folderInput.setSize(70);
-//		p.getChildren().add(folderInput);		
-//		p.getChildren().add(WFUtil.getBreak());
-//		Categories
-//		WebDAVCategories categoriesUI = new WebDAVCategories();
-//		ArticleItemBean articleItemBean = (ArticleItemBean) getArticleItemBean();
-//		String resourcePath = articleItemBean.getArticleResourcePath();
-		
-		
-		//Categories input
-		UIComponent categoriesContainer = getCategoryEditor(iwc);	//	TODO: categories
+		//	Categories input
+		WebDAVCategories categoriesContainer = getCategoryEditor(iwc);
 		UIComponent categoriesText = WFUtil.group(localizer.getTextVB("categories"), WFUtil.getText(":"));
 		HtmlOutputLabel categoriesLabel = new HtmlOutputLabel();
 		categoriesLabel.getChildren().add(categoriesText);
-		categoriesLabel.setFor(categoriesContainer.getClientId(context));
+		categoriesLabel.setFor(categoriesContainer.getClientId(iwc));
 		
 		WFFormItem categoriesItem = new WFFormItem();
+		categoriesItem.setId(editArticleCategoriesSelectionBlockId);
 		categoriesItem.add(categoriesLabel);
 		categoriesItem.add(categoriesContainer);
+		if (!categoriesContainer.isNeedDisplayCategoriesSelection(iwc)) {
+			categoriesItem.setStyleAttribute("display", "none");
+		}
 		mainContainer.add(categoriesItem);
-		
-		
-//		WFComponentSelector cs = new WFComponentSelector();
-//		cs.setId(BUTTON_SELECTOR_ID);
-//		cs.setDividerText(" ");
-//		HtmlCommandButton saveButton = WFUtil.getButtonVB(SAVE_ID, WFPage.CONTENT_BUNDLE + "save", this);
-//		cs.add(saveButton);
-//		cs.add(WFUtil.getButtonVB(FOR_REVIEW_ID, bref + "for_review", this));
-//		cs.add(WFUtil.getButtonVB(PUBLISH_ID, bref + "publish", this));
-//		cs.add(WFUtil.getButtonVB(REWRITE_ID, bref + "rewrite", this));
-//		cs.add(WFUtil.getButtonVB(REJECT_ID, bref + "reject", this));
-//		cs.add(WFUtil.getButtonVB(DELETE_ID, bref + "delete", this));
-//		cs.add(WFUtil.getButtonVB(CANCEL_ID, bref + "cancel", this));
-//		cs.setSelectedId(CANCEL_ID, true);
-//		p.getChildren().add(cs);
 
+		//	Button
 		FieldSet buttons = new FieldSet();
 		buttons.setStyleClass("buttons");
-		
 		HtmlCommandButton saveButton = localizer.getButtonVB(SAVE_ID, "save", this);
 		buttons.getChildren().add(saveButton);
-		
+		if (needsForm) {
+			IWResourceBundle iwrb = iwc.getIWMainApplication().getBundle(ArticleConstants.IW_BUNDLE_IDENTIFIER).getResourceBundle(iwc);
+			StringBuffer action = new StringBuffer("window.parent.showLoadingMessage('").append(iwrb.getLocalizedString("saving", "Saving...")).append("');");
+			action.append(" addActionAfterArticleIsSavedAndEditorClosed();");
+			saveButton.setOnclick(action.toString());
+		}
 		mainContainer.getChildren().add(buttons);
 		
 		return mainContainer;
@@ -477,18 +419,17 @@ public class EditArticleView extends IWBaseComponent implements ManagedContentBe
 
 	/**
 	 * <p>
-	 * TODO tryggvil describe method getLanguageDropdownMenu
 	 * </p>
 	 * @return
 	 */
-	private UIComponent getLanguageDropdownMenu() {
-		
-		
-		Iterator iter = ICLocaleBusiness.getListOfLocalesJAVA().iterator();
+	@SuppressWarnings("unchecked")
+	private UIComponent getLanguageDropdownMenu(IWContext iwc) {
+		Iterator<Locale> iter = ICLocaleBusiness.getListOfLocalesJAVA().iterator();
 		HtmlSelectOneMenu langDropdown = new HtmlSelectOneMenu();
+		langDropdown.setId(LOCALE_ID);
 		List<SelectItem> arrayList = new ArrayList<SelectItem>();
 		while(iter.hasNext()) {
-			Locale locale = (Locale)iter.next();
+			Locale locale = iter.next();
 			String keyStr = locale.getLanguage();
 			String langStr = locale.getDisplayLanguage();
 			SelectItem itemTemp = new SelectItem(keyStr, langStr, keyStr, false);
@@ -496,7 +437,6 @@ public class EditArticleView extends IWBaseComponent implements ManagedContentBe
 		}
 		
 		UISelectItems items = new UISelectItems();
-		items.setId(LOCALE_ID);
 		items.setValue(arrayList);
 		langDropdown.getChildren().add(items);
 		ValueBinding vb = WFUtil.createValueBinding("#{" + ref +"language" + "}");
@@ -504,7 +444,13 @@ public class EditArticleView extends IWBaseComponent implements ManagedContentBe
 		langDropdown.getValue();
 		langDropdown.addValueChangeListener(this);
 		langDropdown.setImmediate(true);
-		langDropdown.setOnchange("submit();");
+		StringBuffer action = new StringBuffer();;
+		if (needsForm) {
+			IWResourceBundle iwrb = iwc.getIWMainApplication().getBundle(ArticleConstants.IW_BUNDLE_IDENTIFIER).getResourceBundle(iwc);
+			action.append("window.parent.showLoadingMessage('").append(iwrb.getLocalizedString("loading", "Loading...")).append("'); ");
+		}
+		action.append("submit();");
+		langDropdown.setOnchange(action.toString());
 		
 		return langDropdown;
 	}
@@ -512,82 +458,97 @@ public class EditArticleView extends IWBaseComponent implements ManagedContentBe
 	/*
 	 * Returns container with form for editing categories.
 	 */
-	private UIComponent getCategoryEditor(IWContext iwc) {
-		WebDAVCategories categoriesUI = (WebDAVCategories)findComponent(CATEGORY_EDITOR_ID);//WebDAVCategories.CATEGORIES_BLOCK_ID);
-		if(categoriesUI==null){
-			//id on the component is set implicitly
-			categoriesUI=new WebDAVCategories();
+	private WebDAVCategories getCategoryEditor(IWContext iwc) {
+		WebDAVCategories categoriesUI = null;
+		Object o = findEditArticleComponent(this.getChildren(), WebDAVCategories.class, CATEGORY_EDITOR_ID, true);
+		if (o instanceof WebDAVCategories) {
+			categoriesUI = (WebDAVCategories) o;
+		}
+		if (categoriesUI == null) {
+			Locale l = getArticleItemBean().getLocale();
+			if (l == null) {
+				l = iwc.getCurrentLocale();
+			}
+			categoriesUI = new WebDAVCategories(resourcePath, l.toString());
+			categoriesUI.setAddCategoryCreator(false);
+			//	Id on the component is set implicitly
 			categoriesUI.setId(CATEGORY_EDITOR_ID);
-			//we want to set the categories also on the parent ".article" folder:
+			//	We want to set the categories also on the parent ".article" folder:
 			categoriesUI.setCategoriesOnParent(true);
 			categoriesUI.setDisplaySaveButton(false);
 			categoriesUI.setDisplayHeader(false);
-			//categoriesUI.setId(CATEGORY_EDITOR_ID);
 			
 			String setCategories = (String) iwc.getExternalContext().getRequestParameterMap().get(ContentItemToolbar.PARAMETER_CATEGORIES);
-			if(setCategories!=null){
+			if (setCategories != null) {
 				categoriesUI.setCategories(setCategories);
 			}
-			//Categories are set in encodeBegin:
-			//if(!isInCreateMode()){
-				//there is no resourcepath set for the article if it's about to be created
-			//	categoriesUI.setResourcePath(resourcePath);
-			//}
-			//parent.getChildren().add(categoriesUI);
 		}
+		else {
+			categoriesUI.setLocaleIdentity(getArticleItemBean().getLocale().toString());
+			categoriesUI.getSelectedAndNotSelectedCategories(iwc);
+			categoriesUI.setAddCategoryCreator(false);
+			categoriesUI.setCategoriesOnParent(true);
+			categoriesUI.setDisplaySaveButton(false);
+			categoriesUI.setDisplayHeader(false);
+		}
+		
 		return categoriesUI;
 	}
 	
+	private UIComponent findEditArticleComponent(UIComponent comp, Class<?> classToSearch, String id) {
+		if (comp == null) {
+			return null;
+		}
+		
+		if (comp.getClass().equals(classToSearch) && id.equals(comp.getId())) {
+			return comp;
+		}
+		
+		Object o = comp.findComponent(id);
+		if (o instanceof UIComponent) {
+			UIComponent founded = (UIComponent) o;
+			if (founded.getClass().equals(classToSearch) && id.equals(founded.getId())) {
+				return founded;
+			}
+		}
+		
+		UIComponent fromChildren = findEditArticleComponent(comp.getChildren(), classToSearch, id, false);
+		if (fromChildren != null) {
+			return fromChildren;
+		}
+		
+		return findEditArticleComponent(comp.getParent(), classToSearch, id);
+	}
 	
-	/*
-	 * Returns a list with realted content item links for the article.
-	 *
-	private UIComponent getRelatedContentItemsList() {
-		String bref = WFPage.CONTENT_BUNDLE + ".";
-		String var = "article_related_items";
-		HtmlDataTable t = new HtmlDataTable();
-		t.setVar(var);
-		WFUtil.setValueBinding(t, "value", ARTICLE_ITEM_BEAN_ID + ".relatedContentItems");
-		t.setColumnClasses("wf_valign_middle");
+	@SuppressWarnings("unchecked")
+	private UIComponent findEditArticleComponent(List children, Class<?> classToSearch, String id, boolean checkChildren) {
+		if (children == null) {
+			return null;
+		}
 		
-		UIColumn col = new UIColumn();
-		HtmlOutputLink link = new HtmlOutputLink();
-		WFUtil.setValueBinding(link, "tabindex", var + ".value");
-		link.setOnclick("wurl='previewarticle.jsf?" + PREVIEW_ARTICLE_ITEM_ID + 
-					"='+this.tabindex;window.open(wurl,'Preview','height=300,width=500,status=no,toolbar=no,menubar=no,location=no,scrollbars=yes');return false;");
-		HtmlOutputText txt = new HtmlOutputText();
-		WFUtil.setValueBinding(txt, "value", var + ".name");
-		link.getChildren().add(txt);
-		col.getChildren().add(link);
-		t.getChildren().add(col);
+		Object o = null;
+		UIComponent founded = null;
+		for (int i = 0; (i < children.size() && founded == null); i++) {
+			o = children.get(i);
+			if (o instanceof UIComponent) {
+				founded = (UIComponent) o;
+				if (founded.getClass().equals(classToSearch) && id.equals(founded.getId())) {
+					return founded;
+				}
+				else {
+					founded = null;
+					if (checkChildren) {
+						founded = findEditArticleComponent(((UIComponent) o).getChildren(), classToSearch, id, checkChildren);
+						if (founded != null) {
+							return founded;
+						}
+					}
+				}
+			}
+		}
 		
-		col = new UIColumn();
-		HtmlCommandButton removeButton = WFUtil.getButtonVB(REMOVE_RELATED_CONTENT_ITEM_ID, bref + "remove", this);
-		WFUtil.addParameterVB(removeButton, "item_id", var + ".value");
-		removeButton.setValueBinding("onclick", WFUtil.createValueBinding("#{" + bref + "onclick_remove_related_content_item}"));
-		WFUtil.addParameterVB(removeButton, "related_item_no", var + ".orderNoString");
-		col.getChildren().add(removeButton);
-		t.getChildren().add(col);
-		
-		return t;
-	}*/
-	
-	/*
-	 * Returns container with form for selecting related content items.
-	 *
-	private UIComponent getRelatedContentItemsContainer() {
-		String bref = WFPage.CONTENT_BUNDLE + ".";
-		WFContainer c = new WFContainer();
-		c.setId(RELATED_CONTENT_ITEMS_EDITOR_ID);
-		WFUtil.invoke(RELATED_ITEMS_LIST_BEAN_ID, "setCaseLinkListener", this, ActionListener.class);
-		WFList l = new WFList(RELATED_ITEMS_LIST_BEAN_ID, 0, 10);
-		l.setId(RELATED_CONTENT_ITEMS_LIST_ID);
-		c.add(l);
-		c.add(WFUtil.getBreak());
-		c.add(new WFPlainOutputText("&nbsp;&nbsp;&nbsp;"));
-		c.add(WFUtil.getButtonVB(RELATED_CONTENT_ITEMS_CANCEL_ID, bref + "cancel", this));
-		return c;
-	}*/
+		return null;
+	}
 	
 	/**
 	 * javax.faces.event.ActionListener#processAction()
@@ -595,14 +556,28 @@ public class EditArticleView extends IWBaseComponent implements ManagedContentBe
 	public void processAction(ActionEvent event) {
 		String id = event.getComponent().getId();
 		UIComponent comp = event.getComponent();
-		EditArticleView editArticle = (EditArticleView) comp.findComponent(EDIT_ARTICLE_BLOCK_ID);
+		UIComponent founded = findEditArticleComponent(comp, EditArticleView.class, EDIT_ARTICLE_BLOCK_ID);
+		if (founded == null) {
+			throw new NullPointerException(EditArticleView.class.getName() + " is null");
+		}
+		EditArticleView editArticle = (EditArticleView) founded;
+		founded = null;
 		if (id.equals(SAVE_ID)) {
-			//We have the save button pressed
+			//	We have the save button pressed
+			founded = editArticle.findComponent(CATEGORY_EDITOR_ID);
+			if (!(founded instanceof WebDAVCategories)) {
+				founded = findEditArticleComponent(comp, WebDAVCategories.class, CATEGORY_EDITOR_ID);
+			}
 			boolean saveSuccessful = false;
-			WebDAVCategories categoriesUI = (WebDAVCategories) editArticle.findComponent(CATEGORY_EDITOR_ID);
+			String submittedCategories = null;
 			ArticleItemBean articleItemBean = getArticleItemBean();
-			if (categoriesUI != null) {
-				articleItemBean.setArticleCategories(categoriesUI.getEnabledCategories());
+			WebDAVCategories categoriesUI = null;
+			if (founded instanceof WebDAVCategories) {
+				categoriesUI = (WebDAVCategories) founded;
+				if (categoriesUI != null) {
+					submittedCategories = categoriesUI.getEnabledCategories();
+					articleItemBean.setArticleCategories(submittedCategories);
+				}
 			}
 			else {
 				log.warn("categoriesUI == null");
@@ -613,58 +588,40 @@ public class EditArticleView extends IWBaseComponent implements ManagedContentBe
 					try {
 						categoriesUI.setResourcePath(articleItemBean.getLocalizedArticle().getResourcePath());
 						categoriesUI.saveCategoriesSettings();
+						
+						Object o = comp.findComponent(editArticleCategoriesSelectionBlockId);
+						if (o instanceof WFFormItem) {
+							String displayValue = "none";
+							if (categoriesUI.getLocalizedCategories() > 0) {
+								if (categoriesUI.isNeedDisplayCategoriesSelection(CoreUtil.getIWContext()) || CoreConstants.COMMA.equals(submittedCategories)) {
+									displayValue = "block";
+								}
+							}
+							((WFFormItem) o).setStyleAttribute("display", displayValue);
+						}
 					} catch (RuntimeException re) {
 						re.printStackTrace();
 					}
 				}
 			}
-			this.clearOnInit=false;
+			this.clearOnInit = false;
 		}
 		else if (id.equals(DELETE_ID)) {
-			//we are deleting
+			//	We are deleting
 			ArticleItemBean articleItemBean = getArticleItemBean();
 			articleItemBean.delete();
 			WFUtil.addMessageVB(editArticle.findComponent(DELETE_ID),ArticleConstants.IW_BUNDLE_IDENTIFIER, "delete_successful");
 		}
-		
-/*		else if (id.equals(FOR_REVIEW_ID)) {
-			WFUtil.invoke(ARTICLE_ITEM_BEAN_ID, "setRequestedStatus", ContentItemCase.STATUS_READY_FOR_REVIEW);
-			ab.storeArticle();
-		} else if (id.equals(PUBLISH_ID)) {
-			WFUtil.invoke(ARTICLE_ITEM_BEAN_ID, "setRequestedStatus", ContentItemCase.STATUS_PUBLISHED);
-			ab.storeArticle();
-		} else if (id.equals(REWRITE_ID)) {
-			WFUtil.invoke(ARTICLE_ITEM_BEAN_ID, "setRequestedStatus", ContentItemCase.STATUS_REWRITE);
-			ab.storeArticle();
-		} else if (id.equals(REJECT_ID)) {
-			WFUtil.invoke(ARTICLE_ITEM_BEAN_ID, "setRequestedStatus", ContentItemCase.STATUS_DELETED);
-			ab.storeArticle();
-		} else if (id.equals(DELETE_ID)) {
-			WFUtil.invoke(ARTICLE_ITEM_BEAN_ID, "setRequestedStatus", ContentItemCase.STATUS_DELETED);
-			ab.storeArticle();
-		} else if (id.equals(ADD_IMAGE_ID)) {
-			ab.setEditView(FILE_UPLOAD_FORM_ID);
-		} else if (id.equals(FILE_UPLOAD_CANCEL_ID)) {
-			ab.setEditView(ARTICLE_EDITOR_ID);
-		} else if (id.equals(FILE_UPLOAD_ID)) {
-			ab.setEditView(ARTICLE_EDITOR_ID);
-		} else if (id.equals(CaseListBean.CASE_ID)){
-			String itemId = WFUtil.getParameter(event.getComponent(), "id");
-			WFUtil.invoke(ARTICLE_ITEM_BEAN_ID, "addRelatedContentItem", new Integer(itemId));
-			ab.setEditView(ARTICLE_EDITOR_ID);
-		}
-*/
 	}
 
 	/**
 	 * Stores the current article. 
 	 * Returns false if save failed
 	 */
-	public boolean storeArticle() {
-		
+	private boolean storeArticle() {
 		try{
 			getArticleItemBean().store();
-			setEditMode(EDIT_MODE_EDIT);
+			setEditMode(ContentConstants.CONTENT_ITEM_ACTION_EDIT);
 			setUserMessage("article_saved");
 			return true;
 		}
@@ -675,11 +632,11 @@ public class EditArticleView extends IWBaseComponent implements ManagedContentBe
 		catch(Exception e){
 			String errorKey = ArticleStoreException.KEY_ERROR_ON_STORE;
 			WFUtil.addErrorMessageVB(findComponent(SAVE_ID),ArticleConstants.IW_BUNDLE_IDENTIFIER, errorKey);
-			//WFUtil.addErrorMessageVB(findComponent(SAVE_ID),e.getClass().getName()+" : "+e.getMessage());
 			e.printStackTrace();
 		}
 		return false;
 	}
+	
 	/*
 	 * Sets the text in the message task container. 
 	 */
@@ -698,8 +655,7 @@ public class EditArticleView extends IWBaseComponent implements ManagedContentBe
 	 * Sets this block to message mode. 
 	 */
 	public void setMessageMode() {
-		/*WFTabbedPane tb = (WFTabbedPane)*/ findComponent(TASKBAR_ID);
-		//tb.setSelectedMenuItemId(TASK_ID_MESSAGES);
+		findComponent(TASKBAR_ID);
 	}
 	
 
@@ -787,27 +743,40 @@ public class EditArticleView extends IWBaseComponent implements ManagedContentBe
 	 * @see javax.faces.component.UIComponent#encodeBegin(javax.faces.context.FacesContext)
 	 */
 	public void encodeBegin(FacesContext context) throws IOException {
-		/*if(clearOnInit) {
-			ArticleItemBean bean = getArticleItemBean();
-			if(bean!=null){
-				bean.clear();
-			}
-		}*/
-
 		IWContext iwc = IWContext.getIWContext(context);
-		String resourcePath = iwc.getParameter(ContentViewer.PARAMETER_CONTENT_RESOURCE);
-		String baseFolderPath = iwc.getParameter(ContentItemToolbar.PARAMETER_BASE_FOLDER_PATH);
+		resourcePath = iwc.getParameter(ContentViewer.PARAMETER_CONTENT_RESOURCE);
+		baseFolderPath = iwc.getParameter(ContentItemToolbar.PARAMETER_BASE_FOLDER_PATH);
+		String mode = iwc.getParameter(ContentViewer.PARAMETER_ACTION);
+		if (mode instanceof String) {
+			setEditMode(mode);
+		}
+		String needForm = iwc.getParameter(ContentViewer.CONTENT_VIEWER_EDITOR_NEEDS_FORM);
+		if (needForm instanceof String) {
+			needsForm = Boolean.TRUE.toString().equals(needForm);
+		}
+		String renderingParameter = iwc.getParameter(ContentConstants.RENDERING_COMPONENT_OF_ARTICLE_LIST);
+		if (renderingParameter != null) {
+			fromArticleItemListViewer = Boolean.TRUE.toString().equals(renderingParameter);
+		}
+		else {
+			fromArticleItemListViewer = false;
+		}
 		
-		if(resourcePath!=null){
+		String languageChange = getArticleItemBean().getLanguageChange();
+		if (languageChange != null) {
+			getArticleItemBean().setLanguageChange(null);
+		}
+		
+		if (resourcePath != null) {
 			getArticleItemBean().setResourcePath(resourcePath);
 		}
 		
-		if(baseFolderPath!=null){
+		if (baseFolderPath != null) {
 			getArticleItemBean().setBaseFolderLocation(baseFolderPath);
 		}
 		
-		if(isInDeleteMode()){
-			//this has to happen before initializeComponent for delet case:
+		if (isInDeleteMode()) {
+			//	This has to happen before initializeComponent for delete case:
 			try {
 				getArticleItemBean().load();
 			}
@@ -816,60 +785,26 @@ public class EditArticleView extends IWBaseComponent implements ManagedContentBe
 			}
 		}
 		
-//		WFUtil.invoke(ARTICLE_ITEM_BEAN_ID, "updateLocale");
-//		updateEditButtons();
-		
 		super.encodeBegin(context);
 
-		
-			if(isInCreateMode()){
-			//if("create".equals(iwc.getParameter(ContentViewer.PARAMETER_ACTION))){
-				//WFUtil.invoke(ARTICLE_ITEM_BEAN_ID,"setFolderLocation",resourcePath,String.class);
-				//getArticleItemBean().setFolderLocation(resourcePath);
-
-				WebDAVCategories categoriesUI = (WebDAVCategories)getCategoryEditor(iwc);
-				categoriesUI.reset();
-				
-			} else {
-				//We are in edit mode and an article already exits
-				
-				//WFUtil.invoke(ARTICLE_ITEM_BEAN_ID,"load",resourcePath,String.class);
-				try {
-					//getArticleItemBean().load(resourcePath);
+		WebDAVCategories categoriesUI = getCategoryEditor(iwc);
+		if (isInCreateMode()) {
+			categoriesUI.reset();
+		} else {
+			//	We are in edit mode and an article already exits
+			try {
+				if (languageChange == null) {
 					getArticleItemBean().load();
-
-					WebDAVCategories categoriesUI = (WebDAVCategories)getCategoryEditor(iwc);
-					//Update the categoriesUI with the resourcePath given:
-					if(categoriesUI!=null){
-						//there is no resourcepath set for the article if it's about to be created
-						categoriesUI.setResourcePath(resourcePath);
-					}
-					
 				}
-				catch (Exception e) {
-					e.printStackTrace();
+				else {
+					getArticleItemBean().reload();
 				}
+				//	Update the categoriesUI with the resourcePath given
+				categoriesUI.setResourcePath(resourcePath);
 			}
-			
-			
-		//}
-		//else{
-			
-		//}
-//		if(((Boolean)WFUtil.invoke(ARTICLE_ITEM_BEAN_ID,"getLanguageChange")).booleanValue()) {
-		//String languageChange=(String)WFUtil.invoke(ARTICLE_ITEM_BEAN_ID,"getLanguageChange");
-		String languageChange = getArticleItemBean().getLanguageChange();
-		if(languageChange!=null) {
-			/*String articlePath = (String)WFUtil.invoke(ARTICLE_ITEM_BEAN_ID, "getArticlePath");
-			if(null!=articlePath && articlePath.length()>0) {
-				boolean result = ((Boolean)WFUtil.invoke(ARTICLE_ITEM_BEAN_ID, "load",articlePath+"/"+languageChange+ArticleItemBean.ARTICLE_FILE_SUFFIX)).booleanValue();
-				if(!result) {
-					System.out.println("Warning loading new language did not work!");
-				}
+			catch (Exception e) {
+				e.printStackTrace();
 			}
-			WFUtil.invoke(ARTICLE_ITEM_BEAN_ID, "setLanguageChange","");
-			*/
-			getArticleItemBean().setLanguageChange(languageChange);
 		}
 	}
 
@@ -877,36 +812,26 @@ public class EditArticleView extends IWBaseComponent implements ManagedContentBe
 	 * @see javax.faces.event.ValueChangeListener#processValueChange(javax.faces.event.ValueChangeEvent)
 	 */
 	public void processValueChange(ValueChangeEvent event) throws AbortProcessingException {
-
-		
-		if(event.getComponent().getId().equals(LOCALE_ID)){
-			if(event.getOldValue()==null) {
+		if (event.getComponent().getId().equals(LOCALE_ID)) {
+			if (event.getOldValue() == null) {
 				return;
 			}
-			if(event.getNewValue()==null) {
+			if (event.getNewValue() == null) {
 				return;
 			}
 			
 			log.debug("Language value has changed from "+event.getOldValue()+" to "+event.getNewValue());
 			
 			ArticleItemBean bean = getArticleItemBean();
-			//String articlePath = (String)WFUtil.invoke(ARTICLE_ITEM_BEAN_ID, "getArticlePath");
 			String articlePath = bean.getResourcePath();
-			//String language = (String)WFUtil.invoke(ARTICLE_ITEM_BEAN_ID, "getContentLanguage");
-			//String language = bean.getContentLanguage();
-			if(null==articlePath) {
+			if (null == articlePath) {
 				//Article has not been stored previously, so nothing has to be done
 				return;
 			}
-			log.info("Article path: "+articlePath);
-			//boolean result = ((Boolean)WFUtil.invoke(ARTICLE_ITEM_BEAN_ID, "load",articlePath+"/"+arg0.getNewValue()+ArticleItemBean.ARTICLE_SUFFIX)).booleanValue();
-			//System.out.println("loading other language "+result);
-			//if(result) {
-			//WFUtil.invoke(ARTICLE_ITEM_BEAN_ID, "setLanguageChange",arg0.getNewValue().toString());
+			log.info("Article path: " + articlePath);
 			String langChange = event.getNewValue().toString();
 			bean.setLanguageChange(langChange);
-			Locale locale = new Locale(langChange);
-			bean.setLocale(locale);
+			bean.setLocale(LocaleUtil.getLocale(langChange));
 			log.info("Changed to other language "+langChange);
 		}
 		else if(event.getComponent().getId().equals(BODY_ID)){
@@ -925,22 +850,13 @@ public class EditArticleView extends IWBaseComponent implements ManagedContentBe
 			String newValue = event.getNewValue().toString();
 			getArticleItemBean().setTeaser(newValue);
 		}
-		
-		//}else {
-			//if(null!=language) {
-				//result = ((Boolean)WFUtil.invoke(ARTICLE_ITEM_BEAN_ID, "load",articlePath+"/"+language+ArticleItemBean.ARTICLE_SUFFIX)).booleanValue();
-				//bean.setLanguageChange(language);
-				//bean.setLocale(new Locale(language));
-				//System.out.println("loading other language "+result);
-			//}
-		//}
 	}
 	
 	/**
 	 * @param mode
 	 */
 	public void setEditMode(String mode) {
-		this.clearOnInit = mode.equalsIgnoreCase("create");
+		this.clearOnInit = mode.equalsIgnoreCase(ContentConstants.CONTENT_ITEM_ACTION_CREATE);
 		this.editMode=mode;
 	}
 	
@@ -948,8 +864,8 @@ public class EditArticleView extends IWBaseComponent implements ManagedContentBe
 		return this.editMode;
 	}
 	
-	protected ArticleItemBean getArticleItemBean(){
-		return (ArticleItemBean)WFUtil.getBeanInstance(ARTICLE_ITEM_BEAN_ID);
+	private ArticleItemBean getArticleItemBean() {
+		return (ArticleItemBean) WFUtil.getBeanInstance(ARTICLE_ITEM_BEAN_ID);
 	}
 	
 	/**
@@ -960,10 +876,8 @@ public class EditArticleView extends IWBaseComponent implements ManagedContentBe
 	 */
 	private boolean isInCreateMode(){
 		String mode = getEditMode();
-		if(mode!=null){
-			if(mode.equals(EDIT_MODE_CREATE)){
-				return true;
-			}
+		if (mode != null) {
+			return mode.equals(ContentConstants.CONTENT_ITEM_ACTION_CREATE);
 		}
 		return false;
 	}
@@ -976,10 +890,8 @@ public class EditArticleView extends IWBaseComponent implements ManagedContentBe
 	 */
 	private boolean isInEditMode(){
 		String mode = getEditMode();
-		if(mode!=null){
-			if(mode.equals(EDIT_MODE_EDIT)){
-				return true;
-			}
+		if (mode!=null) {
+			return mode.equals(ContentConstants.CONTENT_ITEM_ACTION_EDIT);
 		}
 		return false;
 	}
@@ -993,9 +905,7 @@ public class EditArticleView extends IWBaseComponent implements ManagedContentBe
 	private boolean isInDeleteMode(){
 		String mode = getEditMode();
 		if(mode!=null){
-			if(mode.equals(EDIT_MODE_DELETE)){
-				return true;
-			}
+			return mode.equals(ContentConstants.CONTENT_ITEM_ACTION_DELETE);
 		}
 		return false;
 	}

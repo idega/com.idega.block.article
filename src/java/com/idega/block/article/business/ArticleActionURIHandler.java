@@ -1,5 +1,5 @@
 /*
- * $Id: ArticleActionURIHandler.java,v 1.9 2007/02/08 19:40:07 valdas Exp $
+ * $Id: ArticleActionURIHandler.java,v 1.10 2008/01/23 12:12:06 valdas Exp $
  * Created on Jan 31, 2005
  *
  * Copyright (C) 2005 Idega Software hf. All Rights Reserved.
@@ -9,11 +9,20 @@
  */
 package com.idega.block.article.business;
 
+import java.rmi.RemoteException;
+import java.util.ArrayList;
+import java.util.List;
+
+import com.idega.block.article.component.ArticleEditor;
+import com.idega.builder.bean.AdvancedProperty;
 import com.idega.content.business.ContentConstants;
 import com.idega.content.presentation.ContentViewer;
+import com.idega.core.builder.business.BuilderService;
+import com.idega.core.builder.business.BuilderServiceFactory;
 import com.idega.core.uri.DefaultIWActionURIHandler;
 import com.idega.core.uri.IWActionURI;
 import com.idega.core.uri.IWActionURIHandler;
+import com.idega.idegaweb.IWMainApplication;
 
 
 
@@ -22,11 +31,11 @@ import com.idega.core.uri.IWActionURIHandler;
  * <p>
  * An IWActionURIHandler handler that handles the actions for the article module (edit/delete).
  * </p>
- *  Last modified: $Date: 2007/02/08 19:40:07 $ by $Author: valdas $
+ *  Last modified: $Date: 2008/01/23 12:12:06 $ by $Author: valdas $
  * 
  * 
  * @author <a href="mailto:eiki@idega.com">eiki</a>
- * @version $Revision: 1.9 $
+ * @version $Revision: 1.10 $
  */
 public class ArticleActionURIHandler extends DefaultIWActionURIHandler implements IWActionURIHandler {
 
@@ -62,18 +71,32 @@ public class ArticleActionURIHandler extends DefaultIWActionURIHandler implement
 		String action = uri.getActionPart();
 		String subjectParameterName = ContentViewer.PARAMETER_CONTENT_RESOURCE;
 		
+		String pathPart = uri.getPathPart();
+		
 		StringBuffer redirectURI = new StringBuffer();
 		redirectURI.append(uri.getContextURI());
 		if ("preview".equals(action)) {
 			redirectURI.append(ContentConstants.PAGES_START_URI_WITHOUT_FIRST_SLASH).append(ContentConstants.ARTICLE_VIEWER_URI);
 			redirectURI.append("?");
 		}
+		else if (action.equals(ContentConstants.CONTENT_ITEM_ACTION_EDIT) || action.equals(ContentConstants.CONTENT_ITEM_ACTION_CREATE)) {
+			BuilderService service = null;
+			try {
+				service = BuilderServiceFactory.getBuilderService(IWMainApplication.getDefaultIWApplicationContext());
+			} catch (RemoteException e) {
+				e.printStackTrace();
+				return null;
+			}
+			List<AdvancedProperty> parameters = new ArrayList<AdvancedProperty>();
+			parameters.add(new AdvancedProperty(ContentViewer.PARAMETER_CONTENT_RESOURCE, pathPart));
+			parameters.add(new AdvancedProperty(ContentViewer.PARAMETER_ACTION, action));
+			return addQueryPart(uri, new StringBuffer(service.getUriToObject(ArticleEditor.class, parameters))).toString();
+		}
 		else {
 			redirectURI.append("workspace/content/article/");
 			redirectURI.append(action);
 			redirectURI.append("/?");
 		}
-		String pathPart = uri.getPathPart();
 		if(pathPart!=null && !pathPart.equals("")){
 			redirectURI.append(subjectParameterName);
 			redirectURI.append("=");
@@ -84,28 +107,26 @@ public class ArticleActionURIHandler extends DefaultIWActionURIHandler implement
 		redirectURI.append("=");
 		redirectURI.append(action);
 		
-		String queryString = uri.getQueryString();
-		if(queryString!=null){
-			/*StringTokenizer tokenizer = new StringTokenizer(queryString,"&");
-			while(tokenizer.hasMoreTokens()){
-				String token = tokenizer.nextToken();
-				if(token.startsWith("?")){
-					token = token.substring(1,token.length());
-				}
-				redirectURI.append("&");
-				redirectURI.append(token);
-			}*/
-			if(!queryString.startsWith("&")){
-				if(queryString.startsWith("?")){
-					queryString = queryString.substring(1,queryString.length());
-				}
-				redirectURI.append("&");
-			}
-			redirectURI.append(queryString);
-		}
-		
-		return redirectURI.toString();
+		return addQueryPart(uri, redirectURI).toString();
 	}
+	
+	private StringBuffer addQueryPart(IWActionURI uri, StringBuffer redirectURI) {
+		String queryString = uri.getQueryString();
+		if (queryString == null) {
+			return redirectURI;
+		}
+			
+		if (!queryString.startsWith("&")) {
+			if (queryString.startsWith("?")) {
+				queryString = queryString.substring(1);
+			}
+			redirectURI.append("&");
+		}
+		redirectURI.append(queryString);
+	
+		return redirectURI;
+	}
+	
 	/* (non-Javadoc)
 	 * @see com.idega.core.uri.IWActionURIHandler#getIWActionURI(java.lang.String)
 	 */

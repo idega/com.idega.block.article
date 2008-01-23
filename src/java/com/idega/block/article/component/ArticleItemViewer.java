@@ -1,5 +1,5 @@
 /*
- * $Id: ArticleItemViewer.java,v 1.30 2008/01/09 13:45:29 valdas Exp $
+ * $Id: ArticleItemViewer.java,v 1.31 2008/01/23 12:12:06 valdas Exp $
  *
  * Copyright (C) 2004 Idega. All Rights Reserved.
  *
@@ -8,6 +8,7 @@
  */
 package com.idega.block.article.component;
 
+import java.io.IOException;
 import java.rmi.RemoteException;
 import java.sql.Timestamp;
 
@@ -19,8 +20,10 @@ import com.idega.block.article.ArticleCacher;
 import com.idega.block.article.bean.ArticleItemBean;
 import com.idega.block.article.bean.ArticleLocalizedItemBean;
 import com.idega.block.article.business.ArticleActionURIHandler;
+import com.idega.block.article.business.ArticleUtil;
 import com.idega.content.bean.ContentItem;
 import com.idega.content.business.ContentConstants;
+import com.idega.content.business.ContentUtil;
 import com.idega.content.presentation.ContentItemToolbar;
 import com.idega.content.presentation.ContentItemViewer;
 import com.idega.core.builder.business.BuilderService;
@@ -28,17 +31,20 @@ import com.idega.core.builder.business.BuilderServiceFactory;
 import com.idega.core.cache.UIComponentCacher;
 import com.idega.idegaweb.IWMainApplication;
 import com.idega.presentation.IWContext;
+import com.idega.presentation.Layer;
 import com.idega.presentation.Script;
+import com.idega.util.CoreUtil;
+import com.idega.util.PresentationUtil;
 import com.idega.webface.WFHtml;
 import com.idega.webface.convert.WFTimestampConverter;
 
 /**
- * Last modified: $Date: 2008/01/09 13:45:29 $ by $Author: valdas $
+ * Last modified: $Date: 2008/01/23 12:12:06 $ by $Author: valdas $
  *
  * Displays the article item
  *
  * @author <a href="mailto:gummi@idega.com">Gudmundur Agust Saemundsson</a>
- * @version $Revision: 1.30 $
+ * @version $Revision: 1.31 $
  */
 public class ArticleItemViewer extends ContentItemViewer {
 	
@@ -57,6 +63,8 @@ public class ArticleItemViewer extends ContentItemViewer {
 	private boolean showAuthor = true;
 	private boolean showCreationDate = true;
 	private boolean addCommentsViewer = false;
+	
+	private boolean canModifyRenderingAttribute = false;
 	
 	/**
 	 * @return Returns the cacheEnabled.
@@ -101,13 +109,13 @@ public class ArticleItemViewer extends ContentItemViewer {
 	
 	@SuppressWarnings("unchecked")
 	protected UIComponent createFieldComponent(String attribute){
-		if(ContentConstants.ATTRIBUTE_BODY.equals(attribute)){
+		if (ContentConstants.ATTRIBUTE_BODY.equals(attribute)) {
 			return new WFHtml();
 		}
-		else if(ATTRIBUTE_TEASER.equals(attribute)){
+		else if (ATTRIBUTE_TEASER.equals(attribute)) {
 			return new WFHtml();
 		}
-		else if(attribute.equals(ContentConstants.ATTRIBUTE_HEADLINE)&&this.getHeadlineAsLink()){
+		else if (attribute.equals(ContentConstants.ATTRIBUTE_HEADLINE) && this.getHeadlineAsLink()) {
 			UIComponent link = getEmptyMoreLink();
 			HtmlOutputText text = new HtmlOutputText();
 			link.getChildren().add(text);
@@ -356,6 +364,42 @@ public class ArticleItemViewer extends ContentItemViewer {
 	protected void setAddCommentsViewer(boolean addCommentsViewer) {
 		this.addCommentsViewer = addCommentsViewer;
 	}
+	
+	@SuppressWarnings("unchecked")
+	@Override
+	public void encodeBegin(FacesContext context) throws IOException {
+		IWContext iwc = IWContext.getIWContext(context);
+		if (ContentUtil.hasContentEditorRoles(iwc)) {
+			Object renderingParameter = iwc.getSessionAttribute(ContentConstants.RENDERING_COMPONENT_OF_ARTICLE_LIST);
+			if (renderingParameter == null) {
+				iwc.setSessionAttribute(ContentConstants.RENDERING_COMPONENT_OF_ARTICLE_LIST, Boolean.FALSE);
+				canModifyRenderingAttribute = true;
+			}
+
+			if (CoreUtil.isSingleComponentRenderingProcess(iwc)) {
+				Layer script = new Layer();
+				script.add(PresentationUtil.getJavaScriptSourceLines(ArticleUtil.getJavaScriptSourcesForArticleEditor(iwc, true)));
+				getFacets().put(ContentItemViewer.FACET_JAVA_SCRIPT, script);
+			}
+			else {
+				PresentationUtil.addJavaScriptSourcesLinesToHeader(iwc, ArticleUtil.getJavaScriptSourcesForArticleEditor(iwc, false));
+				PresentationUtil.addStyleSheetsToHeader(iwc, ArticleUtil.getStyleSheetsSourcesForArticleEditor(iwc));
+			}
+		}
+		
+		super.encodeBegin(context);
+	}
+	
+	@Override
+	public void encodeEnd(FacesContext context) throws IOException {
+		super.encodeEnd(context);
+	
+		IWContext iwc = IWContext.getIWContext(context);
+		if (ContentUtil.hasContentEditorRoles(iwc)) {
+			if (canModifyRenderingAttribute) {
+				iwc.removeSessionAttribute(ContentConstants.RENDERING_COMPONENT_OF_ARTICLE_LIST);
+			}
+		}
+	}
 
 }
-//
