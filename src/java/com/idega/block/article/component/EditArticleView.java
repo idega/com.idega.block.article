@@ -1,5 +1,5 @@
 /*
- * $Id: EditArticleView.java,v 1.32 2008/01/23 12:12:06 valdas Exp $
+ * $Id: EditArticleView.java,v 1.33 2008/01/23 13:14:11 valdas Exp $
  *
  * Copyright (C) 2004 Idega. All Rights Reserved.
  *
@@ -71,10 +71,10 @@ import com.idega.webface.htmlarea.HTMLArea;
  * <p>
  * This is the part for the editor of article is inside the admin interface
  * </p>
- * Last modified: $Date: 2008/01/23 12:12:06 $ by $Author: valdas $
+ * Last modified: $Date: 2008/01/23 13:14:11 $ by $Author: valdas $
  *
  * @author Joakim,Tryggvi Larusson
- * @version $Revision: 1.32 $
+ * @version $Revision: 1.33 $
  */
 public class EditArticleView extends IWBaseComponent implements ManagedContentBeans, ActionListener, ValueChangeListener {
 	private static final Log log = LogFactory.getLog(EditArticleView.class);
@@ -470,13 +470,8 @@ public class EditArticleView extends IWBaseComponent implements ManagedContentBe
 				l = iwc.getCurrentLocale();
 			}
 			categoriesUI = new WebDAVCategories(resourcePath, l.toString());
-			categoriesUI.setAddCategoryCreator(false);
 			//	Id on the component is set implicitly
 			categoriesUI.setId(CATEGORY_EDITOR_ID);
-			//	We want to set the categories also on the parent ".article" folder:
-			categoriesUI.setCategoriesOnParent(true);
-			categoriesUI.setDisplaySaveButton(false);
-			categoriesUI.setDisplayHeader(false);
 			
 			String setCategories = (String) iwc.getExternalContext().getRequestParameterMap().get(ContentItemToolbar.PARAMETER_CATEGORIES);
 			if (setCategories != null) {
@@ -484,13 +479,15 @@ public class EditArticleView extends IWBaseComponent implements ManagedContentBe
 			}
 		}
 		else {
-			categoriesUI.setLocaleIdentity(getArticleItemBean().getLocale().toString());
 			categoriesUI.getSelectedAndNotSelectedCategories(iwc);
-			categoriesUI.setAddCategoryCreator(false);
-			categoriesUI.setCategoriesOnParent(true);
-			categoriesUI.setDisplaySaveButton(false);
-			categoriesUI.setDisplayHeader(false);
+			categoriesUI.setLocaleIdentity(getArticleItemBean().getLocale().toString());
 		}
+		
+		categoriesUI.setAddCategoryCreator(false);
+		//	We want to set the categories also on the parent ".article" folder:
+		categoriesUI.setCategoriesOnParent(true);
+		categoriesUI.setDisplaySaveButton(false);
+		categoriesUI.setDisplayHeader(false);
 		
 		return categoriesUI;
 	}
@@ -586,14 +583,16 @@ public class EditArticleView extends IWBaseComponent implements ManagedContentBe
 			if (saveSuccessful) {
 				if (categoriesUI != null) {
 					try {
+						IWContext iwc = CoreUtil.getIWContext();
 						categoriesUI.setResourcePath(articleItemBean.getLocalizedArticle().getResourcePath());
 						categoriesUI.saveCategoriesSettings();
+						categoriesUI.getSelectedAndNotSelectedCategories(iwc);
 						
 						Object o = comp.findComponent(editArticleCategoriesSelectionBlockId);
 						if (o instanceof WFFormItem) {
 							String displayValue = "none";
 							if (categoriesUI.getLocalizedCategories() > 0) {
-								if (categoriesUI.isNeedDisplayCategoriesSelection(CoreUtil.getIWContext()) || CoreConstants.COMMA.equals(submittedCategories)) {
+								if (CoreConstants.COMMA.equals(submittedCategories) || categoriesUI.isNeedDisplayCategoriesSelection(iwc)) {
 									displayValue = "block";
 								}
 							}
