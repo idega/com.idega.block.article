@@ -1,13 +1,11 @@
 package com.idega.block.article.component;
 
 import java.rmi.RemoteException;
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.faces.component.UIComponent;
 import javax.faces.context.FacesContext;
-
-import org.apache.myfaces.renderkit.html.util.AddResource;
-import org.apache.myfaces.renderkit.html.util.AddResourceFactory;
 
 import com.idega.block.article.business.ArticleConstants;
 import com.idega.block.article.business.CommentsEngine;
@@ -31,6 +29,8 @@ import com.idega.presentation.text.Link;
 import com.idega.presentation.text.Text;
 import com.idega.presentation.ui.CheckBox;
 import com.idega.util.CoreConstants;
+import com.idega.util.CoreUtil;
+import com.idega.util.PresentationUtil;
 
 public class CommentsViewer extends Block {
 	
@@ -49,10 +49,13 @@ public class CommentsViewer extends Block {
 	private boolean isForumPage = false;
 	private boolean usedInArticleList = false;
 	
-	protected static final String DWR_ENGINE = "/dwr/engine.js";
-	protected static final String COMMENTS_ENGINE = "/dwr/interface/CommentsEngine.js";
-	protected static final String COMMENTS_HELPER = "javascript/ArticleCommentsHelper.js";
-	protected static final String INIT_SCRIPT_LINE = "window.addEvent('domready', initComments);";
+	private String DWR_ENGINE = "/dwr/engine.js";
+	private String COMMENTS_ENGINE = "/dwr/interface/CommentsEngine.js";
+	private String COMMENTS_HELPER = "javascript/ArticleCommentsHelper.js";
+	private String INIT_COMMENTS_ACTION = "initComments();";
+	private String INIT_SCRIPT_LINE = "window.addEvent('domready', function() {"+INIT_COMMENTS_ACTION+"});";
+	private String ENABLE_REVERSE_AJAX_ACTION = "enableReverseAjax();";
+	private String ENABLE_REVERSE_AJAX_SCRIPT_LINE = "window.addEvent('domready', function() {"+ENABLE_REVERSE_AJAX_ACTION+"});";
 	
 	private static final String SEPARATOR = "', '";
 	
@@ -88,28 +91,18 @@ public class CommentsViewer extends Block {
 		this.add(container);
 		
 		if (!isUsedInArticleList()) {
-			AddResource adder = AddResourceFactory.getInstance(iwc);
-			
-			//	DWR
-			adder.addJavaScriptAtPosition(iwc, AddResource.HEADER_BEGIN, COMMENTS_ENGINE);
-			adder.addJavaScriptAtPosition(iwc, AddResource.HEADER_BEGIN, DWR_ENGINE);
-			
-			//	Helper
-			adder.addJavaScriptAtPosition(iwc, AddResource.HEADER_BEGIN, bundle.getVirtualPathWithFileNameString(COMMENTS_HELPER));
-			
-			//	MooTools
-			Web2Business web2 = SpringBeanLookup.getInstance().getSpringBean(iwc, Web2Business.class);
-			if (web2 != null) {
-				try {
-					adder.addJavaScriptAtPosition(iwc, AddResource.HEADER_BEGIN, web2.getBundleURIToMootoolsLib());
-				} catch (RemoteException e) {
-					e.printStackTrace();
-				}
+			if (CoreUtil.isSingleComponentRenderingProcess(iwc)) {
+				container.add(PresentationUtil.getJavaScriptSourceLines(getJavaScriptSources(iwc)));
+				
+				List<String> actions = new ArrayList<String>();
+				actions.add(INIT_COMMENTS_ACTION);
+				actions.add(ENABLE_REVERSE_AJAX_ACTION);
+				container.add(PresentationUtil.getJavaScriptActions(actions));
 			}
-			
-			//	Initialize script
-			adder.addInlineScriptAtPosition(iwc, AddResource.BODY_END, INIT_SCRIPT_LINE);
-			adder.addInlineScriptAtPosition(iwc, AddResource.BODY_END, "window.addEvent('domready', enableReverseAjax);");
+			else {
+				PresentationUtil.addJavaScriptSourcesLinesToHeader(iwc, getJavaScriptSources(iwc));
+				PresentationUtil.addJavaScriptActionsToBody(iwc, getJavaScriptActions());
+			}
 		}
 		
 		boolean hasValidRights = ContentUtil.hasContentEditorRoles(iwc);
@@ -176,6 +169,29 @@ public class CommentsViewer extends Block {
 		
 		// Add comment block
 		container.add(getAddCommentBlock(iwc, commentsId));
+	}
+	
+	protected List<String> getJavaScriptSources(IWContext iwc) {
+		List<String> sources = new ArrayList<String>();
+		sources.add(COMMENTS_ENGINE);
+		sources.add(DWR_ENGINE);
+		sources.add(getBundle(iwc).getVirtualPathWithFileNameString(COMMENTS_HELPER));
+		Web2Business web2 = SpringBeanLookup.getInstance().getSpringBean(iwc, Web2Business.class);
+		if (web2 != null) {
+			try {
+				sources.add(web2.getBundleURIToMootoolsLib());
+			} catch (RemoteException e) {
+				e.printStackTrace();
+			}
+		}
+		return sources;
+	}
+	
+	protected List<String> getJavaScriptActions() {
+		List<String> actions = new ArrayList<String>();
+		actions.add(INIT_SCRIPT_LINE);
+		actions.add(ENABLE_REVERSE_AJAX_SCRIPT_LINE);
+		return actions;
 	}
 		
 	private void addSimpleSpace(Layer container) {
