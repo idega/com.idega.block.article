@@ -1,5 +1,5 @@
 /*
- * $Id: EditArticleView.java,v 1.35 2008/01/24 11:42:51 valdas Exp $
+ * $Id: EditArticleView.java,v 1.36 2008/01/24 16:56:09 valdas Exp $
  *
  * Copyright (C) 2004 Idega. All Rights Reserved.
  *
@@ -59,6 +59,7 @@ import com.idega.user.data.User;
 import com.idega.util.CoreConstants;
 import com.idega.util.CoreUtil;
 import com.idega.util.LocaleUtil;
+import com.idega.webface.WFBlock;
 import com.idega.webface.WFComponentSelector;
 import com.idega.webface.WFContainer;
 import com.idega.webface.WFDateInput;
@@ -73,10 +74,10 @@ import com.idega.webface.htmlarea.HTMLArea;
  * <p>
  * This is the part for the editor of article is inside the admin interface
  * </p>
- * Last modified: $Date: 2008/01/24 11:42:51 $ by $Author: valdas $
+ * Last modified: $Date: 2008/01/24 16:56:09 $ by $Author: valdas $
  *
  * @author Joakim,Tryggvi Larusson
- * @version $Revision: 1.35 $
+ * @version $Revision: 1.36 $
  */
 public class EditArticleView extends IWBaseComponent implements ManagedContentBeans, ActionListener, ValueChangeListener {
 	private static final Log log = LogFactory.getLog(EditArticleView.class);
@@ -222,7 +223,7 @@ public class EditArticleView extends IWBaseComponent implements ManagedContentBe
 
 	}
 	
-	protected WFContainer getMainContainer(){
+	private WFContainer getMainContainer(){
 		WFContainer mainContainer = new WFContainer();
 		mainContainer.setId(ARTICLE_EDITOR_ID);
 		
@@ -261,7 +262,11 @@ public class EditArticleView extends IWBaseComponent implements ManagedContentBe
 		
 		//	Headline input
 		HtmlInputText headlineInput = WFUtil.getInputText(HEADLINE_ID, ref + "headline");
-		headlineInput.setSize(70);
+		int size = 70;
+		if (needsForm) {
+			size = 42;
+		}
+		headlineInput.setSize(size);
 		headlineInput.setImmediate(true);
 		headlineInput.addValueChangeListener(this);
 		UIComponent headlineText = WFUtil.group(localizer.getTextVB("headline"), WFUtil.getText(":"));
@@ -277,6 +282,7 @@ public class EditArticleView extends IWBaseComponent implements ManagedContentBe
 		if (fromArticleItemListViewer) {
 			//	Author input
 			HtmlInputText authorInput = WFUtil.getInputText(AUTHOR_ID, ref + "author");
+			authorInput.setSize(size);
 			authorInput.setImmediate(true);
 			authorInput.addValueChangeListener(this);
 			User user = iwc.getCurrentUser();
@@ -295,8 +301,14 @@ public class EditArticleView extends IWBaseComponent implements ManagedContentBe
 			mainContainer.add(authorItem);
 		}
 
+		String htmlAreaWidth = "640px";
+		String htmlAreaHeight = "480px";
+		if (needsForm) {
+			htmlAreaWidth = "340px";
+			htmlAreaHeight = "320px";
+		}
 		//	Article body
-		HTMLArea bodyArea = WFUtil.getHtmlAreaTextArea(BODY_ID, ref + "body", "640px", "480px", needsForm);
+		HTMLArea bodyArea = WFUtil.getHtmlAreaTextArea(BODY_ID, ref + "body", htmlAreaWidth, htmlAreaHeight, needsForm);
 		bodyArea.addValueChangeListener(this);
 		bodyArea.setImmediate(true);
 		
@@ -319,7 +331,7 @@ public class EditArticleView extends IWBaseComponent implements ManagedContentBe
 		
 		if (fromArticleItemListViewer) {
 			//	Teaser input
-			HTMLArea teaserArea = WFUtil.getHtmlAreaTextArea(TEASER_ID, ref + "teaser", "640px", "150px");
+			HTMLArea teaserArea = WFUtil.getHtmlAreaTextArea(TEASER_ID, ref + "teaser", htmlAreaWidth, "100px");
 			teaserArea.addValueChangeListener(this);
 			teaserArea.setImmediate(true);
 			teaserArea.setAllowFontSelection(false);
@@ -335,6 +347,7 @@ public class EditArticleView extends IWBaseComponent implements ManagedContentBe
 		
 			//Source input
 			HtmlInputText sourceInput = WFUtil.getInputText(SOURCE_ID, ref + "source");
+			sourceInput.setSize(size);
 			UIComponent sourceText = WFUtil.group(localizer.getTextVB("source"), WFUtil.getText(":"));
 			HtmlOutputLabel sourceLabel = new HtmlOutputLabel();
 			sourceLabel.getChildren().add(sourceText);
@@ -377,7 +390,7 @@ public class EditArticleView extends IWBaseComponent implements ManagedContentBe
 		
 		if (fromArticleItemListViewer) {
 			//	Comment input
-			HtmlInputTextarea commentArea = WFUtil.getTextArea(COMMENT_ID, ref + "comment", "500px", "60px");
+			HtmlInputTextarea commentArea = WFUtil.getTextArea(COMMENT_ID, ref + "comment", htmlAreaWidth, "60px");
 			UIComponent commentText = WFUtil.group(localizer.getTextVB("comment"), WFUtil.getText(":"));
 			HtmlOutputLabel commentLabel = new HtmlOutputLabel();
 			commentLabel.getChildren().add(commentText);
@@ -431,6 +444,15 @@ public class EditArticleView extends IWBaseComponent implements ManagedContentBe
 			saveButton.setOnclick(action.toString());
 		}
 		mainContainer.getChildren().add(buttons);
+		
+		if (needsForm) {
+			WFBlock block = new WFBlock();
+			mainContainer.setStyleAttribute("width", "100%");
+			mainContainer.setStyleAttribute("height", "97%");
+			mainContainer.setStyleAttribute("overflow", "auto");
+			block.add(mainContainer);
+			return block;
+		}
 		
 		return mainContainer;
 	}
