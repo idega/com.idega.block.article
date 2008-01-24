@@ -1,5 +1,5 @@
 /*
- * $Id: EditArticleView.java,v 1.34 2008/01/24 06:45:38 valdas Exp $
+ * $Id: EditArticleView.java,v 1.35 2008/01/24 11:42:51 valdas Exp $
  *
  * Copyright (C) 2004 Idega. All Rights Reserved.
  *
@@ -20,6 +20,7 @@ import javax.faces.component.html.HtmlCommandButton;
 import javax.faces.component.html.HtmlForm;
 import javax.faces.component.html.HtmlInputText;
 import javax.faces.component.html.HtmlInputTextarea;
+import javax.faces.component.html.HtmlMessage;
 import javax.faces.component.html.HtmlOutputLabel;
 import javax.faces.component.html.HtmlOutputText;
 import javax.faces.component.html.HtmlSelectOneMenu;
@@ -72,10 +73,10 @@ import com.idega.webface.htmlarea.HTMLArea;
  * <p>
  * This is the part for the editor of article is inside the admin interface
  * </p>
- * Last modified: $Date: 2008/01/24 06:45:38 $ by $Author: valdas $
+ * Last modified: $Date: 2008/01/24 11:42:51 $ by $Author: valdas $
  *
  * @author Joakim,Tryggvi Larusson
- * @version $Revision: 1.34 $
+ * @version $Revision: 1.35 $
  */
 public class EditArticleView extends IWBaseComponent implements ManagedContentBeans, ActionListener, ValueChangeListener {
 	private static final Log log = LogFactory.getLog(EditArticleView.class);
@@ -165,6 +166,20 @@ public class EditArticleView extends IWBaseComponent implements ManagedContentBe
 		Script closeLoadingMessages = new Script();
 		closeLoadingMessages.addScriptLine("try {window.parent.closeAllLoadingMessages();} catch(e) {}");
 		managementComponent.getChildren().add(closeLoadingMessages);
+		
+		Script checkFieldsIfNotEmpty = new Script();
+		StringBuffer checkAction = new StringBuffer("function checkIfValidArticleEditorFields(ids, message) {\n");
+			checkAction.append("if (ids == null || message == null) return true;\n");
+			checkAction.append("for (var i = 0; i < ids.length; i++) {\n");
+			checkAction.append("var input = document.getElementById(ids[i]);\n");
+				checkAction.append("if (input != null) {\n");
+				checkAction.append("if (input.value == null || input.value == '') {alert(message); return false;}");
+				checkAction.append("}\n");
+			checkAction.append("}\n");
+			checkAction.append("return true;");
+		checkAction.append("}");
+		checkFieldsIfNotEmpty.addScriptLine(checkAction.toString());
+		managementComponent.getChildren().add(checkFieldsIfNotEmpty);
 	}
 	
 	public ArticleAdminBlock getArticleAdminBlock(){
@@ -409,8 +424,10 @@ public class EditArticleView extends IWBaseComponent implements ManagedContentBe
 		buttons.getChildren().add(saveButton);
 		if (needsForm) {
 			IWResourceBundle iwrb = iwc.getIWMainApplication().getBundle(ArticleConstants.IW_BUNDLE_IDENTIFIER).getResourceBundle(iwc);
-			StringBuffer action = new StringBuffer("window.parent.showLoadingMessage('").append(iwrb.getLocalizedString("saving", "Saving...")).append("');");
-			action.append(" addActionAfterArticleIsSavedAndEditorClosed();");
+			StringBuffer action = new StringBuffer("if (checkIfValidArticleEditorFields(['").append(headlineInput.getId()).append("'], '");
+			action.append(iwrb.getLocalizedString("error_headline_empty", "Heading must be entered.")).append("')) {");
+			action.append("window.parent.showLoadingMessage('").append(iwrb.getLocalizedString("saving", "Saving...")).append("');");
+			action.append(" addActionAfterArticleIsSavedAndEditorClosed();} else {return false;}");
 			saveButton.setOnclick(action.toString());
 		}
 		mainContainer.getChildren().add(buttons);
@@ -627,14 +644,37 @@ public class EditArticleView extends IWBaseComponent implements ManagedContentBe
 		}
 		catch(ArticleStoreException ae){
 			String errorKey = ae.getErrorKey();
-			WFUtil.addErrorMessageVB(findComponent(SAVE_ID),ArticleConstants.IW_BUNDLE_IDENTIFIER, errorKey);
+			UIComponent message = getMessageComponent(SAVE_ID);
+			if (message == null) {
+				return false;
+			}
+			WFUtil.addErrorMessageVB(message, ArticleConstants.IW_BUNDLE_IDENTIFIER, errorKey);
 		}
 		catch(Exception e){
 			String errorKey = ArticleStoreException.KEY_ERROR_ON_STORE;
-			WFUtil.addErrorMessageVB(findComponent(SAVE_ID),ArticleConstants.IW_BUNDLE_IDENTIFIER, errorKey);
+			UIComponent message = getMessageComponent(SAVE_ID);
+			if (message == null) {
+				return false;
+			}
+			WFUtil.addErrorMessageVB(message,ArticleConstants.IW_BUNDLE_IDENTIFIER, errorKey);
 			e.printStackTrace();
 		}
 		return false;
+	}
+	
+	private UIComponent getMessageComponent(String id) {
+		UIComponent c = findComponent(SAVE_ID);;
+		if (c == null) {
+			Object o = findEditArticleComponent(this.getChildren(), HtmlMessage.class, id + WFMessages.MESSAGE_COMPONENT_ID_ENDING, true);
+			if (o instanceof HtmlMessage) {
+				c = (HtmlMessage) o;
+			}
+			else {
+				return null;
+			}
+		}
+		
+		return c;
 	}
 	
 	/*
@@ -762,23 +802,29 @@ public class EditArticleView extends IWBaseComponent implements ManagedContentBe
 			fromArticleItemListViewer = false;
 		}
 		
-		String languageChange = getArticleItemBean().getLanguageChange();
+		ArticleItemBean article = getArticleItemBean();
+		String languageChange = article.getLanguageChange();
 		if (languageChange != null) {
-			getArticleItemBean().setLanguageChange(null);
+			article.setLanguageChange(null);
 		}
 		
 		if (resourcePath != null) {
-			getArticleItemBean().setResourcePath(resourcePath);
+			if (resourcePath.equals(CoreConstants.EMPTY)) {
+				resourcePath = article.getResourcePath();
+			}
+			else {
+				article.setResourcePath(resourcePath);
+			}
 		}
 		
 		if (baseFolderPath != null) {
-			getArticleItemBean().setBaseFolderLocation(baseFolderPath);
+			article.setBaseFolderLocation(baseFolderPath);
 		}
 		
 		if (isInDeleteMode()) {
 			//	This has to happen before initializeComponent for delete case:
 			try {
-				getArticleItemBean().load();
+				article.load();
 			}
 			catch (Exception e) {
 				e.printStackTrace();
@@ -794,10 +840,10 @@ public class EditArticleView extends IWBaseComponent implements ManagedContentBe
 			//	We are in edit mode and an article already exits
 			try {
 				if (languageChange == null) {
-					getArticleItemBean().load();
+					article.load();
 				}
 				else {
-					getArticleItemBean().reload();
+					article.reload();
 				}
 				//	Update the categoriesUI with the resourcePath given
 				categoriesUI.setResourcePath(resourcePath);
