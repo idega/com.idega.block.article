@@ -1,5 +1,5 @@
 /*
- * $Id: ArticleItemBean.java,v 1.76 2008/01/23 12:12:06 valdas Exp $
+ * $Id: ArticleItemBean.java,v 1.77 2008/01/24 11:42:14 valdas Exp $
  *
  * Copyright (C) 2004-2005 Idega. All Rights Reserved.
  *
@@ -60,10 +60,10 @@ import com.idega.xml.XMLException;
  * This is a JSF managed bean that manages each article instance and delegates 
  * all calls to the correct localized instance.
  * <p>
- * Last modified: $Date: 2008/01/23 12:12:06 $ by $Author: valdas $
+ * Last modified: $Date: 2008/01/24 11:42:14 $ by $Author: valdas $
  *
  * @author Anders Lindman,<a href="mailto:tryggvi@idega.com">Tryggvi Larusson</a>
- * @version $Revision: 1.76 $
+ * @version $Revision: 1.77 $
  */
 public class ArticleItemBean extends ContentItemBean implements Serializable, ContentItem, ValueChangeListener {
 	
@@ -320,15 +320,8 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 	 * @see com.idega.block.article.bean.ArticleLocalizedItemBean#store()
 	 */
 	public void store() throws IDOStoreException {
-		
-		//First validate headline and body:
-		
-//		if ( (getHeadline()==null) || (getHeadline().trim().equals("")) ) {
-//			ArticleStoreException exception = new ArticleStoreException();
-//			exception.setErrorKey(ArticleStoreException.KEY_ERROR_HEADLINE_EMPTY);
-//			throw exception;
-//		}
-		if (getBody().trim().equals("")) {
+		//	First validate headline and body:
+		if (getBody().trim().equals(CoreConstants.EMPTY)) {
 			ArticleStoreException exception = new ArticleStoreException();
 			exception.setErrorKey(ArticleStoreException.KEY_ERROR_BODY_EMPTY);
 			throw exception;
@@ -339,17 +332,16 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 			IWSlideSession session = getIWSlideSession(iwuc);
 			WebdavRootResource rootResource = session.getWebdavRootResource();
 
-			//Setting the path for creating new file/creating localized version/updating existing file
+			//	Setting the path for creating new file/creating localized version/updating existing file
 			String articleFolderPath = getResourcePath();
 	
 			boolean hadToCreate = session.createAllFoldersInPath(articleFolderPath);
-
-			if(hadToCreate){
+			if (hadToCreate) {
 				String fixedFolderURL = session.getURI(articleFolderPath);
-				rootResource.proppatchMethod(fixedFolderURL,PROPERTY_CONTENT_TYPE,"LocalizedFile",true);
+				rootResource.proppatchMethod(fixedFolderURL, PROPERTY_CONTENT_TYPE, "LocalizedFile", true);
 			}
 			else{
-				rootResource.proppatchMethod(articleFolderPath,PROPERTY_CONTENT_TYPE,"LocalizedFile",true);
+				rootResource.proppatchMethod(articleFolderPath, PROPERTY_CONTENT_TYPE, "LocalizedFile", true);
 			}
 			
 			rootResource.close();
@@ -357,7 +349,6 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 			
 			ArticleCacher cacher = ArticleCacher.getInstance(IWMainApplication.getDefaultIWMainApplication());
 			cacher.getCacheMap().clear();
-			
 		}
 		catch(ArticleStoreException ase){
 			throw ase;
@@ -1268,10 +1259,9 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 	 * @see ContentItem#getResourcePath()
 	 * @return
 	 */
-	public String getResourcePath(){
-		//String resourcePath = super.getResourcePath();
+	public String getResourcePath() {
 		String sResourcePath = this.resourcePath;
-		if(sResourcePath==null){
+		if (sResourcePath == null || CoreConstants.EMPTY.equals(sResourcePath)) {
 			sResourcePath = createArticlePath();
 			setResourcePath(sResourcePath);
 		}
