@@ -1,5 +1,5 @@
 /*
- * $Id: EditArticleView.java,v 1.36 2008/01/24 16:56:09 valdas Exp $
+ * $Id: EditArticleView.java,v 1.37 2008/01/24 17:13:29 valdas Exp $
  *
  * Copyright (C) 2004 Idega. All Rights Reserved.
  *
@@ -74,10 +74,10 @@ import com.idega.webface.htmlarea.HTMLArea;
  * <p>
  * This is the part for the editor of article is inside the admin interface
  * </p>
- * Last modified: $Date: 2008/01/24 16:56:09 $ by $Author: valdas $
+ * Last modified: $Date: 2008/01/24 17:13:29 $ by $Author: valdas $
  *
  * @author Joakim,Tryggvi Larusson
- * @version $Revision: 1.36 $
+ * @version $Revision: 1.37 $
  */
 public class EditArticleView extends IWBaseComponent implements ManagedContentBeans, ActionListener, ValueChangeListener {
 	private static final Log log = LogFactory.getLog(EditArticleView.class);
@@ -264,7 +264,7 @@ public class EditArticleView extends IWBaseComponent implements ManagedContentBe
 		HtmlInputText headlineInput = WFUtil.getInputText(HEADLINE_ID, ref + "headline");
 		int size = 70;
 		if (needsForm) {
-			size = 42;
+			size = 54;
 		}
 		headlineInput.setSize(size);
 		headlineInput.setImmediate(true);
@@ -304,7 +304,7 @@ public class EditArticleView extends IWBaseComponent implements ManagedContentBe
 		String htmlAreaWidth = "640px";
 		String htmlAreaHeight = "480px";
 		if (needsForm) {
-			htmlAreaWidth = "340px";
+			htmlAreaWidth = "440px";
 			htmlAreaHeight = "320px";
 		}
 		//	Article body
