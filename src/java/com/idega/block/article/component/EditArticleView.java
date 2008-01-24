@@ -1,5 +1,5 @@
 /*
- * $Id: EditArticleView.java,v 1.33 2008/01/23 13:14:11 valdas Exp $
+ * $Id: EditArticleView.java,v 1.34 2008/01/24 06:45:38 valdas Exp $
  *
  * Copyright (C) 2004 Idega. All Rights Reserved.
  *
@@ -19,6 +19,7 @@ import javax.faces.component.UISelectItems;
 import javax.faces.component.html.HtmlCommandButton;
 import javax.faces.component.html.HtmlForm;
 import javax.faces.component.html.HtmlInputText;
+import javax.faces.component.html.HtmlInputTextarea;
 import javax.faces.component.html.HtmlOutputLabel;
 import javax.faces.component.html.HtmlOutputText;
 import javax.faces.component.html.HtmlSelectOneMenu;
@@ -71,10 +72,10 @@ import com.idega.webface.htmlarea.HTMLArea;
  * <p>
  * This is the part for the editor of article is inside the admin interface
  * </p>
- * Last modified: $Date: 2008/01/23 13:14:11 $ by $Author: valdas $
+ * Last modified: $Date: 2008/01/24 06:45:38 $ by $Author: valdas $
  *
  * @author Joakim,Tryggvi Larusson
- * @version $Revision: 1.33 $
+ * @version $Revision: 1.34 $
  */
 public class EditArticleView extends IWBaseComponent implements ManagedContentBeans, ActionListener, ValueChangeListener {
 	private static final Log log = LogFactory.getLog(EditArticleView.class);
@@ -90,8 +91,8 @@ public class EditArticleView extends IWBaseComponent implements ManagedContentBe
 	private final static String TEASER_ID = P + "teaser";
 	public final static String BODY_ID = P + "body";
 	private final static String AUTHOR_ID = P + "author";
-//	private final static String SOURCE_ID = P + "source";
-//	private final static String COMMENT_ID = P + "comment";
+	private final static String SOURCE_ID = P + "source";
+	private final static String COMMENT_ID = P + "comment";
 	private final static String PUBLISHED_DATE_ID = P + "published_date";
 	
 	private final static String USER_MESSAGE_ID = P + "user_message";
@@ -316,19 +317,19 @@ public class EditArticleView extends IWBaseComponent implements ManagedContentBe
 			teaserItem.add(teaserLabel);
 			teaserItem.add(teaserArea);
 			mainContainer.add(teaserItem);
+		
+			//Source input
+			HtmlInputText sourceInput = WFUtil.getInputText(SOURCE_ID, ref + "source");
+			UIComponent sourceText = WFUtil.group(localizer.getTextVB("source"), WFUtil.getText(":"));
+			HtmlOutputLabel sourceLabel = new HtmlOutputLabel();
+			sourceLabel.getChildren().add(sourceText);
+			sourceLabel.setFor(sourceInput.getClientId(iwc));
+			
+			WFFormItem sourceItem = new WFFormItem();
+			sourceItem.add(sourceLabel);
+			sourceItem.add(sourceInput);
+			mainContainer.add(sourceItem);
 		}
-		
-		//Source input
-		/*HtmlInputText sourceInput = WFUtil.getInputText(SOURCE_ID, ref + "source");
-		UIComponent sourceText = WFUtil.group(localizer.getTextVB("source"), WFUtil.getText(":"));
-		HtmlOutputLabel sourceLabel = new HtmlOutputLabel();
-		sourceLabel.getChildren().add(sourceText);
-		sourceLabel.setFor(sourceInput.getClientId(context));
-		
-		WFFormItem sourceItem = new WFFormItem();
-		sourceItem.add(sourceLabel);
-		sourceItem.add(sourceInput);
-		mainContainer.add(sourceItem);*/
 		
 
 		//Status field
@@ -359,19 +360,19 @@ public class EditArticleView extends IWBaseComponent implements ManagedContentBe
 		versionItem.add(versionContainer);
 		mainContainer.add(versionItem);*/
 		
-		//Comment input
-		/*HtmlInputTextarea commentArea = WFUtil.getTextArea(COMMENT_ID, ref + "comment", "500px", "60px");
-		UIComponent commentText = WFUtil.group(localizer.getTextVB("comment"), WFUtil.getText(":"));
-		HtmlOutputLabel commentLabel = new HtmlOutputLabel();
-		commentLabel.getChildren().add(commentText);
-		commentLabel.setFor(commentArea.getClientId(context));
-		
-		WFFormItem commentItem = new WFFormItem();
-		commentItem.add(commentLabel);
-		commentItem.add(commentArea);
-		mainContainer.add(commentItem);*/
-		
 		if (fromArticleItemListViewer) {
+			//	Comment input
+			HtmlInputTextarea commentArea = WFUtil.getTextArea(COMMENT_ID, ref + "comment", "500px", "60px");
+			UIComponent commentText = WFUtil.group(localizer.getTextVB("comment"), WFUtil.getText(":"));
+			HtmlOutputLabel commentLabel = new HtmlOutputLabel();
+			commentLabel.getChildren().add(commentText);
+			commentLabel.setFor(commentArea.getClientId(iwc));
+			
+			WFFormItem commentItem = new WFFormItem();
+			commentItem.add(commentLabel);
+			commentItem.add(commentArea);
+			mainContainer.add(commentItem);
+
 			//	Published date
 			WFDateInput publishedInput = WFUtil.getDateInput(PUBLISHED_DATE_ID, ref + "publishedDate");
 			publishedInput.setShowTime(true);
