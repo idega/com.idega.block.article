@@ -4,12 +4,8 @@ import java.util.List;
 import java.util.Locale;
 
 import com.idega.block.article.bean.ArticleItemBean;
-import com.idega.content.bean.ContentItemBean;
 import com.idega.content.business.ContentItemChecker;
-import com.idega.idegaweb.IWApplicationContext;
-import com.idega.idegaweb.IWMainApplication;
-import com.idega.presentation.IWContext;
-import com.idega.util.CoreUtil;
+import com.idega.core.localisation.business.ICLocaleBusiness;
 
 public class ArticleItemChecker implements ContentItemChecker {
 
@@ -17,39 +13,60 @@ public class ArticleItemChecker implements ContentItemChecker {
 		if (paths == null) {
 			return false;
 		}
-
-		IWApplicationContext iwac = IWMainApplication.getDefaultIWApplicationContext();
-		if (iwac == null) {
+		
+		List<Locale> locales = ICLocaleBusiness.getListOfLocalesJAVA();
+		if (locales == null) {
 			return false;
 		}
 		
-		Locale l = iwac.getIWMainApplication().getDefaultLocale();
-		IWContext iwc = CoreUtil.getIWContext();
-		if (iwc != null) {
-			l = iwc.getLocale();
-		}
-		if (l == null) {
-			return false;
-		}
-		
-		String path = null;
-		ContentItemBean bean = new ArticleItemBean();
+		String resourcePath = null;
+		ArticleItemBean dummyArticle = null; 
 		for (int i = 0; i < paths.size(); i++) {
-			path = paths.get(i);
+			resourcePath = paths.get(i);
 			
-			bean.setLocale(l);
-			bean.setResourcePath(path);
-			try {
-				bean.load();
-				if (bean.isDummyContentItem()) {
-					bean.delete();
-				}
-			} catch (Exception e) {
-				e.printStackTrace();
+			dummyArticle = findDummyArticle(resourcePath, locales);
+			if (dummyArticle != null) {
+				dummyArticle.delete();
 			}
 		}
 		
 		return true;
+	}
+	
+	private ArticleItemBean findDummyArticle(String resourcePath, List<Locale> locales) {
+		Locale l = null;
+		ArticleItemBean article = null;
+		for (int i = 0; i < locales.size(); i++) {
+			//	Will check all articles by locales
+			l = locales.get(i);
+			
+			article = getLoadedArticleBean(resourcePath, l);
+			
+			if (article == null) {
+				return null;
+			}
+			
+			if (!article.isDummyContentItem()) {
+				return null;	//	Can not delete article - at least one localized article is not dummy
+			}
+		}
+		
+		return article;	//	Can delete article
+	}
+	
+	private ArticleItemBean getLoadedArticleBean(String resourcePath, Locale l) {
+		ArticleItemBean article = new ArticleItemBean();
+		
+		article.setLocale(l);
+		article.setResourcePath(resourcePath);
+		try {
+			article.load();
+		} catch(Exception e) {
+			e.printStackTrace();
+			return null;
+		}
+		
+		return article;
 	}
 	
 }
