@@ -1,5 +1,5 @@
 /*
- * $Id: ArticleItemBean.java,v 1.77 2008/01/24 11:42:14 valdas Exp $
+ * $Id: ArticleItemBean.java,v 1.78 2008/01/26 10:15:05 valdas Exp $
  *
  * Copyright (C) 2004-2005 Idega. All Rights Reserved.
  *
@@ -34,6 +34,7 @@ import com.idega.block.article.business.ArticleUtil;
 import com.idega.content.bean.ContentItem;
 import com.idega.content.bean.ContentItemBean;
 import com.idega.content.bean.ContentItemCase;
+import com.idega.content.business.ContentConstants;
 import com.idega.core.accesscontrol.business.StandardRoles;
 import com.idega.core.builder.business.BuilderService;
 import com.idega.core.builder.business.BuilderServiceFactory;
@@ -60,10 +61,10 @@ import com.idega.xml.XMLException;
  * This is a JSF managed bean that manages each article instance and delegates 
  * all calls to the correct localized instance.
  * <p>
- * Last modified: $Date: 2008/01/24 11:42:14 $ by $Author: valdas $
+ * Last modified: $Date: 2008/01/26 10:15:05 $ by $Author: valdas $
  *
  * @author Anders Lindman,<a href="mailto:tryggvi@idega.com">Tryggvi Larusson</a>
- * @version $Revision: 1.77 $
+ * @version $Revision: 1.78 $
  */
 public class ArticleItemBean extends ContentItemBean implements Serializable, ContentItem, ValueChangeListener {
 	
@@ -1518,10 +1519,10 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 	}
 	
 	public void setNotAvailableInSelectedLanguage(){
-		this.availableInRequestedLanguage=false;
-		if(!getAllowFallbackToSystemLanguage()){
+		this.availableInRequestedLanguage = false;
+		if (!getAllowFallbackToSystemLanguage()) {
 			getLocalizedArticle().setHeadline("Article not available");
-			getLocalizedArticle().setBody("The article you have chosen is not available in the selected language");
+			getLocalizedArticle().setBody(ContentConstants.ARTICLE_NOT_AVAILABLE_BODY);
 			setExists(true);
 			setRendered(true);
 			getLocalizedArticle().setRendered(true);
