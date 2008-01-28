@@ -1,5 +1,5 @@
 /*
- * $Id: ArticleLocalizedItemBean.java,v 1.25 2008/01/22 16:43:28 valdas Exp $
+ * $Id: ArticleLocalizedItemBean.java,v 1.26 2008/01/28 06:20:56 valdas Exp $
  *
  * Copyright (C) 2004 Idega. All Rights Reserved.
  *
@@ -9,12 +9,11 @@
  */
 package com.idega.block.article.bean;
 
-import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.io.Serializable;
-import java.io.UnsupportedEncodingException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
@@ -52,10 +51,10 @@ import com.idega.xml.XMLParser;
  * This is a JSF managed bean that manages each article xml document 
  * instance per language/locale.
  * <p>
- * Last modified: $Date: 2008/01/22 16:43:28 $ by $Author: valdas $
+ * Last modified: $Date: 2008/01/28 06:20:56 $ by $Author: valdas $
  *
  * @author Anders Lindman,<a href="mailto:tryggvi@idega.com">Tryggvi Larusson</a>
- * @version $Revision: 1.25 $
+ * @version $Revision: 1.26 $
  */
 public class ArticleLocalizedItemBean extends ContentItemBean implements Serializable, ContentItem {
 	
@@ -149,23 +148,6 @@ public class ArticleLocalizedItemBean extends ContentItemBean implements Seriali
 	public void setTeaser(String s) { setValue(FIELDNAME_TEASER, s); } 
 	public void setBody(String body) {
 		setValue(ContentItemBean.FIELDNAME_BODY, body);
-//		if (null != articleIn) {
-////			System.out.println("ArticleIn = "+articleIn);
-//			//Use JTidy to clean up the html
-//			Tidy tidy = new Tidy();
-//			tidy.setXHTML(true);
-//			tidy.setXmlOut(true);
-//			ByteArrayInputStream bais = new ByteArrayInputStream(articleIn.getBytes());
-//			ByteArrayOutputStream baos = new ByteArrayOutputStream();
-//			tidy.parse(bais, baos);
-//			String articleOut = baos.toString();
-////			System.out.println("ArticleOut = "+articleOut);
-//			setValue(FIELDNAME_BODY, articleOut);
-////			setValue(FIELDNAME_BODY, articleIn);
-//		}
-//		else {
-//			setValue(FIELDNAME_BODY, null);
-//		}
 	} 
 	public void setAuthor(String s) { setValue(FIELDNAME_AUTHOR, s); } 
 	public void setSource(String s) { setValue(FIELDNAME_SOURCE, s); }
@@ -179,12 +161,6 @@ public class ArticleLocalizedItemBean extends ContentItemBean implements Seriali
 	}
 	
 	public void setImages(List l) { setItemFields(FIELDNAME_IMAGES, l); }
-	//public void setFilename(String l) { setValue(FIELDNAME_FILENAME, l); }
-//	public void setFolderLocation(String l) { setValue(FIELDNAME_FOLDER_LOCATION, l); }
-	//public void setContentLanguage(String lang) { 	
-		//setValue(FIELDNAME_CONTENT_LANGUAGE, lang); 
-	//	setLanguage(lang);
-	//}
 	
 	public void setPublishedDate(Timestamp date) { super.setPublishedDate(date); }
 	
@@ -194,7 +170,6 @@ public class ArticleLocalizedItemBean extends ContentItemBean implements Seriali
 		super.setLanguage(lang);
 		getArticleItem().setLanguage(lang);
 	}
-	//public void setLanguageChange(String s) { setValue(FIELDNAME_LANGUAGE_CHANGE, s); }
 
 	public boolean isUpdated() { return this._isUpdated; }
 	public void setUpdated(boolean b) { this._isUpdated = b; }
@@ -266,7 +241,20 @@ public class ArticleLocalizedItemBean extends ContentItemBean implements Seriali
 		setStatus(ContentItemCase.STATUS_PUBLISHED);
 	}
 	
-
+	private boolean closeInputStream(InputStream stream) {
+		if (stream == null) {
+			return true;
+		}
+		
+		try {
+			stream.close();
+		} catch (IOException e) {
+			e.printStackTrace();
+			return false;
+		}
+		return true;
+	}
+	
 	/**
 	 * Returns the Article Item as an XML-formatted string
 	 * @return the XML string
@@ -275,7 +263,7 @@ public class ArticleLocalizedItemBean extends ContentItemBean implements Seriali
 	 */
 	public String getAsXML() throws IOException, XMLException {
 		
-		//Remove absolute references for example
+		//	Remove absolute references for example
 		prettifyBody();
 		prettifyTeaser();
 		
@@ -296,81 +284,46 @@ public class ArticleLocalizedItemBean extends ContentItemBean implements Seriali
 		XMLElement teaserElement = null;
 		XMLNamespace jTidyNamespace = new XMLNamespace("http://www.w3.org/1999/xhtml");
 		
+		InputStream stream = null;
 		if (body != null && !ContentConstants.EMPTY.equals(body.trim())) {
-			XMLDocument bodyDoc = builder.parse(new ByteArrayInputStream(body.getBytes(CoreConstants.ENCODING_UTF8)));
-			rootElement = bodyDoc.getRootElement();
-			if (rootElement != null) {
-				bodyElement = rootElement.getChild("body", jTidyNamespace);
-				if (bodyElement != null) {
-					body = bodyElement.getContentAsString();
+			try {
+				stream = StringHandler.getStreamFromString(body);
+				XMLDocument bodyDoc = builder.parse(stream);
+				rootElement = bodyDoc.getRootElement();
+				if (rootElement != null) {
+					bodyElement = rootElement.getChild("body", jTidyNamespace);
+					if (bodyElement != null) {
+						body = bodyElement.getContentAsString();
+					}
 				}
+			} catch(Exception e) {
+				e.printStackTrace();
+			} finally {
+				closeInputStream(stream);
 			}
 		}
 		
 		if (teaser != null && !ContentConstants.EMPTY.equals(teaser.trim())) {
-			XMLDocument bodyDoc = builder.parse(new ByteArrayInputStream(teaser.getBytes(CoreConstants.ENCODING_UTF8)));
-			rootElement = bodyDoc.getRootElement();
-			if (rootElement != null) {
-				teaserElement = rootElement.getChild("body", jTidyNamespace);
-				if (teaserElement != null) {
-					teaser = teaserElement.getContentAsString();
+			try {
+				stream = StringHandler.getStreamFromString(teaser);
+				XMLDocument bodyDoc = builder.parse(stream);
+				rootElement = bodyDoc.getRootElement();
+				if (rootElement != null) {
+					teaserElement = rootElement.getChild("body", jTidyNamespace);
+					if (teaserElement != null) {
+						teaser = teaserElement.getContentAsString();
+					}
 				}
+			} catch(Exception e) {
+				e.printStackTrace();
+			} finally {
+				closeInputStream(stream);
 			}
 		}
 		
 		IWContext iwc = CoreUtil.getIWContext();
-		return getFeedEntryAsXML(iwc, getHeadline(), null, getHeadline(), teaser, body, getAuthor(), getCategories(), getSource(),
-				getComment(), ArticleItemViewer.class.getName(), getLinkToComments());
-
-		/*XMLParser builder = new XMLParser();
-		
-		XMLElement bodyElement = null;
-		XMLElement teaserElement = null;
-		
-		prettifyBody();
-		prettifyTeaser();
-		
-		String bodyString = getBody();
-		if(bodyString != null && !bodyString.trim().equals("")){
-			XMLDocument bodyDoc = builder.parse(new ByteArrayInputStream(bodyString.getBytes(ENCODING_UTF8)));
-			bodyElement = bodyDoc.getRootElement();
-		}
-		
-		String teaserString = getTeaser();
-		if(teaserString != null && !teaserString.trim().equals("")){
-			XMLDocument bodyDoc = builder.parse(new ByteArrayInputStream(teaserString.getBytes(ENCODING_UTF8)));
-			teaserElement = bodyDoc.getRootElement();
-		}
-
-		
-		
-		XMLElement root = new XMLElement("article",getIdegaXMLNameSpace());
-		XMLElement contentLanguage = new XMLElement(FIELDNAME_CONTENT_LANGUAGE,getIdegaXMLNameSpace()).setText(getContentLanguage());
-		XMLElement headline = new XMLElement(FIELDNAME_HEADLINE,getIdegaXMLNameSpace()).setText(getHeadline());
-		XMLElement author = new XMLElement(FIELDNAME_AUTHOR,getIdegaXMLNameSpace()).setText(getAuthor());
-		XMLElement source = new XMLElement(FIELDNAME_SOURCE,getIdegaXMLNameSpace()).setText(getSource());
-		XMLElement articleComment = new XMLElement("article_comment",getIdegaXMLNameSpace()).setText(getComment());
-
-		XMLElement body = new XMLElement(FIELDNAME_BODY,getIdegaXMLNameSpace());
-		if(bodyElement != null){
-			body.addContent(bodyElement);
-		}
-
-		XMLElement teaser = new XMLElement(FIELDNAME_TEASER,getIdegaXMLNameSpace());
-		if(teaserElement != null){
-			teaser.addContent(teaserElement);
-		}
-
-		root.addContent(contentLanguage);
-		root.addContent(headline);
-		root.addContent(teaser);
-		root.addContent(body);
-		root.addContent(author);
-		root.addContent(source);
-		root.addContent(articleComment);
-		XMLDocument doc = new XMLDocument(root);
-		XMLOutput outputter = new XMLOutput();
-		return outputter.outputString(doc);*/
+		return getFeedEntryAsXML(iwc, getHeadline(), null, getHeadline(), teaser, body, getAuthor(), getCategories(), getSource(), getComment(),
+				ArticleItemViewer.class.getName(), getLinkToComments());
 	}
 
 	/**
@@ -396,62 +349,70 @@ public class ArticleLocalizedItemBean extends ContentItemBean implements Seriali
 	 * Stores this article file.
 	 */
 	public void store() throws IDOStoreException{
-
-			try {
-				IWContext iwc = IWContext.getInstance();
-				//IWSlideSession session = (IWSlideSession)IBOLookup.getSessionInstance(iwuc,IWSlideSession.class);
-				IWSlideSession session = getIWSlideSession(iwc);
-				WebdavRootResource rootResource = session.getWebdavRootResource();
+		InputStream stream = null;
+		try {
+			IWContext iwc = CoreUtil.getIWContext();
+			IWSlideSession session = getIWSlideSession(iwc);
+			WebdavRootResource rootResource = session.getWebdavRootResource();
 	
-				//Setting the path for creating new file/creating localized version/updating existing file
-				String filePath=getResourcePath();
-				
-				String article = getAsXML();
-				if (article == null) {
-					return;
-				}
-				
-				ByteArrayInputStream utf8stream = new ByteArrayInputStream(article.getBytes(CoreConstants.ENCODING_UTF8));
-				
-	//			System.out.println(article);
-				
+			//	Setting the path for creating new file/creating localized version/updating existing file
+			String filePath = getResourcePath();
+			
+			String article = getAsXML();
+			if (article == null) {
+				return;
+			}
+			
+			boolean success = false;
+			try {
+				stream = StringHandler.getStreamFromString(article);
+			
 				//Conflict fix: uri for creating but path for updating
 				//Note! This is a patch to what seems to be a bug in WebDav
 				//Apparently in verion below works in some cases and the other in other cases.
 				//Seems to be connected to creating files in folders created in same tomcat session or similar
 				//not quite clear...
-				
-				if(rootResource.putMethod(filePath,utf8stream)){
-					rootResource.proppatchMethod(filePath,ArticleItemBean.PROPERTY_CONTENT_TYPE,CoreConstants.ARTICLE_FILENAME_SCOPE,true);
-				}
-				else{
-					utf8stream = new ByteArrayInputStream(article.getBytes(CoreConstants.ENCODING_UTF8));
-					String fixedURL = session.getURI(filePath);
-					rootResource.putMethod(fixedURL,utf8stream);
-					rootResource.proppatchMethod(fixedURL,ArticleItemBean.PROPERTY_CONTENT_TYPE,CoreConstants.ARTICLE_FILENAME_SCOPE,true);
-				}
-				
-				rootResource.close();
-				//createFeedEntry(iwc, "Articles of " + iwc.getDomain().getDomainName(), "articles.atom", "atom_1.0", "All articles lies here", getHeadline(), getBody());
+			
+				success = rootResource.putMethod(filePath, stream);
+			} catch(Exception e) {
+				e.printStackTrace();
+			} finally {
+				closeInputStream(stream);
+			}
+			if (success) {
+				rootResource.proppatchMethod(filePath, ArticleItemBean.PROPERTY_CONTENT_TYPE,CoreConstants.ARTICLE_FILENAME_SCOPE,true);
+			}
+			else {
 				try {
-					//load(filePath);
-					ArticleLocalizedItemBean newBean = new ArticleLocalizedItemBean();
-					newBean.setArticleItem(this.getArticleItem());
-					newBean.setResourcePath(filePath);
-					newBean.load();
-				}
-				catch (Exception e) {
-					throw new RuntimeException(e);
+					stream = StringHandler.getStreamFromString(article);
+					String fixedURL = session.getURI(filePath);
+					rootResource.putMethod(fixedURL, stream);
+					rootResource.proppatchMethod(fixedURL, ArticleItemBean.PROPERTY_CONTENT_TYPE,CoreConstants.ARTICLE_FILENAME_SCOPE,true);
+				} catch(Exception e) {
+					e.printStackTrace();
+				} finally {
+					closeInputStream(stream);
 				}
 			}
-			catch (IOException e1) {
-				throw new RuntimeException(e1);
+			
+			rootResource.close();
+			try {
+				ArticleLocalizedItemBean newBean = new ArticleLocalizedItemBean();
+				newBean.setArticleItem(this.getArticleItem());
+				newBean.setResourcePath(filePath);
+				newBean.load();
 			}
-			catch (XMLException e) {
+			catch (Exception e) {
 				throw new RuntimeException(e);
 			}
-		
-
+		}
+		catch (IOException e1) {
+			throw new RuntimeException(e1);
+		}
+		catch (XMLException e) {
+			throw new RuntimeException(e);
+		}
+	
 		if (getRequestedStatus() != null) {
 			setStatus(getRequestedStatus());
 			setRequestedStatus(null);
@@ -481,44 +442,47 @@ public class ArticleLocalizedItemBean extends ContentItemBean implements Seriali
 		}
 		
 		String text = toPrettify;
-		//Use JTidy to clean up the html
+		//	Use JTidy to clean up the HTML
 		Tidy tidy = new Tidy();
 		tidy.setXHTML(true);
 		tidy.setXmlOut(true);
 		tidy.setShowWarnings(false);
 		tidy.setCharEncoding(Configuration.UTF8);
-		ByteArrayInputStream bais = null;
+		InputStream stream = null;
 		ByteArrayOutputStream baos = null;
 		try {
-			bais = new ByteArrayInputStream(text.getBytes(CoreConstants.ENCODING_UTF8));
+			stream = StringHandler.getStreamFromString(text);
 			baos = new ByteArrayOutputStream();
 			
-			tidy.parse(bais, baos);
+			tidy.parse(stream, baos);
 			text = baos.toString(CoreConstants.ENCODING_UTF8);
 		}
-		catch (UnsupportedEncodingException e) {
+		catch (Exception e) {
 			e.printStackTrace();
-		}
-			
-		if (bais != null) {
-			try {
-				bais.close();
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-		}
-		if (baos != null) {
-			try {
-				baos.close();
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
+		} finally {
+			closeInputStream(stream);
+			closeOutputStream(baos);
 		}
 	
 		text = removeAbsoluteReferences(text);
 		return text;
 	}
 
+	private boolean closeOutputStream(OutputStream outputStream) {
+		if (outputStream == null) {
+			return false;
+		}
+		
+		try {
+			outputStream.close();
+		} catch (IOException e) {
+			e.printStackTrace();
+			return false;
+		}
+		
+		return true;
+	}
+	
 	private String removeAbsoluteReferences(String text) {
 		return StringHandler.removeAbsoluteReferencies(text);
 	}
@@ -530,30 +494,27 @@ public class ArticleLocalizedItemBean extends ContentItemBean implements Seriali
 	protected boolean load(WebdavExtendedResource webdavResource) throws IOException {
 		XMLParser builder = new XMLParser();
 		XMLDocument bodyDoc = null;
+		InputStream stream = null;
 		try {
-			
-			if(webdavResource.isCollection()){
+			if (webdavResource.isCollection()) {
 				throw new RuntimeException(webdavResource+" is folder but should be file");
 			}
 			WebdavResource theArticle = webdavResource;
-			
-
-			if(theArticle!=null && !theArticle.isCollection()){
-				//setArticleResourcePath(theArticle.getPath());
+			if (theArticle != null && !theArticle.isCollection()) {
 				setResourcePath(theArticle.getPath());
-				//String inStr = theArticle.getMethodDataAsString();
-				//byte[] bytes = inStr.getBytes(ENCODING_UTF8);
-				//InputStream inStream = new ByteArrayInputStream(bytes);
-				InputStream inStream = theArticle.getMethodData();
-				bodyDoc = builder.parse(inStream);
+				stream = theArticle.getMethodData();
+				bodyDoc = builder.parse(stream);
 			} else {
 				bodyDoc = null;
 			}
 		} catch (XMLException e) {
 			e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+		} finally {
+			closeInputStream(stream);
 		}
-		if(bodyDoc==null){
-//			article not found
+		
+		if (bodyDoc == null) {
+			//	Article not found
 			Logger log = Logger.getLogger(this.getClass().toString());
 			log.warning("Article xml file was not found");
 			setRendered(false);
@@ -606,7 +567,6 @@ public class ArticleLocalizedItemBean extends ContentItemBean implements Seriali
 					setTeaser(bodyValue);
 				}
 			}catch(Exception e) {		//Nullpointer could occur if field isn't used
-	//			e.printStackTrace();
 				Logger log = Logger.getLogger(this.getClass().toString());
 				log.warning("Teaser of article is empty");
 				setTeaser(CoreConstants.EMPTY);
@@ -637,7 +597,6 @@ public class ArticleLocalizedItemBean extends ContentItemBean implements Seriali
 			String bodyValue = htmlBodyElement.getContentAsString();
 			setBody(bodyValue);
 		}catch(Exception e) {		//Nullpointer could occur if field isn't used
-//			e.printStackTrace();
 			Logger log = Logger.getLogger(this.getClass().toString());
 			log.warning("Body of article is empty");
 			setBody(CoreConstants.EMPTY);
@@ -665,8 +624,6 @@ public class ArticleLocalizedItemBean extends ContentItemBean implements Seriali
 			setComment(CoreConstants.EMPTY);
 		}
 		return true;
-//	    setFilename();
-//		setFolderLocation(bodyElement.getChild(FIELDNAME_FOLDER_LOCATION,idegans).getText());
 	}
 	
 	private boolean loadArticleFromFeed(XMLElement root) {
