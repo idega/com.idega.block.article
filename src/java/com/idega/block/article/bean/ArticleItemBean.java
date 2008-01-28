@@ -1,5 +1,5 @@
 /*
- * $Id: ArticleItemBean.java,v 1.78 2008/01/26 10:15:05 valdas Exp $
+ * $Id: ArticleItemBean.java,v 1.79 2008/01/28 06:14:41 valdas Exp $
  *
  * Copyright (C) 2004-2005 Idega. All Rights Reserved.
  *
@@ -61,10 +61,10 @@ import com.idega.xml.XMLException;
  * This is a JSF managed bean that manages each article instance and delegates 
  * all calls to the correct localized instance.
  * <p>
- * Last modified: $Date: 2008/01/26 10:15:05 $ by $Author: valdas $
+ * Last modified: $Date: 2008/01/28 06:14:41 $ by $Author: valdas $
  *
  * @author Anders Lindman,<a href="mailto:tryggvi@idega.com">Tryggvi Larusson</a>
- * @version $Revision: 1.78 $
+ * @version $Revision: 1.79 $
  */
 public class ArticleItemBean extends ContentItemBean implements Serializable, ContentItem, ValueChangeListener {
 	
@@ -547,591 +547,6 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 	public void setRendered(Boolean render) {
 		getLocalizedArticle().setRendered(render);
 	}
-//
-//	/* (non-Javadoc)
-//	 * @see com.idega.content.bean.ContentItemBean#getDeleted()
-//	 */
-//	public boolean getDeleted() {
-//		return getLocalizedArticle().getDeleted();
-//	}
-//
-//	/* (non-Javadoc)
-//	 * @see com.idega.content.bean.ContentItemBean#getDeletedByUserId()
-//	 */
-//	public int getDeletedByUserId() {
-//		return getLocalizedArticle().getDeletedByUserId();
-//	}
-//
-//	/* (non-Javadoc)
-//	 * @see com.idega.content.bean.ContentItemBean#getDeletedWhen()
-//	 */
-//	public Timestamp getDeletedWhen() {
-//		return getLocalizedArticle().getDeletedWhen();
-//	}
-//
-//	/* (non-Javadoc)
-//	 * @see com.idega.content.bean.ContentItemBean#getFileSize()
-//	 */
-//	public Integer getFileSize() {
-//		return getLocalizedArticle().getFileSize();
-//	}
-//
-//	/* (non-Javadoc)
-//	 * @see com.idega.content.bean.ContentItemBean#getFileValue()
-//	 */
-//	public InputStream getFileValue() {
-//		return getLocalizedArticle().getFileValue();
-//	}
-//
-//	/* (non-Javadoc)
-//	 * @see com.idega.content.bean.ContentItemBean#getFileValueForWrite()
-//	 */
-//	public OutputStream getFileValueForWrite() {
-//		return getLocalizedArticle().getFileValueForWrite();
-//	}
-//
-//	/* (non-Javadoc)
-//	 * @see com.idega.content.bean.ContentItemBean#getICLocale()
-//	 */
-//	public ICLocale getICLocale() {
-//		return getLocalizedArticle().getICLocale();
-//	}
-//
-//	/* (non-Javadoc)
-//	 * @see com.idega.content.bean.ContentItemBean#getLanguage()
-//	 */
-//	public int getLanguage() {
-//		return getLocalizedArticle().getLanguage();
-//	}
-//
-//	/* (non-Javadoc)
-//	 * @see com.idega.content.bean.ContentItemBean#getMimeType()
-//	 */
-//	public String getMimeType() {
-//		return getLocalizedArticle().getMimeType();
-//	}
-//
-//	/* (non-Javadoc)
-//	 * @see com.idega.content.bean.ContentItemBean#getModificationDate()
-//	 */
-//	public Timestamp getModificationDate() {
-//		return getLocalizedArticle().getModificationDate();
-//	}
-//
-//	/* (non-Javadoc)
-//	 * @see com.idega.content.bean.ContentItemBean#initializeAttributes()
-//	 */
-//	public void initializeAttributes() {
-//		getLocalizedArticle().initializeAttributes();
-//	}
-//
-//	/* (non-Javadoc)
-//	 * @see com.idega.content.bean.ContentItemBean#isLeaf()
-//	 */
-//	public boolean isLeaf() {
-//		return getLocalizedArticle().isLeaf();
-//	}
-//
-//	/* (non-Javadoc)
-//	 * @see com.idega.content.bean.ContentItemBean#setCreationDate(java.sql.Timestamp)
-//	 */
-//	public void setCreationDate(Timestamp date) {
-//		getLocalizedArticle().setCreationDate(date);
-//	}
-//
-//	/* (non-Javadoc)
-//	 * @see com.idega.content.bean.ContentItemBean#setResourcePath(java.lang.String)
-//	 */
-//	public void setResourcePath(String path) {
-//		getLocalizedArticle().setResourcePath(path);
-//	}
-//
-//	/* (non-Javadoc)
-//	 * @see com.idega.content.bean.ContentItemBean#setDeleted(boolean)
-//	 */
-//	public void setDeleted(boolean p0) {
-//		getLocalizedArticle().setDeleted(p0);
-//	}
-//
-//	/* (non-Javadoc)
-//	 * @see com.idega.content.bean.ContentItemBean#setFileSize(java.lang.Integer)
-//	 */
-//	public void setFileSize(Integer p0) {
-//		
-//		getLocalizedArticle().setFileSize(p0);
-//	}
-//
-//	/* (non-Javadoc)
-//	 * @see com.idega.content.bean.ContentItemBean#setFileSize(int)
-//	 */
-//	public void setFileSize(int p0) {
-//		
-//		getLocalizedArticle().setFileSize(p0);
-//	}
-//
-//	/* (non-Javadoc)
-//	 * @see com.idega.content.bean.ContentItemBean#setFileValue(java.io.InputStream)
-//	 */
-//	public void setFileValue(InputStream p0) {
-//		
-//		getLocalizedArticle().setFileValue(p0);
-//	}
-//
-//	/* (non-Javadoc)
-//	 * @see com.idega.content.bean.ContentItemBean#setLanguage(int)
-//	 */
-//	public void setLanguage(int p0) {
-//		
-//		getLocalizedArticle().setLanguage(p0);
-//	}
-//
-//	/* (non-Javadoc)
-//	 * @see com.idega.content.bean.ContentItemBean#setLocale()
-//	 */
-//	public void setLocale() {
-//		
-//		getLocalizedArticle().setLocale();
-//	}
-//
-//	/* (non-Javadoc)
-//	 * @see com.idega.content.bean.ContentItemBean#setMimeType(java.lang.String)
-//	 */
-//	public void setMimeType(String p0) {
-//		
-//		getLocalizedArticle().setMimeType(p0);
-//	}
-//
-//	/* (non-Javadoc)
-//	 * @see com.idega.content.bean.ContentItemBean#setModificationDate(java.sql.Timestamp)
-//	 */
-//	public void setModificationDate(Timestamp p0) {
-//		
-//		getLocalizedArticle().setModificationDate(p0);
-//	}
-//
-//	/* (non-Javadoc)
-//	 * @see com.idega.content.bean.ContentItemBean#superDelete()
-//	 */
-//	public void superDelete() throws SQLException {
-//		
-//		getLocalizedArticle().superDelete();
-//	}
-//
-//	/* (non-Javadoc)
-//	 * @see com.idega.content.bean.ContentItemBean#unDelete(boolean)
-//	 */
-//	public void unDelete(boolean p0) throws SQLException {
-//		
-//		getLocalizedArticle().unDelete(p0);
-//	}
-//
-//	/* (non-Javadoc)
-//	 * @see com.idega.content.bean.ContentItemBean#delete()
-//	 */
-//	public void delete() throws SQLException {
-//		
-//		getLocalizedArticle().delete();
-//	}
-//
-//	/* (non-Javadoc)
-//	 * @see com.idega.content.bean.ContentItemBean#isFolder()
-//	 */
-//	public boolean isFolder() {
-//		
-//		return getLocalizedArticle().isFolder();
-//	}
-//
-//	/* (non-Javadoc)
-//	 * @see com.idega.content.bean.ContentItemBean#isEmpty()
-//	 */
-//	public boolean isEmpty() {
-//		
-//		return getLocalizedArticle().isEmpty();
-//	}
-//
-//	/* (non-Javadoc)
-//	 * @see com.idega.content.bean.ContentItemBean#getLocalizationKey()
-//	 */
-//	public String getLocalizationKey() {
-//		
-//		return getLocalizedArticle().getLocalizationKey();
-//	}
-//
-//	/* (non-Javadoc)
-//	 * @see com.idega.content.bean.ContentItemBean#setLocalizationKey(java.lang.String)
-//	 */
-//	public void setLocalizationKey(String key) {
-//		
-//		getLocalizedArticle().setLocalizationKey(key);
-//	}
-//
-//	/* (non-Javadoc)
-//	 * @see com.idega.content.bean.ContentItemBean#getEntityDefinition()
-//	 */
-//	public IDOEntityDefinition getEntityDefinition() {
-//		
-//		return getLocalizedArticle().getEntityDefinition();
-//	}
-//
-//	/* (non-Javadoc)
-//	 * @see com.idega.content.bean.ContentItemBean#decode(java.lang.String)
-//	 */
-//	public Object decode(String pkString) {
-//		
-//		return getLocalizedArticle().decode(pkString);
-//	}
-//
-//	/* (non-Javadoc)
-//	 * @see com.idega.content.bean.ContentItemBean#decode(java.lang.String[])
-//	 */
-//	public Collection decode(String[] pkString) {
-//		
-//		return getLocalizedArticle().decode(pkString);
-//	}
-//
-//	/* (non-Javadoc)
-//	 * @see com.idega.content.bean.ContentItemBean#getEJBLocalHome()
-//	 */
-//	public EJBLocalHome getEJBLocalHome() throws EJBException {
-//		
-//		return getLocalizedArticle().getEJBLocalHome();
-//	}
-//
-//	/* (non-Javadoc)
-//	 * @see com.idega.content.bean.ContentItemBean#getPrimaryKey()
-//	 */
-//	public Object getPrimaryKey() throws EJBException {
-//		
-//		return getLocalizedArticle().getPrimaryKey();
-//	}
-//
-//	/* (non-Javadoc)
-//	 * @see com.idega.content.bean.ContentItemBean#remove()
-//	 */
-//	public void remove() throws RemoveException, EJBException {
-//		
-//		getLocalizedArticle().remove();
-//	}
-//
-//	/* (non-Javadoc)
-//	 * @see com.idega.content.bean.ContentItemBean#isIdentical(javax.ejb.EJBLocalObject)
-//	 */
-//	public boolean isIdentical(EJBLocalObject arg0) throws EJBException {
-//		
-//		return getLocalizedArticle().isIdentical(arg0);
-//	}
-//
-//	/* (non-Javadoc)
-//	 * @see com.idega.content.bean.ContentItemBean#compareTo(java.lang.Object)
-//	 */
-//	public int compareTo(Object o) {
-//		
-//		return getLocalizedArticle().compareTo(o);
-//	}
-//
-//	/* (non-Javadoc)
-//	 * @see com.idega.content.bean.ContentItemBean#addChild(com.idega.data.TreeableEntity)
-//	 */
-//	public void addChild(TreeableEntity p0) throws SQLException {
-//		
-//		getLocalizedArticle().addChild(p0);
-//	}
-//
-//	/* (non-Javadoc)
-//	 * @see com.idega.content.bean.ContentItemBean#getChildrenIterator(java.lang.String)
-//	 */
-//	public Iterator getChildrenIterator(String p0) {
-//		
-//		return getLocalizedArticle().getChildrenIterator(p0);
-//	}
-//
-//	/* (non-Javadoc)
-//	 * @see com.idega.content.bean.ContentItemBean#getChildrenIterator(java.lang.String, boolean)
-//	 */
-//	public Iterator getChildrenIterator(String p0, boolean p1) {
-//		
-//		return getLocalizedArticle().getChildrenIterator(p0, p1);
-//	}
-//
-//	/* (non-Javadoc)
-//	 * @see com.idega.content.bean.ContentItemBean#getIndex(com.idega.core.data.ICTreeNode)
-//	 */
-//	public int getIndex(ICTreeNode p0) {
-//		
-//		return getLocalizedArticle().getIndex(p0);
-//	}
-//
-//	/* (non-Javadoc)
-//	 * @see com.idega.content.bean.ContentItemBean#getParentEntity()
-//	 */
-//	public TreeableEntity getParentEntity() {
-//		
-//		return getLocalizedArticle().getParentEntity();
-//	}
-//
-//	/* (non-Javadoc)
-//	 * @see com.idega.content.bean.ContentItemBean#getTreeRelationshipChildColumnName(com.idega.data.TreeableEntity)
-//	 */
-//	public String getTreeRelationshipChildColumnName(TreeableEntity p0) {
-//		
-//		return getLocalizedArticle().getTreeRelationshipChildColumnName(p0);
-//	}
-//
-//	/* (non-Javadoc)
-//	 * @see com.idega.content.bean.ContentItemBean#getTreeRelationshipTableName(com.idega.data.TreeableEntity)
-//	 */
-//	public String getTreeRelationshipTableName(TreeableEntity p0) {
-//		
-//		return getLocalizedArticle().getTreeRelationshipTableName(p0);
-//	}
-//
-//	/* (non-Javadoc)
-//	 * @see com.idega.content.bean.ContentItemBean#moveChildrenFrom(com.idega.data.TreeableEntity)
-//	 */
-//	public void moveChildrenFrom(TreeableEntity p0) throws SQLException {
-//		
-//		getLocalizedArticle().moveChildrenFrom(p0);
-//	}
-//
-//	/* (non-Javadoc)
-//	 * @see com.idega.content.bean.ContentItemBean#removeChild(com.idega.data.TreeableEntity)
-//	 */
-//	public void removeChild(TreeableEntity p0) throws SQLException {
-//		
-//		getLocalizedArticle().removeChild(p0);
-//	}
-//
-//	/* (non-Javadoc)
-//	 * @see com.idega.content.bean.ContentItemBean#leafsFirst()
-//	 */
-//	public boolean leafsFirst() {
-//		
-//		return getLocalizedArticle().leafsFirst();
-//	}
-//
-//	/* (non-Javadoc)
-//	 * @see com.idega.content.bean.ContentItemBean#sortLeafs()
-//	 */
-//	public boolean sortLeafs() {
-//		
-//		return getLocalizedArticle().sortLeafs();
-//	}
-//
-//	/* (non-Javadoc)
-//	 * @see com.idega.content.bean.ContentItemBean#setLeafsFirst(boolean)
-//	 */
-//	public void setLeafsFirst(boolean b) {
-//		
-//		getLocalizedArticle().setLeafsFirst(b);
-//	}
-//
-//	/* (non-Javadoc)
-//	 * @see com.idega.content.bean.ContentItemBean#setToSortLeafs(boolean)
-//	 */
-//	public void setToSortLeafs(boolean b) {
-//		
-//		getLocalizedArticle().setToSortLeafs(b);
-//	}
-//
-//	/* (non-Javadoc)
-//	 * @see com.idega.content.bean.ContentItemBean#getChildren()
-//	 */
-//	public Collection getChildren() {
-//		
-//		return getLocalizedArticle().getChildren();
-//	}
-//
-//	/* (non-Javadoc)
-//	 * @see com.idega.content.bean.ContentItemBean#getChildrenIterator()
-//	 */
-//	public Iterator getChildrenIterator() {
-//		
-//		return getLocalizedArticle().getChildrenIterator();
-//	}
-//
-//	/* (non-Javadoc)
-//	 * @see com.idega.content.bean.ContentItemBean#getAllowsChildren()
-//	 */
-//	public boolean getAllowsChildren() {
-//		
-//		return getLocalizedArticle().getAllowsChildren();
-//	}
-//
-//	/* (non-Javadoc)
-//	 * @see com.idega.content.bean.ContentItemBean#getChildAtIndex(int)
-//	 */
-//	public ICTreeNode getChildAtIndex(int childIndex) {
-//		
-//		return getLocalizedArticle().getChildAtIndex(childIndex);
-//	}
-//
-//	/* (non-Javadoc)
-//	 * @see com.idega.content.bean.ContentItemBean#getChildCount()
-//	 */
-//	public int getChildCount() {
-//		
-//		return getLocalizedArticle().getChildCount();
-//	}
-//
-//	/* (non-Javadoc)
-//	 * @see com.idega.content.bean.ContentItemBean#getParentNode()
-//	 */
-//	public ICTreeNode getParentNode() {
-//		
-//		return getLocalizedArticle().getParentNode();
-//	}
-//
-//	/* (non-Javadoc)
-//	 * @see com.idega.content.bean.ContentItemBean#getNodeName()
-//	 */
-//	public String getNodeName() {
-//		
-//		return getLocalizedArticle().getNodeName();
-//	}
-//
-//	/* (non-Javadoc)
-//	 * @see com.idega.content.bean.ContentItemBean#getNodeName(java.util.Locale)
-//	 */
-//	public String getNodeName(Locale locale) {
-//		
-//		return getLocalizedArticle().getNodeName(locale);
-//	}
-//
-//	/* (non-Javadoc)
-//	 * @see com.idega.content.bean.ContentItemBean#getNodeName(java.util.Locale, com.idega.idegaweb.IWApplicationContext)
-//	 */
-//	public String getNodeName(Locale locale, IWApplicationContext iwac) {
-//		
-//		return getLocalizedArticle().getNodeName(locale, iwac);
-//	}
-//
-//	/* (non-Javadoc)
-//	 * @see com.idega.content.bean.ContentItemBean#getNodeID()
-//	 */
-//	public int getNodeID() {
-//		
-//		return getLocalizedArticle().getNodeID();
-//	}
-//
-//	/* (non-Javadoc)
-//	 * @see com.idega.content.bean.ContentItemBean#getSiblingCount()
-//	 */
-//	public int getSiblingCount() {
-//		
-//		return getLocalizedArticle().getSiblingCount();
-//	}
-//
-//	/* (non-Javadoc)
-//	 * @see com.idega.content.bean.ContentItemBean#setMetaDataAttributes(java.util.Map)
-//	 */
-//	public void setMetaDataAttributes(Map map) {
-//		
-//		getLocalizedArticle().setMetaDataAttributes(map);
-//	}
-//
-//	/* (non-Javadoc)
-//	 * @see com.idega.content.bean.ContentItemBean#getMetaDataAttributes()
-//	 */
-//	public Map getMetaDataAttributes() {
-//		
-//		return getLocalizedArticle().getMetaDataAttributes();
-//	}
-//
-//	/* (non-Javadoc)
-//	 * @see com.idega.content.bean.ContentItemBean#getMetaDataTypes()
-//	 */
-//	public Map getMetaDataTypes() {
-//		
-//		return getLocalizedArticle().getMetaDataTypes();
-//	}
-//
-//	/* (non-Javadoc)
-//	 * @see com.idega.content.bean.ContentItemBean#setMetaData(java.lang.String, java.lang.String)
-//	 */
-//	public void setMetaData(String metaDataKey, String value) {
-//		
-//		getLocalizedArticle().setMetaData(metaDataKey, value);
-//	}
-//
-//	/* (non-Javadoc)
-//	 * @see com.idega.content.bean.ContentItemBean#setMetaData(java.lang.String, java.lang.String, java.lang.String)
-//	 */
-//	public void setMetaData(String metaDataKey, String value, String type) {
-//		
-//		getLocalizedArticle().setMetaData(metaDataKey, value, type);
-//	}
-//
-//	/* (non-Javadoc)
-//	 * @see com.idega.content.bean.ContentItemBean#getMetaData(java.lang.String)
-//	 */
-//	public String getMetaData(String metaDataKey) {
-//		
-//		return getLocalizedArticle().getMetaData(metaDataKey);
-//	}
-//
-//	/* (non-Javadoc)
-//	 * @see com.idega.content.bean.ContentItemBean#renameMetaData(java.lang.String, java.lang.String)
-//	 */
-//	public void renameMetaData(String oldKeyName, String newKeyName) {
-//		
-//		getLocalizedArticle().renameMetaData(oldKeyName, newKeyName);
-//	}
-//
-//	/* (non-Javadoc)
-//	 * @see com.idega.content.bean.ContentItemBean#renameMetaData(java.lang.String, java.lang.String, java.lang.String)
-//	 */
-//	public void renameMetaData(String oldKeyName, String newKeyName, String value) {
-//		
-//		getLocalizedArticle().renameMetaData(oldKeyName, newKeyName, value);
-//	}
-//
-//	/* (non-Javadoc)
-//	 * @see com.idega.content.bean.ContentItemBean#removeMetaData(java.lang.String)
-//	 */
-//	public boolean removeMetaData(String metaDataKey) {
-//		
-//		return getLocalizedArticle().removeMetaData(metaDataKey);
-//	}
-//
-//	/* (non-Javadoc)
-//	 * @see com.idega.content.bean.ContentItemBean#updateMetaData()
-//	 */
-//	public void updateMetaData() throws SQLException {
-//		
-//		getLocalizedArticle().updateMetaData();
-//	}
-//
-//	/* (non-Javadoc)
-//	 * @see com.idega.content.bean.ContentItemBean#getLocaleId()
-//	 */
-//	public int getLocaleId() {
-//		
-//		return getLocalizedArticle().getLocaleId();
-//	}
-//
-//	/* (non-Javadoc)
-//	 * @see com.idega.content.bean.ContentItemBean#getDatasource()
-//	 */
-//	public String getDatasource() {
-//		
-//		return getLocalizedArticle().getDatasource();
-//	}
-//
-//	/* (non-Javadoc)
-//	 * @see com.idega.content.bean.ContentItemBean#write(com.idega.io.serialization.ObjectWriter, com.idega.presentation.IWContext)
-//	 */
-//	public Object write(ObjectWriter writer, IWContext iwc) throws RemoteException {
-//		
-//		return getLocalizedArticle().write(writer, iwc);
-//	}
-//
-//	/* (non-Javadoc)
-//	 * @see com.idega.content.bean.ContentItemBean#read(com.idega.io.serialization.ObjectReader, com.idega.presentation.IWContext)
-//	 */
-//	public Object read(ObjectReader reader, IWContext iwc) throws RemoteException {
-//		
-//		return getLocalizedArticle().read(reader, iwc);
-//	}
 
 	/* (non-Javadoc)
 	 * @see com.idega.content.bean.ContentItemBean#isAutoCreateResource()
@@ -1185,12 +600,6 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 		else{
 			return ArticleUtil.getArticleBaseFolderPath();
 		}
-		/*
-		String articlePath = getResourcePath();
-		if(articlePath!=null){
-			return ContentUtil.getParentPath(ContentUtil.getParentPath(articlePath));
-		}
-		return null;*/
 	}
 	/*
 	 * This sets the base folder for storing articles, 
@@ -1209,7 +618,6 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 	}
 	
 	public void setResourcePath(String resourcePath){
-		//super.setResourcePath(resourcePath);
 		this.resourcePath=resourcePath;
 		updateLocalizedArticleBean();
 	}
@@ -1292,17 +700,12 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 	private String getGeneratedArticleResourcePath() {
 		makesureStandardFolderisCreated();
 		String path = null;
-		//String path = getResourcePath();
-		//String path = (String)getValue(FIELDNAME_RESOURCE_PATH);
-		//if(path==null){
-			try {
-				path =  generateArticleResourcePath(CoreUtil.getIWContext());
-				//setArticleResourcePath(path);
-			}
-			catch (UnavailableIWContext e) {
-				e.printStackTrace();
-			}
-		//}
+		try {
+			path =  generateArticleResourcePath(CoreUtil.getIWContext());
+		}
+		catch (UnavailableIWContext e) {
+			e.printStackTrace();
+		}
 		return path;
 	}
 	
@@ -1316,15 +719,6 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 	 * @return
 	 */
 	protected String generateArticleResourcePath(IWContext iwc) {
-		/*String baseFolderLocation = getBaseFolderLocation();
-		String dateFolderLocation = ArticleUtil.getArticleYearMonthPath(baseFolderLocation);
-		StringBuffer path = new StringBuffer(dateFolderLocation);
-		path.append("/");
-		path.append(service.createUniqueFileName(ARTICLE_FILENAME_SCOPE));
-		path.append(".");
-		path.append(ARTICLE_FILENAME_SCOPE);
-		return path.toString();*/
-		
 		BuilderService service = null;
 		try {
 			service = BuilderServiceFactory.getBuilderService(iwc);
@@ -1374,8 +768,6 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 			Ace editorAce = new Ace(editorRoleUri);
 			editorAce.addPrivilege(Privilege.READ);
 			editorAce.addPrivilege(Privilege.WRITE);
-			//editorAce.addPrivilege(Privilege.READ);
-			//editorAce.setInherited(true);
 			AccessControlEntry editorEntry = new AccessControlEntry(editorAce,AccessControlEntry.PRINCIPAL_TYPE_ROLE);
 			aclList.add(editorEntry);
 			
@@ -1383,8 +775,6 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 			Ace authorAce = new Ace(authorRoleUri);
 			authorAce.addPrivilege(Privilege.READ);
 			authorAce.addPrivilege(Privilege.WRITE);
-			//editorAce.addPrivilege(Privilege.READ);
-			//editorAce.setInherited(true);
 			AccessControlEntry authorEntry = new AccessControlEntry(authorAce,AccessControlEntry.PRINCIPAL_TYPE_ROLE);
 			aclList.add(authorEntry);
 			
@@ -1425,11 +815,9 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 	 * Loads the article (folder)
 	 */
 	protected boolean load(WebdavExtendedResource webdavResource) throws IOException {
-		//isDummyArticleSet = false;
 		WebdavExtendedResource localizedArticleFile = null;
 		//First check if the resource is a folder, as it should be
 		if(webdavResource.isCollection()){
-			//IWContext iwc = IWContext.getInstance();
 			
 			WebdavResources resources = webdavResource.getChildResources();
 			String userLanguageArticleResourcePath = getArticleDefaultLocalizedResourcePath();
@@ -1454,35 +842,18 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 				}
 				
 			}
-				
-			/*} else if(resources.isThereResourceName(systemLanguageArticleName)){ //the language that is default for the system
-				articleFile = (WebdavExtendedResource) resources.getResource(systemLanguageArticleName);
-			} else {  // take the first language
-				Enumeration en = resources.getResources();
-				if(en.hasMoreElements()){
-					articleFile = (WebdavExtendedResource)en.nextElement();
-				}
-			}*/
 		} else {
-			//theArticle = webdavResource;
-			//throw new RuntimeException(webdavResource+" is directory, but should be a file");
 			String path = getResourcePath();
 			setLanguageFromFilePath(path);
 			String parentFolder = webdavResource.getParentPath();
 			setResourcePath(parentFolder);
 			return load(parentFolder);
-			
-			//WebdavResource folder = webdavResource.getParentPath();
 		}
 		if(localizedArticleFile!=null){
 			return getLocalizedArticle().load(localizedArticleFile);
 		}
 		return false;
 	}
-	
-	/*public boolean getShowOnlyArticleInSelectedLanguage(){
-		return true;
-	}*/
 	
 	/**
 	 * <p>
