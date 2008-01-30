@@ -1,5 +1,5 @@
 /*
- * $Id: ArticleUtil.java,v 1.11 2008/01/23 12:12:05 valdas Exp $
+ * $Id: ArticleUtil.java,v 1.12 2008/01/30 13:49:42 valdas Exp $
  * Created on 7.2.2005
  *
  * Copyright (C) 2005 Idega Software hf. All Rights Reserved.
@@ -32,10 +32,10 @@ import com.idega.webface.WFUtil;
 
 /**
  * 
- *  Last modified: $Date: 2008/01/23 12:12:05 $ by $Author: valdas $
+ *  Last modified: $Date: 2008/01/30 13:49:42 $ by $Author: valdas $
  * 
  * @author <a href="mailto:gummi@idega.com">Gudmundur Agust Saemundsson</a>
- * @version $Revision: 1.11 $
+ * @version $Revision: 1.12 $
  */
 public class ArticleUtil {
 
@@ -110,6 +110,8 @@ public class ArticleUtil {
 		List<String> sources = new ArrayList<String>();
 		
 		sources.add(iwc.getIWMainApplication().getBundle(ArticleConstants.IW_BUNDLE_IDENTIFIER).getVirtualPathWithFileNameString("javascript/ArticleEditorHelper.js"));
+		sources.add("/dwr/engine.js");
+		sources.add("/dwr/interface/ThemesEngine.js");
 		
 		if (!needOnlyHelper) {
 			Web2Business web2 = SpringBeanLookup.getInstance().getSpringBean(iwc.getApplicationContext(), Web2Business.class);

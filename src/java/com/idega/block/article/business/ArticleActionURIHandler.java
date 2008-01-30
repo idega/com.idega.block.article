@@ -1,5 +1,5 @@
 /*
- * $Id: ArticleActionURIHandler.java,v 1.10 2008/01/23 12:12:06 valdas Exp $
+ * $Id: ArticleActionURIHandler.java,v 1.11 2008/01/30 13:49:42 valdas Exp $
  * Created on Jan 31, 2005
  *
  * Copyright (C) 2005 Idega Software hf. All Rights Reserved.
@@ -13,6 +13,7 @@ import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.idega.block.article.component.ArticleDeleter;
 import com.idega.block.article.component.ArticleEditor;
 import com.idega.builder.bean.AdvancedProperty;
 import com.idega.content.business.ContentConstants;
@@ -31,11 +32,11 @@ import com.idega.idegaweb.IWMainApplication;
  * <p>
  * An IWActionURIHandler handler that handles the actions for the article module (edit/delete).
  * </p>
- *  Last modified: $Date: 2008/01/23 12:12:06 $ by $Author: valdas $
+ *  Last modified: $Date: 2008/01/30 13:49:42 $ by $Author: valdas $
  * 
  * 
  * @author <a href="mailto:eiki@idega.com">eiki</a>
- * @version $Revision: 1.10 $
+ * @version $Revision: 1.11 $
  */
 public class ArticleActionURIHandler extends DefaultIWActionURIHandler implements IWActionURIHandler {
 
@@ -80,17 +81,10 @@ public class ArticleActionURIHandler extends DefaultIWActionURIHandler implement
 			redirectURI.append("?");
 		}
 		else if (action.equals(ContentConstants.CONTENT_ITEM_ACTION_EDIT) || action.equals(ContentConstants.CONTENT_ITEM_ACTION_CREATE)) {
-			BuilderService service = null;
-			try {
-				service = BuilderServiceFactory.getBuilderService(IWMainApplication.getDefaultIWApplicationContext());
-			} catch (RemoteException e) {
-				e.printStackTrace();
-				return null;
-			}
-			List<AdvancedProperty> parameters = new ArrayList<AdvancedProperty>();
-			parameters.add(new AdvancedProperty(ContentViewer.PARAMETER_CONTENT_RESOURCE, pathPart));
-			parameters.add(new AdvancedProperty(ContentViewer.PARAMETER_ACTION, action));
-			return addQueryPart(uri, new StringBuffer(service.getUriToObject(ArticleEditor.class, parameters))).toString();
+			return addQueryPart(uri, new StringBuffer(getBuilderService().getUriToObject(ArticleEditor.class, getDefaultParameters(pathPart, action)))).toString();
+		}
+		else if (action.equals(ContentConstants.CONTENT_ITEM_ACTION_DELETE)) {
+			return addQueryPart(uri, new StringBuffer(getBuilderService().getUriToObject(ArticleDeleter.class, getDefaultParameters(pathPart, action)))).toString();
 		}
 		else {
 			redirectURI.append("workspace/content/article/");
@@ -108,6 +102,22 @@ public class ArticleActionURIHandler extends DefaultIWActionURIHandler implement
 		redirectURI.append(action);
 		
 		return addQueryPart(uri, redirectURI).toString();
+	}
+	
+	private List<AdvancedProperty> getDefaultParameters(String pathPart, String action) {
+		List<AdvancedProperty> parameters = new ArrayList<AdvancedProperty>();
+		parameters.add(new AdvancedProperty(ContentViewer.PARAMETER_CONTENT_RESOURCE, pathPart));
+		parameters.add(new AdvancedProperty(ContentViewer.PARAMETER_ACTION, action));
+		return parameters;
+	}
+	
+	private BuilderService getBuilderService() {
+		try {
+			return BuilderServiceFactory.getBuilderService(IWMainApplication.getDefaultIWApplicationContext());
+		} catch (RemoteException e) {
+			e.printStackTrace();
+		}
+		return null;
 	}
 	
 	private StringBuffer addQueryPart(IWActionURI uri, StringBuffer redirectURI) {

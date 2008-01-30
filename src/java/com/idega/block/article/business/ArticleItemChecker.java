@@ -68,5 +68,20 @@ public class ArticleItemChecker implements ContentItemChecker {
 		
 		return article;
 	}
+
+	public boolean deleteContentItem(String path, Locale l) {
+		if (path == null || l == null) {
+			return false;
+		}
+		
+		ArticleItemBean article = getLoadedArticleBean(path, l);
+		if (article == null) {
+			return false;
+		}
+		
+		article.delete();
+		
+		return true;
+	}
 	
 }

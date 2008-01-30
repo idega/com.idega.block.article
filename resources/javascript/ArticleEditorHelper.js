@@ -21,10 +21,26 @@ function registerArticleLinksForMoodalBox() {
 			}
 		}
 	);
+	$$('a.delete').each(
+		function(element) {
+			if (element.getProperty('rel') == 'moodalbox') {
+				MOOdalBox.register(element);
+			}
+		}
+	);
 }
 
 function addActionAfterArticleIsSavedAndEditorClosed() {
 	MOOdalBox.addEventToCloseAction(function() {
 		reloadPage();
+	});
+}
+
+function deleteSelectedArticle(resource) {
+	ThemesEngine.deleteArticle(resource, {
+		callback: function(result) {
+			MOOdalBox.close();
+			reloadPage();
+		}
 	});
 }
