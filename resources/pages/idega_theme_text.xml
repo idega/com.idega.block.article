@@ -17,7 +17,7 @@
     	</module>
     	<module id="" class="com.idega.block.article.component.CommentsViewer">
 			<property name="showCommentsList" value="false" />
-			<property name="showCommentsForAllUsers" value="true" />
+			<property name="showCommentsForAllUsers" value="false" />
 		</module>
     </region>
     <region id="toolbar" label="toolbar">
