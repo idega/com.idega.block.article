@@ -96,7 +96,7 @@ public class CommentsViewer extends Block {
 				
 				List<String> actions = new ArrayList<String>();
 				actions.add(INIT_COMMENTS_ACTION);
-				actions.add(ENABLE_REVERSE_AJAX_ACTION);
+//				actions.add(ENABLE_REVERSE_AJAX_ACTION);
 				container.add(PresentationUtil.getJavaScriptActions(actions));
 			}
 			else {
@@ -190,7 +190,7 @@ public class CommentsViewer extends Block {
 	protected List<String> getJavaScriptActions() {
 		List<String> actions = new ArrayList<String>();
 		actions.add(INIT_SCRIPT_LINE);
-		actions.add(ENABLE_REVERSE_AJAX_SCRIPT_LINE);
+//		actions.add(ENABLE_REVERSE_AJAX_SCRIPT_LINE);
 		return actions;
 	}
 		

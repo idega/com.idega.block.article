@@ -1,6 +1,4 @@
-Test
-
-Idega Software hf. Source Code Licence Agreement
+Idega Software hf. Source Code Licence Agreement x
 
 This agreement, made this 10th of February 2006 by and between Idega Software hf., a business formed and operating under laws of Iceland, having its principal place of business in Reykjavik, Iceland, hereinafter after referred to as "Manufacturer" and Agura IT hereinafter referred to as "Licensee".
 
