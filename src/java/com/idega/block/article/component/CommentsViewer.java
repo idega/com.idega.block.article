@@ -53,9 +53,9 @@ public class CommentsViewer extends Block {
 	private String COMMENTS_ENGINE = "/dwr/interface/CommentsEngine.js";
 	private String COMMENTS_HELPER = "javascript/ArticleCommentsHelper.js";
 	private String INIT_COMMENTS_ACTION = "initComments();";
-	private String INIT_SCRIPT_LINE = "window.addEvent('domready', function() {"+INIT_COMMENTS_ACTION+"});";
+	private String INIT_SCRIPT_LINE = "window.addEvent('load', function() {"+INIT_COMMENTS_ACTION+"});";
 	private String ENABLE_REVERSE_AJAX_ACTION = "enableReverseAjax();";
-	private String ENABLE_REVERSE_AJAX_SCRIPT_LINE = "window.addEvent('domready', function() {"+ENABLE_REVERSE_AJAX_ACTION+"});";
+	private String ENABLE_REVERSE_AJAX_SCRIPT_LINE = "window.addEvent('load', function() {"+ENABLE_REVERSE_AJAX_ACTION+"});";
 	
 	private static final String SEPARATOR = "', '";
 	

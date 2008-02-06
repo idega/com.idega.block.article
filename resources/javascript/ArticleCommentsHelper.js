@@ -519,6 +519,8 @@ function getAllComments() {
 }
 
 function getComments(linkToComments, commentsId) {
+	enableReverseAjax();
+	
 	showLoadingMessage(getCommentsLoadingMessage());
 	CommentsEngine.getComments(linkToComments, {
   		callback:function(comments) {
