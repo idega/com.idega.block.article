@@ -1,5 +1,5 @@
 /*
- * $Id: EditArticleView.java,v 1.37 2008/01/24 17:13:29 valdas Exp $
+ * $Id: EditArticleView.java,v 1.38 2008/02/11 09:18:05 valdas Exp $
  *
  * Copyright (C) 2004 Idega. All Rights Reserved.
  *
@@ -74,10 +74,10 @@ import com.idega.webface.htmlarea.HTMLArea;
  * <p>
  * This is the part for the editor of article is inside the admin interface
  * </p>
- * Last modified: $Date: 2008/01/24 17:13:29 $ by $Author: valdas $
+ * Last modified: $Date: 2008/02/11 09:18:05 $ by $Author: valdas $
  *
  * @author Joakim,Tryggvi Larusson
- * @version $Revision: 1.37 $
+ * @version $Revision: 1.38 $
  */
 public class EditArticleView extends IWBaseComponent implements ManagedContentBeans, ActionListener, ValueChangeListener {
 	private static final Log log = LogFactory.getLog(EditArticleView.class);
@@ -172,9 +172,9 @@ public class EditArticleView extends IWBaseComponent implements ManagedContentBe
 		StringBuffer checkAction = new StringBuffer("function checkIfValidArticleEditorFields(ids, message) {\n");
 			checkAction.append("if (ids == null || message == null) return true;\n");
 			checkAction.append("for (var i = 0; i < ids.length; i++) {\n");
-			checkAction.append("var input = document.getElementById(ids[i]);\n");
+				checkAction.append("var input = document.getElementById(ids[i]);\n");
 				checkAction.append("if (input != null) {\n");
-				checkAction.append("if (input.value == null || input.value == '') {alert(message); return false;}");
+					checkAction.append("if (input.value == null || input.value == '') {alert(message); return false;}");
 				checkAction.append("}\n");
 			checkAction.append("}\n");
 			checkAction.append("return true;");
@@ -510,6 +510,9 @@ public class EditArticleView extends IWBaseComponent implements ManagedContentBe
 				l = iwc.getCurrentLocale();
 			}
 			categoriesUI = new WebDAVCategories(resourcePath, l.toString());
+			if (isInCreateMode() && fromArticleItemListViewer) {
+				categoriesUI.setSelectAllCategories(true);
+			}
 			//	Id on the component is set implicitly
 			categoriesUI.setId(CATEGORY_EDITOR_ID);
 			
@@ -614,6 +617,7 @@ public class EditArticleView extends IWBaseComponent implements ManagedContentBe
 				if (categoriesUI != null) {
 					submittedCategories = categoriesUI.getEnabledCategories();
 					articleItemBean.setArticleCategories(submittedCategories);
+					categoriesUI.setSelectAllCategories(false);	//	Need to display user selection
 				}
 			}
 			else {
