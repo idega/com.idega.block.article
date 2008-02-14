@@ -1,5 +1,5 @@
 /*
- * $Id: EditArticleView.java,v 1.38 2008/02/11 09:18:05 valdas Exp $
+ * $Id: EditArticleView.java,v 1.39 2008/02/14 14:26:32 valdas Exp $
  *
  * Copyright (C) 2004 Idega. All Rights Reserved.
  *
@@ -74,10 +74,10 @@ import com.idega.webface.htmlarea.HTMLArea;
  * <p>
  * This is the part for the editor of article is inside the admin interface
  * </p>
- * Last modified: $Date: 2008/02/11 09:18:05 $ by $Author: valdas $
+ * Last modified: $Date: 2008/02/14 14:26:32 $ by $Author: valdas $
  *
  * @author Joakim,Tryggvi Larusson
- * @version $Revision: 1.38 $
+ * @version $Revision: 1.39 $
  */
 public class EditArticleView extends IWBaseComponent implements ManagedContentBeans, ActionListener, ValueChangeListener {
 	private static final Log log = LogFactory.getLog(EditArticleView.class);
@@ -170,13 +170,13 @@ public class EditArticleView extends IWBaseComponent implements ManagedContentBe
 		
 		Script checkFieldsIfNotEmpty = new Script();
 		StringBuffer checkAction = new StringBuffer("function checkIfValidArticleEditorFields(ids, message) {\n");
-			checkAction.append("if (ids == null || message == null) return true;\n");
+			/*checkAction.append("if (ids == null || message == null) return true;\n");
 			checkAction.append("for (var i = 0; i < ids.length; i++) {\n");
 				checkAction.append("var input = document.getElementById(ids[i]);\n");
 				checkAction.append("if (input != null) {\n");
 					checkAction.append("if (input.value == null || input.value == '') {alert(message); return false;}");
 				checkAction.append("}\n");
-			checkAction.append("}\n");
+			checkAction.append("}\n");*/
 			checkAction.append("return true;");
 		checkAction.append("}");
 		checkFieldsIfNotEmpty.addScriptLine(checkAction.toString());
@@ -358,35 +358,6 @@ public class EditArticleView extends IWBaseComponent implements ManagedContentBe
 			sourceItem.add(sourceInput);
 			mainContainer.add(sourceItem);
 		}
-		
-
-		//Status field
-		/*HtmlOutputText statusValue = WFUtil.getTextVB(ref + "status");
-		WFContainer statusContainer = new WFContainer();
-		statusContainer.add(statusValue);
-		UIComponent statusText = WFUtil.group(localizer.getTextVB("status"), WFUtil.getText(":"));
-		HtmlOutputLabel statusLabel = new HtmlOutputLabel();
-		statusLabel.getChildren().add(statusText);
-		statusLabel.setFor(statusValue.getClientId(context));
-		
-		WFFormItem statusItem = new WFFormItem();
-		statusItem.add(statusLabel);
-		statusItem.add(statusContainer);
-		mainContainer.add(statusItem);*/
-		
-		//Version field
-		/*HtmlOutputText versionValue = WFUtil.getTextVB(ref + "versionName");
-		WFContainer versionContainer = new WFContainer();
-		versionContainer.add(versionValue);
-		UIComponent versionText = WFUtil.group(localizer.getTextVB("current_version"), WFUtil.getText(":"));
-		HtmlOutputLabel versionLabel = new HtmlOutputLabel();
-		versionLabel.getChildren().add(versionText);
-		versionLabel.setFor(versionValue.getClientId(context));
-		
-		WFFormItem versionItem = new WFFormItem();
-		versionItem.add(versionLabel);
-		versionItem.add(versionContainer);
-		mainContainer.add(versionItem);*/
 		
 		if (fromArticleItemListViewer) {
 			//	Comment input

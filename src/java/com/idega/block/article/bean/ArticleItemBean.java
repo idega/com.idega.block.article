@@ -1,5 +1,5 @@
 /*
- * $Id: ArticleItemBean.java,v 1.79 2008/01/28 06:14:41 valdas Exp $
+ * $Id: ArticleItemBean.java,v 1.80 2008/02/14 14:26:31 valdas Exp $
  *
  * Copyright (C) 2004-2005 Idega. All Rights Reserved.
  *
@@ -61,10 +61,10 @@ import com.idega.xml.XMLException;
  * This is a JSF managed bean that manages each article instance and delegates 
  * all calls to the correct localized instance.
  * <p>
- * Last modified: $Date: 2008/01/28 06:14:41 $ by $Author: valdas $
+ * Last modified: $Date: 2008/02/14 14:26:31 $ by $Author: valdas $
  *
  * @author Anders Lindman,<a href="mailto:tryggvi@idega.com">Tryggvi Larusson</a>
- * @version $Revision: 1.79 $
+ * @version $Revision: 1.80 $
  */
 public class ArticleItemBean extends ContentItemBean implements Serializable, ContentItem, ValueChangeListener {
 	
@@ -321,13 +321,6 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 	 * @see com.idega.block.article.bean.ArticleLocalizedItemBean#store()
 	 */
 	public void store() throws IDOStoreException {
-		//	First validate headline and body:
-		if (getBody().trim().equals(CoreConstants.EMPTY)) {
-			ArticleStoreException exception = new ArticleStoreException();
-			exception.setErrorKey(ArticleStoreException.KEY_ERROR_BODY_EMPTY);
-			throw exception;
-		}
-		
 		try {
 			IWUserContext iwuc = IWContext.getInstance();
 			IWSlideSession session = getIWSlideSession(iwuc);
