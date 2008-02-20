@@ -1,5 +1,5 @@
 /*
- * $Id: ArticleListManagedBean.java,v 1.16 2008/02/20 14:09:55 laddi Exp $
+ * $Id: ArticleListManagedBean.java,v 1.17 2008/02/20 15:48:11 laddi Exp $
  * Created on 27.1.2005
  *
  * Copyright (C) 2005 Idega Software hf. All Rights Reserved.
@@ -48,10 +48,10 @@ import com.idega.util.IWTimestamp;
 
 /**
  * 
- *  Last modified: $Date: 2008/02/20 14:09:55 $ by $Author: laddi $
+ *  Last modified: $Date: 2008/02/20 15:48:11 $ by $Author: laddi $
  * 
  * @author <a href="mailto:gummi@idega.com">Gudmundur Agust Saemundsson</a>
- * @version $Revision: 1.16 $
+ * @version $Revision: 1.17 $
  */
 public class ArticleListManagedBean implements ContentListViewerManagedBean {
 
@@ -63,9 +63,16 @@ public class ArticleListManagedBean implements ContentListViewerManagedBean {
 	private String detailsViewerPath = null;
 	private boolean headlineAsLink=false;
 	private String datePattern = null;
+	private boolean showDate = true;
+	private boolean showTime = true;
 	private String resourcePath;
 	private int maxNumberOfDisplayed=-1;
 	
+	private boolean showAuthor = true;
+	private boolean showCreationDate = true;
+	private boolean showTeaser = true;
+	private boolean showBody = true;
+
 	/**
 	 * 
 	 */
@@ -220,13 +227,19 @@ public class ArticleListManagedBean implements ContentListViewerManagedBean {
 	public ContentItemViewer getContentViewer() {
 		ArticleItemViewer viewer = new ArticleItemViewer();
 		viewer.setDatePattern(getDatePattern());
+		viewer.setHeadlineAsLink(getHeadlineAsLink());
+		viewer.setShowDate(isShowDate());
+		viewer.setShowTime(isShowTime());
+		viewer.setShowAuthor(isShowAuthor());
+		viewer.setShowCreationDate(isShowCreationDate());
+		viewer.setShowTeaser(isShowTeaser());
+		viewer.setShowBody(isShowBody());
 		
 		if(this.detailsViewerPath != null){
 			viewer.setDetailsViewerPath(this.detailsViewerPath);
 			HtmlOutputLink moreLink = viewer.getEmptyMoreLink();
 			moreLink.getChildren().add(ArticleUtil.getBundle().getLocalizedText(this.LOCALIZEDKEY_MORE));
 			viewer.setDetailsCommand(moreLink);
-			viewer.setHeadlineAsLink(getHeadlineAsLink());
 		}
 		
 		return viewer;
@@ -266,6 +279,38 @@ public class ArticleListManagedBean implements ContentListViewerManagedBean {
 		return ArticleActionURIHandler.HANDLER_IDENTIFIER;
 	}
 
+	public boolean isShowAuthor() {
+		return showAuthor;
+	}
+
+	public void setShowAuthor(boolean showAuthor) {
+		this.showAuthor = showAuthor;
+	}
+
+	public boolean isShowCreationDate() {
+		return showCreationDate;
+	}
+
+	public void setShowCreationDate(boolean showCreationDate) {
+		this.showCreationDate = showCreationDate;
+	}
+	
+	public boolean isShowTeaser() {
+		return showTeaser;
+	}
+
+	public void setShowTeaser(boolean showTeaser) {
+		this.showTeaser = showTeaser;
+	}
+
+	public boolean isShowBody() {
+		return showBody;
+	}
+
+	public void setShowBody(boolean showBody) {
+		this.showBody = showBody;
+	}
+	
 	/**
 	 * <p>
 	 * TODO tryggvil describe method setHeadlineAsLink
@@ -286,6 +331,22 @@ public class ArticleListManagedBean implements ContentListViewerManagedBean {
 
 	public String getDatePattern() {
 		return this.datePattern;
+	}
+
+	public void setShowDate(boolean showDate) {
+		this.showDate = showDate;
+	}
+
+	public boolean isShowDate() {
+		return this.showDate;
+	}
+
+	public void setShowTime(boolean showTime) {
+		this.showTime = showTime;
+	}
+
+	public boolean isShowTime() {
+		return this.showTime;
 	}
 
 	/* (non-Javadoc)

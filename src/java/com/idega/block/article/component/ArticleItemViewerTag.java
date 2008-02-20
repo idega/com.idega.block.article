@@ -1,5 +1,5 @@
 /*
- * $Id: ArticleItemViewerTag.java,v 1.3 2008/02/20 14:09:55 laddi Exp $
+ * $Id: ArticleItemViewerTag.java,v 1.4 2008/02/20 15:48:11 laddi Exp $
  * Created on 21.2.2005
  *
  * Copyright (C) 2005 Idega Software hf. All Rights Reserved.
@@ -15,17 +15,21 @@ import com.idega.content.presentation.ContentItemViewerTag;
 
 /**
  * 
- *  Last modified: $Date: 2008/02/20 14:09:55 $ by $Author: laddi $
+ *  Last modified: $Date: 2008/02/20 15:48:11 $ by $Author: laddi $
  * 
  * @author <a href="mailto:gummi@idega.com">Gudmundur Agust Saemundsson</a>
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
 public class ArticleItemViewerTag extends ContentItemViewerTag {
 
 	private boolean headlineAsLink = false;
 	private boolean showAuthor = true;
 	private boolean showCreationDate = true;
+	private boolean showTeaser = true;
+	private boolean showBody = true;
 	private String datePattern = null;
+	private boolean showDate = true;
+	private boolean showTime = true;
 	
 	/**
 	 * 
@@ -50,7 +54,11 @@ public class ArticleItemViewerTag extends ContentItemViewerTag {
 			article.setHeadlineAsLink(isHeadlineAsLink());
 			article.setShowAuthor(isShowAuthor());
 			article.setShowCreationDate(isShowCreationDate());
+			article.setShowTeaser(isShowTeaser());
+			article.setShowBody(isShowBody());
 			article.setDatePattern(getDatePattern());
+			article.setShowDate(isShowDate());
+			article.setShowTime(isShowTime());
 		}
 	}
 	
@@ -86,11 +94,43 @@ public class ArticleItemViewerTag extends ContentItemViewerTag {
 		this.showCreationDate = showCreationDate;
 	}
 	
+	public boolean isShowTeaser() {
+		return showTeaser;
+	}
+
+	public void setShowTeaser(boolean showTeaser) {
+		this.showTeaser = showTeaser;
+	}
+
+	public boolean isShowBody() {
+		return showBody;
+	}
+
+	public void setShowBody(boolean showBody) {
+		this.showBody = showBody;
+	}
+
 	public String getDatePattern() {
 		return datePattern;
 	}
 	
 	public void setDatePattern(String datePattern) {
 		this.datePattern = datePattern;
+	}
+
+	public void setShowDate(boolean showDate) {
+		this.showDate = showDate;
+	}
+
+	public boolean isShowDate() {
+		return this.showDate;
+	}
+
+	public void setShowTime(boolean showTime) {
+		this.showTime = showTime;
+	}
+
+	public boolean isShowTime() {
+		return this.showTime;
 	}
 }

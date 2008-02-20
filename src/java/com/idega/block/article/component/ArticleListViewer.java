@@ -1,5 +1,5 @@
 /*
- * $Id: ArticleListViewer.java,v 1.16 2008/02/20 14:09:55 laddi Exp $
+ * $Id: ArticleListViewer.java,v 1.17 2008/02/20 15:48:11 laddi Exp $
  * Created on 24.1.2005
  *
  * Copyright (C) 2005 Idega Software hf. All Rights Reserved.
@@ -41,10 +41,10 @@ import com.idega.util.PresentationUtil;
  * for the article module.
  * </p>
  * 
- *  Last modified: $Date: 2008/02/20 14:09:55 $ by $Author: laddi $
+ *  Last modified: $Date: 2008/02/20 15:48:11 $ by $Author: laddi $
  * 
  * @author <a href="mailto:tryggvi@idega.com">Tryggvi Larusson</a>
- * @version $Revision: 1.16 $
+ * @version $Revision: 1.17 $
  */
 public class ArticleListViewer extends ContentItemListViewer {
 
@@ -54,6 +54,13 @@ public class ArticleListViewer extends ContentItemListViewer {
 	//instance variables:
 	boolean headlineAsLink=false;
 	String datePattern = null;
+	boolean showDate = true;
+	boolean showTime = true;
+
+	private boolean showAuthor = true;
+	private boolean showCreationDate = true;
+	private boolean showTeaser = true;
+	private boolean showBody = true;
 	
 	private boolean showComments = false;
 	private static final String SHOW_COMMENTS_PROPERTY = "showComments";
@@ -74,10 +81,12 @@ public class ArticleListViewer extends ContentItemListViewer {
 	 */
 	@Override
 	public Object saveState(FacesContext ctx) {
-		Object values[] = new Object[3];
+		Object values[] = new Object[5];
 		values[0] = super.saveState(ctx);
 		values[1] = Boolean.valueOf(this.headlineAsLink);
 		values[2] = this.datePattern;
+		values[3] = Boolean.valueOf(this.showDate);
+		values[4] = Boolean.valueOf(this.showTime);
 		return values;
 	}
 
@@ -91,6 +100,8 @@ public class ArticleListViewer extends ContentItemListViewer {
 		super.restoreState(ctx, values[0]);
 		this.headlineAsLink=((Boolean)values[1]).booleanValue();
 		this.datePattern = (String)values[2];
+		this.showDate = values[3] == null ? true : ((Boolean) values[3]).booleanValue();
+		this.showTime = values[4] == null ? true : ((Boolean) values[4]).booleanValue();
 	}
 	
 	public void setHeadlineAsLink(boolean asLink){
@@ -109,11 +120,65 @@ public class ArticleListViewer extends ContentItemListViewer {
 		return this.datePattern;
 	}
 
+	public void setShowDate(boolean showDate) {
+		this.showDate = showDate;
+	}
+
+	public boolean isShowDate() {
+		return this.showDate;
+	}
+
+	public void setShowTime(boolean showTime) {
+		this.showTime = showTime;
+	}
+
+	public boolean isShowTime() {
+		return this.showTime;
+	}
+
+	public boolean isShowAuthor() {
+		return showAuthor;
+	}
+
+	public void setShowAuthor(boolean showAuthor) {
+		this.showAuthor = showAuthor;
+	}
+
+	public boolean isShowCreationDate() {
+		return showCreationDate;
+	}
+
+	public void setShowCreationDate(boolean showCreationDate) {
+		this.showCreationDate = showCreationDate;
+	}
+	
+	public boolean isShowTeaser() {
+		return showTeaser;
+	}
+
+	public void setShowTeaser(boolean showTeaser) {
+		this.showTeaser = showTeaser;
+	}
+
+	public boolean isShowBody() {
+		return showBody;
+	}
+
+	public void setShowBody(boolean showBody) {
+		this.showBody = showBody;
+	}
+	
 	@Override
 	protected void notifyManagedBeanOfVariableValues(){
 		super.notifyManagedBeanOfVariableValues();
 		getArticleListBean().setHeadlineAsLink(getHeadlineAsLink());
 		getArticleListBean().setDatePattern(getDatePattern());
+		getArticleListBean().setShowDate(isShowDate());
+		getArticleListBean().setShowTime(isShowTime());
+		getArticleListBean().setShowAuthor(isShowAuthor());
+		getArticleListBean().setShowCreationDate(isShowCreationDate());
+		getArticleListBean().setShowTeaser(isShowTeaser());
+		getArticleListBean().setShowBody(isShowBody());
 	}
 	
 	public ArticleListManagedBean getArticleListBean(){

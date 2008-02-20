@@ -2,6 +2,7 @@
 <jsp:root xmlns:jsp="http://java.sun.com/JSP/Page"
         xmlns:h="http://java.sun.com/jsf/html"
         xmlns:jsf="http://java.sun.com/jsf/core"
+        xmlns:t="http://myfaces.apache.org/tomahawk"
         xmlns:ws="http://xmlns.idega.com/com.idega.workspace"
         xmlns:wf="http://xmlns.idega.com/com.idega.webface"
         xmlns:article="http://xmlns.idega.com/com.idega.block.article"
@@ -12,7 +13,12 @@ version="1.2">
 		<ws:page id="listarticles1">
 			<h:form id="listarticlesform1">
 				<wf:wfblock id="article_list_block" title="#{localizedStrings['com.idega.block.article']['list_articles']}" maximizedVertically="true">
-					<article:ArticleListViewer id="article_list" resourcePath="/files/cms/article" detailsViewerPath="/workspace/content/article/preview" headlineAsLink="true" datePattern="dd.MM.yy" showComments="false" />
+					<t:div styleClass="articleHeadings">
+						<t:div styleClass="articleDate"><h:outputText value="#{localizedStrings['com.idega.block.article']['article_date']}" /></t:div>
+						<t:div styleClass="articleTitle"><h:outputText value="#{localizedStrings['com.idega.block.article']['article_title']}" /></t:div>
+						<t:div styleClass="articleAuthor"><h:outputText value="#{localizedStrings['com.idega.block.article']['article_author']}" /></t:div>
+					</t:div>
+					<article:ArticleListViewer id="article_list" resourcePath="/files/cms/article" detailsViewerPath="/workspace/content/article/preview" showBody="false" headlineAsLink="true" showTime="false" showComments="false" />
 				</wf:wfblock>
 			</h:form>
 		</ws:page>

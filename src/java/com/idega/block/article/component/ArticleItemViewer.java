@@ -1,5 +1,5 @@
 /*
- * $Id: ArticleItemViewer.java,v 1.32 2008/02/20 14:09:55 laddi Exp $
+ * $Id: ArticleItemViewer.java,v 1.33 2008/02/20 15:48:11 laddi Exp $
  *
  * Copyright (C) 2004 Idega. All Rights Reserved.
  *
@@ -39,12 +39,12 @@ import com.idega.webface.WFHtml;
 import com.idega.webface.convert.WFTimestampConverter;
 
 /**
- * Last modified: $Date: 2008/02/20 14:09:55 $ by $Author: laddi $
+ * Last modified: $Date: 2008/02/20 15:48:11 $ by $Author: laddi $
  *
  * Displays the article item
  *
  * @author <a href="mailto:gummi@idega.com">Gudmundur Agust Saemundsson</a>
- * @version $Revision: 1.32 $
+ * @version $Revision: 1.33 $
  */
 public class ArticleItemViewer extends ContentItemViewer {
 	
@@ -59,10 +59,14 @@ public class ArticleItemViewer extends ContentItemViewer {
 	//instance variables:
 	private boolean headlineAsLink;
 	private String datePattern;
+	private boolean showDate = true;
+	private boolean showTime = true;
 	private boolean cacheEnabled=true;
 	
 	private boolean showAuthor = true;
 	private boolean showCreationDate = true;
+	private boolean showTeaser = true;
+	private boolean showBody = true;
 	private boolean addCommentsViewer = false;
 	
 	private boolean canModifyRenderingAttribute = false;
@@ -145,7 +149,7 @@ public class ArticleItemViewer extends ContentItemViewer {
 		initializeToolbar();
 		initializeComments(context);
 		if (isShowCreationDate()) {
-			((HtmlOutputText)getFieldViewerComponent(ContentConstants.ATTRIBUTE_CREATION_DATE)).setConverter(new WFTimestampConverter(datePattern));
+			((HtmlOutputText)getFieldViewerComponent(ContentConstants.ATTRIBUTE_CREATION_DATE)).setConverter(new WFTimestampConverter(datePattern, showDate, showTime));
 		}
 		addFeed(context);
 	}
@@ -158,6 +162,12 @@ public class ArticleItemViewer extends ContentItemViewer {
 			return false;
 		}
 		if (ContentConstants.ATTRIBUTE_CREATION_DATE.equals(attribute) && !isShowCreationDate()) {
+			return false;
+		}
+		if (ContentConstants.ATTRIBUTE_BODY.equals(attribute) && !isShowBody()) {
+			return false;
+		}
+		if (ATTRIBUTE_TEASER.equals(attribute) && !isShowTeaser()) {
 			return false;
 		}
 		return true;
@@ -261,17 +271,34 @@ public class ArticleItemViewer extends ContentItemViewer {
 		return this.datePattern;
 	}
 
-	
+	public void setShowDate(boolean showDate) {
+		this.showDate = showDate;
+	}
+
+	public boolean isShowDate() {
+		return this.showDate;
+	}
+
+	public void setShowTime(boolean showTime) {
+		this.showTime = showTime;
+	}
+
+	public boolean isShowTime() {
+		return this.showTime;
+	}
+
 	/**
 	 * @see javax.faces.component.UIComponentBase#saveState(javax.faces.context.FacesContext)
 	 */
 	@Override
 	public Object saveState(FacesContext ctx) {
-		Object values[] = new Object[4];
+		Object values[] = new Object[6];
 		values[0] = super.saveState(ctx);
 		values[1] = Boolean.valueOf(this.headlineAsLink);
 		values[2] = this.datePattern;
 		values[3] = Boolean.valueOf(this.cacheEnabled);
+		values[4] = Boolean.valueOf(this.showDate);
+		values[5] = Boolean.valueOf(this.showTime);
 		return values;
 	}
 
@@ -286,6 +313,8 @@ public class ArticleItemViewer extends ContentItemViewer {
 		this.headlineAsLink=((Boolean)values[1]).booleanValue();
 		this.datePattern = (String)values[2];
 		this.cacheEnabled = values[3] == null ? true : ((Boolean) values[3]).booleanValue();
+		this.showDate = values[4] == null ? true : ((Boolean) values[4]).booleanValue();
+		this.showTime = values[5] == null ? true : ((Boolean) values[5]).booleanValue();
 	}
 	
 	/**
@@ -323,6 +352,22 @@ public class ArticleItemViewer extends ContentItemViewer {
 
 	public void setShowCreationDate(boolean showCreationDate) {
 		this.showCreationDate = showCreationDate;
+	}
+	
+	public boolean isShowTeaser() {
+		return showTeaser;
+	}
+
+	public void setShowTeaser(boolean showTeaser) {
+		this.showTeaser = showTeaser;
+	}
+
+	public boolean isShowBody() {
+		return showBody;
+	}
+
+	public void setShowBody(boolean showBody) {
+		this.showBody = showBody;
 	}
 	
 	@Override

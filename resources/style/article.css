@@ -33,16 +33,10 @@
 
 .article_teaser {
 	width: auto;
-	text-align: justify;
-	padding: 10px;
-	margin: 10px;
-	border: 1px solid #000000;
-	display: none;
 }
 
 .article_body {
 	width: auto;
-	text-align: justify;
 }
 
 .comment_fieldset {
@@ -134,6 +128,65 @@
 }
 
 /* Workspace override */
+.article .content_item_toolbarcontainer {
+	position: absolute;
+	top: 0;
+	left: 0;	
+}
+
+.article .content_item_toolbar li {
+	border: 0;
+	padding: 0;
+	height: 32px;
+}
+
+.article .content_item_toolbar li .create {
+	background: url(images/new_32.png) top left no-repeat #fff;
+	width: 32px;
+	height: 32px;
+	padding: 0;
+	margin: 0;
+	border: 0;
+}
+
+.article .content_item_toolbar li .create:hover {
+	background: url(images/new_32.png) top left no-repeat #fff;
+}
+
+.article .content_item_toolbar li a:hover {
+	background-color: transparent;	
+}
+
+
+.article .articleHeadings {
+	margin-top: 48px;
+	line-height: 25px;
+	font-size: 13px;
+	font-weight: bold;	
+	color: #1f1f1f;
+	font-family: "Lucida Grande", "Lucida Sans", "Lucida Sans Unicode", Arial, Helvetica, sans-serif;
+	position: relative;
+}
+
+.article .articleHeadings .articleDate {
+	position: absolute;
+	left: 18px;
+	top: 0;
+	width: 82px;	
+}
+
+.article .articleHeadings .articleTitle {
+	margin-left: 112px;
+	margin-right: 270px;
+}
+
+.article .articleHeadings .articleAuthor {
+	position: absolute;
+	right: 0;
+	width: 265px;
+	top: 0;	
+}
+
 .article .ws_main .wf_block {
 	left: 0;
 }
@@ -203,6 +256,12 @@
 	margin-right: 280px;
 	padding-top: 4px;
 	padding-bottom: 4px;
+	padding-left: 12px;
+	background: url(images/article-arrow.gif) 0 7px no-repeat;
+}
+
+.article .content_list .blog-entry-title a {
+	color: #1f1f1f;	
 }
 
 .article .content_list .blog-entry-body {
@@ -211,7 +270,7 @@
 
 .article .content_list .article_teaser {
 	display: block;
-	margin-left: 100px;
+	margin-left: 112px;
 	margin-right: 280px;
 	padding: 0;
 	font-size: 11px;
@@ -227,7 +286,8 @@
 
 .article .content_list .article_item .content_item_toolbarcontainer {
 	position: absolute;
-	right: 0;
+	right: 0 !important;
+	left: auto;
 	top: 0;	
 	margin: 0;
 	padding: 0;
@@ -236,13 +296,13 @@
 .article .content_list .article_item .content_item_toolbar {
 	margin: 0;
 	padding: 0;
-	margin-top: 1px;
+	margin-top: 2px;
 }
 
 .article .content_list .article_item .content_item_toolbar li {
-	border: 1px #0f0 solid;
-	margin: 0;
-	margin-right: 4px;
+	height: auto;
+	margin-top: 2px;
+	margin-right: 8px;
 	border: 0;
 	background: none;
 }

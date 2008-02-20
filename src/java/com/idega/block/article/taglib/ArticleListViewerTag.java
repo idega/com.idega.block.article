@@ -1,5 +1,5 @@
 /*
- * $Id: ArticleListViewerTag.java,v 1.2 2008/02/20 14:09:55 laddi Exp $
+ * $Id: ArticleListViewerTag.java,v 1.3 2008/02/20 15:48:11 laddi Exp $
  * Created on 1.9.2005 in project com.idega.block.article
  *
  * Copyright (C) 2005 Idega Software hf. All Rights Reserved.
@@ -19,16 +19,22 @@ import com.idega.content.presentation.ContentItemListViewerTag;
  * <p>
  * TODO tryggvil Describe Type ListArticlesViewerTag
  * </p>
- *  Last modified: $Date: 2008/02/20 14:09:55 $ by $Author: laddi $
+ *  Last modified: $Date: 2008/02/20 15:48:11 $ by $Author: laddi $
  * 
  * @author <a href="mailto:tryggvil@idega.com">tryggvil</a>
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 public class ArticleListViewerTag extends ContentItemListViewerTag {
 
+	private boolean showAuthor = true;
+	private boolean showCreationDate = true;
+	private boolean showTeaser = true;
+	private boolean showBody = true;
 	private String datePattern = null;
 	private boolean headlineAsLink = false;
 	private boolean showComments = false;
+	private boolean showDate = true;
+	private boolean showTime = true;
 
 	public static final String COMPONENT_TYPE="ArticleListViewer";
 	
@@ -61,10 +67,48 @@ public class ArticleListViewerTag extends ContentItemListViewerTag {
 		super.setProperties(component);
 		if (component != null) {
 			ArticleListViewer viewer = ((ArticleListViewer)component);
+			viewer.setShowAuthor(isShowAuthor());
+			viewer.setShowCreationDate(isShowCreationDate());
+			viewer.setShowTeaser(isShowTeaser());
+			viewer.setShowBody(isShowBody());
 			viewer.setDatePattern(getDatePattern());
 			viewer.setHeadlineAsLink(getHeadlineAsLink());
 			viewer.setShowComments(getShowComments());
+			viewer.setShowDate(isShowDate());
+			viewer.setShowTime(isShowTime());
 		}
+	}
+
+	public boolean isShowAuthor() {
+		return showAuthor;
+	}
+
+	public void setShowAuthor(boolean showAuthor) {
+		this.showAuthor = showAuthor;
+	}
+
+	public boolean isShowCreationDate() {
+		return showCreationDate;
+	}
+
+	public void setShowCreationDate(boolean showCreationDate) {
+		this.showCreationDate = showCreationDate;
+	}
+	
+	public boolean isShowTeaser() {
+		return showTeaser;
+	}
+
+	public void setShowTeaser(boolean showTeaser) {
+		this.showTeaser = showTeaser;
+	}
+
+	public boolean isShowBody() {
+		return showBody;
+	}
+
+	public void setShowBody(boolean showBody) {
+		this.showBody = showBody;
 	}
 
 	public void setDatePattern(String datePattern) {
@@ -89,5 +133,21 @@ public class ArticleListViewerTag extends ContentItemListViewerTag {
 	
 	public boolean getShowComments() {
 		return this.showComments;
+	}
+
+	public void setShowDate(boolean showDate) {
+		this.showDate = showDate;
+	}
+
+	public boolean isShowDate() {
+		return this.showDate;
+	}
+
+	public void setShowTime(boolean showTime) {
+		this.showTime = showTime;
+	}
+
+	public boolean isShowTime() {
+		return this.showTime;
 	}
 }
