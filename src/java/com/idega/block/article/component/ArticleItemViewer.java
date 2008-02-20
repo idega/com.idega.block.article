@@ -1,5 +1,5 @@
 /*
- * $Id: ArticleItemViewer.java,v 1.31 2008/01/23 12:12:06 valdas Exp $
+ * $Id: ArticleItemViewer.java,v 1.32 2008/02/20 14:09:55 laddi Exp $
  *
  * Copyright (C) 2004 Idega. All Rights Reserved.
  *
@@ -39,12 +39,12 @@ import com.idega.webface.WFHtml;
 import com.idega.webface.convert.WFTimestampConverter;
 
 /**
- * Last modified: $Date: 2008/01/23 12:12:06 $ by $Author: valdas $
+ * Last modified: $Date: 2008/02/20 14:09:55 $ by $Author: laddi $
  *
  * Displays the article item
  *
  * @author <a href="mailto:gummi@idega.com">Gudmundur Agust Saemundsson</a>
- * @version $Revision: 1.31 $
+ * @version $Revision: 1.32 $
  */
 public class ArticleItemViewer extends ContentItemViewer {
 	
@@ -58,6 +58,7 @@ public class ArticleItemViewer extends ContentItemViewer {
 	private final static String DEFAULT_STYLE_CLASS = styleClassPrefix + "item";
 	//instance variables:
 	private boolean headlineAsLink;
+	private String datePattern;
 	private boolean cacheEnabled=true;
 	
 	private boolean showAuthor = true;
@@ -89,6 +90,7 @@ public class ArticleItemViewer extends ContentItemViewer {
 	
 	
 	
+	@Override
 	public String[] getViewerFieldNames(){
 		return ATTRIBUTE_ARRAY;
 	}
@@ -96,6 +98,7 @@ public class ArticleItemViewer extends ContentItemViewer {
 	/**
 	 * @return Returns the facetIdPrefix.
 	 */
+	@Override
 	protected String getFacetIdPrefix() {
 		return facetIdPrefix;
 	}
@@ -103,10 +106,12 @@ public class ArticleItemViewer extends ContentItemViewer {
 	/**
 	 * @return Returns the styleClassPrefix.
 	 */
+	@Override
 	protected String getDefaultStyleClassPrefix() {
 		return styleClassPrefix;
 	}
 	
+	@Override
 	@SuppressWarnings("unchecked")
 	protected UIComponent createFieldComponent(String attribute){
 		if (ContentConstants.ATTRIBUTE_BODY.equals(attribute)) {
@@ -126,6 +131,7 @@ public class ArticleItemViewer extends ContentItemViewer {
 		}
 	}
 	
+	@Override
 	protected void initializeComponent(FacesContext context) {
 		String attr[] = getViewerFieldNames();
 		if (attr == null) {
@@ -139,7 +145,7 @@ public class ArticleItemViewer extends ContentItemViewer {
 		initializeToolbar();
 		initializeComments(context);
 		if (isShowCreationDate()) {
-			((HtmlOutputText)getFieldViewerComponent(ContentConstants.ATTRIBUTE_CREATION_DATE)).setConverter(new WFTimestampConverter());
+			((HtmlOutputText)getFieldViewerComponent(ContentConstants.ATTRIBUTE_CREATION_DATE)).setConverter(new WFTimestampConverter(datePattern));
 		}
 		addFeed(context);
 	}
@@ -223,6 +229,7 @@ public class ArticleItemViewer extends ContentItemViewer {
 	}
 	
 	
+	@Override
 	public ContentItem loadContentItem(String itemResourcePath) {
 		try {
 			ArticleItemBean bean = new ArticleItemBean();
@@ -246,15 +253,25 @@ public class ArticleItemViewer extends ContentItemViewer {
 		return this.headlineAsLink;
 	}
 	
+	public void setDatePattern(String pattern) {
+		this.datePattern = pattern;
+	}
+
+	public String getDatePattern() {
+		return this.datePattern;
+	}
+
 	
 	/**
 	 * @see javax.faces.component.UIComponentBase#saveState(javax.faces.context.FacesContext)
 	 */
+	@Override
 	public Object saveState(FacesContext ctx) {
-		Object values[] = new Object[3];
+		Object values[] = new Object[4];
 		values[0] = super.saveState(ctx);
 		values[1] = Boolean.valueOf(this.headlineAsLink);
-		values[2] = Boolean.valueOf(this.cacheEnabled);
+		values[2] = this.datePattern;
+		values[3] = Boolean.valueOf(this.cacheEnabled);
 		return values;
 	}
 
@@ -262,16 +279,19 @@ public class ArticleItemViewer extends ContentItemViewer {
 	 * @see javax.faces.component.UIComponentBase#restoreState(javax.faces.context.FacesContext,
 	 *      java.lang.Object)
 	 */
+	@Override
 	public void restoreState(FacesContext ctx, Object state) {
 		Object values[] = (Object[]) state;
 		super.restoreState(ctx, values[0]);
 		this.headlineAsLink=((Boolean)values[1]).booleanValue();
-		this.cacheEnabled=((Boolean)values[2]).booleanValue();
+		this.datePattern = (String)values[2];
+		this.cacheEnabled = values[3] == null ? true : ((Boolean) values[3]).booleanValue();
 	}
 	
 	/**
 	 * 
 	 */
+	@Override
 	public void updateToolbar() {
 		ContentItemToolbar toolbar = getToolbar();
 		if (toolbar != null) {
@@ -283,6 +303,7 @@ public class ArticleItemViewer extends ContentItemViewer {
 	/* (non-Javadoc)
 	 * @see com.idega.content.presentation.ContentItemListViewer#getCacher(javax.faces.context.FacesContext)
 	 */
+	@Override
 	public UIComponentCacher getCacher(FacesContext context) {
 		IWMainApplication iwma = IWMainApplication.getIWMainApplication(context);
 		return ArticleCacher.getInstance(iwma);
@@ -304,11 +325,13 @@ public class ArticleItemViewer extends ContentItemViewer {
 		this.showCreationDate = showCreationDate;
 	}
 	
+	@Override
 	@SuppressWarnings("unchecked")
 	protected void initializeComments(FacesContext context) {
 		super.initializeComments(context);
 	}
 	
+	@Override
 	@SuppressWarnings("unchecked")
 	protected void updateComments() {
 		if (isAddCommentsViewer()) {

@@ -12,7 +12,7 @@ version="1.2">
 		<ws:page id="listarticles1">
 			<h:form id="listarticlesform1">
 				<wf:wfblock id="article_list_block" title="#{localizedStrings['com.idega.block.article']['list_articles']}" maximizedVertically="true">
-					<article:ArticleListViewer id="article_list" resourcePath="/files/cms/article" detailsViewerPath="/workspace/content/article/preview" />
+					<article:ArticleListViewer id="article_list" resourcePath="/files/cms/article" detailsViewerPath="/workspace/content/article/preview" headlineAsLink="true" datePattern="dd.MM.yy" showComments="false" />
 				</wf:wfblock>
 			</h:form>
 		</ws:page>

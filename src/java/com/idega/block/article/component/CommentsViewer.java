@@ -59,6 +59,7 @@ public class CommentsViewer extends Block {
 	
 	private static final String SEPARATOR = "', '";
 	
+	@Override
 	public void main(IWContext iwc) {
 		getModuleId(iwc);
 		
@@ -254,6 +255,7 @@ public class CommentsViewer extends Block {
 		if (iwc == null || propertyName == null) {
 			return commentsController;
 		}
+		commentsController.setStyleClass("commentsController");
 		
 		String pageKey = getThisPageKey(iwc);
 		if (pageKey == null) {
@@ -328,6 +330,7 @@ public class CommentsViewer extends Block {
 		}
 	}
 	
+	@Override
 	public Object saveState(FacesContext context) {
 		Object values[] = new Object[7];
 		values[0] = super.saveState(context);
@@ -340,6 +343,7 @@ public class CommentsViewer extends Block {
 		return values;
 	}
 
+	@Override
 	public void restoreState(FacesContext context, Object state) {
 		Object values[] = (Object[]) state;
 		super.restoreState(context, values[0]);
@@ -375,10 +379,12 @@ public class CommentsViewer extends Block {
 		this.showCommentsList = showCommentsList;
 	}
 
+	@Override
 	public String getStyleClass() {
 		return styleClass;
 	}
 
+	@Override
 	public void setStyleClass(String styleClass) {
 		this.styleClass = styleClass;
 	}
@@ -391,6 +397,7 @@ public class CommentsViewer extends Block {
 		this.linkToComments = linkToComments;
 	}
 	
+	@Override
 	public String getBuilderName(IWUserContext iwuc) {
 		String name = getBundle(iwuc).getComponentName(CommentsViewer.class);
 		if (name == null || ArticleConstants.EMPTY.equals(name)) {
@@ -407,6 +414,7 @@ public class CommentsViewer extends Block {
 		this.usedInArticleList = usedInArticleList;
 	}
 	
+	@Override
 	public String getBundleIdentifier() {
 		return ArticleConstants.IW_BUNDLE_IDENTIFIER;
 	}

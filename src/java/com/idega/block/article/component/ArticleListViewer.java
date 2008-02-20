@@ -1,5 +1,5 @@
 /*
- * $Id: ArticleListViewer.java,v 1.15 2008/01/23 12:12:06 valdas Exp $
+ * $Id: ArticleListViewer.java,v 1.16 2008/02/20 14:09:55 laddi Exp $
  * Created on 24.1.2005
  *
  * Copyright (C) 2005 Idega Software hf. All Rights Reserved.
@@ -41,10 +41,10 @@ import com.idega.util.PresentationUtil;
  * for the article module.
  * </p>
  * 
- *  Last modified: $Date: 2008/01/23 12:12:06 $ by $Author: valdas $
+ *  Last modified: $Date: 2008/02/20 14:09:55 $ by $Author: laddi $
  * 
  * @author <a href="mailto:tryggvi@idega.com">Tryggvi Larusson</a>
- * @version $Revision: 1.15 $
+ * @version $Revision: 1.16 $
  */
 public class ArticleListViewer extends ContentItemListViewer {
 
@@ -53,6 +53,7 @@ public class ArticleListViewer extends ContentItemListViewer {
 	final static String DEFAULT_RESOURCE_PATH=ArticleUtil.getArticleBaseFolderPath();
 	//instance variables:
 	boolean headlineAsLink=false;
+	String datePattern = null;
 	
 	private boolean showComments = false;
 	private static final String SHOW_COMMENTS_PROPERTY = "showComments";
@@ -71,10 +72,12 @@ public class ArticleListViewer extends ContentItemListViewer {
 	/**
 	 * @see javax.faces.component.UIComponentBase#saveState(javax.faces.context.FacesContext)
 	 */
+	@Override
 	public Object saveState(FacesContext ctx) {
-		Object values[] = new Object[2];
+		Object values[] = new Object[3];
 		values[0] = super.saveState(ctx);
 		values[1] = Boolean.valueOf(this.headlineAsLink);
+		values[2] = this.datePattern;
 		return values;
 	}
 
@@ -82,10 +85,12 @@ public class ArticleListViewer extends ContentItemListViewer {
 	 * @see javax.faces.component.UIComponentBase#restoreState(javax.faces.context.FacesContext,
 	 *      java.lang.Object)
 	 */
+	@Override
 	public void restoreState(FacesContext ctx, Object state) {
 		Object values[] = (Object[]) state;
 		super.restoreState(ctx, values[0]);
 		this.headlineAsLink=((Boolean)values[1]).booleanValue();
+		this.datePattern = (String)values[2];
 	}
 	
 	public void setHeadlineAsLink(boolean asLink){
@@ -96,9 +101,19 @@ public class ArticleListViewer extends ContentItemListViewer {
 		return this.headlineAsLink;
 	}
 	
+	public void setDatePattern(String pattern) {
+		this.datePattern = pattern;
+	}
+
+	public String getDatePattern() {
+		return this.datePattern;
+	}
+
+	@Override
 	protected void notifyManagedBeanOfVariableValues(){
 		super.notifyManagedBeanOfVariableValues();
 		getArticleListBean().setHeadlineAsLink(getHeadlineAsLink());
+		getArticleListBean().setDatePattern(getDatePattern());
 	}
 	
 	public ArticleListManagedBean getArticleListBean(){
@@ -108,6 +123,7 @@ public class ArticleListViewer extends ContentItemListViewer {
 	/* (non-Javadoc)
 	 * @see com.idega.content.presentation.ContentItemListViewer#getCacher(javax.faces.context.FacesContext)
 	 */
+	@Override
 	public UIComponentCacher getCacher(FacesContext context) {
 		IWMainApplication iwma = IWMainApplication.getIWMainApplication(context);
 		return ArticleCacher.getInstance(iwma);
@@ -243,10 +259,12 @@ public class ArticleListViewer extends ContentItemListViewer {
 		}
 	}
 		
+	@Override
 	public void encodeChildren(FacesContext context) throws IOException {
 		super.encodeChildren(context);
 	}
 	
+	@Override
 	protected void addContentItemViewer(ContentItemViewer viewer) {
 		FacesContext context = FacesContext.getCurrentInstance();
 		IWContext iwc = IWContext.getIWContext(context);

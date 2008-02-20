@@ -1,5 +1,5 @@
 /*
- * $Id: ArticleListManagedBean.java,v 1.15 2007/10/05 08:38:55 valdas Exp $
+ * $Id: ArticleListManagedBean.java,v 1.16 2008/02/20 14:09:55 laddi Exp $
  * Created on 27.1.2005
  *
  * Copyright (C) 2005 Idega Software hf. All Rights Reserved.
@@ -48,10 +48,10 @@ import com.idega.util.IWTimestamp;
 
 /**
  * 
- *  Last modified: $Date: 2007/10/05 08:38:55 $ by $Author: valdas $
+ *  Last modified: $Date: 2008/02/20 14:09:55 $ by $Author: laddi $
  * 
  * @author <a href="mailto:gummi@idega.com">Gudmundur Agust Saemundsson</a>
- * @version $Revision: 1.15 $
+ * @version $Revision: 1.16 $
  */
 public class ArticleListManagedBean implements ContentListViewerManagedBean {
 
@@ -62,6 +62,7 @@ public class ArticleListManagedBean implements ContentListViewerManagedBean {
 
 	private String detailsViewerPath = null;
 	private boolean headlineAsLink=false;
+	private String datePattern = null;
 	private String resourcePath;
 	private int maxNumberOfDisplayed=-1;
 	
@@ -196,7 +197,7 @@ public class ArticleListManagedBean implements ContentListViewerManagedBean {
 		List<CompareExpression> categoryExpressions = new ArrayList<CompareExpression>();
 		if (categoryList != null) {
 			for (Iterator<String> iter = categoryList.iterator(); iter.hasNext();) {
-				String categoryName = (String) iter.next();
+				String categoryName = iter.next();
 				categoryExpressions.add(s.compare(CompareOperator.LIKE,IWSlideConstants.PROPERTY_CATEGORY,"%,"+categoryName+",%"));
 			}
 			Iterator<CompareExpression> expr = categoryExpressions.iterator();
@@ -218,6 +219,7 @@ public class ArticleListManagedBean implements ContentListViewerManagedBean {
 	 */
 	public ContentItemViewer getContentViewer() {
 		ArticleItemViewer viewer = new ArticleItemViewer();
+		viewer.setDatePattern(getDatePattern());
 		
 		if(this.detailsViewerPath != null){
 			viewer.setDetailsViewerPath(this.detailsViewerPath);
@@ -276,6 +278,14 @@ public class ArticleListManagedBean implements ContentListViewerManagedBean {
 	
 	public boolean getHeadlineAsLink(){
 		return this.headlineAsLink;
+	}
+
+	public void setDatePattern(String pattern) {
+		this.datePattern = pattern;
+	}
+
+	public String getDatePattern() {
+		return this.datePattern;
 	}
 
 	/* (non-Javadoc)

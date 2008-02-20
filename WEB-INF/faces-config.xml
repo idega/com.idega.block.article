@@ -57,6 +57,26 @@
 			<property-name>styleClass</property-name>
 			<property-class>java.lang.String</property-class>
 		</property>
+		<property>
+			<display-name>Display headline as a link</display-name>
+			<property-name>headlineAsLink</property-name>
+			<property-class>boolean</property-class>
+		</property>
+		<property>
+			<display-name>Date pattern</display-name>
+			<property-name>datePattern</property-name>
+			<property-class>java.lang.String</property-class>
+		</property>
+		<property>
+			<display-name>Show author</display-name>
+			<property-name>showAuthor</property-name>
+			<property-class>boolean</property-class>
+		</property>
+		<property>
+			<display-name>Show creation date</display-name>
+			<property-name>showCreationDate</property-name>
+			<property-class>boolean</property-class>
+		</property>
 		<component-extension>
 			<idegaweb-info>
 				<builder-visible>true</builder-visible>
@@ -96,6 +116,11 @@
 			<display-name>Date pattern</display-name>
 			<property-name>datePattern</property-name>
 			<property-class>java.lang.String</property-class>
+		</property>
+		<property>
+			<display-name>Show comments</display-name>
+			<property-name>showComments</property-name>
+			<property-class>boolean</property-class>
 		</property>
 		<property>
 			<display-name>URI to details viewer page</display-name>
