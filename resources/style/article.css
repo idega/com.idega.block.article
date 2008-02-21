@@ -33,6 +33,7 @@
 
 .article_teaser {
 	width: auto;
+	display: none;
 }
 
 .article_body {
