@@ -1,5 +1,5 @@
 /*
- * $Id: EditArticleView.java,v 1.42 2008/02/21 13:49:32 laddi Exp $
+ * $Id: EditArticleView.java,v 1.43 2008/02/21 15:24:44 laddi Exp $
  *
  * Copyright (C) 2004 Idega. All Rights Reserved.
  *
@@ -75,10 +75,10 @@ import com.idega.webface.htmlarea.HTMLArea;
  * <p>
  * This is the part for the editor of article is inside the admin interface
  * </p>
- * Last modified: $Date: 2008/02/21 13:49:32 $ by $Author: laddi $
+ * Last modified: $Date: 2008/02/21 15:24:44 $ by $Author: laddi $
  *
  * @author Joakim,Tryggvi Larusson
- * @version $Revision: 1.42 $
+ * @version $Revision: 1.43 $
  */
 public class EditArticleView extends IWBaseComponent implements ManagedContentBeans, ActionListener, ValueChangeListener {
 	private static final Log log = LogFactory.getLog(EditArticleView.class);
@@ -132,7 +132,7 @@ public class EditArticleView extends IWBaseComponent implements ManagedContentBe
 		IWContext iwc = IWContext.getIWContext(context);
 		
 		Stylesheet sheet = new Stylesheet();
-		sheet.setPath("/idegaweb/bundles/com.idega.block.article/resources/style/article.css");
+		sheet.setPath("/idegaweb/bundles/com.idega.block.article.bundle/resources/style/article.css");
 		add(sheet);
 		
 		UIComponent managementComponent = null;
