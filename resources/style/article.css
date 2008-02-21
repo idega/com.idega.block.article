@@ -236,15 +236,10 @@
 }
 
 .article .content_list .blog-entry-body {
-	display: none;
-}
-
-.article .content_list .article_teaser {
 	display: block;
 	margin: 2px 24px 6px 112px;
 	padding: 0;
 	font-size: 11px;
-	border: 0;
 }
 
 .article .content_list .item_details_command {
@@ -381,4 +376,80 @@ html>body .articleListButtons a {
 .article.preview .article_item .blog-entry-body {
 	margin-top: 12px;
 	font-size: 11px;
+}
+
+/* Article editor */
+body {
+	margin: 0;
+	padding: 0;	
+}
+
+form.editArticleForm {
+	font-family: "Lucida Grande", "Lucida Sans", "Lucida Sans Unicode", Arial, Helvetica, sans-serif;
+	font-size: 13px;
+	margin: 0 !important;
+	padding: 0 !important;
+}
+
+form.editArticleForm .wf_block {
+	margin: 0 !important;
+	padding: 0 !important;
+	border: 0 !important;
+	background-color: #fff !important;
+}
+
+form.editArticleForm .wf_blockmainarea {
+	background-color: #fff !important;
+	padding: 0 !important;
+	margin: 0 !important;
+}
+
+form.editArticleForm .wf_block .formitem{
+	margin-top: 20px;
+	margin-left: 20px;
+	margin-right: 20px;
+}
+
+form.editArticleForm .wf_block .formitem label{
+	text-align: left;
+	width: auto;
+	float: none;
+	display: block;
+	line-height: 18px;
+}
+
+form.editArticleForm .wf_block .formitem input, form.editArticleForm .wf_block .formitem textarea {
+	border: 1px #aaa solid;
+	font-size: 13px;
+	width: 70% !important;
+}
+
+form.editArticleForm .wf_block .formitem select {
+	border: 1px #aaa solid;
+	margin-right: 3px !important;
+}
+
+form.editArticleForm .wf_block .formitem table.htmlarea {
+	border: 1px #aaa solid;
+	width: 100% !important;
+	margin: 0;
+}
+
+form.editArticleForm .wf_block .footer, form.editArticleForm .wf_block .buttons{
+	background: #fff;
+	border-top: 1px solid #D7D7D7;
+	height: auto;
+	padding: 20px 20px;
+	margin-top: 20px;
+}
+
+form.editArticleForm .buttons input {
+	font-family: "Lucida Grande", "Lucida Sans", "Lucida Sans Unicode", Arial, Helvetica, sans-serif;
+	font-size: 16px;
+	background-color: #cef3cf;
+	border: 1px #b5e1b7 solid;
+	border-right-color: #80b082;
+	border-bottom-color: #6e9870;
+	border-left-color: #a9dcac;
+	padding: 4px 8px;
 }

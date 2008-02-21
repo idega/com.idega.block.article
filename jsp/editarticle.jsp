@@ -2,6 +2,7 @@
 <jsp:root xmlns:jsp="http://java.sun.com/JSP/Page"
         xmlns:html="http://java.sun.com/jsf/html"
         xmlns:jsf="http://java.sun.com/jsf/core"
+        xmlns:t="http://myfaces.apache.org/tomahawk"
         xmlns:ws="http://xmlns.idega.com/com.idega.workspace"
         xmlns:article="http://xmlns.idega.com/com.idega.block.article"
 version="1.2">

@@ -20,7 +20,7 @@ version="1.2">
 						<t:div styleClass="articleTitle"><h:outputText value="#{localizedStrings['com.idega.block.article']['article_title']}" /></t:div>
 						<t:div styleClass="articleAuthor"><h:outputText value="#{localizedStrings['com.idega.block.article']['article_author']}" /></t:div>
 					</t:div>
-					<article:ArticleListViewer id="article_list" resourcePath="/files/cms/article" detailsViewerPath="/workspace/content/article/preview" showBody="false" headlineAsLink="true" showTime="false" showComments="false" />
+					<article:ArticleListViewer id="article_list" resourcePath="/files/cms/article" detailsViewerPath="/workspace/content/article/preview" showTeaser="false" headlineAsLink="true" showTime="false" showComments="false" />
 				</wf:wfblock>
 				<t:div styleClass="articleListButtons"></t:div>
 			</h:form>

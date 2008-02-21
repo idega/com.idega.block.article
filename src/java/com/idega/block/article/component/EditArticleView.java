@@ -1,5 +1,5 @@
 /*
- * $Id: EditArticleView.java,v 1.39 2008/02/14 14:26:32 valdas Exp $
+ * $Id: EditArticleView.java,v 1.40 2008/02/21 12:47:15 laddi Exp $
  *
  * Copyright (C) 2004 Idega. All Rights Reserved.
  *
@@ -35,6 +35,7 @@ import javax.faces.model.SelectItem;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.myfaces.custom.stylesheet.Stylesheet;
 
 import com.idega.block.article.IWBundleStarter;
 import com.idega.block.article.bean.ArticleItemBean;
@@ -74,10 +75,10 @@ import com.idega.webface.htmlarea.HTMLArea;
  * <p>
  * This is the part for the editor of article is inside the admin interface
  * </p>
- * Last modified: $Date: 2008/02/14 14:26:32 $ by $Author: valdas $
+ * Last modified: $Date: 2008/02/21 12:47:15 $ by $Author: laddi $
  *
  * @author Joakim,Tryggvi Larusson
- * @version $Revision: 1.39 $
+ * @version $Revision: 1.40 $
  */
 public class EditArticleView extends IWBaseComponent implements ManagedContentBeans, ActionListener, ValueChangeListener {
 	private static final Log log = LogFactory.getLog(EditArticleView.class);
@@ -125,10 +126,15 @@ public class EditArticleView extends IWBaseComponent implements ManagedContentBe
 
 	public EditArticleView() {}
 
+	@Override
 	@SuppressWarnings("unchecked")
 	protected void initializeComponent(FacesContext context) {
 		IWContext iwc = IWContext.getIWContext(context);
-
+		
+		Stylesheet sheet = new Stylesheet();
+		sheet.setPath("/idegaweb/bundles/com.idega.block.article/resources/style/article.css");
+		add(sheet);
+		
 		UIComponent managementComponent = null;
 		if (isInCreateMode() || isInEditMode()) {
 			managementComponent = getEditContainer(iwc);
@@ -141,6 +147,7 @@ public class EditArticleView extends IWBaseComponent implements ManagedContentBe
 		if (needsForm) {
 			//	Form
 			HtmlForm f = new HtmlForm();
+			f.setStyleClass("editArticleForm");
 			f.getChildren().add(managementComponent);
 			add(f);
 			
@@ -226,6 +233,7 @@ public class EditArticleView extends IWBaseComponent implements ManagedContentBe
 	private WFContainer getMainContainer(){
 		WFContainer mainContainer = new WFContainer();
 		mainContainer.setId(ARTICLE_EDITOR_ID);
+		mainContainer.setStyleClass(mainContainer.getStyleClass() + " " + "editArticleContainer");
 		
 		WFMessages em = new WFMessages();
 		em.addMessageToDisplay(HEADLINE_ID);
@@ -308,7 +316,7 @@ public class EditArticleView extends IWBaseComponent implements ManagedContentBe
 			htmlAreaHeight = "320px";
 		}
 		//	Article body
-		HTMLArea bodyArea = WFUtil.getHtmlAreaTextArea(BODY_ID, ref + "body", htmlAreaWidth, htmlAreaHeight, needsForm);
+		HTMLArea bodyArea = WFUtil.getHtmlAreaTextArea(BODY_ID, ref + "body", null, null, needsForm);
 		bodyArea.addValueChangeListener(this);
 		bodyArea.setImmediate(true);
 		
@@ -418,9 +426,6 @@ public class EditArticleView extends IWBaseComponent implements ManagedContentBe
 		
 		if (needsForm) {
 			WFBlock block = new WFBlock();
-			mainContainer.setStyleAttribute("width", "100%");
-			mainContainer.setStyleAttribute("height", "97%");
-			mainContainer.setStyleAttribute("overflow", "auto");
 			block.add(mainContainer);
 			return block;
 		}
@@ -779,6 +784,7 @@ public class EditArticleView extends IWBaseComponent implements ManagedContentBe
 	/**
 	 * @see javax.faces.component.UIComponent#encodeBegin(javax.faces.context.FacesContext)
 	 */
+	@Override
 	public void encodeBegin(FacesContext context) throws IOException {
 		IWContext iwc = IWContext.getIWContext(context);
 		resourcePath = iwc.getParameter(ContentViewer.PARAMETER_CONTENT_RESOURCE);
@@ -956,6 +962,7 @@ public class EditArticleView extends IWBaseComponent implements ManagedContentBe
 	/**
 	 * @see javax.faces.component.UIPanel#saveState(javax.faces.context.FacesContext)
 	 */
+	@Override
 	public Object saveState(FacesContext ctx) {
 		Object values[] = new Object[2];
 		values[0] = super.saveState(ctx);
@@ -967,6 +974,7 @@ public class EditArticleView extends IWBaseComponent implements ManagedContentBe
 	 * @see javax.faces.component.UIPanel#restoreState(javax.faces.context.FacesContext,
 	 *      java.lang.Object)
 	 */
+	@Override
 	public void restoreState(FacesContext ctx, Object state) {
 		Object values[] = (Object[]) state;
 		super.restoreState(ctx, values[0]);
@@ -977,6 +985,7 @@ public class EditArticleView extends IWBaseComponent implements ManagedContentBe
 	/* (non-Javadoc)
 	 * @see javax.faces.component.UIComponentBase#processUpdates(javax.faces.context.FacesContext)
 	 */
+	@Override
 	public void processUpdates(FacesContext context) {
 		super.processUpdates(context);
 	}
@@ -984,6 +993,7 @@ public class EditArticleView extends IWBaseComponent implements ManagedContentBe
 	/* (non-Javadoc)
 	 * @see javax.faces.component.UIComponentBase#processUpdates(javax.faces.context.FacesContext)
 	 */
+	@Override
 	public void processValidators(FacesContext context) {
 		super.processValidators(context);
 	}
