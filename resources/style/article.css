@@ -446,6 +446,7 @@ form.editArticleForm .wf_block .formitem input, form.editArticleForm .wf_block .
 form.editArticleForm .wf_block .formitem textarea {
 	font-size: 11px;
 	padding: 4px;
+	width: 100% !important;
 }
 
 form.editArticleForm .wf_block .formitem select {
