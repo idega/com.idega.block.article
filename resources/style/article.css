@@ -396,6 +396,7 @@ form.editArticleForm .formsection {
 	border: 1px #b9c6ae solid;
 	position: relative;
 	background-color: #e0e8d9;
+	padding-bottom: 20px;
 }
 
 form.editArticleForm .wf_headertext {
@@ -494,10 +495,6 @@ form.editArticleForm .articleHeadline {
 
 form.editArticleForm .wf_block .articleHeadline input {
 	width: 100% !important;
-}
-
-form.editArticleForm .wf_block .articlePublishDate {
-	margin-bottom: 20px;	
 }
 
 form.editArticleForm .wf_block .articlePublishDate select {
