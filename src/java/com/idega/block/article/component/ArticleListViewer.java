@@ -1,5 +1,5 @@
 /*
- * $Id: ArticleListViewer.java,v 1.17 2008/02/20 15:48:11 laddi Exp $
+ * $Id: ArticleListViewer.java,v 1.18 2008/02/21 10:23:13 valdas Exp $
  * Created on 24.1.2005
  *
  * Copyright (C) 2005 Idega Software hf. All Rights Reserved.
@@ -41,10 +41,10 @@ import com.idega.util.PresentationUtil;
  * for the article module.
  * </p>
  * 
- *  Last modified: $Date: 2008/02/20 15:48:11 $ by $Author: laddi $
+ *  Last modified: $Date: 2008/02/21 10:23:13 $ by $Author: valdas $
  * 
  * @author <a href="mailto:tryggvi@idega.com">Tryggvi Larusson</a>
- * @version $Revision: 1.17 $
+ * @version $Revision: 1.18 $
  */
 public class ArticleListViewer extends ContentItemListViewer {
 
@@ -303,11 +303,13 @@ public class ArticleListViewer extends ContentItemListViewer {
 			if (CoreUtil.isSingleComponentRenderingProcess(iwc)) {
 				Layer script = new Layer();
 				script.add(PresentationUtil.getJavaScriptSourceLines(ArticleUtil.getJavaScriptSourcesForArticleEditor(iwc, true)));
+				script.add(PresentationUtil.getJavaScriptAction(ArticleUtil.getJavaScriptInitializationAction(false)));
 				getFacets().put(ContentItemViewer.FACET_JAVA_SCRIPT, script);
 			}
 			else {
 				PresentationUtil.addJavaScriptSourcesLinesToHeader(iwc, ArticleUtil.getJavaScriptSourcesForArticleEditor(iwc, false));
 				PresentationUtil.addStyleSheetsToHeader(iwc, ArticleUtil.getStyleSheetsSourcesForArticleEditor(iwc));
+				PresentationUtil.addJavaScriptActionToBody(iwc, ArticleUtil.getJavaScriptInitializationAction(true));
 			}
 		}
 		

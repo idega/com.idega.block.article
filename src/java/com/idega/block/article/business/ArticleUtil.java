@@ -1,5 +1,5 @@
 /*
- * $Id: ArticleUtil.java,v 1.12 2008/01/30 13:49:42 valdas Exp $
+ * $Id: ArticleUtil.java,v 1.13 2008/02/21 10:23:13 valdas Exp $
  * Created on 7.2.2005
  *
  * Copyright (C) 2005 Idega Software hf. All Rights Reserved.
@@ -32,10 +32,10 @@ import com.idega.webface.WFUtil;
 
 /**
  * 
- *  Last modified: $Date: 2008/01/30 13:49:42 $ by $Author: valdas $
+ *  Last modified: $Date: 2008/02/21 10:23:13 $ by $Author: valdas $
  * 
  * @author <a href="mailto:gummi@idega.com">Gudmundur Agust Saemundsson</a>
- * @version $Revision: 1.12 $
+ * @version $Revision: 1.13 $
  */
 public class ArticleUtil {
 
@@ -124,6 +124,15 @@ public class ArticleUtil {
 		}
 	
 		return sources;
+	}
+	
+	public static String getJavaScriptInitializationAction(boolean onLoadInit) {
+		String plainAction = "initializeJavaScriptActionsForEditingAndCreatingArticles();";
+		if (onLoadInit) {
+			return new StringBuffer("window.addEvent('domready', function() {").append(plainAction).append("});").toString();
+		}
+		
+		return plainAction;
 	}
 	
 	public static List<String> getStyleSheetsSourcesForArticleEditor(IWContext iwc) {

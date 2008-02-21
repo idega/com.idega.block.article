@@ -1,5 +1,5 @@
 /*
- * $Id: ArticleItemViewer.java,v 1.33 2008/02/20 15:48:11 laddi Exp $
+ * $Id: ArticleItemViewer.java,v 1.34 2008/02/21 10:23:13 valdas Exp $
  *
  * Copyright (C) 2004 Idega. All Rights Reserved.
  *
@@ -39,12 +39,12 @@ import com.idega.webface.WFHtml;
 import com.idega.webface.convert.WFTimestampConverter;
 
 /**
- * Last modified: $Date: 2008/02/20 15:48:11 $ by $Author: laddi $
+ * Last modified: $Date: 2008/02/21 10:23:13 $ by $Author: valdas $
  *
  * Displays the article item
  *
  * @author <a href="mailto:gummi@idega.com">Gudmundur Agust Saemundsson</a>
- * @version $Revision: 1.33 $
+ * @version $Revision: 1.34 $
  */
 public class ArticleItemViewer extends ContentItemViewer {
 	
@@ -447,11 +447,13 @@ public class ArticleItemViewer extends ContentItemViewer {
 			if (CoreUtil.isSingleComponentRenderingProcess(iwc)) {
 				Layer script = new Layer();
 				script.add(PresentationUtil.getJavaScriptSourceLines(ArticleUtil.getJavaScriptSourcesForArticleEditor(iwc, true)));
+				script.add(PresentationUtil.getJavaScriptAction(ArticleUtil.getJavaScriptInitializationAction(false)));
 				getFacets().put(ContentItemViewer.FACET_JAVA_SCRIPT, script);
 			}
 			else {
 				PresentationUtil.addJavaScriptSourcesLinesToHeader(iwc, ArticleUtil.getJavaScriptSourcesForArticleEditor(iwc, false));
 				PresentationUtil.addStyleSheetsToHeader(iwc, ArticleUtil.getStyleSheetsSourcesForArticleEditor(iwc));
+				PresentationUtil.addJavaScriptActionToBody(iwc, ArticleUtil.getJavaScriptInitializationAction(true));
 			}
 		}
 		
