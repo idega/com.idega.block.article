@@ -1,5 +1,5 @@
 /*
- * $Id: EditArticleView.java,v 1.41 2008/02/21 13:16:29 laddi Exp $
+ * $Id: EditArticleView.java,v 1.42 2008/02/21 13:49:32 laddi Exp $
  *
  * Copyright (C) 2004 Idega. All Rights Reserved.
  *
@@ -75,10 +75,10 @@ import com.idega.webface.htmlarea.HTMLArea;
  * <p>
  * This is the part for the editor of article is inside the admin interface
  * </p>
- * Last modified: $Date: 2008/02/21 13:16:29 $ by $Author: laddi $
+ * Last modified: $Date: 2008/02/21 13:49:32 $ by $Author: laddi $
  *
  * @author Joakim,Tryggvi Larusson
- * @version $Revision: 1.41 $
+ * @version $Revision: 1.42 $
  */
 public class EditArticleView extends IWBaseComponent implements ManagedContentBeans, ActionListener, ValueChangeListener {
 	private static final Log log = LogFactory.getLog(EditArticleView.class);
@@ -273,12 +273,13 @@ public class EditArticleView extends IWBaseComponent implements ManagedContentBe
 		
 		//	Languages menu
 		UIComponent langDropdown = getLanguageDropdownMenu(iwc);
-		UIComponent languageText = WFUtil.group(localizer.getTextVB("language"), WFUtil.getText(":"));
+		UIComponent languageText = localizer.getTextVB("language");
 		HtmlOutputLabel languageLabel = new HtmlOutputLabel();
 		languageLabel.getChildren().add(languageText);
 		languageLabel.setFor(langDropdown.getClientId(iwc));
 		
 		WFFormItem languageItem = new WFFormItem();
+		languageItem.setStyleClass("formitem articleLanguage");
 		languageItem.add(languageLabel);
 		languageItem.add(langDropdown);
 		mainContainer.add(languageItem);
@@ -292,12 +293,13 @@ public class EditArticleView extends IWBaseComponent implements ManagedContentBe
 		headlineInput.setSize(size);
 		headlineInput.setImmediate(true);
 		headlineInput.addValueChangeListener(this);
-		UIComponent headlineText = WFUtil.group(localizer.getTextVB("headline"), WFUtil.getText(":"));
+		UIComponent headlineText = localizer.getTextVB("headline");
 		HtmlOutputLabel headlineLabel = new HtmlOutputLabel();
 		headlineLabel.getChildren().add(headlineText);
 		headlineLabel.setFor(headlineInput.getClientId(iwc));
 		
 		WFFormItem headlineItem = new WFFormItem();
+		headlineItem.setStyleClass("formitem articleHeadline");
 		headlineItem.add(headlineLabel);
 		headlineItem.add(headlineInput);
 		mainContainer.add(headlineItem);
@@ -313,12 +315,13 @@ public class EditArticleView extends IWBaseComponent implements ManagedContentBe
 				String userName = user.getName();
 				getArticleItemBean().setAuthor(userName);
 			}
-			UIComponent authorText = WFUtil.group(localizer.getTextVB("author"), WFUtil.getText(":"));
+			UIComponent authorText = localizer.getTextVB("author");
 			HtmlOutputLabel authorLabel = new HtmlOutputLabel();
 			authorLabel.getChildren().add(authorText);
 			authorLabel.setFor(authorInput.getClientId(iwc));
 			
 			WFFormItem authorItem = new WFFormItem();
+			authorItem.setStyleClass("formitem articleAuthor");
 			authorItem.add(authorLabel);
 			authorItem.add(authorInput);
 			mainContainer.add(authorItem);
@@ -342,12 +345,13 @@ public class EditArticleView extends IWBaseComponent implements ManagedContentBe
 		bodyArea.addPlugin(HTMLArea.PLUGIN_STYLIST);
 		bodyArea.addPlugin("DoubleClick");
 		
-		UIComponent bodyText = WFUtil.group(localizer.getTextVB("body"), WFUtil.getText(":"));
+		UIComponent bodyText = localizer.getTextVB("body");
 		HtmlOutputLabel bodyLabel = new HtmlOutputLabel();
 		bodyLabel.getChildren().add(bodyText);
 		bodyLabel.setFor(bodyArea.getClientId(iwc));
 		
 		WFFormItem bodyItem = new WFFormItem();
+		bodyItem.setStyleClass("formitem articleBody");
 		bodyItem.add(bodyLabel);
 		bodyItem.add(bodyArea);
 		mainContainer.add(bodyItem);
@@ -358,12 +362,13 @@ public class EditArticleView extends IWBaseComponent implements ManagedContentBe
 			teaserArea.addValueChangeListener(this);
 			teaserArea.setImmediate(true);
 			teaserArea.setAllowFontSelection(false);
-			UIComponent teaserText = WFUtil.group(localizer.getTextVB("teaser"), WFUtil.getText(":"));
+			UIComponent teaserText = localizer.getTextVB("teaser");
 			HtmlOutputLabel teaserLabel = new HtmlOutputLabel();
 			teaserLabel.getChildren().add(teaserText);
 			teaserLabel.setFor(teaserArea.getClientId(iwc));
 			
 			WFFormItem teaserItem = new WFFormItem();
+			teaserItem.setStyleClass("formitem articleTeaser");
 			teaserItem.add(teaserLabel);
 			teaserItem.add(teaserArea);
 			mainContainer.add(teaserItem);
@@ -371,26 +376,26 @@ public class EditArticleView extends IWBaseComponent implements ManagedContentBe
 			//Source input
 			HtmlInputText sourceInput = WFUtil.getInputText(SOURCE_ID, ref + "source");
 			sourceInput.setSize(size);
-			UIComponent sourceText = WFUtil.group(localizer.getTextVB("source"), WFUtil.getText(":"));
+			UIComponent sourceText = localizer.getTextVB("source");
 			HtmlOutputLabel sourceLabel = new HtmlOutputLabel();
 			sourceLabel.getChildren().add(sourceText);
 			sourceLabel.setFor(sourceInput.getClientId(iwc));
 			
 			WFFormItem sourceItem = new WFFormItem();
+			sourceItem.setStyleClass("formitem articleSource");
 			sourceItem.add(sourceLabel);
 			sourceItem.add(sourceInput);
 			mainContainer.add(sourceItem);
-		}
-		
-		if (fromArticleItemListViewer) {
+
 			//	Comment input
 			HtmlInputTextarea commentArea = WFUtil.getTextArea(COMMENT_ID, ref + "comment", htmlAreaWidth, "60px");
-			UIComponent commentText = WFUtil.group(localizer.getTextVB("comment"), WFUtil.getText(":"));
+			UIComponent commentText = localizer.getTextVB("comment");
 			HtmlOutputLabel commentLabel = new HtmlOutputLabel();
 			commentLabel.getChildren().add(commentText);
 			commentLabel.setFor(commentArea.getClientId(iwc));
 			
 			WFFormItem commentItem = new WFFormItem();
+			commentItem.setStyleClass("formitem articleComment");
 			commentItem.add(commentLabel);
 			commentItem.add(commentArea);
 			mainContainer.add(commentItem);
@@ -398,24 +403,26 @@ public class EditArticleView extends IWBaseComponent implements ManagedContentBe
 			//	Published date
 			WFDateInput publishedInput = WFUtil.getDateInput(PUBLISHED_DATE_ID, ref + "publishedDate");
 			publishedInput.setShowTime(true);
-			UIComponent publishedText = WFUtil.group(localizer.getTextVB("publishing_date"), WFUtil.getText(":"));
+			UIComponent publishedText = localizer.getTextVB("publishing_date");
 			HtmlOutputLabel publishedLabel = new HtmlOutputLabel();
 			publishedLabel.getChildren().add(publishedText);
 	
-			WFFormItem publisheDateItem = new WFFormItem();
-			publisheDateItem.add(publishedLabel);
-			publisheDateItem.add(publishedInput);
-			mainContainer.add(publisheDateItem);
+			WFFormItem publishDateItem = new WFFormItem();
+			publishDateItem.setStyleClass("formitem articlePublishDate");
+			publishDateItem.add(publishedLabel);
+			publishDateItem.add(publishedInput);
+			mainContainer.add(publishDateItem);
 		}
 		
 		//	Categories input
 		WebDAVCategories categoriesContainer = getCategoryEditor(iwc);
-		UIComponent categoriesText = WFUtil.group(localizer.getTextVB("categories"), WFUtil.getText(":"));
+		UIComponent categoriesText = localizer.getTextVB("categories");
 		HtmlOutputLabel categoriesLabel = new HtmlOutputLabel();
 		categoriesLabel.getChildren().add(categoriesText);
 		categoriesLabel.setFor(categoriesContainer.getClientId(iwc));
 		
 		WFFormItem categoriesItem = new WFFormItem();
+		categoriesItem.setStyleClass("formitem articleCategories");
 		categoriesItem.setId(editArticleCategoriesSelectionBlockId);
 		categoriesItem.add(categoriesLabel);
 		categoriesItem.add(categoriesContainer);

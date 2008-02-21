@@ -424,13 +424,15 @@ form.editArticleForm .wf_block .formitem label{
 	width: auto;
 	float: none;
 	display: block;
-	line-height: 18px;
+	line-height: 20px;
+	padding: 0;
 }
 
 form.editArticleForm .wf_block .formitem input, form.editArticleForm .wf_block .formitem textarea {
 	border: 1px #aaa solid;
-	font-size: 13px;
-	width: 70% !important;
+	font-size: 18px;
+	padding: 2px 3px;
+	width: 80% !important;
 }
 
 form.editArticleForm .wf_block .formitem select {
@@ -461,4 +463,28 @@ form.editArticleForm .buttons input {
 	border-bottom-color: #6e9870;
 	border-left-color: #a9dcac;
 	padding: 4px 8px;
+}
+
+form.editArticleForm .articleLanguage {
+	margin-top: 0 !important;
+	position: absolute;
+	top: 0;
+	right: 0;
+	width: 100px;
+}
+
+form.editArticleForm .articleLanguage select {
+	width: 100px;
+}
+
+form.editArticleForm .articleHeadline {
+	margin-right: 146px !important;
+}
+
+form.editArticleForm .wf_block .articleHeadline input {
+	width: 100% !important;
+}
+
+form.editArticleForm .wf_block .articlePublishDate select {
+	font-size: 13px;
 }
