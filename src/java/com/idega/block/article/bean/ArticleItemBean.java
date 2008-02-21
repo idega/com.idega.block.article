@@ -1,5 +1,5 @@
 /*
- * $Id: ArticleItemBean.java,v 1.80 2008/02/14 14:26:31 valdas Exp $
+ * $Id: ArticleItemBean.java,v 1.81 2008/02/21 17:45:42 valdas Exp $
  *
  * Copyright (C) 2004-2005 Idega. All Rights Reserved.
  *
@@ -61,10 +61,10 @@ import com.idega.xml.XMLException;
  * This is a JSF managed bean that manages each article instance and delegates 
  * all calls to the correct localized instance.
  * <p>
- * Last modified: $Date: 2008/02/14 14:26:31 $ by $Author: valdas $
+ * Last modified: $Date: 2008/02/21 17:45:42 $ by $Author: valdas $
  *
  * @author Anders Lindman,<a href="mailto:tryggvi@idega.com">Tryggvi Larusson</a>
- * @version $Revision: 1.80 $
+ * @version $Revision: 1.81 $
  */
 public class ArticleItemBean extends ContentItemBean implements Serializable, ContentItem, ValueChangeListener {
 	
@@ -743,7 +743,7 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 	 * </p>
 	 */
 	private void makesureStandardFolderisCreated() {
-		IWUserContext iwuc = CoreUtil.getIWContext();
+		/*IWUserContext iwuc = CoreUtil.getIWContext();
 		IWSlideService slideService = getIWSlideService(iwuc);
 		String contentFolderPath = ArticleUtil.getContentRootPath();
 		String articlePath = ArticleUtil.getArticleBaseFolderPath();
@@ -780,7 +780,7 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 		}
 		catch (Exception e) {
 			e.printStackTrace();
-		}
+		}*/
 		
 	}
 	
