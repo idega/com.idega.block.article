@@ -1,5 +1,5 @@
 /*
- * $Id: EditArticleView.java,v 1.43 2008/02/21 15:24:44 laddi Exp $
+ * $Id: EditArticleView.java,v 1.44 2008/02/21 15:33:29 laddi Exp $
  *
  * Copyright (C) 2004 Idega. All Rights Reserved.
  *
@@ -49,6 +49,7 @@ import com.idega.content.presentation.ContentItemToolbar;
 import com.idega.content.presentation.ContentViewer;
 import com.idega.content.presentation.WebDAVCategories;
 import com.idega.core.localisation.business.ICLocaleBusiness;
+import com.idega.idegaweb.IWBundle;
 import com.idega.idegaweb.IWResourceBundle;
 import com.idega.presentation.IWBaseComponent;
 import com.idega.presentation.IWContext;
@@ -75,10 +76,10 @@ import com.idega.webface.htmlarea.HTMLArea;
  * <p>
  * This is the part for the editor of article is inside the admin interface
  * </p>
- * Last modified: $Date: 2008/02/21 15:24:44 $ by $Author: laddi $
+ * Last modified: $Date: 2008/02/21 15:33:29 $ by $Author: laddi $
  *
  * @author Joakim,Tryggvi Larusson
- * @version $Revision: 1.43 $
+ * @version $Revision: 1.44 $
  */
 public class EditArticleView extends IWBaseComponent implements ManagedContentBeans, ActionListener, ValueChangeListener {
 	private static final Log log = LogFactory.getLog(EditArticleView.class);
@@ -130,9 +131,10 @@ public class EditArticleView extends IWBaseComponent implements ManagedContentBe
 	@SuppressWarnings("unchecked")
 	protected void initializeComponent(FacesContext context) {
 		IWContext iwc = IWContext.getIWContext(context);
-		
+
+		IWBundle iwb = getBundle(context, "com.idega.block.article");
 		Stylesheet sheet = new Stylesheet();
-		sheet.setPath("/idegaweb/bundles/com.idega.block.article.bundle/resources/style/article.css");
+		sheet.setPath(iwb.getResourcesPath() + "/style/article.css");
 		add(sheet);
 		
 		UIComponent managementComponent = null;
