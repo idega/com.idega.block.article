@@ -1,5 +1,5 @@
 /*
- * $Id: EditArticleView.java,v 1.45 2008/02/21 15:55:20 laddi Exp $
+ * $Id: EditArticleView.java,v 1.46 2008/02/21 17:44:54 valdas Exp $
  *
  * Copyright (C) 2004 Idega. All Rights Reserved.
  *
@@ -48,6 +48,7 @@ import com.idega.content.data.ContentItemCase;
 import com.idega.content.presentation.ContentItemToolbar;
 import com.idega.content.presentation.ContentViewer;
 import com.idega.content.presentation.WebDAVCategories;
+import com.idega.core.accesscontrol.business.StandardRoles;
 import com.idega.core.localisation.business.ICLocaleBusiness;
 import com.idega.idegaweb.IWBundle;
 import com.idega.idegaweb.IWResourceBundle;
@@ -76,10 +77,10 @@ import com.idega.webface.htmlarea.HTMLArea;
  * <p>
  * This is the part for the editor of article is inside the admin interface
  * </p>
- * Last modified: $Date: 2008/02/21 15:55:20 $ by $Author: laddi $
+ * Last modified: $Date: 2008/02/21 17:44:54 $ by $Author: valdas $
  *
  * @author Joakim,Tryggvi Larusson
- * @version $Revision: 1.45 $
+ * @version $Revision: 1.46 $
  */
 public class EditArticleView extends IWBaseComponent implements ManagedContentBeans, ActionListener, ValueChangeListener {
 	private static final Log log = LogFactory.getLog(EditArticleView.class);
@@ -405,8 +406,10 @@ public class EditArticleView extends IWBaseComponent implements ManagedContentBe
 			commentItem.add(commentLabel);
 			commentItem.add(commentArea);
 			section.add(commentItem);
-
-			//	Published date
+		}
+		
+		if (fromArticleItemListViewer || iwc.hasRole(StandardRoles.ROLE_KEY_EDITOR)) {
+			//		Published date
 			WFDateInput publishedInput = WFUtil.getDateInput(PUBLISHED_DATE_ID, ref + "publishedDate");
 			publishedInput.setShowTime(true);
 			UIComponent publishedText = localizer.getTextVB("publishing_date");
