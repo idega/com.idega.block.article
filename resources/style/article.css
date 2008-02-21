@@ -391,13 +391,20 @@ form.editArticleForm {
 	padding: 0 !important;
 }
 
+form.editArticleForm .formsection {
+	margin: 20px;
+	border: 1px #b9c6ae solid;
+	position: relative;
+	background-color: #e0e8d9;
+}
+
 form.editArticleForm .wf_headertext {
 	display: block;
 	font-size: 24px;
 	font-weight: normal;
 	color: #063038;
 	padding: 20px;
-	border-bottom: 1px solid #D7D7D7;
+	padding-bottom: 0;
 }
 
 form.editArticleForm .wf_block {
@@ -414,7 +421,7 @@ form.editArticleForm .wf_blockmainarea {
 }
 
 form.editArticleForm .wf_block .formitem{
-	margin-top: 8px;
+	margin-top: 20px;
 	margin-left: 20px;
 	margin-right: 20px;
 }
@@ -435,6 +442,11 @@ form.editArticleForm .wf_block .formitem input, form.editArticleForm .wf_block .
 	width: 80% !important;
 }
 
+form.editArticleForm .wf_block .formitem textarea {
+	font-size: 11px;
+	padding: 4px;
+}
+
 form.editArticleForm .wf_block .formitem select {
 	border: 1px #aaa solid;
 	margin-right: 3px !important;
@@ -448,10 +460,10 @@ form.editArticleForm .wf_block .formitem table.htmlarea {
 
 form.editArticleForm .wf_block .footer, form.editArticleForm .wf_block .buttons{
 	background: #fff;
-	border-top: 1px solid #D7D7D7;
 	height: auto;
 	padding: 20px 20px;
-	margin-top: 20px;
+	padding-top: 0;
+	border: 0;
 }
 
 form.editArticleForm .buttons input {
@@ -462,11 +474,10 @@ form.editArticleForm .buttons input {
 	border-right-color: #80b082;
 	border-bottom-color: #6e9870;
 	border-left-color: #a9dcac;
-	padding: 4px 8px;
+	padding: 6px 16px;
 }
 
 form.editArticleForm .articleLanguage {
-	margin-top: 0 !important;
 	position: absolute;
 	top: 0;
 	right: 0;
@@ -483,6 +494,10 @@ form.editArticleForm .articleHeadline {
 
 form.editArticleForm .wf_block .articleHeadline input {
 	width: 100% !important;
+}
+
+form.editArticleForm .wf_block .articlePublishDate {
+	margin-bottom: 20px;	
 }
 
 form.editArticleForm .wf_block .articlePublishDate select {

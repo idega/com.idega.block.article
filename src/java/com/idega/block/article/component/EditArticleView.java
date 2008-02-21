@@ -1,5 +1,5 @@
 /*
- * $Id: EditArticleView.java,v 1.44 2008/02/21 15:33:29 laddi Exp $
+ * $Id: EditArticleView.java,v 1.45 2008/02/21 15:55:20 laddi Exp $
  *
  * Copyright (C) 2004 Idega. All Rights Reserved.
  *
@@ -76,10 +76,10 @@ import com.idega.webface.htmlarea.HTMLArea;
  * <p>
  * This is the part for the editor of article is inside the admin interface
  * </p>
- * Last modified: $Date: 2008/02/21 15:33:29 $ by $Author: laddi $
+ * Last modified: $Date: 2008/02/21 15:55:20 $ by $Author: laddi $
  *
  * @author Joakim,Tryggvi Larusson
- * @version $Revision: 1.44 $
+ * @version $Revision: 1.45 $
  */
 public class EditArticleView extends IWBaseComponent implements ManagedContentBeans, ActionListener, ValueChangeListener {
 	private static final Log log = LogFactory.getLog(EditArticleView.class);
@@ -273,6 +273,10 @@ public class EditArticleView extends IWBaseComponent implements ManagedContentBe
 		WFResourceUtil localizer = WFResourceUtil.getResourceUtilArticle();
 		WFContainer mainContainer = getMainContainer();
 		
+		WFContainer section = new WFContainer();
+		section.setStyleClass("formsection");
+		mainContainer.add(section);
+		
 		//	Languages menu
 		UIComponent langDropdown = getLanguageDropdownMenu(iwc);
 		UIComponent languageText = localizer.getTextVB("language");
@@ -284,7 +288,7 @@ public class EditArticleView extends IWBaseComponent implements ManagedContentBe
 		languageItem.setStyleClass("formitem articleLanguage");
 		languageItem.add(languageLabel);
 		languageItem.add(langDropdown);
-		mainContainer.add(languageItem);
+		section.add(languageItem);
 		
 		//	Headline input
 		HtmlInputText headlineInput = WFUtil.getInputText(HEADLINE_ID, ref + "headline");
@@ -304,7 +308,7 @@ public class EditArticleView extends IWBaseComponent implements ManagedContentBe
 		headlineItem.setStyleClass("formitem articleHeadline");
 		headlineItem.add(headlineLabel);
 		headlineItem.add(headlineInput);
-		mainContainer.add(headlineItem);
+		section.add(headlineItem);
 		
 		if (fromArticleItemListViewer) {
 			//	Author input
@@ -326,7 +330,7 @@ public class EditArticleView extends IWBaseComponent implements ManagedContentBe
 			authorItem.setStyleClass("formitem articleAuthor");
 			authorItem.add(authorLabel);
 			authorItem.add(authorInput);
-			mainContainer.add(authorItem);
+			section.add(authorItem);
 		}
 
 		String htmlAreaWidth = "640px";
@@ -356,7 +360,7 @@ public class EditArticleView extends IWBaseComponent implements ManagedContentBe
 		bodyItem.setStyleClass("formitem articleBody");
 		bodyItem.add(bodyLabel);
 		bodyItem.add(bodyArea);
-		mainContainer.add(bodyItem);
+		section.add(bodyItem);
 		
 		if (fromArticleItemListViewer) {
 			//	Teaser input
@@ -373,7 +377,7 @@ public class EditArticleView extends IWBaseComponent implements ManagedContentBe
 			teaserItem.setStyleClass("formitem articleTeaser");
 			teaserItem.add(teaserLabel);
 			teaserItem.add(teaserArea);
-			mainContainer.add(teaserItem);
+			section.add(teaserItem);
 		
 			//Source input
 			HtmlInputText sourceInput = WFUtil.getInputText(SOURCE_ID, ref + "source");
@@ -387,7 +391,7 @@ public class EditArticleView extends IWBaseComponent implements ManagedContentBe
 			sourceItem.setStyleClass("formitem articleSource");
 			sourceItem.add(sourceLabel);
 			sourceItem.add(sourceInput);
-			mainContainer.add(sourceItem);
+			section.add(sourceItem);
 
 			//	Comment input
 			HtmlInputTextarea commentArea = WFUtil.getTextArea(COMMENT_ID, ref + "comment", htmlAreaWidth, "60px");
@@ -400,7 +404,7 @@ public class EditArticleView extends IWBaseComponent implements ManagedContentBe
 			commentItem.setStyleClass("formitem articleComment");
 			commentItem.add(commentLabel);
 			commentItem.add(commentArea);
-			mainContainer.add(commentItem);
+			section.add(commentItem);
 
 			//	Published date
 			WFDateInput publishedInput = WFUtil.getDateInput(PUBLISHED_DATE_ID, ref + "publishedDate");
@@ -413,7 +417,7 @@ public class EditArticleView extends IWBaseComponent implements ManagedContentBe
 			publishDateItem.setStyleClass("formitem articlePublishDate");
 			publishDateItem.add(publishedLabel);
 			publishDateItem.add(publishedInput);
-			mainContainer.add(publishDateItem);
+			section.add(publishDateItem);
 		}
 		
 		//	Categories input
@@ -431,7 +435,7 @@ public class EditArticleView extends IWBaseComponent implements ManagedContentBe
 		if (!categoriesContainer.isNeedDisplayCategoriesSelection(iwc)) {
 			categoriesItem.setStyleAttribute("display", "none");
 		}
-		mainContainer.add(categoriesItem);
+		section.add(categoriesItem);
 
 		//	Button
 		FieldSet buttons = new FieldSet();
