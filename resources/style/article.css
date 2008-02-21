@@ -9,14 +9,12 @@
 }
 
 .article_author {
-	font-size: 10px;
 	display: inline;
 	padding-right: 4px;
 	
 }
 
 .article_creation_date {
-	font-size: 10px;
 	display: inline;
 	padding-left: 4px;
 	padding-right: 4px;
@@ -344,4 +342,43 @@
 html>body .articleListButtons a {
 	min-width: 24px;
 	width: auto;
+}
+
+/* Article preview in workspace */
+.article.preview .ws_main .wf_block {
+	position: absolute;
+	top: 0;
+	bottom: 0;
+	left: 0;
+	right: 0;
+	width: auto;
+	background-color: #fff;
+	height: auto;
+}
+
+.article.preview .article_item {
+	margin: 12px;
+	font-size: 13px;
+	position: relative;
+	font-family: "Lucida Grande", "Lucida Sans", "Lucida Sans Unicode", Arial, Helvetica, sans-serif;
+}
+
+.article.preview .article_item .blog-entry-title {
+	font-size: 13px;
+	font-weight: bold;
+	margin-bottom: 2px;
+}
+
+.article.preview .article_item .blog-entry-date {
+	display: block;
+	margin-bottom: 2px;
+}
+
+.article.preview .article_item .article_author {
+	display: block;	
+}
+
+.article.preview .article_item .blog-entry-body {
+	margin-top: 12px;
+	font-size: 11px;
 }
