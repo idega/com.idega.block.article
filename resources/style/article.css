@@ -391,6 +391,15 @@ form.editArticleForm {
 	padding: 0 !important;
 }
 
+form.editArticleForm .wf_headertext {
+	display: block;
+	font-size: 24px;
+	font-weight: normal;
+	color: #063038;
+	padding: 20px;
+	border-bottom: 1px solid #D7D7D7;
+}
+
 form.editArticleForm .wf_block {
 	margin: 0 !important;
 	padding: 0 !important;
@@ -405,7 +414,7 @@ form.editArticleForm .wf_blockmainarea {
 }
 
 form.editArticleForm .wf_block .formitem{
-	margin-top: 20px;
+	margin-top: 8px;
 	margin-left: 20px;
 	margin-right: 20px;
 }

@@ -1,5 +1,5 @@
 /*
- * $Id: EditArticleView.java,v 1.40 2008/02/21 12:47:15 laddi Exp $
+ * $Id: EditArticleView.java,v 1.41 2008/02/21 13:16:29 laddi Exp $
  *
  * Copyright (C) 2004 Idega. All Rights Reserved.
  *
@@ -75,10 +75,10 @@ import com.idega.webface.htmlarea.HTMLArea;
  * <p>
  * This is the part for the editor of article is inside the admin interface
  * </p>
- * Last modified: $Date: 2008/02/21 12:47:15 $ by $Author: laddi $
+ * Last modified: $Date: 2008/02/21 13:16:29 $ by $Author: laddi $
  *
  * @author Joakim,Tryggvi Larusson
- * @version $Revision: 1.40 $
+ * @version $Revision: 1.41 $
  */
 public class EditArticleView extends IWBaseComponent implements ManagedContentBeans, ActionListener, ValueChangeListener {
 	private static final Log log = LogFactory.getLog(EditArticleView.class);
@@ -144,10 +144,25 @@ public class EditArticleView extends IWBaseComponent implements ManagedContentBe
 		}
 		this.setId(EDIT_ARTICLE_BLOCK_ID);
 		
+		WFResourceUtil localizer = WFResourceUtil.getResourceUtilArticle();
+		UIComponent titleText = null;
+		if (isInCreateMode()) {
+			titleText = localizer.getHeaderTextVB("create_article");
+		}
+		else if (isInEditMode()) {
+			titleText = localizer.getHeaderTextVB("edit_article");
+		}
+		else if (isInDeleteMode()) {
+			titleText = localizer.getHeaderTextVB("delete_article");
+		}
+		
 		if (needsForm) {
 			//	Form
 			HtmlForm f = new HtmlForm();
 			f.setStyleClass("editArticleForm");
+			if (titleText != null) {
+				f.getChildren().add(titleText);
+			}
 			f.getChildren().add(managementComponent);
 			add(f);
 			
