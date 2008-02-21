@@ -1,5 +1,5 @@
 /*
- * $Id: ArticleItemViewer.java,v 1.34 2008/02/21 10:23:13 valdas Exp $
+ * $Id: ArticleItemViewer.java,v 1.35 2008/02/21 17:38:36 valdas Exp $
  *
  * Copyright (C) 2004 Idega. All Rights Reserved.
  *
@@ -39,12 +39,12 @@ import com.idega.webface.WFHtml;
 import com.idega.webface.convert.WFTimestampConverter;
 
 /**
- * Last modified: $Date: 2008/02/21 10:23:13 $ by $Author: valdas $
+ * Last modified: $Date: 2008/02/21 17:38:36 $ by $Author: valdas $
  *
  * Displays the article item
  *
  * @author <a href="mailto:gummi@idega.com">Gudmundur Agust Saemundsson</a>
- * @version $Revision: 1.34 $
+ * @version $Revision: 1.35 $
  */
 public class ArticleItemViewer extends ContentItemViewer {
 	
@@ -415,8 +415,14 @@ public class ArticleItemViewer extends ContentItemViewer {
 		}
 		try {
 			String serverName = iwc.getServerURL();
+			if (serverName == null) {
+				return;
+			}
 			serverName.substring(0, serverName.length()-1);
 			String feedUri = bservice.getCurrentPageURI(iwc);
+			if (feedUri == null) {
+				return;
+			}
 			feedUri.substring(1);
 			String linkToFeed = serverName+"rss/article"+feedUri;
 			addFeedJavaScript(linkToFeed, "atom", "Atom 1.0");
