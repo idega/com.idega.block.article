@@ -1,9 +1,15 @@
 function initializeJavaScriptActionsForEditingAndCreatingArticles() {
+	window.addEvent('resize', setDimensionsForArticleEditWindow);
+	
+	setDimensionsForArticleEditWindow();
+	registerArticleLinksForMoodalBox();
+}
+
+function setDimensionsForArticleEditWindow() {
 	var width = Math.round(window.getWidth() * 0.8);
 	var height = Math.round(window.getHeight() * 0.8);
 	
 	MOOdalBox.init({resizeDuration: 0, evalScripts: true, animateCaption: false, defContentsWidth: width, defContentsHeight: height});
-	registerArticleLinksForMoodalBox();
 }
 
 function registerArticleLinksForMoodalBox() {
