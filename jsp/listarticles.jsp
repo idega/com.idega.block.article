@@ -10,8 +10,10 @@
 version="1.2">
 <jsp:directive.page contentType="text/html" pageEncoding="UTF-8"/>
 	<jsf:view>
-		<ws:page id="listarticles1">
-			<h:form id="listarticlesform1">
+		<ws:page id="listarticles1" javascripturls="
+				/idegaweb/bundles/com.idega.block.web2.0.bundle/resources/javascript/jquery/1.2.3/jquery-compressed.js,
+				/idegaweb/bundles/com.idega.block.article.bundle/resources/javascript/article-list.js">
+			<h:form styleClass="articleListContent" id="listarticlesform1">
 				<wf:wfblock id="article_list_block" title="#{localizedStrings['com.idega.block.article']['list_articles']}" maximizedVertically="true">
 					<t:div styleClass="articleHeadings">
 						<t:div styleClass="articleDate"><h:outputText value="#{localizedStrings['com.idega.block.article']['article_date']}" /></t:div>
@@ -20,6 +22,7 @@ version="1.2">
 					</t:div>
 					<article:ArticleListViewer id="article_list" resourcePath="/files/cms/article" detailsViewerPath="/workspace/content/article/preview" showBody="false" headlineAsLink="true" showTime="false" showComments="false" />
 				</wf:wfblock>
+				<t:div styleClass="articleListButtons"></t:div>
 			</h:form>
 		</ws:page>
 	</jsf:view>
