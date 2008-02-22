@@ -1,5 +1,5 @@
 /*
- * $Id: ArticleItemBean.java,v 1.81 2008/02/21 17:45:42 valdas Exp $
+ * $Id: ArticleItemBean.java,v 1.82 2008/02/22 12:01:05 valdas Exp $
  *
  * Copyright (C) 2004-2005 Idega. All Rights Reserved.
  *
@@ -23,8 +23,6 @@ import javax.faces.event.AbortProcessingException;
 import javax.faces.event.ValueChangeEvent;
 import javax.faces.event.ValueChangeListener;
 
-import org.apache.webdav.lib.Ace;
-import org.apache.webdav.lib.Privilege;
 import org.apache.webdav.lib.PropertyName;
 import org.apache.webdav.lib.WebdavResources;
 
@@ -35,7 +33,6 @@ import com.idega.content.bean.ContentItem;
 import com.idega.content.bean.ContentItemBean;
 import com.idega.content.bean.ContentItemCase;
 import com.idega.content.business.ContentConstants;
-import com.idega.core.accesscontrol.business.StandardRoles;
 import com.idega.core.builder.business.BuilderService;
 import com.idega.core.builder.business.BuilderServiceFactory;
 import com.idega.data.IDOStoreException;
@@ -43,12 +40,7 @@ import com.idega.idegaweb.IWMainApplication;
 import com.idega.idegaweb.IWUserContext;
 import com.idega.idegaweb.UnavailableIWContext;
 import com.idega.presentation.IWContext;
-import com.idega.slide.authentication.AuthenticationBusiness;
-import com.idega.slide.business.IWSlideService;
-import com.idega.slide.business.IWSlideServiceBean;
 import com.idega.slide.business.IWSlideSession;
-import com.idega.slide.util.AccessControlEntry;
-import com.idega.slide.util.AccessControlList;
 import com.idega.slide.util.WebdavExtendedResource;
 import com.idega.slide.util.WebdavRootResource;
 import com.idega.util.CoreConstants;
@@ -61,10 +53,10 @@ import com.idega.xml.XMLException;
  * This is a JSF managed bean that manages each article instance and delegates 
  * all calls to the correct localized instance.
  * <p>
- * Last modified: $Date: 2008/02/21 17:45:42 $ by $Author: valdas $
+ * Last modified: $Date: 2008/02/22 12:01:05 $ by $Author: valdas $
  *
  * @author Anders Lindman,<a href="mailto:tryggvi@idega.com">Tryggvi Larusson</a>
- * @version $Revision: 1.81 $
+ * @version $Revision: 1.82 $
  */
 public class ArticleItemBean extends ContentItemBean implements Serializable, ContentItem, ValueChangeListener {
 	
