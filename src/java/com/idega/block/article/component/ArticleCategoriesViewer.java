@@ -27,6 +27,7 @@ import com.idega.presentation.Layer;
 import com.idega.presentation.text.Link;
 import com.idega.presentation.text.Text;
 import com.idega.presentation.ui.CheckBox;
+import com.idega.util.CoreConstants;
 
 public class ArticleCategoriesViewer extends Block {
 	
@@ -127,7 +128,7 @@ public class ArticleCategoriesViewer extends Block {
 		AddResource adder = AddResourceFactory.getInstance(iwc);
 		
 		adder.addJavaScriptAtPosition(iwc, AddResource.HEADER_BEGIN, "/dwr/interface/BuilderService.js");
-		adder.addJavaScriptAtPosition(iwc, AddResource.HEADER_BEGIN, "/dwr/engine.js");
+		adder.addJavaScriptAtPosition(iwc, AddResource.HEADER_BEGIN, CoreConstants.DWR_ENGINE_SCRIPT);
 		adder.addJavaScriptAtPosition(iwc, AddResource.HEADER_BEGIN, getBundle(iwc).getVirtualPathWithFileNameString("javascript/ArticleCategoriesHelper.js"));
 	}
 	

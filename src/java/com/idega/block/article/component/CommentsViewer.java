@@ -49,7 +49,6 @@ public class CommentsViewer extends Block {
 	private boolean isForumPage = false;
 	private boolean usedInArticleList = false;
 	
-	private String DWR_ENGINE = "/dwr/engine.js";
 	private String COMMENTS_ENGINE = "/dwr/interface/CommentsEngine.js";
 	private String COMMENTS_HELPER = "javascript/ArticleCommentsHelper.js";
 	private String INIT_COMMENTS_ACTION = "initComments();";
@@ -175,7 +174,7 @@ public class CommentsViewer extends Block {
 	protected List<String> getJavaScriptSources(IWContext iwc) {
 		List<String> sources = new ArrayList<String>();
 		sources.add(COMMENTS_ENGINE);
-		sources.add(DWR_ENGINE);
+		sources.add(CoreConstants.DWR_ENGINE_SCRIPT);
 		sources.add(getBundle(iwc).getVirtualPathWithFileNameString(COMMENTS_HELPER));
 		Web2Business web2 = SpringBeanLookup.getInstance().getSpringBean(iwc, Web2Business.class);
 		if (web2 != null) {
