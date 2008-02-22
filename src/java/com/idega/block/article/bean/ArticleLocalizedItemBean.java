@@ -1,5 +1,5 @@
 /*
- * $Id: ArticleLocalizedItemBean.java,v 1.26 2008/01/28 06:20:56 valdas Exp $
+ * $Id: ArticleLocalizedItemBean.java,v 1.27 2008/02/22 13:48:05 valdas Exp $
  *
  * Copyright (C) 2004 Idega. All Rights Reserved.
  *
@@ -51,10 +51,10 @@ import com.idega.xml.XMLParser;
  * This is a JSF managed bean that manages each article xml document 
  * instance per language/locale.
  * <p>
- * Last modified: $Date: 2008/01/28 06:20:56 $ by $Author: valdas $
+ * Last modified: $Date: 2008/02/22 13:48:05 $ by $Author: valdas $
  *
  * @author Anders Lindman,<a href="mailto:tryggvi@idega.com">Tryggvi Larusson</a>
- * @version $Revision: 1.26 $
+ * @version $Revision: 1.27 $
  */
 public class ArticleLocalizedItemBean extends ContentItemBean implements Serializable, ContentItem {
 	
@@ -657,10 +657,23 @@ public class ArticleLocalizedItemBean extends ContentItemBean implements Seriali
 			}
 		}
 		
-		XMLElement author = entry.getChild("creator", dcNamespace);
+		XMLElement author = entry.getChild("author", atomNamespace);
 		if (author != null) {
-			if (author.getValue() != null) {
-				setAuthor(author.getValue());
+			XMLElement authorName = author.getChild("name", atomNamespace);
+			if (authorName != null) {
+				setAuthor(authorName.getValue() == null ? CoreConstants.EMPTY : authorName.getValue());
+			}
+		}
+		
+		XMLElement creator = entry.getChild("creator", dcNamespace);
+		if (creator != null) {
+			String creatorId = creator.getValue();
+			if (creatorId != null) {
+				int convertedCreatorId = -1;
+				try {
+					convertedCreatorId = Integer.valueOf(creatorId);
+				} catch(Exception e) {}
+				setCreatedByUserId(convertedCreatorId);
 			}
 		}
 		
