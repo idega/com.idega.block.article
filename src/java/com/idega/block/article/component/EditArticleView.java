@@ -1,5 +1,5 @@
 /*
- * $Id: EditArticleView.java,v 1.46 2008/02/21 17:44:54 valdas Exp $
+ * $Id: EditArticleView.java,v 1.47 2008/02/22 13:45:35 valdas Exp $
  *
  * Copyright (C) 2004 Idega. All Rights Reserved.
  *
@@ -77,10 +77,10 @@ import com.idega.webface.htmlarea.HTMLArea;
  * <p>
  * This is the part for the editor of article is inside the admin interface
  * </p>
- * Last modified: $Date: 2008/02/21 17:44:54 $ by $Author: valdas $
+ * Last modified: $Date: 2008/02/22 13:45:35 $ by $Author: valdas $
  *
  * @author Joakim,Tryggvi Larusson
- * @version $Revision: 1.46 $
+ * @version $Revision: 1.47 $
  */
 public class EditArticleView extends IWBaseComponent implements ManagedContentBeans, ActionListener, ValueChangeListener {
 	private static final Log log = LogFactory.getLog(EditArticleView.class);
@@ -408,7 +408,7 @@ public class EditArticleView extends IWBaseComponent implements ManagedContentBe
 			section.add(commentItem);
 		}
 		
-		if (fromArticleItemListViewer || iwc.hasRole(StandardRoles.ROLE_KEY_EDITOR)) {
+		if (iwc.hasRole(StandardRoles.ROLE_KEY_EDITOR)) {
 			//		Published date
 			WFDateInput publishedInput = WFUtil.getDateInput(PUBLISHED_DATE_ID, ref + "publishedDate");
 			publishedInput.setShowTime(true);
