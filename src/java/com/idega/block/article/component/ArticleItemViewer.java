@@ -1,5 +1,5 @@
 /*
- * $Id: ArticleItemViewer.java,v 1.35 2008/02/21 17:38:36 valdas Exp $
+ * $Id: ArticleItemViewer.java,v 1.36 2008/02/24 08:52:37 laddi Exp $
  *
  * Copyright (C) 2004 Idega. All Rights Reserved.
  *
@@ -39,12 +39,12 @@ import com.idega.webface.WFHtml;
 import com.idega.webface.convert.WFTimestampConverter;
 
 /**
- * Last modified: $Date: 2008/02/21 17:38:36 $ by $Author: valdas $
+ * Last modified: $Date: 2008/02/24 08:52:37 $ by $Author: laddi $
  *
  * Displays the article item
  *
  * @author <a href="mailto:gummi@idega.com">Gudmundur Agust Saemundsson</a>
- * @version $Revision: 1.35 $
+ * @version $Revision: 1.36 $
  */
 public class ArticleItemViewer extends ContentItemViewer {
 	
@@ -65,6 +65,7 @@ public class ArticleItemViewer extends ContentItemViewer {
 	
 	private boolean showAuthor = true;
 	private boolean showCreationDate = true;
+	private boolean showHeadline = true;
 	private boolean showTeaser = true;
 	private boolean showBody = true;
 	private boolean addCommentsViewer = false;
@@ -168,6 +169,9 @@ public class ArticleItemViewer extends ContentItemViewer {
 			return false;
 		}
 		if (ATTRIBUTE_TEASER.equals(attribute) && !isShowTeaser()) {
+			return false;
+		}
+		if (ContentConstants.ATTRIBUTE_HEADLINE.equals(attribute) && !isShowHeadline()) {
 			return false;
 		}
 		return true;
@@ -354,6 +358,14 @@ public class ArticleItemViewer extends ContentItemViewer {
 		this.showCreationDate = showCreationDate;
 	}
 	
+	public boolean isShowHeadline() {
+		return showHeadline;
+	}
+
+	public void setShowHeadline(boolean showHeadline) {
+		this.showHeadline = showHeadline;
+	}
+
 	public boolean isShowTeaser() {
 		return showTeaser;
 	}
@@ -368,6 +380,10 @@ public class ArticleItemViewer extends ContentItemViewer {
 
 	public void setShowBody(boolean showBody) {
 		this.showBody = showBody;
+	}
+	
+	public void setShowDetailsCommand(boolean showDetailsCommand) {
+		setRenderDetailsCommand(showDetailsCommand);
 	}
 	
 	@Override

@@ -1,5 +1,5 @@
 /*
- * $Id: ArticleListManagedBean.java,v 1.18 2008/02/22 13:48:05 valdas Exp $
+ * $Id: ArticleListManagedBean.java,v 1.19 2008/02/24 08:52:36 laddi Exp $
  * Created on 27.1.2005
  *
  * Copyright (C) 2005 Idega Software hf. All Rights Reserved.
@@ -52,10 +52,10 @@ import com.idega.util.IWTimestamp;
 
 /**
  * 
- *  Last modified: $Date: 2008/02/22 13:48:05 $ by $Author: valdas $
+ *  Last modified: $Date: 2008/02/24 08:52:36 $ by $Author: laddi $
  * 
  * @author <a href="mailto:gummi@idega.com">Gudmundur Agust Saemundsson</a>
- * @version $Revision: 1.18 $
+ * @version $Revision: 1.19 $
  */
 public class ArticleListManagedBean implements ContentListViewerManagedBean {
 
@@ -74,8 +74,10 @@ public class ArticleListManagedBean implements ContentListViewerManagedBean {
 	
 	private boolean showAuthor = true;
 	private boolean showCreationDate = true;
+	private boolean showHeadline = true;
 	private boolean showTeaser = true;
 	private boolean showBody = true;
+	private Boolean showDetailsCommand = null;
 
 	/**
 	 * 
@@ -242,8 +244,12 @@ public class ArticleListManagedBean implements ContentListViewerManagedBean {
 		viewer.setShowTime(isShowTime());
 		viewer.setShowAuthor(isShowAuthor());
 		viewer.setShowCreationDate(isShowCreationDate());
+		viewer.setShowHeadline(isShowHeadline());
 		viewer.setShowTeaser(isShowTeaser());
 		viewer.setShowBody(isShowBody());
+		if (isShowDetailsCommand() != null) {
+			viewer.setShowDetailsCommand(isShowDetailsCommand().booleanValue());
+		}
 		
 		if(this.detailsViewerPath != null){
 			viewer.setDetailsViewerPath(this.detailsViewerPath);
@@ -305,6 +311,14 @@ public class ArticleListManagedBean implements ContentListViewerManagedBean {
 		this.showCreationDate = showCreationDate;
 	}
 	
+	public boolean isShowHeadline() {
+		return showHeadline;
+	}
+
+	public void setShowHeadline(boolean showHeadline) {
+		this.showHeadline = showHeadline;
+	}
+
 	public boolean isShowTeaser() {
 		return showTeaser;
 	}
@@ -321,6 +335,14 @@ public class ArticleListManagedBean implements ContentListViewerManagedBean {
 		this.showBody = showBody;
 	}
 	
+	public Boolean isShowDetailsCommand() {
+		return showDetailsCommand;
+	}
+
+	public void setShowDetailsCommand(boolean showDetailsCommand) {
+		this.showDetailsCommand = Boolean.valueOf(showDetailsCommand);
+	}
+
 	/**
 	 * <p>
 	 * TODO tryggvil describe method setHeadlineAsLink

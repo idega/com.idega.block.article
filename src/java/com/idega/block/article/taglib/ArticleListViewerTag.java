@@ -1,5 +1,5 @@
 /*
- * $Id: ArticleListViewerTag.java,v 1.3 2008/02/20 15:48:11 laddi Exp $
+ * $Id: ArticleListViewerTag.java,v 1.4 2008/02/24 08:52:35 laddi Exp $
  * Created on 1.9.2005 in project com.idega.block.article
  *
  * Copyright (C) 2005 Idega Software hf. All Rights Reserved.
@@ -19,17 +19,19 @@ import com.idega.content.presentation.ContentItemListViewerTag;
  * <p>
  * TODO tryggvil Describe Type ListArticlesViewerTag
  * </p>
- *  Last modified: $Date: 2008/02/20 15:48:11 $ by $Author: laddi $
+ *  Last modified: $Date: 2008/02/24 08:52:35 $ by $Author: laddi $
  * 
  * @author <a href="mailto:tryggvil@idega.com">tryggvil</a>
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
 public class ArticleListViewerTag extends ContentItemListViewerTag {
 
 	private boolean showAuthor = true;
 	private boolean showCreationDate = true;
+	private boolean showHeadline = true;
 	private boolean showTeaser = true;
 	private boolean showBody = true;
+	private Boolean showDetailsCommand = null;
 	private String datePattern = null;
 	private boolean headlineAsLink = false;
 	private boolean showComments = false;
@@ -69,8 +71,12 @@ public class ArticleListViewerTag extends ContentItemListViewerTag {
 			ArticleListViewer viewer = ((ArticleListViewer)component);
 			viewer.setShowAuthor(isShowAuthor());
 			viewer.setShowCreationDate(isShowCreationDate());
+			viewer.setShowHeadline(isShowHeadline());
 			viewer.setShowTeaser(isShowTeaser());
 			viewer.setShowBody(isShowBody());
+			if (isShowDetailsCommand() != null) {
+				viewer.setShowDetailsCommand(isShowDetailsCommand().booleanValue());
+			}
 			viewer.setDatePattern(getDatePattern());
 			viewer.setHeadlineAsLink(getHeadlineAsLink());
 			viewer.setShowComments(getShowComments());
@@ -95,6 +101,14 @@ public class ArticleListViewerTag extends ContentItemListViewerTag {
 		this.showCreationDate = showCreationDate;
 	}
 	
+	public boolean isShowHeadline() {
+		return showHeadline;
+	}
+
+	public void setShowHeadline(boolean showHeadline) {
+		this.showHeadline = showHeadline;
+	}
+
 	public boolean isShowTeaser() {
 		return showTeaser;
 	}
@@ -109,6 +123,14 @@ public class ArticleListViewerTag extends ContentItemListViewerTag {
 
 	public void setShowBody(boolean showBody) {
 		this.showBody = showBody;
+	}
+
+	public Boolean isShowDetailsCommand() {
+		return showDetailsCommand;
+	}
+
+	public void setShowDetailsCommand(boolean showDetailsCommand) {
+		this.showDetailsCommand = Boolean.valueOf(showDetailsCommand);
 	}
 
 	public void setDatePattern(String datePattern) {

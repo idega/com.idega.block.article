@@ -78,6 +78,11 @@
 			<property-class>boolean</property-class>
 		</property>
 		<property>
+			<display-name>Show headline</display-name>
+			<property-name>showHeadline</property-name>
+			<property-class>boolean</property-class>
+		</property>
+		<property>
 			<display-name>Show teaser</display-name>
 			<property-name>showTeaser</property-name>
 			<property-class>boolean</property-class>
@@ -85,6 +90,11 @@
 		<property>
 			<display-name>Show body</display-name>
 			<property-name>showBody</property-name>
+			<property-class>boolean</property-class>
+		</property>
+		<property>
+			<display-name>Show details command</display-name>
+			<property-name>showDetailsCommand</property-name>
 			<property-class>boolean</property-class>
 		</property>
 		<property>
@@ -133,6 +143,11 @@
 			<property-class>boolean</property-class>
 		</property>
 		<property>
+			<display-name>Show headline</display-name>
+			<property-name>showHeadline</property-name>
+			<property-class>boolean</property-class>
+		</property>
+		<property>
 			<display-name>Show teaser</display-name>
 			<property-name>showTeaser</property-name>
 			<property-class>boolean</property-class>
@@ -140,6 +155,11 @@
 		<property>
 			<display-name>Show body</display-name>
 			<property-name>showBody</property-name>
+			<property-class>boolean</property-class>
+		</property>
+		<property>
+			<display-name>Show details command</display-name>
+			<property-name>showDetailsCommand</property-name>
 			<property-class>boolean</property-class>
 		</property>
 		<property>

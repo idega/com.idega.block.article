@@ -1,5 +1,5 @@
 /*
- * $Id: ArticleListViewer.java,v 1.18 2008/02/21 10:23:13 valdas Exp $
+ * $Id: ArticleListViewer.java,v 1.19 2008/02/24 08:52:37 laddi Exp $
  * Created on 24.1.2005
  *
  * Copyright (C) 2005 Idega Software hf. All Rights Reserved.
@@ -41,10 +41,10 @@ import com.idega.util.PresentationUtil;
  * for the article module.
  * </p>
  * 
- *  Last modified: $Date: 2008/02/21 10:23:13 $ by $Author: valdas $
+ *  Last modified: $Date: 2008/02/24 08:52:37 $ by $Author: laddi $
  * 
  * @author <a href="mailto:tryggvi@idega.com">Tryggvi Larusson</a>
- * @version $Revision: 1.18 $
+ * @version $Revision: 1.19 $
  */
 public class ArticleListViewer extends ContentItemListViewer {
 
@@ -59,8 +59,10 @@ public class ArticleListViewer extends ContentItemListViewer {
 
 	private boolean showAuthor = true;
 	private boolean showCreationDate = true;
+	private boolean showHeadline = true;
 	private boolean showTeaser = true;
 	private boolean showBody = true;
+	private Boolean showDetailsCommand = null;
 	
 	private boolean showComments = false;
 	private static final String SHOW_COMMENTS_PROPERTY = "showComments";
@@ -152,6 +154,14 @@ public class ArticleListViewer extends ContentItemListViewer {
 		this.showCreationDate = showCreationDate;
 	}
 	
+	public boolean isShowHeadline() {
+		return showHeadline;
+	}
+
+	public void setShowHeadline(boolean showHeadline) {
+		this.showHeadline = showHeadline;
+	}
+
 	public boolean isShowTeaser() {
 		return showTeaser;
 	}
@@ -168,6 +178,14 @@ public class ArticleListViewer extends ContentItemListViewer {
 		this.showBody = showBody;
 	}
 	
+	public Boolean isShowDetailsCommand() {
+		return showDetailsCommand;
+	}
+
+	public void setShowDetailsCommand(boolean showDetailsCommand) {
+		this.showDetailsCommand = Boolean.valueOf(showDetailsCommand);
+	}
+	
 	@Override
 	protected void notifyManagedBeanOfVariableValues(){
 		super.notifyManagedBeanOfVariableValues();
@@ -177,8 +195,12 @@ public class ArticleListViewer extends ContentItemListViewer {
 		getArticleListBean().setShowTime(isShowTime());
 		getArticleListBean().setShowAuthor(isShowAuthor());
 		getArticleListBean().setShowCreationDate(isShowCreationDate());
+		getArticleListBean().setShowHeadline(isShowHeadline());
 		getArticleListBean().setShowTeaser(isShowTeaser());
 		getArticleListBean().setShowBody(isShowBody());
+		if (isShowDetailsCommand() != null) {
+			getArticleListBean().setShowDetailsCommand(isShowDetailsCommand().booleanValue());
+		}
 	}
 	
 	public ArticleListManagedBean getArticleListBean(){
