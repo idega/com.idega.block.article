@@ -12,7 +12,7 @@ version="1.2">
 		<ws:page>
 			<h:form>
 				<wf:wfblock id="article_item_block" title="#{localizedStrings['com.idega.block.article']['preview_article']}">
-					<article:ArticleItemViewer id="article_item" renderDetailsCommand="false" showRequestedItem="true" />
+					<article:ArticleItemViewer id="article_item" renderDetailsCommand="false" showRequestedItem="true" showTeaser="false" />
 				</wf:wfblock>
 			</h:form>
 		</ws:page>

@@ -1,5 +1,5 @@
 /*
- * $Id: ArticleItemViewerTag.java,v 1.5 2008/02/24 08:52:36 laddi Exp $
+ * $Id: ArticleItemViewerTag.java,v 1.6 2008/02/25 14:41:59 laddi Exp $
  * Created on 21.2.2005
  *
  * Copyright (C) 2005 Idega Software hf. All Rights Reserved.
@@ -15,10 +15,10 @@ import com.idega.content.presentation.ContentItemViewerTag;
 
 /**
  * 
- *  Last modified: $Date: 2008/02/24 08:52:36 $ by $Author: laddi $
+ *  Last modified: $Date: 2008/02/25 14:41:59 $ by $Author: laddi $
  * 
  * @author <a href="mailto:gummi@idega.com">Gudmundur Agust Saemundsson</a>
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
  */
 public class ArticleItemViewerTag extends ContentItemViewerTag {
 
@@ -32,6 +32,7 @@ public class ArticleItemViewerTag extends ContentItemViewerTag {
 	private String datePattern = null;
 	private boolean showDate = true;
 	private boolean showTime = true;
+	private boolean showComments = false;
 	
 	/**
 	 * 
@@ -65,6 +66,7 @@ public class ArticleItemViewerTag extends ContentItemViewerTag {
 			if (isShowDetailsCommand() != null) {
 				article.setShowDetailsCommand(isShowDetailsCommand().booleanValue());
 			}
+			article.setAddCommentsViewer(isShowComments());
 		}
 	}
 	
@@ -154,5 +156,13 @@ public class ArticleItemViewerTag extends ContentItemViewerTag {
 
 	public boolean isShowTime() {
 		return this.showTime;
+	}
+
+	public void setShowComments(boolean showComments) {
+		this.showComments = showComments;
+	}
+
+	public boolean isShowComments() {
+		return this.showComments;
 	}
 }

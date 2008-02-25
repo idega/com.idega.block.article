@@ -72,6 +72,7 @@ no_messages=Engin skilabo\u00F0
 onclick_remove_attachment=return confirm('Ertu viss um a\u00F0 \u00FE\u00FA viljir fjarl\u00E6gja vi\u00F0hengi');return false;
 onclick_remove_related_content_item=return confirm('Ertu viss um a\u00F0 \u00FE\u00FA viljir taka burt tilv\u00EDsun \u00ED innihaldshluta');return false;\r\n
 preview=Sko\u00F0a
+preview_article=Sko\u00F0a grein
 previous_article_versions=Fyrri \u00FAtg\u00E1fur greinar
 publish=Gefa \u00FAt
 published=\u00DAtgefin

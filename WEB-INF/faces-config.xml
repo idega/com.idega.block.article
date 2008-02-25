@@ -107,6 +107,11 @@
 			<property-name>showTime</property-name>
 			<property-class>boolean</property-class>
 		</property>
+		<property>
+			<display-name>Show comments</display-name>
+			<property-name>showComments</property-name>
+			<property-class>boolean</property-class>
+		</property>
 		<component-extension>
 			<idegaweb-info>
 				<builder-visible>true</builder-visible>

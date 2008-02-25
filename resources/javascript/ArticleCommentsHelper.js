@@ -226,6 +226,7 @@ function getCommentPane(linkToComments, addEmail, commentsId, instanceId) {
 	
 	var container = new Element('div');
 	container.setProperty('id', commentsId + COMMENT_PANEL_ID);
+	container.addClass('commentsContainer');
 	
 	var fieldset = new Element('fieldset');
 	fieldset.addClass('comment_fieldset');
@@ -284,16 +285,16 @@ function getCommentPane(linkToComments, addEmail, commentsId, instanceId) {
 		NEED_TO_NOTIFY = false;
 		
 		var needToNotifyContainer = new Element('div');
+		needToNotifyContainer.addClass('commentsNotify');
 		
 		var notificationTextContainer = new Element('div');
-		notificationTextContainer.setStyle('float', 'right');
 		notificationTextContainer.appendText(getAddNotificationText());
 		needToNotifyContainer.appendChild(notificationTextContainer);
 		
 		needToNotifyContainer.appendChild(new Element('div').addClass('spacer'));
 
 		var sendNotificationContainer = new Element('div');
-		sendNotificationContainer.setStyle('float', 'right');
+		sendNotificationContainer.addClass('commentsSendNotification');
 		var sendNotification = new Element('input');
 		sendNotification.setProperty('id', 'comments_send_notifications');
 		sendNotification.setProperty('type', 'radio');
@@ -330,7 +331,6 @@ function getCommentPane(linkToComments, addEmail, commentsId, instanceId) {
 		
 		needToNotifyContainer.appendChild(sendNotificationContainer);
 		mainCommentContainer.appendChild(needToNotifyContainer);
-		mainCommentContainer.appendChild(new Element('div').addClass('spacer'));
 	//}
 	
 	// Send button
@@ -393,7 +393,7 @@ function closeCommentPanelAndSendComment(userId, subjectId, emailId, bodyId, lin
 	CommentsEngine.addComment(USER, SUBJECT, EMAIL, BODY, linkToComments, NEED_TO_NOTIFY, commentsId, instanceId);
 }
 
-function addComment(articleComment, commentsId, linkToComments) {
+function addComment(index, articleComment, commentsId, linkToComments) {
 	var commentIndex = 0;
 	var counter = $(commentsId + 'contentItemCount');
 	if (counter != null) {
@@ -427,11 +427,19 @@ function addComment(articleComment, commentsId, linkToComments) {
 	
 	var commentContainer = new Element('li');
 	commentContainer.addClass('comment_list_item');
+	if (index % 2 == 0) {
+		commentContainer.addClass('even');
+	}
+	else {
+		commentContainer.addClass('odd');
+	}
 	commentContainer.setProperty('id', 'cmnt_' + commentIndex);
 	if (commentIndex == 1) {
 		commentContainer.setProperty('style', 'margin: 0px;');
 	}
-	var commentValue = new Element('dl');
+	
+	var commentValue = new Element('div');
+	commentValue.addClass('commentItem');
 	
 	if (HAS_COMMENT_VIEWER_VALID_RIGHTS) {
 		var deleteImage = new Element('img');
@@ -447,29 +455,29 @@ function addComment(articleComment, commentsId, linkToComments) {
 		commentContainer.appendChild(deleteImage);
 	}
 	
-	var user = new Element('dt');
-	var userValue = new Element('p');
-	userValue.addClass('comment_author_text');
-	userValue.appendText(articleComment.user + ':');
-	user.appendChild(userValue);
-	commentValue.appendChild(user);
+	var number = new Element('div');
+	number.addClass('commentItemNumber');
+	number.appendText((index + 1) + '.');
+	commentValue.appendChild(number);
 	
-	var subject = new Element('dd');
-	var subjectValue = new Element('p');
-	subjectValue.appendText(articleComment.subject);
-	subject.appendChild(subjectValue);
+	var subject = new Element('div');
+	subject.addClass('commentItemSubject');
+	subject.appendText(articleComment.subject);
 	commentValue.appendChild(subject);
 	
-	var body = new Element('dd');
-	var bodyValue = new Element('p');
-	bodyValue.appendText(articleComment.comment);
-	body.appendChild(bodyValue);
+	var body = new Element('div');
+	body.addClass('commentItemComment');
+	body.appendText(articleComment.comment);
 	commentValue.appendChild(body);
 	
-	var posted = new Element('dd');
-	var postedValue = new Element('p');
-	postedValue.appendText(getPostedLabel() + ': ' + articleComment.posted);
-	posted.appendChild(postedValue);
+	var user = new Element('div');
+	user.addClass('commentItemAuthor');
+	user.appendText(articleComment.user);
+	commentValue.appendChild(user);
+	
+	var posted = new Element('div');
+	posted.addClass('commentItemCreated');
+	posted.appendText(articleComment.posted);
 	commentValue.appendChild(posted);
 	
 	commentContainer.appendChild(commentValue);
@@ -548,7 +556,7 @@ function getCommentsCallback(comments, id, linkToComments) {
 	}
 	removeCommentsList(id);
 	for (var i = 0; i < comments.length; i++) {
-		addComment(comments[i], id, linkToComments);
+		addComment(i, comments[i], id, linkToComments);
 	}
 }
 

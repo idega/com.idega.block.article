@@ -82,6 +82,7 @@ no_messages=No messages
 onclick_remove_attachment=return confirm('Are you sure you want to delete attachment?');return false;
 onclick_remove_related_content_item=return confirm('Are you sure you want to delete related content item?');return false;
 preview=Preview
+preview_article=Preview article
 previous_article_versions=Previous article versions
 publish=Publish
 published=Published

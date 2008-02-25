@@ -38,37 +38,46 @@
 	width: auto;
 }
 
+.content_item_comments_style {
+	margin-top: 8px;	
+}
+
+.content_item_comments_style a img {
+	vertical-align: bottom;
+}
+
 .comment_fieldset {
-	border-style:solid;
-	border-width:1px;
-	margin:20px 0pt 10px;
-	padding:10px 15px;
-	border-color:#ABABAB;
+	border: 1px #ababab solid;
+	margin: 15px 0 10px 0;
+	padding: 10px 15px;
 }
 
 .comment_legend {
 	font-weight:bold;
-	margin:0pt 5px;
-	border-color:#ABABAB;
-	color:#444444;
 }
 
 .comment_input_style {
 	border-style:solid;
 	border-width:1px;
-	width:100%;
+	width:98%;
 	border-color:#ABABAB;
+	padding: 3px 4px;
 }
 
 .comment_comment_style {
 	border-style:solid;
 	border-width:1px;
-	width:100%;
+	width:98%;
 	border-color:#ABABAB;
+	padding: 3px 4px;
 }
 
 .add_comment_table {
 	width:100%;
+}
+
+.secretCommentsInputStyle {
+	display: none;
 }
 
 .add_comment_table td {
@@ -85,38 +94,92 @@
 	font-family:inherit;
 	font-size:1.1em;
 	text-align:justify;
-	font-weight:bold;
+	padding: 3px 4px;
 }
 
 .comments_table_cell {
-	color:#444444;
 	text-align:left;
 	font-weight:bold;
+	line-height: 30px;
+	vertical-align: top;
 }
 
-.comment_author_text {
+.commentItemNumber {
+	float: left;
+	margin-right: 6px;
+	line-height: 16px;
+	font-weight: bold;
+	width: 18px;
+}
+
+.commentItemSubject {
+	font-weight: bold;
+	line-height: 16px;
+}
+
+.commentItemComment {
+	clear: both;
+	line-height: 14px;
+	padding: 8px;
+}
+
+.commentItemAuthor {
 	font-weight:bold;
-	color:#222222;
+	position: absolute;
+	top: 8px;
+	right: 8px;
+	line-height: 16px;
+}
+
+.commentItemCreated {
+	float: right;
+	font-weight: bold;
 }
 
 .comment_list_item {
 	margin-top:5px;
-	border-style:solid;
-	border-width:1px;
-	border-color:#ABABAB;
-	list-style-position:inside;
+	border: 1px #ababab solid;
+	padding: 8px;
+	font-size: 11px;
+	overflow: hidden;
+	position: relative;
+}
+
+.comment_list_item.even {
 }
 
 .commens_list_all_items {
-	border-style:solid;
-	border-width:1px;
-	margin-left:0pt;
-	padding:10px;
-	border-color:#ABABAB;
+	margin: 0;
+	padding: 0;
+	margin-top: 12px;
+	list-style: none;
 }
 
 .secretCommentsInputStyle {
 	visibility: hidden;
+}
+
+.commentsNotify {
+	padding: 4px;
+}
+
+.commentsSendNotification {
+	margin-top: 3px;
+	margin-bottom: 8px;
+}
+
+.commentsSendNotification label {
+	font-weight: bold;
+	font-size: 11px;
+	margin-right: 12px;
+}
+
+.commentsSendNotification input {
+	margin: 0;
+	width: 14px;
+	height: 14px;
+	vertical-align: middle;
+	margin-right: 5px;
 }
 
 .deleteCommentsImage {
@@ -349,6 +412,7 @@ html>body .articleListButtons a {
 	width: auto;
 	background-color: #fff;
 	height: auto;
+	overflow: auto;
 }
 
 .article.preview .article_item {
