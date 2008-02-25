@@ -1,5 +1,5 @@
 /*
- * $Id: ArticleListManagedBean.java,v 1.19 2008/02/24 08:52:36 laddi Exp $
+ * $Id: ArticleListManagedBean.java,v 1.20 2008/02/25 13:14:00 valdas Exp $
  * Created on 27.1.2005
  *
  * Copyright (C) 2005 Idega Software hf. All Rights Reserved.
@@ -52,10 +52,10 @@ import com.idega.util.IWTimestamp;
 
 /**
  * 
- *  Last modified: $Date: 2008/02/24 08:52:36 $ by $Author: laddi $
+ *  Last modified: $Date: 2008/02/25 13:14:00 $ by $Author: valdas $
  * 
  * @author <a href="mailto:gummi@idega.com">Gudmundur Agust Saemundsson</a>
- * @version $Revision: 1.19 $
+ * @version $Revision: 1.20 $
  */
 public class ArticleListManagedBean implements ContentListViewerManagedBean {
 
@@ -177,8 +177,16 @@ public class ArticleListManagedBean implements ContentListViewerManagedBean {
 			try {
 				userId = Integer.valueOf(currentUser.getId());
 			} catch(NumberFormatException e) {
-				e.printStackTrace();
-				return false;
+				//	Trying to get access rights by user's name and article's author name
+				String articleAuthor = article.getAuthor();
+				if (articleAuthor == null) {
+					return false;
+				}
+				String userName = currentUser.getName();
+				if (userName == null) {
+					return false;
+				}
+				return articleAuthor.equals(userName);
 			}
 			
 			return userId.intValue() == creatorId;
