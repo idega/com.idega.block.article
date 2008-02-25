@@ -1,5 +1,5 @@
 /*
- * $Id: EditArticleView.java,v 1.47 2008/02/22 13:45:35 valdas Exp $
+ * $Id: EditArticleView.java,v 1.48 2008/02/25 13:13:31 valdas Exp $
  *
  * Copyright (C) 2004 Idega. All Rights Reserved.
  *
@@ -77,10 +77,10 @@ import com.idega.webface.htmlarea.HTMLArea;
  * <p>
  * This is the part for the editor of article is inside the admin interface
  * </p>
- * Last modified: $Date: 2008/02/22 13:45:35 $ by $Author: valdas $
+ * Last modified: $Date: 2008/02/25 13:13:31 $ by $Author: valdas $
  *
  * @author Joakim,Tryggvi Larusson
- * @version $Revision: 1.47 $
+ * @version $Revision: 1.48 $
  */
 public class EditArticleView extends IWBaseComponent implements ManagedContentBeans, ActionListener, ValueChangeListener {
 	private static final Log log = LogFactory.getLog(EditArticleView.class);
@@ -314,7 +314,6 @@ public class EditArticleView extends IWBaseComponent implements ManagedContentBe
 		if (fromArticleItemListViewer) {
 			//	Author input
 			HtmlInputText authorInput = WFUtil.getInputText(AUTHOR_ID, ref + "author");
-			authorInput.setSize(size);
 			authorInput.setImmediate(true);
 			authorInput.addValueChangeListener(this);
 			User user = iwc.getCurrentUser();
@@ -335,10 +334,8 @@ public class EditArticleView extends IWBaseComponent implements ManagedContentBe
 		}
 
 		String htmlAreaWidth = "640px";
-		String htmlAreaHeight = "480px";
 		if (needsForm) {
 			htmlAreaWidth = "440px";
-			htmlAreaHeight = "320px";
 		}
 		//	Article body
 		HTMLArea bodyArea = WFUtil.getHtmlAreaTextArea(BODY_ID, ref + "body", null, null, needsForm);
@@ -382,7 +379,6 @@ public class EditArticleView extends IWBaseComponent implements ManagedContentBe
 		
 			//Source input
 			HtmlInputText sourceInput = WFUtil.getInputText(SOURCE_ID, ref + "source");
-			sourceInput.setSize(size);
 			UIComponent sourceText = localizer.getTextVB("source");
 			HtmlOutputLabel sourceLabel = new HtmlOutputLabel();
 			sourceLabel.getChildren().add(sourceText);

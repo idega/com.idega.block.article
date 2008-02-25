@@ -498,6 +498,15 @@ form.editArticleForm .wf_block .articleHeadline input {
 	width: 100% !important;
 }
 
+form.editArticleForm .wf_block .articleAuthor input {
+	width: 100% !important;
+}
+
+
+form.editArticleForm .wf_block .articleSource input {
+	width: 100% !important;
+}
+
 form.editArticleForm .wf_block .articlePublishDate select {
 	font-size: 13px;
 }
