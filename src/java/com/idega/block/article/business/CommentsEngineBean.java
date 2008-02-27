@@ -2,12 +2,14 @@ package com.idega.block.article.business;
 
 import java.rmi.RemoteException;
 import java.sql.Timestamp;
+import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 import org.directwebremoting.ScriptBuffer;
@@ -35,6 +37,7 @@ import com.idega.presentation.IWContext;
 import com.idega.slide.business.IWSlideService;
 import com.idega.util.CoreConstants;
 import com.idega.util.CoreUtil;
+import com.idega.util.IWTimestamp;
 import com.idega.util.StringHandler;
 import com.sun.syndication.feed.atom.Content;
 import com.sun.syndication.feed.atom.Entry;
@@ -419,12 +422,22 @@ public class CommentsEngineBean extends IBOSessionBean implements CommentsEngine
 			return fake;
 		}
 		
+		Locale locale = null;
+		IWContext iwc = CoreUtil.getIWContext();
+		if (iwc != null) {
+			locale = iwc.getCurrentLocale();
+		}
+		if (locale == null) {
+			locale = Locale.ENGLISH;
+		}
+		
 		List<ArticleComment> items = new ArrayList<ArticleComment>();
 		ArticleComment comment = null;
 		Object o = null;
 		Entry entry = null;
 		Content content = null;
 		Person author = null;
+		IWTimestamp posted = null;
 		for (int i = 0; i < entries.size(); i++) {
 			o = entries.get(i);
 			if (o instanceof Entry) {
@@ -468,7 +481,8 @@ public class CommentsEngineBean extends IBOSessionBean implements CommentsEngine
 				}
 				
 				// Date of creation
-				comment.setPosted(entry.getPublished().toString());
+				posted = new IWTimestamp(entry.getPublished());
+				comment.setPosted(posted.getLocaleDateAndTime(locale, DateFormat.FULL, DateFormat.MEDIUM));
 				items.add(comment);
 			}
 		}
