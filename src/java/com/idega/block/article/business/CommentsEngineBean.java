@@ -22,7 +22,6 @@ import com.idega.block.article.ArticleCacher;
 import com.idega.block.article.bean.ArticleComment;
 import com.idega.block.article.component.CommentsViewer;
 import com.idega.block.rss.business.RSSBusiness;
-import com.idega.business.IBOLookup;
 import com.idega.business.IBOLookupException;
 import com.idega.business.IBOSessionBean;
 import com.idega.content.bean.ContentItemFeedBean;
@@ -54,7 +53,7 @@ public class CommentsEngineBean extends IBOSessionBean implements CommentsEngine
 	
 	private static final String COMMENTS_CACHE_NAME = "article_comments_feeds_cache";
 	
-	private RSSBusiness rss = getRSSBusiness();
+	private RSSBusiness rss = null;
 	private WireFeedOutput wfo = new WireFeedOutput();
 	
 	private String newComment = "New comment";
@@ -336,14 +335,11 @@ public class CommentsEngineBean extends IBOSessionBean implements CommentsEngine
 	
 	private RSSBusiness getRSSBusiness() {
 		if (rss == null) {
-			synchronized (CommentsEngineBean.class) {
-				if (rss == null) {
-					try {
-						rss = (RSSBusiness) IBOLookup.getServiceInstance(IWContext.getInstance(), RSSBusiness.class);
-					} catch (IBOLookupException e) {
-						e.printStackTrace();
-					}
-				}
+			try {
+				rss = (RSSBusiness) getServiceInstance(RSSBusiness.class);
+			} catch (IBOLookupException e) {
+				e.printStackTrace();
+				return null;
 			}
 		}
 		return rss;
@@ -526,6 +522,8 @@ public class CommentsEngineBean extends IBOSessionBean implements CommentsEngine
 		if (!helper.existFileInSlide(uri)) {
 			return null;
 		}
+		
+		RSSBusiness rss = getRSSBusiness();
 		if (rss == null) {
 			return null;
 		}
