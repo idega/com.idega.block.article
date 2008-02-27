@@ -22,6 +22,7 @@ import com.idega.block.article.ArticleCacher;
 import com.idega.block.article.bean.ArticleComment;
 import com.idega.block.article.component.CommentsViewer;
 import com.idega.block.rss.business.RSSBusiness;
+import com.idega.business.IBOLookup;
 import com.idega.business.IBOLookupException;
 import com.idega.business.IBOSessionBean;
 import com.idega.content.bean.ContentItemFeedBean;
@@ -31,6 +32,7 @@ import com.idega.content.themes.helpers.business.ThemesHelper;
 import com.idega.core.builder.business.BuilderService;
 import com.idega.core.builder.business.BuilderServiceFactory;
 import com.idega.core.cache.IWCacheManager2;
+import com.idega.idegaweb.IWMainApplication;
 import com.idega.idegaweb.IWResourceBundle;
 import com.idega.presentation.IWContext;
 import com.idega.slide.business.IWSlideService;
@@ -336,7 +338,7 @@ public class CommentsEngineBean extends IBOSessionBean implements CommentsEngine
 	private RSSBusiness getRSSBusiness() {
 		if (rss == null) {
 			try {
-				rss = (RSSBusiness) getServiceInstance(RSSBusiness.class);
+				rss = (RSSBusiness) IBOLookup.getServiceInstance(IWMainApplication.getDefaultIWApplicationContext(), RSSBusiness.class);
 			} catch (IBOLookupException e) {
 				e.printStackTrace();
 				return null;
