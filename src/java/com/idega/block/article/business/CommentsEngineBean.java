@@ -32,6 +32,7 @@ import com.idega.content.themes.helpers.business.ThemesHelper;
 import com.idega.core.builder.business.BuilderService;
 import com.idega.core.builder.business.BuilderServiceFactory;
 import com.idega.core.cache.IWCacheManager2;
+import com.idega.dwr.business.ScriptCaller;
 import com.idega.idegaweb.IWMainApplication;
 import com.idega.idegaweb.IWResourceBundle;
 import com.idega.presentation.IWContext;
@@ -89,49 +90,47 @@ public class CommentsEngineBean extends IBOSessionBean implements CommentsEngine
 		
 		Timestamp date = new Timestamp(System.currentTimeMillis());
 		
-		Feed comments = null;
-		synchronized (CommentsEngineBean.class) {
-			comments = getCommentsFeed(uri, iwc);
-			if (comments == null) {
-				comments = createFeed(uri, user, subject, body, date, language, iwc);
-			}
-			if (comments == null) {
-				closeLoadingMessage();
-				return false;
-			}
-			
-			if (!addNewEntry(comments, subject, uri, date, body, user, language, email, notify)) {
-				closeLoadingMessage();
-				return false;
-			}
-			
-			putFeedToCache(comments, uri, iwc);
-			
-			if (iwc == null) {
-				return false;
-			}
-			
-			sendNotification(comments, email, iwc);
-			if (!uploadFeed(uri, comments, iwc)) {
-				closeLoadingMessage();
-			}
-			
-			WebContext wctx = WebContextFactory.get();
-			BuilderService service = getBuilderService();
-			if (wctx != null && service != null) {
-				String pageKey  = service.getPageKeyByURI(wctx.getCurrentPage());
-				if (pageKey != null) {
-					if (ArticleUtil.isPageTypeBlog(service.getICPage(pageKey))) {
-						Map articles = getArticlesCache(iwc);
-						if (articles != null) {
-							articles.clear();
-						}
+		Feed comments = getCommentsFeed(uri, iwc);
+		if (comments == null) {
+			comments = createFeed(uri, user, subject, body, date, language, iwc);
+		}
+		if (comments == null) {
+			return false;
+		}
+		
+		if (!addNewEntry(comments, subject, uri, date, body, user, language, email, notify)) {
+			return false;
+		}
+		
+		putFeedToCache(comments, uri, iwc);
+		
+		if (iwc == null) {
+			return false;
+		}
+		
+		sendNotification(comments, email, iwc);
+		if (!uploadFeed(uri, comments, iwc)) {
+			return false;
+		}
+		
+		WebContext wctx = WebContextFactory.get();
+		BuilderService service = getBuilderService();
+		if (wctx != null && service != null) {
+			String pageKey  = service.getPageKeyByURI(wctx.getCurrentPage());
+			if (pageKey != null) {
+				if (ArticleUtil.isPageTypeBlog(service.getICPage(pageKey))) {
+					Map articles = getArticlesCache(iwc);
+					if (articles != null) {
+						articles.clear();
 					}
 				}
 			}
-			
-			return getCommentsForAllPages(uri, id);
 		}
+
+		Thread scriptCaller = new Thread(new ScriptCaller(new ScriptBuffer("getUpdatedCommentsFromServer();"), true));
+		scriptCaller.run();
+		
+		return true;
 	}
 	
 	private boolean sendNotification(Feed comments, String email, IWContext iwc) {
@@ -511,7 +510,7 @@ public class CommentsEngineBean extends IBOSessionBean implements CommentsEngine
 		return comments.getEntries().size();
 	}
 	
-	private Feed getCommentsFeed(String uri, IWContext iwc) {
+	private synchronized Feed getCommentsFeed(String uri, IWContext iwc) {
 		Feed cachedFeed = getFeedFromCache(uri, iwc);
 		if (cachedFeed != null) {
 			return cachedFeed;
@@ -579,7 +578,12 @@ public class CommentsEngineBean extends IBOSessionBean implements CommentsEngine
 		if (cache == null) {
 			return null;
 		}
-		Map comments = cache.getCache(COMMENTS_CACHE_NAME);
+		Map comments = null;
+		try {
+			comments = cache.getCache(COMMENTS_CACHE_NAME);
+		} catch(Exception e) {
+			e.printStackTrace();
+		}
 		if (comments == null) {
 			return null;
 		}
@@ -605,14 +609,11 @@ public class CommentsEngineBean extends IBOSessionBean implements CommentsEngine
 	
 	private BuilderService getBuilderService() {
 		if (builder == null) {
-			synchronized (CommentsEngineBean.class) {
-				if (builder == null) {
-					try {
-						builder = BuilderServiceFactory.getBuilderService(getIWApplicationContext());
-					} catch (RemoteException e) {
-						e.printStackTrace();
-					}
-				}
+			try {
+				builder = BuilderServiceFactory.getBuilderService(IWMainApplication.getDefaultIWApplicationContext());
+			} catch (RemoteException e) {
+				e.printStackTrace();
+				return null;
 			}
 		}
 		return builder;
@@ -765,20 +766,17 @@ public class CommentsEngineBean extends IBOSessionBean implements CommentsEngine
 			return null;
 		}
 		IWContext iwc = CoreUtil.getIWContext();
-		Feed comments = null;
-		synchronized(CommentsEngineBean.class) {
-			comments = getCommentsFeed(linkToComments, iwc);
-			if (comments == null) {
-				return null;
-			}
-			if (commentId == null) { //	Delete all comments
-				comments.setEntries(new ArrayList<Entry>());
-			}
-			else { // Delete one comment
-				comments.setEntries(getUpdatedEntries(initEntries(comments.getEntries()), commentId));
-			}
-			putFeedToCache(comments, linkToComments, iwc);
+		Feed comments = getCommentsFeed(linkToComments, iwc);
+		if (comments == null) {
+			return null;
 		}
+		if (commentId == null) { //	Delete all comments
+			comments.setEntries(new ArrayList<Entry>());
+		}
+		else { // Delete one comment
+			comments.setEntries(getUpdatedEntries(initEntries(comments.getEntries()), commentId));
+		}
+		putFeedToCache(comments, linkToComments, iwc);
 		if (!uploadFeed(linkToComments, comments, iwc)) {
 			return null;
 		}

@@ -390,7 +390,11 @@ function closeCommentPanelAndSendComment(userId, subjectId, emailId, bodyId, lin
 	showLoadingMessage(LABEL_SENDING);
 	closeCommentsPanel(commentsId);
 	setCommentValues(user.value, subject.value, emailValue, body.value);
-	CommentsEngine.addComment(USER, SUBJECT, EMAIL, BODY, linkToComments, NEED_TO_NOTIFY, commentsId, instanceId);
+	CommentsEngine.addComment(USER, SUBJECT, EMAIL, BODY, linkToComments, NEED_TO_NOTIFY, commentsId, instanceId, {
+		callback: function(result) {
+			closeAllLoadingMessages();
+		}
+	});
 }
 
 function addComment(index, articleComment, commentsId, linkToComments) {
@@ -890,4 +894,12 @@ function needToShowCommentsList(commentsId) {
 
 function initComments() {
 	CommentsEngine.getInitInfoForComments(getInitInfoForCommentsCallback);
+}
+
+function getUpdatedCommentsFromServer() {
+	if (COMMENTS_INFO == null || COMMENTS_INFO.length == 0) {
+		getComments(getLinkToComments());
+	} else {
+		getAllComments();
+	}
 }
