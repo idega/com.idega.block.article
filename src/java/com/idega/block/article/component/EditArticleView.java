@@ -1,5 +1,5 @@
 /*
- * $Id: EditArticleView.java,v 1.48 2008/02/25 13:13:31 valdas Exp $
+ * $Id: EditArticleView.java,v 1.49 2008/02/28 14:30:49 valdas Exp $
  *
  * Copyright (C) 2004 Idega. All Rights Reserved.
  *
@@ -77,10 +77,10 @@ import com.idega.webface.htmlarea.HTMLArea;
  * <p>
  * This is the part for the editor of article is inside the admin interface
  * </p>
- * Last modified: $Date: 2008/02/25 13:13:31 $ by $Author: valdas $
+ * Last modified: $Date: 2008/02/28 14:30:49 $ by $Author: valdas $
  *
  * @author Joakim,Tryggvi Larusson
- * @version $Revision: 1.48 $
+ * @version $Revision: 1.49 $
  */
 public class EditArticleView extends IWBaseComponent implements ManagedContentBeans, ActionListener, ValueChangeListener {
 	private static final Log log = LogFactory.getLog(EditArticleView.class);
@@ -402,21 +402,21 @@ public class EditArticleView extends IWBaseComponent implements ManagedContentBe
 			commentItem.add(commentLabel);
 			commentItem.add(commentArea);
 			section.add(commentItem);
-		}
 		
-		if (iwc.hasRole(StandardRoles.ROLE_KEY_EDITOR)) {
-			//		Published date
-			WFDateInput publishedInput = WFUtil.getDateInput(PUBLISHED_DATE_ID, ref + "publishedDate");
-			publishedInput.setShowTime(true);
-			UIComponent publishedText = localizer.getTextVB("publishing_date");
-			HtmlOutputLabel publishedLabel = new HtmlOutputLabel();
-			publishedLabel.getChildren().add(publishedText);
-	
-			WFFormItem publishDateItem = new WFFormItem();
-			publishDateItem.setStyleClass("formitem articlePublishDate");
-			publishDateItem.add(publishedLabel);
-			publishDateItem.add(publishedInput);
-			section.add(publishDateItem);
+			if (iwc.hasRole(StandardRoles.ROLE_KEY_EDITOR)) {
+				//		Published date
+				WFDateInput publishedInput = WFUtil.getDateInput(PUBLISHED_DATE_ID, ref + "publishedDate");
+				publishedInput.setShowTime(true);
+				UIComponent publishedText = localizer.getTextVB("publishing_date");
+				HtmlOutputLabel publishedLabel = new HtmlOutputLabel();
+				publishedLabel.getChildren().add(publishedText);
+		
+				WFFormItem publishDateItem = new WFFormItem();
+				publishDateItem.setStyleClass("formitem articlePublishDate");
+				publishDateItem.add(publishedLabel);
+				publishDateItem.add(publishedInput);
+				section.add(publishDateItem);
+			}
 		}
 		
 		//	Categories input
@@ -513,9 +513,8 @@ public class EditArticleView extends IWBaseComponent implements ManagedContentBe
 				l = iwc.getCurrentLocale();
 			}
 			categoriesUI = new WebDAVCategories(resourcePath, l.toString());
-			if (isInCreateMode() && fromArticleItemListViewer) {
-				categoriesUI.setSelectAllCategories(true);
-			}
+			categoriesUI.setSelectAnyCategory(fromArticleItemListViewer);
+
 			//	Id on the component is set implicitly
 			categoriesUI.setId(CATEGORY_EDITOR_ID);
 			
@@ -620,7 +619,6 @@ public class EditArticleView extends IWBaseComponent implements ManagedContentBe
 				if (categoriesUI != null) {
 					submittedCategories = categoriesUI.getEnabledCategories();
 					articleItemBean.setArticleCategories(submittedCategories);
-					categoriesUI.setSelectAllCategories(false);	//	Need to display user selection
 				}
 			}
 			else {
@@ -665,8 +663,11 @@ public class EditArticleView extends IWBaseComponent implements ManagedContentBe
 	 * Returns false if save failed
 	 */
 	private boolean storeArticle() {
-		try{
-			getArticleItemBean().store();
+		try {
+			ArticleItemBean article = getArticleItemBean();
+			article.setSetPublishedDateByDefault(fromArticleItemListViewer);
+			article.getLocalizedArticle().setSetPublishedDateByDefault(fromArticleItemListViewer);
+			article.store();
 			setEditMode(ContentConstants.CONTENT_ITEM_ACTION_EDIT);
 			setUserMessage("article_saved");
 			return true;
@@ -991,9 +992,10 @@ public class EditArticleView extends IWBaseComponent implements ManagedContentBe
 	 */
 	@Override
 	public Object saveState(FacesContext ctx) {
-		Object values[] = new Object[2];
+		Object values[] = new Object[3];
 		values[0] = super.saveState(ctx);
 		values[1] = this.editMode;
+		values[2] = this.fromArticleItemListViewer;
 		return values;
 	}
 
@@ -1006,6 +1008,7 @@ public class EditArticleView extends IWBaseComponent implements ManagedContentBe
 		Object values[] = (Object[]) state;
 		super.restoreState(ctx, values[0]);
 		this.editMode = (String)values[1];
+		this.fromArticleItemListViewer = Boolean.valueOf(values[2].toString());
 		//super.restoreState(ctx,state);
 	}
 

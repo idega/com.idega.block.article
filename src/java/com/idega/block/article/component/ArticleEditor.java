@@ -36,6 +36,8 @@ public class ArticleEditor extends Block {
 		}
 		String basePath = iwc.getParameter(ContentItemToolbar.PARAMETER_BASE_FOLDER_PATH);
 		
+		String categories = iwc.getParameter(ContentItemToolbar.PARAMETER_CATEGORIES);
+		
 		BuilderService service = null;
 		try {
 			service = getBuilderService(iwc);
@@ -51,6 +53,9 @@ public class ArticleEditor extends Block {
 		parameters.add(new AdvancedProperty(ContentConstants.RENDERING_COMPONENT_OF_ARTICLE_LIST, renderingFromList));
 		if (basePath != null) {
 			parameters.add(new AdvancedProperty(ContentItemToolbar.PARAMETER_BASE_FOLDER_PATH, basePath));
+		}
+		if (categories != null) {
+			parameters.add(new AdvancedProperty(ContentItemToolbar.PARAMETER_CATEGORIES, categories));
 		}
 		String uri = service.getUriToObject(EditArticleView.class, parameters);
 		

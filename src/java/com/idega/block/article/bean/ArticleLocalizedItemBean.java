@@ -1,5 +1,5 @@
 /*
- * $Id: ArticleLocalizedItemBean.java,v 1.27 2008/02/22 13:48:05 valdas Exp $
+ * $Id: ArticleLocalizedItemBean.java,v 1.28 2008/02/28 14:30:49 valdas Exp $
  *
  * Copyright (C) 2004 Idega. All Rights Reserved.
  *
@@ -51,10 +51,10 @@ import com.idega.xml.XMLParser;
  * This is a JSF managed bean that manages each article xml document 
  * instance per language/locale.
  * <p>
- * Last modified: $Date: 2008/02/22 13:48:05 $ by $Author: valdas $
+ * Last modified: $Date: 2008/02/28 14:30:49 $ by $Author: valdas $
  *
  * @author Anders Lindman,<a href="mailto:tryggvi@idega.com">Tryggvi Larusson</a>
- * @version $Revision: 1.27 $
+ * @version $Revision: 1.28 $
  */
 public class ArticleLocalizedItemBean extends ContentItemBean implements Serializable, ContentItem {
 	
@@ -790,4 +790,15 @@ public class ArticleLocalizedItemBean extends ContentItemBean implements Seriali
 		}
 		return categories;
 	}
+	
+	@Override
+	public boolean isSetPublishedDateByDefault() {
+		return super.isSetPublishedDateByDefault();
+	}
+
+	@Override
+	public void setSetPublishedDateByDefault(boolean setPublishedDateByDefault) {
+		super.setSetPublishedDateByDefault(setPublishedDateByDefault);
+	}
+
 }

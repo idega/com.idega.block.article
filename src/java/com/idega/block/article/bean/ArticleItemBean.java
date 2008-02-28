@@ -1,5 +1,5 @@
 /*
- * $Id: ArticleItemBean.java,v 1.82 2008/02/22 12:01:05 valdas Exp $
+ * $Id: ArticleItemBean.java,v 1.83 2008/02/28 14:30:49 valdas Exp $
  *
  * Copyright (C) 2004-2005 Idega. All Rights Reserved.
  *
@@ -53,10 +53,10 @@ import com.idega.xml.XMLException;
  * This is a JSF managed bean that manages each article instance and delegates 
  * all calls to the correct localized instance.
  * <p>
- * Last modified: $Date: 2008/02/22 12:01:05 $ by $Author: valdas $
+ * Last modified: $Date: 2008/02/28 14:30:49 $ by $Author: valdas $
  *
  * @author Anders Lindman,<a href="mailto:tryggvi@idega.com">Tryggvi Larusson</a>
- * @version $Revision: 1.82 $
+ * @version $Revision: 1.83 $
  */
 public class ArticleItemBean extends ContentItemBean implements Serializable, ContentItem, ValueChangeListener {
 	
@@ -926,6 +926,16 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 	
 	public void setArticleCategories(String articleCategories) {
 		getLocalizedArticle().setArticleCategories(articleCategories);
+	}
+	
+	@Override
+	public boolean isSetPublishedDateByDefault() {
+		return super.isSetPublishedDateByDefault();
+	}
+
+	@Override
+	public void setSetPublishedDateByDefault(boolean setPublishedDateByDefault) {
+		super.setSetPublishedDateByDefault(setPublishedDateByDefault);
 	}
 
 }
