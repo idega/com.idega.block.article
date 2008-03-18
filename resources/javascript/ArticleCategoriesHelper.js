@@ -1,4 +1,4 @@
-function setDisplayArticleCategory(id, pageKey, moduleIds, savingMessage) {
+function setDisplayArticleCategory(id, pageKey, moduleIds, savingMessage, cacheKey) {
 	if (id == null || pageKey == null || moduleIds == null) {
 		return false;
 	}
@@ -13,13 +13,30 @@ function setDisplayArticleCategory(id, pageKey, moduleIds, savingMessage) {
 	}
 	showLoadingMessage(savingMessage);
 	if (element.checked) {
-		BuilderService.addPropertyToModules(pageKey, moduleIds, "categories", categoryKey, setDisplayArticleCategoryCallback);
+		BuilderService.addPropertyToModules(pageKey, moduleIds, "categories", categoryKey, {
+			callback: function(result) {
+				setDisplayArticleCategoryCallback(result, cacheKey);
+			}
+		});
 	}
 	else {
-		BuilderService.removeValueFromModuleProperty(pageKey, moduleIds, "categories", categoryKey, setDisplayArticleCategoryCallback);
+		BuilderService.removeValueFromModulesProperties(pageKey, moduleIds, "categories", categoryKey, {
+			callback: function(result) {
+				setDisplayArticleCategoryCallback(result, cacheKey);
+			}
+		});
 	}
 }
 
-function setDisplayArticleCategoryCallback(result) {
-	reloadPage();
+function setDisplayArticleCategoryCallback(result, cacheKey) {
+	if (result) {
+		BuilderService.removeBlockObjectFromCacheByCacheKey(cacheKey, {
+			callback: function(result) {
+				reloadPage();
+			}
+		});
+	}
+	else {
+		reloadPage();
+	}
 }

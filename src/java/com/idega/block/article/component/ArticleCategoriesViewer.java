@@ -8,12 +8,10 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
-import org.apache.myfaces.renderkit.html.util.AddResource;
-import org.apache.myfaces.renderkit.html.util.AddResourceFactory;
-
 import com.idega.block.article.bean.ArticleListManagedBean;
 import com.idega.block.article.business.ArticleConstants;
 import com.idega.block.article.business.ArticleUtil;
+import com.idega.content.business.ContentConstants;
 import com.idega.content.business.ContentUtil;
 import com.idega.content.business.categories.CategoryBean;
 import com.idega.content.data.ContentCategory;
@@ -28,6 +26,8 @@ import com.idega.presentation.text.Link;
 import com.idega.presentation.text.Text;
 import com.idega.presentation.ui.CheckBox;
 import com.idega.util.CoreConstants;
+import com.idega.util.CoreUtil;
+import com.idega.util.PresentationUtil;
 
 public class ArticleCategoriesViewer extends Block {
 	
@@ -43,19 +43,35 @@ public class ArticleCategoriesViewer extends Block {
 	private Boolean hasUserValidRights = Boolean.FALSE;
 	
 	public ArticleCategoriesViewer() {
+		setCacheable(getCacheKey());
+		
 		countedCategories = new HashMap<String, Integer>();
 		availableCategories = new HashMap<String, List<String>>();
 	}
-
+	
+	@Override
+	public String getCacheKey() {
+		return ContentConstants.ARTICLE_CATEGORIES_VIEWER_BLOCK_CACHE_KEY;
+	}
+	
+	@Override
+	protected String getCacheState(IWContext iwc, String cacheStatePrefix) {
+		return super.getCacheState(iwc, cacheStatePrefix);
+	}
+	
+	@Override
 	public void main(IWContext iwc) {
 		Locale currentLocale = iwc.getCurrentLocale();
 		if (currentLocale == null) {
-			return;
+			currentLocale = Locale.ENGLISH;
 		}
+		
+		Layer container = new Layer();
+		add(container);
 		
 		hasUserValidRights = ContentUtil.hasContentEditorRoles(iwc);
 		if (hasUserValidRights) {
-			addScript(iwc);
+			addScript(iwc, container);
 		}
 		
 		CategoryBean bean = CategoryBean.getInstance();
@@ -78,11 +94,7 @@ public class ArticleCategoriesViewer extends Block {
 		}
 		
 		String lang = currentLocale.toString();
-		
-		Layer container = new Layer();
-		add(container);
 		Layer disabledCategoryContainer = null;
-		
 		boolean isCheckedAnyCategory = isCheckedAnyCategory();
 		String categoryName = null;
 		String categoryKey = null;
@@ -111,25 +123,35 @@ public class ArticleCategoriesViewer extends Block {
 					}
 				}
 				else {
-					if (hasUserValidRights) {
+					if (isCheckedCategory(categoryKey) || hasUserValidRights) {
 						Text text = new Text(nameWithCount);
 						disabledCategoryContainer = new Layer();
-						addCheckBox(pageKey, moduleIds, disabledCategoryContainer, iwc, categoryKey);
+						if (hasUserValidRights) {	
+							addCheckBox(pageKey, moduleIds, disabledCategoryContainer, iwc, categoryKey);
+						}
 						disabledCategoryContainer.setStyleClass(blogLinkDisabled);
 						disabledCategoryContainer.add(text);
-						container.add(disabledCategoryContainer);
+						if (hasUserValidRights || !category.isDisabled()) {
+							container.add(disabledCategoryContainer);
+						}
 					}
 				}
 			}
 		}
 	}
 
-	private void addScript(IWContext iwc) {
-		AddResource adder = AddResourceFactory.getInstance(iwc);
+	private void addScript(IWContext iwc, Layer container) {
+		List<String> scripts = new ArrayList<String>();
+		scripts.add("/dwr/interface/BuilderService.js");
+		scripts.add(CoreConstants.DWR_ENGINE_SCRIPT);
+		scripts.add(getBundle(iwc).getVirtualPathWithFileNameString("javascript/ArticleCategoriesHelper.js"));
 		
-		adder.addJavaScriptAtPosition(iwc, AddResource.HEADER_BEGIN, "/dwr/interface/BuilderService.js");
-		adder.addJavaScriptAtPosition(iwc, AddResource.HEADER_BEGIN, CoreConstants.DWR_ENGINE_SCRIPT);
-		adder.addJavaScriptAtPosition(iwc, AddResource.HEADER_BEGIN, getBundle(iwc).getVirtualPathWithFileNameString("javascript/ArticleCategoriesHelper.js"));
+		if (CoreUtil.isSingleComponentRenderingProcess(iwc)) {
+			container.add(PresentationUtil.getJavaScriptSourceLines(scripts));
+		}
+		else {
+			PresentationUtil.addJavaScriptSourcesLinesToHeader(iwc, scripts);
+		}
 	}
 	
 	@Override
@@ -200,7 +222,8 @@ public class ArticleCategoriesViewer extends Block {
 			}
 				
 			StringBuilder action = new StringBuilder("setDisplayArticleCategory('").append(box.getId()).append(separator).append(pageKey);
-			action.append(getModulesParameter(moduleIds.get(i), modules)).append(iwrb.getLocalizedString("saving", "Saving...")).append("');");
+			action.append(getModulesParameter(moduleIds.get(i), modules)).append(iwrb.getLocalizedString("saving", "Saving...")).append(separator);
+			action.append(ContentConstants.ARTICLE_CATEGORIES_VIEWER_BLOCK_CACHE_KEY).append("');");
 			box.setOnClick(action.toString());
 		}
 		container.add(box);

@@ -1,5 +1,5 @@
 /*
- * $Id: ArticleItemBean.java,v 1.83 2008/02/28 14:30:49 valdas Exp $
+ * $Id: ArticleItemBean.java,v 1.84 2008/03/18 08:11:02 valdas Exp $
  *
  * Copyright (C) 2004-2005 Idega. All Rights Reserved.
  *
@@ -33,6 +33,7 @@ import com.idega.content.bean.ContentItem;
 import com.idega.content.bean.ContentItemBean;
 import com.idega.content.bean.ContentItemCase;
 import com.idega.content.business.ContentConstants;
+import com.idega.content.business.ContentUtil;
 import com.idega.core.builder.business.BuilderService;
 import com.idega.core.builder.business.BuilderServiceFactory;
 import com.idega.data.IDOStoreException;
@@ -53,10 +54,10 @@ import com.idega.xml.XMLException;
  * This is a JSF managed bean that manages each article instance and delegates 
  * all calls to the correct localized instance.
  * <p>
- * Last modified: $Date: 2008/02/28 14:30:49 $ by $Author: valdas $
+ * Last modified: $Date: 2008/03/18 08:11:02 $ by $Author: valdas $
  *
  * @author Anders Lindman,<a href="mailto:tryggvi@idega.com">Tryggvi Larusson</a>
- * @version $Revision: 1.83 $
+ * @version $Revision: 1.84 $
  */
 public class ArticleItemBean extends ContentItemBean implements Serializable, ContentItem, ValueChangeListener {
 	
@@ -335,6 +336,8 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 			
 			ArticleCacher cacher = ArticleCacher.getInstance(IWMainApplication.getDefaultIWMainApplication());
 			cacher.getCacheMap().clear();
+			
+			ContentUtil.removeCategoriesViewersFromCache();
 		}
 		catch(ArticleStoreException ase){
 			throw ase;
