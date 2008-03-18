@@ -1,5 +1,5 @@
 /*
- * $Id: ArticleListManagedBean.java,v 1.20 2008/02/25 13:14:00 valdas Exp $
+ * $Id: ArticleListManagedBean.java,v 1.21 2008/03/18 14:59:56 valdas Exp $
  * Created on 27.1.2005
  *
  * Copyright (C) 2005 Idega Software hf. All Rights Reserved.
@@ -52,10 +52,10 @@ import com.idega.util.IWTimestamp;
 
 /**
  * 
- *  Last modified: $Date: 2008/02/25 13:14:00 $ by $Author: valdas $
+ *  Last modified: $Date: 2008/03/18 14:59:56 $ by $Author: valdas $
  * 
  * @author <a href="mailto:gummi@idega.com">Gudmundur Agust Saemundsson</a>
- * @version $Revision: 1.20 $
+ * @version $Revision: 1.21 $
  */
 public class ArticleListManagedBean implements ContentListViewerManagedBean {
 
@@ -163,7 +163,10 @@ public class ArticleListManagedBean implements ContentListViewerManagedBean {
 		Timestamp publishedDate = article.getPublishedDate();
 		if (publishedDate == null) {
 			//	Article is not published
-			User currentUser = iwc.getCurrentUser();
+			User currentUser = null;
+			try {
+				currentUser = iwc.getCurrentUser();
+			} catch(Exception e) {}
 			if (currentUser == null) {
 				return false;
 			}
