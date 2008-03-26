@@ -26,7 +26,6 @@ import com.idega.presentation.text.Link;
 import com.idega.presentation.text.Text;
 import com.idega.presentation.ui.CheckBox;
 import com.idega.util.CoreConstants;
-import com.idega.util.CoreUtil;
 import com.idega.util.PresentationUtil;
 
 public class ArticleCategoriesViewer extends Block {
@@ -146,12 +145,7 @@ public class ArticleCategoriesViewer extends Block {
 		scripts.add(CoreConstants.DWR_ENGINE_SCRIPT);
 		scripts.add(getBundle(iwc).getVirtualPathWithFileNameString("javascript/ArticleCategoriesHelper.js"));
 		
-		if (CoreUtil.isSingleComponentRenderingProcess(iwc)) {
-			container.add(PresentationUtil.getJavaScriptSourceLines(scripts));
-		}
-		else {
-			PresentationUtil.addJavaScriptSourcesLinesToHeader(iwc, scripts);
-		}
+		container.add(PresentationUtil.getJavaScriptSourceLines(scripts));
 	}
 	
 	@Override
