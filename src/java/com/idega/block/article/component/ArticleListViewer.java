@@ -1,5 +1,5 @@
 /*
- * $Id: ArticleListViewer.java,v 1.19 2008/02/24 08:52:37 laddi Exp $
+ * $Id: ArticleListViewer.java,v 1.20 2008/04/14 20:27:21 valdas Exp $
  * Created on 24.1.2005
  *
  * Copyright (C) 2005 Idega Software hf. All Rights Reserved.
@@ -24,6 +24,7 @@ import com.idega.content.business.ContentUtil;
 import com.idega.content.presentation.ContentItemListViewer;
 import com.idega.content.presentation.ContentItemViewer;
 import com.idega.content.renderkit.ContentListViewerRenderer;
+import com.idega.core.accesscontrol.business.StandardRoles;
 import com.idega.core.builder.business.BuilderService;
 import com.idega.core.builder.business.BuilderServiceFactory;
 import com.idega.core.cache.UIComponentCacher;
@@ -41,10 +42,10 @@ import com.idega.util.PresentationUtil;
  * for the article module.
  * </p>
  * 
- *  Last modified: $Date: 2008/02/24 08:52:37 $ by $Author: laddi $
+ *  Last modified: $Date: 2008/04/14 20:27:21 $ by $Author: valdas $
  * 
  * @author <a href="mailto:tryggvi@idega.com">Tryggvi Larusson</a>
- * @version $Revision: 1.19 $
+ * @version $Revision: 1.20 $
  */
 public class ArticleListViewer extends ContentItemListViewer {
 
@@ -295,17 +296,23 @@ public class ArticleListViewer extends ContentItemListViewer {
 	@SuppressWarnings("unchecked")
 	private void addCommentsScript(IWContext iwc, CommentsViewer comments) {
 		if (ArticleUtil.isPageTypeBlog(iwc)) {
-			List<String> sources = comments.getJavaScriptSources(iwc);
-			List<String> actions = comments.getJavaScriptActions();
-			if (CoreUtil.isSingleComponentRenderingProcess(iwc)) {
-				Layer script = new Layer();
-				script.add(PresentationUtil.getJavaScriptSourceLines(sources));
-				script.add(PresentationUtil.getJavaScriptActions(actions));
-				getFacets().put(ContentItemViewer.FACET_COMMENTS_SCRIPTS, script);
+			boolean addComments = showComments;
+			if (!addComments) {
+				addComments = (iwc.hasRole(StandardRoles.ROLE_KEY_AUTHOR) || iwc.hasRole(StandardRoles.ROLE_KEY_EDITOR));
 			}
-			else {
-				PresentationUtil.addJavaScriptSourcesLinesToHeader(iwc, sources);
-				PresentationUtil.addJavaScriptActionsToBody(iwc, actions);
+			if (addComments) {
+				List<String> sources = comments.getJavaScriptSources(iwc);
+				List<String> actions = comments.getJavaScriptActions();
+				if (CoreUtil.isSingleComponentRenderingProcess(iwc)) {
+					Layer script = new Layer();
+					script.add(PresentationUtil.getJavaScriptSourceLines(sources));
+					script.add(PresentationUtil.getJavaScriptActions(actions));
+					getFacets().put(ContentItemViewer.FACET_COMMENTS_SCRIPTS, script);
+				}
+				else {
+					PresentationUtil.addJavaScriptSourcesLinesToHeader(iwc, sources);
+					PresentationUtil.addJavaScriptActionsToBody(iwc, actions);
+				}
 			}
 		}
 	}

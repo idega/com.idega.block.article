@@ -53,13 +53,18 @@ public class CommentsViewer extends Block {
 	private String COMMENTS_HELPER = "javascript/ArticleCommentsHelper.js";
 	private String INIT_COMMENTS_ACTION = "initComments();";
 	private String INIT_SCRIPT_LINE = "window.addEvent('load', function() {"+INIT_COMMENTS_ACTION+"});";
-	private String ENABLE_REVERSE_AJAX_ACTION = "enableReverseAjax();";
-	private String ENABLE_REVERSE_AJAX_SCRIPT_LINE = "window.addEvent('load', function() {"+ENABLE_REVERSE_AJAX_ACTION+"});";
+//	private String ENABLE_REVERSE_AJAX_ACTION = "enableReverseAjax();";
+//	private String ENABLE_REVERSE_AJAX_SCRIPT_LINE = "window.addEvent('load', function() {"+ENABLE_REVERSE_AJAX_ACTION+"});";
 	
 	private static final String SEPARATOR = "', '";
 	
 	@Override
 	public void main(IWContext iwc) {
+		boolean hasValidRights = ContentUtil.hasContentEditorRoles(iwc);
+		if (!hasValidRights && !showCommentsForAllUsers) {
+			return;
+		}
+		
 		getModuleId(iwc);
 		
 		if (linkToComments == null) {
@@ -103,12 +108,6 @@ public class CommentsViewer extends Block {
 				PresentationUtil.addJavaScriptSourcesLinesToHeader(iwc, getJavaScriptSources(iwc));
 				PresentationUtil.addJavaScriptActionsToBody(iwc, getJavaScriptActions());
 			}
-		}
-		
-		boolean hasValidRights = ContentUtil.hasContentEditorRoles(iwc);
-		
-		if (!hasValidRights && !showCommentsForAllUsers) {
-			return;
 		}
 		
 		int commentsCount = getCommentsCount(iwc);
@@ -457,7 +456,7 @@ public class CommentsViewer extends Block {
 		if (service != null) {
 			moduleId = service.getInstanceId(this);
 			if (moduleId == null) {
-					moduleId = this.getId();
+				moduleId = this.getId();
 			}
 		}
 	}
