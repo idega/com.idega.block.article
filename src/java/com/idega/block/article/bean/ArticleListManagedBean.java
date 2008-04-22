@@ -1,5 +1,5 @@
 /*
- * $Id: ArticleListManagedBean.java,v 1.21 2008/03/18 14:59:56 valdas Exp $
+ * $Id: ArticleListManagedBean.java,v 1.22 2008/04/22 02:40:08 valdas Exp $
  * Created on 27.1.2005
  *
  * Copyright (C) 2005 Idega Software hf. All Rights Reserved.
@@ -52,10 +52,10 @@ import com.idega.util.IWTimestamp;
 
 /**
  * 
- *  Last modified: $Date: 2008/03/18 14:59:56 $ by $Author: valdas $
+ *  Last modified: $Date: 2008/04/22 02:40:08 $ by $Author: valdas $
  * 
  * @author <a href="mailto:gummi@idega.com">Gudmundur Agust Saemundsson</a>
- * @version $Revision: 1.21 $
+ * @version $Revision: 1.22 $
  */
 public class ArticleListManagedBean implements ContentListViewerManagedBean {
 
@@ -258,6 +258,7 @@ public class ArticleListManagedBean implements ContentListViewerManagedBean {
 		viewer.setShowHeadline(isShowHeadline());
 		viewer.setShowTeaser(isShowTeaser());
 		viewer.setShowBody(isShowBody());
+		viewer.setPartOfArticlesList(true);
 		if (isShowDetailsCommand() != null) {
 			viewer.setShowDetailsCommand(isShowDetailsCommand().booleanValue());
 		}

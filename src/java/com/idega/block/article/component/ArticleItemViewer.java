@@ -1,5 +1,5 @@
 /*
- * $Id: ArticleItemViewer.java,v 1.37 2008/04/22 02:26:23 valdas Exp $
+ * $Id: ArticleItemViewer.java,v 1.38 2008/04/22 02:40:08 valdas Exp $
  *
  * Copyright (C) 2004 Idega. All Rights Reserved.
  *
@@ -39,12 +39,12 @@ import com.idega.webface.WFHtml;
 import com.idega.webface.convert.WFTimestampConverter;
 
 /**
- * Last modified: $Date: 2008/04/22 02:26:23 $ by $Author: valdas $
+ * Last modified: $Date: 2008/04/22 02:40:08 $ by $Author: valdas $
  *
  * Displays the article item
  *
  * @author <a href="mailto:gummi@idega.com">Gudmundur Agust Saemundsson</a>
- * @version $Revision: 1.37 $
+ * @version $Revision: 1.38 $
  */
 public class ArticleItemViewer extends ContentItemViewer {
 	
@@ -70,6 +70,7 @@ public class ArticleItemViewer extends ContentItemViewer {
 	private boolean addCommentsViewer = false;
 	
 	private boolean canModifyRenderingAttribute = false;
+	private boolean partOfArticlesList = false;
 	
 	/**
 	 * @return Returns the cacheEnabled.
@@ -177,7 +178,7 @@ public class ArticleItemViewer extends ContentItemViewer {
 	}
 	
 	private boolean useTeaserInBodyField() {
-		return !isShowBody() && isShowTeaser();
+		return partOfArticlesList ? (!isShowBody() && isShowTeaser()) : false;
 	}
 	
 	/**
@@ -508,4 +509,11 @@ public class ArticleItemViewer extends ContentItemViewer {
 		}
 	}
 
+	public boolean isPartOfArticlesList() {
+		return partOfArticlesList;
+	}
+
+	public void setPartOfArticlesList(boolean partOfArticlesList) {
+		this.partOfArticlesList = partOfArticlesList;
+	}
 }
