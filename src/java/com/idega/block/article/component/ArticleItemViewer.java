@@ -1,5 +1,5 @@
 /*
- * $Id: ArticleItemViewer.java,v 1.36 2008/02/24 08:52:37 laddi Exp $
+ * $Id: ArticleItemViewer.java,v 1.37 2008/04/22 02:26:23 valdas Exp $
  *
  * Copyright (C) 2004 Idega. All Rights Reserved.
  *
@@ -39,20 +39,19 @@ import com.idega.webface.WFHtml;
 import com.idega.webface.convert.WFTimestampConverter;
 
 /**
- * Last modified: $Date: 2008/02/24 08:52:37 $ by $Author: laddi $
+ * Last modified: $Date: 2008/04/22 02:26:23 $ by $Author: valdas $
  *
  * Displays the article item
  *
  * @author <a href="mailto:gummi@idega.com">Gudmundur Agust Saemundsson</a>
- * @version $Revision: 1.36 $
+ * @version $Revision: 1.37 $
  */
 public class ArticleItemViewer extends ContentItemViewer {
 	
 	//constants:
 	private final static String ATTRIBUTE_AUTHOR = "author";
-	private final static String ATTRIBUTE_TEASER = "teaser";
 	private final static String[] ATTRIBUTE_ARRAY = new String[] {ContentConstants.ATTRIBUTE_HEADLINE, ContentConstants.ATTRIBUTE_CREATION_DATE, ATTRIBUTE_AUTHOR,
-		ATTRIBUTE_TEASER, ContentConstants.ATTRIBUTE_BODY};
+		ContentConstants.ATTRIBUTE_TEASER, ContentConstants.ATTRIBUTE_BODY};
 	private final static String facetIdPrefix = "article_";
 	private final static String styleClassPrefix = "article_";
 	private final static String DEFAULT_STYLE_CLASS = styleClassPrefix + "item";
@@ -122,7 +121,7 @@ public class ArticleItemViewer extends ContentItemViewer {
 		if (ContentConstants.ATTRIBUTE_BODY.equals(attribute)) {
 			return new WFHtml();
 		}
-		else if (ATTRIBUTE_TEASER.equals(attribute)) {
+		else if (ContentConstants.ATTRIBUTE_TEASER.equals(attribute)) {
 			return new WFHtml();
 		}
 		else if (attribute.equals(ContentConstants.ATTRIBUTE_HEADLINE) && this.getHeadlineAsLink()) {
@@ -165,16 +164,20 @@ public class ArticleItemViewer extends ContentItemViewer {
 		if (ContentConstants.ATTRIBUTE_CREATION_DATE.equals(attribute) && !isShowCreationDate()) {
 			return false;
 		}
-		if (ContentConstants.ATTRIBUTE_BODY.equals(attribute) && !isShowBody()) {
+		if (ContentConstants.ATTRIBUTE_BODY.equals(attribute) && (!isShowBody() && !useTeaserInBodyField())) {
 			return false;
 		}
-		if (ATTRIBUTE_TEASER.equals(attribute) && !isShowTeaser()) {
+		if (ContentConstants.ATTRIBUTE_TEASER.equals(attribute) && (!isShowTeaser() || useTeaserInBodyField())) {
 			return false;
 		}
 		if (ContentConstants.ATTRIBUTE_HEADLINE.equals(attribute) && !isShowHeadline()) {
 			return false;
 		}
 		return true;
+	}
+	
+	private boolean useTeaserInBodyField() {
+		return !isShowBody() && isShowTeaser();
 	}
 	
 	/**
@@ -188,6 +191,17 @@ public class ArticleItemViewer extends ContentItemViewer {
 	 */
 	public void setAuthor(String author) {
 		setFieldLocalValue(ATTRIBUTE_AUTHOR,author);
+	}
+	
+	@Override
+	public Object getValue(String fieldName) {
+		if (ContentConstants.ATTRIBUTE_BODY.equals(fieldName)) {
+			if (useTeaserInBodyField()) {
+				fieldName = ContentConstants.ATTRIBUTE_TEASER;
+			}
+		}
+		
+		return super.getValue(fieldName);
 	}
 
 	/**
@@ -233,13 +247,13 @@ public class ArticleItemViewer extends ContentItemViewer {
 	 * @return Returns the teaser.
 	 */
 	public String getTeaser() {
-		return (String)getValue(ATTRIBUTE_TEASER);
+		return (String)getValue(ContentConstants.ATTRIBUTE_TEASER);
 	}
 	/**
 	 * @param teaser The teaser to set.
 	 */
 	public void setTeaser(String teaser) {
-		setFieldLocalValue(ATTRIBUTE_TEASER,teaser);
+		setFieldLocalValue(ContentConstants.ATTRIBUTE_TEASER,teaser);
 	}
 	
 	
