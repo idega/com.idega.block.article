@@ -1,5 +1,5 @@
 /*
- * $Id: ArticleItemViewer.java,v 1.38 2008/04/22 02:40:08 valdas Exp $
+ * $Id: ArticleItemViewer.java,v 1.39 2008/04/23 00:49:29 valdas Exp $
  *
  * Copyright (C) 2004 Idega. All Rights Reserved.
  *
@@ -39,12 +39,12 @@ import com.idega.webface.WFHtml;
 import com.idega.webface.convert.WFTimestampConverter;
 
 /**
- * Last modified: $Date: 2008/04/22 02:40:08 $ by $Author: valdas $
+ * Last modified: $Date: 2008/04/23 00:49:29 $ by $Author: valdas $
  *
  * Displays the article item
  *
  * @author <a href="mailto:gummi@idega.com">Gudmundur Agust Saemundsson</a>
- * @version $Revision: 1.38 $
+ * @version $Revision: 1.39 $
  */
 public class ArticleItemViewer extends ContentItemViewer {
 	
@@ -196,8 +196,8 @@ public class ArticleItemViewer extends ContentItemViewer {
 	
 	@Override
 	public Object getValue(String fieldName) {
-		if (ContentConstants.ATTRIBUTE_BODY.equals(fieldName)) {
-			if (useTeaserInBodyField()) {
+		if (useTeaserInBodyField()) {
+			if (ContentConstants.ATTRIBUTE_BODY.equals(fieldName)) {
 				fieldName = ContentConstants.ATTRIBUTE_TEASER;
 			}
 		}
@@ -311,13 +311,14 @@ public class ArticleItemViewer extends ContentItemViewer {
 	 */
 	@Override
 	public Object saveState(FacesContext ctx) {
-		Object values[] = new Object[6];
+		Object values[] = new Object[7];
 		values[0] = super.saveState(ctx);
 		values[1] = Boolean.valueOf(this.headlineAsLink);
 		values[2] = this.datePattern;
 		values[3] = Boolean.valueOf(this.cacheEnabled);
 		values[4] = Boolean.valueOf(this.showDate);
 		values[5] = Boolean.valueOf(this.showTime);
+		values[6] = Boolean.valueOf(this.partOfArticlesList);
 		return values;
 	}
 
@@ -334,6 +335,7 @@ public class ArticleItemViewer extends ContentItemViewer {
 		this.cacheEnabled = values[3] == null ? true : ((Boolean) values[3]).booleanValue();
 		this.showDate = values[4] == null ? true : ((Boolean) values[4]).booleanValue();
 		this.showTime = values[5] == null ? true : ((Boolean) values[5]).booleanValue();
+		this.partOfArticlesList = values[6] == null ? false : Boolean.valueOf(values[6].toString());
 	}
 	
 	/**
