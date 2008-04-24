@@ -1,5 +1,5 @@
 /*
- * $Id: EditArticleView.java,v 1.49 2008/02/28 14:30:49 valdas Exp $
+ * $Id: EditArticleView.java,v 1.50 2008/04/24 21:27:47 laddi Exp $
  *
  * Copyright (C) 2004 Idega. All Rights Reserved.
  *
@@ -77,10 +77,10 @@ import com.idega.webface.htmlarea.HTMLArea;
  * <p>
  * This is the part for the editor of article is inside the admin interface
  * </p>
- * Last modified: $Date: 2008/02/28 14:30:49 $ by $Author: valdas $
+ * Last modified: $Date: 2008/04/24 21:27:47 $ by $Author: laddi $
  *
  * @author Joakim,Tryggvi Larusson
- * @version $Revision: 1.49 $
+ * @version $Revision: 1.50 $
  */
 public class EditArticleView extends IWBaseComponent implements ManagedContentBeans, ActionListener, ValueChangeListener {
 	private static final Log log = LogFactory.getLog(EditArticleView.class);
@@ -129,7 +129,6 @@ public class EditArticleView extends IWBaseComponent implements ManagedContentBe
 	public EditArticleView() {}
 
 	@Override
-	@SuppressWarnings("unchecked")
 	protected void initializeComponent(FacesContext context) {
 		IWContext iwc = IWContext.getIWContext(context);
 
@@ -216,7 +215,6 @@ public class EditArticleView extends IWBaseComponent implements ManagedContentBe
 	/*
 	 * Creates an edit container for the article.
 	 */
-	@SuppressWarnings("unchecked")
 	public UIComponent getDeleteContainer() {
 		
 		getArticleAdminBlock().setMaximizedVertically(false);
@@ -269,7 +267,6 @@ public class EditArticleView extends IWBaseComponent implements ManagedContentBe
 	/*
 	 * Creates an edit container for the article.
 	 */
-	@SuppressWarnings("unchecked")
 	public UIComponent getEditContainer(IWContext iwc) {
 		WFResourceUtil localizer = WFResourceUtil.getResourceUtilArticle();
 		WFContainer mainContainer = getMainContainer();
@@ -465,7 +462,6 @@ public class EditArticleView extends IWBaseComponent implements ManagedContentBe
 	 * </p>
 	 * @return
 	 */
-	@SuppressWarnings("unchecked")
 	private UIComponent getLanguageDropdownMenu(IWContext iwc) {
 		Iterator<Locale> iter = ICLocaleBusiness.getListOfLocalesJAVA().iterator();
 		HtmlSelectOneMenu langDropdown = new HtmlSelectOneMenu();
@@ -487,7 +483,7 @@ public class EditArticleView extends IWBaseComponent implements ManagedContentBe
 		langDropdown.getValue();
 		langDropdown.addValueChangeListener(this);
 		langDropdown.setImmediate(true);
-		StringBuffer action = new StringBuffer();;
+		StringBuffer action = new StringBuffer();
 		if (needsForm) {
 			IWResourceBundle iwrb = iwc.getIWMainApplication().getBundle(ArticleConstants.IW_BUNDLE_IDENTIFIER).getResourceBundle(iwc);
 			action.append("window.parent.showLoadingMessage('").append(iwrb.getLocalizedString("loading", "Loading...")).append("'); ");
@@ -562,7 +558,6 @@ public class EditArticleView extends IWBaseComponent implements ManagedContentBe
 		return findEditArticleComponent(comp.getParent(), classToSearch, id);
 	}
 	
-	@SuppressWarnings("unchecked")
 	private UIComponent findEditArticleComponent(List children, Class<?> classToSearch, String id, boolean checkChildren) {
 		if (children == null) {
 			return null;
@@ -693,7 +688,7 @@ public class EditArticleView extends IWBaseComponent implements ManagedContentBe
 	}
 	
 	private UIComponent getMessageComponent(String id) {
-		UIComponent c = findComponent(SAVE_ID);;
+		UIComponent c = findComponent(SAVE_ID);
 		if (c == null) {
 			Object o = findEditArticleComponent(this.getChildren(), HtmlMessage.class, id + WFMessages.MESSAGE_COMPONENT_ID_ENDING, true);
 			if (o instanceof HtmlMessage) {
@@ -818,11 +813,11 @@ public class EditArticleView extends IWBaseComponent implements ManagedContentBe
 		resourcePath = iwc.getParameter(ContentViewer.PARAMETER_CONTENT_RESOURCE);
 		baseFolderPath = iwc.getParameter(ContentItemToolbar.PARAMETER_BASE_FOLDER_PATH);
 		String mode = iwc.getParameter(ContentViewer.PARAMETER_ACTION);
-		if (mode instanceof String) {
+		if (mode != null) {
 			setEditMode(mode);
 		}
 		String needForm = iwc.getParameter(ContentViewer.CONTENT_VIEWER_EDITOR_NEEDS_FORM);
-		if (needForm instanceof String) {
+		if (needForm != null) {
 			needsForm = Boolean.TRUE.toString().equals(needForm);
 		}
 		String renderingParameter = iwc.getParameter(ContentConstants.RENDERING_COMPONENT_OF_ARTICLE_LIST);
