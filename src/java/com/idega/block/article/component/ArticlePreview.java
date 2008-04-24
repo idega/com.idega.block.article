@@ -1,5 +1,5 @@
 /*
- * $Id: ArticlePreview.java,v 1.6 2006/04/09 12:32:00 laddi Exp $
+ * $Id: ArticlePreview.java,v 1.7 2008/04/24 21:05:27 laddi Exp $
  *
  * Copyright (C) 2004 Idega. All Rights Reserved.
  *
@@ -24,12 +24,12 @@ import com.idega.webface.WFResourceUtil;
 import com.idega.webface.WFUtil;
 
 /**
- * Last modified: $Date: 2006/04/09 12:32:00 $ by $Author: laddi $
+ * Last modified: $Date: 2008/04/24 21:05:27 $ by $Author: laddi $
  *
  * Displays the article item
  *
  * @author Joakim
- * @version $Revision: 1.6 $
+ * @version $Revision: 1.7 $
  */
 public class ArticlePreview extends IWBaseComponent implements ManagedContentBeans, ActionListener{
 	public final static String EDIT_ARTICLE_BLOCK_ID = "edit_articles_block";
@@ -44,6 +44,7 @@ public class ArticlePreview extends IWBaseComponent implements ManagedContentBea
 		//No action...
 	}
 
+	@Override
 	protected void initializeComponent(FacesContext context) {
 		add(getPreviewPanel());
 	}
@@ -100,8 +101,8 @@ public class ArticlePreview extends IWBaseComponent implements ManagedContentBea
 				cs.setSelectedId(ARTICLE_VIEW_ID, true);
 			}
 		}else {
-			cs.setSelectedId(NO_ARTICLE_ID, false);
-			cs.setSelectedId(ARTICLE_VIEW_ID, true);
+			/*cs.setSelectedId(NO_ARTICLE_ID, false);
+			cs.setSelectedId(ARTICLE_VIEW_ID, true);*/
 			System.out.println("Could not find the Component selector!!!");
 		}
 	}
@@ -109,6 +110,7 @@ public class ArticlePreview extends IWBaseComponent implements ManagedContentBea
 	/**
 	 * @see javax.faces.component.UIComponent#encodeBegin(javax.faces.context.FacesContext)
 	 */
+	@Override
 	public void encodeBegin(FacesContext context) throws IOException {
 		super.encodeBegin(context);
 		selectComponent();
