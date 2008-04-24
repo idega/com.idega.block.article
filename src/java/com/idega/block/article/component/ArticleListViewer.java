@@ -1,5 +1,5 @@
 /*
- * $Id: ArticleListViewer.java,v 1.20 2008/04/14 20:27:21 valdas Exp $
+ * $Id: ArticleListViewer.java,v 1.21 2008/04/24 23:15:06 laddi Exp $
  * Created on 24.1.2005
  *
  * Copyright (C) 2005 Idega Software hf. All Rights Reserved.
@@ -42,10 +42,10 @@ import com.idega.util.PresentationUtil;
  * for the article module.
  * </p>
  * 
- *  Last modified: $Date: 2008/04/14 20:27:21 $ by $Author: valdas $
+ *  Last modified: $Date: 2008/04/24 23:15:06 $ by $Author: laddi $
  * 
  * @author <a href="mailto:tryggvi@idega.com">Tryggvi Larusson</a>
- * @version $Revision: 1.20 $
+ * @version $Revision: 1.21 $
  */
 public class ArticleListViewer extends ContentItemListViewer {
 
@@ -237,7 +237,6 @@ public class ArticleListViewer extends ContentItemListViewer {
 		addFeed(context);
 	}
 	
-	@SuppressWarnings("unchecked")
 	private void addCommentsController(IWContext iwc, CommentsViewer comments) {
 		if (!ContentUtil.hasContentEditorRoles(iwc) || !ArticleUtil.isPageTypeBlog(iwc)) {
 			return;
@@ -285,7 +284,6 @@ public class ArticleListViewer extends ContentItemListViewer {
 		}
 	}
 	
-	@SuppressWarnings("unchecked")
 	private boolean addFeedJavaScript(String linkToFeed, String feedType, String feedTitle) {
 		Script script = new Script();
 		script.addScriptLine("registerEvent(window, 'load', function(){addFeedSymbolInHeader('"+linkToFeed+"', '"+feedType+"', '"+feedTitle+"');});");		
@@ -293,7 +291,6 @@ public class ArticleListViewer extends ContentItemListViewer {
 		return true;
 	}
 	
-	@SuppressWarnings("unchecked")
 	private void addCommentsScript(IWContext iwc, CommentsViewer comments) {
 		if (ArticleUtil.isPageTypeBlog(iwc)) {
 			boolean addComments = showComments;
@@ -317,7 +314,6 @@ public class ArticleListViewer extends ContentItemListViewer {
 		}
 	}
 	
-	@SuppressWarnings("unchecked")
 	@Override
 	public void encodeBegin(FacesContext context) throws IOException {
 		IWContext iwc = IWContext.getIWContext(context);

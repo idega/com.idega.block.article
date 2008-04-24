@@ -198,7 +198,6 @@ public class CommentsViewer extends Block {
 		container.add(new Text(ContentConstants.SPACE));
 	}
 	
-	@SuppressWarnings("unchecked")
 	private boolean findLinkToComments() {
 		UIComponent region = this.getParent();
 		if (region == null) {

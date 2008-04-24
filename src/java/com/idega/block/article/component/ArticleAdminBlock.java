@@ -1,5 +1,5 @@
 /*
- * $Id: ArticleAdminBlock.java,v 1.8 2008/01/23 12:12:06 valdas Exp $
+ * $Id: ArticleAdminBlock.java,v 1.9 2008/04/24 23:15:06 laddi Exp $
  *
  * Copyright (C) 2004 Idega. All Rights Reserved.
  *
@@ -9,11 +9,10 @@
 package com.idega.block.article.component;
 
 import javax.faces.context.FacesContext;
-import javax.faces.el.ValueBinding;
 import javax.faces.event.AbortProcessingException;
 import javax.faces.event.ActionEvent;
 import javax.faces.event.ActionListener;
-import org.apache.myfaces.custom.savestate.UISaveState;
+
 import com.idega.block.article.IWBundleStarter;
 import com.idega.block.article.business.ArticleUtil;
 import com.idega.content.bean.ManagedContentBeans;
@@ -25,10 +24,10 @@ import com.idega.webface.WFUtil;
  * <p>
  * This is the main block for administering articles (creating,editing)
  * </p>
- * Last modified: $Date: 2008/01/23 12:12:06 $ by $Author: valdas $
+ * Last modified: $Date: 2008/04/24 23:15:06 $ by $Author: laddi $
  *
  * @author Joakim, Tryggvi Larusson
- * @version $Revision: 1.8 $
+ * @version $Revision: 1.9 $
  */
 public class ArticleAdminBlock extends WFBlockTabbed implements ActionListener, ManagedContentBeans {
 
@@ -52,6 +51,7 @@ public class ArticleAdminBlock extends WFBlockTabbed implements ActionListener, 
 	/* (non-Javadoc)
 	 * @see com.idega.webface.WFBlockTabbed#initializeTabbedPane(javax.faces.context.FacesContext)
 	 */
+	@Override
 	protected WFTabbedPane initializeTabbedPane(FacesContext context) {
 		WFTabbedPane tb = new WFTabbedPane();
 		//tb.setMainAreaStyleClass(WFContainer.DEFAULT_STYLE_CLASS);
@@ -74,6 +74,7 @@ public class ArticleAdminBlock extends WFBlockTabbed implements ActionListener, 
 	}
 	
 	
+	@Override
 	public void initializeComponent(FacesContext context){
 		super.initializeComponent(context);
 		
@@ -116,6 +117,7 @@ public class ArticleAdminBlock extends WFBlockTabbed implements ActionListener, 
 	/**
 	 * @see javax.faces.component.UIPanel#saveState(javax.faces.context.FacesContext)
 	 */
+	@Override
 	public Object saveState(FacesContext ctx) {
 		Object values[] = new Object[2];
 		values[0] = super.saveState(ctx);
@@ -127,6 +129,7 @@ public class ArticleAdminBlock extends WFBlockTabbed implements ActionListener, 
 	 * @see javax.faces.component.UIPanel#restoreState(javax.faces.context.FacesContext,
 	 *      java.lang.Object)
 	 */
+	@Override
 	public void restoreState(FacesContext ctx, Object state) {
 		Object values[] = (Object[]) state;
 		super.restoreState(ctx, values[0]);

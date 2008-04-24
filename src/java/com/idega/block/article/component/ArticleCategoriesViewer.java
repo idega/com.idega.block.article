@@ -153,7 +153,6 @@ public class ArticleCategoriesViewer extends Block {
 		return ArticleConstants.IW_BUNDLE_IDENTIFIER;
 	}
 	
-	@SuppressWarnings("unchecked")
 	private void countCategories(Collection<ContentCategory> categories, IWContext iwc) {
 		if (categories == null) {
 			return;
@@ -282,6 +281,7 @@ public class ArticleCategoriesViewer extends Block {
 		categoryContainer.add(link);
 	}
 	
+	@Override
 	public String getBuilderName(IWUserContext iwuc) {
 		String name = ArticleUtil.getBundle().getComponentName(ArticleCategoriesViewer.class);
 		if (name == null || ArticleConstants.EMPTY.equals(name)){

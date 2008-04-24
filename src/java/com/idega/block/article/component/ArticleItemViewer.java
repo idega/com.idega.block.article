@@ -1,5 +1,5 @@
 /*
- * $Id: ArticleItemViewer.java,v 1.39 2008/04/23 00:49:29 valdas Exp $
+ * $Id: ArticleItemViewer.java,v 1.40 2008/04/24 23:15:06 laddi Exp $
  *
  * Copyright (C) 2004 Idega. All Rights Reserved.
  *
@@ -39,12 +39,12 @@ import com.idega.webface.WFHtml;
 import com.idega.webface.convert.WFTimestampConverter;
 
 /**
- * Last modified: $Date: 2008/04/23 00:49:29 $ by $Author: valdas $
+ * Last modified: $Date: 2008/04/24 23:15:06 $ by $Author: laddi $
  *
  * Displays the article item
  *
  * @author <a href="mailto:gummi@idega.com">Gudmundur Agust Saemundsson</a>
- * @version $Revision: 1.39 $
+ * @version $Revision: 1.40 $
  */
 public class ArticleItemViewer extends ContentItemViewer {
 	
@@ -117,7 +117,6 @@ public class ArticleItemViewer extends ContentItemViewer {
 	}
 	
 	@Override
-	@SuppressWarnings("unchecked")
 	protected UIComponent createFieldComponent(String attribute){
 		if (ContentConstants.ATTRIBUTE_BODY.equals(attribute)) {
 			return new WFHtml();
@@ -404,13 +403,11 @@ public class ArticleItemViewer extends ContentItemViewer {
 	}
 	
 	@Override
-	@SuppressWarnings("unchecked")
 	protected void initializeComments(FacesContext context) {
 		super.initializeComments(context);
 	}
 	
 	@Override
-	@SuppressWarnings("unchecked")
 	protected void updateComments() {
 		if (isAddCommentsViewer()) {
 			CommentsViewer comments = new CommentsViewer();
@@ -430,7 +427,6 @@ public class ArticleItemViewer extends ContentItemViewer {
 		setValue(ArticleLocalizedItemBean.FIELDNAME_LINK_TO_COMMENT, linkToComments);
 	}
 	
-	@SuppressWarnings("unchecked")
 	private boolean addFeedJavaScript(String linkToFeed, String feedType, String feedTitle) {
 		Script script = new Script();
 		script.addScriptLine("registerEvent(window, 'load', function(){addFeedSymbolInHeader('"+linkToFeed+"', '"+feedType+"', '"+feedTitle+"');});");
@@ -472,7 +468,6 @@ public class ArticleItemViewer extends ContentItemViewer {
 		this.addCommentsViewer = addCommentsViewer;
 	}
 	
-	@SuppressWarnings("unchecked")
 	@Override
 	public void encodeBegin(FacesContext context) throws IOException {
 		IWContext iwc = IWContext.getIWContext(context);
