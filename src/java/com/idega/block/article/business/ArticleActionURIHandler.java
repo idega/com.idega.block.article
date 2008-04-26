@@ -1,5 +1,5 @@
 /*
- * $Id: ArticleActionURIHandler.java,v 1.11 2008/01/30 13:49:42 valdas Exp $
+ * $Id: ArticleActionURIHandler.java,v 1.12 2008/04/26 01:00:02 valdas Exp $
  * Created on Jan 31, 2005
  *
  * Copyright (C) 2005 Idega Software hf. All Rights Reserved.
@@ -32,11 +32,11 @@ import com.idega.idegaweb.IWMainApplication;
  * <p>
  * An IWActionURIHandler handler that handles the actions for the article module (edit/delete).
  * </p>
- *  Last modified: $Date: 2008/01/30 13:49:42 $ by $Author: valdas $
+ *  Last modified: $Date: 2008/04/26 01:00:02 $ by $Author: valdas $
  * 
  * 
  * @author <a href="mailto:eiki@idega.com">eiki</a>
- * @version $Revision: 1.11 $
+ * @version $Revision: 1.12 $
  */
 public class ArticleActionURIHandler extends DefaultIWActionURIHandler implements IWActionURIHandler {
 
@@ -70,7 +70,6 @@ public class ArticleActionURIHandler extends DefaultIWActionURIHandler implement
 		//todo set to previewer or editor depending on action
 		//todo register actions as subnodes of article
 		String action = uri.getActionPart();
-		String subjectParameterName = ContentViewer.PARAMETER_CONTENT_RESOURCE;
 		
 		String pathPart = uri.getPathPart();
 		
@@ -92,7 +91,7 @@ public class ArticleActionURIHandler extends DefaultIWActionURIHandler implement
 			redirectURI.append("/?");
 		}
 		if(pathPart!=null && !pathPart.equals("")){
-			redirectURI.append(subjectParameterName);
+			redirectURI.append(ContentViewer.PARAMETER_CONTENT_RESOURCE);
 			redirectURI.append("=");
 			redirectURI.append(pathPart);
 			redirectURI.append("&");
