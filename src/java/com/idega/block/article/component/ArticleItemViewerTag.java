@@ -1,5 +1,5 @@
 /*
- * $Id: ArticleItemViewerTag.java,v 1.6 2008/02/25 14:41:59 laddi Exp $
+ * $Id: ArticleItemViewerTag.java,v 1.7 2008/04/29 09:19:40 valdas Exp $
  * Created on 21.2.2005
  *
  * Copyright (C) 2005 Idega Software hf. All Rights Reserved.
@@ -15,10 +15,10 @@ import com.idega.content.presentation.ContentItemViewerTag;
 
 /**
  * 
- *  Last modified: $Date: 2008/02/25 14:41:59 $ by $Author: laddi $
+ *  Last modified: $Date: 2008/04/29 09:19:40 $ by $Author: valdas $
  * 
  * @author <a href="mailto:gummi@idega.com">Gudmundur Agust Saemundsson</a>
- * @version $Revision: 1.6 $
+ * @version $Revision: 1.7 $
  */
 public class ArticleItemViewerTag extends ContentItemViewerTag {
 
@@ -28,11 +28,14 @@ public class ArticleItemViewerTag extends ContentItemViewerTag {
 	private boolean showHeadline = true;
 	private boolean showTeaser = true;
 	private boolean showBody = true;
-	private Boolean showDetailsCommand = null;
-	private String datePattern = null;
 	private boolean showDate = true;
 	private boolean showTime = true;
 	private boolean showComments = false;
+	
+	private Boolean showDetailsCommand = null;
+	
+	private String datePattern = null;
+	private String articleItemViewerFilter = null;
 	
 	/**
 	 * 
@@ -67,6 +70,7 @@ public class ArticleItemViewerTag extends ContentItemViewerTag {
 				article.setShowDetailsCommand(isShowDetailsCommand().booleanValue());
 			}
 			article.setAddCommentsViewer(isShowComments());
+			article.setArticleItemViewerFilter(getArticleItemViewerFilter());
 		}
 	}
 	
@@ -76,6 +80,7 @@ public class ArticleItemViewerTag extends ContentItemViewerTag {
 		showAuthor = true;
 		showCreationDate = true;
 		datePattern = null;
+		this.articleItemViewerFilter = null;
 	}
 	
 	public boolean isHeadlineAsLink() {
@@ -165,4 +170,13 @@ public class ArticleItemViewerTag extends ContentItemViewerTag {
 	public boolean isShowComments() {
 		return this.showComments;
 	}
+
+	public String getArticleItemViewerFilter() {
+		return articleItemViewerFilter;
+	}
+
+	public void setArticleItemViewerFilter(String articleItemViewerFilter) {
+		this.articleItemViewerFilter = articleItemViewerFilter;
+	}
+
 }

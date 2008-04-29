@@ -1,5 +1,5 @@
 /*
- * $Id: ArticleItemViewer.java,v 1.40 2008/04/24 23:15:06 laddi Exp $
+ * $Id: ArticleItemViewer.java,v 1.41 2008/04/29 09:19:40 valdas Exp $
  *
  * Copyright (C) 2004 Idega. All Rights Reserved.
  *
@@ -26,6 +26,7 @@ import com.idega.content.business.ContentConstants;
 import com.idega.content.business.ContentUtil;
 import com.idega.content.presentation.ContentItemToolbar;
 import com.idega.content.presentation.ContentItemViewer;
+import com.idega.content.presentation.ContentViewer;
 import com.idega.core.builder.business.BuilderService;
 import com.idega.core.builder.business.BuilderServiceFactory;
 import com.idega.core.cache.UIComponentCacher;
@@ -39,12 +40,12 @@ import com.idega.webface.WFHtml;
 import com.idega.webface.convert.WFTimestampConverter;
 
 /**
- * Last modified: $Date: 2008/04/24 23:15:06 $ by $Author: laddi $
+ * Last modified: $Date: 2008/04/29 09:19:40 $ by $Author: valdas $
  *
  * Displays the article item
  *
  * @author <a href="mailto:gummi@idega.com">Gudmundur Agust Saemundsson</a>
- * @version $Revision: 1.40 $
+ * @version $Revision: 1.41 $
  */
 public class ArticleItemViewer extends ContentItemViewer {
 	
@@ -54,7 +55,7 @@ public class ArticleItemViewer extends ContentItemViewer {
 		ContentConstants.ATTRIBUTE_TEASER, ContentConstants.ATTRIBUTE_BODY};
 	private final static String facetIdPrefix = "article_";
 	private final static String styleClassPrefix = "article_";
-	private final static String DEFAULT_STYLE_CLASS = styleClassPrefix + "item";
+	private final static String DEFAULT_STYLE_CLASS = "blog-entry";
 	//instance variables:
 	private boolean headlineAsLink;
 	private String datePattern;
@@ -71,6 +72,7 @@ public class ArticleItemViewer extends ContentItemViewer {
 	
 	private boolean canModifyRenderingAttribute = false;
 	private boolean partOfArticlesList = false;
+	private boolean canInitAnyField = true;
 	
 	/**
 	 * @return Returns the cacheEnabled.
@@ -86,14 +88,10 @@ public class ArticleItemViewer extends ContentItemViewer {
 		this.cacheEnabled = cacheEnabled;
 	}
 
-
-
 	public ArticleItemViewer() {
 		super();
 		this.setStyleClass(DEFAULT_STYLE_CLASS);
 	}
-	
-	
 	
 	@Override
 	public String[] getViewerFieldNames(){
@@ -137,6 +135,10 @@ public class ArticleItemViewer extends ContentItemViewer {
 	
 	@Override
 	protected void initializeComponent(FacesContext context) {
+		if (!canInitAnyField) {
+			return;
+		}
+		
 		String attr[] = getViewerFieldNames();
 		if (attr == null) {
 			return;
@@ -146,10 +148,14 @@ public class ArticleItemViewer extends ContentItemViewer {
 				initializeComponent(attr[i]);
 			}
 		}
+		
 		initializeToolbar();
 		initializeComments(context);
 		if (isShowCreationDate()) {
-			((HtmlOutputText)getFieldViewerComponent(ContentConstants.ATTRIBUTE_CREATION_DATE)).setConverter(new WFTimestampConverter(datePattern, showDate, showTime));
+			UIComponent creationDate = getFieldViewerComponent(ContentConstants.ATTRIBUTE_CREATION_DATE);
+			if (creationDate instanceof HtmlOutputText) {
+				((HtmlOutputText) creationDate).setConverter(new WFTimestampConverter(datePattern, showDate, showTime));
+			}
 		}
 		addFeed(context);
 	}
@@ -256,7 +262,6 @@ public class ArticleItemViewer extends ContentItemViewer {
 		setFieldLocalValue(ContentConstants.ATTRIBUTE_TEASER,teaser);
 	}
 	
-	
 	@Override
 	public ContentItem loadContentItem(String itemResourcePath) {
 		try {
@@ -272,7 +277,6 @@ public class ArticleItemViewer extends ContentItemViewer {
 		return null;
 	}
 	
-
 	public void setHeadlineAsLink(boolean asLink) {
 		this.headlineAsLink = asLink;
 	}
@@ -310,7 +314,7 @@ public class ArticleItemViewer extends ContentItemViewer {
 	 */
 	@Override
 	public Object saveState(FacesContext ctx) {
-		Object values[] = new Object[7];
+		Object values[] = new Object[8];
 		values[0] = super.saveState(ctx);
 		values[1] = Boolean.valueOf(this.headlineAsLink);
 		values[2] = this.datePattern;
@@ -318,6 +322,7 @@ public class ArticleItemViewer extends ContentItemViewer {
 		values[4] = Boolean.valueOf(this.showDate);
 		values[5] = Boolean.valueOf(this.showTime);
 		values[6] = Boolean.valueOf(this.partOfArticlesList);
+		values[7] = Boolean.valueOf(this.canInitAnyField);
 		return values;
 	}
 
@@ -335,6 +340,7 @@ public class ArticleItemViewer extends ContentItemViewer {
 		this.showDate = values[4] == null ? true : ((Boolean) values[4]).booleanValue();
 		this.showTime = values[5] == null ? true : ((Boolean) values[5]).booleanValue();
 		this.partOfArticlesList = values[6] == null ? false : Boolean.valueOf(values[6].toString());
+		this.canInitAnyField = values[7] == null ? true : Boolean.valueOf(values[7].toString());
 	}
 	
 	/**
@@ -434,15 +440,11 @@ public class ArticleItemViewer extends ContentItemViewer {
 		return true;
 	}
 
-	private void addFeed(FacesContext context){
+	private void addFeed(FacesContext context) {
 		IWContext iwc = IWContext.getIWContext(context);
 		BuilderService bservice = null;
 		try {
 			bservice = BuilderServiceFactory.getBuilderService(iwc);
-		} catch (RemoteException e) {
-			e.printStackTrace();
-		}
-		try {
 			String serverName = iwc.getServerURL();
 			if (serverName == null) {
 				return;
@@ -471,6 +473,28 @@ public class ArticleItemViewer extends ContentItemViewer {
 	@Override
 	public void encodeBegin(FacesContext context) throws IOException {
 		IWContext iwc = IWContext.getIWContext(context);
+		
+		String viewerIdentifier = iwc.getParameter(ContentConstants.CONTENT_ITEM_VIEWER_IDENTIFIER_PARAMETER);
+		String articileItemViewerFilter = getArticleItemViewerFilter();
+		if (viewerIdentifier != null && articileItemViewerFilter == null) {
+			canInitAnyField = false;
+		}
+		else {
+			if (articileItemViewerFilter != null) {
+				if (viewerIdentifier != null && !viewerIdentifier.equals(articileItemViewerFilter)) {
+					canInitAnyField = false;
+				}
+			}
+		}
+		
+		String resourcePathFromRequest = iwc.getParameter(ContentViewer.PARAMETER_CONTENT_RESOURCE);
+		if (resourcePathFromRequest != null) {
+			String resourcePath = getResourcePath();
+			if (resourcePath != null && !resourcePathFromRequest.equals(resourcePath)) {
+				canInitAnyField = false;
+			}
+		}
+		
 		if (ContentUtil.hasContentEditorRoles(iwc)) {
 			Object renderingParameter = iwc.getSessionAttribute(ContentConstants.RENDERING_COMPONENT_OF_ARTICLE_LIST);
 			if (renderingParameter == null) {
@@ -513,4 +537,17 @@ public class ArticleItemViewer extends ContentItemViewer {
 	public void setPartOfArticlesList(boolean partOfArticlesList) {
 		this.partOfArticlesList = partOfArticlesList;
 	}
+
+	public String getArticleItemViewerFilter() {
+		return super.getArticleItemViewerFilter();
+	}
+
+	public void setArticleItemViewerFilter(String articleItemViewerFilter) {
+		super.setArticleItemViewerFilter(articleItemViewerFilter);
+	}
+
+	public boolean isCanInitAnyField() {
+		return canInitAnyField;
+	}
+
 }

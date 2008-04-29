@@ -15,6 +15,7 @@ import com.idega.business.IBOLookupException;
 import com.idega.business.SpringBeanLookup;
 import com.idega.content.business.ContentConstants;
 import com.idega.content.business.ContentUtil;
+import com.idega.content.presentation.ContentViewer;
 import com.idega.content.themes.helpers.business.ThemesHelper;
 import com.idega.core.accesscontrol.business.NotLoggedOnException;
 import com.idega.core.builder.business.BuilderService;
@@ -68,7 +69,7 @@ public class CommentsViewer extends Block {
 		getModuleId(iwc);
 		
 		if (linkToComments == null) {
-			if (!findLinkToComments()) {
+			if (!findLinkToComments(iwc.getParameter(ContentViewer.PARAMETER_CONTENT_RESOURCE), iwc.getParameter(ContentConstants.CONTENT_ITEM_VIEWER_IDENTIFIER_PARAMETER))) {
 				if (isStandAlone(iwc)) {
 					CommentsEngine engine = null;
 					try {
@@ -198,7 +199,7 @@ public class CommentsViewer extends Block {
 		container.add(new Text(ContentConstants.SPACE));
 	}
 	
-	private boolean findLinkToComments() {
+	private boolean findLinkToComments(String resourcePathFromRequest, String viewerIdentifier) {
 		UIComponent region = this.getParent();
 		if (region == null) {
 			return false;
@@ -213,13 +214,34 @@ public class CommentsViewer extends Block {
 			o = children.get(i);
 			if (o instanceof ArticleItemViewer) {
 				articleViewer = (ArticleItemViewer) o;
-				linkToComments = articleViewer.getLinkToComments();
+				
+				UIComponent nextItem = null;	//	CommentsViewer is next to ArticleItemViewer
+				if (i + 1 < children.size()) {
+					nextItem = children.get(i + 1);
+				}
+				if (nextItem instanceof CommentsViewer && nextItem.equals(this)) {
+					if (canInitComments(articleViewer, resourcePathFromRequest, viewerIdentifier)) {
+						linkToComments = articleViewer.getLinkToComments();
+					}
+				}
 			}
 		}
 		if (linkToComments == null) {
 			return false;
 		}
 		return true;
+	}
+	
+	private boolean canInitComments(ArticleItemViewer articleViewer, String resourcePathFromRequest, String viewerIdentifier) {
+		if (!articleViewer.isCanInitAnyField()) {
+			return false;
+		}
+		
+		if (viewerIdentifier != null && !viewerIdentifier.equals(articleViewer.getArticleItemViewerFilter())) {
+			return false;
+		}
+		
+		return resourcePathFromRequest == null ? true : resourcePathFromRequest.equals(articleViewer.getResourcePath());
 	}
 	
 	protected String getThisPageKey(IWContext iwc) {

@@ -150,6 +150,11 @@
 			<required>false</required>
 			<rtexprvalue>false</rtexprvalue>
 		</attribute>
+		<attribute>
+			<name>articleItemViewerFilter</name>
+			<required>false</required>
+			<rtexprvalue>false</rtexprvalue>
+		</attribute>
 	</tag>
 
 	<tag>
@@ -246,6 +251,11 @@
 		</attribute>
 		<attribute>
 			<name>showTime</name>
+			<required>false</required>
+			<rtexprvalue>false</rtexprvalue>
+		</attribute>
+		<attribute>
+			<name>articleItemViewerFilter</name>
 			<required>false</required>
 			<rtexprvalue>false</rtexprvalue>
 		</attribute>

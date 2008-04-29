@@ -1,5 +1,5 @@
 /*
- * $Id: ArticleListViewerTag.java,v 1.4 2008/02/24 08:52:35 laddi Exp $
+ * $Id: ArticleListViewerTag.java,v 1.5 2008/04/29 09:19:39 valdas Exp $
  * Created on 1.9.2005 in project com.idega.block.article
  *
  * Copyright (C) 2005 Idega Software hf. All Rights Reserved.
@@ -19,10 +19,10 @@ import com.idega.content.presentation.ContentItemListViewerTag;
  * <p>
  * TODO tryggvil Describe Type ListArticlesViewerTag
  * </p>
- *  Last modified: $Date: 2008/02/24 08:52:35 $ by $Author: laddi $
+ *  Last modified: $Date: 2008/04/29 09:19:39 $ by $Author: valdas $
  * 
  * @author <a href="mailto:tryggvil@idega.com">tryggvil</a>
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  */
 public class ArticleListViewerTag extends ContentItemListViewerTag {
 
@@ -31,12 +31,15 @@ public class ArticleListViewerTag extends ContentItemListViewerTag {
 	private boolean showHeadline = true;
 	private boolean showTeaser = true;
 	private boolean showBody = true;
-	private Boolean showDetailsCommand = null;
-	private String datePattern = null;
 	private boolean headlineAsLink = false;
 	private boolean showComments = false;
 	private boolean showDate = true;
 	private boolean showTime = true;
+	
+	private Boolean showDetailsCommand = null;
+	
+	private String datePattern = null;
+	private String articleItemViewerFilter = null;
 
 	public static final String COMPONENT_TYPE="ArticleListViewer";
 	
@@ -62,6 +65,7 @@ public class ArticleListViewerTag extends ContentItemListViewerTag {
 		this.datePattern = null; 
 		this.headlineAsLink = false;
 		this.showComments = false;
+		this.articleItemViewerFilter = null;
 	}
 
 	@Override
@@ -82,6 +86,7 @@ public class ArticleListViewerTag extends ContentItemListViewerTag {
 			viewer.setShowComments(getShowComments());
 			viewer.setShowDate(isShowDate());
 			viewer.setShowTime(isShowTime());
+			viewer.setArticleItemViewerFilter(getArticleItemViewerFilter());
 		}
 	}
 
@@ -172,4 +177,13 @@ public class ArticleListViewerTag extends ContentItemListViewerTag {
 	public boolean isShowTime() {
 		return this.showTime;
 	}
+
+	public String getArticleItemViewerFilter() {
+		return articleItemViewerFilter;
+	}
+
+	public void setArticleItemViewerFilter(String articleItemViewerFilter) {
+		this.articleItemViewerFilter = articleItemViewerFilter;
+	}
+	
 }

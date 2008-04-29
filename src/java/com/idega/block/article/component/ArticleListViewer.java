@@ -1,5 +1,5 @@
 /*
- * $Id: ArticleListViewer.java,v 1.21 2008/04/24 23:15:06 laddi Exp $
+ * $Id: ArticleListViewer.java,v 1.22 2008/04/29 09:19:40 valdas Exp $
  * Created on 24.1.2005
  *
  * Copyright (C) 2005 Idega Software hf. All Rights Reserved.
@@ -42,10 +42,10 @@ import com.idega.util.PresentationUtil;
  * for the article module.
  * </p>
  * 
- *  Last modified: $Date: 2008/04/24 23:15:06 $ by $Author: laddi $
+ *  Last modified: $Date: 2008/04/29 09:19:40 $ by $Author: valdas $
  * 
  * @author <a href="mailto:tryggvi@idega.com">Tryggvi Larusson</a>
- * @version $Revision: 1.21 $
+ * @version $Revision: 1.22 $
  */
 public class ArticleListViewer extends ContentItemListViewer {
 
@@ -188,8 +188,9 @@ public class ArticleListViewer extends ContentItemListViewer {
 	}
 	
 	@Override
-	protected void notifyManagedBeanOfVariableValues(){
+	protected void notifyManagedBeanOfVariableValues() {
 		super.notifyManagedBeanOfVariableValues();
+		
 		getArticleListBean().setHeadlineAsLink(getHeadlineAsLink());
 		getArticleListBean().setDatePattern(getDatePattern());
 		getArticleListBean().setShowDate(isShowDate());
@@ -199,6 +200,7 @@ public class ArticleListViewer extends ContentItemListViewer {
 		getArticleListBean().setShowHeadline(isShowHeadline());
 		getArticleListBean().setShowTeaser(isShowTeaser());
 		getArticleListBean().setShowBody(isShowBody());
+		getArticleListBean().setArticleItemViewerFilter(getArticleItemViewerFilter());
 		if (isShowDetailsCommand() != null) {
 			getArticleListBean().setShowDetailsCommand(isShowDetailsCommand().booleanValue());
 		}
@@ -377,6 +379,14 @@ public class ArticleListViewer extends ContentItemListViewer {
 			}
 		}
 		super.addContentItemViewer(viewer);
+	}
+
+	public String getArticleItemViewerFilter() {
+		return super.getArticleItemViewerFilter();
+	}
+
+	public void setArticleItemViewerFilter(String articleItemViewerFilter) {
+		super.setArticleItemViewerFilter(articleItemViewerFilter);
 	}
 
 }

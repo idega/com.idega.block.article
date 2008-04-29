@@ -1,5 +1,5 @@
 /*
- * $Id: ArticleListManagedBean.java,v 1.22 2008/04/22 02:40:08 valdas Exp $
+ * $Id: ArticleListManagedBean.java,v 1.23 2008/04/29 09:19:41 valdas Exp $
  * Created on 27.1.2005
  *
  * Copyright (C) 2005 Idega Software hf. All Rights Reserved.
@@ -38,6 +38,7 @@ import com.idega.content.bean.ContentItemBeanComparator;
 import com.idega.content.bean.ContentListViewerManagedBean;
 import com.idega.content.business.ContentSearch;
 import com.idega.content.presentation.ContentItemViewer;
+import com.idega.content.presentation.ContentViewer;
 import com.idega.core.accesscontrol.business.StandardRoles;
 import com.idega.core.search.business.Search;
 import com.idega.core.search.business.SearchResult;
@@ -48,19 +49,17 @@ import com.idega.user.data.User;
 import com.idega.util.CoreUtil;
 import com.idega.util.IWTimestamp;
 
-
-
 /**
  * 
- *  Last modified: $Date: 2008/04/22 02:40:08 $ by $Author: valdas $
+ *  Last modified: $Date: 2008/04/29 09:19:41 $ by $Author: valdas $
  * 
  * @author <a href="mailto:gummi@idega.com">Gudmundur Agust Saemundsson</a>
- * @version $Revision: 1.22 $
+ * @version $Revision: 1.23 $
  */
 public class ArticleListManagedBean implements ContentListViewerManagedBean {
 
 	private int numberOfDaysDisplayed = 0;
-	private List categories = null;
+	private List<String> categories = null;
 
 	private String LOCALIZEDKEY_MORE = "itemviewer.more";
 
@@ -78,6 +77,8 @@ public class ArticleListManagedBean implements ContentListViewerManagedBean {
 	private boolean showTeaser = true;
 	private boolean showBody = true;
 	private Boolean showDetailsCommand = null;
+	
+	private String articleItemViewerFilter = null;
 
 	/**
 	 * 
@@ -106,8 +107,6 @@ public class ArticleListManagedBean implements ContentListViewerManagedBean {
 		return new ArrayList<ArticleItemBean>();
 	}
 	
-	
-	
 	/**
 	 * Loads all xml files in the given folder
 	 * @param folder
@@ -118,40 +117,52 @@ public class ArticleListManagedBean implements ContentListViewerManagedBean {
 	public List<ArticleItemBean> loadAllArticlesInFolder(String folder) throws XmlException, IOException{
 		List<ArticleItemBean> list = new ArrayList<ArticleItemBean>();		
 			
-		IWContext iwc = CoreUtil.getIWContext();		
-		Collection results = getArticleSearcResults(folder, this.categories, iwc);
-		int count=0;
+		IWContext iwc = CoreUtil.getIWContext();
+		String resourcePathFromRequest = iwc.getParameter(ContentViewer.PARAMETER_CONTENT_RESOURCE);
+		
+		Collection<SearchResult> results = getArticleSearcResults(folder, this.categories, iwc);
 		if (results == null) {
 			return list;
 		}
+		
+		int count = 0;
 		ArticleItemBean article = null;
-		for (Iterator iter = results.iterator(); iter.hasNext();) {
-			SearchResult result = (SearchResult) iter.next();
+		for (SearchResult result: results) {
 			try {
 				System.out.println("ArticleListManagedBean: Attempting to load "+result.getSearchResultURI());
 				article = new ArticleItemBean();
 				article.setResourcePath(result.getSearchResultURI());
 				article.load();
-				if (hasUserRightToViewArticle(article, iwc)) {
-					if (!article.isDummyContentItem()) {
-						if (article.getAvailableInRequestedLanguage()) {
-							int maxNumber = getMaxNumberOfDisplayed();
-							if (maxNumber == -1 || count < maxNumber) {
-								list.add(article);
-								count++;
-								if (count == maxNumber) {
-									break;
-								}
-							}
+				if (canShowArticle(article, iwc, resourcePathFromRequest)) {
+					int maxNumber = getMaxNumberOfDisplayed();
+					if (maxNumber < 0 || count < maxNumber) {
+						list.add(article);
+						count++;
+						if (count == maxNumber) {
+							break;
 						}
 					}
 				}
-			}catch(Exception e) {
+			} catch(Exception e) {
 				e.printStackTrace();
 			}
 		}
 			
 		return list;
+	}
+	
+	private boolean canShowArticle(ArticleItemBean article, IWContext iwc, String resourcePathFromRequest) {
+		if (!hasUserRightToViewArticle(article, iwc)) {
+			return false;
+		}
+		if (article.isDummyContentItem()) {
+			return false;
+		}
+		if (!article.getAvailableInRequestedLanguage()) {
+			return false;
+		}
+		
+		return resourcePathFromRequest == null ? true : article.getResourcePath().equals(resourcePathFromRequest);
 	}
 	
 	private boolean hasUserRightToViewArticle(ArticleItemBean article, IWContext iwc) {
@@ -213,7 +224,6 @@ public class ArticleListManagedBean implements ContentListViewerManagedBean {
 		s.addScope(new SearchScope(scope));
 		SearchExpression expression = null;
 		
-		
 		String localeString = "";
 		SearchExpression namePatternExpression = s.compare(CompareOperator.LIKE, IWSlideConstants.PROPERTY_DISPLAY_NAME,"%"+localeString+".article");
 		expression = namePatternExpression;
@@ -259,6 +269,7 @@ public class ArticleListManagedBean implements ContentListViewerManagedBean {
 		viewer.setShowTeaser(isShowTeaser());
 		viewer.setShowBody(isShowBody());
 		viewer.setPartOfArticlesList(true);
+		viewer.setArticleItemViewerFilter(getArticleItemViewerFilter());
 		if (isShowDetailsCommand() != null) {
 			viewer.setShowDetailsCommand(isShowDetailsCommand().booleanValue());
 		}
@@ -290,13 +301,13 @@ public class ArticleListManagedBean implements ContentListViewerManagedBean {
 	/**
 	 * @return Returns the categories.
 	 */
-	public List getCategories() {
+	public List<String> getCategories() {
 		return this.categories;
 	}
 	/**
 	 * @param categories The categories to set.
 	 */
-	public void setCategories(List categories) {
+	public void setCategories(List<String> categories) {
 		this.categories = categories;
 	}
 
@@ -356,9 +367,6 @@ public class ArticleListManagedBean implements ContentListViewerManagedBean {
 	}
 
 	/**
-	 * <p>
-	 * TODO tryggvil describe method setHeadlineAsLink
-	 * </p>
 	 * @param headlineAsLink
 	 */
 	public void setHeadlineAsLink(boolean headlineAsLink) {
@@ -421,7 +429,7 @@ public class ArticleListManagedBean implements ContentListViewerManagedBean {
 		return this.maxNumberOfDisplayed;
 	}
 	
-	public Collection getArticleSearcResults(String folder, List<String> categories, IWContext iwc) {
+	public Collection<SearchResult> getArticleSearcResults(String folder, List<String> categories, IWContext iwc) {
 		if (folder == null) {
 			return null;
 		}
@@ -473,5 +481,17 @@ public class ArticleListManagedBean implements ContentListViewerManagedBean {
 		Search search = searchBusiness.createSearch(articleSearch);
 		return search.getSearchResults();
 	}
-	
+
+	public String getArticleItemViewerFilter() {
+		return articleItemViewerFilter;
+	}
+
+	public void setArticleItemViewerFilter(String articleItemViewerFilter) {
+		this.articleItemViewerFilter = articleItemViewerFilter;
+	}
+
+	public void setViewerIdentifier(String viewerIdentifier) {
+		this.setArticleItemViewerFilter(viewerIdentifier);
+	}
+
 }
