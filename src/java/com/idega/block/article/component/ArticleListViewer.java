@@ -1,5 +1,5 @@
 /*
- * $Id: ArticleListViewer.java,v 1.22 2008/04/29 09:19:40 valdas Exp $
+ * $Id: ArticleListViewer.java,v 1.23 2008/04/29 10:59:51 valdas Exp $
  * Created on 24.1.2005
  *
  * Copyright (C) 2005 Idega Software hf. All Rights Reserved.
@@ -42,10 +42,10 @@ import com.idega.util.PresentationUtil;
  * for the article module.
  * </p>
  * 
- *  Last modified: $Date: 2008/04/29 09:19:40 $ by $Author: valdas $
+ *  Last modified: $Date: 2008/04/29 10:59:51 $ by $Author: valdas $
  * 
  * @author <a href="mailto:tryggvi@idega.com">Tryggvi Larusson</a>
- * @version $Revision: 1.22 $
+ * @version $Revision: 1.23 $
  */
 public class ArticleListViewer extends ContentItemListViewer {
 
@@ -201,6 +201,7 @@ public class ArticleListViewer extends ContentItemListViewer {
 		getArticleListBean().setShowTeaser(isShowTeaser());
 		getArticleListBean().setShowBody(isShowBody());
 		getArticleListBean().setArticleItemViewerFilter(getArticleItemViewerFilter());
+		getArticleListBean().setShowAllItems(isShowAllItems());
 		if (isShowDetailsCommand() != null) {
 			getArticleListBean().setShowDetailsCommand(isShowDetailsCommand().booleanValue());
 		}
@@ -388,5 +389,12 @@ public class ArticleListViewer extends ContentItemListViewer {
 	public void setArticleItemViewerFilter(String articleItemViewerFilter) {
 		super.setArticleItemViewerFilter(articleItemViewerFilter);
 	}
+	
+	public boolean isShowAllItems() {
+		return super.isShowAllItems();
+	}
 
+	public void setShowAllItems(boolean showAllItems) {
+		super.setShowAllItems(showAllItems);
+	}
 }

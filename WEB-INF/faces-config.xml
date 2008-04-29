@@ -212,6 +212,11 @@
 			<property-name>articleItemViewerFilter</property-name>
 			<property-class>java.lang.String</property-class>
 		</property>
+		<property>
+			<display-name>Show all articles despite categories</display-name>
+			<property-name>showAllItems</property-name>
+			<property-class>boolean</property-class>
+		</property>
 		<component-extension>
 			<idegaweb-info>
 				<builder-visible>true</builder-visible>

@@ -1,5 +1,5 @@
 /*
- * $Id: ArticleListViewerTag.java,v 1.5 2008/04/29 09:19:39 valdas Exp $
+ * $Id: ArticleListViewerTag.java,v 1.6 2008/04/29 10:59:50 valdas Exp $
  * Created on 1.9.2005 in project com.idega.block.article
  *
  * Copyright (C) 2005 Idega Software hf. All Rights Reserved.
@@ -19,10 +19,10 @@ import com.idega.content.presentation.ContentItemListViewerTag;
  * <p>
  * TODO tryggvil Describe Type ListArticlesViewerTag
  * </p>
- *  Last modified: $Date: 2008/04/29 09:19:39 $ by $Author: valdas $
+ *  Last modified: $Date: 2008/04/29 10:59:50 $ by $Author: valdas $
  * 
  * @author <a href="mailto:tryggvil@idega.com">tryggvil</a>
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
  */
 public class ArticleListViewerTag extends ContentItemListViewerTag {
 
@@ -35,6 +35,7 @@ public class ArticleListViewerTag extends ContentItemListViewerTag {
 	private boolean showComments = false;
 	private boolean showDate = true;
 	private boolean showTime = true;
+	private boolean showAllItems = false;
 	
 	private Boolean showDetailsCommand = null;
 	
@@ -48,7 +49,6 @@ public class ArticleListViewerTag extends ContentItemListViewerTag {
 	 */
 	public ArticleListViewerTag() {
 		super();
-		// TODO Auto-generated constructor stub
 	}
 
 	/* (non-Javadoc)
@@ -66,13 +66,14 @@ public class ArticleListViewerTag extends ContentItemListViewerTag {
 		this.headlineAsLink = false;
 		this.showComments = false;
 		this.articleItemViewerFilter = null;
+		this.showAllItems = false;
 	}
 
 	@Override
 	protected void setProperties(UIComponent component) {      
 		super.setProperties(component);
-		if (component != null) {
-			ArticleListViewer viewer = ((ArticleListViewer)component);
+		if (component instanceof ArticleListViewer) {
+			ArticleListViewer viewer = (ArticleListViewer) component;
 			viewer.setShowAuthor(isShowAuthor());
 			viewer.setShowCreationDate(isShowCreationDate());
 			viewer.setShowHeadline(isShowHeadline());
@@ -87,6 +88,7 @@ public class ArticleListViewerTag extends ContentItemListViewerTag {
 			viewer.setShowDate(isShowDate());
 			viewer.setShowTime(isShowTime());
 			viewer.setArticleItemViewerFilter(getArticleItemViewerFilter());
+			viewer.setShowAllItems(isShowAllItems());
 		}
 	}
 
@@ -184,6 +186,14 @@ public class ArticleListViewerTag extends ContentItemListViewerTag {
 
 	public void setArticleItemViewerFilter(String articleItemViewerFilter) {
 		this.articleItemViewerFilter = articleItemViewerFilter;
+	}
+
+	public boolean isShowAllItems() {
+		return showAllItems;
+	}
+
+	public void setShowAllItems(boolean showAllItems) {
+		this.showAllItems = showAllItems;
 	}
 	
 }

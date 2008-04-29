@@ -1,5 +1,5 @@
 /*
- * $Id: ArticleListManagedBean.java,v 1.23 2008/04/29 09:19:41 valdas Exp $
+ * $Id: ArticleListManagedBean.java,v 1.24 2008/04/29 10:59:50 valdas Exp $
  * Created on 27.1.2005
  *
  * Copyright (C) 2005 Idega Software hf. All Rights Reserved.
@@ -51,34 +51,35 @@ import com.idega.util.IWTimestamp;
 
 /**
  * 
- *  Last modified: $Date: 2008/04/29 09:19:41 $ by $Author: valdas $
+ *  Last modified: $Date: 2008/04/29 10:59:50 $ by $Author: valdas $
  * 
  * @author <a href="mailto:gummi@idega.com">Gudmundur Agust Saemundsson</a>
- * @version $Revision: 1.23 $
+ * @version $Revision: 1.24 $
  */
 public class ArticleListManagedBean implements ContentListViewerManagedBean {
 
-	private int numberOfDaysDisplayed = 0;
 	private List<String> categories = null;
 
 	private String LOCALIZEDKEY_MORE = "itemviewer.more";
 
 	private String detailsViewerPath = null;
-	private boolean headlineAsLink=false;
 	private String datePattern = null;
+	private String resourcePath;
+	private String articleItemViewerFilter = null;
+	
+	private int numberOfDaysDisplayed = 0;
+	private int maxNumberOfDisplayed = -1;
+	
+	private boolean headlineAsLink=false;
 	private boolean showDate = true;
 	private boolean showTime = true;
-	private String resourcePath;
-	private int maxNumberOfDisplayed=-1;
-	
 	private boolean showAuthor = true;
 	private boolean showCreationDate = true;
 	private boolean showHeadline = true;
 	private boolean showTeaser = true;
 	private boolean showBody = true;
+	private boolean showAllItems = false;
 	private Boolean showDetailsCommand = null;
-	
-	private String articleItemViewerFilter = null;
 
 	/**
 	 * 
@@ -160,6 +161,12 @@ public class ArticleListManagedBean implements ContentListViewerManagedBean {
 		}
 		if (!article.getAvailableInRequestedLanguage()) {
 			return false;
+		}
+		if (!isShowAllItems()) {
+			List<String> categories = getCategories();
+			if (categories == null || categories.isEmpty()) {
+				return false;
+			}
 		}
 		
 		return resourcePathFromRequest == null ? true : article.getResourcePath().equals(resourcePathFromRequest);
@@ -492,6 +499,14 @@ public class ArticleListManagedBean implements ContentListViewerManagedBean {
 
 	public void setViewerIdentifier(String viewerIdentifier) {
 		this.setArticleItemViewerFilter(viewerIdentifier);
+	}
+
+	public boolean isShowAllItems() {
+		return showAllItems;
+	}
+
+	public void setShowAllItems(boolean showAllItems) {
+		this.showAllItems = showAllItems;
 	}
 
 }
