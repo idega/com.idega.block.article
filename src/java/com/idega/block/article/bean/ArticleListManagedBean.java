@@ -1,5 +1,5 @@
 /*
- * $Id: ArticleListManagedBean.java,v 1.24 2008/04/29 10:59:50 valdas Exp $
+ * $Id: ArticleListManagedBean.java,v 1.25 2008/04/30 14:31:05 valdas Exp $
  * Created on 27.1.2005
  *
  * Copyright (C) 2005 Idega Software hf. All Rights Reserved.
@@ -36,6 +36,7 @@ import com.idega.business.IBOLookup;
 import com.idega.business.IBOLookupException;
 import com.idega.content.bean.ContentItemBeanComparator;
 import com.idega.content.bean.ContentListViewerManagedBean;
+import com.idega.content.business.ContentConstants;
 import com.idega.content.business.ContentSearch;
 import com.idega.content.presentation.ContentItemViewer;
 import com.idega.content.presentation.ContentViewer;
@@ -46,15 +47,16 @@ import com.idega.presentation.IWContext;
 import com.idega.slide.business.IWSlideSession;
 import com.idega.slide.util.IWSlideConstants;
 import com.idega.user.data.User;
+import com.idega.util.CoreConstants;
 import com.idega.util.CoreUtil;
 import com.idega.util.IWTimestamp;
 
 /**
  * 
- *  Last modified: $Date: 2008/04/29 10:59:50 $ by $Author: valdas $
+ *  Last modified: $Date: 2008/04/30 14:31:05 $ by $Author: valdas $
  * 
  * @author <a href="mailto:gummi@idega.com">Gudmundur Agust Saemundsson</a>
- * @version $Revision: 1.24 $
+ * @version $Revision: 1.25 $
  */
 public class ArticleListManagedBean implements ContentListViewerManagedBean {
 
@@ -120,6 +122,7 @@ public class ArticleListManagedBean implements ContentListViewerManagedBean {
 			
 		IWContext iwc = CoreUtil.getIWContext();
 		String resourcePathFromRequest = iwc.getParameter(ContentViewer.PARAMETER_CONTENT_RESOURCE);
+		String identifierFromRequest = iwc.getParameter(ContentConstants.CONTENT_ITEM_VIEWER_IDENTIFIER_PARAMETER);
 		
 		Collection<SearchResult> results = getArticleSearcResults(folder, this.categories, iwc);
 		if (results == null) {
@@ -130,11 +133,10 @@ public class ArticleListManagedBean implements ContentListViewerManagedBean {
 		ArticleItemBean article = null;
 		for (SearchResult result: results) {
 			try {
-				System.out.println("ArticleListManagedBean: Attempting to load "+result.getSearchResultURI());
 				article = new ArticleItemBean();
 				article.setResourcePath(result.getSearchResultURI());
 				article.load();
-				if (canShowArticle(article, iwc, resourcePathFromRequest)) {
+				if (canShowArticle(article, iwc, resourcePathFromRequest, identifierFromRequest)) {
 					int maxNumber = getMaxNumberOfDisplayed();
 					if (maxNumber < 0 || count < maxNumber) {
 						list.add(article);
@@ -152,7 +154,7 @@ public class ArticleListManagedBean implements ContentListViewerManagedBean {
 		return list;
 	}
 	
-	private boolean canShowArticle(ArticleItemBean article, IWContext iwc, String resourcePathFromRequest) {
+	private boolean canShowArticle(ArticleItemBean article, IWContext iwc, String resourcePathFromRequest, String identifierFromRequest) {
 		if (!hasUserRightToViewArticle(article, iwc)) {
 			return false;
 		}
@@ -169,7 +171,27 @@ public class ArticleListManagedBean implements ContentListViewerManagedBean {
 			}
 		}
 		
-		return resourcePathFromRequest == null ? true : article.getResourcePath().equals(resourcePathFromRequest);
+		if (getArticleItemViewerFilter() == null) {
+			//	No identifier set as property. Will check resource paths
+			return resourcePathFromRequest == null ? true : article.getResourcePath().equals(resourcePathFromRequest);
+		}
+		else {
+			if (identifierFromRequest == null) {
+				//	No identifier in request
+				return true;
+			}
+			if (identifierFromRequest.equals(getArticleItemViewerFilter())) {
+				//	Identifiers match, checking resource paths
+				if (resourcePathFromRequest == null) {
+					//	No custom resource path provided, can show article
+					return true;
+				}
+				//	Showing ONLY selected article
+				return article.getResourcePath().equals(resourcePathFromRequest);
+			}
+			//	Identifiers do not match, can show article
+			return true;
+		}
 	}
 	
 	private boolean hasUserRightToViewArticle(ArticleItemBean article, IWContext iwc) {
@@ -231,7 +253,7 @@ public class ArticleListManagedBean implements ContentListViewerManagedBean {
 		s.addScope(new SearchScope(scope));
 		SearchExpression expression = null;
 		
-		String localeString = "";
+		String localeString = CoreConstants.EMPTY;
 		SearchExpression namePatternExpression = s.compare(CompareOperator.LIKE, IWSlideConstants.PROPERTY_DISPLAY_NAME,"%"+localeString+".article");
 		expression = namePatternExpression;
 		
@@ -281,7 +303,7 @@ public class ArticleListManagedBean implements ContentListViewerManagedBean {
 			viewer.setShowDetailsCommand(isShowDetailsCommand().booleanValue());
 		}
 		
-		if(this.detailsViewerPath != null){
+		if (this.detailsViewerPath != null) {
 			viewer.setDetailsViewerPath(this.detailsViewerPath);
 			HtmlOutputLink moreLink = viewer.getEmptyMoreLink();
 			moreLink.getChildren().add(ArticleUtil.getBundle().getLocalizedText(this.LOCALIZEDKEY_MORE));

@@ -1,5 +1,5 @@
 /*
- * $Id: ArticleItemViewer.java,v 1.42 2008/04/29 09:35:33 valdas Exp $
+ * $Id: ArticleItemViewer.java,v 1.43 2008/04/30 14:31:05 valdas Exp $
  *
  * Copyright (C) 2004 Idega. All Rights Reserved.
  *
@@ -40,29 +40,28 @@ import com.idega.webface.WFHtml;
 import com.idega.webface.convert.WFTimestampConverter;
 
 /**
- * Last modified: $Date: 2008/04/29 09:35:33 $ by $Author: valdas $
+ * Last modified: $Date: 2008/04/30 14:31:05 $ by $Author: valdas $
  *
  * Displays the article item
  *
  * @author <a href="mailto:gummi@idega.com">Gudmundur Agust Saemundsson</a>
- * @version $Revision: 1.42 $
+ * @version $Revision: 1.43 $
  */
 public class ArticleItemViewer extends ContentItemViewer {
 	
-	//constants:
+	//	Constants:
 	private final static String ATTRIBUTE_AUTHOR = "author";
 	private final static String[] ATTRIBUTE_ARRAY = new String[] {ContentConstants.ATTRIBUTE_HEADLINE, ContentConstants.ATTRIBUTE_CREATION_DATE, ATTRIBUTE_AUTHOR,
 		ContentConstants.ATTRIBUTE_TEASER, ContentConstants.ATTRIBUTE_BODY};
 	private final static String facetIdPrefix = "article_";
 	private final static String styleClassPrefix = "article_";
 	private final static String DEFAULT_STYLE_CLASS = "article_item";
-	//instance variables:
+	
+	//	Instance variables:
 	private boolean headlineAsLink;
-	private String datePattern;
 	private boolean showDate = true;
 	private boolean showTime = true;
-	private boolean cacheEnabled=true;
-	
+	private boolean cacheEnabled = true;
 	private boolean showAuthor = true;
 	private boolean showCreationDate = true;
 	private boolean showHeadline = true;
@@ -70,6 +69,9 @@ public class ArticleItemViewer extends ContentItemViewer {
 	private boolean showBody = true;
 	private boolean addCommentsViewer = false;
 	
+	private String datePattern;
+	
+	//	Other
 	private boolean canModifyRenderingAttribute = false;
 	private boolean partOfArticlesList = false;
 	private boolean canInitAnyField = true;
@@ -470,28 +472,40 @@ public class ArticleItemViewer extends ContentItemViewer {
 		this.addCommentsViewer = addCommentsViewer;
 	}
 	
+	private void prepareToActAsCustomArticleViewer(String resourcePath, boolean canInitAnyField) {
+		setResourcePath(resourcePath);
+		setShowBody(true);
+		setShowHeadline(true);
+		setShowTeaser(false);
+		this.canInitAnyField = canInitAnyField;
+	}
+	
 	@Override
 	public void encodeBegin(FacesContext context) throws IOException {
 		IWContext iwc = IWContext.getIWContext(context);
 		
-		String viewerIdentifier = iwc.getParameter(ContentConstants.CONTENT_ITEM_VIEWER_IDENTIFIER_PARAMETER);
 		String articileItemViewerFilter = getArticleItemViewerFilter();
-		if (viewerIdentifier != null && articileItemViewerFilter == null) {
-			canInitAnyField = false;
-		}
-		else {
-			if (articileItemViewerFilter != null) {
-				if (viewerIdentifier != null && !viewerIdentifier.equals(articileItemViewerFilter)) {
-					canInitAnyField = false;
+		String viewerIdentifierFromRequest = iwc.getParameter(ContentConstants.CONTENT_ITEM_VIEWER_IDENTIFIER_PARAMETER);
+		if (viewerIdentifierFromRequest != null) {
+			//	Identifier is set in request! Checking if it matches with object's parameter
+			if (articileItemViewerFilter != null && viewerIdentifierFromRequest.equals(articileItemViewerFilter)) {
+				//	Identifiers match, checking if new resource path is provided
+				String resourcePathFromRequest = iwc.getParameter(ContentViewer.PARAMETER_CONTENT_RESOURCE);
+				if (resourcePathFromRequest != null) {
+					//	New resource path needs to be set
+					prepareToActAsCustomArticleViewer(resourcePathFromRequest, true);
 				}
 			}
 		}
-		
-		String resourcePathFromRequest = iwc.getParameter(ContentViewer.PARAMETER_CONTENT_RESOURCE);
-		if (resourcePathFromRequest != null) {
-			String resourcePath = getResourcePath();
-			if (resourcePath != null && !resourcePathFromRequest.equals(resourcePath)) {
-				canInitAnyField = false;
+		else {
+			//	No identifier set, checking if resource path is provided in request
+			String resourcePathFromRequest = iwc.getParameter(ContentViewer.PARAMETER_CONTENT_RESOURCE);
+			if (resourcePathFromRequest != null) {
+				//	New resource path is set
+				String resourcePath = getResourcePath();
+				if (resourcePath != null && !resourcePathFromRequest.equals(resourcePath) && viewerIdentifierFromRequest == null) {
+					prepareToActAsCustomArticleViewer(resourcePath, false);
+				}
 			}
 		}
 		
