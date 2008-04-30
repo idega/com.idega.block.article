@@ -1,5 +1,5 @@
 /*
- * $Id: ArticleListManagedBean.java,v 1.26 2008/04/30 15:55:45 valdas Exp $
+ * $Id: ArticleListManagedBean.java,v 1.27 2008/04/30 16:08:42 valdas Exp $
  * Created on 27.1.2005
  *
  * Copyright (C) 2005 Idega Software hf. All Rights Reserved.
@@ -53,10 +53,10 @@ import com.idega.util.IWTimestamp;
 
 /**
  * 
- *  Last modified: $Date: 2008/04/30 15:55:45 $ by $Author: valdas $
+ *  Last modified: $Date: 2008/04/30 16:08:42 $ by $Author: valdas $
  * 
  * @author <a href="mailto:gummi@idega.com">Gudmundur Agust Saemundsson</a>
- * @version $Revision: 1.26 $
+ * @version $Revision: 1.27 $
  */
 public class ArticleListManagedBean implements ContentListViewerManagedBean {
 
@@ -177,6 +177,7 @@ public class ArticleListManagedBean implements ContentListViewerManagedBean {
 				//	Identifiers do not match
 				return true;
 			}
+			//	Displaying selected article or not displaying at all
 			return resourcePathFromRequest == null ? true : article.getResourcePath().equals(resourcePathFromRequest);
 		}
 		else {

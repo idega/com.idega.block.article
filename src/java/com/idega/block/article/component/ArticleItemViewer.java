@@ -1,5 +1,5 @@
 /*
- * $Id: ArticleItemViewer.java,v 1.44 2008/04/30 15:50:16 valdas Exp $
+ * $Id: ArticleItemViewer.java,v 1.45 2008/04/30 16:08:42 valdas Exp $
  *
  * Copyright (C) 2004 Idega. All Rights Reserved.
  *
@@ -40,12 +40,12 @@ import com.idega.webface.WFHtml;
 import com.idega.webface.convert.WFTimestampConverter;
 
 /**
- * Last modified: $Date: 2008/04/30 15:50:16 $ by $Author: valdas $
+ * Last modified: $Date: 2008/04/30 16:08:42 $ by $Author: valdas $
  *
  * Displays the article item
  *
  * @author <a href="mailto:gummi@idega.com">Gudmundur Agust Saemundsson</a>
- * @version $Revision: 1.44 $
+ * @version $Revision: 1.45 $
  */
 public class ArticleItemViewer extends ContentItemViewer {
 	
@@ -484,13 +484,17 @@ public class ArticleItemViewer extends ContentItemViewer {
 	public void encodeBegin(FacesContext context) throws IOException {
 		IWContext iwc = IWContext.getIWContext(context);
 		
+		String resourcePathFromRequest = iwc.getParameter(ContentViewer.PARAMETER_CONTENT_RESOURCE);
+		if (getResourcePath() == null && resourcePathFromRequest != null) {
+			setResourcePath(resourcePathFromRequest);
+		}
+		
 		String articileItemViewerFilter = getArticleItemViewerFilter();
 		String viewerIdentifierFromRequest = iwc.getParameter(ContentConstants.CONTENT_ITEM_VIEWER_IDENTIFIER_PARAMETER);
 		if (viewerIdentifierFromRequest != null) {
 			//	Identifier is set in request! Checking if it matches with object's parameter
 			if (articileItemViewerFilter != null && viewerIdentifierFromRequest.equals(articileItemViewerFilter)) {
 				//	Identifiers match, checking if new resource path is provided
-				String resourcePathFromRequest = iwc.getParameter(ContentViewer.PARAMETER_CONTENT_RESOURCE);
 				if (resourcePathFromRequest != null) {
 					//	New resource path needs to be set
 					prepareToActAsCustomArticleViewer(resourcePathFromRequest, true);
@@ -498,16 +502,17 @@ public class ArticleItemViewer extends ContentItemViewer {
 			}
 		}
 		else {
-			//	No identifier set, checking if resource path is provided in request
-			String resourcePathFromRequest = iwc.getParameter(ContentViewer.PARAMETER_CONTENT_RESOURCE);
-			if (resourcePathFromRequest != null) {
-				//	New resource path is set
-				String resourcePath = getResourcePath();
-				if (resourcePath == null) {
-					prepareToActAsCustomArticleViewer(resourcePathFromRequest, true);
-				}
-				else if (!resourcePathFromRequest.equals(resourcePath) && viewerIdentifierFromRequest == null) {
-					prepareToActAsCustomArticleViewer(resourcePath, false);
+			if (articileItemViewerFilter == null) {
+				//	No identifier set, checking if resource path is provided in request
+				if (resourcePathFromRequest != null) {
+					//	New resource path is set
+					String resourcePath = getResourcePath();
+					if (resourcePath == null) {
+						prepareToActAsCustomArticleViewer(resourcePathFromRequest, true);
+					}
+					else if (!resourcePathFromRequest.equals(resourcePath) && viewerIdentifierFromRequest == null) {
+						prepareToActAsCustomArticleViewer(resourcePath, false);
+					}
 				}
 			}
 		}
