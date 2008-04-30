@@ -1,5 +1,5 @@
 /*
- * $Id: ArticleItemViewer.java,v 1.43 2008/04/30 14:31:05 valdas Exp $
+ * $Id: ArticleItemViewer.java,v 1.44 2008/04/30 15:50:16 valdas Exp $
  *
  * Copyright (C) 2004 Idega. All Rights Reserved.
  *
@@ -40,12 +40,12 @@ import com.idega.webface.WFHtml;
 import com.idega.webface.convert.WFTimestampConverter;
 
 /**
- * Last modified: $Date: 2008/04/30 14:31:05 $ by $Author: valdas $
+ * Last modified: $Date: 2008/04/30 15:50:16 $ by $Author: valdas $
  *
  * Displays the article item
  *
  * @author <a href="mailto:gummi@idega.com">Gudmundur Agust Saemundsson</a>
- * @version $Revision: 1.43 $
+ * @version $Revision: 1.44 $
  */
 public class ArticleItemViewer extends ContentItemViewer {
 	
@@ -503,7 +503,10 @@ public class ArticleItemViewer extends ContentItemViewer {
 			if (resourcePathFromRequest != null) {
 				//	New resource path is set
 				String resourcePath = getResourcePath();
-				if (resourcePath != null && !resourcePathFromRequest.equals(resourcePath) && viewerIdentifierFromRequest == null) {
+				if (resourcePath == null) {
+					prepareToActAsCustomArticleViewer(resourcePathFromRequest, true);
+				}
+				else if (!resourcePathFromRequest.equals(resourcePath) && viewerIdentifierFromRequest == null) {
 					prepareToActAsCustomArticleViewer(resourcePath, false);
 				}
 			}
