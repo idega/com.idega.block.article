@@ -68,6 +68,7 @@ public class CommentsEngineBean extends IBOSessionBean implements CommentsEngine
 	
 	private volatile BuilderService builder = null;
 
+	@SuppressWarnings("unchecked")
 	public boolean addComment(String user, String subject, String email, String body, String uri, boolean notify, String id, String instanceId) {
 		if (uri == null) {
 			closeLoadingMessage();
@@ -153,6 +154,7 @@ public class CommentsEngineBean extends IBOSessionBean implements CommentsEngine
 		return true;
 	}
 	
+	@SuppressWarnings("unchecked")
 	private List<String> getEmails(Feed comments, String email) {
 		List<String> emails = new ArrayList<String>();
 		if (comments == null) {
@@ -254,6 +256,7 @@ public class CommentsEngineBean extends IBOSessionBean implements CommentsEngine
 		return true;
 	}
 	
+	@SuppressWarnings("unchecked")
 	private List<Entry> initEntries(List oldEntries) {
 		if (oldEntries == null) {
 			return new ArrayList<Entry>();
@@ -360,6 +363,7 @@ public class CommentsEngineBean extends IBOSessionBean implements CommentsEngine
 		return script;
 	}
 	
+	@SuppressWarnings("unchecked")
 	private Collection getAllCurrentPageSessions() {
 		WebContext wctx = WebContextFactory.get();
 		if (wctx == null) {
@@ -389,6 +393,7 @@ public class CommentsEngineBean extends IBOSessionBean implements CommentsEngine
 		return getCommentsList(uri, true);
 	}
 	
+	@SuppressWarnings("unchecked")
 	private List<ArticleComment> getCommentsList(String uri, boolean addNulls) {
 		List<ArticleComment> fake = new ArrayList<ArticleComment>();
 		if (uri == null) {
@@ -536,6 +541,7 @@ public class CommentsEngineBean extends IBOSessionBean implements CommentsEngine
 		return null;
 	}
 	
+	@SuppressWarnings("unchecked")
 	private void putFeedToCache(Feed comments, String uri, IWContext iwc) {
 		if (comments == null || uri == null) {
 			return;
@@ -557,6 +563,7 @@ public class CommentsEngineBean extends IBOSessionBean implements CommentsEngine
 		commentsMap.put(uri, comments);
 	}
 	
+	@SuppressWarnings("unchecked")
 	private Feed getFeedFromCache(String uri, IWContext iwc) {
 		if (uri == null) {
 			return null;
@@ -633,6 +640,7 @@ public class CommentsEngineBean extends IBOSessionBean implements CommentsEngine
 		return executeScriptForAllPages(script);
 	}
 	
+	@SuppressWarnings("unchecked")
 	private Map getArticlesCache(IWContext iwc) {
 		if (iwc == null) {
 			return null;
@@ -644,6 +652,7 @@ public class CommentsEngineBean extends IBOSessionBean implements CommentsEngine
 		return cache.getCacheMap();
 	}
 	
+	@SuppressWarnings("unchecked")
 	private void decacheComponent(String cacheKey, IWContext iwc) {
 		if (cacheKey == null || iwc == null) {
 			return;
@@ -654,19 +663,26 @@ public class CommentsEngineBean extends IBOSessionBean implements CommentsEngine
 			return;
 		}
 		
-		List<String> keys = new ArrayList<String>();
-		keys.add(cacheKey);
-		String[] keyParts = cacheKey.split("edit");
-		if (keyParts != null) {
-			if (keyParts.length == 2) {
-				keys.add(new StringBuffer(keyParts[0]).append("view").append(keyParts[1]).toString());
-			}
+		try {
+			articles.clear();
+		} catch (UnsupportedOperationException e) {
+			e.printStackTrace();
+			clearAllCaches(iwc);
 		}
-		for (int i = 0; i < keys.size(); i++) {
-			if (articles.get(keys.get(i)) != null) {
-				articles.remove(keys.get(i));
-			}
+	}
+	
+	private void clearAllCaches(IWContext iwc) {
+		IWCacheManager2 cacheManager = null;
+		try {
+			cacheManager = IWCacheManager2.getInstance(iwc.getIWMainApplication());
+		} catch(Exception e) {
+			e.printStackTrace();
 		}
+		if (cacheManager == null) {
+			return;
+		}
+		
+		cacheManager.reset();
 	}
 	
 	public boolean hideOrShowComments() {
@@ -677,6 +693,7 @@ public class CommentsEngineBean extends IBOSessionBean implements CommentsEngine
 		return true; // Need to reload page (disable component)
 	}
 	
+	@SuppressWarnings("unchecked")
 	private boolean executeScriptForAllPages(ScriptBuffer script) {
 		Collection allPages = getAllCurrentPageSessions();
 		if (allPages == null) {
@@ -698,7 +715,7 @@ public class CommentsEngineBean extends IBOSessionBean implements CommentsEngine
 	 * Closes loading layer in client's browser
 	 */
 	private void closeLoadingMessage() {
-		ScriptBuffer script = new ScriptBuffer("closeLoadingMessage();");
+		ScriptBuffer script = new ScriptBuffer("closeAllLoadingMessages();");
 		executeScriptForAllPages(script);
 	}
 	
