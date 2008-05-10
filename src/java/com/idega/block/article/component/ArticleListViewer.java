@@ -1,5 +1,5 @@
 /*
- * $Id: ArticleListViewer.java,v 1.23 2008/04/29 10:59:51 valdas Exp $
+ * $Id: ArticleListViewer.java,v 1.24 2008/05/10 16:10:42 valdas Exp $
  * Created on 24.1.2005
  *
  * Copyright (C) 2005 Idega Software hf. All Rights Reserved.
@@ -42,10 +42,10 @@ import com.idega.util.PresentationUtil;
  * for the article module.
  * </p>
  * 
- *  Last modified: $Date: 2008/04/29 10:59:51 $ by $Author: valdas $
+ *  Last modified: $Date: 2008/05/10 16:10:42 $ by $Author: valdas $
  * 
  * @author <a href="mailto:tryggvi@idega.com">Tryggvi Larusson</a>
- * @version $Revision: 1.23 $
+ * @version $Revision: 1.24 $
  */
 public class ArticleListViewer extends ContentItemListViewer {
 
@@ -241,7 +241,7 @@ public class ArticleListViewer extends ContentItemListViewer {
 	}
 	
 	private void addCommentsController(IWContext iwc, CommentsViewer comments) {
-		if (!ContentUtil.hasContentEditorRoles(iwc) || !ArticleUtil.isPageTypeBlog(iwc)) {
+		if (!needAddCommentsStuff(iwc, true)) {
 			return;
 		}
 		
@@ -295,24 +295,18 @@ public class ArticleListViewer extends ContentItemListViewer {
 	}
 	
 	private void addCommentsScript(IWContext iwc, CommentsViewer comments) {
-		if (ArticleUtil.isPageTypeBlog(iwc)) {
-			boolean addComments = showComments;
-			if (!addComments) {
-				addComments = (iwc.hasRole(StandardRoles.ROLE_KEY_AUTHOR) || iwc.hasRole(StandardRoles.ROLE_KEY_EDITOR));
+		if (needAddCommentsStuff(iwc, false)) {
+			List<String> sources = comments.getJavaScriptSources(iwc);
+			List<String> actions = comments.getJavaScriptActions();
+			if (CoreUtil.isSingleComponentRenderingProcess(iwc)) {
+				Layer script = new Layer();
+				script.add(PresentationUtil.getJavaScriptSourceLines(sources));
+				script.add(PresentationUtil.getJavaScriptActions(actions));
+				getFacets().put(ContentItemViewer.FACET_COMMENTS_SCRIPTS, script);
 			}
-			if (addComments) {
-				List<String> sources = comments.getJavaScriptSources(iwc);
-				List<String> actions = comments.getJavaScriptActions();
-				if (CoreUtil.isSingleComponentRenderingProcess(iwc)) {
-					Layer script = new Layer();
-					script.add(PresentationUtil.getJavaScriptSourceLines(sources));
-					script.add(PresentationUtil.getJavaScriptActions(actions));
-					getFacets().put(ContentItemViewer.FACET_COMMENTS_SCRIPTS, script);
-				}
-				else {
-					PresentationUtil.addJavaScriptSourcesLinesToHeader(iwc, sources);
-					PresentationUtil.addJavaScriptActionsToBody(iwc, actions);
-				}
+			else {
+				PresentationUtil.addJavaScriptSourcesLinesToHeader(iwc, sources);
+				PresentationUtil.addJavaScriptActionsToBody(iwc, actions);
 			}
 		}
 	}
@@ -359,18 +353,34 @@ public class ArticleListViewer extends ContentItemListViewer {
 		super.encodeChildren(context);
 	}
 	
+	private boolean needAddCommentsStuff(IWContext iwc, boolean forController) {
+		boolean contentEditor = (iwc.hasRole(StandardRoles.ROLE_KEY_AUTHOR) || iwc.hasRole(StandardRoles.ROLE_KEY_EDITOR));
+		if (!showComments && !contentEditor) {
+			//	Not editor and property to do not show comments
+			return false;
+		}
+		
+		if (forController) {
+			if (contentEditor) {
+				return ArticleUtil.isPageTypeBlog(iwc) ? true : showComments;
+			}
+			return false;
+		}
+		
+		if (contentEditor && ArticleUtil.isPageTypeBlog(iwc)) {
+			//	Always showing comments if page is blog type and user has editor rights
+			return true;
+		}
+
+		return showComments;
+	}
+	
 	@Override
 	protected void addContentItemViewer(ContentItemViewer viewer) {
 		FacesContext context = FacesContext.getCurrentInstance();
 		IWContext iwc = IWContext.getIWContext(context);
-		boolean addComments = false;
-		if (ArticleUtil.isPageTypeBlog(iwc) && ContentUtil.hasContentEditorRoles(iwc)) {
-			addComments = true;
-		}
-		else {
-			addComments = isShowComments();
-		}
-		if (addComments) {
+		
+		if (needAddCommentsStuff(iwc, false)) {
 			ArticleItemViewer article = null;
 			if (viewer instanceof ArticleItemViewer) {
 				article = (ArticleItemViewer) viewer;
