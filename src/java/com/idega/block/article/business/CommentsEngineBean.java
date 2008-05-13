@@ -127,8 +127,8 @@ public class CommentsEngineBean extends IBOSessionBean implements CommentsEngine
 			}
 		}
 
-		Thread scriptCaller = new Thread(new ScriptCaller(new ScriptBuffer("getUpdatedCommentsFromServer();"), true));
-		scriptCaller.run();
+		ScriptCaller scriptCaller = new ScriptCaller(wctx, new ScriptBuffer("getUpdatedCommentsFromServer();"), true);
+		scriptCaller.run();	//	Not thread!
 		
 		return true;
 	}
