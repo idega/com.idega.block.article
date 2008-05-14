@@ -20,11 +20,15 @@ import org.directwebremoting.impl.DefaultScriptSession;
 
 import com.idega.block.article.ArticleCacher;
 import com.idega.block.article.bean.ArticleComment;
+import com.idega.block.article.component.ArticleItemViewer;
+import com.idega.block.article.component.ArticleListViewer;
 import com.idega.block.article.component.CommentsViewer;
 import com.idega.block.rss.business.RSSBusiness;
+import com.idega.builder.business.BuilderLogicWrapper;
 import com.idega.business.IBOLookup;
 import com.idega.business.IBOLookupException;
 import com.idega.business.IBOSessionBean;
+import com.idega.business.SpringBeanLookup;
 import com.idega.content.bean.ContentItemFeedBean;
 import com.idega.content.business.ContentConstants;
 import com.idega.content.business.ContentUtil;
@@ -113,21 +117,35 @@ public class CommentsEngineBean extends IBOSessionBean implements CommentsEngine
 			return false;
 		}
 		
-		WebContext wctx = WebContextFactory.get();
-		BuilderService service = getBuilderService();
-		if (wctx != null && service != null) {
-			String pageKey  = service.getPageKeyByURI(wctx.getCurrentPage());
-			if (pageKey != null) {
-				if (ArticleUtil.isPageTypeBlog(service.getICPage(pageKey))) {
-					Map articles = getArticlesCache(iwc);
-					if (articles != null) {
-						articles.clear();
-					}
-				}
+		WebContext webContext = WebContextFactory.get();
+		
+		//	Clearing cache for articles
+		boolean cleanCache = false;
+		BuilderLogicWrapper builder = (BuilderLogicWrapper) SpringBeanLookup.getInstance().getSpringBean(iwc.getServletContext(), CoreConstants.SPRING_BEAN_NAME_BUILDER_LOGIC_WRAPPER);
+		if (builder == null) {
+			cleanCache = false;
+		}
+		else {
+			BuilderService service = builder.getBuilderService(iwc);
+			String pageKey = service.getPageKeyByURI(webContext.getCurrentPage());
+			List<String> listViewers = service.getModuleId(pageKey, ArticleListViewer.class.getName());
+			List<String> itemViewers = service.getModuleId(pageKey, ArticleItemViewer.class.getName());
+			
+			if (listViewers != null && !listViewers.isEmpty()) {
+				cleanCache = true;
+			}
+			if (itemViewers != null && !itemViewers.isEmpty()) {
+				cleanCache = true;
+			}
+		}
+		if (cleanCache) {
+			Map articles = getArticlesCache(iwc);
+			if (articles != null) {
+				articles.clear();
 			}
 		}
 
-		ScriptCaller scriptCaller = new ScriptCaller(wctx, new ScriptBuffer("getUpdatedCommentsFromServer();"), true);
+		ScriptCaller scriptCaller = new ScriptCaller(webContext, new ScriptBuffer("getUpdatedCommentsFromServer();"), true);
 		scriptCaller.run();	//	Not thread!
 		
 		return true;
@@ -649,7 +667,14 @@ public class CommentsEngineBean extends IBOSessionBean implements CommentsEngine
 		if (cache == null) {
 			return null;
 		}
-		return cache.getCacheMap();
+		
+		try {
+			return cache.getCacheMap();
+		} catch(Exception e) {
+			e.printStackTrace();
+		}
+		
+		return null;
 	}
 	
 	@SuppressWarnings("unchecked")
