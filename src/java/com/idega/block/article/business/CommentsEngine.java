@@ -1,13 +1,13 @@
 package com.idega.block.article.business;
 
 
+import java.rmi.RemoteException;
+import java.sql.Timestamp;
 import java.util.List;
 
 import com.idega.block.article.bean.ArticleComment;
 import com.idega.business.IBOSession;
 import com.idega.presentation.IWContext;
-
-import java.rmi.RemoteException;
 
 public interface CommentsEngine extends IBOSession {
 	/**
@@ -69,4 +69,6 @@ public interface CommentsEngine extends IBOSession {
 	 * @see com.idega.block.article.business.CommentsEngineBean#getCommentsFromUris
 	 */
 	public List<List<ArticleComment>> getCommentsFromUris(List<String> uris);
+	
+	public boolean initCommentsFeed(IWContext iwc, String uri, String user, Timestamp date, String language);
 }

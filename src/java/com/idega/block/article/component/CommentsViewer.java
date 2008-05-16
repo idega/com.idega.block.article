@@ -7,6 +7,8 @@ import java.util.List;
 import javax.faces.component.UIComponent;
 import javax.faces.context.FacesContext;
 
+import org.apache.webdav.lib.WebdavResource;
+
 import com.idega.block.article.business.ArticleConstants;
 import com.idega.block.article.business.CommentsEngine;
 import com.idega.block.web2.business.Web2Business;
@@ -19,7 +21,9 @@ import com.idega.content.presentation.ContentViewer;
 import com.idega.content.themes.helpers.business.ThemesHelper;
 import com.idega.core.accesscontrol.business.NotLoggedOnException;
 import com.idega.core.builder.business.BuilderService;
+import com.idega.idegaweb.IWApplicationContext;
 import com.idega.idegaweb.IWBundle;
+import com.idega.idegaweb.IWResourceBundle;
 import com.idega.idegaweb.IWUserContext;
 import com.idega.presentation.Block;
 import com.idega.presentation.IWContext;
@@ -29,8 +33,11 @@ import com.idega.presentation.Script;
 import com.idega.presentation.text.Link;
 import com.idega.presentation.text.Text;
 import com.idega.presentation.ui.CheckBox;
+import com.idega.slide.business.IWSlideService;
+import com.idega.user.data.User;
 import com.idega.util.CoreConstants;
 import com.idega.util.CoreUtil;
+import com.idega.util.IWTimestamp;
 import com.idega.util.PresentationUtil;
 
 public class CommentsViewer extends Block {
@@ -59,6 +66,8 @@ public class CommentsViewer extends Block {
 	
 	private static final String SEPARATOR = "', '";
 	
+	private CommentsEngine commentsEngine = null;
+	
 	@Override
 	public void main(IWContext iwc) {
 		boolean hasValidRights = ContentUtil.hasContentEditorRoles(iwc);
@@ -71,11 +80,8 @@ public class CommentsViewer extends Block {
 		if (linkToComments == null) {
 			if (!findLinkToComments(iwc.getParameter(ContentViewer.PARAMETER_CONTENT_RESOURCE), iwc.getParameter(ContentConstants.CONTENT_ITEM_VIEWER_IDENTIFIER_PARAMETER))) {
 				if (isStandAlone(iwc)) {
-					CommentsEngine engine = null;
-					try {
-						engine = (CommentsEngine) IBOLookup.getSessionInstance(iwc, CommentsEngine.class);
-					} catch (IBOLookupException e) {
-						e.printStackTrace();
+					CommentsEngine engine = getCommentsEngine(iwc);
+					if (engine == null) {
 						return;
 					}
 					linkToComments = engine.getFixedCommentsUri(iwc, null, moduleId);
@@ -88,6 +94,7 @@ public class CommentsViewer extends Block {
 		
 		ThemesHelper helper = ThemesHelper.getInstance();
 		IWBundle bundle = getBundle(iwc);
+		IWResourceBundle iwrb = bundle.getResourceBundle(iwc);
 		
 		String commentsId = moduleId;
 		
@@ -130,7 +137,7 @@ public class CommentsViewer extends Block {
 		// Comments label
 		Layer articleComments = new Layer();
 		articleComments.setId(new StringBuffer(commentsId).append("article_comments_link_label_container").toString());
-		StringBuffer comments = new StringBuffer(bundle.getLocalizedString("comments"));
+		StringBuffer comments = new StringBuffer(iwrb.getLocalizedString("comments", "Comments"));
 		comments.append(ContentConstants.SPACE).append("(<span id='").append(commentsId);
 		comments.append("contentItemCount' class='contentItemCountStyle'>").append(commentsCount).append("</span>)");
 		Link commentsLabel = new Link(comments.toString(), "javascript:void(0)");
@@ -143,32 +150,76 @@ public class CommentsViewer extends Block {
 		addSimpleSpace(articleComments);
 		
 		// Link - Atom feed
-		if (commentsCount > 0) {
-			Image atom = new Image(linkToAtomFeedImage.toString(), bundle.getLocalizedString("atom_feed"));
-			Link linkToFeed = new Link();
-			linkToFeed.setId(new StringBuffer(commentsId).append("article_comments_link_to_feed").toString());
-			linkToFeed.setImage(atom);
-			linkToFeed.setURL(helper.getFullServerName(iwc) + CoreConstants.WEBDAV_SERVLET_URI + linkToComments);
-			articleComments.add(linkToFeed);
-			
-			// Delete comments image
-			if (hasValidRights) {
-				addSimpleSpace(articleComments);
-				String deleteImage = new StringBuffer(bundle.getResourcesPath()).append(DELETE_IMAGE).toString();
-				Image delete = new Image(deleteImage, bundle.getLocalizedString("delete_all_comments"));
-				delete.setStyleClass("deleteCommentsImage");
-				delete.setId(new StringBuffer(commentsId).append("delete_article_comments").toString());
-				StringBuffer deleteAction = new StringBuffer("deleteComments('").append(commentsId).append("', null, '");
-				deleteAction.append(linkToComments).append("'); return false;");
-				delete.setOnClick(deleteAction.toString());
-				articleComments.add(delete);
-			}
+		Image atom = new Image(linkToAtomFeedImage.toString(), iwrb.getLocalizedString("atom_feed", "Atom feed"));
+		Link linkToFeed = new Link();
+		linkToFeed.setId(new StringBuffer(commentsId).append("article_comments_link_to_feed").toString());
+		linkToFeed.setImage(atom);
+		makeCommentsFeedIfNotExists(iwc);
+		linkToFeed.setURL(helper.getFullServerName(iwc) + CoreConstants.WEBDAV_SERVLET_URI + linkToComments);
+		articleComments.add(linkToFeed);
+		
+		// Delete comments image
+		if (hasValidRights) {
+			addSimpleSpace(articleComments);
+			String deleteImage = new StringBuffer(bundle.getResourcesPath()).append(DELETE_IMAGE).toString();
+			Image delete = new Image(deleteImage, iwrb.getLocalizedString("delete_all_comments", "Delete all comments"));
+			delete.setStyleClass("deleteCommentsImage");
+			delete.setId(new StringBuffer(commentsId).append("delete_article_comments").toString());
+			StringBuffer deleteAction = new StringBuffer("deleteComments('").append(commentsId).append("', null, '");
+			deleteAction.append(linkToComments).append("'); return false;");
+			delete.setOnClick(deleteAction.toString());
+			articleComments.add(delete);
 		}
 		
 		container.add(articleComments);
 		
 		// Add comment block
 		container.add(getAddCommentBlock(iwc, commentsId));
+	}
+	
+	private void makeCommentsFeedIfNotExists(IWContext iwc) {
+		IWSlideService slide = null;
+		try {
+			slide = (IWSlideService) IBOLookup.getServiceInstance(iwc, IWSlideService.class);
+		} catch (IBOLookupException e) {
+			e.printStackTrace();
+		}
+		if (slide == null) {
+			return;
+		}
+		
+		boolean makeEmptyComments = false;
+		WebdavResource commentsFeed = null;
+		try {
+			commentsFeed = slide.getWebdavResourceAuthenticatedAsRoot(CoreConstants.WEBDAV_SERVLET_URI + linkToComments);
+		} catch (Exception e) {
+			makeEmptyComments = true;
+		}
+		if (commentsFeed == null) {
+			makeEmptyComments = true;
+		}
+		if (!makeEmptyComments) {
+			makeEmptyComments = !commentsFeed.getExistence();
+		}
+		
+		if (!makeEmptyComments) {
+			return;
+		}
+		
+		CommentsEngine commentsEngine = getCommentsEngine(iwc);
+		if (commentsEngine == null) {
+			return;
+		}
+		
+		String user = getResourceBundle(iwc).getLocalizedString("anonymous", "Anonymous");
+		User currentUser = null;
+		try {
+			currentUser = iwc.getCurrentUser();
+		} catch(Exception e) {}
+		if (currentUser != null) {
+			user = currentUser.getName();
+		}
+		commentsEngine.initCommentsFeed(iwc, linkToComments, user, IWTimestamp.getTimestampRightNow(), ThemesHelper.getInstance().getCurrentLanguage(iwc));
 	}
 	
 	protected List<String> getJavaScriptSources(IWContext iwc) {
@@ -199,6 +250,7 @@ public class CommentsViewer extends Block {
 		container.add(new Text(ContentConstants.SPACE));
 	}
 	
+	@SuppressWarnings("unchecked")
 	private boolean findLinkToComments(String resourcePathFromRequest, String viewerIdentifier) {
 		UIComponent region = this.getParent();
 		if (region == null) {
@@ -303,44 +355,53 @@ public class CommentsViewer extends Block {
 	}
 	
 	private UIComponent getAddCommentBlock(IWContext iwc, String commentsId) {
-		IWBundle bundle = getBundle(iwc);
+		IWResourceBundle iwrb = getResourceBundle(iwc);
 		
 		Layer addComments = new Layer();
 		addComments.setId(new StringBuffer(commentsId).append("add_comment_block").toString());
-		Link label = new Link(bundle.getLocalizedString("add_your_comment"), "javascript:void(0)");
-		String user = bundle.getLocalizedString("name");
-		String subject = bundle.getLocalizedString("subject");
-		String comment = bundle.getLocalizedString("comment");
-		String posted = bundle.getLocalizedString("posted");
-		String send = bundle.getLocalizedString("send");
-		String sending = bundle.getLocalizedString("sending");
+		Link label = new Link(iwrb.getLocalizedString("add_your_comment", "Add your comment"), "javascript:void(0)");
+		String user = iwrb.getLocalizedString("name", "Name");
+		String subject = iwrb.getLocalizedString("subject", "Subject");
+		String comment = iwrb.getLocalizedString("comment", "Comment");
+		String posted = iwrb.getLocalizedString("posted", "Posted");
+		String send = iwrb.getLocalizedString("send", "Send");
+		String sending = iwrb.getLocalizedString("sending", "Sending...");
 		String loggedUser = null;
 		try {
 			loggedUser = iwc.getCurrentUser().getName();
 		} catch (NotLoggedOnException e) {
-			loggedUser = bundle.getLocalizedString("anonymous");
+			loggedUser = iwrb.getLocalizedString("anonymous", "Anonymous");
 		}
 		
 		StringBuffer action = new StringBuffer("addCommentPanel('").append(addComments.getId()).append(SEPARATOR);
 		action.append(linkToComments).append(SEPARATOR).append(user).append(SEPARATOR).append(subject).append(SEPARATOR);
 		action.append(comment).append(SEPARATOR).append(posted).append(SEPARATOR).append(send).append(SEPARATOR);
 		action.append(sending).append(SEPARATOR).append(loggedUser).append(SEPARATOR);
-		action.append(bundle.getLocalizedString("email")).append(SEPARATOR);
-		action.append(bundle.getLocalizedString("comment_form")).append("', ").append(isForumPage);
+		action.append(iwrb.getLocalizedString("email", "Email")).append(SEPARATOR);
+		action.append(iwrb.getLocalizedString("comment_form", "Comment form")).append("', ").append(isForumPage);
 		action.append(", '").append(commentsId).append("', '").append(moduleId).append("'); return false;");
 		label.setOnClick(action.toString());
 		addComments.add(label);
 		return addComments;
 	}
 	
+	private CommentsEngine getCommentsEngine(IWApplicationContext iwac) {
+		if (commentsEngine == null) {
+			try {
+				commentsEngine = (CommentsEngine) IBOLookup.getServiceInstance(iwac, CommentsEngine.class);
+			} catch (IBOLookupException e) {
+				e.printStackTrace();
+			}
+		}
+		return commentsEngine;
+	}
+	
 	private int getCommentsCount(IWContext iwc) {
-		CommentsEngine comments = null;
-		try {
-			comments = (CommentsEngine) IBOLookup.getServiceInstance(iwc, CommentsEngine.class);
-		} catch (IBOLookupException e) {
-			e.printStackTrace();
+		CommentsEngine comments = getCommentsEngine(iwc);
+		if (comments == null) {
 			return 0;
 		}
+		
 		try {
 			return comments.getCommentsCount(linkToComments);
 		} catch (RemoteException e) {

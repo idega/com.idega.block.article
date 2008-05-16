@@ -552,12 +552,15 @@ function getCommentsCallback(comments, id, linkToComments) {
 		id = GLOBAL_COMMENTS_MARK_ID;
 	}
 	
+	/*
 	if (comments.length == 0) {
 		removeAtomAndDeleteButtonsForComments(id);
 	}
 	else {
 		addAtomButtonForComments(id, linkToComments);
 	}
+	*/
+	
 	removeCommentsList(id);
 	for (var i = 0; i < comments.length; i++) {
 		addComment(i, comments[i], id, linkToComments);
