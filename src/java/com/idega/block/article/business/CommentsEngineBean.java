@@ -72,7 +72,6 @@ public class CommentsEngineBean extends IBOSessionBean implements CommentsEngine
 	
 	private volatile BuilderService builder = null;
 
-	@SuppressWarnings("unchecked")
 	public boolean addComment(String user, String subject, String email, String body, String uri, boolean notify, String id, String instanceId) {
 		Logger loggger = Logger.getLogger(CommentsEngineBean.class.getName());
 		String errorMessage = "Unable to add comment: '" + subject + "' by: " + user;
@@ -120,17 +119,7 @@ public class CommentsEngineBean extends IBOSessionBean implements CommentsEngine
 		sendNotification(comments, email, iwc);
 		
 		//	Clearing cache for articles (ALWAYS)
-		BuilderLogicWrapper builder = (BuilderLogicWrapper) SpringBeanLookup.getInstance().getSpringBean(iwc.getServletContext(), CoreConstants.SPRING_BEAN_NAME_BUILDER_LOGIC_WRAPPER);
-		Map articlesCache = null;
-		if (builder != null) {
-			articlesCache = getArticlesCache(iwc);
-		}
-		if (articlesCache == null) {
-			loggger.log(Level.WARNING, "Aticle cache is null, can not clear it!");
-		}
-		else {
-			articlesCache.clear();
-		}
+		clearArticleCache(iwc);
 
 		//	Updating clients with the newest comments
 		ScriptCaller scriptCaller = new ScriptCaller(WebContextFactory.get(), new ScriptBuffer("getUpdatedCommentsFromServer();"), true);
@@ -143,6 +132,21 @@ public class CommentsEngineBean extends IBOSessionBean implements CommentsEngine
 		}
 		
 		return true;
+	}
+	
+	@SuppressWarnings("unchecked")
+	private void clearArticleCache(IWContext iwc) {
+		BuilderLogicWrapper builder = (BuilderLogicWrapper) SpringBeanLookup.getInstance().getSpringBean(iwc.getServletContext(), CoreConstants.SPRING_BEAN_NAME_BUILDER_LOGIC_WRAPPER);
+		Map articlesCache = null;
+		if (builder != null) {
+			articlesCache = getArticlesCache(iwc);
+		}
+		if (articlesCache == null) {
+			Logger.getLogger(CommentsEngineBean.class.getName()).log(Level.WARNING, "Aticle cache is null, can not clear it!");
+		}
+		else {
+			articlesCache.clear();
+		}
 	}
 	
 	private boolean sendNotification(Feed comments, String email, IWContext iwc) {
@@ -802,10 +806,14 @@ public class CommentsEngineBean extends IBOSessionBean implements CommentsEngine
 			// Delete one comment
 			comments.setEntries(getUpdatedEntries(initEntries(comments.getEntries()), commentId));
 		}
+		
+		clearArticleCache(iwc);
+		
 		putFeedToCache(comments, linkToComments, iwc);
 		if (!uploadFeed(linkToComments, comments, iwc, true)) {
 			return null;
 		}
+		
 		List<String> params = new ArrayList<String>();
 		params.add(id);
 		params.add(linkToComments);
