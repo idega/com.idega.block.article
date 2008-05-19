@@ -590,3 +590,7 @@ form.editArticleForm .wf_block .articleCategories input {
 	margin: 0 !important;
 	margin-right: 8px !important;
 }
+
+a.articleCommentsAtomFeedLinkStyle {
+	padding-left: 5px;
+}

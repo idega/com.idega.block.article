@@ -37,6 +37,7 @@ import com.idega.core.builder.business.BuilderService;
 import com.idega.core.builder.business.BuilderServiceFactory;
 import com.idega.core.cache.IWCacheManager2;
 import com.idega.dwr.business.ScriptCaller;
+import com.idega.idegaweb.IWBundle;
 import com.idega.idegaweb.IWMainApplication;
 import com.idega.idegaweb.IWResourceBundle;
 import com.idega.presentation.IWContext;
@@ -756,8 +757,8 @@ public class CommentsEngineBean extends IBOSessionBean implements CommentsEngine
 			return info;
 		}
 		
-		try {		
-			String resourcePath = ArticleUtil.getBundle().getResourcesPath();
+		try {
+			IWBundle bundle = ArticleUtil.getBundle();
 			info.add(resourceBundle.getLocalizedString("posted", "Posted"));								// 0
 			info.add(resourceBundle.getLocalizedString("loading_comments", "Loading comments..."));			// 1
 			info.add(resourceBundle.getLocalizedString("atom_feed", "Atom Feed"));							// 2
@@ -767,13 +768,13 @@ public class CommentsEngineBean extends IBOSessionBean implements CommentsEngine
 			info.add(resourceBundle.getLocalizedString("no", "No"));										// 6
 			info.add(resourceBundle.getLocalizedString("enter_email_text", "Please enter your e-mail!"));	// 7
 			info.add(resourceBundle.getLocalizedString("saving", "Saving..."));								// 8
-			info.add(new StringBuffer(resourcePath).append(CommentsViewer.FEED_IMAGE).toString());			// 9
-			info.add(new StringBuffer(resourcePath).append(CommentsViewer.DELETE_IMAGE).toString());		// 10
+			info.add(bundle.getVirtualPathWithFileNameString(CommentsViewer.FEED_IMAGE));					// 9
+			info.add(bundle.getVirtualPathWithFileNameString(CommentsViewer.DELETE_IMAGE));					// 10
 			info.add(resourceBundle.getLocalizedString("deleting", "Deleting..."));							// 11
 			info.add(resourceBundle.getLocalizedString("are_you_sure", "Are you sure?"));					// 12
 			info.add(resourceBundle.getLocalizedString("delete_all_comments", "Delete comments"));			// 13
 			info.add(resourceBundle.getLocalizedString("delete_comment", "Delete this comment"));			// 14
-			info.add(new StringBuffer(resourcePath).append("/images/comment_delete.png").toString());		// 15
+			info.add(bundle.getVirtualPathWithFileNameString("images/comment_delete.png"));					// 15
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

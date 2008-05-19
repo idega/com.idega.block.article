@@ -42,8 +42,8 @@ import com.idega.util.PresentationUtil;
 
 public class CommentsViewer extends Block {
 	
-	public static final String FEED_IMAGE = "/images/feed.png";
-	public static final String DELETE_IMAGE = "/images/comments_delete.png";
+	public static final String FEED_IMAGE = "images/feed.png";
+	public static final String DELETE_IMAGE = "images/comments_delete.png";
 	private static final String COMMENTS_BLOCK_ID = "comments_block";
 	private static final String SHOW_COMMENTS_PROPERTY = "showCommentsForAllUsers";
 	
@@ -119,8 +119,7 @@ public class CommentsViewer extends Block {
 		}
 		
 		int commentsCount = getCommentsCount(iwc);
-		StringBuffer linkToAtomFeedImage = new StringBuffer(bundle.getResourcesPath());
-		linkToAtomFeedImage.append(FEED_IMAGE);
+		String linkToAtomFeedImage = bundle.getVirtualPathWithFileNameString(FEED_IMAGE);
 		
 		if (!isUsedInArticleList()) {
 			// JavaScript
@@ -137,21 +136,18 @@ public class CommentsViewer extends Block {
 		// Comments label
 		Layer articleComments = new Layer();
 		articleComments.setId(new StringBuffer(commentsId).append("article_comments_link_label_container").toString());
-		StringBuffer comments = new StringBuffer(iwrb.getLocalizedString("comments", "Comments"));
-		comments.append(ContentConstants.SPACE).append("(<span id='").append(commentsId);
-		comments.append("contentItemCount' class='contentItemCountStyle'>").append(commentsCount).append("</span>)");
-		Link commentsLabel = new Link(comments.toString(), "javascript:void(0)");
+		
+		Link link = new Link(new StringBuffer(iwrb.getLocalizedString("comments", "Comments")).append("(").append(commentsCount).append(")").toString(), "javascript:void(0)");
+		link.setId(commentsId + "CommentsLabelWithCount");
 		StringBuffer getCommentsAction = new StringBuffer("getCommentsList('").append(linkToComments).append(SEPARATOR);
 		getCommentsAction.append(commentsId).append("'); return false;");
-		commentsLabel.setOnClick(getCommentsAction.toString());
-		articleComments.add(commentsLabel);
-		
-		// Simple space
-		addSimpleSpace(articleComments);
+		link.setOnClick(getCommentsAction.toString());
+		articleComments.add(link);
 		
 		// Link - Atom feed
-		Image atom = new Image(linkToAtomFeedImage.toString(), iwrb.getLocalizedString("atom_feed", "Atom feed"));
+		Image atom = new Image(linkToAtomFeedImage, iwrb.getLocalizedString("atom_feed", "Atom feed"));
 		Link linkToFeed = new Link();
+		linkToFeed.setStyleClass("articleCommentsAtomFeedLinkStyle");
 		linkToFeed.setId(new StringBuffer(commentsId).append("article_comments_link_to_feed").toString());
 		linkToFeed.setImage(atom);
 		makeCommentsFeedIfNotExists(iwc);
@@ -161,8 +157,7 @@ public class CommentsViewer extends Block {
 		// Delete comments image
 		if (hasValidRights) {
 			addSimpleSpace(articleComments);
-			String deleteImage = new StringBuffer(bundle.getResourcesPath()).append(DELETE_IMAGE).toString();
-			Image delete = new Image(deleteImage, iwrb.getLocalizedString("delete_all_comments", "Delete all comments"));
+			Image delete = new Image(bundle.getVirtualPathWithFileNameString(DELETE_IMAGE), iwrb.getLocalizedString("delete_all_comments", "Delete all comments"));
 			delete.setStyleClass("deleteCommentsImage");
 			delete.setId(new StringBuffer(commentsId).append("delete_article_comments").toString());
 			StringBuffer deleteAction = new StringBuffer("deleteComments('").append(commentsId).append("', null, '");

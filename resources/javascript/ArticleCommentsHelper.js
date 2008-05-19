@@ -397,20 +397,41 @@ function closeCommentPanelAndSendComment(userId, subjectId, emailId, bodyId, lin
 	});
 }
 
-function addComment(index, articleComment, commentsId, linkToComments) {
-	var commentIndex = 0;
-	var counter = $(commentsId + 'contentItemCount');
-	if (counter != null) {
-		var children = counter.childNodes;
-		if (children != null) {
-			if (children.length > 0) {
-				var countValue = counter.childNodes[0];
-				countValue.nodeValue++;
-				commentIndex = countValue.nodeValue;
-			}
-		}
+function changeCommentsCount(linkId, change, finalCount) {
+	var link = $(linkId + 'CommentsLabelWithCount');
+	if (link == null) {
+		return false;
 	}
 	
+	var text = link.getText();
+	if (text == null) {
+		return false;
+	}
+	
+	var textParts = text.split('(');
+	if (textParts == null && textParts.length < 2) {
+		return false;
+	}	
+
+	var countPart = textParts[1];
+	var count = countPart.substring(0, countPart.length - 1);
+	if (count == null || count == '') {
+		return false;
+	}
+	
+	if (finalCount == null && change != null) {
+		var counter = count.toInt();
+		counter += change;
+	}
+	else {
+		counter = finalCount;
+	}
+	
+	text = textParts[0] + '(' + counter + ')';
+	link.setText(text);
+}
+
+function addComment(index, articleComment, commentsId, linkToComments) {
 	var commentsContainer = $(commentsId + 'comments_block');
 	if (commentsContainer == null) {
 		return false;
@@ -437,8 +458,8 @@ function addComment(index, articleComment, commentsId, linkToComments) {
 	else {
 		commentContainer.addClass('odd');
 	}
-	commentContainer.setProperty('id', 'cmnt_' + commentIndex);
-	if (commentIndex == 1) {
+	commentContainer.setProperty('id', 'cmnt_' + index);
+	if (index == 0) {
 		commentContainer.setProperty('style', 'margin: 0px;');
 	}
 	
@@ -561,7 +582,7 @@ function getCommentsCallback(comments, id, linkToComments) {
 	}
 	*/
 	
-	removeCommentsList(id);
+	removeCommentsList(id, comments.length);
 	for (var i = 0; i < comments.length; i++) {
 		addComment(i, comments[i], id, linkToComments);
 	}
@@ -600,15 +621,8 @@ function createTableLine(cellLabel, inputId, inputType, inputValue, inputStyle) 
 	return line;
 }
 
-function removeCommentsList(commentId) {
-	var counter = $(commentId + 'contentItemCount');
-	if (counter != null) {
-		var children = counter.childNodes;
-		if (children != null) {
-			var countValue = counter.childNodes[0];
-			countValue.nodeValue = 0;
-		}
-	}
+function removeCommentsList(commentId, totalComments) {
+	changeCommentsCount(commentId, null, totalComments);
 	
 	var commentsList = $(commentId + COMMENTS_BLOCK_LIST_ID);
 	if (commentsList == null) {
@@ -673,32 +687,7 @@ function refreshGlobalCommentsId(commentsId) {
 }
 
 function setCommentsCount(count, commentId) {
-	var counter = $(commentId + 'contentItemCount');
-	if (counter == null) {
-		return false;
-	}
-	var children = counter.childNodes;
-	if (children == null) {
-		return false;
-	}
-	counter.removeChild(counter.childNodes[0]);
-	counter.appendText(count);
-}
-
-function getCommentsCount(commentId) {
-	var counter = $(commentId + 'contentItemCount');
-	if (counter == null) {
-		return 0;
-	}
-	var children = counter.childNodes;
-	if (children == null) {
-		return 0;
-	}
-	var count = children[0].nodeValue;
-	if (count == null) {
-		return 0;
-	}
-	return count;
+	changeCommentsCount(commentId, null, count);
 }
 
 function setNeedToNotify(id, otherId) {
