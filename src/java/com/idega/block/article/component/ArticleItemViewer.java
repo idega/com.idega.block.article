@@ -1,5 +1,5 @@
 /*
- * $Id: ArticleItemViewer.java,v 1.45 2008/04/30 16:08:42 valdas Exp $
+ * $Id: ArticleItemViewer.java,v 1.46 2008/06/06 16:22:46 valdas Exp $
  *
  * Copyright (C) 2004 Idega. All Rights Reserved.
  *
@@ -40,12 +40,12 @@ import com.idega.webface.WFHtml;
 import com.idega.webface.convert.WFTimestampConverter;
 
 /**
- * Last modified: $Date: 2008/04/30 16:08:42 $ by $Author: valdas $
+ * Last modified: $Date: 2008/06/06 16:22:46 $ by $Author: valdas $
  *
  * Displays the article item
  *
  * @author <a href="mailto:gummi@idega.com">Gudmundur Agust Saemundsson</a>
- * @version $Revision: 1.45 $
+ * @version $Revision: 1.46 $
  */
 public class ArticleItemViewer extends ContentItemViewer {
 	
@@ -495,9 +495,11 @@ public class ArticleItemViewer extends ContentItemViewer {
 			//	Identifier is set in request! Checking if it matches with object's parameter
 			if (articileItemViewerFilter != null && viewerIdentifierFromRequest.equals(articileItemViewerFilter)) {
 				//	Identifiers match, checking if new resource path is provided
-				if (resourcePathFromRequest != null) {
-					//	New resource path needs to be set
-					prepareToActAsCustomArticleViewer(resourcePathFromRequest, true);
+				if (!isPartOfArticlesList()) {	//	If part of list (and identifiers matches) then we can not change list's item
+					if (resourcePathFromRequest != null) {
+						//	New resource path needs to be set
+						prepareToActAsCustomArticleViewer(resourcePathFromRequest, true);
+					}
 				}
 			}
 		}

@@ -1,5 +1,5 @@
 /*
- * $Id: ArticleItemBean.java,v 1.84 2008/03/18 08:11:02 valdas Exp $
+ * $Id: ArticleItemBean.java,v 1.85 2008/06/06 16:22:46 valdas Exp $
  *
  * Copyright (C) 2004-2005 Idega. All Rights Reserved.
  *
@@ -54,10 +54,10 @@ import com.idega.xml.XMLException;
  * This is a JSF managed bean that manages each article instance and delegates 
  * all calls to the correct localized instance.
  * <p>
- * Last modified: $Date: 2008/03/18 08:11:02 $ by $Author: valdas $
+ * Last modified: $Date: 2008/06/06 16:22:46 $ by $Author: valdas $
  *
  * @author Anders Lindman,<a href="mailto:tryggvi@idega.com">Tryggvi Larusson</a>
- * @version $Revision: 1.84 $
+ * @version $Revision: 1.85 $
  */
 public class ArticleItemBean extends ContentItemBean implements Serializable, ContentItem, ValueChangeListener {
 	
@@ -77,6 +77,16 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 	private String resourcePath;
 	private boolean availableInRequestedLanguage=false;
 	
+	private boolean isPartOfArticleList = false;
+	
+	public boolean isPartOfArticleList() {
+		return isPartOfArticleList;
+	}
+
+	public void setPartOfArticleList(boolean isPartOfArticleList) {
+		this.isPartOfArticleList = isPartOfArticleList;
+	}
+
 	public ArticleLocalizedItemBean getLocalizedArticle(){
 		if (this.localizedArticle == null || getLanguageChange() != null) {
 			this.localizedArticle = new ArticleLocalizedItemBean();
