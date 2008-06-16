@@ -243,6 +243,7 @@
 	font-size: 13px;
 	color: #1f1f1f;
 	font-family: "Lucida Grande", "Lucida Sans", "Lucida Sans Unicode", Arial, Helvetica, sans-serif;
+	min-height: 25px;
 }
 
 .article .content_list .article_item_first {
@@ -292,6 +293,7 @@
 	margin-right: 280px;
 	padding-top: 4px;
 	padding-bottom: 4px;
+	min-height: 17px;
 }
 
 .article .content_list .blog-entry-title a {
@@ -306,7 +308,7 @@
 }
 
 .article .content_list .item_details_command {
-	display: none;	
+	display: none;
 }
 
 .article .content_list .article_item .content_item_toolbar_itemcontainer {
@@ -316,12 +318,14 @@
 	top: 0;	
 	margin: 0;
 	padding: 0;
+	height: 25px;
 }
 
 .article .content_list .article_item .content_item_toolbar_item {
 	margin: 0;
 	padding: 0;
 	margin-top: 2px;
+	float: left;
 }
 
 .article .content_list .article_item .content_item_toolbar_item li {
@@ -593,4 +597,20 @@ form.editArticleForm .wf_block .articleCategories input {
 
 a.articleCommentsAtomFeedLinkStyle {
 	padding-left: 5px;
+}
+
+.articleDelete {
+	padding: 80px;
+}
+
+.articleDelete h3 {
+	font-size: 24px;
+	margin: 0;
+	margin-bottom: 20px;
+}
+
+.articleDelete input {
+	margin-right: 8px !important;
+	font-size: 16px !important;
+	padding: 8px 14px !important;
 }

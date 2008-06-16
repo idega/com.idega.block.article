@@ -14,8 +14,10 @@ import com.idega.presentation.ui.GenericButton;
 
 public class ArticleDeleter extends Block {
 	
+	@Override
 	public void main(IWContext iwc) {
 		Layer container = new Layer();
+		container.setStyleClass("articleDelete");
 		add(container);
 		Layer buttons = new Layer();
 		
@@ -40,7 +42,7 @@ public class ArticleDeleter extends Block {
 			return;
 		}
 		
-		String text = iwrb.getLocalizedString("are_you_sure_you_want_delete_this_article", "Are you sure you want delete this article?");
+		String text = iwrb.getLocalizedString("are_you_sure_you_want_delete_this_article", "Are you sure you want to delete this article?");
 		container.add(new Heading3(text));
 		
 		container.add(buttons);
@@ -53,6 +55,7 @@ public class ArticleDeleter extends Block {
 		buttons.add(cancel);
 	}
 	
+	@Override
 	public String getBundleIdentifier() {
 		return ArticleConstants.IW_BUNDLE_IDENTIFIER;
 	}
