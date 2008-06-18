@@ -5,13 +5,11 @@
 
 
 .article_item {
-	margin: 15px;
 }
 
 .article_author {
 	display: inline;
-	padding-right: 4px;
-	
+	padding-right: 4px;	
 }
 
 .article_creation_date {
