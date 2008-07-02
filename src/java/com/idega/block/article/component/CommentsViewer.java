@@ -14,7 +14,6 @@ import com.idega.block.article.business.CommentsEngine;
 import com.idega.block.web2.business.Web2Business;
 import com.idega.business.IBOLookup;
 import com.idega.business.IBOLookupException;
-import com.idega.business.SpringBeanLookup;
 import com.idega.content.business.ContentConstants;
 import com.idega.content.business.ContentUtil;
 import com.idega.content.presentation.ContentViewer;
@@ -39,6 +38,7 @@ import com.idega.util.CoreConstants;
 import com.idega.util.CoreUtil;
 import com.idega.util.IWTimestamp;
 import com.idega.util.PresentationUtil;
+import com.idega.util.expression.ELUtil;
 
 public class CommentsViewer extends Block {
 	
@@ -222,7 +222,7 @@ public class CommentsViewer extends Block {
 		sources.add(COMMENTS_ENGINE);
 		sources.add(CoreConstants.DWR_ENGINE_SCRIPT);
 		sources.add(getBundle(iwc).getVirtualPathWithFileNameString(COMMENTS_HELPER));
-		Web2Business web2 = SpringBeanLookup.getInstance().getSpringBean(iwc, Web2Business.class);
+		Web2Business web2 = ELUtil.getInstance().getBean(Web2Business.class);
 		if (web2 != null) {
 			try {
 				sources.add(web2.getBundleURIToMootoolsLib());

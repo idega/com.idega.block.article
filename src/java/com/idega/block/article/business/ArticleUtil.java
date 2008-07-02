@@ -1,5 +1,5 @@
 /*
- * $Id: ArticleUtil.java,v 1.14 2008/02/22 10:20:18 alexis Exp $
+ * $Id: ArticleUtil.java,v 1.15 2008/07/02 19:22:56 civilis Exp $
  * Created on 7.2.2005
  *
  * Copyright (C) 2005 Idega Software hf. All Rights Reserved.
@@ -20,7 +20,6 @@ import javax.faces.el.ValueBinding;
 import org.apache.myfaces.custom.savestate.UISaveState;
 
 import com.idega.block.web2.business.Web2Business;
-import com.idega.business.SpringBeanLookup;
 import com.idega.content.business.ContentUtil;
 import com.idega.core.builder.business.BuilderService;
 import com.idega.core.builder.business.BuilderServiceFactory;
@@ -28,14 +27,15 @@ import com.idega.core.builder.data.ICPage;
 import com.idega.idegaweb.IWBundle;
 import com.idega.presentation.IWContext;
 import com.idega.util.CoreConstants;
+import com.idega.util.expression.ELUtil;
 import com.idega.webface.WFUtil;
 
 /**
  * 
- *  Last modified: $Date: 2008/02/22 10:20:18 $ by $Author: alexis $
+ *  Last modified: $Date: 2008/07/02 19:22:56 $ by $Author: civilis $
  * 
  * @author <a href="mailto:gummi@idega.com">Gudmundur Agust Saemundsson</a>
- * @version $Revision: 1.14 $
+ * @version $Revision: 1.15 $
  */
 public class ArticleUtil {
 
@@ -114,7 +114,7 @@ public class ArticleUtil {
 		sources.add("/dwr/interface/ThemesEngine.js");
 		
 		if (!needOnlyHelper) {
-			Web2Business web2 = SpringBeanLookup.getInstance().getSpringBean(iwc.getApplicationContext(), Web2Business.class);
+			Web2Business web2 = ELUtil.getInstance().getBean(Web2Business.class);
 			try {
 				sources.add(web2.getBundleURIToMootoolsLib());			//	MooTools
 				sources.add(web2.getMoodalboxScriptFilePath(false));	//	MOOdalBox
@@ -141,7 +141,7 @@ public class ArticleUtil {
 		}
 		
 		List<String> styleSheets = new ArrayList<String>();
-		Web2Business web2 = SpringBeanLookup.getInstance().getSpringBean(iwc.getApplicationContext(), Web2Business.class);
+		Web2Business web2 = ELUtil.getInstance().getBean(Web2Business.class);
 		try {
 			styleSheets.add(web2.getMoodalboxStyleFilePath());		//	MOOdalBox
 		} catch (RemoteException e) {

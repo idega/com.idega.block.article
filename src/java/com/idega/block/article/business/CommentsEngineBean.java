@@ -28,7 +28,6 @@ import com.idega.builder.business.BuilderLogicWrapper;
 import com.idega.business.IBOLookup;
 import com.idega.business.IBOLookupException;
 import com.idega.business.IBOSessionBean;
-import com.idega.business.SpringBeanLookup;
 import com.idega.content.bean.ContentItemFeedBean;
 import com.idega.content.business.ContentConstants;
 import com.idega.content.business.ContentUtil;
@@ -46,6 +45,7 @@ import com.idega.util.CoreConstants;
 import com.idega.util.CoreUtil;
 import com.idega.util.IWTimestamp;
 import com.idega.util.StringHandler;
+import com.idega.util.expression.ELUtil;
 import com.sun.syndication.feed.atom.Content;
 import com.sun.syndication.feed.atom.Entry;
 import com.sun.syndication.feed.atom.Feed;
@@ -137,7 +137,7 @@ public class CommentsEngineBean extends IBOSessionBean implements CommentsEngine
 	
 	@SuppressWarnings("unchecked")
 	private void clearArticleCache(IWContext iwc) {
-		BuilderLogicWrapper builder = (BuilderLogicWrapper) SpringBeanLookup.getInstance().getSpringBean(iwc.getServletContext(), CoreConstants.SPRING_BEAN_NAME_BUILDER_LOGIC_WRAPPER);
+		BuilderLogicWrapper builder = ELUtil.getInstance().getBean(CoreConstants.SPRING_BEAN_NAME_BUILDER_LOGIC_WRAPPER);
 		Map articlesCache = null;
 		if (builder != null) {
 			articlesCache = getArticlesCache(iwc);
