@@ -2,10 +2,35 @@
 <!DOCTYPE dwr PUBLIC "-//GetAhead Limited//DTD Direct Web Remoting 2.0//EN" "http://www.getahead.ltd.uk/dwr//dwr20.dtd">
 
 <dwr>
-  <allow>
-    <create creator="ibo" javascript="CommentsEngine" scope="session">
-      <param name="class" value="com.idega.block.article.business.CommentsEngine"/>
-    </create>
-    <convert converter="bean" match="com.idega.block.article.bean.ArticleComment" />
-  </allow>
+	<allow>
+		<create creator="ibo" javascript="CommentsEngine" scope="session">
+			<param name="class" value="com.idega.block.article.business.CommentsEngine"/>
+			<include method="getCommentsFromUris"/>
+			<include method="getComments"/>
+			<include method="setModuleProperty"/>
+			<include method="hideOrShowComments"/>
+			<include method="getUserRights"/>
+			<include method="deleteComments"/>
+			<include method="getCommentsForAllPages"/>
+			<include method="getInitInfoForComments"/>
+			<include method="addComment"/>
+		</create>
+		
+		<convert converter="bean" match="com.idega.block.article.bean.ArticleComment" />
+		<convert converter="bean" match="com.idega.block.article.bean.CommentsViewerProperties" />
+	</allow>
+	<signatures>
+		<![CDATA[
+			import java.util.List;
+			import com.idega.builder.bean.AdvancedProperty;
+			import com.idega.block.article.bean.CommentsViewerProperties;
+			import com.idega.block.article.bean.ArticleComment;
+
+			CommentsEngine.addComment(CommentsViewerProperties);
+			CommentsViewerProperties CommentsEngine.deleteComments(CommentsViewerProperties);
+			CommentsEngine.getCommentsForAllPages(CommentsViewerProperties);
+			CommentsEngine.getComments(CommentsViewerProperties);
+			List<List<ArticleComment>> CommentsEngine.getCommentsFromUris(List<AdvancedProperty>);
+		]]>
+	</signatures>
 </dwr>

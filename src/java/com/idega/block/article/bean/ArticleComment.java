@@ -9,6 +9,8 @@ public class ArticleComment {
 	private String posted = null;
 	private String id = null;
 	
+	private int listNumber = 1;
+	
 	public String getComment() {
 		return comment;
 	}
@@ -44,6 +46,12 @@ public class ArticleComment {
 	}
 	public void setId(String id) {
 		this.id = id;
+	}
+	public int getListNumber() {
+		return listNumber;
+	}
+	public void setListNumber(int listNumber) {
+		this.listNumber = listNumber;
 	}
 
 }

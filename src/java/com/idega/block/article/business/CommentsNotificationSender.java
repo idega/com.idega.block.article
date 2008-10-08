@@ -2,8 +2,6 @@ package com.idega.block.article.business;
 
 import java.util.List;
 
-import javax.mail.MessagingException;
-
 import com.idega.util.SendMail;
 
 public class CommentsNotificationSender implements Runnable {
@@ -30,7 +28,7 @@ public class CommentsNotificationSender implements Runnable {
 		for (int i = 0; i < emails.size(); i++) {
 			try {
 				SendMail.send(emailFieldFrom, emails.get(i), null, null, mailServerHost, emailFieldSubject, emailFieldBody);
-			} catch (MessagingException e) {
+			} catch (Exception e) {
 				e.printStackTrace();
 			}
 		}

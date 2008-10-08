@@ -41,6 +41,7 @@ var DELETE_COMMENT_LABEL = 'Delete this comment';
 
 var HAS_COMMENT_VIEWER_VALID_RIGHTS = false;
 var ADDED_LINK_TO_ATOM_IN_BODY = false;
+var NEWEST_ENTRIES_ON_TOP = false;
 
 var COMMENTS_LINK_TO_FILE = '/files';
 var SHOW_COMMENTS_LIST_ON_LOAD = false;
@@ -139,20 +140,26 @@ function isShowCommentsListOnLoad() {
 	return SHOW_COMMENTS_LIST_ON_LOAD;
 }
 
-function setCommentStartInfo(linkToComments, commentsId, showCommentsList) {
+function setCommentStartInfo(linkToComments, commentsId, showCommentsList, newestEntriesOnTop, springBeanIdentifier, identifier) {
 	COMMENTS_LINK_TO_FILE = linkToComments;
 	GLOBAL_COMMENTS_MARK_ID = commentsId;
 	SHOW_COMMENTS_LIST_ON_LOAD = showCommentsList;
+	NEWEST_ENTRIES_ON_TOP = newestEntriesOnTop;
 
 	if (showCommentsList) {
-		COMMENTS_INFO.push(new SingleCommentInfo(linkToComments, commentsId, showCommentsList));
+		var commentsInfo = new SingleCommentInfo(linkToComments, commentsId, springBeanIdentifier, identifier, showCommentsList, newestEntriesOnTop);
+		COMMENTS_INFO.push(commentsInfo);
 	}
 }
 
-function SingleCommentInfo(linkToComments, commentsId, showCommentsList) {
+function SingleCommentInfo(linkToComments, commentsId, springBeanIdentifier, identifier, showCommentsList, newestEntriesOnTop) {
 	this.linkToComments = linkToComments;
 	this.commentsId = commentsId;
+	this.springBeanIdentifier = springBeanIdentifier;
+	this.identifier = identifier;
+	
 	this.showCommentsList = showCommentsList;
+	this.newestEntriesOnTop = newestEntriesOnTop;
 }
 
 function setLinkToDeleteImage(deleteImage) {
@@ -188,7 +195,7 @@ function setCommentValues(user, subject, email, body) {
 }
 
 function addCommentPanel(id, linkToComments, lblUser, lblSubject, lblComment, lblPosted, lblSend, lblSending, loggedUser, lblEmail,
-	lblCommentForm, addEmail, commentsId, instanceId) {
+	lblCommentForm, addEmail, commentsId, instanceId, springBeanIdentifier, identifier, newestEntriesOnTop) {
 	enableReverseAjax();
 	setCommentValues('', '', '', '');
 	refreshGlobalCommentsId(commentsId);
@@ -214,10 +221,10 @@ function addCommentPanel(id, linkToComments, lblUser, lblSubject, lblComment, lb
 	if (container == null) {
 		return false;
 	}
-	container.appendChild(getCommentPane(linkToComments, addEmail, commentsId, instanceId));
+	container.appendChild(getCommentPane(linkToComments, addEmail, commentsId, instanceId, springBeanIdentifier, identifier, newestEntriesOnTop));
 }
 
-function getCommentPane(linkToComments, addEmail, commentsId, instanceId) {
+function getCommentPane(linkToComments, addEmail, commentsId, instanceId, springBeanIdentifier, identifier, newestEntriesOnTop) {
 	var userId = 'comment_user_value';
 	var subjectId = 'comment_subject_value';
 	var emailId = 'comment_email_value';
@@ -338,7 +345,8 @@ function getCommentPane(linkToComments, addEmail, commentsId, instanceId) {
 	sendButtonContainer.setStyle('float', 'right');
 	var send = createInput('send_comment', 'button', LABEL_SEND, 'send_comment_button');
 	send.addEvent('click', function() {
-		closeCommentPanelAndSendComment(userId, subjectId, emailId, bodyId, linkToComments, secretInputId, commentsId, instanceId);
+		closeCommentPanelAndSendComment(userId, subjectId, emailId, bodyId, linkToComments, secretInputId, commentsId, instanceId, springBeanIdentifier,
+		identifier, newestEntriesOnTop);
 	});
 	sendButtonContainer.appendChild(send);
 	mainCommentContainer.appendChild(sendButtonContainer);
@@ -354,7 +362,8 @@ function getCommentPane(linkToComments, addEmail, commentsId, instanceId) {
 	return container;
 }
 
-function closeCommentPanelAndSendComment(userId, subjectId, emailId, bodyId, linkToComments, secretInputId, commentsId, instanceId) {
+function closeCommentPanelAndSendComment(userId, subjectId, emailId, bodyId, linkToComments, secretInputId, commentsId, instanceId, springBeanIdentifier,
+										identifier, newestEntriesOnTop) {
 	if (userId == null || subjectId == null || bodyId == null || linkToComments == null) {
 		return false;
 	}
@@ -390,11 +399,28 @@ function closeCommentPanelAndSendComment(userId, subjectId, emailId, bodyId, lin
 	showLoadingMessage(LABEL_SENDING);
 	closeCommentsPanel(commentsId);
 	setCommentValues(user.value, subject.value, emailValue, body.value);
-	CommentsEngine.addComment(USER, SUBJECT, EMAIL, BODY, linkToComments, NEED_TO_NOTIFY, commentsId, instanceId, {
+	var commentProperties = new CommentsViewerProperties(USER, SUBJECT, EMAIL, BODY, linkToComments, commentsId, instanceId, springBeanIdentifier, identifier,
+								NEED_TO_NOTIFY, newestEntriesOnTop);
+	CommentsEngine.addComment(commentProperties, {
 		callback: function(result) {
 			closeAllLoadingMessages();
 		}
 	});
+}
+
+function CommentsViewerProperties(user, subject, email, body, uri, id, instanceId, springBeanIdentifier, identifier, notify, newestEntriesOnTop) {
+	this.user = user || null;
+	this.subject = subject || null;
+	this.email = email || null;
+	this.body = body || null;
+	this.uri = uri || null;
+	this.id = id || null;
+	this.instanceId = instanceId || null;
+	this.springBeanIdentifier = springBeanIdentifier || null;
+	this.identifier = identifier || null;
+	
+	this.notify = notify || true;
+	this.newestEntriesOnTop = newestEntriesOnTop || false;
 }
 
 function changeCommentsCount(linkId, change, finalCount) {
@@ -438,7 +464,7 @@ function addComment(index, articleComment, commentsId, linkToComments) {
 	}
 	var commentsList = $(commentsId + COMMENTS_BLOCK_LIST_ID);
 	if (commentsList == null) {
-		commentsList = new Element('ol');
+		commentsList = new Element('ul');
 		commentsList.setProperty('id', commentsId + COMMENTS_BLOCK_LIST_ID);
 		commentsContainer.appendChild(commentsList);
 		if (needToShowCommentsList(commentsId)) {
@@ -475,14 +501,14 @@ function addComment(index, articleComment, commentsId, linkToComments) {
 		deleteImage.setProperty('name', DELETE_COMMENT_LABEL);
 		deleteImage.addClass('deleteCommentsImage');
 		deleteImage.addEvent('click', function() {
-			deleteComments(commentsId, articleComment.id, linkToComments);
+			deleteComments(commentsId, articleComment.id, linkToComments, getCommentsInfo(linkToComments).newestEntriesOnTop);
 		});
 		commentContainer.appendChild(deleteImage);
 	}
 	
 	var number = new Element('div');
 	number.addClass('commentItemNumber');
-	number.appendText((index + 1) + '.');
+	number.appendText(articleComment.listNumber + '.');
 	commentValue.appendChild(number);
 	
 	var subject = new Element('div');
@@ -524,18 +550,36 @@ function closeCommentsPanel(commentId) {
 	return true;
 }
 
+function getCommentsInfo(linkToComments) {
+	if (linkToComments == null) {
+		return null;
+	}
+	
+	if (COMMENTS_INFO == null || COMMENTS_INFO.length == 0) {
+		return null;
+	}
+	
+	for (var i = 0; i < COMMENTS_INFO.length; i++) {
+		if (COMMENTS_INFO[i].linkToComments == linkToComments) {
+			return COMMENTS_INFO[i];
+		}
+	}
+	
+	return null;
+}
+
 function getAllComments() {
 	if (COMMENTS_INFO == null) {
 		return false;
 	}
 	
-	var uris = new Array();
+	var properties = new Array();
 	for (var i = 0; i < COMMENTS_INFO.length; i++) {
-		uris.push(COMMENTS_INFO[i].linkToComments);
+		properties.push({id: COMMENTS_INFO[i].linkToComments, value: COMMENTS_INFO[i].newestEntriesOnTop});
 	}
 	
 	showLoadingMessage(getCommentsLoadingMessage());
-	CommentsEngine.getCommentsFromUris(uris, {
+	CommentsEngine.getCommentsFromUris(properties, {
 		callback: function(allComments) {
 			closeAllLoadingMessages();
 			
@@ -543,7 +587,7 @@ function getAllComments() {
 				if (allComments.length == COMMENTS_INFO.length) {
 					for (var i = 0; i < allComments.length; i++) {
 						GLOBAL_COMMENTS_MARK_ID = null;
-						getCommentsCallback(allComments[i], COMMENTS_INFO[i].commentsId, COMMENTS_INFO[i].linkToComments);
+						getCommentsCallback(allComments[i], COMMENTS_INFO[i].commentsId, COMMENTS_INFO[i].linkToComments, COMMENTS_INFO[i].newestEntriesOnTop);
 					}
 				}
 			}
@@ -552,19 +596,27 @@ function getAllComments() {
 }
 
 function getComments(linkToComments, commentsId) {
+	var commentsInfo = getCommentsInfo(linkToComments);
+	if (commentsInfo == null) {
+		return false;
+	}
+	
 	showLoadingMessage(getCommentsLoadingMessage());
-	CommentsEngine.getComments(linkToComments, {
+	var newestEntriesOnTop = commentsInfo.newestEntriesOnTop;
+	CommentsEngine.getComments(new CommentsViewerProperties(null, null, null, null, linkToComments, commentsId, null, commentsInfo.springBeanIdentifier,
+															commentsInfo.identifier, true, newestEntriesOnTop), {
   		callback:function(comments) {
-    		getCommentsCallback(comments, commentsId, linkToComments);
+    		getCommentsCallback(comments, commentsId, linkToComments, newestEntriesOnTop);
     		
     		enableReverseAjax();
   		}
 	});
 }
 
-function getCommentsCallback(comments, id, linkToComments) {
+function getCommentsCallback(comments, id, linkToComments, newestEntriesOnTop) {
 	closeAllLoadingMessages();
 	if (comments == null) {
+		removeCommentsList(id, 0);
 		closeAllLoadingMessages();
 		return false;
 	}
@@ -584,7 +636,7 @@ function getCommentsCallback(comments, id, linkToComments) {
 	
 	removeCommentsList(id, comments.length);
 	for (var i = 0; i < comments.length; i++) {
-		addComment(i, comments[i], id, linkToComments);
+		addComment(i, comments[i], id, linkToComments, newestEntriesOnTop);
 	}
 }
 
@@ -796,7 +848,7 @@ function removeAtomAndDeleteButtonsForComments(commentsId) {
 	removeElementFromParent($(deleteImageId));
 }
 
-function addAtomButtonForComments(commentsId, linkToComments) {
+function addAtomButtonForComments(commentsId, linkToComments, newestEntriesOnTop) {
 	if (commentsId == null || linkToComments == null) {
 		return false;
 	}
@@ -843,7 +895,7 @@ function addAtomButtonForComments(commentsId, linkToComments) {
 		deleteImage.addClass('deleteCommentsImage');
 		
 		deleteImage.addEvent('click', function() {
-			deleteComments(commentsId, null, linkToComments);
+			deleteComments(commentsId, null, linkToComments, newestEntriesOnTop);
 		});
 		
 		container.appendChild(deleteImage);
@@ -854,23 +906,35 @@ function setAddedLinkToAtomInBody(added) {
 	ADDED_LINK_TO_ATOM_IN_BODY = added;
 }
 
-function deleteComments(id, commentId, linkToComments) {
+function deleteComments(id, commentId, linkToComments, newestEntriesOnTop) {
 	var confirmed = confirm(ARE_YOU_SURE_FOR_DELETING);
 	if (!confirmed) {
 		return false;
 	}
-	showLoadingMessage(DELETING_MESSAGE_TEXT);
-	CommentsEngine.deleteComments(id, commentId, linkToComments, deleteCommentsCallback);
-}
-
-function deleteCommentsCallback(result) {
-	closeAllLoadingMessages();
-	if (result == null) {
+	
+	var commentInfo = getCommentsInfo(linkToComments);
+	if (commentInfo == null) {
 		return false;
 	}
-	if (result.length == 2) {
-		CommentsEngine.getCommentsForAllPages(result[1], result[0]);
-	}
+	
+	showLoadingMessage(DELETING_MESSAGE_TEXT);
+	CommentsEngine.deleteComments(new CommentsViewerProperties(null, null, null, null, linkToComments, commentId, id, commentInfo.springBeanIdentifier,
+									commentInfo.identifier, true, newestEntriesOnTop), {
+		callback: function(properties) {
+			closeAllLoadingMessages();
+			if (properties == null) {
+				return false;
+			}
+			if (properties.actionSuccess) {
+				if (commentId == null) {
+					changeCommentsCount(id, null, 0);
+					removeElementFromParent($(id + 'comments_block_list'));
+				}
+				
+				CommentsEngine.getCommentsForAllPages(properties);
+			}
+		}
+	});
 }
 
 function needToShowCommentsList(commentsId) {

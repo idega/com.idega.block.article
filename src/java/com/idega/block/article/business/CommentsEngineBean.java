@@ -1,10 +1,12 @@
 package com.idega.block.article.business;
 
+import java.io.IOException;
 import java.rmi.RemoteException;
 import java.sql.Timestamp;
 import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -14,16 +16,19 @@ import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import org.apache.commons.httpclient.HttpException;
+import org.apache.webdav.lib.WebdavResource;
 import org.directwebremoting.ScriptBuffer;
-import org.directwebremoting.ScriptSession;
 import org.directwebremoting.WebContext;
 import org.directwebremoting.WebContextFactory;
 import org.directwebremoting.impl.DefaultScriptSession;
 
 import com.idega.block.article.ArticleCacher;
 import com.idega.block.article.bean.ArticleComment;
+import com.idega.block.article.bean.CommentsViewerProperties;
 import com.idega.block.article.component.CommentsViewer;
 import com.idega.block.rss.business.RSSBusiness;
+import com.idega.builder.bean.AdvancedProperty;
 import com.idega.builder.business.BuilderLogicWrapper;
 import com.idega.business.IBOLookup;
 import com.idega.business.IBOLookupException;
@@ -32,6 +37,7 @@ import com.idega.content.bean.ContentItemFeedBean;
 import com.idega.content.business.ContentConstants;
 import com.idega.content.business.ContentUtil;
 import com.idega.content.themes.helpers.business.ThemesHelper;
+import com.idega.core.accesscontrol.business.NotLoggedOnException;
 import com.idega.core.builder.business.BuilderService;
 import com.idega.core.builder.business.BuilderServiceFactory;
 import com.idega.core.cache.IWCacheManager2;
@@ -41,10 +47,13 @@ import com.idega.idegaweb.IWMainApplication;
 import com.idega.idegaweb.IWResourceBundle;
 import com.idega.presentation.IWContext;
 import com.idega.slide.business.IWSlideService;
+import com.idega.user.data.User;
 import com.idega.util.CoreConstants;
 import com.idega.util.CoreUtil;
 import com.idega.util.IWTimestamp;
+import com.idega.util.ListUtil;
 import com.idega.util.StringHandler;
+import com.idega.util.StringUtil;
 import com.idega.util.expression.ELUtil;
 import com.sun.syndication.feed.atom.Content;
 import com.sun.syndication.feed.atom.Entry;
@@ -58,6 +67,7 @@ import com.sun.syndication.io.WireFeedOutput;
 public class CommentsEngineBean extends IBOSessionBean implements CommentsEngine {
 
 	private static final long serialVersionUID = 7299800648381936213L;
+	private static final Logger logger = Logger.getLogger(CommentsEngineBean.class.getName());
 	
 	private static final String COMMENTS_CACHE_NAME = "article_comments_feeds_cache";
 	
@@ -73,66 +83,88 @@ public class CommentsEngineBean extends IBOSessionBean implements CommentsEngine
 	
 	private volatile BuilderService builder = null;
 
-	public boolean addComment(String user, String subject, String email, String body, String uri, boolean notify, String id, String instanceId) {
-		Logger loggger = Logger.getLogger(CommentsEngineBean.class.getName());
+	public boolean addComment(CommentsViewerProperties properties) {
+		if (properties == null) {
+			logger.log(Level.INFO, "Comment properties are undefined!");
+			return false;
+		}
+		
+		String uri = properties.getUri();
+		String subject = properties.getSubject();
+		String user = properties.getUser();
+		String instanceId = properties.getInstanceId();
+		String body = properties.getBody();
+		String email = properties.getEmail();
 		String errorMessage = "Unable to add comment: '" + subject + "' by: " + user;
+		boolean notify = properties.isNotify();
 		
 		if (uri == null) {
 			closeLoadingMessage();
-			loggger.log(Level.SEVERE, errorMessage);
+			logger.log(Level.SEVERE, errorMessage);
 			return false;
 		}
 		if (ContentConstants.EMPTY.equals(uri)) {
 			closeLoadingMessage();
-			loggger.log(Level.SEVERE, errorMessage);
+			logger.log(Level.SEVERE, errorMessage);
 			return false;
 		}
 		
 		IWContext iwc = CoreUtil.getIWContext();
 		if (iwc == null) {
-			loggger.log(Level.SEVERE, errorMessage);
+			logger.log(Level.SEVERE, errorMessage);
 			return false;
 		}
 		
-		uri = getFixedCommentsUri(iwc, uri, instanceId);
+		CommentsPersistenceManager commentsManager = getCommentsManager(properties.getSpringBeanIdentifier());
+		
+		if (commentsManager == null) {
+			uri = getFixedCommentsUri(iwc, uri, instanceId);
+		}
 		
 		String language = ThemesHelper.getInstance().getCurrentLanguage(iwc);
-		
 		Timestamp date = IWTimestamp.getTimestampRightNow();
-		Feed comments = getCommentsFeed(uri, iwc);
+		Feed comments = getCommentsFeed(uri, properties.getSpringBeanIdentifier(), properties.getIdentifier(), iwc);
 		if (comments == null) {
-			comments = createFeed(uri, user, date, language, iwc);
+			String feedTitle = commentsManager == null ? properties.getTitle() : commentsManager.getFeedTitle(iwc, properties.getIdentifier());
+			String feedSubtitle = commentsManager == null ? properties.getSubtitle() : commentsManager.getFeedSubtitle(iwc, properties.getIdentifier());
+			comments = createFeed(uri, user, date, language, iwc, feedTitle, feedSubtitle, commentsManager);
 		}
 		if (comments == null) {
-			loggger.log(Level.SEVERE, errorMessage);
+			logger.log(Level.SEVERE, errorMessage);
 			return false;
 		}
 		
 		if (!addNewEntry(comments, subject, uri, date, body, user, language, email, notify)) {
-			loggger.log(Level.SEVERE, errorMessage);
+			logger.log(Level.SEVERE, errorMessage);
 			return false;
 		}
 		
 		//	Caching XML
-		putFeedToCache(comments, uri, iwc);
-		
-		//	Sending notifications (if needed) about new comment
-		sendNotification(comments, email, iwc);
+		if (commentsManager == null) {
+			putFeedToCache(comments, uri, iwc);
+		}
 		
 		//	Clearing cache for articles (ALWAYS)
-		clearArticleCache(iwc);
-
+		if (commentsManager == null) {
+			clearArticleCache(iwc);
+		}
+		
+		//	Uploading changed XML for comments
+		boolean finisheSuccessfully = commentsManager == null ? uploadFeed(uri, comments, iwc, true) : commentsManager.storeFeed(properties.getIdentifier(),
+																																comments);
+		if (!finisheSuccessfully) {
+			logger.log(Level.SEVERE, errorMessage);
+			return false;
+		}
+		
 		//	Updating clients with the newest comments
 		ScriptCaller scriptCaller = new ScriptCaller(WebContextFactory.get(), new ScriptBuffer("getUpdatedCommentsFromServer();"), true);
 		scriptCaller.run();	//	Not thread!
 		
-		//	Uploading changed XML for comments
-		if (!uploadFeed(uri, comments, iwc, true)) {
-			loggger.log(Level.SEVERE, errorMessage);
-			return false;
-		}
+		//	Sending notifications (if needed) about new comment
+		sendNotification(comments, email, iwc);
 		
-		return true;
+		return finisheSuccessfully;
 	}
 	
 	@SuppressWarnings("unchecked")
@@ -152,19 +184,19 @@ public class CommentsEngineBean extends IBOSessionBean implements CommentsEngine
 	
 	private boolean sendNotification(Feed comments, String email, IWContext iwc) {
 		List<String> emails = getEmails(comments, email);
-		newCommentMessage = getLocalizedString(iwc, "new_comment_message", "New comment was entered. You can read all comments at");
-		newComment = getLocalizedString(iwc, "new_comment", "New comment");
+		newCommentMessage = getLocalizedString(iwc, "comments_viewer.new_comment_message", "New comment was entered. You can read all comments at");
+		newComment = getLocalizedString(iwc, "comments_viewer.new_comment", "New comment");
 		
 		StringBuffer body = new StringBuffer(newCommentMessage);
 		WebContext wctx = WebContextFactory.get();
 		body.append(ThemesHelper.getInstance().getFullServerName(iwc)).append(wctx.getCurrentPage());
 		String host = iwc.getApplicationSettings().getProperty(CoreConstants.PROP_SYSTEM_SMTP_MAILSERVER);
 //		if (host == null) {
-//			host = "mail.simnet.is";
+//			host = "smtp.emailsrvr.com";
 //		}
 		String from = iwc.getApplicationSettings().getProperty(CoreConstants.PROP_SYSTEM_MAIL_FROM_ADDRESS);
 //		if (from == null) {
-//			from = "testing@formbuilder.idega.is";
+//			from = "comments@idega.com";
 //		}
 		Thread sender = new Thread(new CommentsNotificationSender(emails, from, newComment,	body.toString(), host));
 		sender.start();
@@ -292,11 +324,12 @@ public class CommentsEngineBean extends IBOSessionBean implements CommentsEngine
 		return entries;
 	}
 	
-	private Feed createFeed(String uri, String user, Timestamp date, String language, IWContext iwc) {
+	private Feed createFeed(String uri, String user, Timestamp date, String language, IWContext iwc, String feedTitle, String feedSubtitle,
+							CommentsPersistenceManager commentsManager) {
 		String serverName = ThemesHelper.getInstance().getFullServerName(iwc);
 		
-		articeComments = getLocalizedString(iwc, "article_comments", "Comments of Article");
-		allArticleComments = getLocalizedString(iwc, "all_article_comments", "All comments");
+		articeComments = StringUtil.isEmpty(feedTitle) ? getLocalizedString(iwc, "comments_viewer.article_comments", "Comments of Article") : feedTitle;
+		allArticleComments = StringUtil.isEmpty(feedSubtitle) ? getLocalizedString(iwc, "comments_viewer.all_article_comments", "All comments"): feedSubtitle;
 		
 		Feed comments = new Feed();
 		comments.setFeedType(ContentItemFeedBean.FEED_TYPE_ATOM_1);
@@ -332,7 +365,10 @@ public class CommentsEngineBean extends IBOSessionBean implements CommentsEngine
 		List<Link> links = new ArrayList<Link>();
 		links.add(link);
 		comments.setAlternateLinks(links);
-		putFeedToCache(comments, uri, iwc);
+		
+		if (commentsManager == null) {
+			putFeedToCache(comments, uri, iwc);
+		}
 		
 		return comments;
 	}
@@ -367,14 +403,25 @@ public class CommentsEngineBean extends IBOSessionBean implements CommentsEngine
 	 * @param id - comments group id
 	 * @return
 	 */
-	public boolean getCommentsForAllPages(String uri, String id) {
-		return executeScriptForAllPages(getScriptForCommentsList(uri, id));
+	public boolean getCommentsForAllPages(CommentsViewerProperties properties) {
+		return executeScriptForAllPages(getScriptForCommentsList(properties));
 	}
 	
-	private ScriptBuffer getScriptForCommentsList(String uri, String id) {
+	private ScriptBuffer getScriptForCommentsList(CommentsViewerProperties properties) {
+		if (properties == null) {
+			logger.log(Level.WARNING, "Can not create ScriptBuffer: properties unknown");
+			return null;
+		}
+		
+		String id = properties.getInstanceId();
+		String uri = properties.getUri();
+		String identifier = properties.getIdentifier();
+		boolean newestEntriesOnTop = properties.isNewestEntriesOnTop();
+		String springBeanIdentifier = properties.getSpringBeanIdentifier();
+		
 		ScriptBuffer script = new ScriptBuffer();
-		script = new ScriptBuffer("getCommentsCallback(").appendData(getCommentsList(uri, true)).appendScript(", ").appendData(id);
-		script.appendScript(", ").appendData(uri).appendScript(");");
+		script = new ScriptBuffer("getCommentsCallback(").appendData(getCommentsList(uri, springBeanIdentifier, identifier, true, newestEntriesOnTop))
+					.appendScript(", ").appendData(id).appendScript(", ").appendData(uri).appendScript(");");
 		return script;
 	}
 	
@@ -392,24 +439,32 @@ public class CommentsEngineBean extends IBOSessionBean implements CommentsEngine
 		return pages;
 	}
 	
-	public List<List<ArticleComment>> getCommentsFromUris(List<String> uris) {
-		if (uris == null) {
+	public List<List<ArticleComment>> getCommentsFromUris(List<AdvancedProperty> commentsProperties) {
+		if (ListUtil.isEmpty(commentsProperties)) {
 			return null;
 		}
 		
 		List<List<ArticleComment>> allComments = new ArrayList<List<ArticleComment>>();
-		for (int i = 0; i < uris.size(); i++) {
-			allComments.add(getCommentsList(uris.get(i), false));
+		for (AdvancedProperty commentProperty: commentsProperties) {
+			allComments.add(getCommentsList(commentProperty.getId(), null, null, false, Boolean.valueOf(commentProperty.getValue())));
 		}
 		return allComments;
 	}
 	
-	public List<ArticleComment> getComments(String uri) {
-		return getCommentsList(uri, true);
+	public List<ArticleComment> getComments(CommentsViewerProperties properties) {
+		return getCommentsList(properties);
+	}
+	
+	private List<ArticleComment> getCommentsList(CommentsViewerProperties properties) {
+		if (properties == null) {
+			return null;
+		}
+		
+		return getCommentsList(properties.getUri(), properties.getSpringBeanIdentifier(), properties.getIdentifier(), true, properties.isNewestEntriesOnTop());
 	}
 	
 	@SuppressWarnings("unchecked")
-	private List<ArticleComment> getCommentsList(String uri, boolean addNulls) {
+	private List<ArticleComment> getCommentsList(String uri, String springBeanIdentifier, String identifier, boolean addNulls, boolean newestEntriesOnTop) {
 		List<ArticleComment> fake = new ArrayList<ArticleComment>();
 		if (uri == null) {
 			if (addNulls) {
@@ -418,7 +473,7 @@ public class CommentsEngineBean extends IBOSessionBean implements CommentsEngine
 			return fake;
 		}
 		
-		Feed comments = getCommentsFeed(uri, null);
+		Feed comments = getCommentsFeed(uri, springBeanIdentifier, identifier, CoreUtil.getIWContext());
 		if (comments == null) {
 			if (addNulls) {
 				return null;
@@ -427,7 +482,7 @@ public class CommentsEngineBean extends IBOSessionBean implements CommentsEngine
 		}
 		
 		List entries = comments.getEntries();
-		if (entries == null) {
+		if (ListUtil.isEmpty(entries)) {
 			if (addNulls) {
 				return null;
 			}
@@ -455,6 +510,9 @@ public class CommentsEngineBean extends IBOSessionBean implements CommentsEngine
 			if (o instanceof Entry) {
 				comment = new ArticleComment();
 				entry = (Entry) o;
+				
+				//	Number
+				comment.setListNumber(i + 1);
 				
 				// ID
 				comment.setId(entry.getId());
@@ -498,24 +556,28 @@ public class CommentsEngineBean extends IBOSessionBean implements CommentsEngine
 				items.add(comment);
 			}
 		}
+		
+		Collections.sort(items, new ArticleCommentComparator(locale, DateFormat.FULL, DateFormat.MEDIUM, newestEntriesOnTop));
+		
 		return items;
 	}
 	
-	public boolean getCommentsForCurrentPage(String uri, String id) {
-		WebContext wctx = WebContextFactory.get();
-		if (wctx == null) {
-			return false;
+	public CommentsPersistenceManager getCommentsManager(String springBeanIdentifier) {
+		if (StringUtil.isEmpty(springBeanIdentifier)) {
+			return null;
 		}
-		ScriptSession ss = wctx.getScriptSession();
-		if (ss == null) {
-			return false;
+		
+		try {
+			return ELUtil.getInstance().getBean(springBeanIdentifier);
+		} catch(Exception e) {
+			logger.log(Level.SEVERE, "Error getting specified Spring bean: " + springBeanIdentifier, e);
 		}
-		ss.addScript(getScriptForCommentsList(uri, id));
-		return true;
+		
+		return null;
 	}
 	
-	public int getCommentsCount(String uri) {
-		Feed comments = getCommentsFeed(uri, null);
+	public int getCommentsCount(String uri, String springBeanIdentifier, String identifier, IWContext iwc) {
+		Feed comments = getCommentsFeed(uri, springBeanIdentifier, identifier, iwc);
 		if (comments == null) {
 			return 0;
 		}
@@ -525,17 +587,35 @@ public class CommentsEngineBean extends IBOSessionBean implements CommentsEngine
 		return comments.getEntries().size();
 	}
 	
-	private synchronized Feed getCommentsFeed(String uri, IWContext iwc) {
+	private synchronized Feed getCommentsFeed(String uri, String springBeanIdentifier, String identifier, IWContext iwc) {
+		CommentsPersistenceManager commentsManager = getCommentsManager(springBeanIdentifier);
+		if (commentsManager != null) {
+			return commentsManager.getCommentsFeed(iwc, identifier);
+		}
+		
 		Feed cachedFeed = getFeedFromCache(uri, iwc);
 		if (cachedFeed != null) {
 			return cachedFeed;
 		}
 		
-		if (uri == null) {
+		if (StringUtil.isEmpty(uri)) {
 			return null;
 		}
-		ThemesHelper helper = ThemesHelper.getInstance();
-		if (!helper.existFileInSlide(uri)) {
+		IWSlideService slide = getSlideService();
+		if (slide == null) {
+			return null;
+		}
+		WebdavResource commentsResource = null;
+		try {
+			commentsResource = slide.getWebdavResourceAuthenticatedAsRoot(uri);
+		} catch (HttpException e) {
+			e.printStackTrace();
+		} catch (RemoteException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		if (commentsResource == null || !commentsResource.getExistence()) {
 			return null;
 		}
 		
@@ -543,7 +623,12 @@ public class CommentsEngineBean extends IBOSessionBean implements CommentsEngine
 		if (rss == null) {
 			return null;
 		}
-		SyndFeed comments = rss.getFeed(helper.getFullWebRoot() + uri);
+		User currentUser = null;
+		try {
+			currentUser = iwc == null ? null : iwc.getCurrentUser();
+		} catch(NotLoggedOnException e) {}
+		
+		SyndFeed comments = rss.getFeedAuthenticatedByUser(new StringBuilder(ThemesHelper.getInstance().getFullWebRoot()).append(uri).toString(), currentUser);
 		if (comments == null) {
 			return null;
 		}
@@ -576,6 +661,8 @@ public class CommentsEngineBean extends IBOSessionBean implements CommentsEngine
 			commentsMap = new HashMap<String, Feed>();
 		}
 		commentsMap.put(uri, comments);
+		
+		return;
 	}
 	
 	@SuppressWarnings("unchecked")
@@ -747,34 +834,34 @@ public class CommentsEngineBean extends IBOSessionBean implements CommentsEngine
 		if (iwc == null) {
 			return info;
 		}
-		IWResourceBundle resourceBundle = null;
+		IWResourceBundle iwrb = null;
 		try {
-			resourceBundle = ArticleUtil.getBundle().getResourceBundle(iwc);
+			iwrb = ArticleUtil.getBundle().getResourceBundle(iwc);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		if (resourceBundle == null) {
+		if (iwrb == null) {
 			return info;
 		}
 		
 		try {
 			IWBundle bundle = ArticleUtil.getBundle();
-			info.add(resourceBundle.getLocalizedString("posted", "Posted"));								// 0
-			info.add(resourceBundle.getLocalizedString("loading_comments", "Loading comments..."));			// 1
-			info.add(resourceBundle.getLocalizedString("atom_feed", "Atom Feed"));							// 2
-			info.add(ThemesHelper.getInstance().getFullServerName(iwc) + CoreConstants.WEBDAV_SERVLET_URI);	// 3
-			info.add(resourceBundle.getLocalizedString("need_send_notification", "Do you wish to receive notifications about new comments?"));	// 4
-			info.add(resourceBundle.getLocalizedString("yes", "Yes"));										// 5
-			info.add(resourceBundle.getLocalizedString("no", "No"));										// 6
-			info.add(resourceBundle.getLocalizedString("enter_email_text", "Please enter your e-mail!"));	// 7
-			info.add(resourceBundle.getLocalizedString("saving", "Saving..."));								// 8
-			info.add(bundle.getVirtualPathWithFileNameString(CommentsViewer.FEED_IMAGE));					// 9
-			info.add(bundle.getVirtualPathWithFileNameString(CommentsViewer.DELETE_IMAGE));					// 10
-			info.add(resourceBundle.getLocalizedString("deleting", "Deleting..."));							// 11
-			info.add(resourceBundle.getLocalizedString("are_you_sure", "Are you sure?"));					// 12
-			info.add(resourceBundle.getLocalizedString("delete_all_comments", "Delete comments"));			// 13
-			info.add(resourceBundle.getLocalizedString("delete_comment", "Delete this comment"));			// 14
-			info.add(bundle.getVirtualPathWithFileNameString("images/comment_delete.png"));					// 15
+			info.add(iwrb.getLocalizedString("comments_viewer.posted", "Posted"));								// 0
+			info.add(iwrb.getLocalizedString("comments_viewer.loading_comments", "Loading comments..."));		// 1
+			info.add(iwrb.getLocalizedString("comments_viewer.atom_feed", "Atom Feed"));						// 2
+			info.add(ThemesHelper.getInstance().getFullServerName(iwc) + CoreConstants.WEBDAV_SERVLET_URI);		// 3
+			info.add(iwrb.getLocalizedString("comments_viewer.need_send_notification", "Do you wish to receive notifications about new comments?"));	// 4
+			info.add(iwrb.getLocalizedString("yes", "Yes"));													// 5
+			info.add(iwrb.getLocalizedString("no", "No"));														// 6
+			info.add(iwrb.getLocalizedString("comments_viewer.enter_email_text", "Please enter your e-mail!"));	// 7
+			info.add(iwrb.getLocalizedString("comments_viewer.saving", "Saving..."));							// 8
+			info.add(bundle.getVirtualPathWithFileNameString(CommentsViewer.FEED_IMAGE));						// 9
+			info.add(bundle.getVirtualPathWithFileNameString(CommentsViewer.DELETE_IMAGE));						// 10
+			info.add(iwrb.getLocalizedString("comments_viewer.deleting", "Deleting..."));						// 11
+			info.add(iwrb.getLocalizedString("are_you_sure", "Are you sure?"));									// 12
+			info.add(iwrb.getLocalizedString("comments_viewer.delete_all_comments", "Delete comments"));		// 13
+			info.add(iwrb.getLocalizedString("comments_viewer.delete_comment", "Delete this comment"));			// 14
+			info.add(bundle.getVirtualPathWithFileNameString("images/comment_delete.png"));						// 15
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -790,12 +877,15 @@ public class CommentsEngineBean extends IBOSessionBean implements CommentsEngine
 		return ContentUtil.hasContentEditorRoles(iwc);
 	}
 	
-	public List<String> deleteComments(String id, String commentId, String linkToComments) {
-		if (id == null || linkToComments == null) {
+	public CommentsViewerProperties deleteComments(CommentsViewerProperties properties) {
+		if (properties == null) {
 			return null;
 		}
+		
+		String linkToComments = properties.getUri();
+		String commentId = properties.getId();
 		IWContext iwc = CoreUtil.getIWContext();
-		Feed comments = getCommentsFeed(linkToComments, iwc);
+		Feed comments = getCommentsFeed(linkToComments, properties.getSpringBeanIdentifier(), properties.getIdentifier(), iwc);
 		if (comments == null) {
 			return null;
 		}
@@ -808,17 +898,17 @@ public class CommentsEngineBean extends IBOSessionBean implements CommentsEngine
 			comments.setEntries(getUpdatedEntries(initEntries(comments.getEntries()), commentId));
 		}
 		
-		clearArticleCache(iwc);
-		
-		putFeedToCache(comments, linkToComments, iwc);
-		if (!uploadFeed(linkToComments, comments, iwc, true)) {
-			return null;
+		CommentsPersistenceManager commentsManager = getCommentsManager(properties.getSpringBeanIdentifier());
+		if (commentsManager == null) {
+			clearArticleCache(iwc);
+			
+			putFeedToCache(comments, linkToComments, iwc);
 		}
 		
-		List<String> params = new ArrayList<String>();
-		params.add(id);
-		params.add(linkToComments);
-		return params;
+		String identifier = properties.getIdentifier();
+		boolean deleted = commentsManager == null ? uploadFeed(linkToComments, comments, iwc, true) : commentsManager.storeFeed(identifier, comments);
+		properties.setActionSuccess(deleted);
+		return properties;
 	}
 	
 	private List<Entry> getUpdatedEntries(List<Entry> entries, String commentId) {
@@ -840,8 +930,9 @@ public class CommentsEngineBean extends IBOSessionBean implements CommentsEngine
 		return entries;
 	}
 	
-	public boolean initCommentsFeed(IWContext iwc, String uri, String user, Timestamp date, String language) {
-		Feed initialFeed = createFeed(uri, user, date, language, iwc);
+	public boolean initCommentsFeed(IWContext iwc, String uri, String user, Timestamp date, String language, String feedTitle, String feedSubtitle,
+			CommentsPersistenceManager commentsManager) {
+		Feed initialFeed = createFeed(uri, user, date, language, iwc, feedTitle, feedSubtitle, commentsManager);
 		if (initialFeed == null) {
 			return false;
 		}
@@ -851,6 +942,11 @@ public class CommentsEngineBean extends IBOSessionBean implements CommentsEngine
 	
 	private boolean uploadFeed(String uri, Feed comments, IWContext iwc, boolean useThread) {
 		if (uri == null || comments == null || iwc == null) {
+			return false;
+		}
+		
+		IWSlideService service = getSlideService();
+		if (service == null) {
 			return false;
 		}
 		
@@ -872,16 +968,24 @@ public class CommentsEngineBean extends IBOSessionBean implements CommentsEngine
 			fileBase = uri.substring(0, index + 1);
 			fileName = uri.substring(index + 1);
 		}
-		IWSlideService service = ThemesHelper.getInstance().getSlideService(iwc);
 		Thread uploader = new Thread(new CommentsFeedUploader(service, fileBase, fileName, commentsContent));
 		if (useThread) {
 			uploader.start();
 		}
-		else{
+		else {
 			uploader.run();
 		}
 		
 		return true;
+	}
+	
+	private IWSlideService getSlideService() {
+		try {
+			return (IWSlideService) IBOLookup.getServiceInstance(IWMainApplication.getDefaultIWApplicationContext(), IWSlideService.class);
+		} catch (IBOLookupException e) {
+			e.printStackTrace();
+		}
+		return null;
 	}
 	
 	private String getLocalizedString(IWContext iwc, String key, String defaultValue) {

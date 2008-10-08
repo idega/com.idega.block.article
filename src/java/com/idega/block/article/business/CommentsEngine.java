@@ -6,6 +6,8 @@ import java.sql.Timestamp;
 import java.util.List;
 
 import com.idega.block.article.bean.ArticleComment;
+import com.idega.block.article.bean.CommentsViewerProperties;
+import com.idega.builder.bean.AdvancedProperty;
 import com.idega.business.IBOSession;
 import com.idega.presentation.IWContext;
 
@@ -13,27 +15,27 @@ public interface CommentsEngine extends IBOSession {
 	/**
 	 * @see com.idega.block.article.business.CommentsEngineBean#addComment
 	 */
-	public boolean addComment(String user, String subject, String email, String body, String uri, boolean notify, String id, String instanceId) throws RemoteException;
+	public boolean addComment(CommentsViewerProperties properties) throws RemoteException;
 
 	/**
 	 * @see com.idega.block.article.business.CommentsEngineBean#getCommentsForAllPages
 	 */
-	public boolean getCommentsForAllPages(String uri, String id) throws RemoteException;
+	public boolean getCommentsForAllPages(CommentsViewerProperties properties) throws RemoteException;
 
 	/**
 	 * @see com.idega.block.article.business.CommentsEngineBean#getComments
 	 */
-	public List<ArticleComment> getComments(String uri) throws RemoteException;
+	public List<ArticleComment> getComments(CommentsViewerProperties properties) throws RemoteException;
 
 	/**
 	 * @see com.idega.block.article.business.CommentsEngineBean#getCommentsForCurrentPage
 	 */
-	public boolean getCommentsForCurrentPage(String uri, String id) throws RemoteException;
+	//public boolean getCommentsForCurrentPage(String uri, String id, boolean newestEntriesOnTop) throws RemoteException;
 
 	/**
 	 * @see com.idega.block.article.business.CommentsEngineBean#getCommentsCount
 	 */
-	public int getCommentsCount(String uri) throws RemoteException;
+	public int getCommentsCount(String uri, String springBeanIdentifier, String identifier, IWContext iwc) throws RemoteException;
 
 	/**
 	 * @see com.idega.block.article.business.CommentsEngineBean#setModuleProperty
@@ -58,7 +60,7 @@ public interface CommentsEngine extends IBOSession {
 	/**
 	 * @see com.idega.block.article.business.CommentsEngineBean#deleteComments
 	 */
-	public List<String> deleteComments(String id, String commentId, String linkToComments) throws RemoteException;
+	public CommentsViewerProperties deleteComments(CommentsViewerProperties properties) throws RemoteException;
 	
 	/**
 	 * @see com.idega.block.article.business.CommentsEngineBean#getFixedCommentsUri
@@ -68,7 +70,10 @@ public interface CommentsEngine extends IBOSession {
 	/**
 	 * @see com.idega.block.article.business.CommentsEngineBean#getCommentsFromUris
 	 */
-	public List<List<ArticleComment>> getCommentsFromUris(List<String> uris);
+	public List<List<ArticleComment>> getCommentsFromUris(List<AdvancedProperty> commentsProperties);
 	
-	public boolean initCommentsFeed(IWContext iwc, String uri, String user, Timestamp date, String language);
+	public boolean initCommentsFeed(IWContext iwc, String uri, String user, Timestamp date, String language, String feedTitle, String feedSubtitle,
+			CommentsPersistenceManager commentsManager);
+	
+	public CommentsPersistenceManager getCommentsManager(String springBeanIdentifier);
 }
