@@ -28,11 +28,6 @@ public interface CommentsEngine extends IBOSession {
 	public List<ArticleComment> getComments(CommentsViewerProperties properties) throws RemoteException;
 
 	/**
-	 * @see com.idega.block.article.business.CommentsEngineBean#getCommentsForCurrentPage
-	 */
-	//public boolean getCommentsForCurrentPage(String uri, String id, boolean newestEntriesOnTop) throws RemoteException;
-
-	/**
 	 * @see com.idega.block.article.business.CommentsEngineBean#getCommentsCount
 	 */
 	public int getCommentsCount(String uri, String springBeanIdentifier, String identifier, IWContext iwc) throws RemoteException;
@@ -46,16 +41,6 @@ public interface CommentsEngine extends IBOSession {
 	 * @see com.idega.block.article.business.CommentsEngineBean#hideOrShowComments
 	 */
 	public boolean hideOrShowComments() throws RemoteException;
-
-	/**
-	 * @see com.idega.block.article.business.CommentsEngineBean#getInitInfoForComments
-	 */
-	public List<String> getInitInfoForComments() throws RemoteException;
-
-	/**
-	 * @see com.idega.block.article.business.CommentsEngineBean#getUserRights
-	 */
-	public boolean getUserRights() throws RemoteException;
 
 	/**
 	 * @see com.idega.block.article.business.CommentsEngineBean#deleteComments

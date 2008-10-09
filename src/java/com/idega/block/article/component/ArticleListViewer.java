@@ -1,5 +1,5 @@
 /*
- * $Id: ArticleListViewer.java,v 1.25 2008/06/06 16:22:46 valdas Exp $
+ * $Id: ArticleListViewer.java,v 1.26 2008/10/09 12:40:06 valdas Exp $
  * Created on 24.1.2005
  *
  * Copyright (C) 2005 Idega Software hf. All Rights Reserved.
@@ -42,10 +42,10 @@ import com.idega.util.PresentationUtil;
  * for the article module.
  * </p>
  * 
- *  Last modified: $Date: 2008/06/06 16:22:46 $ by $Author: valdas $
+ *  Last modified: $Date: 2008/10/09 12:40:06 $ by $Author: valdas $
  * 
  * @author <a href="mailto:tryggvi@idega.com">Tryggvi Larusson</a>
- * @version $Revision: 1.25 $
+ * @version $Revision: 1.26 $
  */
 public class ArticleListViewer extends ContentItemListViewer {
 
@@ -298,16 +298,13 @@ public class ArticleListViewer extends ContentItemListViewer {
 	private void addCommentsScript(IWContext iwc, CommentsViewer comments) {
 		if (needAddCommentsStuff(iwc, false)) {
 			List<String> sources = comments.getJavaScriptSources(iwc);
-			List<String> actions = comments.getJavaScriptActions();
 			if (CoreUtil.isSingleComponentRenderingProcess(iwc)) {
 				Layer script = new Layer();
 				script.add(PresentationUtil.getJavaScriptSourceLines(sources));
-				script.add(PresentationUtil.getJavaScriptActions(actions));
 				getFacets().put(ContentItemViewer.FACET_COMMENTS_SCRIPTS, script);
 			}
 			else {
 				PresentationUtil.addJavaScriptSourcesLinesToHeader(iwc, sources);
-				PresentationUtil.addJavaScriptActionsToBody(iwc, actions);
 			}
 		}
 	}

@@ -1,5 +1,47 @@
+if (CommentsViewer == null) var CommentsViewer = {};
+
+CommentsViewer.localizations = {
+	posted: 'Posted',
+	loadingComments: 'Loading comments...',
+	atomLink: 'Atom Feed',
+	addNotification: 'Do you wish to receive notifications about new comments?',
+	yes: 'Yes',
+	no: 'No',
+	enterEmail: 'Please enter your e-mail!',
+	saving: 'Saving...',
+	deleting: 'Deleting...',
+	areYouSure: 'Are you sure?',
+	deleteComments: 'Delete comments',
+	deleteComment: 'Delete this comment'
+}
+
+CommentsViewer.info = {
+	commentsServer: '127.0.0.1',
+	feedImage: '/idegaweb/bundles/com.idega.block.article.bundle/resources/images/feed.png',
+	deleteImage: '/idegaweb/bundles/com.idega.block.article.bundle/resources/images/comments_delete.png',
+	deleteCommentImage: '/idegaweb/bundles/com.idega.block.article.bundle/resources/images/comment_delete.png',
+	hasValidRights: false
+}
+
+CommentsViewer.commentInfo = [];
+
+CommentsViewer.setLocalization = function(localizations) {
+	if (localizations == null) {
+		return false;
+	}
+	
+	CommentsViewer.localizations = localizations;
+}
+
+CommentsViewer.setStartInfo = function(startInfo) {
+	if (startInfo == null) {
+		return false;
+	}
+	
+	CommentsViewer.info = startInfo;
+}
+
 var IS_COMMENT_PANEL_ADDED = false;
-var SHOW_COMMENTS_LIST = false;
 var SET_REVERSE_AJAX = false;
 var NEED_TO_CHECK_COMMENTS_SIZE = true;
 var NEED_TO_NOTIFY = false;
@@ -22,133 +64,15 @@ var LABEL_COMMENT_FORM = 'Comment form';
 var COMMENT_PANEL_ID = 'comment_panel';
 var COMMENTS_BLOCK_LIST_ID = 'comments_block_list';
 
-var COMMENTS_POSTED_LABEL = 'Posted';
-var COMMENTS_MESSAGE = 'Loading comments...';
-var COMMENTS_ATOM_LINK_TITLE = 'Atom Feed';
-var COMMENTS_ATOMS_SERVER = '127.0.0.1';
-var ADD_NOTIFICATION_TEXT = 'Do you wish to receive notifications about new comments?';
-var COMMENTS_YES = 'Yes';
-var COMMENTS_NO = 'No';
-var COMMENTS_ENTER_EMAIL = 'Please enter your e-mail!';
-var COMMENTS_SAVING_TEXT = 'Saving...';
-var LINK_TO_ATOM_FEED_IMAGE = '/idegaweb/bundles/com.idega.block.article.bundle/resources/images/feed.png';
-var LINK_TO_DELETE_COMMENTS_IMAGE = '/idegaweb/bundles/com.idega.block.article.bundle/resources/images/comments_delete.png';
-var LINK_TO_DELETE_COMMENT_IMAGE = '/idegaweb/bundles/com.idega.block.article.bundle/resources/images/comment_delete.png';
-var DELETING_MESSAGE_TEXT = 'Deleting...';
-var ARE_YOU_SURE_FOR_DELETING = 'Are you sure?';
-var DELETE_COMMENTS_LABEL = 'Delete comments';
-var DELETE_COMMENT_LABEL = 'Delete this comment';
-
-var HAS_COMMENT_VIEWER_VALID_RIGHTS = false;
-var ADDED_LINK_TO_ATOM_IN_BODY = false;
-var NEWEST_ENTRIES_ON_TOP = false;
-
-var COMMENTS_LINK_TO_FILE = '/files';
-var SHOW_COMMENTS_LIST_ON_LOAD = false;
-
 var GLOBAL_COMMENTS_MARK_ID = null;
 var ENABLE_REVERSE_AJAX_TIME_OUT_ID = 0;
 
-var COMMENTS_INFO = new Array();
+function addCommentStartInfo(linkToComments, commentsId, showCommentsListOnLoad, newestEntriesOnTop, springBeanIdentifier, identifier) {
+	var commentsInfo = new SingleCommentInfo(linkToComments, commentsId, springBeanIdentifier, identifier, showCommentsListOnLoad, newestEntriesOnTop);
+	CommentsViewer.commentInfo.push(commentsInfo);
 
-/** Setters - getters  begins**/
-function setPostedLabel(postedLabel) {
-	COMMENTS_POSTED_LABEL = postedLabel;
-}
-function getPostedLabel() {
-	return COMMENTS_POSTED_LABEL;
-}
-
-function setCommentsLoadingMessage(message) {
-	COMMENTS_MESSAGE = message;
-}
-function getCommentsLoadingMessage() {
-	return COMMENTS_MESSAGE;
-}
-
-function setCommentsAtomLinkTitle(title) {
-	COMMENTS_ATOM_LINK_TITLE = title;
-}
-function getCommentsAtomLinkTitle() {
-	return COMMENTS_ATOM_LINK_TITLE;
-}
-
-function setCommentsAtomsServer(atomServer) {
-	COMMENTS_ATOMS_SERVER = atomServer;
-}
-function getCommentsAtomsServer() {
-	return COMMENTS_ATOMS_SERVER;
-}
-
-function getAddNotificationText() {
-	return ADD_NOTIFICATION_TEXT;
-}
-function setAddNotificationText(text) {
-	ADD_NOTIFICATION_TEXT = text;
-}
-
-function getYesText() {
-	return COMMENTS_YES;
-}
-function setYesText(text) {
-	COMMENTS_YES = text;
-}
-
-function getNoText() {
-	return COMMENTS_NO;
-}
-function setNoText(text) {
-	COMMENTS_NO = text;
-}
-
-function getEnterEmailText() {
-	return COMMENTS_ENTER_EMAIL;
-}
-function setEnterEmailText(text) {
-	COMMENTS_ENTER_EMAIL = text;
-}
-
-function setCommentsSavingText(text) {
-	COMMENTS_SAVING_TEXT = text;
-}
-function getCommentsSavingText() {
-	return COMMENTS_SAVING_TEXT;
-}
-
-function setHasCommentViewerValidRights(rights) {
-	HAS_COMMENT_VIEWER_VALID_RIGHTS = rights;
-}
-function getHasCommentViewerValidRights() {
-	return HAS_COMMENT_VIEWER_VALID_RIGHTS;
-}
-
-function setLinkToAtomFeedImage(link) {
-	LINK_TO_ATOM_FEED_IMAGE = link;
-}
-function getLinkToAtomFeedImage() {
-	return LINK_TO_ATOM_FEED_IMAGE;
-}
-
-function setLinkToComments(link) {
-	COMMENTS_LINK_TO_FILE = link;
-}
-function getLinkToComments() {
-	return COMMENTS_LINK_TO_FILE;
-}
-
-function isShowCommentsListOnLoad() {
-	return SHOW_COMMENTS_LIST_ON_LOAD;
-}
-
-function setCommentStartInfo(linkToComments, commentsId, showCommentsList, newestEntriesOnTop, springBeanIdentifier, identifier) {
-	COMMENTS_LINK_TO_FILE = linkToComments;
-	GLOBAL_COMMENTS_MARK_ID = commentsId;
-	SHOW_COMMENTS_LIST_ON_LOAD = showCommentsList;
-	NEWEST_ENTRIES_ON_TOP = newestEntriesOnTop;
-
-	if (showCommentsList) {
-		var commentsInfo = new SingleCommentInfo(linkToComments, commentsId, springBeanIdentifier, identifier, showCommentsList, newestEntriesOnTop);
-		COMMENTS_INFO.push(commentsInfo);
+	if (showCommentsListOnLoad) {
+		getComments(linkToComments, commentsId);
 	}
 }
 
@@ -160,32 +84,9 @@ function SingleCommentInfo(linkToComments, commentsId, springBeanIdentifier, ide
 	
 	this.showCommentsList = showCommentsList;
 	this.newestEntriesOnTop = newestEntriesOnTop;
+	
+	this.commentsListOpened = false;
 }
-
-function setLinkToDeleteImage(deleteImage) {
-	LINK_TO_DELETE_COMMENTS_IMAGE = deleteImage;
-}
-
-function setDeletingCommentMessageText(text) {
-	DELETING_MESSAGE_TEXT = text;
-}
-
-function setAreYouSureForDeletingComments(text) {
-	ARE_YOU_SURE_FOR_DELETING = text;
-}
-
-function setDeleteCommentsLabel(text) {
-	DELETE_COMMENTS_LABEL = text;
-}
-
-function setDeleteCommentLabel(text) {
-	DELETE_COMMENT_LABEL = text;
-}
-
-function setDeleteCommentImage(link) {
-	LINK_TO_DELETE_COMMENT_IMAGE = link;
-}
-/** Setters - getters ends**/
 
 function setCommentValues(user, subject, email, body) {
 	USER = user;
@@ -203,18 +104,17 @@ function addCommentPanel(id, linkToComments, lblUser, lblSubject, lblComment, lb
 	LABEL_USER = lblUser;
 	LABEL_SUBJECT = lblSubject;
 	LABEL_COMMENT = lblComment;
-	setPostedLabel(lblPosted);
+	CommentsViewer.localizations.posted = lblPosted;
 	LABEL_SEND = lblSend;
 	LABEL_SENDING = lblSending;
 	LOGGED_USER = loggedUser;
-	setLinkToComments(linkToComments);
 	LABEL_EMAIL = lblEmail;
 	LABEL_COMMENT_FORM = lblCommentForm;
 	
 	if (closeCommentsPanel(commentsId)) {
 		return false;
 	}
-	if (id == null || getLinkToComments() == null) {
+	if (id == null || linkToComments == null) {
 		return false;
 	}
 	var container = $(id);
@@ -241,7 +141,7 @@ function getCommentPane(linkToComments, addEmail, commentsId, instanceId, spring
 	
 	var legend = new Element('legend');
 	legend.addClass('comment_legend');
-	legend.appendText('Comment form');
+	legend.appendText(LABEL_COMMENT_FORM);
 	fieldset.appendChild(legend);
 	
 	var mainCommentContainer = new Element('div');
@@ -295,7 +195,7 @@ function getCommentPane(linkToComments, addEmail, commentsId, instanceId, spring
 		needToNotifyContainer.addClass('commentsNotify');
 		
 		var notificationTextContainer = new Element('div');
-		notificationTextContainer.appendText(getAddNotificationText());
+		notificationTextContainer.appendText(CommentsViewer.localizations.addNotification);
 		needToNotifyContainer.appendChild(notificationTextContainer);
 		
 		needToNotifyContainer.appendChild(new Element('div').addClass('spacer'));
@@ -313,7 +213,7 @@ function getCommentPane(linkToComments, addEmail, commentsId, instanceId, spring
 		
 		var sendNotificationLabel = new Element('label');
 		sendNotificationLabel.setProperty('for', 'comments_send_notifications');
-		sendNotificationLabel.appendText(getYesText());
+		sendNotificationLabel.appendText(CommentsViewer.localizations.yes);
 		sendNotificationContainer.appendChild(sendNotificationLabel);
 		
 		var notSendNotification = new Element('input');
@@ -333,7 +233,7 @@ function getCommentPane(linkToComments, addEmail, commentsId, instanceId, spring
 		
 		var notSendNotificationLabel = new Element('label');
 		notSendNotificationLabel.setProperty('for', 'comments_not_send_notifications');
-		notSendNotificationLabel.appendText(getNoText());
+		notSendNotificationLabel.appendText(CommentsViewer.localizations.no);
 		sendNotificationContainer.appendChild(notSendNotificationLabel);
 		
 		needToNotifyContainer.appendChild(sendNotificationContainer);
@@ -392,7 +292,7 @@ function closeCommentPanelAndSendComment(userId, subjectId, emailId, bodyId, lin
 	}
 	if (NEED_TO_NOTIFY) {
 		if (emailValue == '') {
-			alert(getEnterEmailText());
+			alert(CommentsViewer.localizations.enterEmail);
 			return false;
 		}
 	}
@@ -401,6 +301,7 @@ function closeCommentPanelAndSendComment(userId, subjectId, emailId, bodyId, lin
 	setCommentValues(user.value, subject.value, emailValue, body.value);
 	var commentProperties = new CommentsViewerProperties(USER, SUBJECT, EMAIL, BODY, linkToComments, commentsId, instanceId, springBeanIdentifier, identifier,
 								NEED_TO_NOTIFY, newestEntriesOnTop);
+	GLOBAL_COMMENTS_MARK_ID = commentsId;
 	CommentsEngine.addComment(commentProperties, {
 		callback: function(result) {
 			closeAllLoadingMessages();
@@ -492,13 +393,13 @@ function addComment(index, articleComment, commentsId, linkToComments) {
 	var commentValue = new Element('div');
 	commentValue.addClass('commentItem');
 	
-	if (HAS_COMMENT_VIEWER_VALID_RIGHTS) {
+	if (CommentsViewer.info.hasValidRights) {
 		var deleteImage = new Element('img');
 		deleteImage.setProperty('id', commentsId + 'delete_article_comment' + articleComment.id);
-		deleteImage.setProperty('src', LINK_TO_DELETE_COMMENT_IMAGE);
-		deleteImage.setProperty('title', DELETE_COMMENT_LABEL);
-		deleteImage.setProperty('alt', DELETE_COMMENT_LABEL);
-		deleteImage.setProperty('name', DELETE_COMMENT_LABEL);
+		deleteImage.setProperty('src', CommentsViewer.info.deleteCommentImage);
+		deleteImage.setProperty('title', CommentsViewer.localizations.deleteComment);
+		deleteImage.setProperty('alt', CommentsViewer.localizations.deleteComment);
+		deleteImage.setProperty('name', CommentsViewer.localizations.deleteComment);
 		deleteImage.addClass('deleteCommentsImage');
 		deleteImage.addEvent('click', function() {
 			deleteComments(commentsId, articleComment.id, linkToComments, getCommentsInfo(linkToComments).newestEntriesOnTop);
@@ -555,13 +456,31 @@ function getCommentsInfo(linkToComments) {
 		return null;
 	}
 	
-	if (COMMENTS_INFO == null || COMMENTS_INFO.length == 0) {
+	if (CommentsViewer.commentInfo == null || CommentsViewer.commentInfo.length == 0) {
 		return null;
 	}
 	
-	for (var i = 0; i < COMMENTS_INFO.length; i++) {
-		if (COMMENTS_INFO[i].linkToComments == linkToComments) {
-			return COMMENTS_INFO[i];
+	for (var i = 0; i < CommentsViewer.commentInfo.length; i++) {
+		if (CommentsViewer.commentInfo[i].linkToComments == linkToComments) {
+			return CommentsViewer.commentInfo[i];
+		}
+	}
+	
+	return null;
+}
+
+function getCommentsInfoById(id) {
+	if (id == null) {
+		return null;
+	}
+	
+	if (CommentsViewer.commentInfo == null || CommentsViewer.commentInfo.length == 0) {
+		return null;
+	}
+	
+	for (var i = 0; i < CommentsViewer.commentInfo.length; i++) {
+		if (CommentsViewer.commentInfo[i].commentsId == id) {
+			return CommentsViewer.commentInfo[i];
 		}
 	}
 	
@@ -569,25 +488,25 @@ function getCommentsInfo(linkToComments) {
 }
 
 function getAllComments() {
-	if (COMMENTS_INFO == null) {
+	if (CommentsViewer.commentInfo == null) {
 		return false;
 	}
 	
 	var properties = new Array();
-	for (var i = 0; i < COMMENTS_INFO.length; i++) {
-		properties.push({id: COMMENTS_INFO[i].linkToComments, value: COMMENTS_INFO[i].newestEntriesOnTop});
+	for (var i = 0; i < CommentsViewer.commentInfo.length; i++) {
+		properties.push({id: CommentsViewer.commentInfo[i].linkToComments, value: CommentsViewer.commentInfo[i].newestEntriesOnTop});
 	}
 	
-	showLoadingMessage(getCommentsLoadingMessage());
+	showLoadingMessage(CommentsViewer.localizations.loadingComments);
 	CommentsEngine.getCommentsFromUris(properties, {
 		callback: function(allComments) {
 			closeAllLoadingMessages();
 			
 			if (allComments != null) {
-				if (allComments.length == COMMENTS_INFO.length) {
+				if (allComments.length == CommentsViewer.commentInfo.length) {
 					for (var i = 0; i < allComments.length; i++) {
-						GLOBAL_COMMENTS_MARK_ID = null;
-						getCommentsCallback(allComments[i], COMMENTS_INFO[i].commentsId, COMMENTS_INFO[i].linkToComments, COMMENTS_INFO[i].newestEntriesOnTop);
+						getCommentsCallback(allComments[i], CommentsViewer.commentInfo[i].commentsId, CommentsViewer.commentInfo[i].linkToComments,
+											CommentsViewer.commentInfo[i].newestEntriesOnTop);
 					}
 				}
 			}
@@ -601,7 +520,7 @@ function getComments(linkToComments, commentsId) {
 		return false;
 	}
 	
-	showLoadingMessage(getCommentsLoadingMessage());
+	showLoadingMessage(CommentsViewer.localizations.loadingComments);
 	var newestEntriesOnTop = commentsInfo.newestEntriesOnTop;
 	CommentsEngine.getComments(new CommentsViewerProperties(null, null, null, null, linkToComments, commentsId, null, commentsInfo.springBeanIdentifier,
 															commentsInfo.identifier, true, newestEntriesOnTop), {
@@ -620,19 +539,6 @@ function getCommentsCallback(comments, id, linkToComments, newestEntriesOnTop) {
 		closeAllLoadingMessages();
 		return false;
 	}
-	
-	if ($(id) == null && GLOBAL_COMMENTS_MARK_ID != null) {
-		id = GLOBAL_COMMENTS_MARK_ID;
-	}
-	
-	/*
-	if (comments.length == 0) {
-		removeAtomAndDeleteButtonsForComments(id);
-	}
-	else {
-		addAtomButtonForComments(id, linkToComments);
-	}
-	*/
 	
 	removeCommentsList(id, comments.length);
 	for (var i = 0; i < comments.length; i++) {
@@ -692,12 +598,22 @@ function hideCommentsList(commentsId) {
 	if (list != null) {
 		list.style.display = 'none';
 	}
+	
+	var commentInfo = getCommentsInfoById(commentsId);
+	if (commentInfo != null) {
+		commentInfo.commentsListOpened = false;
+	}
 }
 
 function showCommentsList(commentsId) {
 	var list = $(commentsId + COMMENTS_BLOCK_LIST_ID);
 	if (list != null) {
 		list.style.display = 'block';
+	}
+	
+	var commentInfo = getCommentsInfoById(commentsId);
+	if (commentInfo != null) {
+		commentInfo.commentsListOpened = true;
 	}
 }
 
@@ -759,7 +675,7 @@ function setNeedToNotify(id, otherId) {
 
 function enableComments(enable, pageKey, moduleId, propName, cacheKey) {
 	CHECKED_BOX_MANUALY = true;
-	showLoadingMessage(getCommentsSavingText());
+	showLoadingMessage(CommentsViewer.localizations.saving);
 	CommentsEngine.setModuleProperty(pageKey, moduleId, propName, enable, cacheKey);
 }
 
@@ -776,7 +692,7 @@ function hideOrShowCommentsCallback(needToReload, id) {
 		reloadPage();
 	}
 	closeAllLoadingMessages();
-	if (getHasCommentViewerValidRights()) {
+	if (CommentsViewer.info.hasValidRights) {
 		if (CHECKED_BOX_MANUALY) {
 			CHECKED_BOX_MANUALY = false; // Original page, no actions to perform
 		}
@@ -786,44 +702,6 @@ function hideOrShowCommentsCallback(needToReload, id) {
 				checkBox.checked = !checkBox.checked;
 			}
 		}
-	}
-}
-
-function getInitInfoForCommentsCallback(list) {
-	if (list != null) {
-		if (list.length == 16) {
-			setPostedLabel(list[0]);
-			setCommentsLoadingMessage(list[1]);
-			setCommentsAtomLinkTitle(list[2]);
-			setCommentsAtomsServer(list[3]);
-			setAddNotificationText(list[4]);
-			setYesText(list[5]);
-			setNoText(list[6]);
-			setEnterEmailText(list[7]);
-			setCommentsSavingText(list[8]);
-			setLinkToAtomFeedImage(list[9]);
-			setLinkToDeleteImage(list[10]);
-			setDeletingCommentMessageText(list[11]);
-			setAreYouSureForDeletingComments(list[12]);
-			setDeleteCommentsLabel(list[13]);
-			setDeleteCommentLabel(list[14]);
-			setDeleteCommentImage(list[15]);
-		}
-	}
-	
-	CommentsEngine.getUserRights(getUserRightsCallback);
-}
-
-function getUserRightsCallback(rights) {
-	setHasCommentViewerValidRights(rights);
-	
-	if (COMMENTS_INFO == null || COMMENTS_INFO.length == 0) {
-		if (isShowCommentsListOnLoad()) {
-			SHOW_COMMENTS_LIST = true;
-			getComments(getLinkToComments());
-		}
-	} else {
-		getAllComments();
 	}
 }
 
@@ -867,7 +745,7 @@ function addAtomButtonForComments(commentsId, linkToComments, newestEntriesOnTop
 	// Link
 	var linkToFeed = new Element('a');
 	linkToFeed.setProperty('id', atomLinkId);
-	linkToFeed.setProperty('href', getCommentsAtomsServer() + linkToComments);
+	linkToFeed.setProperty('href', CommentsViewer.info.commentsServer + linkToComments);
 	linkToFeed.setProperty('rel', 'alternate');
 	linkToFeed.setProperty('type', 'application/atom+xml');
 		
@@ -875,23 +753,23 @@ function addAtomButtonForComments(commentsId, linkToComments, newestEntriesOnTop
 		
 	// Image
 	var image = new Element('img');
-	image.setProperty('src', getLinkToAtomFeedImage());
-	image.setProperty('title', getCommentsAtomLinkTitle());
-	image.setProperty('alt', getCommentsAtomLinkTitle());
-	image.setProperty('name', getCommentsAtomLinkTitle());
+	image.setProperty('src', CommentsViewer.info.feedImage);
+	image.setProperty('title', CommentsViewer.localizations.atomLink);
+	image.setProperty('alt', CommentsViewer.localizations.atomLink);
+	image.setProperty('name', CommentsViewer.localizations.atomLink);
 	linkToFeed.appendChild(image);
 		
 	container.appendChild(linkToFeed);
 	
-	if (HAS_COMMENT_VIEWER_VALID_RIGHTS) {
+	if (CommentsViewer.info.hasValidRights) {
 		container.appendText(' ');
 		
 		var deleteImage = new Element('img');
 		deleteImage.setProperty('id', commentsId + 'delete_article_comments');
-		deleteImage.setProperty('src', LINK_TO_DELETE_COMMENTS_IMAGE);
-		deleteImage.setProperty('title', DELETE_COMMENTS_LABEL);
-		deleteImage.setProperty('alt', DELETE_COMMENTS_LABEL);
-		deleteImage.setProperty('name', DELETE_COMMENTS_LABEL);
+		deleteImage.setProperty('src', CommentsViewer.info.deleteImage);
+		deleteImage.setProperty('title', CommentsViewer.localizations.deleteComments);
+		deleteImage.setProperty('alt', CommentsViewer.localizations.deleteComments);
+		deleteImage.setProperty('name', CommentsViewer.localizations.deleteComments);
 		deleteImage.addClass('deleteCommentsImage');
 		
 		deleteImage.addEvent('click', function() {
@@ -902,12 +780,8 @@ function addAtomButtonForComments(commentsId, linkToComments, newestEntriesOnTop
 	}
 }
 
-function setAddedLinkToAtomInBody(added) {
-	ADDED_LINK_TO_ATOM_IN_BODY = added;
-}
-
 function deleteComments(id, commentId, linkToComments, newestEntriesOnTop) {
-	var confirmed = confirm(ARE_YOU_SURE_FOR_DELETING);
+	var confirmed = confirm(CommentsViewer.localizations.areYouSure);
 	if (!confirmed) {
 		return false;
 	}
@@ -917,7 +791,7 @@ function deleteComments(id, commentId, linkToComments, newestEntriesOnTop) {
 		return false;
 	}
 	
-	showLoadingMessage(DELETING_MESSAGE_TEXT);
+	showLoadingMessage(CommentsViewer.localizations.deleting);
 	CommentsEngine.deleteComments(new CommentsViewerProperties(null, null, null, null, linkToComments, commentId, id, commentInfo.springBeanIdentifier,
 									commentInfo.identifier, true, newestEntriesOnTop), {
 		callback: function(properties) {
@@ -938,6 +812,7 @@ function deleteComments(id, commentId, linkToComments, newestEntriesOnTop) {
 }
 
 function needToShowCommentsList(commentsId) {
+	var workingWithCurrentComments = (GLOBAL_COMMENTS_MARK_ID != null && GLOBAL_COMMENTS_MARK_ID == commentsId);
 	var list = $(commentsId + COMMENTS_BLOCK_LIST_ID);
 	if (list == null) {
 		return true;
@@ -945,17 +820,22 @@ function needToShowCommentsList(commentsId) {
 	if (list.style.display == 'block') {
 		return false;
 	}
+	
+	if (!workingWithCurrentComments) {
+		var commentInfo = getCommentsInfoById(commentsId);
+		if (commentInfo == null) {
+			return false;
+		}
+		if (commentInfo.commentsListOpened) {
+			return true;
+		}
+		return false;
+	}
+	
 	return true;
 }
 
-function initComments() {
-	CommentsEngine.getInitInfoForComments(getInitInfoForCommentsCallback);
-}
-
-function getUpdatedCommentsFromServer() {
-	if (COMMENTS_INFO == null || COMMENTS_INFO.length == 0) {
-		getComments(getLinkToComments());
-	} else {
-		getAllComments();
-	}
+function getUpdatedCommentsFromServer(commentsId) {
+	GLOBAL_COMMENTS_MARK_ID = commentsId;
+	getAllComments();
 }

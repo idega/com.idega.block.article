@@ -26,7 +26,6 @@ import org.directwebremoting.impl.DefaultScriptSession;
 import com.idega.block.article.ArticleCacher;
 import com.idega.block.article.bean.ArticleComment;
 import com.idega.block.article.bean.CommentsViewerProperties;
-import com.idega.block.article.component.CommentsViewer;
 import com.idega.block.rss.business.RSSBusiness;
 import com.idega.builder.bean.AdvancedProperty;
 import com.idega.builder.business.BuilderLogicWrapper;
@@ -42,7 +41,6 @@ import com.idega.core.builder.business.BuilderService;
 import com.idega.core.builder.business.BuilderServiceFactory;
 import com.idega.core.cache.IWCacheManager2;
 import com.idega.dwr.business.ScriptCaller;
-import com.idega.idegaweb.IWBundle;
 import com.idega.idegaweb.IWMainApplication;
 import com.idega.idegaweb.IWResourceBundle;
 import com.idega.presentation.IWContext;
@@ -158,7 +156,8 @@ public class CommentsEngineBean extends IBOSessionBean implements CommentsEngine
 		}
 		
 		//	Updating clients with the newest comments
-		ScriptCaller scriptCaller = new ScriptCaller(WebContextFactory.get(), new ScriptBuffer("getUpdatedCommentsFromServer();"), true);
+		ScriptCaller scriptCaller = new ScriptCaller(WebContextFactory.get(), new ScriptBuffer("getUpdatedCommentsFromServer(").appendData(properties.getId())
+				.appendScript(");"), true);
 		scriptCaller.run();	//	Not thread!
 		
 		//	Sending notifications (if needed) about new comment
@@ -828,63 +827,22 @@ public class CommentsEngineBean extends IBOSessionBean implements CommentsEngine
 		executeScriptForAllPages(script);
 	}
 	
-	public List<String> getInitInfoForComments() {
-		List<String> info = new ArrayList<String>();
-		IWContext iwc = CoreUtil.getIWContext();
-		if (iwc == null) {
-			return info;
-		}
-		IWResourceBundle iwrb = null;
-		try {
-			iwrb = ArticleUtil.getBundle().getResourceBundle(iwc);
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		if (iwrb == null) {
-			return info;
-		}
-		
-		try {
-			IWBundle bundle = ArticleUtil.getBundle();
-			info.add(iwrb.getLocalizedString("comments_viewer.posted", "Posted"));								// 0
-			info.add(iwrb.getLocalizedString("comments_viewer.loading_comments", "Loading comments..."));		// 1
-			info.add(iwrb.getLocalizedString("comments_viewer.atom_feed", "Atom Feed"));						// 2
-			info.add(ThemesHelper.getInstance().getFullServerName(iwc) + CoreConstants.WEBDAV_SERVLET_URI);		// 3
-			info.add(iwrb.getLocalizedString("comments_viewer.need_send_notification", "Do you wish to receive notifications about new comments?"));	// 4
-			info.add(iwrb.getLocalizedString("yes", "Yes"));													// 5
-			info.add(iwrb.getLocalizedString("no", "No"));														// 6
-			info.add(iwrb.getLocalizedString("comments_viewer.enter_email_text", "Please enter your e-mail!"));	// 7
-			info.add(iwrb.getLocalizedString("comments_viewer.saving", "Saving..."));							// 8
-			info.add(bundle.getVirtualPathWithFileNameString(CommentsViewer.FEED_IMAGE));						// 9
-			info.add(bundle.getVirtualPathWithFileNameString(CommentsViewer.DELETE_IMAGE));						// 10
-			info.add(iwrb.getLocalizedString("comments_viewer.deleting", "Deleting..."));						// 11
-			info.add(iwrb.getLocalizedString("are_you_sure", "Are you sure?"));									// 12
-			info.add(iwrb.getLocalizedString("comments_viewer.delete_all_comments", "Delete comments"));		// 13
-			info.add(iwrb.getLocalizedString("comments_viewer.delete_comment", "Delete this comment"));			// 14
-			info.add(bundle.getVirtualPathWithFileNameString("images/comment_delete.png"));						// 15
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		
-		return info;
-	}
-	
-	public boolean getUserRights() {
-		IWContext iwc = CoreUtil.getIWContext();
-		if (iwc == null) {
-			return false;
-		}
-		return ContentUtil.hasContentEditorRoles(iwc);
-	}
-	
 	public CommentsViewerProperties deleteComments(CommentsViewerProperties properties) {
 		if (properties == null) {
+			return null;
+		}
+		IWContext iwc = CoreUtil.getIWContext();
+		if (iwc == null) {
+			return null;
+		}
+		if (!ContentUtil.hasContentEditorRoles(iwc)) {
+			logger.log(Level.WARNING, "Current user doesn't have enough rights to delete comment(s)!");
 			return null;
 		}
 		
 		String linkToComments = properties.getUri();
 		String commentId = properties.getId();
-		IWContext iwc = CoreUtil.getIWContext();
+		
 		Feed comments = getCommentsFeed(linkToComments, properties.getSpringBeanIdentifier(), properties.getIdentifier(), iwc);
 		if (comments == null) {
 			return null;

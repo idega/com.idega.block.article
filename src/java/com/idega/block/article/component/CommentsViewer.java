@@ -29,7 +29,6 @@ import com.idega.presentation.Block;
 import com.idega.presentation.IWContext;
 import com.idega.presentation.Image;
 import com.idega.presentation.Layer;
-import com.idega.presentation.Script;
 import com.idega.presentation.text.Link;
 import com.idega.presentation.text.Text;
 import com.idega.presentation.ui.CheckBox;
@@ -44,8 +43,10 @@ import com.idega.util.expression.ELUtil;
 
 public class CommentsViewer extends Block {
 	
-	public static final String FEED_IMAGE = "images/feed.png";
-	public static final String DELETE_IMAGE = "images/comments_delete.png";
+	private static final String FEED_IMAGE = "images/feed.png";
+	private static final String DELETE_IMAGE = "images/comments_delete.png";
+	private static final String DELETE_COMMENT_IMAGE = "images/comment_delete.png";
+	
 	private static final String COMMENTS_BLOCK_ID = "comments_block";
 	private static final String SHOW_COMMENTS_PROPERTY = "showCommentsForAllUsers";
 	
@@ -65,10 +66,6 @@ public class CommentsViewer extends Block {
 	
 	private String COMMENTS_ENGINE = "/dwr/interface/CommentsEngine.js";
 	private String COMMENTS_HELPER = "javascript/ArticleCommentsHelper.js";
-	private String INIT_COMMENTS_ACTION = "initComments();";
-	private String INIT_SCRIPT_LINE = "window.addEvent('load', function() {"+INIT_COMMENTS_ACTION+"});";
-//	private String ENABLE_REVERSE_AJAX_ACTION = "enableReverseAjax();";
-//	private String ENABLE_REVERSE_AJAX_SCRIPT_LINE = "window.addEvent('load', function() {"+ENABLE_REVERSE_AJAX_ACTION+"});";
 	
 	private static final String SEPARATOR = "', '";
 	
@@ -120,36 +117,18 @@ public class CommentsViewer extends Block {
 		container.setStyleClass(styleClass);
 		this.add(container);
 		
-		if (!isUsedInArticleList()) {
-			if (CoreUtil.isSingleComponentRenderingProcess(iwc)) {
-				container.add(PresentationUtil.getJavaScriptSourceLines(getJavaScriptSources(iwc)));
-				
-				List<String> actions = new ArrayList<String>();
-				actions.add(INIT_COMMENTS_ACTION);
-//				actions.add(ENABLE_REVERSE_AJAX_ACTION);
-				container.add(PresentationUtil.getJavaScriptActions(actions));
-			}
-			else {
-				PresentationUtil.addJavaScriptSourcesLinesToHeader(iwc, getJavaScriptSources(iwc));
-				PresentationUtil.addJavaScriptActionsToBody(iwc, getJavaScriptActions());
-			}
+		if (isUsedInArticleList()) {
+			showCommentsList = false;
+		}
+		if (CoreUtil.isSingleComponentRenderingProcess(iwc)) {
+			container.add(PresentationUtil.getJavaScriptSourceLines(getJavaScriptSources(iwc)));
+		}
+		else {
+			PresentationUtil.addJavaScriptSourcesLinesToHeader(iwc, getJavaScriptSources(iwc));
 		}
 		
 		int commentsCount = getCommentsCount(iwc);
 		String linkToAtomFeedImage = bundle.getVirtualPathWithFileNameString(FEED_IMAGE);
-		
-		if (!isUsedInArticleList()) {
-			String springBean = getSpringBeanIdentifier() == null ? CoreConstants.EMPTY : getSpringBeanIdentifier();
-			String identifier = getIdentifier() == null ? CoreConstants.EMPTY : getIdentifier();
-			
-			// JavaScript
-			Script script = new Script();
-			StringBuffer action = new StringBuffer("window.addEvent('domready', function(){setCommentStartInfo('");
-			action.append(linkToComments).append(SEPARATOR).append(commentsId).append("', ").append(showCommentsList).append(", ").append(isNewestEntriesOnTop())
-			.append(", '").append(springBean).append(SEPARATOR).append(identifier).append("')});");
-			script.addScriptLine(action.toString());
-			container.add(script);
-		}
 		
 		// Enable comments container
 		addEnableCommentsCheckboxContainer(iwc, container, hasValidRights, null);
@@ -177,7 +156,7 @@ public class CommentsViewer extends Block {
 		articleComments.add(linkToFeed);
 		
 		// Delete comments image
-		if (iwc.isSuperAdmin()) {
+		if (ContentUtil.hasContentEditorRoles(iwc)) {
 			addSimpleSpace(articleComments);
 			Image delete = new Image(bundle.getVirtualPathWithFileNameString(DELETE_IMAGE),
 					iwrb.getLocalizedString("comments_viewer.delete_all_comments", "Delete all comments"));
@@ -193,6 +172,59 @@ public class CommentsViewer extends Block {
 		
 		// Add comment block
 		container.add(getAddCommentBlock(iwc, commentsId));
+	
+		addInitInfo(iwc, container);
+	}
+	
+	private void addInitInfo(IWContext iwc, Layer container) {
+		IWBundle bundle = getBundle(iwc);
+		IWResourceBundle iwrb = bundle.getResourceBundle(iwc);
+		
+		StringBuilder localization = new StringBuilder("CommentsViewer.setLocalization({posted: '")
+							.append(iwrb.getLocalizedString("comments_viewer.posted", "Posted")).append("', ")
+							.append("loadingComments: '")
+							.append(iwrb.getLocalizedString("comments_viewer.loading_comments", "Loading comments..."))
+							.append("', atomLink: '")
+							.append(iwrb.getLocalizedString("comments_viewer.atom_feed", "Atom Feed"))
+							.append("', addNotification: '")
+							.append(iwrb.getLocalizedString("comments_viewer.need_send_notification", "Do you wish to receive notifications about new comments?"))
+							.append("', yes: '")
+							.append(iwrb.getLocalizedString("yes", "Yes"))
+							.append("', no: '")
+							.append(iwrb.getLocalizedString("no", "No"))
+							.append("', enterEmail: '")
+							.append(iwrb.getLocalizedString("comments_viewer.enter_email_text", "Please enter your e-mail!"))
+							.append("', saving: '")
+							.append(iwrb.getLocalizedString("comments_viewer.saving", "Saving..."))
+							.append("', deleting: '")
+							.append(iwrb.getLocalizedString("comments_viewer.deleting", "Deleting..."))
+							.append("', areYouSure: '")
+							.append(iwrb.getLocalizedString("are_you_sure", "Are you sure?"))
+							.append("', deleteComments: '")
+							.append(iwrb.getLocalizedString("comments_viewer.delete_all_comments", "Delete comments"))
+							.append("', deleteComment: '")
+							.append(iwrb.getLocalizedString("comments_viewer.delete_comment", "Delete this comment"))
+		.append("'});");
+		PresentationUtil.addJavaScriptActionToBody(iwc, localization.toString());
+		
+		StringBuilder info = new StringBuilder("CommentsViewer.setStartInfo({commentsServer: '")
+							.append(ThemesHelper.getInstance().getFullServerName(iwc) + CoreConstants.WEBDAV_SERVLET_URI)
+							.append("', feedImage: '")
+							.append(bundle.getVirtualPathWithFileNameString(CommentsViewer.FEED_IMAGE))
+							.append("', deleteImage: '")
+							.append(bundle.getVirtualPathWithFileNameString(CommentsViewer.DELETE_IMAGE))
+							.append("', deleteCommentImage: '")
+							.append(bundle.getVirtualPathWithFileNameString(CommentsViewer.DELETE_COMMENT_IMAGE))
+							.append("', hasValidRights: ").append(ContentUtil.hasContentEditorRoles(iwc))
+		.append("});");
+		PresentationUtil.addJavaScriptActionToBody(iwc, info.toString());
+		
+		String springBean = getSpringBeanIdentifier() == null ? CoreConstants.EMPTY : getSpringBeanIdentifier();
+		String identifier = getIdentifier() == null ? CoreConstants.EMPTY : getIdentifier();
+		StringBuilder action = new StringBuilder("addCommentStartInfo('").append(linkToComments).append(SEPARATOR).append(moduleId).append("', ")
+		.append(showCommentsList).append(", ").append(isNewestEntriesOnTop()).append(", '").append(springBean).append(SEPARATOR).append(identifier)
+		.append("');");
+		container.add(PresentationUtil.getJavaScriptAction(action.toString()));
 	}
 	
 	private boolean isCommentsViewerVisible(IWContext iwc) {
@@ -282,13 +314,6 @@ public class CommentsViewer extends Block {
 			}
 		}
 		return sources;
-	}
-	
-	protected List<String> getJavaScriptActions() {
-		List<String> actions = new ArrayList<String>();
-		actions.add(INIT_SCRIPT_LINE);
-//		actions.add(ENABLE_REVERSE_AJAX_SCRIPT_LINE);
-		return actions;
 	}
 		
 	private void addSimpleSpace(Layer container) {
@@ -424,7 +449,7 @@ public class CommentsViewer extends Block {
 			.append(iwrb.getLocalizedString("comments_viewer.comment_form", "Comment form")).append("', ").append(isForumPage).append(", '").append(commentsId)
 			.append(SEPARATOR).append(moduleId).append("', ").append(StringUtil.isEmpty(springBeanIdentifier) ? "null" : new StringBuilder("'")
 			.append(springBeanIdentifier).append("'").toString()).append(", ").append(StringUtil.isEmpty(identifier) ? "null" : new StringBuilder("'")
-			.append(identifier).append("', ").append(newestEntriesOnTop).toString()).append("); return false;");
+			.append(identifier).append("'").toString()).append(", ").append(newestEntriesOnTop).append("); return false;");
 		label.setOnClick(action.toString());
 		addComments.add(label);
 		return addComments;

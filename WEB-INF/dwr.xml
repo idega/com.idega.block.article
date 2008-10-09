@@ -9,10 +9,8 @@
 			<include method="getComments"/>
 			<include method="setModuleProperty"/>
 			<include method="hideOrShowComments"/>
-			<include method="getUserRights"/>
 			<include method="deleteComments"/>
 			<include method="getCommentsForAllPages"/>
-			<include method="getInitInfoForComments"/>
 			<include method="addComment"/>
 		</create>
 		
