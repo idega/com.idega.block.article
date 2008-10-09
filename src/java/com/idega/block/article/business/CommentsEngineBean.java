@@ -444,7 +444,7 @@ public class CommentsEngineBean extends IBOSessionBean implements CommentsEngine
 		
 		List<List<ArticleComment>> allComments = new ArrayList<List<ArticleComment>>();
 		for (CommentsViewerProperties commentProperty: commentsProperties) {
-			allComments.add(getCommentsList(commentProperty.getId(), commentProperty.getSpringBeanIdentifier(), commentProperty.getIdentifier(), false,
+			allComments.add(getCommentsList(commentProperty.getUri(), commentProperty.getSpringBeanIdentifier(), commentProperty.getIdentifier(), false,
 					commentProperty.isNewestEntriesOnTop()));
 		}
 		return allComments;
