@@ -185,7 +185,7 @@ public class CommentsEngineBean extends IBOSessionBean implements CommentsEngine
 		newCommentMessage = getLocalizedString(iwc, "comments_viewer.new_comment_message", "New comment was entered. You can read all comments at");
 		newComment = getLocalizedString(iwc, "comments_viewer.new_comment", "New comment");
 		
-		StringBuffer body = new StringBuffer(newCommentMessage);
+		StringBuffer body = new StringBuffer(newCommentMessage).append(CoreConstants.COLON).append(CoreConstants.SPACE);
 		WebContext wctx = WebContextFactory.get();
 		body.append(ThemesHelper.getInstance().getFullServerName(iwc)).append(wctx.getCurrentPage());
 		String host = iwc.getApplicationSettings().getProperty(CoreConstants.PROP_SYSTEM_SMTP_MAILSERVER);
