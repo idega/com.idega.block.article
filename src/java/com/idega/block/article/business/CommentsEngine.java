@@ -7,7 +7,6 @@ import java.util.List;
 
 import com.idega.block.article.bean.ArticleComment;
 import com.idega.block.article.bean.CommentsViewerProperties;
-import com.idega.builder.bean.AdvancedProperty;
 import com.idega.business.IBOSession;
 import com.idega.presentation.IWContext;
 
@@ -55,7 +54,7 @@ public interface CommentsEngine extends IBOSession {
 	/**
 	 * @see com.idega.block.article.business.CommentsEngineBean#getCommentsFromUris
 	 */
-	public List<List<ArticleComment>> getCommentsFromUris(List<AdvancedProperty> commentsProperties);
+	public List<List<ArticleComment>> getCommentsFromUris(List<CommentsViewerProperties> commentsProperties);
 	
 	public boolean initCommentsFeed(IWContext iwc, String uri, String user, Timestamp date, String language, String feedTitle, String feedSubtitle,
 			CommentsPersistenceManager commentsManager);

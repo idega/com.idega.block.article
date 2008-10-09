@@ -494,7 +494,9 @@ function getAllComments() {
 	
 	var properties = new Array();
 	for (var i = 0; i < CommentsViewer.commentInfo.length; i++) {
-		properties.push({id: CommentsViewer.commentInfo[i].linkToComments, value: CommentsViewer.commentInfo[i].newestEntriesOnTop});
+		properties.push(new CommentsViewerProperties(null, null, null, null, CommentsViewer.commentInfo[i].linkToComments,
+			CommentsViewer.commentInfo[i].commentsId, null, CommentsViewer.commentInfo[i].springBeanIdentifier, CommentsViewer.commentInfo[i].identifier, true,
+			CommentsViewer.commentInfo[i].newestEntriesOnTop));
 	}
 	
 	showLoadingMessage(CommentsViewer.localizations.loadingComments);

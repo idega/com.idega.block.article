@@ -20,7 +20,6 @@
 	<signatures>
 		<![CDATA[
 			import java.util.List;
-			import com.idega.builder.bean.AdvancedProperty;
 			import com.idega.block.article.bean.CommentsViewerProperties;
 			import com.idega.block.article.bean.ArticleComment;
 
@@ -28,7 +27,7 @@
 			CommentsViewerProperties CommentsEngine.deleteComments(CommentsViewerProperties);
 			CommentsEngine.getCommentsForAllPages(CommentsViewerProperties);
 			CommentsEngine.getComments(CommentsViewerProperties);
-			List<List<ArticleComment>> CommentsEngine.getCommentsFromUris(List<AdvancedProperty>);
+			List<List<ArticleComment>> CommentsEngine.getCommentsFromUris(List<CommentsViewerProperties>);
 		]]>
 	</signatures>
 </dwr>

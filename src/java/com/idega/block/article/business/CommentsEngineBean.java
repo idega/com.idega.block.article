@@ -27,7 +27,6 @@ import com.idega.block.article.ArticleCacher;
 import com.idega.block.article.bean.ArticleComment;
 import com.idega.block.article.bean.CommentsViewerProperties;
 import com.idega.block.rss.business.RSSBusiness;
-import com.idega.builder.bean.AdvancedProperty;
 import com.idega.builder.business.BuilderLogicWrapper;
 import com.idega.business.IBOLookup;
 import com.idega.business.IBOLookupException;
@@ -438,14 +437,15 @@ public class CommentsEngineBean extends IBOSessionBean implements CommentsEngine
 		return pages;
 	}
 	
-	public List<List<ArticleComment>> getCommentsFromUris(List<AdvancedProperty> commentsProperties) {
+	public List<List<ArticleComment>> getCommentsFromUris(List<CommentsViewerProperties> commentsProperties) {
 		if (ListUtil.isEmpty(commentsProperties)) {
 			return null;
 		}
 		
 		List<List<ArticleComment>> allComments = new ArrayList<List<ArticleComment>>();
-		for (AdvancedProperty commentProperty: commentsProperties) {
-			allComments.add(getCommentsList(commentProperty.getId(), null, null, false, Boolean.valueOf(commentProperty.getValue())));
+		for (CommentsViewerProperties commentProperty: commentsProperties) {
+			allComments.add(getCommentsList(commentProperty.getId(), commentProperty.getSpringBeanIdentifier(), commentProperty.getIdentifier(), false,
+					commentProperty.isNewestEntriesOnTop()));
 		}
 		return allComments;
 	}
