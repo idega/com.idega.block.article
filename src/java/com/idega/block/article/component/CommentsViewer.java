@@ -501,8 +501,8 @@ public class CommentsViewer extends Block {
 	public void restoreState(FacesContext context, Object state) {
 		Object values[] = (Object[]) state;
 		super.restoreState(context, values[0]);
-		linkToComments = values[1].toString();
-		styleClass = values[2].toString();
+		linkToComments = values[1] == null ? null : values[1].toString();
+		styleClass = values[2] == null ? null : values[2].toString();
 		showCommentsList = (Boolean) values[3];
 		isForumPage = (Boolean) values[4];
 		showCommentsForAllUsers = (Boolean) values[5];
