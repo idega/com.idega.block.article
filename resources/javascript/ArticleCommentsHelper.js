@@ -96,7 +96,7 @@ function setCommentValues(user, subject, email, body) {
 }
 
 function addCommentPanel(id, linkToComments, lblUser, lblSubject, lblComment, lblPosted, lblSend, lblSending, loggedUser, lblEmail,
-	lblCommentForm, addEmail, commentsId, instanceId, springBeanIdentifier, identifier, newestEntriesOnTop) {
+	lblCommentForm, addEmail, commentsId, instanceId, springBeanIdentifier, identifier, newestEntriesOnTop, emailAddress) {
 	enableReverseAjax();
 	setCommentValues('', '', '', '');
 	refreshGlobalCommentsId(commentsId);
@@ -121,10 +121,10 @@ function addCommentPanel(id, linkToComments, lblUser, lblSubject, lblComment, lb
 	if (container == null) {
 		return false;
 	}
-	container.appendChild(getCommentPane(linkToComments, addEmail, commentsId, instanceId, springBeanIdentifier, identifier, newestEntriesOnTop));
+	container.appendChild(getCommentPane(linkToComments, addEmail, commentsId, instanceId, springBeanIdentifier, identifier, newestEntriesOnTop, emailAddress));
 }
 
-function getCommentPane(linkToComments, addEmail, commentsId, instanceId, springBeanIdentifier, identifier, newestEntriesOnTop) {
+function getCommentPane(linkToComments, addEmail, commentsId, instanceId, springBeanIdentifier, identifier, newestEntriesOnTop, emailAddress) {
 	var userId = 'comment_user_value';
 	var subjectId = 'comment_subject_value';
 	var emailId = 'comment_email_value';
@@ -169,7 +169,7 @@ function getCommentPane(linkToComments, addEmail, commentsId, instanceId, spring
 	
 	//Email
 	//if (addEmail) {
-		tbBody.appendChild(createTableLine(LABEL_EMAIL + ':', emailId, 'text', '', 'comment_input_style'));
+		tbBody.appendChild(createTableLine(LABEL_EMAIL + ':', emailId, 'text', emailAddress == null ? '' : emailAddress, 'comment_input_style'));
 	//}
 	
 	// Comment
@@ -320,7 +320,7 @@ function CommentsViewerProperties(user, subject, email, body, uri, id, instanceI
 	this.springBeanIdentifier = springBeanIdentifier || null;
 	this.identifier = identifier || null;
 	
-	this.notify = notify || true;
+	this.notify = notify || false;
 	this.newestEntriesOnTop = newestEntriesOnTop || false;
 }
 

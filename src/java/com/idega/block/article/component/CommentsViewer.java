@@ -21,6 +21,7 @@ import com.idega.content.presentation.ContentViewer;
 import com.idega.content.themes.helpers.business.ThemesHelper;
 import com.idega.core.accesscontrol.business.NotLoggedOnException;
 import com.idega.core.builder.business.BuilderService;
+import com.idega.core.contact.data.Email;
 import com.idega.idegaweb.IWApplicationContext;
 import com.idega.idegaweb.IWBundle;
 import com.idega.idegaweb.IWResourceBundle;
@@ -33,6 +34,8 @@ import com.idega.presentation.text.Link;
 import com.idega.presentation.text.Text;
 import com.idega.presentation.ui.CheckBox;
 import com.idega.slide.business.IWSlideService;
+import com.idega.user.business.NoEmailFoundException;
+import com.idega.user.business.UserBusiness;
 import com.idega.user.data.User;
 import com.idega.util.CoreConstants;
 import com.idega.util.CoreUtil;
@@ -449,10 +452,49 @@ public class CommentsViewer extends Block {
 			.append(iwrb.getLocalizedString("comments_viewer.comment_form", "Comment form")).append("', ").append(isForumPage).append(", '").append(commentsId)
 			.append(SEPARATOR).append(moduleId).append("', ").append(StringUtil.isEmpty(springBeanIdentifier) ? "null" : new StringBuilder("'")
 			.append(springBeanIdentifier).append("'").toString()).append(", ").append(StringUtil.isEmpty(identifier) ? "null" : new StringBuilder("'")
-			.append(identifier).append("'").toString()).append(", ").append(newestEntriesOnTop).append("); return false;");
+			.append(identifier).append("'").toString()).append(", ").append(newestEntriesOnTop).append(", ").append(getUsersEmail(iwc))
+			.append("); return false;");
 		label.setOnClick(action.toString());
 		addComments.add(label);
 		return addComments;
+	}
+	
+	private String getUsersEmail(IWContext iwc) {
+		String emailAddress = "null";
+		
+		User currentUser = null;
+		try {
+			currentUser = iwc.getCurrentUser();
+		} catch(NotLoggedOnException e) {}
+		if (currentUser == null) {
+			return emailAddress;
+		}
+		
+		UserBusiness userBusiness = null;
+		try {
+			userBusiness = (UserBusiness) IBOLookup.getServiceInstance(iwc, UserBusiness.class);
+		} catch (IBOLookupException e) {
+			e.printStackTrace();
+		}
+		if (userBusiness == null) {
+			return emailAddress;
+		}
+		
+		Email email = null;
+		try {
+			email = userBusiness.getUsersMainEmail(currentUser);
+		} catch (RemoteException e) {
+		} catch (NoEmailFoundException e) {
+		}
+		if (email == null) {
+			return emailAddress;
+		}
+		emailAddress = email.getEmailAddress();
+		if (StringUtil.isEmpty(emailAddress)) {
+			return "null";
+		}
+		
+		return new StringBuilder("'").append(emailAddress).append("'").toString();
 	}
 	
 	private CommentsEngine getCommentsEngine(IWApplicationContext iwac) {

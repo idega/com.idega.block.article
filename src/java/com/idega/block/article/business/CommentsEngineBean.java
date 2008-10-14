@@ -532,7 +532,7 @@ public class CommentsEngineBean extends IBOSessionBean implements CommentsEngine
 				}
 				
 				// Subject
-				comment.setSubject(entry.getTitle());
+				comment.setSubject(StringUtil.isEmpty(entry.getTitle()) ? CoreConstants.EMPTY : entry.getTitle());
 				
 				// Content
 				try {
