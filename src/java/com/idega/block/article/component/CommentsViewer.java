@@ -12,6 +12,7 @@ import org.apache.webdav.lib.WebdavResource;
 import com.idega.block.article.business.ArticleConstants;
 import com.idega.block.article.business.CommentsEngine;
 import com.idega.block.article.business.CommentsPersistenceManager;
+import com.idega.block.rss.business.RSSBusiness;
 import com.idega.block.web2.business.Web2Business;
 import com.idega.business.IBOLookup;
 import com.idega.business.IBOLookupException;
@@ -149,6 +150,18 @@ public class CommentsViewer extends Block {
 		link.setOnClick(getCommentsAction.toString());
 		articleComments.add(link);
 		
+		RSSBusiness rss = null;
+		if (isAddLoginbyUUIDOnRSSFeedLink()) {
+			try {
+				rss = (RSSBusiness) IBOLookup.getServiceInstance(iwc, RSSBusiness.class);
+			} catch (IBOLookupException e) {
+				e.printStackTrace();
+			}
+			if (rss == null) {
+				return;
+			}
+		}
+		
 		// Link - Atom feed
 		Image atom = new Image(linkToAtomFeedImage, iwrb.getLocalizedString("comments_viewer.atom_feed", "Atom feed"));
 		Link linkToFeed = new Link();
@@ -156,7 +169,8 @@ public class CommentsViewer extends Block {
 		linkToFeed.setId(new StringBuffer(commentsId).append("article_comments_link_to_feed").toString());
 		linkToFeed.setImage(atom);
 		makeCommentsFeedIfNotExists(iwc);
-		linkToFeed.setURL(helper.getFullServerName(iwc) + CoreConstants.WEBDAV_SERVLET_URI + linkToComments);
+		linkToFeed.setURL(new StringBuilder(helper.getFullServerName(iwc)).append(CoreConstants.WEBDAV_SERVLET_URI)
+				.append(isAddLoginbyUUIDOnRSSFeedLink() ? rss.getLinkToFeedWithUUIDParameters(linkToComments, getUser(iwc)) : linkToComments).toString());
 		articleComments.add(linkToFeed);
 		
 		// Delete comments image
@@ -178,6 +192,24 @@ public class CommentsViewer extends Block {
 		container.add(getAddCommentBlock(iwc, commentsId));
 	
 		addInitInfo(iwc, container);
+	}
+	
+	private User getUser(IWContext iwc) {
+		User currentUser = null;
+		try {
+			currentUser = iwc.getCurrentUser();
+		} catch(NotLoggedOnException e) {
+			e.printStackTrace();
+		}
+		if (currentUser == null) {
+			return null;
+		}
+		
+		if (StringUtil.isEmpty(getSpringBeanIdentifier())) {
+			return currentUser;
+		}
+		
+		return commentsEngine.getCommentsManager(getSpringBeanIdentifier()).getUserAvailableToReadWriteCommentsFeed(iwc);
 	}
 	
 	private void addInitInfo(IWContext iwc, Layer container) {

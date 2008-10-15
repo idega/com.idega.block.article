@@ -147,8 +147,8 @@ public class CommentsEngineBean extends IBOSessionBean implements CommentsEngine
 		}
 		
 		//	Uploading changed XML for comments
-		boolean finisheSuccessfully = commentsManager == null ? uploadFeed(uri, comments, iwc, true) : commentsManager.storeFeed(properties.getIdentifier(),
-																																comments);
+		boolean finisheSuccessfully = commentsManager == null ? uploadFeed(uri, comments, iwc, true) :
+																commentsManager.storeFeed(properties.getIdentifier(), comments);
 		if (!finisheSuccessfully) {
 			logger.log(Level.SEVERE, errorMessage);
 			return false;

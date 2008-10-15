@@ -1,6 +1,7 @@
 package com.idega.block.article.business;
 
 import com.idega.presentation.IWContext;
+import com.idega.user.data.User;
 import com.sun.syndication.feed.atom.Feed;
 
 public interface CommentsPersistenceManager {
@@ -18,4 +19,6 @@ public interface CommentsPersistenceManager {
 	public boolean storeFeed(String processInstanceId, Feed comments);
 	
 	public Feed getCommentsFeed(IWContext iwc, String processInstanceId);
+	
+	public User getUserAvailableToReadWriteCommentsFeed(IWContext iwc);
 }
