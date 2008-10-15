@@ -17,6 +17,7 @@ public class CommentsViewerProperties {
 	private boolean notify;
 	private boolean newestEntriesOnTop;
 	private boolean actionSuccess;
+	private boolean addLoginbyUUIDOnRSSFeedLink;
 
 	public String getUser() {
 		return user;
@@ -128,6 +129,14 @@ public class CommentsViewerProperties {
 
 	public void setActionSuccess(boolean actionSuccess) {
 		this.actionSuccess = actionSuccess;
+	}
+
+	public boolean isAddLoginbyUUIDOnRSSFeedLink() {
+		return addLoginbyUUIDOnRSSFeedLink;
+	}
+
+	public void setAddLoginbyUUIDOnRSSFeedLink(boolean addLoginbyUUIDOnRSSFeedLink) {
+		this.addLoginbyUUIDOnRSSFeedLink = addLoginbyUUIDOnRSSFeedLink;
 	}
 	
 }

@@ -29,7 +29,7 @@ public interface CommentsEngine extends IBOSession {
 	/**
 	 * @see com.idega.block.article.business.CommentsEngineBean#getCommentsCount
 	 */
-	public int getCommentsCount(String uri, String springBeanIdentifier, String identifier, IWContext iwc) throws RemoteException;
+	public int getCommentsCount(String uri, String springBeanIdentifier, String identifier, IWContext iwc, boolean addLoginbyUUIDOnRSSFeedLink) throws RemoteException;
 
 	/**
 	 * @see com.idega.block.article.business.CommentsEngineBean#setModuleProperty

@@ -120,7 +120,7 @@ public class CommentsEngineBean extends IBOSessionBean implements CommentsEngine
 		
 		String language = ThemesHelper.getInstance().getCurrentLanguage(iwc);
 		Timestamp date = IWTimestamp.getTimestampRightNow();
-		Feed comments = getCommentsFeed(uri, properties.getSpringBeanIdentifier(), properties.getIdentifier(), iwc);
+		Feed comments = getCommentsFeed(uri, properties.getSpringBeanIdentifier(), properties.getIdentifier(), iwc, properties.isAddLoginbyUUIDOnRSSFeedLink());
 		if (comments == null) {
 			String feedTitle = commentsManager == null ? properties.getTitle() : commentsManager.getFeedTitle(iwc, properties.getIdentifier());
 			String feedSubtitle = commentsManager == null ? properties.getSubtitle() : commentsManager.getFeedSubtitle(iwc, properties.getIdentifier());
@@ -415,10 +415,12 @@ public class CommentsEngineBean extends IBOSessionBean implements CommentsEngine
 		String uri = properties.getUri();
 		String identifier = properties.getIdentifier();
 		boolean newestEntriesOnTop = properties.isNewestEntriesOnTop();
+		boolean addLoginbyUUIDOnRSSFeedLink = properties.isAddLoginbyUUIDOnRSSFeedLink();
 		String springBeanIdentifier = properties.getSpringBeanIdentifier();
 		
 		ScriptBuffer script = new ScriptBuffer();
-		script = new ScriptBuffer("getCommentsCallback(").appendData(getCommentsList(uri, springBeanIdentifier, identifier, true, newestEntriesOnTop))
+		script = new ScriptBuffer("getCommentsCallback(")
+					.appendData(getCommentsList(uri, springBeanIdentifier, identifier, true, newestEntriesOnTop, addLoginbyUUIDOnRSSFeedLink))
 					.appendScript(", ").appendData(id).appendScript(", ").appendData(uri).appendScript(");");
 		return script;
 	}
@@ -445,7 +447,7 @@ public class CommentsEngineBean extends IBOSessionBean implements CommentsEngine
 		List<List<ArticleComment>> allComments = new ArrayList<List<ArticleComment>>();
 		for (CommentsViewerProperties commentProperty: commentsProperties) {
 			allComments.add(getCommentsList(commentProperty.getUri(), commentProperty.getSpringBeanIdentifier(), commentProperty.getIdentifier(), false,
-					commentProperty.isNewestEntriesOnTop()));
+					commentProperty.isNewestEntriesOnTop(), commentProperty.isAddLoginbyUUIDOnRSSFeedLink()));
 		}
 		return allComments;
 	}
@@ -459,11 +461,13 @@ public class CommentsEngineBean extends IBOSessionBean implements CommentsEngine
 			return null;
 		}
 		
-		return getCommentsList(properties.getUri(), properties.getSpringBeanIdentifier(), properties.getIdentifier(), true, properties.isNewestEntriesOnTop());
+		return getCommentsList(properties.getUri(), properties.getSpringBeanIdentifier(), properties.getIdentifier(), true, properties.isNewestEntriesOnTop(),
+								properties.isAddLoginbyUUIDOnRSSFeedLink());
 	}
 	
 	@SuppressWarnings("unchecked")
-	private List<ArticleComment> getCommentsList(String uri, String springBeanIdentifier, String identifier, boolean addNulls, boolean newestEntriesOnTop) {
+	private List<ArticleComment> getCommentsList(String uri, String springBeanIdentifier, String identifier, boolean addNulls, boolean newestEntriesOnTop,
+													boolean addLoginbyUUIDOnRSSFeedLink) {
 		List<ArticleComment> fake = new ArrayList<ArticleComment>();
 		if (uri == null) {
 			if (addNulls) {
@@ -472,7 +476,7 @@ public class CommentsEngineBean extends IBOSessionBean implements CommentsEngine
 			return fake;
 		}
 		
-		Feed comments = getCommentsFeed(uri, springBeanIdentifier, identifier, CoreUtil.getIWContext());
+		Feed comments = getCommentsFeed(uri, springBeanIdentifier, identifier, CoreUtil.getIWContext(), addLoginbyUUIDOnRSSFeedLink);
 		if (comments == null) {
 			if (addNulls) {
 				return null;
@@ -575,8 +579,8 @@ public class CommentsEngineBean extends IBOSessionBean implements CommentsEngine
 		return null;
 	}
 	
-	public int getCommentsCount(String uri, String springBeanIdentifier, String identifier, IWContext iwc) {
-		Feed comments = getCommentsFeed(uri, springBeanIdentifier, identifier, iwc);
+	public int getCommentsCount(String uri, String springBeanIdentifier, String identifier, IWContext iwc, boolean addLoginbyUUIDOnRSSFeedLink) {
+		Feed comments = getCommentsFeed(uri, springBeanIdentifier, identifier, iwc, addLoginbyUUIDOnRSSFeedLink);
 		if (comments == null) {
 			return 0;
 		}
@@ -586,7 +590,7 @@ public class CommentsEngineBean extends IBOSessionBean implements CommentsEngine
 		return comments.getEntries().size();
 	}
 	
-	private synchronized Feed getCommentsFeed(String uri, String springBeanIdentifier, String identifier, IWContext iwc) {
+	private synchronized Feed getCommentsFeed(String uri, String springBeanIdentifier, String identifier, IWContext iwc, boolean addLoginbyUUIDOnRSSFeedLink) {
 		CommentsPersistenceManager commentsManager = getCommentsManager(springBeanIdentifier);
 		if (commentsManager != null) {
 			return commentsManager.getCommentsFeed(iwc, identifier);
@@ -626,8 +630,13 @@ public class CommentsEngineBean extends IBOSessionBean implements CommentsEngine
 		try {
 			currentUser = iwc == null ? null : iwc.getCurrentUser();
 		} catch(NotLoggedOnException e) {}
+		if (addLoginbyUUIDOnRSSFeedLink && currentUser == null) {
+			logger.log(Level.WARNING, "User must be looged to get comments feed!");
+			return null;
+		}
 		
-		SyndFeed comments = rss.getFeedAuthenticatedByUser(new StringBuilder(ThemesHelper.getInstance().getFullWebRoot()).append(uri).toString(), currentUser);
+		String pathToComments = new StringBuilder(ThemesHelper.getInstance().getFullWebRoot()).append(uri).toString();
+		SyndFeed comments = addLoginbyUUIDOnRSSFeedLink ? rss.getFeedAuthenticatedByUser(pathToComments, currentUser) : rss.getFeed(pathToComments);
 		if (comments == null) {
 			return null;
 		}
@@ -843,7 +852,8 @@ public class CommentsEngineBean extends IBOSessionBean implements CommentsEngine
 		String linkToComments = properties.getUri();
 		String commentId = properties.getId();
 		
-		Feed comments = getCommentsFeed(linkToComments, properties.getSpringBeanIdentifier(), properties.getIdentifier(), iwc);
+		Feed comments = getCommentsFeed(linkToComments, properties.getSpringBeanIdentifier(), properties.getIdentifier(), iwc,
+										properties.isAddLoginbyUUIDOnRSSFeedLink());
 		if (comments == null) {
 			return null;
 		}

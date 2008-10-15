@@ -66,6 +66,7 @@ public class CommentsViewer extends Block {
 	private boolean usedInArticleList = false;
 	private boolean showViewController = true;
 	private boolean newestEntriesOnTop = false;
+	private boolean addLoginbyUUIDOnRSSFeedLink = false;
 	
 	private String COMMENTS_ENGINE = "/dwr/interface/CommentsEngine.js";
 	private String COMMENTS_HELPER = "javascript/ArticleCommentsHelper.js";
@@ -226,7 +227,7 @@ public class CommentsViewer extends Block {
 		String identifier = getIdentifier() == null ? CoreConstants.EMPTY : getIdentifier();
 		StringBuilder action = new StringBuilder("addCommentStartInfo('").append(linkToComments).append(SEPARATOR).append(moduleId).append("', ")
 		.append(showCommentsList).append(", ").append(isNewestEntriesOnTop()).append(", '").append(springBean).append(SEPARATOR).append(identifier)
-		.append("');");
+		.append("', ").append(isAddLoginbyUUIDOnRSSFeedLink()).append(");");
 		container.add(PresentationUtil.getJavaScriptAction(action.toString()));
 	}
 	
@@ -515,7 +516,7 @@ public class CommentsViewer extends Block {
 		}
 		
 		try {
-			return comments.getCommentsCount(linkToComments, getSpringBeanIdentifier(), getIdentifier(), iwc);
+			return comments.getCommentsCount(linkToComments, getSpringBeanIdentifier(), getIdentifier(), iwc, isAddLoginbyUUIDOnRSSFeedLink());
 		} catch (RemoteException e) {
 			e.printStackTrace();
 			return 0;
@@ -524,7 +525,7 @@ public class CommentsViewer extends Block {
 	
 	@Override
 	public Object saveState(FacesContext context) {
-		Object values[] = new Object[11];
+		Object values[] = new Object[12];
 		values[0] = super.saveState(context);
 		values[1] = linkToComments;
 		values[2] = styleClass;
@@ -536,6 +537,7 @@ public class CommentsViewer extends Block {
 		values[8] = identifier;
 		values[9] = showViewController;
 		values[10] = newestEntriesOnTop;
+		values[11] = addLoginbyUUIDOnRSSFeedLink;
 		return values;
 	}
 
@@ -553,6 +555,7 @@ public class CommentsViewer extends Block {
 		identifier = values[8] == null ? null : values[8].toString();
 		showViewController = (Boolean) values[9];
 		newestEntriesOnTop = (Boolean) values[10];
+		addLoginbyUUIDOnRSSFeedLink = (Boolean) values[11];
 	}
 
 	public boolean isForumPage() {
@@ -693,6 +696,14 @@ public class CommentsViewer extends Block {
 
 	public void setNewestEntriesOnTop(boolean newestEntriesOnTop) {
 		this.newestEntriesOnTop = newestEntriesOnTop;
+	}
+
+	public boolean isAddLoginbyUUIDOnRSSFeedLink() {
+		return addLoginbyUUIDOnRSSFeedLink;
+	}
+
+	public void setAddLoginbyUUIDOnRSSFeedLink(boolean addLoginbyUUIDOnRSSFeedLink) {
+		this.addLoginbyUUIDOnRSSFeedLink = addLoginbyUUIDOnRSSFeedLink;
 	}
 
 }

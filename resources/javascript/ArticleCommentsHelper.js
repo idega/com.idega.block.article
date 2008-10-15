@@ -67,8 +67,8 @@ var COMMENTS_BLOCK_LIST_ID = 'comments_block_list';
 var GLOBAL_COMMENTS_MARK_ID = null;
 var ENABLE_REVERSE_AJAX_TIME_OUT_ID = 0;
 
-function addCommentStartInfo(linkToComments, commentsId, showCommentsListOnLoad, newestEntriesOnTop, springBeanIdentifier, identifier) {
-	var commentsInfo = new SingleCommentInfo(linkToComments, commentsId, springBeanIdentifier, identifier, showCommentsListOnLoad, newestEntriesOnTop);
+function addCommentStartInfo(linkToComments, commentsId, showCommentsListOnLoad, newestEntriesOnTop, springBeanIdentifier, identifier, addLoginbyUUIDOnRSSFeedLink) {
+	var commentsInfo = new SingleCommentInfo(linkToComments, commentsId, springBeanIdentifier, identifier, showCommentsListOnLoad, newestEntriesOnTop, addLoginbyUUIDOnRSSFeedLink);
 	CommentsViewer.commentInfo.push(commentsInfo);
 
 	if (showCommentsListOnLoad) {
@@ -76,7 +76,7 @@ function addCommentStartInfo(linkToComments, commentsId, showCommentsListOnLoad,
 	}
 }
 
-function SingleCommentInfo(linkToComments, commentsId, springBeanIdentifier, identifier, showCommentsList, newestEntriesOnTop) {
+function SingleCommentInfo(linkToComments, commentsId, springBeanIdentifier, identifier, showCommentsList, newestEntriesOnTop, addLoginbyUUIDOnRSSFeedLink) {
 	this.linkToComments = linkToComments;
 	this.commentsId = commentsId;
 	this.springBeanIdentifier = springBeanIdentifier;
@@ -84,6 +84,7 @@ function SingleCommentInfo(linkToComments, commentsId, springBeanIdentifier, ide
 	
 	this.showCommentsList = showCommentsList;
 	this.newestEntriesOnTop = newestEntriesOnTop;
+	this.addLoginbyUUIDOnRSSFeedLink = addLoginbyUUIDOnRSSFeedLink;
 	
 	this.commentsListOpened = false;
 }
@@ -299,8 +300,10 @@ function closeCommentPanelAndSendComment(userId, subjectId, emailId, bodyId, lin
 	showLoadingMessage(LABEL_SENDING);
 	closeCommentsPanel(commentsId);
 	setCommentValues(user.value, subject.value, emailValue, body.value);
+	
+	var commentsInfo = getCommentsInfo(linkToComments);
 	var commentProperties = new CommentsViewerProperties(USER, SUBJECT, EMAIL, BODY, linkToComments, commentsId, instanceId, springBeanIdentifier, identifier,
-								NEED_TO_NOTIFY, newestEntriesOnTop);
+								NEED_TO_NOTIFY, newestEntriesOnTop, commentsInfo == null ? false : commentsInfo.addLoginbyUUIDOnRSSFeedLink);
 	GLOBAL_COMMENTS_MARK_ID = commentsId;
 	CommentsEngine.addComment(commentProperties, {
 		callback: function(result) {
@@ -309,7 +312,8 @@ function closeCommentPanelAndSendComment(userId, subjectId, emailId, bodyId, lin
 	});
 }
 
-function CommentsViewerProperties(user, subject, email, body, uri, id, instanceId, springBeanIdentifier, identifier, notify, newestEntriesOnTop) {
+function CommentsViewerProperties(user, subject, email, body, uri, id, instanceId, springBeanIdentifier, identifier, notify, newestEntriesOnTop,
+									addLoginbyUUIDOnRSSFeedLink) {
 	this.user = user || null;
 	this.subject = subject || null;
 	this.email = email || null;
@@ -322,6 +326,7 @@ function CommentsViewerProperties(user, subject, email, body, uri, id, instanceI
 	
 	this.notify = notify || false;
 	this.newestEntriesOnTop = newestEntriesOnTop || false;
+	this.addLoginbyUUIDOnRSSFeedLink = addLoginbyUUIDOnRSSFeedLink || false;
 }
 
 function changeCommentsCount(linkId, change, finalCount) {
@@ -496,7 +501,7 @@ function getAllComments() {
 	for (var i = 0; i < CommentsViewer.commentInfo.length; i++) {
 		properties.push(new CommentsViewerProperties(null, null, null, null, CommentsViewer.commentInfo[i].linkToComments,
 			CommentsViewer.commentInfo[i].commentsId, null, CommentsViewer.commentInfo[i].springBeanIdentifier, CommentsViewer.commentInfo[i].identifier, true,
-			CommentsViewer.commentInfo[i].newestEntriesOnTop));
+			CommentsViewer.commentInfo[i].newestEntriesOnTop, CommentsViewer.commentInfo[i].addLoginbyUUIDOnRSSFeedLink));
 	}
 	
 	showLoadingMessage(CommentsViewer.localizations.loadingComments);
@@ -525,7 +530,7 @@ function getComments(linkToComments, commentsId) {
 	showLoadingMessage(CommentsViewer.localizations.loadingComments);
 	var newestEntriesOnTop = commentsInfo.newestEntriesOnTop;
 	CommentsEngine.getComments(new CommentsViewerProperties(null, null, null, null, linkToComments, commentsId, null, commentsInfo.springBeanIdentifier,
-															commentsInfo.identifier, true, newestEntriesOnTop), {
+															commentsInfo.identifier, true, newestEntriesOnTop, commentsInfo.addLoginbyUUIDOnRSSFeedLink), {
   		callback:function(comments) {
     		getCommentsCallback(comments, commentsId, linkToComments, newestEntriesOnTop);
     		
@@ -795,7 +800,7 @@ function deleteComments(id, commentId, linkToComments, newestEntriesOnTop) {
 	
 	showLoadingMessage(CommentsViewer.localizations.deleting);
 	CommentsEngine.deleteComments(new CommentsViewerProperties(null, null, null, null, linkToComments, commentId, id, commentInfo.springBeanIdentifier,
-									commentInfo.identifier, true, newestEntriesOnTop), {
+									commentInfo.identifier, true, newestEntriesOnTop, commentInfo.addLoginbyUUIDOnRSSFeedLink), {
 		callback: function(properties) {
 			closeAllLoadingMessages();
 			if (properties == null) {
