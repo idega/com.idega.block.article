@@ -363,7 +363,7 @@ function changeCommentsCount(linkId, change, finalCount) {
 	link.setText(text);
 }
 
-function addComment(index, articleComment, commentsId, linkToComments) {
+function addComment(index, articleComment, commentsId, linkToComments, newestEntriesOnTop, forceToOpen) {
 	var commentsContainer = $(commentsId + 'comments_block');
 	if (commentsContainer == null) {
 		return false;
@@ -373,7 +373,7 @@ function addComment(index, articleComment, commentsId, linkToComments) {
 		commentsList = new Element('ul');
 		commentsList.setProperty('id', commentsId + COMMENTS_BLOCK_LIST_ID);
 		commentsContainer.appendChild(commentsList);
-		if (needToShowCommentsList(commentsId)) {
+		if (forceToOpen || needToShowCommentsList(commentsId)) {
 			showCommentsList(commentsId);
 		}
 		else {
@@ -513,7 +513,7 @@ function getAllComments() {
 				if (allComments.length == CommentsViewer.commentInfo.length) {
 					for (var i = 0; i < allComments.length; i++) {
 						getCommentsCallback(allComments[i], CommentsViewer.commentInfo[i].commentsId, CommentsViewer.commentInfo[i].linkToComments,
-											CommentsViewer.commentInfo[i].newestEntriesOnTop);
+											CommentsViewer.commentInfo[i].newestEntriesOnTop, false);
 					}
 				}
 			}
@@ -532,14 +532,14 @@ function getComments(linkToComments, commentsId) {
 	CommentsEngine.getComments(new CommentsViewerProperties(null, null, null, null, linkToComments, commentsId, null, commentsInfo.springBeanIdentifier,
 															commentsInfo.identifier, true, newestEntriesOnTop, commentsInfo.addLoginbyUUIDOnRSSFeedLink), {
   		callback:function(comments) {
-    		getCommentsCallback(comments, commentsId, linkToComments, newestEntriesOnTop);
+    		getCommentsCallback(comments, commentsId, linkToComments, newestEntriesOnTop, true);
     		
     		enableReverseAjax();
   		}
 	});
 }
 
-function getCommentsCallback(comments, id, linkToComments, newestEntriesOnTop) {
+function getCommentsCallback(comments, id, linkToComments, newestEntriesOnTop, forceToOpen) {
 	closeAllLoadingMessages();
 	if (comments == null) {
 		removeCommentsList(id, 0);
@@ -549,7 +549,7 @@ function getCommentsCallback(comments, id, linkToComments, newestEntriesOnTop) {
 	
 	removeCommentsList(id, comments.length);
 	for (var i = 0; i < comments.length; i++) {
-		addComment(i, comments[i], id, linkToComments, newestEntriesOnTop);
+		addComment(i, comments[i], id, linkToComments, newestEntriesOnTop, forceToOpen);
 	}
 }
 
