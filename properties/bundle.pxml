@@ -7,21 +7,6 @@
       <value>com.idega.block.article</value>
     </key>
     <key>
-      <name>name</name>
-      <type>java.lang.String</type>
-      <value>Article</value>
-    </key>
-    <key>
-      <name>version</name>
-      <type>java.lang.String</type>
-      <value>4.0.2</value>
-    </key>
-    <key>
-      <name>vendor</name>
-      <type>java.lang.String</type>
-      <value>idega Software</value>
-    </key>
-    <key>
       <name>iw_components</name>
       <value>
         <map>
