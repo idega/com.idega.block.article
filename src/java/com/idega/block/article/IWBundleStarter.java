@@ -1,5 +1,5 @@
 /*
- * $Id: IWBundleStarter.java,v 1.25 2007/11/13 09:31:02 laddi Exp $
+ * $Id: IWBundleStarter.java,v 1.26 2008/10/23 06:02:52 laddi Exp $
  * Created on 2.11.2004
  *
  * Copyright (C) 2004 Idega Software hf. All Rights Reserved.
@@ -24,19 +24,18 @@ import com.idega.core.view.ViewNode;
 import com.idega.idegaweb.IWApplicationContext;
 import com.idega.idegaweb.IWBundle;
 import com.idega.idegaweb.IWBundleStartable;
-import com.idega.idegaweb.include.GlobalIncludeManager;
 import com.idega.slide.business.IWSlideService;
 
 
 /**
  * 
- *  Last modified: $Date: 2007/11/13 09:31:02 $ by $Author: laddi $
+ *  Last modified: $Date: 2008/10/23 06:02:52 $ by $Author: laddi $
  * 
  * @author <a href="mailto:tryggvil@idega.com">Tryggvi Larusson</a>
- * @version $Revision: 1.25 $
+ * @version $Revision: 1.26 $
  */
 public class IWBundleStarter implements IWBundleStartable {
-	private static final String STYLE_SHEET_URL = "/style/article.css";
+	//private static final String STYLE_SHEET_URL = "/style/article.css";
 	public static final String BUNDLE_IDENTIFIER="com.idega.block.article";
 
 	/* (non-Javadoc)
@@ -47,7 +46,7 @@ public class IWBundleStarter implements IWBundleStartable {
 		addArticleViews(starterBundle);
 		addRSSProducers(starterBundle);
 		//Add the stylesheet:
-		GlobalIncludeManager.getInstance().addBundleStyleSheet(BUNDLE_IDENTIFIER,STYLE_SHEET_URL);
+		//GlobalIncludeManager.getInstance().addBundleStyleSheet(BUNDLE_IDENTIFIER,STYLE_SHEET_URL);
 	}
 
 	/**

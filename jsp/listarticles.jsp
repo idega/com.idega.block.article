@@ -12,7 +12,10 @@ version="1.2">
 	<jsf:view>
 		<ws:page id="listarticles1" javascripturls="
 				/idegaweb/bundles/com.idega.block.web2.0.bundle/resources/javascript/jquery/1.2.3/jquery-compressed.js,
-				/idegaweb/bundles/com.idega.block.article.bundle/resources/javascript/article-list.js">
+				/idegaweb/bundles/com.idega.block.article.bundle/resources/javascript/article-list.js"
+				
+				stylesheeturls="/idegaweb/bundles/com.idega.content.bundle/resources/style/content.css,
+								/idegaweb/bundles/com.idega.block.article.bundle/resources/style/article.css">
 			<h:form styleClass="articleListContent" id="listarticlesform1">
 				<wf:wfblock id="article_list_block" title="#{localizedStrings['com.idega.block.article']['list_articles']}" maximizedVertically="true">
 					<t:div styleClass="articleHeadings">

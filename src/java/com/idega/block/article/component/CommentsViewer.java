@@ -88,6 +88,7 @@ public class CommentsViewer extends Block {
 			return;
 		}
 		
+		PresentationUtil.addStyleSheetToHeader(iwc, "/idegaweb/bundles/com.idega.block.article.bundle/resources/style/article.css");
 		getModuleId(iwc);
 		
 		if (linkToComments == null) {

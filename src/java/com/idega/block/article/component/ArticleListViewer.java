@@ -1,5 +1,5 @@
 /*
- * $Id: ArticleListViewer.java,v 1.26 2008/10/09 12:40:06 valdas Exp $
+ * $Id: ArticleListViewer.java,v 1.27 2008/10/23 06:02:51 laddi Exp $
  * Created on 24.1.2005
  *
  * Copyright (C) 2005 Idega Software hf. All Rights Reserved.
@@ -42,10 +42,10 @@ import com.idega.util.PresentationUtil;
  * for the article module.
  * </p>
  * 
- *  Last modified: $Date: 2008/10/09 12:40:06 $ by $Author: valdas $
+ *  Last modified: $Date: 2008/10/23 06:02:51 $ by $Author: laddi $
  * 
  * @author <a href="mailto:tryggvi@idega.com">Tryggvi Larusson</a>
- * @version $Revision: 1.26 $
+ * @version $Revision: 1.27 $
  */
 public class ArticleListViewer extends ContentItemListViewer {
 
@@ -312,12 +312,14 @@ public class ArticleListViewer extends ContentItemListViewer {
 	@Override
 	public void encodeBegin(FacesContext context) throws IOException {
 		IWContext iwc = IWContext.getIWContext(context);
+		PresentationUtil.addStyleSheetToHeader(iwc, "/idegaweb/bundles/com.idega.block.article.bundle/resources/style/article.css");
 		
 		CommentsViewer comments = new CommentsViewer();
 		addCommentsScript(iwc, comments);
 		addCommentsController(iwc, comments);
 		
 		if (ContentUtil.hasContentEditorRoles(iwc)) {
+			PresentationUtil.addStyleSheetToHeader(iwc, "/idegaweb/bundles/com.idega.content.bundle/resources/style/content-admin.css");
 			iwc.setSessionAttribute(ContentConstants.RENDERING_COMPONENT_OF_ARTICLE_LIST, Boolean.TRUE);
 
 			if (CoreUtil.isSingleComponentRenderingProcess(iwc)) {
@@ -390,18 +392,22 @@ public class ArticleListViewer extends ContentItemListViewer {
 		super.addContentItemViewer(viewer);
 	}
 
+	@Override
 	public String getArticleItemViewerFilter() {
 		return super.getArticleItemViewerFilter();
 	}
 
+	@Override
 	public void setArticleItemViewerFilter(String articleItemViewerFilter) {
 		super.setArticleItemViewerFilter(articleItemViewerFilter);
 	}
 	
+	@Override
 	public boolean isShowAllItems() {
 		return super.isShowAllItems();
 	}
 
+	@Override
 	public void setShowAllItems(boolean showAllItems) {
 		super.setShowAllItems(showAllItems);
 	}

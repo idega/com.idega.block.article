@@ -391,7 +391,7 @@
 
 .articleListButtons a span {
 	display: inline !important;
-	padding: 0;
+	padding: 0 !important;
 	text-transform: capitalize;
 }
 
@@ -455,6 +455,7 @@ form.editArticleForm {
 	font-size: 13px;
 	margin: 0 !important;
 	padding: 0 !important;
+	background-color: #fff;
 }
 
 form.editArticleForm .formsection {

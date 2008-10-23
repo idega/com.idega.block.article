@@ -1,5 +1,5 @@
 /*
- * $Id: ArticleItemViewer.java,v 1.46 2008/06/06 16:22:46 valdas Exp $
+ * $Id: ArticleItemViewer.java,v 1.47 2008/10/23 06:02:51 laddi Exp $
  *
  * Copyright (C) 2004 Idega. All Rights Reserved.
  *
@@ -40,12 +40,12 @@ import com.idega.webface.WFHtml;
 import com.idega.webface.convert.WFTimestampConverter;
 
 /**
- * Last modified: $Date: 2008/06/06 16:22:46 $ by $Author: valdas $
+ * Last modified: $Date: 2008/10/23 06:02:51 $ by $Author: laddi $
  *
  * Displays the article item
  *
  * @author <a href="mailto:gummi@idega.com">Gudmundur Agust Saemundsson</a>
- * @version $Revision: 1.46 $
+ * @version $Revision: 1.47 $
  */
 public class ArticleItemViewer extends ContentItemViewer {
 	
@@ -483,6 +483,7 @@ public class ArticleItemViewer extends ContentItemViewer {
 	@Override
 	public void encodeBegin(FacesContext context) throws IOException {
 		IWContext iwc = IWContext.getIWContext(context);
+		PresentationUtil.addStyleSheetToHeader(iwc, "/idegaweb/bundles/com.idega.block.article.bundle/resources/style/article.css");
 		
 		String resourcePathFromRequest = iwc.getParameter(ContentViewer.PARAMETER_CONTENT_RESOURCE);
 		if (getResourcePath() == null && resourcePathFromRequest != null) {
@@ -520,6 +521,7 @@ public class ArticleItemViewer extends ContentItemViewer {
 		}
 		
 		if (ContentUtil.hasContentEditorRoles(iwc)) {
+			PresentationUtil.addStyleSheetToHeader(iwc, "/idegaweb/bundles/com.idega.content.bundle/resources/style/content-admin.css");
 			Object renderingParameter = iwc.getSessionAttribute(ContentConstants.RENDERING_COMPONENT_OF_ARTICLE_LIST);
 			if (renderingParameter == null) {
 				iwc.setSessionAttribute(ContentConstants.RENDERING_COMPONENT_OF_ARTICLE_LIST, Boolean.FALSE);
@@ -562,10 +564,12 @@ public class ArticleItemViewer extends ContentItemViewer {
 		this.partOfArticlesList = partOfArticlesList;
 	}
 
+	@Override
 	public String getArticleItemViewerFilter() {
 		return super.getArticleItemViewerFilter();
 	}
 
+	@Override
 	public void setArticleItemViewerFilter(String articleItemViewerFilter) {
 		super.setArticleItemViewerFilter(articleItemViewerFilter);
 	}

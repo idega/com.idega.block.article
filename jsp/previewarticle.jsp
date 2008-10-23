@@ -9,7 +9,8 @@
 version="1.2">
 <jsp:directive.page contentType="text/html" pageEncoding="UTF-8"/>
 	<jsf:view>
-		<ws:page>
+		<ws:page stylesheeturls="/idegaweb/bundles/com.idega.content.bundle/resources/style/content.css,
+								/idegaweb/bundles/com.idega.block.article.bundle/resources/style/article.css">
 			<h:form>
 				<wf:wfblock id="article_item_block" title="#{localizedStrings['com.idega.block.article']['preview_article']}">
 					<article:ArticleItemViewer id="article_item" renderDetailsCommand="false" showRequestedItem="true" showTeaser="false" />
