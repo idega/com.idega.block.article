@@ -34,6 +34,7 @@ import com.idega.presentation.Layer;
 import com.idega.presentation.text.Link;
 import com.idega.presentation.text.Text;
 import com.idega.presentation.ui.CheckBox;
+import com.idega.presentation.ui.Label;
 import com.idega.slide.business.IWSlideService;
 import com.idega.user.business.NoEmailFoundException;
 import com.idega.user.business.UserBusiness;
@@ -439,6 +440,9 @@ public class CommentsViewer extends Block {
 			return commentsController;
 		}
 		
+		Layer layer = new Layer();
+		layer.setStyleClass("commentsControllerInputs");
+		
 		CheckBox enableCheckBox = new CheckBox("enableComments");
 		enableCheckBox.setId(new StringBuffer(moduleId).append("manageCommentsBlockCheckBox").toString());
 		StringBuffer action = new StringBuffer("enableComments(this.checked, '");
@@ -452,10 +456,11 @@ public class CommentsViewer extends Block {
 		enableCheckBox.setOnClick(action.toString());
 		enableCheckBox.setChecked(enabled);
 		
-		Text enableText = new Text(getBundle(iwc).getLocalizedString("enable_comments"));
+		Label label = new Label(getBundle(iwc).getLocalizedString("enable_comments"), enableCheckBox);
 		
-		commentsController.add(enableText);
-		commentsController.add(enableCheckBox);
+		layer.add(enableCheckBox);
+		layer.add(label);
+		commentsController.add(layer);
 		
 		return commentsController;
 	}

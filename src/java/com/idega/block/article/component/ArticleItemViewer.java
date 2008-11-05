@@ -1,5 +1,5 @@
 /*
- * $Id: ArticleItemViewer.java,v 1.47 2008/10/23 06:02:51 laddi Exp $
+ * $Id: ArticleItemViewer.java,v 1.48 2008/11/05 16:33:33 laddi Exp $
  *
  * Copyright (C) 2004 Idega. All Rights Reserved.
  *
@@ -21,6 +21,7 @@ import com.idega.block.article.bean.ArticleItemBean;
 import com.idega.block.article.bean.ArticleLocalizedItemBean;
 import com.idega.block.article.business.ArticleActionURIHandler;
 import com.idega.block.article.business.ArticleUtil;
+import com.idega.block.web2.business.Web2Business;
 import com.idega.content.bean.ContentItem;
 import com.idega.content.business.ContentConstants;
 import com.idega.content.business.ContentUtil;
@@ -36,16 +37,17 @@ import com.idega.presentation.Layer;
 import com.idega.presentation.Script;
 import com.idega.util.CoreUtil;
 import com.idega.util.PresentationUtil;
+import com.idega.util.expression.ELUtil;
 import com.idega.webface.WFHtml;
 import com.idega.webface.convert.WFTimestampConverter;
 
 /**
- * Last modified: $Date: 2008/10/23 06:02:51 $ by $Author: laddi $
+ * Last modified: $Date: 2008/11/05 16:33:33 $ by $Author: laddi $
  *
  * Displays the article item
  *
  * @author <a href="mailto:gummi@idega.com">Gudmundur Agust Saemundsson</a>
- * @version $Revision: 1.47 $
+ * @version $Revision: 1.48 $
  */
 public class ArticleItemViewer extends ContentItemViewer {
 	
@@ -527,7 +529,10 @@ public class ArticleItemViewer extends ContentItemViewer {
 				iwc.setSessionAttribute(ContentConstants.RENDERING_COMPONENT_OF_ARTICLE_LIST, Boolean.FALSE);
 				canModifyRenderingAttribute = true;
 			}
-
+			Web2Business web2 = ELUtil.getInstance().getBean(Web2Business.class);
+			PresentationUtil.addJavaScriptSourceLineToHeader(iwc, web2.getBundleURIToJQueryLib());			//jQuery
+			PresentationUtil.addJavaScriptSourceLineToHeader(iwc, iwc.getIWMainApplication().getBundle(ContentConstants.IW_BUNDLE_IDENTIFIER).getVirtualPathWithFileNameString("javascript/ContentAdmin.js"));
+			
 			if (CoreUtil.isSingleComponentRenderingProcess(iwc)) {
 				Layer script = new Layer();
 				script.add(PresentationUtil.getJavaScriptSourceLines(ArticleUtil.getJavaScriptSourcesForArticleEditor(iwc, true)));
