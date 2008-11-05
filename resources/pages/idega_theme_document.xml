@@ -15,12 +15,21 @@
 			<property name="showAuthor" value="false" />
 			<property name="showCreationDate" value="false" />
     	</module>
-    	<module id="" class="com.idega.content.presentation.WhatIsNew">
-    		<property>
-    			<name>:method:1:implied:void:setToHideParentFolderPath:boolean:</name>
-    			<value>Y</value>
-    			<type>java.lang.String</type>
-    		</property>
+    	<module id="" class="com.idega.content.upload.presentation.FilesUploader">
+			<property>
+				<name>:method:1:implied:void:setParentPath:java.lang.String:</name>
+				<value>/files/public</value>
+				<type>java.lang.String</type>
+			</property>
+		</module>
+    	<module id="" class="com.idega.presentation.Layer">
+	    	<module id="" class="com.idega.content.presentation.WhatIsNew">
+	    		<property>
+	    			<name>:method:1:implied:void:setToHideParentFolderPath:boolean:</name>
+	    			<value>Y</value>
+	    			<type>java.lang.String</type>
+	    		</property>
+	    	</module>
     	</module>
     </region>
     <region id="toolbar" label="toolbar">
