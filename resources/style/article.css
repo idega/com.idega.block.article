@@ -40,10 +40,6 @@
 	margin-top: 8px;	
 }
 
-.content_item_comments_style a img {
-	vertical-align: bottom;
-}
-
 .comment_fieldset {
 	border: 1px #ababab solid;
 	margin: 15px 0 10px 0;
@@ -178,6 +174,10 @@
 	height: 14px;
 	vertical-align: middle;
 	margin-right: 5px;
+}
+
+.articleCommentsAtomFeedLinkStyle {
+	padding-left: 10px;
 }
 
 .deleteCommentsImage {
@@ -592,10 +592,6 @@ form.editArticleForm .wf_block .articleCategories input {
 	display: inline !important;
 	margin: 0 !important;
 	margin-right: 8px !important;
-}
-
-a.articleCommentsAtomFeedLinkStyle {
-	padding-left: 5px;
 }
 
 .articleDelete {
