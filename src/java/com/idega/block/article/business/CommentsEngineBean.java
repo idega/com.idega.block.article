@@ -167,7 +167,7 @@ public class CommentsEngineBean extends IBOSessionBean implements CommentsEngine
 	
 	@SuppressWarnings("unchecked")
 	private void clearArticleCache(IWContext iwc) {
-		BuilderLogicWrapper builder = ELUtil.getInstance().getBean(CoreConstants.SPRING_BEAN_NAME_BUILDER_LOGIC_WRAPPER);
+		BuilderLogicWrapper builder = ELUtil.getInstance().getBean(BuilderLogicWrapper.SPRING_BEAN_NAME_BUILDER_LOGIC_WRAPPER);
 		Map articlesCache = null;
 		if (builder != null) {
 			articlesCache = getArticlesCache(iwc);
