@@ -47,7 +47,7 @@ public class ArticleDeleter extends Block {
 		
 		container.add(buttons);
 		GenericButton delete = new GenericButton(iwrb.getLocalizedString("delete", "Delete"));
-		delete.setOnClick(new StringBuffer("deleteSelectedArticle('").append(resource).append("');").toString());
+		delete.setOnClick(new StringBuffer("ArticleEditorHelper.deleteSelectedArticle('").append(resource).append("');").toString());
 		buttons.add(delete);
 		
 		GenericButton cancel = new GenericButton(iwrb.getLocalizedString("cancel", "Cancel"));

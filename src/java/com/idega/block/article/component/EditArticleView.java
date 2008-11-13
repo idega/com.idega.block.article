@@ -1,5 +1,5 @@
 /*
- * $Id: EditArticleView.java,v 1.50 2008/04/24 21:27:47 laddi Exp $
+ * $Id: EditArticleView.java,v 1.51 2008/11/13 09:28:25 valdas Exp $
  *
  * Copyright (C) 2004 Idega. All Rights Reserved.
  *
@@ -77,10 +77,10 @@ import com.idega.webface.htmlarea.HTMLArea;
  * <p>
  * This is the part for the editor of article is inside the admin interface
  * </p>
- * Last modified: $Date: 2008/04/24 21:27:47 $ by $Author: laddi $
+ * Last modified: $Date: 2008/11/13 09:28:25 $ by $Author: valdas $
  *
  * @author Joakim,Tryggvi Larusson
- * @version $Revision: 1.50 $
+ * @version $Revision: 1.51 $
  */
 public class EditArticleView extends IWBaseComponent implements ManagedContentBeans, ActionListener, ValueChangeListener {
 	private static final Log log = LogFactory.getLog(EditArticleView.class);
@@ -177,7 +177,7 @@ public class EditArticleView extends IWBaseComponent implements ManagedContentBe
 			
 			//	JavaScript
 			Script script = new Script();
-			script.addScriptLine("function addActionAfterArticleIsSavedAndEditorClosed() {window.parent.addActionAfterArticleIsSavedAndEditorClosed();}");
+			script.addScriptLine("function addActionAfterArticleIsSavedAndEditorClosed() {window.parent.ArticleEditorHelper.addActionAfterArticleIsSavedAndEditorClosed();}");
 			f.getChildren().add(script);
 			
 			//	Save state for bean

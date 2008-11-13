@@ -1,11 +1,13 @@
-function initializeJavaScriptActionsForEditingAndCreatingArticles() {
-	window.addEvent('resize', setDimensionsForArticleEditWindow);
+if (ArticleEditorHelper == null) var ArticleEditorHelper = {};
+
+ArticleEditorHelper.initializeJavaScriptActionsForEditingAndCreatingArticles = function() {
+	window.addEvent('resize', ArticleEditorHelper.setDimensionsForArticleEditWindow);
 	
-	setDimensionsForArticleEditWindow();
-	registerArticleLinksForMoodalBox();
+	ArticleEditorHelper.setDimensionsForArticleEditWindow();
+	ArticleEditorHelper.registerArticleLinksForMoodalBox();
 }
 
-function setDimensionsForArticleEditWindow() {
+ArticleEditorHelper.setDimensionsForArticleEditWindow = function() {
 	var width = Math.round(window.getWidth() * 0.8);
 	var height = Math.round(window.getHeight() * 0.8);
 	
@@ -14,25 +16,25 @@ function setDimensionsForArticleEditWindow() {
 	} catch(e) {}
 }
 
-function registerArticleLinksForMoodalBox() {
+ArticleEditorHelper.registerArticleLinksForMoodalBox = function() {
 	$$('a.edit').each(
 		function(element) {
-			checkArticleLinkAndRegisterIfItsCorrect(element);
+			ArticleEditorHelper.checkArticleLinkAndRegisterIfItsCorrect(element);
 		}
 	);
 	$$('a.create').each(
 		function(element) {
-			checkArticleLinkAndRegisterIfItsCorrect(element);
+			ArticleEditorHelper.checkArticleLinkAndRegisterIfItsCorrect(element);
 		}
 	);
 	$$('a.delete').each(
 		function(element) {
-			checkArticleLinkAndRegisterIfItsCorrect(element);
+			ArticleEditorHelper.checkArticleLinkAndRegisterIfItsCorrect(element);
 		}
 	);
 }
 
-function checkArticleLinkAndRegisterIfItsCorrect(link) {
+ArticleEditorHelper.checkArticleLinkAndRegisterIfItsCorrect = function(link) {
 	if (link == null) {
 		return false;
 	}
@@ -47,13 +49,13 @@ function checkArticleLinkAndRegisterIfItsCorrect(link) {
 	}
 }
 
-function addActionAfterArticleIsSavedAndEditorClosed() {
+ArticleEditorHelper.addActionAfterArticleIsSavedAndEditorClosed = function() {
 	MOOdalBox.addEventToCloseAction(function() {
 		reloadPage();
 	});
 }
 
-function deleteSelectedArticle(resource) {
+ArticleEditorHelper.deleteSelectedArticle = function(resource) {
 	ThemesEngine.deleteArticle(resource, {
 		callback: function(result) {
 			MOOdalBox.close();

@@ -1,5 +1,5 @@
 /*
- * $Id: ArticleItemViewer.java,v 1.48 2008/11/05 16:33:33 laddi Exp $
+ * $Id: ArticleItemViewer.java,v 1.49 2008/11/13 09:28:25 valdas Exp $
  *
  * Copyright (C) 2004 Idega. All Rights Reserved.
  *
@@ -11,7 +11,6 @@ package com.idega.block.article.component;
 import java.io.IOException;
 import java.rmi.RemoteException;
 import java.sql.Timestamp;
-
 import javax.faces.component.UIComponent;
 import javax.faces.component.html.HtmlOutputText;
 import javax.faces.context.FacesContext;
@@ -21,7 +20,6 @@ import com.idega.block.article.bean.ArticleItemBean;
 import com.idega.block.article.bean.ArticleLocalizedItemBean;
 import com.idega.block.article.business.ArticleActionURIHandler;
 import com.idega.block.article.business.ArticleUtil;
-import com.idega.block.web2.business.Web2Business;
 import com.idega.content.bean.ContentItem;
 import com.idega.content.business.ContentConstants;
 import com.idega.content.business.ContentUtil;
@@ -35,19 +33,17 @@ import com.idega.idegaweb.IWMainApplication;
 import com.idega.presentation.IWContext;
 import com.idega.presentation.Layer;
 import com.idega.presentation.Script;
-import com.idega.util.CoreUtil;
 import com.idega.util.PresentationUtil;
-import com.idega.util.expression.ELUtil;
 import com.idega.webface.WFHtml;
 import com.idega.webface.convert.WFTimestampConverter;
 
 /**
- * Last modified: $Date: 2008/11/05 16:33:33 $ by $Author: laddi $
+ * Last modified: $Date: 2008/11/13 09:28:25 $ by $Author: valdas $
  *
  * Displays the article item
  *
  * @author <a href="mailto:gummi@idega.com">Gudmundur Agust Saemundsson</a>
- * @version $Revision: 1.48 $
+ * @version $Revision: 1.49 $
  */
 public class ArticleItemViewer extends ContentItemViewer {
 	
@@ -118,6 +114,7 @@ public class ArticleItemViewer extends ContentItemViewer {
 		return styleClassPrefix;
 	}
 	
+	@SuppressWarnings("unchecked")
 	@Override
 	protected UIComponent createFieldComponent(String attribute){
 		if (ContentConstants.ATTRIBUTE_BODY.equals(attribute)) {
@@ -485,7 +482,7 @@ public class ArticleItemViewer extends ContentItemViewer {
 	@Override
 	public void encodeBegin(FacesContext context) throws IOException {
 		IWContext iwc = IWContext.getIWContext(context);
-		PresentationUtil.addStyleSheetToHeader(iwc, "/idegaweb/bundles/com.idega.block.article.bundle/resources/style/article.css");
+		PresentationUtil.addStyleSheetToHeader(iwc, ArticleUtil.getBundle().getVirtualPathWithFileNameString("style/article.css"));
 		
 		String resourcePathFromRequest = iwc.getParameter(ContentViewer.PARAMETER_CONTENT_RESOURCE);
 		if (getResourcePath() == null && resourcePathFromRequest != null) {
@@ -523,27 +520,15 @@ public class ArticleItemViewer extends ContentItemViewer {
 		}
 		
 		if (ContentUtil.hasContentEditorRoles(iwc)) {
-			PresentationUtil.addStyleSheetToHeader(iwc, "/idegaweb/bundles/com.idega.content.bundle/resources/style/content-admin.css");
 			Object renderingParameter = iwc.getSessionAttribute(ContentConstants.RENDERING_COMPONENT_OF_ARTICLE_LIST);
 			if (renderingParameter == null) {
 				iwc.setSessionAttribute(ContentConstants.RENDERING_COMPONENT_OF_ARTICLE_LIST, Boolean.FALSE);
 				canModifyRenderingAttribute = true;
 			}
-			Web2Business web2 = ELUtil.getInstance().getBean(Web2Business.class);
-			PresentationUtil.addJavaScriptSourceLineToHeader(iwc, web2.getBundleURIToJQueryLib());			//jQuery
-			PresentationUtil.addJavaScriptSourceLineToHeader(iwc, iwc.getIWMainApplication().getBundle(ContentConstants.IW_BUNDLE_IDENTIFIER).getVirtualPathWithFileNameString("javascript/ContentAdmin.js"));
-			
-			if (CoreUtil.isSingleComponentRenderingProcess(iwc)) {
-				Layer script = new Layer();
-				script.add(PresentationUtil.getJavaScriptSourceLines(ArticleUtil.getJavaScriptSourcesForArticleEditor(iwc, true)));
-				script.add(PresentationUtil.getJavaScriptAction(ArticleUtil.getJavaScriptInitializationAction(false)));
-				getFacets().put(ContentItemViewer.FACET_JAVA_SCRIPT, script);
-			}
-			else {
-				PresentationUtil.addJavaScriptSourcesLinesToHeader(iwc, ArticleUtil.getJavaScriptSourcesForArticleEditor(iwc, false));
-				PresentationUtil.addStyleSheetsToHeader(iwc, ArticleUtil.getStyleSheetsSourcesForArticleEditor(iwc));
-				PresentationUtil.addJavaScriptActionToBody(iwc, ArticleUtil.getJavaScriptInitializationAction(true));
-			}
+
+			Layer script = new Layer();
+			script.add(ArticleUtil.getSourcesAndActionForArticleEditor(iwc));
+			getFacets().put(ContentItemViewer.FACET_JAVA_SCRIPT, script);
 		}
 		
 		super.encodeBegin(context);

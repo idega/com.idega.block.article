@@ -1,5 +1,5 @@
 /*
- * $Id: ArticleUtil.java,v 1.15 2008/07/02 19:22:56 civilis Exp $
+ * $Id: ArticleUtil.java,v 1.16 2008/11/13 09:28:24 valdas Exp $
  * Created on 7.2.2005
  *
  * Copyright (C) 2005 Idega Software hf. All Rights Reserved.
@@ -27,15 +27,16 @@ import com.idega.core.builder.data.ICPage;
 import com.idega.idegaweb.IWBundle;
 import com.idega.presentation.IWContext;
 import com.idega.util.CoreConstants;
+import com.idega.util.PresentationUtil;
 import com.idega.util.expression.ELUtil;
 import com.idega.webface.WFUtil;
 
 /**
  * 
- *  Last modified: $Date: 2008/07/02 19:22:56 $ by $Author: civilis $
+ *  Last modified: $Date: 2008/11/13 09:28:24 $ by $Author: valdas $
  * 
  * @author <a href="mailto:gummi@idega.com">Gudmundur Agust Saemundsson</a>
- * @version $Revision: 1.15 $
+ * @version $Revision: 1.16 $
  */
 public class ArticleUtil {
 
@@ -102,40 +103,41 @@ public class ArticleUtil {
 		return false;
 	}
 	
-	public static List<String> getJavaScriptSourcesForArticleEditor(IWContext iwc, boolean needOnlyHelper) {
+	public static final String getSourcesAndActionForArticleEditor(IWContext iwc) {
+		List<String> sources = getStyleSheetsSourcesForArticleEditor(iwc);	//	CSS
+		
+		sources.addAll(getJavaScriptSourcesForArticleEditor(iwc));			//	JavaScript
+		
+		return PresentationUtil.getJavaScriptAction(PresentationUtil.getJavaScriptLinesLoadedLazily(sources,
+																"ArticleEditorHelper.initializeJavaScriptActionsForEditingAndCreatingArticles();"));
+	}
+	
+	private static List<String> getJavaScriptSourcesForArticleEditor(IWContext iwc) {
 		if (iwc == null) {
 			return null;
 		}
 		
 		List<String> sources = new ArrayList<String>();
 		
-		sources.add(iwc.getIWMainApplication().getBundle(ArticleConstants.IW_BUNDLE_IDENTIFIER).getVirtualPathWithFileNameString("javascript/ArticleEditorHelper.js"));
+		sources.add(getBundle().getVirtualPathWithFileNameString("javascript/ArticleEditorHelper.js"));
 		sources.add(CoreConstants.DWR_ENGINE_SCRIPT);
 		sources.add("/dwr/interface/ThemesEngine.js");
 		
-		if (!needOnlyHelper) {
-			Web2Business web2 = ELUtil.getInstance().getBean(Web2Business.class);
-			try {
-				sources.add(web2.getBundleURIToMootoolsLib());			//	MooTools
-				sources.add(web2.getMoodalboxScriptFilePath(false));	//	MOOdalBox
-			} catch (RemoteException e) {
-				e.printStackTrace();
-			}
+		Web2Business web2 = ELUtil.getInstance().getBean(Web2Business.class);
+		try {
+			sources.add(web2.getBundleURIToMootoolsLib());			//	MooTools
+			sources.add(web2.getMoodalboxScriptFilePath(false));	//	MOOdalBox
+		} catch (RemoteException e) {
+			e.printStackTrace();
 		}
-	
+		
+		sources.add(web2.getBundleURIToJQueryLib());				//	jQuery
+		sources.add(ContentUtil.getBundle().getVirtualPathWithFileNameString("javascript/ContentAdmin.js"));
+
 		return sources;
 	}
 	
-	public static String getJavaScriptInitializationAction(boolean onLoadInit) {
-		String plainAction = "initializeJavaScriptActionsForEditingAndCreatingArticles();";
-		if (onLoadInit) {
-			return new StringBuffer("window.addEvent('domready', function() {").append(plainAction).append("});").toString();
-		}
-		
-		return plainAction;
-	}
-	
-	public static List<String> getStyleSheetsSourcesForArticleEditor(IWContext iwc) {
+	private static List<String> getStyleSheetsSourcesForArticleEditor(IWContext iwc) {
 		if (iwc == null) {
 			return null;
 		}
@@ -147,6 +149,7 @@ public class ArticleUtil {
 		} catch (RemoteException e) {
 			e.printStackTrace();
 		}
+		styleSheets.add(ContentUtil.getBundle().getVirtualPathWithFileNameString("style/content-admin.css"));
 	
 		return styleSheets;
 	}
