@@ -1,5 +1,5 @@
 /*
- * $Id: ArticleUtil.java,v 1.16 2008/11/13 09:28:24 valdas Exp $
+ * $Id: ArticleUtil.java,v 1.17 2008/11/14 12:56:38 valdas Exp $
  * Created on 7.2.2005
  *
  * Copyright (C) 2005 Idega Software hf. All Rights Reserved.
@@ -33,10 +33,10 @@ import com.idega.webface.WFUtil;
 
 /**
  * 
- *  Last modified: $Date: 2008/11/13 09:28:24 $ by $Author: valdas $
+ *  Last modified: $Date: 2008/11/14 12:56:38 $ by $Author: valdas $
  * 
  * @author <a href="mailto:gummi@idega.com">Gudmundur Agust Saemundsson</a>
- * @version $Revision: 1.16 $
+ * @version $Revision: 1.17 $
  */
 public class ArticleUtil {
 
@@ -104,54 +104,36 @@ public class ArticleUtil {
 	}
 	
 	public static final String getSourcesAndActionForArticleEditor(IWContext iwc) {
-		List<String> sources = getStyleSheetsSourcesForArticleEditor(iwc);	//	CSS
-		
-		sources.addAll(getJavaScriptSourcesForArticleEditor(iwc));			//	JavaScript
-		
-		return PresentationUtil.getJavaScriptAction(PresentationUtil.getJavaScriptLinesLoadedLazily(sources,
-																"ArticleEditorHelper.initializeJavaScriptActionsForEditingAndCreatingArticles();"));
-	}
-	
-	private static List<String> getJavaScriptSourcesForArticleEditor(IWContext iwc) {
 		if (iwc == null) {
 			return null;
 		}
 		
 		List<String> sources = new ArrayList<String>();
+		Web2Business web2 = ELUtil.getInstance().getBean(Web2Business.class);
 		
+		//	CSS
+		try {
+			sources.add(web2.getMoodalboxStyleFilePath());			//	MOOdalBox
+		} catch (RemoteException e) {
+			e.printStackTrace();
+		}
+		sources.add(ContentUtil.getBundle().getVirtualPathWithFileNameString("style/content-admin.css"));
+		
+		//	JavaScript
 		sources.add(getBundle().getVirtualPathWithFileNameString("javascript/ArticleEditorHelper.js"));
 		sources.add(CoreConstants.DWR_ENGINE_SCRIPT);
 		sources.add("/dwr/interface/ThemesEngine.js");
-		
-		Web2Business web2 = ELUtil.getInstance().getBean(Web2Business.class);
 		try {
 			sources.add(web2.getBundleURIToMootoolsLib());			//	MooTools
 			sources.add(web2.getMoodalboxScriptFilePath(false));	//	MOOdalBox
 		} catch (RemoteException e) {
 			e.printStackTrace();
 		}
-		
 		sources.add(web2.getBundleURIToJQueryLib());				//	jQuery
 		sources.add(ContentUtil.getBundle().getVirtualPathWithFileNameString("javascript/ContentAdmin.js"));
-
-		return sources;
-	}
-	
-	private static List<String> getStyleSheetsSourcesForArticleEditor(IWContext iwc) {
-		if (iwc == null) {
-			return null;
-		}
 		
-		List<String> styleSheets = new ArrayList<String>();
-		Web2Business web2 = ELUtil.getInstance().getBean(Web2Business.class);
-		try {
-			styleSheets.add(web2.getMoodalboxStyleFilePath());		//	MOOdalBox
-		} catch (RemoteException e) {
-			e.printStackTrace();
-		}
-		styleSheets.add(ContentUtil.getBundle().getVirtualPathWithFileNameString("style/content-admin.css"));
-	
-		return styleSheets;
+		return PresentationUtil.getJavaScriptAction(PresentationUtil.getJavaScriptLinesLoadedLazily(sources,
+				"ArticleEditorHelper.initializeJavaScriptActionsForEditingAndCreatingArticles();"));
 	}
 	
 	public static UISaveState getBeanSaveState(String beanId) {

@@ -1,5 +1,5 @@
 /*
- * $Id: ArticleItemViewer.java,v 1.49 2008/11/13 09:28:25 valdas Exp $
+ * $Id: ArticleItemViewer.java,v 1.50 2008/11/14 12:56:38 valdas Exp $
  *
  * Copyright (C) 2004 Idega. All Rights Reserved.
  *
@@ -26,6 +26,7 @@ import com.idega.content.business.ContentUtil;
 import com.idega.content.presentation.ContentItemToolbar;
 import com.idega.content.presentation.ContentItemViewer;
 import com.idega.content.presentation.ContentViewer;
+import com.idega.core.accesscontrol.business.StandardRoles;
 import com.idega.core.builder.business.BuilderService;
 import com.idega.core.builder.business.BuilderServiceFactory;
 import com.idega.core.cache.UIComponentCacher;
@@ -33,17 +34,21 @@ import com.idega.idegaweb.IWMainApplication;
 import com.idega.presentation.IWContext;
 import com.idega.presentation.Layer;
 import com.idega.presentation.Script;
+import com.idega.presentation.ui.HiddenInput;
+import com.idega.util.CoreConstants;
+import com.idega.util.CoreUtil;
 import com.idega.util.PresentationUtil;
+import com.idega.util.StringUtil;
 import com.idega.webface.WFHtml;
 import com.idega.webface.convert.WFTimestampConverter;
 
 /**
- * Last modified: $Date: 2008/11/13 09:28:25 $ by $Author: valdas $
+ * Last modified: $Date: 2008/11/14 12:56:38 $ by $Author: valdas $
  *
  * Displays the article item
  *
  * @author <a href="mailto:gummi@idega.com">Gudmundur Agust Saemundsson</a>
- * @version $Revision: 1.49 $
+ * @version $Revision: 1.50 $
  */
 public class ArticleItemViewer extends ContentItemViewer {
 	
@@ -118,7 +123,27 @@ public class ArticleItemViewer extends ContentItemViewer {
 	@Override
 	protected UIComponent createFieldComponent(String attribute){
 		if (ContentConstants.ATTRIBUTE_BODY.equals(attribute)) {
-			return new WFHtml();
+			WFHtml body = new WFHtml();
+			
+			IWContext iwc = CoreUtil.getIWContext();
+			if (iwc != null && (iwc.hasRole(StandardRoles.ROLE_KEY_AUTHOR) || iwc.hasRole(StandardRoles.ROLE_KEY_EDITOR))) {
+				String resourcePath = getResourcePath();
+				
+				if (!StringUtil.isEmpty(resourcePath)) {
+					if (resourcePath.startsWith(CoreConstants.WEBDAV_SERVLET_URI)) {
+						resourcePath = resourcePath.replaceFirst(CoreConstants.WEBDAV_SERVLET_URI, CoreConstants.EMPTY);
+					}
+					if (!resourcePath.endsWith(CoreConstants.SLASH)) {
+						resourcePath = new StringBuilder(resourcePath).append(CoreConstants.SLASH).toString();
+					}
+						
+					HiddenInput identifier = new HiddenInput(ContentConstants.CONTENT_ITEM_IDENTIFIER_NAME, resourcePath);
+					identifier.setStyleClass(ContentConstants.CONTENT_ITEM_IDENTIFIER_STYLE_CLASS);
+					this.getFacets().put(ContentConstants.CONTENT_ITEM_IDENTIFIER_NAME, identifier);
+				}
+			}
+			
+			return body;
 		}
 		else if (ContentConstants.ATTRIBUTE_TEASER.equals(attribute)) {
 			return new WFHtml();

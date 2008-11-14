@@ -11,6 +11,8 @@ import com.idega.presentation.Layer;
 import com.idega.presentation.text.Heading1;
 import com.idega.presentation.text.Heading3;
 import com.idega.presentation.ui.GenericButton;
+import com.idega.util.CoreConstants;
+import com.idega.util.StringUtil;
 
 public class ArticleDeleter extends Block {
 	
@@ -23,6 +25,10 @@ public class ArticleDeleter extends Block {
 		
 		String action = iwc.getParameter(ContentViewer.PARAMETER_ACTION);
 		String resource = iwc.getParameter(ContentViewer.PARAMETER_CONTENT_RESOURCE);
+		String fromArticleListParameter = iwc.getParameter(ContentConstants.RENDERING_COMPONENT_OF_ARTICLE_LIST);
+		if (StringUtil.isEmpty(fromArticleListParameter)) {
+			fromArticleListParameter = Boolean.TRUE.toString();
+		}
 		
 		String nullValue = "null";
 		if (action == null || nullValue.endsWith(action)) {
@@ -42,12 +48,17 @@ public class ArticleDeleter extends Block {
 			return;
 		}
 		
+		if (resource.startsWith(CoreConstants.WEBDAV_SERVLET_URI)) {
+			resource = resource.replaceFirst(CoreConstants.WEBDAV_SERVLET_URI, CoreConstants.EMPTY);
+		}
+		
 		String text = iwrb.getLocalizedString("are_you_sure_you_want_delete_this_article", "Are you sure you want to delete this article?");
 		container.add(new Heading3(text));
 		
 		container.add(buttons);
 		GenericButton delete = new GenericButton(iwrb.getLocalizedString("delete", "Delete"));
-		delete.setOnClick(new StringBuffer("ArticleEditorHelper.deleteSelectedArticle('").append(resource).append("');").toString());
+		delete.setOnClick(new StringBuffer("ArticleEditorHelper.deleteSelectedArticle('").append(resource).append("', ")
+							.append(fromArticleListParameter).append(");").toString());
 		buttons.add(delete);
 		
 		GenericButton cancel = new GenericButton(iwrb.getLocalizedString("cancel", "Cancel"));

@@ -10,6 +10,7 @@ import javax.faces.context.FacesContext;
 import org.apache.webdav.lib.WebdavResource;
 
 import com.idega.block.article.business.ArticleConstants;
+import com.idega.block.article.business.ArticleUtil;
 import com.idega.block.article.business.CommentsEngine;
 import com.idega.block.article.business.CommentsPersistenceManager;
 import com.idega.block.rss.business.RSSBusiness;
@@ -89,7 +90,7 @@ public class CommentsViewer extends Block {
 			return;
 		}
 		
-		PresentationUtil.addStyleSheetToHeader(iwc, "/idegaweb/bundles/com.idega.block.article.bundle/resources/style/article.css");
+		PresentationUtil.addStyleSheetToHeader(iwc, ArticleUtil.getBundle().getVirtualPathWithFileNameString("style/article.css"));
 		getModuleId(iwc);
 		
 		if (linkToComments == null) {

@@ -1,5 +1,5 @@
 /*
- * $Id: EditArticleView.java,v 1.51 2008/11/13 09:28:25 valdas Exp $
+ * $Id: EditArticleView.java,v 1.52 2008/11/14 12:56:38 valdas Exp $
  *
  * Copyright (C) 2004 Idega. All Rights Reserved.
  *
@@ -54,6 +54,7 @@ import com.idega.idegaweb.IWBundle;
 import com.idega.idegaweb.IWResourceBundle;
 import com.idega.presentation.IWBaseComponent;
 import com.idega.presentation.IWContext;
+import com.idega.presentation.Layer;
 import com.idega.presentation.Script;
 import com.idega.presentation.text.Paragraph;
 import com.idega.presentation.ui.FieldSet;
@@ -62,6 +63,8 @@ import com.idega.user.data.User;
 import com.idega.util.CoreConstants;
 import com.idega.util.CoreUtil;
 import com.idega.util.LocaleUtil;
+import com.idega.util.PresentationUtil;
+import com.idega.util.StringUtil;
 import com.idega.webface.WFBlock;
 import com.idega.webface.WFComponentSelector;
 import com.idega.webface.WFContainer;
@@ -77,10 +80,10 @@ import com.idega.webface.htmlarea.HTMLArea;
  * <p>
  * This is the part for the editor of article is inside the admin interface
  * </p>
- * Last modified: $Date: 2008/11/13 09:28:25 $ by $Author: valdas $
+ * Last modified: $Date: 2008/11/14 12:56:38 $ by $Author: valdas $
  *
  * @author Joakim,Tryggvi Larusson
- * @version $Revision: 1.51 $
+ * @version $Revision: 1.52 $
  */
 public class EditArticleView extends IWBaseComponent implements ManagedContentBeans, ActionListener, ValueChangeListener {
 	private static final Log log = LogFactory.getLog(EditArticleView.class);
@@ -640,6 +643,32 @@ public class EditArticleView extends IWBaseComponent implements ManagedContentBe
 						}
 					} catch (RuntimeException re) {
 						re.printStackTrace();
+					}
+				}
+				
+				comp = editArticle.findComponent("articleUpdaterScriptCaller");
+				if (comp == null) {
+					String resourcePath = articleItemBean.getResourcePath();
+					if (!StringUtil.isEmpty(resourcePath)) {
+						if (resourcePath.startsWith(CoreConstants.WEBDAV_SERVLET_URI)) {
+							resourcePath = resourcePath.replaceFirst(CoreConstants.WEBDAV_SERVLET_URI, CoreConstants.EMPTY);
+						}
+						
+						String mode = null;
+						IWContext iwc = CoreUtil.getIWContext();
+						if (iwc != null) {
+							mode = iwc.getParameter(ContentViewer.PARAMETER_ACTION);
+						}
+						if (!StringUtil.isEmpty(mode)) {
+							mode = new StringBuilder("'").append(mode).append("'").toString();
+						}
+						
+						Layer script = new Layer();
+						script.setId("articleUpdaterScriptCaller");
+						script.add(PresentationUtil.getJavaScriptAction(new StringBuilder("window.parent.ArticleEditorHelper.reloadArticle('")
+						.append(resourcePath).append("', '").append(ContentConstants.CONTENT_ITEM_IDENTIFIER_STYLE_CLASS).append("', ")
+						.append(StringUtil.isEmpty(mode) ? "null" : mode).append(", ").append(fromArticleItemListViewer).append(");").toString()));
+						editArticle.add(script);
 					}
 				}
 			}

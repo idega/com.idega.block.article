@@ -14,20 +14,33 @@
 			<include method="addComment"/>
 		</create>
 		
+		<create javascript="ArticleItemInfoFetcher" creator="jsf">
+			<param name="managedBeanName" value="articleItemInfoFetcher"/>
+			<param name="class" value="com.idega.block.article.business.ArticleItemInfoFetcher"/>
+			<include method="getArticleInfo"/>
+			<include method="getArticleWasNotDeletedMessage"/>
+			<include method="getButtons"/>
+		</create>
+		
 		<convert converter="bean" match="com.idega.block.article.bean.ArticleComment" />
 		<convert converter="bean" match="com.idega.block.article.bean.CommentsViewerProperties" />
+		<convert converter="bean" match="com.idega.block.article.bean.ArticleFields" />
 	</allow>
 	<signatures>
 		<![CDATA[
 			import java.util.List;
 			import com.idega.block.article.bean.CommentsViewerProperties;
 			import com.idega.block.article.bean.ArticleComment;
+			
+			import com.idega.block.article.bean.ArticleFields;
 
 			CommentsEngine.addComment(CommentsViewerProperties);
 			CommentsViewerProperties CommentsEngine.deleteComments(CommentsViewerProperties);
 			CommentsEngine.getCommentsForAllPages(CommentsViewerProperties);
 			CommentsEngine.getComments(CommentsViewerProperties);
 			List<List<ArticleComment>> CommentsEngine.getCommentsFromUris(List<CommentsViewerProperties>);
+			
+			ArticleFields ArticleItemInfoFetcher.getArticleInfo(String);
 		]]>
 	</signatures>
 </dwr>

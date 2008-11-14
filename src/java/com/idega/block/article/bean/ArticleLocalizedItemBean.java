@@ -1,5 +1,5 @@
 /*
- * $Id: ArticleLocalizedItemBean.java,v 1.28 2008/02/28 14:30:49 valdas Exp $
+ * $Id: ArticleLocalizedItemBean.java,v 1.29 2008/11/14 12:56:38 valdas Exp $
  *
  * Copyright (C) 2004 Idega. All Rights Reserved.
  *
@@ -30,7 +30,6 @@ import com.idega.content.bean.ContentItemBean;
 import com.idega.content.bean.ContentItemCase;
 import com.idega.content.bean.ContentItemField;
 import com.idega.content.bean.ContentItemFieldBean;
-import com.idega.content.business.ContentConstants;
 import com.idega.content.business.categories.CategoryBean;
 import com.idega.data.IDOStoreException;
 import com.idega.presentation.IWContext;
@@ -40,6 +39,7 @@ import com.idega.slide.util.WebdavRootResource;
 import com.idega.util.CoreConstants;
 import com.idega.util.CoreUtil;
 import com.idega.util.StringHandler;
+import com.idega.util.StringUtil;
 import com.idega.xml.XMLDocument;
 import com.idega.xml.XMLElement;
 import com.idega.xml.XMLException;
@@ -51,10 +51,10 @@ import com.idega.xml.XMLParser;
  * This is a JSF managed bean that manages each article xml document 
  * instance per language/locale.
  * <p>
- * Last modified: $Date: 2008/02/28 14:30:49 $ by $Author: valdas $
+ * Last modified: $Date: 2008/11/14 12:56:38 $ by $Author: valdas $
  *
  * @author Anders Lindman,<a href="mailto:tryggvi@idega.com">Tryggvi Larusson</a>
- * @version $Revision: 1.28 $
+ * @version $Revision: 1.29 $
  */
 public class ArticleLocalizedItemBean extends ContentItemBean implements Serializable, ContentItem {
 	
@@ -103,10 +103,12 @@ public class ArticleLocalizedItemBean extends ContentItemBean implements Seriali
 		clear();
 	}
 	
+	@Override
 	public String[] getContentFieldNames(){
 		return ATTRIBUTE_ARRAY;
 	}
 	
+	@Override
 	public String[] getToolbarActions(){
 		//return ACTION_ARRAY;
 		return super.getToolbarActions();
@@ -162,10 +164,13 @@ public class ArticleLocalizedItemBean extends ContentItemBean implements Seriali
 	
 	public void setImages(List l) { setItemFields(FIELDNAME_IMAGES, l); }
 	
+	@Override
 	public void setPublishedDate(Timestamp date) { super.setPublishedDate(date); }
 	
+	@Override
 	public Timestamp getPublishedDate() { return super.getPublishedDate(); }
 	
+	@Override
 	public void setLanguage(String lang){
 		super.setLanguage(lang);
 		getArticleItem().setLanguage(lang);
@@ -178,6 +183,7 @@ public class ArticleLocalizedItemBean extends ContentItemBean implements Seriali
 	/**
 	 * Clears all all attributes for this bean. 
 	 */
+	@Override
 	public void clear() {
 		super.clear();
 
@@ -262,7 +268,6 @@ public class ArticleLocalizedItemBean extends ContentItemBean implements Seriali
 	 * @throws XMLException
 	 */
 	public String getAsXML() throws IOException, XMLException {
-		
 		//	Remove absolute references for example
 		prettifyBody();
 		prettifyTeaser();
@@ -275,50 +280,6 @@ public class ArticleLocalizedItemBean extends ContentItemBean implements Seriali
 		String teaser = getTeaser();
 		if (teaser == null) {
 			teaser = ArticleConstants.EMPTY;
-		}
-		
-		XMLParser builder = new XMLParser();
-		
-		XMLElement rootElement = null;
-		XMLElement bodyElement = null;
-		XMLElement teaserElement = null;
-		XMLNamespace jTidyNamespace = new XMLNamespace("http://www.w3.org/1999/xhtml");
-		
-		InputStream stream = null;
-		if (body != null && !ContentConstants.EMPTY.equals(body.trim())) {
-			try {
-				stream = StringHandler.getStreamFromString(body);
-				XMLDocument bodyDoc = builder.parse(stream);
-				rootElement = bodyDoc.getRootElement();
-				if (rootElement != null) {
-					bodyElement = rootElement.getChild("body", jTidyNamespace);
-					if (bodyElement != null) {
-						body = bodyElement.getContentAsString();
-					}
-				}
-			} catch(Exception e) {
-				e.printStackTrace();
-			} finally {
-				closeInputStream(stream);
-			}
-		}
-		
-		if (teaser != null && !ContentConstants.EMPTY.equals(teaser.trim())) {
-			try {
-				stream = StringHandler.getStreamFromString(teaser);
-				XMLDocument bodyDoc = builder.parse(stream);
-				rootElement = bodyDoc.getRootElement();
-				if (rootElement != null) {
-					teaserElement = rootElement.getChild("body", jTidyNamespace);
-					if (teaserElement != null) {
-						teaser = teaserElement.getContentAsString();
-					}
-				}
-			} catch(Exception e) {
-				e.printStackTrace();
-			} finally {
-				closeInputStream(stream);
-			}
 		}
 		
 		IWContext iwc = CoreUtil.getIWContext();
@@ -348,7 +309,7 @@ public class ArticleLocalizedItemBean extends ContentItemBean implements Seriali
 	/**
 	 * Stores this article file.
 	 */
-	public void store() throws IDOStoreException{
+	public void store() throws IDOStoreException {
 		InputStream stream = null;
 		try {
 			IWContext iwc = CoreUtil.getIWContext();
@@ -463,8 +424,22 @@ public class ArticleLocalizedItemBean extends ContentItemBean implements Seriali
 			closeInputStream(stream);
 			closeOutputStream(baos);
 		}
-	
+		if (StringUtil.isEmpty(text)) {
+			return toPrettify;
+		}
 		text = removeAbsoluteReferences(text);
+		
+		//	Getting content from <body>...</body>
+		String bodyStartTag = "<body>";
+		int startIndex = text.indexOf(bodyStartTag);
+		String bodyEndTag = "</body>";
+		int endIndex = text.indexOf(bodyEndTag);
+		if (startIndex == -1 || endIndex == -1) {
+			//	Didn't find valid body structure
+			return text;
+		}
+		text = text.substring(startIndex + bodyStartTag.length(), endIndex);
+		
 		return text;
 	}
 
@@ -491,6 +466,7 @@ public class ArticleLocalizedItemBean extends ContentItemBean implements Seriali
 	 * Loads an xml file specified by the webdav resource
 	 * The beans atributes are then set according to the information in the XML file
 	 */
+	@Override
 	protected boolean load(WebdavExtendedResource webdavResource) throws IOException {
 		XMLParser builder = new XMLParser();
 		XMLDocument bodyDoc = null;
