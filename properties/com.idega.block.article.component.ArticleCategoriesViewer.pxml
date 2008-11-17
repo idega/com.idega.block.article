@@ -11,6 +11,16 @@
       <type>java.lang.String</type>
       <value>iw.block</value>
     </key>
+    <key>
+      <name>is_block</name>
+      <type>java.lang.String</type>
+      <value>true</value>
+    </key>
+    <key>
+      <name>icon_uri</name>
+      <type>java.lang.String</type>
+      <value>/idegaweb/bundles/com.idega.block.article/resources/images/moduleIcons/categories.png</value>
+    </key>
   </map>
 </pxml>
 
