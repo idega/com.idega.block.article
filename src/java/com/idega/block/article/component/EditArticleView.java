@@ -1,5 +1,5 @@
 /*
- * $Id: EditArticleView.java,v 1.52 2008/11/14 12:56:38 valdas Exp $
+ * $Id: EditArticleView.java,v 1.53 2008/11/17 18:07:16 valdas Exp $
  *
  * Copyright (C) 2004 Idega. All Rights Reserved.
  *
@@ -80,10 +80,10 @@ import com.idega.webface.htmlarea.HTMLArea;
  * <p>
  * This is the part for the editor of article is inside the admin interface
  * </p>
- * Last modified: $Date: 2008/11/14 12:56:38 $ by $Author: valdas $
+ * Last modified: $Date: 2008/11/17 18:07:16 $ by $Author: valdas $
  *
  * @author Joakim,Tryggvi Larusson
- * @version $Revision: 1.52 $
+ * @version $Revision: 1.53 $
  */
 public class EditArticleView extends IWBaseComponent implements ManagedContentBeans, ActionListener, ValueChangeListener {
 	private static final Log log = LogFactory.getLog(EditArticleView.class);
@@ -124,6 +124,7 @@ public class EditArticleView extends IWBaseComponent implements ManagedContentBe
 	private String resourcePath = null;
 	private String baseFolderPath = null;
 	private String editArticleCategoriesSelectionBlockId = "editArticleCategoriesSelectionBlockId";
+	private String containerId;
 	
 	boolean clearOnInit = false;
 	private boolean fromArticleItemListViewer = false;
@@ -177,6 +178,7 @@ public class EditArticleView extends IWBaseComponent implements ManagedContentBe
 			if (baseFolderPath != null) {
 				f.getChildren().add(new HiddenInput(ContentItemToolbar.PARAMETER_BASE_FOLDER_PATH, baseFolderPath));
 			}
+			f.getChildren().add(new HiddenInput(ContentConstants.CONTENT_LIST_ITEMS_IDENTIFIER, containerId));
 			
 			//	JavaScript
 			Script script = new Script();
@@ -648,28 +650,41 @@ public class EditArticleView extends IWBaseComponent implements ManagedContentBe
 				
 				comp = editArticle.findComponent("articleUpdaterScriptCaller");
 				if (comp == null) {
-					String resourcePath = articleItemBean.getResourcePath();
-					if (!StringUtil.isEmpty(resourcePath)) {
-						if (resourcePath.startsWith(CoreConstants.WEBDAV_SERVLET_URI)) {
-							resourcePath = resourcePath.replaceFirst(CoreConstants.WEBDAV_SERVLET_URI, CoreConstants.EMPTY);
-						}
-						
-						String mode = null;
-						IWContext iwc = CoreUtil.getIWContext();
-						if (iwc != null) {
-							mode = iwc.getParameter(ContentViewer.PARAMETER_ACTION);
-						}
-						if (!StringUtil.isEmpty(mode)) {
-							mode = new StringBuilder("'").append(mode).append("'").toString();
-						}
-						
-						Layer script = new Layer();
-						script.setId("articleUpdaterScriptCaller");
-						script.add(PresentationUtil.getJavaScriptAction(new StringBuilder("window.parent.ArticleEditorHelper.reloadArticle('")
-						.append(resourcePath).append("', '").append(ContentConstants.CONTENT_ITEM_IDENTIFIER_STYLE_CLASS).append("', ")
-						.append(StringUtil.isEmpty(mode) ? "null" : mode).append(", ").append(fromArticleItemListViewer).append(");").toString()));
-						editArticle.add(script);
+					String action = null;
+					if (fromArticleItemListViewer && !StringUtil.isEmpty(containerId)) {
+						action = PresentationUtil.getJavaScriptAction(new StringBuilder("window.parent.ArticleEditorHelper.reloadArticlesList('").append(containerId)
+								.append("');").toString());
 					}
+					else {
+						String resourcePath = articleItemBean.getResourcePath();
+						if (!StringUtil.isEmpty(resourcePath)) {
+							if (resourcePath.startsWith(CoreConstants.WEBDAV_SERVLET_URI)) {
+								resourcePath = resourcePath.replaceFirst(CoreConstants.WEBDAV_SERVLET_URI, CoreConstants.EMPTY);
+							}
+							
+							String mode = null;
+							IWContext iwc = CoreUtil.getIWContext();
+							if (iwc != null) {
+								mode = iwc.getParameter(ContentViewer.PARAMETER_ACTION);
+							}
+							if (!StringUtil.isEmpty(mode)) {
+								mode = new StringBuilder("'").append(mode).append("'").toString();
+							}
+							
+							action = PresentationUtil.getJavaScriptAction(new StringBuilder("window.parent.ArticleEditorHelper.reloadArticle('")
+							.append(resourcePath).append("', '").append(ContentConstants.CONTENT_ITEM_IDENTIFIER_STYLE_CLASS).append("', ")
+							.append(StringUtil.isEmpty(mode) ? "null" : mode).append(");").toString());
+						}
+					}
+					if (action == null) {
+						action = PresentationUtil.getJavaScriptAction(new StringBuilder("window.parent.ArticleEditorHelper.needReload = true;")
+																		.toString());
+					}
+					
+					Layer script = new Layer();
+					script.setId("articleUpdaterScriptCaller");
+					script.add(action);
+					editArticle.add(script);
 				}
 			}
 			this.clearOnInit = false;
@@ -856,6 +871,10 @@ public class EditArticleView extends IWBaseComponent implements ManagedContentBe
 		else {
 			fromArticleItemListViewer = false;
 		}
+		containerId = iwc.getParameter(ContentConstants.CONTENT_LIST_ITEMS_IDENTIFIER);
+		if (containerId == null) {
+			containerId = String.valueOf(-1);
+		}
 		
 		ArticleItemBean article = getArticleItemBean();
 		String languageChange = article.getLanguageChange();
@@ -1016,10 +1035,11 @@ public class EditArticleView extends IWBaseComponent implements ManagedContentBe
 	 */
 	@Override
 	public Object saveState(FacesContext ctx) {
-		Object values[] = new Object[3];
+		Object values[] = new Object[4];
 		values[0] = super.saveState(ctx);
 		values[1] = this.editMode;
 		values[2] = this.fromArticleItemListViewer;
+		values[3] = this.containerId;
 		return values;
 	}
 
@@ -1033,6 +1053,7 @@ public class EditArticleView extends IWBaseComponent implements ManagedContentBe
 		super.restoreState(ctx, values[0]);
 		this.editMode = (String)values[1];
 		this.fromArticleItemListViewer = Boolean.valueOf(values[2].toString());
+		this.containerId = values[3].toString();
 		//super.restoreState(ctx,state);
 	}
 

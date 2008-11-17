@@ -1,5 +1,5 @@
 /*
- * $Id: ArticleItemBean.java,v 1.85 2008/06/06 16:22:46 valdas Exp $
+ * $Id: ArticleItemBean.java,v 1.86 2008/11/17 18:07:16 valdas Exp $
  *
  * Copyright (C) 2004-2005 Idega. All Rights Reserved.
  *
@@ -47,6 +47,7 @@ import com.idega.slide.util.WebdavRootResource;
 import com.idega.util.CoreConstants;
 import com.idega.util.CoreUtil;
 import com.idega.util.StringHandler;
+import com.idega.util.StringUtil;
 import com.idega.xml.XMLException;
 
 /**
@@ -54,10 +55,10 @@ import com.idega.xml.XMLException;
  * This is a JSF managed bean that manages each article instance and delegates 
  * all calls to the correct localized instance.
  * <p>
- * Last modified: $Date: 2008/06/06 16:22:46 $ by $Author: valdas $
+ * Last modified: $Date: 2008/11/17 18:07:16 $ by $Author: valdas $
  *
  * @author Anders Lindman,<a href="mailto:tryggvi@idega.com">Tryggvi Larusson</a>
- * @version $Revision: 1.85 $
+ * @version $Revision: 1.86 $
  */
 public class ArticleItemBean extends ContentItemBean implements Serializable, ContentItem, ValueChangeListener {
 	
@@ -113,6 +114,7 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 	/* (non-Javadoc)
 	 * @see com.idega.block.article.bean.ArticleLocalizedItemBean#clear()
 	 */
+	@Override
 	public void clear() {
 		getLocalizedArticle().clear();
 		this.resourcePath=null;
@@ -159,6 +161,7 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 	/* (non-Javadoc)
 	 * @see com.idega.block.article.bean.ArticleLocalizedItemBean#getContentFieldNames()
 	 */
+	@Override
 	public String[] getContentFieldNames() {
 		return getLocalizedArticle().getContentFieldNames();
 	}
@@ -214,6 +217,7 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 	/* (non-Javadoc)
 	 * @see com.idega.block.article.bean.ArticleLocalizedItemBean#getToolbarActions()
 	 */
+	@Override
 	public String[] getToolbarActions() {
 		return getLocalizedArticle().getToolbarActions();
 	}
@@ -367,6 +371,7 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 	/* (non-Javadoc)
 	 * @see com.idega.content.bean.ContentItemBean#getName()
 	 */
+	@Override
 	public String getName() {
 		return getLocalizedArticle().getName();
 	}
@@ -374,6 +379,7 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 	/* (non-Javadoc)
 	 * @see com.idega.content.bean.ContentItemBean#getDescription()
 	 */
+	@Override
 	public String getDescription() {
 		return getLocalizedArticle().getDescription();
 	}
@@ -381,6 +387,7 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 	/* (non-Javadoc)
 	 * @see com.idega.content.bean.ContentItemBean#getItemType()
 	 */
+	@Override
 	public String getItemType() {
 		return getLocalizedArticle().getItemType();
 	}
@@ -388,6 +395,7 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 	/* (non-Javadoc)
 	 * @see com.idega.content.bean.ContentItemBean#getCreatedByUserId()
 	 */
+	@Override
 	public int getCreatedByUserId() {
 		return getLocalizedArticle().getCreatedByUserId();
 	}
@@ -395,6 +403,7 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 	/* (non-Javadoc)
 	 * @see com.idega.content.bean.ContentItemBean#setName(java.lang.String)
 	 */
+	@Override
 	public void setName(String s) {
 		getLocalizedArticle().setName(s);
 	}
@@ -402,6 +411,7 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 	/* (non-Javadoc)
 	 * @see com.idega.content.bean.ContentItemBean#setDescription(java.lang.String)
 	 */
+	@Override
 	public void setDescription(String s) {
 		getLocalizedArticle().setDescription(s);
 	}
@@ -409,6 +419,7 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 	/* (non-Javadoc)
 	 * @see com.idega.content.bean.ContentItemBean#setItemType(java.lang.String)
 	 */
+	@Override
 	public void setItemType(String s) {
 		getLocalizedArticle().setItemType(s);
 	}
@@ -416,6 +427,7 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 	/* (non-Javadoc)
 	 * @see com.idega.content.bean.ContentItemBean#setCreatedByUserId(int)
 	 */
+	@Override
 	public void setCreatedByUserId(int id) {
 		getLocalizedArticle().setCreatedByUserId(id);
 	}
@@ -423,6 +435,7 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 	/* (non-Javadoc)
 	 * @see com.idega.content.bean.ContentItemBean#getLocales()
 	 */
+	@Override
 	public Map getLocales() {
 		return getLocalizedArticle().getLocales();
 	}
@@ -430,6 +443,7 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 	/* (non-Javadoc)
 	 * @see com.idega.content.bean.ContentItemBean#getPendingLocaleId()
 	 */
+	@Override
 	public String getPendingLocaleId() {
 		return getLocalizedArticle().getPendingLocaleId();
 	}
@@ -437,6 +451,7 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 	/* (non-Javadoc)
 	 * @see com.idega.content.bean.ContentItemBean#setPendingLocaleId(java.lang.String)
 	 */
+	@Override
 	public void setPendingLocaleId(String localeId) {
 		getLocalizedArticle().setPendingLocaleId(localeId);
 	}
@@ -444,6 +459,7 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 	/* (non-Javadoc)
 	 * @see com.idega.content.bean.ContentItemBean#getRequestedStatus()
 	 */
+	@Override
 	public String getRequestedStatus() {
 		return getLocalizedArticle().getRequestedStatus();
 	}
@@ -451,6 +467,7 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 	/* (non-Javadoc)
 	 * @see com.idega.content.bean.ContentItemBean#setRequestedStatus(java.lang.String)
 	 */
+	@Override
 	public void setRequestedStatus(String requestedStatus) {
 		getLocalizedArticle().setRequestedStatus(requestedStatus);
 	}
@@ -458,6 +475,7 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 	/* (non-Javadoc)
 	 * @see com.idega.content.bean.ContentItemBean#getAttachments()
 	 */
+	@Override
 	public List getAttachments() {
 		return getLocalizedArticle().getAttachments();
 	}
@@ -465,6 +483,7 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 	/* (non-Javadoc)
 	 * @see com.idega.content.bean.ContentItemBean#setAttachment(java.util.List)
 	 */
+	@Override
 	public void setAttachment(List l) {
 		getLocalizedArticle().setAttachment(l);
 	}
@@ -472,6 +491,7 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 	/* (non-Javadoc)
 	 * @see com.idega.content.bean.ContentItemBean#getCase()
 	 */
+	@Override
 	public ContentItemCase getCase() {
 		return getLocalizedArticle().getCase();
 	}
@@ -479,6 +499,7 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 	/* (non-Javadoc)
 	 * @see com.idega.content.bean.ContentItemBean#setCase(com.idega.content.bean.ContentItemCase)
 	 */
+	@Override
 	public void setCase(ContentItemCase caseBean) {
 		getLocalizedArticle().setCase(caseBean);
 	}
@@ -486,6 +507,7 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 	/* (non-Javadoc)
 	 * @see com.idega.content.bean.ContentItemBean#getStatus()
 	 */
+	@Override
 	public String getStatus() {
 		return getLocalizedArticle().getStatus();
 	}
@@ -493,6 +515,7 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 	/* (non-Javadoc)
 	 * @see com.idega.content.bean.ContentItemBean#setStatus(java.lang.String)
 	 */
+	@Override
 	public void setStatus(String status) {
 		getLocalizedArticle().setStatus(status);
 	}
@@ -500,6 +523,7 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 	/* (non-Javadoc)
 	 * @see com.idega.content.bean.ContentItemBean#updateLocale()
 	 */
+	@Override
 	public void updateLocale() {
 		getLocalizedArticle().updateLocale();
 	}
@@ -507,6 +531,7 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 	/* (non-Javadoc)
 	 * @see com.idega.content.bean.ContentItemBean#getCreationDate()
 	 */
+	@Override
 	public Timestamp getCreationDate() {
 		return getLocalizedArticle().getCreationDate();
 	}
@@ -514,6 +539,7 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 	/* (non-Javadoc)
 	 * @see com.idega.content.bean.ContentItemBean#getVersionName()
 	 */
+	@Override
 	public String getVersionName() {
 		return getLocalizedArticle().getVersionName();
 	}
@@ -521,6 +547,7 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 	/* (non-Javadoc)
 	 * @see com.idega.content.bean.ContentItemBean#setVersionName(java.lang.String)
 	 */
+	@Override
 	public void setVersionName(String name) {
 		getLocalizedArticle().setVersionName(name);
 	}
@@ -528,6 +555,7 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 	/* (non-Javadoc)
 	 * @see com.idega.content.bean.ContentItemBean#getRendered()
 	 */
+	@Override
 	public Boolean getRendered() {
 		return getLocalizedArticle().getRendered();
 	}
@@ -535,6 +563,7 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 	/* (non-Javadoc)
 	 * @see com.idega.content.bean.ContentItemBean#setRendered(boolean)
 	 */
+	@Override
 	public void setRendered(boolean render) {
 		getLocalizedArticle().setRendered(render);
 	}
@@ -542,6 +571,7 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 	/* (non-Javadoc)
 	 * @see com.idega.content.bean.ContentItemBean#setRendered(java.lang.Boolean)
 	 */
+	@Override
 	public void setRendered(Boolean render) {
 		getLocalizedArticle().setRendered(render);
 	}
@@ -549,6 +579,7 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 	/* (non-Javadoc)
 	 * @see com.idega.content.bean.ContentItemBean#isAutoCreateResource()
 	 */
+	@Override
 	public boolean isAutoCreateResource() {
 		
 		return getLocalizedArticle().isAutoCreateResource();
@@ -557,6 +588,7 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 	/* (non-Javadoc)
 	 * @see com.idega.content.bean.ContentItemBean#setAutoCreateResource(boolean)
 	 */
+	@Override
 	public void setAutoCreateResource(boolean autoCreateResource) {
 		
 		getLocalizedArticle().setAutoCreateResource(autoCreateResource);
@@ -565,6 +597,7 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 	/* (non-Javadoc)
 	 * @see com.idega.content.bean.ContentItemBean#getExists()
 	 */
+	@Override
 	public boolean getExists() {
 		
 		return getLocalizedArticle().getExists();
@@ -573,16 +606,19 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 	/* (non-Javadoc)
 	 * @see com.idega.content.bean.ContentItemBean#setExists(boolean)
 	 */
+	@Override
 	public void setExists(boolean exists) {
 		
 		getLocalizedArticle().setExists(exists);
 	}
 	
 	
+	@Override
 	public Object getValue(String fieldName) {
 		return getLocalizedArticle().getValue(fieldName);
 	}
 
+	@Override
 	public void setValue(String fieldName, Object value) {
 		getLocalizedArticle().setValue(fieldName,value);
 	}
@@ -607,14 +643,17 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 		this.baseFolderLocation = path;
 	}
 	
+	@Override
 	public Locale getLocale(){
 		return super.getLocale();
 	}
 	
+	@Override
 	public void setLocale(Locale locale){
 		super.setLocale(locale);
 	}
 	
+	@Override
 	public void setResourcePath(String resourcePath){
 		this.resourcePath=resourcePath;
 		updateLocalizedArticleBean();
@@ -666,9 +705,10 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 	 * @see ContentItem#getResourcePath()
 	 * @return
 	 */
+	@Override
 	public String getResourcePath() {
 		String sResourcePath = this.resourcePath;
-		if (sResourcePath == null || CoreConstants.EMPTY.equals(sResourcePath)) {
+		if (StringUtil.isEmpty(sResourcePath) || sResourcePath.equals(CoreConstants.SLASH)) {
 			sResourcePath = createArticlePath();
 			setResourcePath(sResourcePath);
 		}
@@ -792,6 +832,7 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 	/**
 	 * Loads the article (folder)
 	 */
+	@Override
 	protected boolean load(String path) throws IOException {
 		return super.load(path);
 	}
@@ -812,6 +853,7 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 	/**
 	 * Loads the article (folder)
 	 */
+	@Override
 	protected boolean load(WebdavExtendedResource webdavResource) throws IOException {
 		WebdavExtendedResource localizedArticleFile = null;
 		//First check if the resource is a folder, as it should be
@@ -913,6 +955,7 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 	/* (non-Javadoc)
 	 * @see com.idega.content.bean.ContentItemBean#delete()
 	 */
+	@Override
 	public void delete() {
 		getLocalizedArticle().delete();
 		this.localizedArticle=null;
@@ -929,10 +972,12 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 		
 	}
 
+	@Override
 	public Timestamp getPublishedDate() {
 		return getLocalizedArticle().getPublishedDate();
 	}
 
+	@Override
 	public void setPublishedDate(Timestamp date) {
 		getLocalizedArticle().setPublishedDate(date);
 	}

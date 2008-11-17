@@ -1,5 +1,5 @@
 /*
- * $Id: ArticleListViewer.java,v 1.28 2008/11/13 09:28:25 valdas Exp $
+ * $Id: ArticleListViewer.java,v 1.29 2008/11/17 18:07:16 valdas Exp $
  * Created on 24.1.2005
  *
  * Copyright (C) 2005 Idega Software hf. All Rights Reserved.
@@ -32,8 +32,10 @@ import com.idega.idegaweb.IWMainApplication;
 import com.idega.presentation.IWContext;
 import com.idega.presentation.Layer;
 import com.idega.presentation.Script;
+import com.idega.presentation.ui.HiddenInput;
 import com.idega.util.CoreUtil;
 import com.idega.util.PresentationUtil;
+import com.idega.util.StringUtil;
 
 
 /**
@@ -42,10 +44,10 @@ import com.idega.util.PresentationUtil;
  * for the article module.
  * </p>
  * 
- *  Last modified: $Date: 2008/11/13 09:28:25 $ by $Author: valdas $
+ *  Last modified: $Date: 2008/11/17 18:07:16 $ by $Author: valdas $
  * 
  * @author <a href="mailto:tryggvi@idega.com">Tryggvi Larusson</a>
- * @version $Revision: 1.28 $
+ * @version $Revision: 1.29 $
  */
 public class ArticleListViewer extends ContentItemListViewer {
 
@@ -246,18 +248,7 @@ public class ArticleListViewer extends ContentItemListViewer {
 			return;
 		}
 		
-		BuilderService builder = null;
-		try {
-			builder = BuilderServiceFactory.getBuilderService(iwc);
-		} catch (RemoteException e) {
-			e.printStackTrace();
-			return;
-		}
-		
-		String moduleId = builder.getInstanceId(this);
-		if (moduleId == null) {
-			moduleId = this.getId();
-		}
+		String moduleId = getModuleId(iwc);
 		
 		ArticleCacher cacher = ArticleCacher.getInstance(iwc.getIWMainApplication());
 		if (cacher == null) {
@@ -266,6 +257,26 @@ public class ArticleListViewer extends ContentItemListViewer {
 		
 		UIComponent commentsController = comments.getCommentsController(iwc, cacher.getCacheKey(this, iwc), moduleId, isShowComments(), SHOW_COMMENTS_PROPERTY);
 		getFacets().put(ContentListViewerRenderer.FACET_ITEM_COMMENTS_CONTROLLER, commentsController);
+	}
+	
+	private String getModuleId(IWContext iwc) {
+		BuilderService builder = null;
+		try {
+			builder = BuilderServiceFactory.getBuilderService(iwc);
+		} catch (RemoteException e) {
+			e.printStackTrace();
+		}
+		
+		String moduleId =  null;
+		if (builder != null) {
+			moduleId = builder.getInstanceId(this);
+		}
+		
+		if (StringUtil.isEmpty(moduleId)) {
+			moduleId = this.getId();
+		}
+		
+		return moduleId;
 	}
 	
 	private void addFeed(FacesContext context){
@@ -324,6 +335,10 @@ public class ArticleListViewer extends ContentItemListViewer {
 			Layer script = new Layer();
 			script.add(ArticleUtil.getSourcesAndActionForArticleEditor(iwc));
 			getFacets().put(ContentItemViewer.FACET_JAVA_SCRIPT, script);
+			
+			HiddenInput identifier = new HiddenInput(ContentConstants.CONTENT_LIST_ITEMS_IDENTIFIER_NAME, getModuleId(iwc));
+			identifier.setStyleClass("contentLisItemsIdentifierStyleClass");
+			getFacets().put(ContentConstants.CONTENT_LIST_ITEMS_IDENTIFIER_NAME, identifier);
 		}
 		
 		super.encodeBegin(context);

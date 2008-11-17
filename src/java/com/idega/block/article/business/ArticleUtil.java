@@ -1,5 +1,5 @@
 /*
- * $Id: ArticleUtil.java,v 1.17 2008/11/14 12:56:38 valdas Exp $
+ * $Id: ArticleUtil.java,v 1.18 2008/11/17 18:07:16 valdas Exp $
  * Created on 7.2.2005
  *
  * Copyright (C) 2005 Idega Software hf. All Rights Reserved.
@@ -33,10 +33,10 @@ import com.idega.webface.WFUtil;
 
 /**
  * 
- *  Last modified: $Date: 2008/11/14 12:56:38 $ by $Author: valdas $
+ *  Last modified: $Date: 2008/11/17 18:07:16 $ by $Author: valdas $
  * 
  * @author <a href="mailto:gummi@idega.com">Gudmundur Agust Saemundsson</a>
- * @version $Revision: 1.17 $
+ * @version $Revision: 1.18 $
  */
 public class ArticleUtil {
 
@@ -113,7 +113,7 @@ public class ArticleUtil {
 		
 		//	CSS
 		try {
-			sources.add(web2.getMoodalboxStyleFilePath());			//	MOOdalBox
+			sources.add(web2.getThickboxStyleFilePath());			//	ThickBox
 		} catch (RemoteException e) {
 			e.printStackTrace();
 		}
@@ -123,13 +123,12 @@ public class ArticleUtil {
 		sources.add(getBundle().getVirtualPathWithFileNameString("javascript/ArticleEditorHelper.js"));
 		sources.add(CoreConstants.DWR_ENGINE_SCRIPT);
 		sources.add("/dwr/interface/ThemesEngine.js");
+		sources.add(web2.getBundleURIToJQueryLib());				//	jQuery
 		try {
-			sources.add(web2.getBundleURIToMootoolsLib());			//	MooTools
-			sources.add(web2.getMoodalboxScriptFilePath(false));	//	MOOdalBox
+			sources.add(web2.getThickboxScriptFilePath());			//	ThickBox
 		} catch (RemoteException e) {
 			e.printStackTrace();
 		}
-		sources.add(web2.getBundleURIToJQueryLib());				//	jQuery
 		sources.add(ContentUtil.getBundle().getVirtualPathWithFileNameString("javascript/ContentAdmin.js"));
 		
 		return PresentationUtil.getJavaScriptAction(PresentationUtil.getJavaScriptLinesLoadedLazily(sources,

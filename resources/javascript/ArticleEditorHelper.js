@@ -1,67 +1,84 @@
 if (ArticleEditorHelper == null) var ArticleEditorHelper = {};
 
+ArticleEditorHelper.needReload = false;
+
 ArticleEditorHelper.initializeJavaScriptActionsForEditingAndCreatingArticles = function() {
-	window.addEvent('resize', ArticleEditorHelper.setDimensionsForArticleEditWindow);
-	
-	ArticleEditorHelper.setDimensionsForArticleEditWindow();
-	ArticleEditorHelper.registerArticleLinksForMoodalBox();
+	ArticleEditorHelper.registerArticleActions();
 }
 
-ArticleEditorHelper.setDimensionsForArticleEditWindow = function() {
-	var width = Math.round(window.getWidth() * 0.8);
-	var height = Math.round(window.getHeight() * 0.8);
+ArticleEditorHelper.registerArticleActions = function() {
+	var editButtons = jQuery('a.edit');
+	jQuery.each(editButtons, function() {
+		ArticleEditorHelper.checkArticleLinkAndRegisterIfItsCorrect(this);
+	});
 	
-	try {
-		MOOdalBox.init({resizeDuration: 0, evalScripts: true, animateCaption: false, defContentsWidth: width, defContentsHeight: height});
-	} catch(e) {}
-}
+	var createButtons = jQuery('a.create');
+	jQuery.each(createButtons, function() {
+		ArticleEditorHelper.checkArticleLinkAndRegisterIfItsCorrect(this);
+	});
 
-ArticleEditorHelper.registerArticleLinksForMoodalBox = function() {
-	$$('a.edit').each(
-		function(element) {
-			ArticleEditorHelper.checkArticleLinkAndRegisterIfItsCorrect(element);
-		}
-	);
-	$$('a.create').each(
-		function(element) {
-			ArticleEditorHelper.checkArticleLinkAndRegisterIfItsCorrect(element);
-		}
-	);
-	$$('a.delete').each(
-		function(element) {
-			ArticleEditorHelper.checkArticleLinkAndRegisterIfItsCorrect(element);
-		}
-	);
+	var deleteButtons = jQuery('a.delete');
+	jQuery.each(deleteButtons, function() {
+		ArticleEditorHelper.checkArticleLinkAndRegisterIfItsCorrect(this);
+	});
 }
 
 ArticleEditorHelper.checkArticleLinkAndRegisterIfItsCorrect = function(link) {
-	if (link == null) {
+	if (link == null || link.length == 0) {
 		return false;
 	}
 	
-	var relProperty = link.getProperty('rel');
-	if (relProperty == null) {
+	var fakeJS = 'javascript:void(0);';
+	var uri = jQuery(link).attr('href');
+	if (uri == fakeJS) {
 		return false;
 	}
-	
-	if (relProperty.indexOf('moodalbox') != -1) {
-		MOOdalBox.register(link);
-	}
+	jQuery(link).attr('href', fakeJS);
+	uri += '&height=' + (windowinfo.getWindowHeight() * 0.8) + '&width=' + (windowinfo.getWindowWidth() * 0.8);
+	jQuery(link).bind('click', function(e) {
+		tb_show('', uri, null, function() {
+			ArticleEditorHelper.addActionAfterArticleIsSavedAndEditorClosed();
+		});
+	});
 }
 
 ArticleEditorHelper.addActionAfterArticleIsSavedAndEditorClosed = function() {
+	if (ArticleEditorHelper.needReload) {
+		reloadPage();
+	}
 }
 
-ArticleEditorHelper.deleteSelectedArticle = function(resource, fromArticleItemListViewer) {
+ArticleEditorHelper.deleteSelectedArticle = function(resource, fromArticleList) {
 	ThemesEngine.deleteArticle(resource, {
 		callback: function(result) {
 			LazyLoader.loadMultiple(['/dwr/engine.js', '/dwr/interface/ArticleItemInfoFetcher.js'], function() {
 				if (result) {
 					var parents = ArticleEditorHelper.getArticleContainer(null, resource);
-					var info = {header: '', body: '', teaser: '', date: '', author: ''};
-					ArticleEditorHelper.updateArticleFields(info, parents);
-					
-					ArticleEditorHelper.addToolbarButtons(resource, 'delete', parents, fromArticleItemListViewer, function() {MOOdalBox.close()});
+					if (fromArticleList) {
+						var container = null;
+						while ((parents != null && parents.length > 0) && container == null) {
+							var uuids = jQuery('input.contentLisItemsIdentifierStyleClass[type=\'hidden\']', parents);
+							
+							if (uuids != null && uuids.length > 0) {
+								container = jQuery(uuids[0]).parent();
+							}
+							else {
+								parents = parents.parent();
+							}
+						}
+						
+						if (container == null) {
+							ArticleEditorHelper.needReload = true;
+							return false;
+						}
+						ArticleEditorHelper.reloadArticlesList(jQuery(container).attr('id'), function() { closeAllLoadingMessages(); tb_remove(); });
+					}
+					else {
+						var info = {header: '', body: '', teaser: '', date: '', author: ''};
+						ArticleEditorHelper.updateArticleFields(info, parents);
+						
+						ArticleEditorHelper.addToolbarButtons(resource, 'delete', parents, false, function() { closeAllLoadingMessages(); tb_remove(); });
+					}
 				}
 				else {
 					ArticleItemInfoFetcher.getArticleWasNotDeletedMessage({
@@ -92,7 +109,35 @@ ArticleEditorHelper.deleteSelectedArticle = function(resource, fromArticleItemLi
 	});
 }
 
-ArticleEditorHelper.reloadArticle = function(resourcePath, styleClass, mode, fromArticleItemListViewer) {
+ArticleEditorHelper.reloadArticlesList = function(id, callback) {
+	if (id == null || id == '') {
+		ArticleEditorHelper.needReload = true;
+		return false;
+	}
+	
+	var parentContainer = jQuery('#' + id);
+	if (parentContainer == null || parentContainer.length == 0) {
+		ArticleEditorHelper.needReload = true;
+		return false;
+	}
+	
+	var uuids = jQuery('input.contentLisItemsIdentifierStyleClass[type=\'hidden\']', parentContainer);
+	if (uuids == null || uuids.length == 0) {
+		ArticleEditorHelper.needReload = true;
+		return false;
+	}
+	
+	IWCORE.renderComponent(jQuery(uuids[0]).attr('value'), parentContainer[0], function() {
+		ArticleEditorHelper.registerArticleActions();
+		if (callback) {
+			callback();
+		}
+	});
+	
+	return false;
+}
+
+ArticleEditorHelper.reloadArticle = function(resourcePath, styleClass, mode) {
 	if (resourcePath == null || resourcePath == '') {
 		return false;
 	}
@@ -104,7 +149,7 @@ ArticleEditorHelper.reloadArticle = function(resourcePath, styleClass, mode, fro
 				
 				ArticleEditorHelper.updateArticleFields(info, parents);
 
-				ArticleEditorHelper.addToolbarButtons(resourcePath, mode, parents, fromArticleItemListViewer, null);
+				ArticleEditorHelper.addToolbarButtons(resourcePath, mode, parents, false, null);
 			}
 		});
 	});
@@ -120,16 +165,12 @@ ArticleEditorHelper.getArticleContainer = function(styleClass, resourcePath) {
 
 ArticleEditorHelper.updateArticleFields = function(info, parents) {
 	if (info == null) {
-		MOOdalBox.addEventToCloseAction(function() {
-			reloadPage();
-		});
+		ArticleEditorHelper.needReload = true;
 		return false;
 	}
 	
 	if (parents == null || parents.length == 0) {
-		MOOdalBox.addEventToCloseAction(function() {
-			reloadPage();
-		});
+		ArticleEditorHelper.needReload = true;
 		return false;
 	}
 	var container = null;
@@ -159,7 +200,7 @@ ArticleEditorHelper.addToolbarButtons = function(resourcePath, previousAction, p
 				for (var i = 0; i < parents.length; i++) {
 					jQuery('div[class*=\'content_item_toolbar\']', jQuery(parents[i])).html(buttons);
 				}
-				ArticleEditorHelper.registerArticleLinksForMoodalBox();
+				ArticleEditorHelper.registerArticleActions();
 			}
 			
 			if (callback) {

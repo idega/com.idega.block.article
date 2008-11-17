@@ -17,6 +17,7 @@ import com.idega.presentation.ui.IFrame;
 
 public class ArticleEditor extends Block {
 	
+	@Override
 	public void main(IWContext iwc) {
 		Layer container = new Layer();
 		add(container);
@@ -35,8 +36,8 @@ public class ArticleEditor extends Block {
 			renderingFromList = renderingParameter;
 		}
 		String basePath = iwc.getParameter(ContentItemToolbar.PARAMETER_BASE_FOLDER_PATH);
-		
 		String categories = iwc.getParameter(ContentItemToolbar.PARAMETER_CATEGORIES);
+		String containerId = iwc.getParameter(ContentConstants.CONTENT_LIST_ITEMS_IDENTIFIER);
 		
 		BuilderService service = null;
 		try {
@@ -57,6 +58,9 @@ public class ArticleEditor extends Block {
 		if (categories != null) {
 			parameters.add(new AdvancedProperty(ContentItemToolbar.PARAMETER_CATEGORIES, categories));
 		}
+		if (containerId != null) {
+			parameters.add(new AdvancedProperty(ContentConstants.CONTENT_LIST_ITEMS_IDENTIFIER, containerId));
+		}
 		String uri = service.getUriToObject(EditArticleView.class, parameters);
 		
 		IFrame frame = new IFrame(EditArticleView.class.getSimpleName(), uri);
@@ -64,6 +68,7 @@ public class ArticleEditor extends Block {
 		container.add(frame);
 	}
 	
+	@Override
 	public String getBundleIdentifier() {
 		return ArticleConstants.IW_BUNDLE_IDENTIFIER;
 	}
