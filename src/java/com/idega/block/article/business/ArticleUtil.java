@@ -1,5 +1,5 @@
 /*
- * $Id: ArticleUtil.java,v 1.18 2008/11/17 18:07:16 valdas Exp $
+ * $Id: ArticleUtil.java,v 1.19 2008/11/19 12:29:26 valdas Exp $
  * Created on 7.2.2005
  *
  * Copyright (C) 2005 Idega Software hf. All Rights Reserved.
@@ -13,7 +13,9 @@ import java.io.File;
 import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
+import javax.faces.component.UIComponent;
 import javax.faces.context.FacesContext;
 import javax.faces.el.ValueBinding;
 
@@ -21,22 +23,26 @@ import org.apache.myfaces.custom.savestate.UISaveState;
 
 import com.idega.block.web2.business.Web2Business;
 import com.idega.content.business.ContentUtil;
+import com.idega.content.presentation.ContentItemViewer;
 import com.idega.core.builder.business.BuilderService;
 import com.idega.core.builder.business.BuilderServiceFactory;
 import com.idega.core.builder.data.ICPage;
+import com.idega.core.localisation.business.LocaleSwitcher;
 import com.idega.idegaweb.IWBundle;
 import com.idega.presentation.IWContext;
+import com.idega.presentation.Script;
 import com.idega.util.CoreConstants;
 import com.idega.util.PresentationUtil;
+import com.idega.util.StringUtil;
 import com.idega.util.expression.ELUtil;
 import com.idega.webface.WFUtil;
 
 /**
  * 
- *  Last modified: $Date: 2008/11/17 18:07:16 $ by $Author: valdas $
+ *  Last modified: $Date: 2008/11/19 12:29:26 $ by $Author: valdas $
  * 
  * @author <a href="mailto:gummi@idega.com">Gudmundur Agust Saemundsson</a>
- * @version $Revision: 1.18 $
+ * @version $Revision: 1.19 $
  */
 public class ArticleUtil {
 
@@ -141,5 +147,46 @@ public class ArticleUtil {
 		beanSaveState.setId(new StringBuilder(beanId).append("SaveState").toString());
 		beanSaveState.setValueBinding("value", binding);
 		return beanSaveState;
+	}
+	
+	public static final boolean addArticleFeedFacet(IWContext iwc, Map<Object, UIComponent> facets) {
+		if (facets == null) {
+			return false;
+		}
+		
+		BuilderService bservice = null;
+		try {
+			bservice = BuilderServiceFactory.getBuilderService(iwc);
+		} catch (RemoteException e) {
+			e.printStackTrace();
+		}
+		if (bservice == null) {
+			return false;
+		}
+		
+		String serverName = iwc.getServerURL();
+		
+		String feedUri = null;
+		try {
+			feedUri = bservice.getCurrentPageURI(iwc);
+		} catch (RemoteException e) {
+			e.printStackTrace();
+		}
+		if (StringUtil.isEmpty(feedUri)) {
+			return false;
+		}
+		if (!feedUri.endsWith(CoreConstants.SLASH)) {
+			feedUri = new StringBuilder(feedUri).append(CoreConstants.SLASH).toString();
+		}
+		
+		String linkToFeed = new StringBuilder(serverName).append("rss/article").append(feedUri).append("?").append(LocaleSwitcher.languageParameterString)
+							.append(CoreConstants.EQ).append(iwc.getCurrentLocale().toString()).toString();
+		
+		Script script = new Script();
+		script.addScriptLine(new StringBuilder("registerEvent(window, 'load', function(){addFeedSymbolInHeader('").append(linkToFeed)
+								.append("', 'atom', 'Atom 1.0');});").toString());
+		facets.put(ContentItemViewer.FACET_FEED_SCRIPT, script);
+		
+		return true;
 	}
 }

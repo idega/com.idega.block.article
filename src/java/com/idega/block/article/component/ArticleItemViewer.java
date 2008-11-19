@@ -1,5 +1,5 @@
 /*
- * $Id: ArticleItemViewer.java,v 1.50 2008/11/14 12:56:38 valdas Exp $
+ * $Id: ArticleItemViewer.java,v 1.51 2008/11/19 12:29:26 valdas Exp $
  *
  * Copyright (C) 2004 Idega. All Rights Reserved.
  *
@@ -9,7 +9,6 @@
 package com.idega.block.article.component;
 
 import java.io.IOException;
-import java.rmi.RemoteException;
 import java.sql.Timestamp;
 import javax.faces.component.UIComponent;
 import javax.faces.component.html.HtmlOutputText;
@@ -27,13 +26,10 @@ import com.idega.content.presentation.ContentItemToolbar;
 import com.idega.content.presentation.ContentItemViewer;
 import com.idega.content.presentation.ContentViewer;
 import com.idega.core.accesscontrol.business.StandardRoles;
-import com.idega.core.builder.business.BuilderService;
-import com.idega.core.builder.business.BuilderServiceFactory;
 import com.idega.core.cache.UIComponentCacher;
 import com.idega.idegaweb.IWMainApplication;
 import com.idega.presentation.IWContext;
 import com.idega.presentation.Layer;
-import com.idega.presentation.Script;
 import com.idega.presentation.ui.HiddenInput;
 import com.idega.util.CoreConstants;
 import com.idega.util.CoreUtil;
@@ -43,12 +39,12 @@ import com.idega.webface.WFHtml;
 import com.idega.webface.convert.WFTimestampConverter;
 
 /**
- * Last modified: $Date: 2008/11/14 12:56:38 $ by $Author: valdas $
+ * Last modified: $Date: 2008/11/19 12:29:26 $ by $Author: valdas $
  *
  * Displays the article item
  *
  * @author <a href="mailto:gummi@idega.com">Gudmundur Agust Saemundsson</a>
- * @version $Revision: 1.50 $
+ * @version $Revision: 1.51 $
  */
 public class ArticleItemViewer extends ContentItemViewer {
 	
@@ -183,7 +179,7 @@ public class ArticleItemViewer extends ContentItemViewer {
 				((HtmlOutputText) creationDate).setConverter(new WFTimestampConverter(datePattern, showDate, showTime));
 			}
 		}
-		addFeed(context);
+		addFeed(IWContext.getIWContext(context));
 	}
 
 	private boolean canInitField(String attribute) {
@@ -459,33 +455,8 @@ public class ArticleItemViewer extends ContentItemViewer {
 		setValue(ArticleLocalizedItemBean.FIELDNAME_LINK_TO_COMMENT, linkToComments);
 	}
 	
-	private boolean addFeedJavaScript(String linkToFeed, String feedType, String feedTitle) {
-		Script script = new Script();
-		script.addScriptLine("registerEvent(window, 'load', function(){addFeedSymbolInHeader('"+linkToFeed+"', '"+feedType+"', '"+feedTitle+"');});");
-		getFacets().put(ContentItemViewer.FACET_FEED_SCRIPT, script);
-		return true;
-	}
-
-	private void addFeed(FacesContext context) {
-		IWContext iwc = IWContext.getIWContext(context);
-		BuilderService bservice = null;
-		try {
-			bservice = BuilderServiceFactory.getBuilderService(iwc);
-			String serverName = iwc.getServerURL();
-			if (serverName == null) {
-				return;
-			}
-			serverName.substring(0, serverName.length()-1);
-			String feedUri = bservice.getCurrentPageURI(iwc);
-			if (feedUri == null) {
-				return;
-			}
-			feedUri.substring(1);
-			String linkToFeed = serverName+"rss/article"+feedUri;
-			addFeedJavaScript(linkToFeed, "atom", "Atom 1.0");
-		} catch (RemoteException e) {
-			e.printStackTrace();
-		}
+	private boolean addFeed(IWContext iwc) {
+		return ArticleUtil.addArticleFeedFacet(iwc, getFacets());
 	}
 
 	protected boolean isAddCommentsViewer() {

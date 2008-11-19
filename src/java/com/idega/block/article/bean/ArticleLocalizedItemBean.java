@@ -1,5 +1,5 @@
 /*
- * $Id: ArticleLocalizedItemBean.java,v 1.29 2008/11/14 12:56:38 valdas Exp $
+ * $Id: ArticleLocalizedItemBean.java,v 1.30 2008/11/19 12:29:26 valdas Exp $
  *
  * Copyright (C) 2004 Idega. All Rights Reserved.
  *
@@ -17,6 +17,7 @@ import java.io.Serializable;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.apache.webdav.lib.WebdavResource;
@@ -40,21 +41,21 @@ import com.idega.util.CoreConstants;
 import com.idega.util.CoreUtil;
 import com.idega.util.StringHandler;
 import com.idega.util.StringUtil;
+import com.idega.util.xml.XmlUtil;
 import com.idega.xml.XMLDocument;
 import com.idega.xml.XMLElement;
 import com.idega.xml.XMLException;
 import com.idega.xml.XMLNamespace;
-import com.idega.xml.XMLParser;
 
 /**
  * <p>
  * This is a JSF managed bean that manages each article xml document 
  * instance per language/locale.
  * <p>
- * Last modified: $Date: 2008/11/14 12:56:38 $ by $Author: valdas $
+ * Last modified: $Date: 2008/11/19 12:29:26 $ by $Author: valdas $
  *
  * @author Anders Lindman,<a href="mailto:tryggvi@idega.com">Tryggvi Larusson</a>
- * @version $Revision: 1.29 $
+ * @version $Revision: 1.30 $
  */
 public class ArticleLocalizedItemBean extends ContentItemBean implements Serializable, ContentItem {
 	
@@ -63,6 +64,8 @@ public class ArticleLocalizedItemBean extends ContentItemBean implements Seriali
 	 */
 	private static final long serialVersionUID = -7871069835129148485L;
 
+	private static final Logger LOGGER = Logger.getLogger(ArticleLocalizedItemBean.class.getName());
+	
 	private boolean _isUpdated = false;
 	
 	private static final String ROOT_ELEMENT_NAME_ARTICLE = "article";
@@ -429,18 +432,7 @@ public class ArticleLocalizedItemBean extends ContentItemBean implements Seriali
 		}
 		text = removeAbsoluteReferences(text);
 		
-		//	Getting content from <body>...</body>
-		String bodyStartTag = "<body>";
-		int startIndex = text.indexOf(bodyStartTag);
-		String bodyEndTag = "</body>";
-		int endIndex = text.indexOf(bodyEndTag);
-		if (startIndex == -1 || endIndex == -1) {
-			//	Didn't find valid body structure
-			return text;
-		}
-		text = text.substring(startIndex + bodyStartTag.length(), endIndex);
-		
-		return text;
+		return getOnlyBodyContent(text);
 	}
 
 	private boolean closeOutputStream(OutputStream outputStream) {
@@ -468,7 +460,6 @@ public class ArticleLocalizedItemBean extends ContentItemBean implements Seriali
 	 */
 	@Override
 	protected boolean load(WebdavExtendedResource webdavResource) throws IOException {
-		XMLParser builder = new XMLParser();
 		XMLDocument bodyDoc = null;
 		InputStream stream = null;
 		try {
@@ -479,20 +470,19 @@ public class ArticleLocalizedItemBean extends ContentItemBean implements Seriali
 			if (theArticle != null && !theArticle.isCollection()) {
 				setResourcePath(theArticle.getPath());
 				stream = theArticle.getMethodData();
-				bodyDoc = builder.parse(stream);
+				bodyDoc = new XMLDocument(XmlUtil.getJDOMXMLDocument(stream));
 			} else {
 				bodyDoc = null;
 			}
-		} catch (XMLException e) {
-			e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+		} catch (Exception e) {
+			LOGGER.log(Level.SEVERE, "Can not load article", e);  //To change body of catch statement use File | Settings | File Templates.
 		} finally {
 			closeInputStream(stream);
 		}
 		
 		if (bodyDoc == null) {
 			//	Article not found
-			Logger log = Logger.getLogger(this.getClass().toString());
-			log.warning("Article xml file was not found");
+			LOGGER.warning("Article xml file was not found");
 			setRendered(false);
 			return false;
 		}
@@ -507,98 +497,102 @@ public class ArticleLocalizedItemBean extends ContentItemBean implements Seriali
 			return loadArticleFromFeed(rootElement);
 		}
 	
+		//	Language
 		try {
-			XMLElement language  = rootElement.getChild(FIELDNAME_CONTENT_LANGUAGE,getIdegaXMLNameSpace());
-			if(language != null){
-				setLanguage(language.getText());
-			} else {
+			XMLElement language  = rootElement.getChild(FIELDNAME_CONTENT_LANGUAGE, getIdegaXMLNameSpace());
+			if(language == null) {
 				setLanguage(null);
+			} else {
+				setLanguage(language.getText());
 			}
-		}catch(Exception e) {	
+		} catch(Exception e) {	
 			setLanguage(null);
 		}
+		
+		//	Headline
 		try {
 			XMLElement headline = rootElement.getChild(FIELDNAME_HEADLINE,getIdegaXMLNameSpace());
-			if(headline != null){
-				setHeadline(headline.getText());
-			} else {
+			if (headline == null) {
 				setHeadline(CoreConstants.EMPTY);
+			} else {
+				setHeadline(headline.getText());
 			}
-		}catch(Exception e) {		//Nullpointer could occur if field isn't used
-			e.printStackTrace();
+		} catch(Exception e) {
+			LOGGER.log(Level.WARNING, "Can not load headline", e);
 			setHeadline(CoreConstants.EMPTY);
 		}
+		
+		//	Teaser
 		try {
-			//Parse out the teaser
-			try {
-				XMLNamespace htmlNamespace = new XMLNamespace("http://www.w3.org/1999/xhtml");
-				XMLElement bodyElement = rootElement.getChild(FIELDNAME_TEASER,getIdegaXMLNameSpace());
-				XMLElement htmlElement = bodyElement.getChild("html",htmlNamespace);
-				if (htmlElement == null) {
-					setTeaser(bodyElement.getText());
-				} else {
-					XMLElement htmlBodyElement = htmlElement.getChild("body",htmlNamespace);
-					
-					String bodyValue = htmlBodyElement.getContentAsString();
-					setTeaser(bodyValue);
-				}
-			}catch(Exception e) {		//Nullpointer could occur if field isn't used
-				Logger log = Logger.getLogger(this.getClass().toString());
-				log.warning("Teaser of article is empty");
-				setTeaser(CoreConstants.EMPTY);
-			}
-			}catch(Exception e) {		//Nullpointer could occur if field isn't used
-				e.printStackTrace();
-				setTeaser(CoreConstants.EMPTY);
-			}
-		try {
-			XMLElement author = rootElement.getChild(FIELDNAME_AUTHOR,getIdegaXMLNameSpace());
-			if(author != null){
-				setAuthor(author.getText());
+			XMLNamespace htmlNamespace = new XMLNamespace("http://www.w3.org/1999/xhtml");
+			XMLElement bodyElement = rootElement.getChild(FIELDNAME_TEASER, getIdegaXMLNameSpace());
+			XMLElement htmlElement = bodyElement.getChild("html",htmlNamespace);
+			if (htmlElement == null) {
+				setTeaser(bodyElement.getText());
 			} else {
-				setAuthor(CoreConstants.EMPTY);
+				XMLElement htmlBodyElement = htmlElement.getChild("body",htmlNamespace);
+				
+				String bodyValue = htmlBodyElement.getContentAsString();
+				setTeaser(bodyValue);
 			}
-		}catch(Exception e) {		//Nullpointer could occur if field isn't used
-			e.printStackTrace();
+		} catch(Exception e) {
+			LOGGER.log(Level.WARNING, "Can not load teaser", e);
+			setTeaser(CoreConstants.EMPTY);
+		}
+		
+		//	Author
+		try {
+			XMLElement author = rootElement.getChild(FIELDNAME_AUTHOR, getIdegaXMLNameSpace());
+			if (author == null) {
+				setAuthor(CoreConstants.EMPTY);
+			} else {
+				setAuthor(author.getText());
+			}
+		} catch(Exception e) {
+			LOGGER.log(Level.WARNING, "Can not load author", e);
 			setAuthor(CoreConstants.EMPTY);
 		}
 
-		//Parse out the body
+		//	Body
 		try {
 			XMLNamespace htmlNamespace = new XMLNamespace("http://www.w3.org/1999/xhtml");
-			XMLElement bodyElement = rootElement.getChild(ContentItemBean.FIELDNAME_BODY,getIdegaXMLNameSpace());
-			XMLElement htmlElement = bodyElement.getChild("html",htmlNamespace);
-			XMLElement htmlBodyElement = htmlElement.getChild("body",htmlNamespace);
+			XMLElement bodyElement = rootElement.getChild(ContentItemBean.FIELDNAME_BODY, getIdegaXMLNameSpace());
+			XMLElement htmlElement = bodyElement.getChild("html", htmlNamespace);
+			XMLElement htmlBodyElement = htmlElement.getChild("body", htmlNamespace);
 			
 			String bodyValue = htmlBodyElement.getContentAsString();
 			setBody(bodyValue);
-		}catch(Exception e) {		//Nullpointer could occur if field isn't used
-			Logger log = Logger.getLogger(this.getClass().toString());
-			log.warning("Body of article is empty");
+		} catch(Exception e) {
+			LOGGER.log(Level.WARNING, "Can not load body", e);
 			setBody(CoreConstants.EMPTY);
 		}
 		
+		//	Source
 		try {
-			XMLElement source = rootElement.getChild(FIELDNAME_SOURCE,getIdegaXMLNameSpace());
-			if(source != null){
-				setSource(source.getText());
-			} else {
+			XMLElement source = rootElement.getChild(FIELDNAME_SOURCE, getIdegaXMLNameSpace());
+			if (source == null) {
 				setSource(CoreConstants.EMPTY);
+			} else {
+				setSource(source.getText());
 			}
-		}catch(Exception e) {		//Nullpointer could occur if field isn't used
+		} catch(Exception e) {
+			LOGGER.log(Level.WARNING, "Can not load source", e);
 			setSource(CoreConstants.EMPTY);
 		}
+		
+		//	Comment
 		try {
-			XMLElement comment = rootElement.getChild(FIELDNAME_ARTICLE_COMMENT,getIdegaXMLNameSpace());
-			if(comment != null){
-				setComment(comment.getText());
-			} else {
+			XMLElement comment = rootElement.getChild(FIELDNAME_ARTICLE_COMMENT, getIdegaXMLNameSpace());
+			if (comment == null) {
 				setComment(CoreConstants.EMPTY);
+			} else {
+				setComment(comment.getText());
 			}
-		}catch(Exception e) {		//Nullpointer could occur if field isn't used
-			e.printStackTrace();
+		} catch(Exception e) {
+			LOGGER.log(Level.WARNING, "Can not load comment", e);
 			setComment(CoreConstants.EMPTY);
 		}
+		
 		return true;
 	}
 	
@@ -622,14 +616,14 @@ public class ArticleLocalizedItemBean extends ContentItemBean implements Seriali
 		XMLElement summary = entry.getChild("summary", atomNamespace);
 		if (summary != null) {
 			if (summary.getValue() != null) {
-				setTeaser(summary.getValue());
+				setTeaser(getOnlyBodyContent(summary.getValue()));
 			}
 		}
 		
 		XMLElement content = entry.getChild("content", atomNamespace);
 		if (content != null) {
 			if (content.getValue() != null) {
-				setBody(content.getValue());
+				setBody(getOnlyBodyContent(content.getValue()));
 			}
 		}
 		
@@ -696,6 +690,24 @@ public class ArticleLocalizedItemBean extends ContentItemBean implements Seriali
 		}
 		
 		return true;
+	}
+	
+	private String getOnlyBodyContent(String html) {
+		if (StringUtil.isEmpty(html)) {
+			return null;
+		}
+		
+		//	Getting content from <body>...</body>
+		String bodyStartTag = "<body>";
+		int startIndex = html.indexOf(bodyStartTag);
+		String bodyEndTag = "</body>";
+		int endIndex = html.indexOf(bodyEndTag);
+		if (startIndex == -1 || endIndex == -1) {
+			//	Didn't find valid body structure
+			return html;
+		}
+		
+		return html.substring(startIndex + bodyStartTag.length(), endIndex);
 	}
 	
 /*

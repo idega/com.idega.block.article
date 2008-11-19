@@ -1,5 +1,5 @@
 /*
- * $Id: ArticleListViewer.java,v 1.29 2008/11/17 18:07:16 valdas Exp $
+ * $Id: ArticleListViewer.java,v 1.30 2008/11/19 12:29:26 valdas Exp $
  * Created on 24.1.2005
  *
  * Copyright (C) 2005 Idega Software hf. All Rights Reserved.
@@ -31,7 +31,6 @@ import com.idega.core.cache.UIComponentCacher;
 import com.idega.idegaweb.IWMainApplication;
 import com.idega.presentation.IWContext;
 import com.idega.presentation.Layer;
-import com.idega.presentation.Script;
 import com.idega.presentation.ui.HiddenInput;
 import com.idega.util.CoreUtil;
 import com.idega.util.PresentationUtil;
@@ -44,10 +43,10 @@ import com.idega.util.StringUtil;
  * for the article module.
  * </p>
  * 
- *  Last modified: $Date: 2008/11/17 18:07:16 $ by $Author: valdas $
+ *  Last modified: $Date: 2008/11/19 12:29:26 $ by $Author: valdas $
  * 
  * @author <a href="mailto:tryggvi@idega.com">Tryggvi Larusson</a>
- * @version $Revision: 1.29 $
+ * @version $Revision: 1.30 $
  */
 public class ArticleListViewer extends ContentItemListViewer {
 
@@ -240,7 +239,7 @@ public class ArticleListViewer extends ContentItemListViewer {
 	}
 	
 	protected void initializeComponent(FacesContext context) {
-		addFeed(context);
+		addFeed(IWContext.getIWContext(context));
 	}
 	
 	private void addCommentsController(IWContext iwc, CommentsViewer comments) {
@@ -279,31 +278,8 @@ public class ArticleListViewer extends ContentItemListViewer {
 		return moduleId;
 	}
 	
-	private void addFeed(FacesContext context){
-		IWContext iwc = IWContext.getIWContext(context);
-		BuilderService bservice = null;
-		try {
-			bservice = BuilderServiceFactory.getBuilderService(iwc);
-		} catch (RemoteException e) {
-			e.printStackTrace();
-		}
-		try {
-			String serverName = iwc.getServerURL();
-			serverName.substring(0, serverName.length()-1);
-			String feedUri = bservice.getCurrentPageURI(iwc);
-			feedUri.substring(1);
-			String linkToFeed = serverName+"rss/article"+feedUri;
-			addFeedJavaScript(linkToFeed, "atom", "Atom 1.0");
-		} catch (RemoteException e) {
-			e.printStackTrace();
-		}
-	}
-	
-	private boolean addFeedJavaScript(String linkToFeed, String feedType, String feedTitle) {
-		Script script = new Script();
-		script.addScriptLine("registerEvent(window, 'load', function(){addFeedSymbolInHeader('"+linkToFeed+"', '"+feedType+"', '"+feedTitle+"');});");		
-		getFacets().put(ContentItemViewer.FACET_FEED_SCRIPT, script);
-		return true;
+	private void addFeed(IWContext iwc) {
+		ArticleUtil.addArticleFeedFacet(iwc, getFacets());
 	}
 	
 	private void addCommentsScript(IWContext iwc, CommentsViewer comments) {
