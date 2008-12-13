@@ -1,5 +1,5 @@
 /*
- * $Id: ArticleUtil.java,v 1.19 2008/11/19 12:29:26 valdas Exp $
+ * $Id: ArticleUtil.java,v 1.20 2008/12/13 15:15:40 civilis Exp $
  * Created on 7.2.2005
  *
  * Copyright (C) 2005 Idega Software hf. All Rights Reserved.
@@ -39,10 +39,10 @@ import com.idega.webface.WFUtil;
 
 /**
  * 
- *  Last modified: $Date: 2008/11/19 12:29:26 $ by $Author: valdas $
+ *  Last modified: $Date: 2008/12/13 15:15:40 $ by $Author: civilis $
  * 
  * @author <a href="mailto:gummi@idega.com">Gudmundur Agust Saemundsson</a>
- * @version $Revision: 1.19 $
+ * @version $Revision: 1.20 $
  */
 public class ArticleUtil {
 
@@ -149,7 +149,7 @@ public class ArticleUtil {
 		return beanSaveState;
 	}
 	
-	public static final boolean addArticleFeedFacet(IWContext iwc, Map<Object, UIComponent> facets) {
+	public static final boolean addArticleFeedFacet(IWContext iwc, Map<String, UIComponent> facets) {
 		if (facets == null) {
 			return false;
 		}
