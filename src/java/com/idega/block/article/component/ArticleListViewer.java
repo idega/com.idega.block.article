@@ -1,5 +1,5 @@
 /*
- * $Id: ArticleListViewer.java,v 1.30 2008/11/19 12:29:26 valdas Exp $
+ * $Id: ArticleListViewer.java,v 1.31 2008/12/30 10:11:23 valdas Exp $
  * Created on 24.1.2005
  *
  * Copyright (C) 2005 Idega Software hf. All Rights Reserved.
@@ -43,10 +43,10 @@ import com.idega.util.StringUtil;
  * for the article module.
  * </p>
  * 
- *  Last modified: $Date: 2008/11/19 12:29:26 $ by $Author: valdas $
+ *  Last modified: $Date: 2008/12/30 10:11:23 $ by $Author: valdas $
  * 
  * @author <a href="mailto:tryggvi@idega.com">Tryggvi Larusson</a>
- * @version $Revision: 1.30 $
+ * @version $Revision: 1.31 $
  */
 public class ArticleListViewer extends ContentItemListViewer {
 
@@ -308,9 +308,16 @@ public class ArticleListViewer extends ContentItemListViewer {
 		if (ContentUtil.hasContentEditorRoles(iwc)) {
 			iwc.setSessionAttribute(ContentConstants.RENDERING_COMPONENT_OF_ARTICLE_LIST, Boolean.TRUE);
 
-			Layer script = new Layer();
-			script.add(ArticleUtil.getSourcesAndActionForArticleEditor(iwc));
-			getFacets().put(ContentItemViewer.FACET_JAVA_SCRIPT, script);
+			if (CoreUtil.isSingleComponentRenderingProcess(iwc)) {
+				Layer script = new Layer();
+				script.add(ArticleUtil.getSourcesAndActionForArticleEditor(iwc));
+				getFacets().put(ContentItemViewer.FACET_JAVA_SCRIPT, script);
+			}
+			else {
+				PresentationUtil.addStyleSheetsToHeader(iwc, ArticleUtil.getCSSFilesForArticle());
+				PresentationUtil.addJavaScriptSourcesLinesToHeader(iwc, ArticleUtil.getJavaScriptFilesForArticle());
+				PresentationUtil.addJavaScriptActionToBody(iwc, ArticleUtil.getArticleEditorInitializerAction(true));
+			}
 			
 			HiddenInput identifier = new HiddenInput(ContentConstants.CONTENT_LIST_ITEMS_IDENTIFIER_NAME, getModuleId(iwc));
 			identifier.setStyleClass("contentLisItemsIdentifierStyleClass");

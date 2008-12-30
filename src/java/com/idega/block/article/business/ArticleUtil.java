@@ -1,5 +1,5 @@
 /*
- * $Id: ArticleUtil.java,v 1.20 2008/12/13 15:15:40 civilis Exp $
+ * $Id: ArticleUtil.java,v 1.21 2008/12/30 10:11:23 valdas Exp $
  * Created on 7.2.2005
  *
  * Copyright (C) 2005 Idega Software hf. All Rights Reserved.
@@ -39,10 +39,10 @@ import com.idega.webface.WFUtil;
 
 /**
  * 
- *  Last modified: $Date: 2008/12/13 15:15:40 $ by $Author: civilis $
+ *  Last modified: $Date: 2008/12/30 10:11:23 $ by $Author: valdas $
  * 
  * @author <a href="mailto:gummi@idega.com">Gudmundur Agust Saemundsson</a>
- * @version $Revision: 1.20 $
+ * @version $Revision: 1.21 $
  */
 public class ArticleUtil {
 
@@ -109,36 +109,58 @@ public class ArticleUtil {
 		return false;
 	}
 	
+	public static final List<String> getCSSFilesForArticle() {
+		List<String> css = new ArrayList<String>(2);
+		Web2Business web2 = ELUtil.getInstance().getBean(Web2Business.class);
+		
+		try {
+			css.add(web2.getThickboxStyleFilePath());			//	ThickBox
+		} catch (RemoteException e) {
+			e.printStackTrace();
+		}
+		css.add(ContentUtil.getBundle().getVirtualPathWithFileNameString("style/content-admin.css"));
+		return css;
+	}
+	
+	public static final List<String> getJavaScriptFilesForArticle() {
+		List<String> javaScript = new ArrayList<String>(6);
+		Web2Business web2 = ELUtil.getInstance().getBean(Web2Business.class);
+		
+		javaScript.add(getBundle().getVirtualPathWithFileNameString("javascript/ArticleEditorHelper.js"));
+		javaScript.add(CoreConstants.DWR_ENGINE_SCRIPT);
+		javaScript.add("/dwr/interface/ThemesEngine.js");
+		javaScript.add(web2.getBundleURIToJQueryLib());				//	jQuery
+		try {
+			javaScript.add(web2.getThickboxScriptFilePath());		//	ThickBox
+		} catch (RemoteException e) {
+			e.printStackTrace();
+		}
+		javaScript.add(ContentUtil.getBundle().getVirtualPathWithFileNameString("javascript/ContentAdmin.js"));
+		
+		return javaScript;
+	}
+	
+	public static final String getArticleEditorInitializerAction(boolean executeOnLoad) {
+		String action = "ArticleEditorHelper.initializeJavaScriptActionsForEditingAndCreatingArticles();";
+		if (executeOnLoad) {
+			action = new StringBuilder("jQuery(window).load(function() {").append(action).append("});").toString();
+		}
+		return action;
+	}
+	
 	public static final String getSourcesAndActionForArticleEditor(IWContext iwc) {
 		if (iwc == null) {
 			return null;
 		}
 		
 		List<String> sources = new ArrayList<String>();
-		Web2Business web2 = ELUtil.getInstance().getBean(Web2Business.class);
-		
 		//	CSS
-		try {
-			sources.add(web2.getThickboxStyleFilePath());			//	ThickBox
-		} catch (RemoteException e) {
-			e.printStackTrace();
-		}
-		sources.add(ContentUtil.getBundle().getVirtualPathWithFileNameString("style/content-admin.css"));
+		sources.addAll(getCSSFilesForArticle());
 		
 		//	JavaScript
-		sources.add(getBundle().getVirtualPathWithFileNameString("javascript/ArticleEditorHelper.js"));
-		sources.add(CoreConstants.DWR_ENGINE_SCRIPT);
-		sources.add("/dwr/interface/ThemesEngine.js");
-		sources.add(web2.getBundleURIToJQueryLib());				//	jQuery
-		try {
-			sources.add(web2.getThickboxScriptFilePath());			//	ThickBox
-		} catch (RemoteException e) {
-			e.printStackTrace();
-		}
-		sources.add(ContentUtil.getBundle().getVirtualPathWithFileNameString("javascript/ContentAdmin.js"));
+		sources.addAll(getJavaScriptFilesForArticle());
 		
-		return PresentationUtil.getJavaScriptAction(PresentationUtil.getJavaScriptLinesLoadedLazily(sources,
-				"ArticleEditorHelper.initializeJavaScriptActionsForEditingAndCreatingArticles();"));
+		return PresentationUtil.getJavaScriptAction(PresentationUtil.getJavaScriptLinesLoadedLazily(sources, getArticleEditorInitializerAction(false)));
 	}
 	
 	public static UISaveState getBeanSaveState(String beanId) {

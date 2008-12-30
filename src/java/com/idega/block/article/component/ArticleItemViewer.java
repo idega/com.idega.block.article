@@ -1,5 +1,5 @@
 /*
- * $Id: ArticleItemViewer.java,v 1.51 2008/11/19 12:29:26 valdas Exp $
+ * $Id: ArticleItemViewer.java,v 1.52 2008/12/30 10:11:23 valdas Exp $
  *
  * Copyright (C) 2004 Idega. All Rights Reserved.
  *
@@ -39,12 +39,12 @@ import com.idega.webface.WFHtml;
 import com.idega.webface.convert.WFTimestampConverter;
 
 /**
- * Last modified: $Date: 2008/11/19 12:29:26 $ by $Author: valdas $
+ * Last modified: $Date: 2008/12/30 10:11:23 $ by $Author: valdas $
  *
  * Displays the article item
  *
  * @author <a href="mailto:gummi@idega.com">Gudmundur Agust Saemundsson</a>
- * @version $Revision: 1.51 $
+ * @version $Revision: 1.52 $
  */
 public class ArticleItemViewer extends ContentItemViewer {
 	
@@ -516,15 +516,24 @@ public class ArticleItemViewer extends ContentItemViewer {
 		}
 		
 		if (ContentUtil.hasContentEditorRoles(iwc)) {
-			Object renderingParameter = iwc.getSessionAttribute(ContentConstants.RENDERING_COMPONENT_OF_ARTICLE_LIST);
-			if (renderingParameter == null) {
+			Object renderingArticlesList = iwc.getSessionAttribute(ContentConstants.RENDERING_COMPONENT_OF_ARTICLE_LIST);
+			if (renderingArticlesList == null) {
 				iwc.setSessionAttribute(ContentConstants.RENDERING_COMPONENT_OF_ARTICLE_LIST, Boolean.FALSE);
 				canModifyRenderingAttribute = true;
 			}
 
-			Layer script = new Layer();
-			script.add(ArticleUtil.getSourcesAndActionForArticleEditor(iwc));
-			getFacets().put(ContentItemViewer.FACET_JAVA_SCRIPT, script);
+			if (CoreUtil.isSingleComponentRenderingProcess(iwc)) {
+				Layer script = new Layer();
+				script.add(ArticleUtil.getSourcesAndActionForArticleEditor(iwc));
+				getFacets().put(ContentItemViewer.FACET_JAVA_SCRIPT, script);
+			}
+			else {
+				if (renderingArticlesList == null || !((Boolean) renderingArticlesList)) {
+					PresentationUtil.addStyleSheetsToHeader(iwc, ArticleUtil.getCSSFilesForArticle());
+					PresentationUtil.addJavaScriptSourcesLinesToHeader(iwc, ArticleUtil.getJavaScriptFilesForArticle());
+					PresentationUtil.addJavaScriptActionToBody(iwc, ArticleUtil.getArticleEditorInitializerAction(true));
+				}
+			}
 		}
 		
 		super.encodeBegin(context);
