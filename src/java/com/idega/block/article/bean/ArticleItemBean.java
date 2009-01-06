@@ -1,5 +1,5 @@
 /*
- * $Id: ArticleItemBean.java,v 1.86 2008/11/17 18:07:16 valdas Exp $
+ * $Id: ArticleItemBean.java,v 1.87 2009/01/06 15:17:14 tryggvil Exp $
  *
  * Copyright (C) 2004-2005 Idega. All Rights Reserved.
  *
@@ -22,7 +22,20 @@ import javax.faces.context.FacesContext;
 import javax.faces.event.AbortProcessingException;
 import javax.faces.event.ValueChangeEvent;
 import javax.faces.event.ValueChangeListener;
+import javax.jcr.AccessDeniedException;
+import javax.jcr.InvalidItemStateException;
+import javax.jcr.ItemExistsException;
+import javax.jcr.Node;
+import javax.jcr.NodeIterator;
+import javax.jcr.RepositoryException;
+import javax.jcr.Session;
+import javax.jcr.ValueFormatException;
+import javax.jcr.lock.LockException;
+import javax.jcr.nodetype.ConstraintViolationException;
+import javax.jcr.nodetype.NoSuchNodeTypeException;
+import javax.jcr.version.VersionException;
 
+import org.apache.commons.httpclient.HttpException;
 import org.apache.webdav.lib.PropertyName;
 import org.apache.webdav.lib.WebdavResources;
 
@@ -36,6 +49,7 @@ import com.idega.content.business.ContentConstants;
 import com.idega.content.business.ContentUtil;
 import com.idega.core.builder.business.BuilderService;
 import com.idega.core.builder.business.BuilderServiceFactory;
+import com.idega.core.content.RepositoryHelper;
 import com.idega.data.IDOStoreException;
 import com.idega.idegaweb.IWMainApplication;
 import com.idega.idegaweb.IWUserContext;
@@ -55,10 +69,10 @@ import com.idega.xml.XMLException;
  * This is a JSF managed bean that manages each article instance and delegates 
  * all calls to the correct localized instance.
  * <p>
- * Last modified: $Date: 2008/11/17 18:07:16 $ by $Author: valdas $
+ * Last modified: $Date: 2009/01/06 15:17:14 $ by $Author: tryggvil $
  *
  * @author Anders Lindman,<a href="mailto:tryggvi@idega.com">Tryggvi Larusson</a>
- * @version $Revision: 1.86 $
+ * @version $Revision: 1.87 $
  */
 public class ArticleItemBean extends ContentItemBean implements Serializable, ContentItem, ValueChangeListener {
 	
@@ -68,8 +82,11 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 	private static final long serialVersionUID = 4514851565086272678L;
 	private final static String ARTICLE_FILE_SUFFIX = ".xml";
 	
+	public final static String TYPE_PREFIX = "IW:";
 	public final static String CONTENT_TYPE = "ContentType";
-	public static final PropertyName PROPERTY_CONTENT_TYPE = new PropertyName("IW:",CONTENT_TYPE);
+	public final static String CONTENT_TYPE_WITH_PREFIX = TYPE_PREFIX+CONTENT_TYPE;
+	
+	public static final PropertyName PROPERTY_CONTENT_TYPE = new PropertyName(TYPE_PREFIX,CONTENT_TYPE);
 	
 	private ArticleLocalizedItemBean localizedArticle;
 	private String baseFolderLocation;
@@ -90,9 +107,17 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 
 	public ArticleLocalizedItemBean getLocalizedArticle(){
 		if (this.localizedArticle == null || getLanguageChange() != null) {
-			this.localizedArticle = new ArticleLocalizedItemBean();
-			this.localizedArticle.setLocale(getLocale());
+			this.localizedArticle = new ArticleLocalizedItemBean(getLocale());
+			//this.localizedArticle.setLocale(getLocale());
 			this.localizedArticle.setArticleItem(this);
+			try {
+				if(isPersistToJCR() && this.getSession()!=null){
+					this.localizedArticle.setSession(this.getSession());
+				}
+			} catch (RepositoryException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 		}
 		else {	
 			String thisLanguage = getLanguage();
@@ -329,29 +354,21 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 	 */
 	public void store() throws IDOStoreException {
 		try {
-			IWUserContext iwuc = IWContext.getInstance();
-			IWSlideSession session = getIWSlideSession(iwuc);
-			WebdavRootResource rootResource = session.getWebdavRootResource();
-
-			//	Setting the path for creating new file/creating localized version/updating existing file
-			String articleFolderPath = getResourcePath();
-	
-			boolean hadToCreate = session.createAllFoldersInPath(articleFolderPath);
-			if (hadToCreate) {
-				String fixedFolderURL = session.getURI(articleFolderPath);
-				rootResource.proppatchMethod(fixedFolderURL, PROPERTY_CONTENT_TYPE, "LocalizedFile", true);
+			if(isPersistToWebDav()){
+				storeToWebDav();
 			}
-			else{
-				rootResource.proppatchMethod(articleFolderPath, PROPERTY_CONTENT_TYPE, "LocalizedFile", true);
+			else if(isPersistToJCR()){
+				storeToJCR();
 			}
-			
-			rootResource.close();
 			getLocalizedArticle().store();
 			
-			ArticleCacher cacher = ArticleCacher.getInstance(IWMainApplication.getDefaultIWMainApplication());
-			cacher.getCacheMap().clear();
-			
-			ContentUtil.removeCategoriesViewersFromCache();
+			IWMainApplication iwma = IWMainApplication.getDefaultIWMainApplication();
+			if(iwma!=null){
+				ArticleCacher cacher = ArticleCacher.getInstance(iwma);
+				cacher.getCacheMap().clear();
+				
+				ContentUtil.removeCategoriesViewersFromCache();
+			}
 		}
 		catch(ArticleStoreException ase){
 			throw ase;
@@ -359,6 +376,66 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 		catch(Exception e){
 			throw new RuntimeException(e);
 		}
+		if(isPersistToJCR()){
+			try {
+				commitJCRStore();
+			} catch (RepositoryException e) {
+				throw new IDOStoreException(e.getMessage());
+			}
+		}
+	}
+
+	protected void commitJCRStore() throws RepositoryException{
+		getSession().save();
+	}
+
+	private void storeToWebDav() throws HttpException, IOException,
+			RemoteException {
+		IWUserContext iwuc = IWContext.getInstance();
+		IWSlideSession session = getIWSlideSession(iwuc);
+		WebdavRootResource rootResource = session.getWebdavRootResource();
+
+		//	Setting the path for creating new file/creating localized version/updating existing file
+		String articleFolderPath = getResourcePath();
+
+		boolean hadToCreate = session.createAllFoldersInPath(articleFolderPath);
+		if (hadToCreate) {
+			String fixedFolderURL = session.getURI(articleFolderPath);
+			rootResource.proppatchMethod(fixedFolderURL, PROPERTY_CONTENT_TYPE, "LocalizedFile", true);
+		}
+		else{
+			rootResource.proppatchMethod(articleFolderPath, PROPERTY_CONTENT_TYPE, "LocalizedFile", true);
+		}
+		
+		rootResource.close();
+	}
+	
+	private void storeToJCR() throws IOException, RepositoryException{
+		//IWUserContext iwuc = IWContext.getInstance();
+		//IWSlideSession session = getIWSlideSession(iwuc);
+		Session session = getSession();
+		//WebdavRootResource rootResource = session.getWebdavRootResource();
+		
+		//	Setting the path for creating new file/creating localized version/updating existing file
+		String articleFolderPath = getResourcePath();
+		
+		RepositoryHelper helper = getRepositoryHelper();
+		
+		boolean hadToCreate = helper.createAllFoldersInPath(session,articleFolderPath);
+		/*if (hadToCreate) {
+			//String fixedFolderURL = session.getURI(articleFolderPath);
+			String fixedFolderURL=articleFolderPath;
+			Node node = getNode()
+			rootResource.proppatchMethod(fixedFolderURL, PROPERTY_CONTENT_TYPE, "LocalizedFile", true);
+		}
+		else{
+			rootResource.proppatchMethod(articleFolderPath, PROPERTY_CONTENT_TYPE, "LocalizedFile", true);
+		}*/
+		Node node = getNode();
+		node.setProperty(CONTENT_TYPE_WITH_PREFIX, "LocalizedFile");
+		node.save();
+		//rootResource.close();
+		
 	}
 	
 	/* (non-Javadoc)
@@ -895,6 +972,72 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 		return false;
 	}
 	
+	
+	/**
+	 * Loads the article (folder)
+	 * @throws RepositoryException 
+	 */
+	protected boolean load(Node articleNode) throws IOException, RepositoryException {
+		Node localizedArticleFile = null;
+		//First check if the resource is a folder, as it should be
+		if(articleNode.getPrimaryNodeType().isNodeType(RepositoryHelper.NODE_TYPE_FOLDER)){
+			
+			NodeIterator resources = articleNode.getNodes();
+			String userLanguageArticleResourcePath = getArticleDefaultLocalizedResourcePath();
+			if(containsChildResourceWithPath(resources,userLanguageArticleResourcePath)){ //the language that the user has selected
+				//localizedArticleFile = (WebdavExtendedResource) resources.getResource(userLanguageArticleResourcePath);
+				localizedArticleFile = articleNode.getSession().getRootNode().getNode(userLanguageArticleResourcePath);
+				setAvailableInSelectedLanguage();
+			}
+			else{
+				//selected language not available:
+				if(getAllowFallbackToSystemLanguage()){
+					String systemLanguageArticleResourcePath = getArticleDefaultLocalizedResourcePath(getSystemLanguage());//getArticleName(iwc.getIWMainApplication().getDefaultLocale());
+					if(containsChildResourceWithPath(resources,systemLanguageArticleResourcePath)){ //the language default in the system.
+						//localizedArticleFile = (WebdavExtendedResource) resources.getResource(systemLanguageArticleResourcePath);
+						localizedArticleFile = articleNode.getSession().getRootNode().getNode(systemLanguageArticleResourcePath);
+						setAvailableInSelectedLanguage();
+					}
+					else{
+						setNotAvailableInSelectedLanguage();
+					}
+				}
+				else{
+					setNotAvailableInSelectedLanguage();
+				}
+				
+			}
+		} else {
+			String path = getResourcePath();
+			setLanguageFromFilePath(path);
+			String parentFolder;
+			parentFolder = articleNode.getParent().getPath();
+			setResourcePath(parentFolder);
+			return load(parentFolder);
+		}
+		if(localizedArticleFile!=null){
+			return getLocalizedArticle().load(localizedArticleFile);
+		}
+		return false;
+	}
+
+	
+	protected boolean containsChildResourceWithPath(NodeIterator resources,
+			String childFullPath) {
+		while(resources.hasNext()){
+			Node child = resources.nextNode();
+			try {
+				if(child.getPath().equals(childFullPath)){
+					return true;
+				}
+			} catch (RepositoryException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+		return false;
+	}
+
 	/**
 	 * <p>
 	 * Returns the language set as default in the System
