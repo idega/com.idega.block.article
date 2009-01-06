@@ -17,6 +17,7 @@ import com.idega.content.business.categories.CategoryBean;
 import com.idega.content.data.ContentCategory;
 import com.idega.content.presentation.ContentItemListViewer;
 import com.idega.core.builder.business.BuilderService;
+import com.idega.core.search.business.SearchResult;
 import com.idega.idegaweb.IWResourceBundle;
 import com.idega.idegaweb.IWUserContext;
 import com.idega.presentation.Block;
@@ -144,7 +145,7 @@ public class ArticleCategoriesViewer extends Block {
 		List<String> scripts = new ArrayList<String>();
 		scripts.add("/dwr/interface/BuilderService.js");
 		scripts.add(CoreConstants.DWR_ENGINE_SCRIPT);
-		scripts.add(getBundle(iwc).getVirtualPathWithFileNameString("javascript/ArticleCategoriesHelper.js"));
+		scripts.add(ArticleUtil.getBundle().getVirtualPathWithFileNameString("javascript/ArticleCategoriesHelper.js"));
 		
 		if (CoreUtil.isSingleComponentRenderingProcess(iwc)) {
 			container.add(PresentationUtil.getJavaScriptSourceLines(scripts));
@@ -166,7 +167,7 @@ public class ArticleCategoriesViewer extends Block {
 
 		ArticleListManagedBean bean = new ArticleListManagedBean();
 		List<String> categoriesList = null;
-		Collection results = null;
+		Collection<SearchResult> results = null;
 		for (ContentCategory category : categories) {
 			categoriesList = new ArrayList<String>();
 			categoriesList.add(category.getId());
@@ -212,11 +213,11 @@ public class ArticleCategoriesViewer extends Block {
 		for (int i = 0; i < moduleIds.size(); i++) {
 			List<String> modules = availableCategories.get(category);
 			if (modules == null) {
-				box.setToolTip(iwrb.getLocalizedString("set_category_visible", "Set category visible for common users"));
+				box.setTitle(iwrb.getLocalizedString("set_category_visible", "Set category visible for common users"));
 			}
 			else {
 				box.setChecked(true);
-				box.setToolTip(iwrb.getLocalizedString("set_category_invisible", "Set category invisible for common users"));
+				box.setTitle(iwrb.getLocalizedString("set_category_invisible", "Set category invisible for common users"));
 			}
 				
 			StringBuilder action = new StringBuilder("setDisplayArticleCategory('").append(box.getId()).append(separator).append(pageKey);

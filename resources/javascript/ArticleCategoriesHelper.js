@@ -11,21 +11,24 @@ function setDisplayArticleCategory(id, pageKey, moduleIds, savingMessage, cacheK
 	if (categoryKey == null) {
 		return false;
 	}
-	showLoadingMessage(savingMessage);
-	if (element.checked) {
-		BuilderService.addPropertyToModules(pageKey, moduleIds, "categories", categoryKey, {
-			callback: function(result) {
-				setDisplayArticleCategoryCallback(result, cacheKey);
-			}
-		});
-	}
-	else {
-		BuilderService.removeValueFromModulesProperties(pageKey, moduleIds, "categories", categoryKey, {
-			callback: function(result) {
-				setDisplayArticleCategoryCallback(result, cacheKey);
-			}
-		});
-	}
+	
+	LazyLoader.loadMultiple(['/dwr/engine.js', '/dwr/interface/BuilderService.js'], function() {
+		showLoadingMessage(savingMessage);
+		if (element.checked) {
+			BuilderService.addPropertyToModules(pageKey, moduleIds, "categories", categoryKey, {
+				callback: function(result) {
+					setDisplayArticleCategoryCallback(result, cacheKey);
+				}
+			});
+		}
+		else {
+			BuilderService.removeValueFromModulesProperties(pageKey, moduleIds, "categories", categoryKey, {
+				callback: function(result) {
+					setDisplayArticleCategoryCallback(result, cacheKey);
+				}
+			});
+		}
+	});
 }
 
 function setDisplayArticleCategoryCallback(result, cacheKey) {

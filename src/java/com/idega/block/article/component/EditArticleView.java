@@ -1,5 +1,5 @@
 /*
- * $Id: EditArticleView.java,v 1.53 2008/11/17 18:07:16 valdas Exp $
+ * $Id: EditArticleView.java,v 1.54 2009/01/06 10:35:15 valdas Exp $
  *
  * Copyright (C) 2004 Idega. All Rights Reserved.
  *
@@ -36,7 +36,6 @@ import javax.faces.model.SelectItem;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.myfaces.custom.stylesheet.Stylesheet;
-
 import com.idega.block.article.IWBundleStarter;
 import com.idega.block.article.bean.ArticleItemBean;
 import com.idega.block.article.bean.ArticleStoreException;
@@ -80,10 +79,10 @@ import com.idega.webface.htmlarea.HTMLArea;
  * <p>
  * This is the part for the editor of article is inside the admin interface
  * </p>
- * Last modified: $Date: 2008/11/17 18:07:16 $ by $Author: valdas $
+ * Last modified: $Date: 2009/01/06 10:35:15 $ by $Author: valdas $
  *
  * @author Joakim,Tryggvi Larusson
- * @version $Revision: 1.53 $
+ * @version $Revision: 1.54 $
  */
 public class EditArticleView extends IWBaseComponent implements ManagedContentBeans, ActionListener, ValueChangeListener {
 	private static final Log log = LogFactory.getLog(EditArticleView.class);
@@ -519,7 +518,7 @@ public class EditArticleView extends IWBaseComponent implements ManagedContentBe
 			//	Id on the component is set implicitly
 			categoriesUI.setId(CATEGORY_EDITOR_ID);
 			
-			String setCategories = (String) iwc.getExternalContext().getRequestParameterMap().get(ContentItemToolbar.PARAMETER_CATEGORIES);
+			String setCategories = iwc.getExternalContext().getRequestParameterMap().get(ContentItemToolbar.PARAMETER_CATEGORIES);
 			if (setCategories != null) {
 				categoriesUI.setCategories(setCategories);
 			}
@@ -563,27 +562,25 @@ public class EditArticleView extends IWBaseComponent implements ManagedContentBe
 		return findEditArticleComponent(comp.getParent(), classToSearch, id);
 	}
 	
-	private UIComponent findEditArticleComponent(List children, Class<?> classToSearch, String id, boolean checkChildren) {
+	private UIComponent findEditArticleComponent(List<UIComponent> children, Class<?> classToSearch, String id, boolean checkChildren) {
 		if (children == null) {
 			return null;
 		}
 		
-		Object o = null;
+		UIComponent comp = null;
 		UIComponent founded = null;
 		for (int i = 0; (i < children.size() && founded == null); i++) {
-			o = children.get(i);
-			if (o instanceof UIComponent) {
-				founded = (UIComponent) o;
-				if (founded.getClass().equals(classToSearch) && id.equals(founded.getId())) {
-					return founded;
-				}
-				else {
-					founded = null;
-					if (checkChildren) {
-						founded = findEditArticleComponent(((UIComponent) o).getChildren(), classToSearch, id, checkChildren);
-						if (founded != null) {
-							return founded;
-						}
+			comp = children.get(i);
+			founded = comp;
+			if (founded.getClass().equals(classToSearch) && id.equals(founded.getId())) {
+				return founded;
+			}
+			else {
+				founded = null;
+				if (checkChildren) {
+					founded = findEditArticleComponent(comp.getChildren(), classToSearch, id, checkChildren);
+					if (founded != null) {
+						return founded;
 					}
 				}
 			}
@@ -606,7 +603,9 @@ public class EditArticleView extends IWBaseComponent implements ManagedContentBe
 		founded = null;
 		if (id.equals(SAVE_ID)) {
 			//	We have the save button pressed
-			founded = editArticle.findComponent(CATEGORY_EDITOR_ID);
+			
+			IWContext iwc = CoreUtil.getIWContext();
+			founded = iwc.getViewRoot().findComponent(CATEGORY_EDITOR_ID);
 			if (!(founded instanceof WebDAVCategories)) {
 				founded = findEditArticleComponent(comp, WebDAVCategories.class, CATEGORY_EDITOR_ID);
 			}
@@ -617,7 +616,7 @@ public class EditArticleView extends IWBaseComponent implements ManagedContentBe
 			if (founded instanceof WebDAVCategories) {
 				categoriesUI = (WebDAVCategories) founded;
 				if (categoriesUI != null) {
-					submittedCategories = categoriesUI.getEnabledCategories();
+					submittedCategories = categoriesUI.getEnabledCategories(iwc);
 					articleItemBean.setArticleCategories(submittedCategories);
 				}
 			}
@@ -628,7 +627,6 @@ public class EditArticleView extends IWBaseComponent implements ManagedContentBe
 			if (saveSuccessful) {
 				if (categoriesUI != null) {
 					try {
-						IWContext iwc = CoreUtil.getIWContext();
 						categoriesUI.setResourcePath(articleItemBean.getLocalizedArticle().getResourcePath());
 						categoriesUI.saveCategoriesSettings();
 						categoriesUI.getSelectedAndNotSelectedCategories(iwc);
@@ -663,7 +661,6 @@ public class EditArticleView extends IWBaseComponent implements ManagedContentBe
 							}
 							
 							String mode = null;
-							IWContext iwc = CoreUtil.getIWContext();
 							if (iwc != null) {
 								mode = iwc.getParameter(ContentViewer.PARAMETER_ACTION);
 							}
