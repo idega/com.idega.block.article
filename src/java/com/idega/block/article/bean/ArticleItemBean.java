@@ -1,5 +1,5 @@
 /*
- * $Id: ArticleItemBean.java,v 1.87 2009/01/06 15:17:14 tryggvil Exp $
+ * $Id: ArticleItemBean.java,v 1.88 2009/01/10 12:24:10 valdas Exp $
  *
  * Copyright (C) 2004-2005 Idega. All Rights Reserved.
  *
@@ -22,19 +22,10 @@ import javax.faces.context.FacesContext;
 import javax.faces.event.AbortProcessingException;
 import javax.faces.event.ValueChangeEvent;
 import javax.faces.event.ValueChangeListener;
-import javax.jcr.AccessDeniedException;
-import javax.jcr.InvalidItemStateException;
-import javax.jcr.ItemExistsException;
 import javax.jcr.Node;
 import javax.jcr.NodeIterator;
 import javax.jcr.RepositoryException;
 import javax.jcr.Session;
-import javax.jcr.ValueFormatException;
-import javax.jcr.lock.LockException;
-import javax.jcr.nodetype.ConstraintViolationException;
-import javax.jcr.nodetype.NoSuchNodeTypeException;
-import javax.jcr.version.VersionException;
-
 import org.apache.commons.httpclient.HttpException;
 import org.apache.webdav.lib.PropertyName;
 import org.apache.webdav.lib.WebdavResources;
@@ -69,10 +60,10 @@ import com.idega.xml.XMLException;
  * This is a JSF managed bean that manages each article instance and delegates 
  * all calls to the correct localized instance.
  * <p>
- * Last modified: $Date: 2009/01/06 15:17:14 $ by $Author: tryggvil $
+ * Last modified: $Date: 2009/01/10 12:24:10 $ by $Author: valdas $
  *
  * @author Anders Lindman,<a href="mailto:tryggvi@idega.com">Tryggvi Larusson</a>
- * @version $Revision: 1.87 $
+ * @version $Revision: 1.88 $
  */
 public class ArticleItemBean extends ContentItemBean implements Serializable, ContentItem, ValueChangeListener {
 	
@@ -421,7 +412,7 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 		
 		RepositoryHelper helper = getRepositoryHelper();
 		
-		boolean hadToCreate = helper.createAllFoldersInPath(session,articleFolderPath);
+		helper.createAllFoldersInPath(session,articleFolderPath);
 		/*if (hadToCreate) {
 			//String fixedFolderURL = session.getURI(articleFolderPath);
 			String fixedFolderURL=articleFolderPath;
@@ -977,6 +968,7 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 	 * Loads the article (folder)
 	 * @throws RepositoryException 
 	 */
+	@Override
 	protected boolean load(Node articleNode) throws IOException, RepositoryException {
 		Node localizedArticleFile = null;
 		//First check if the resource is a folder, as it should be
@@ -1106,6 +1098,8 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 		
 		ArticleCacher cacher = ArticleCacher.getInstance(IWMainApplication.getDefaultIWMainApplication());
 		cacher.getCacheMap().clear();
+		
+		ContentUtil.removeCategoriesViewersFromCache();
 	}
 
 	/* (non-Javadoc)
