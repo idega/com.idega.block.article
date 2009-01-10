@@ -1,5 +1,5 @@
 /*
- * $Id: ArticleUtil.java,v 1.22 2009/01/06 10:35:15 valdas Exp $
+ * $Id: ArticleUtil.java,v 1.23 2009/01/10 12:24:34 valdas Exp $
  * Created on 7.2.2005
  *
  * Copyright (C) 2005 Idega Software hf. All Rights Reserved.
@@ -39,10 +39,10 @@ import com.idega.webface.WFUtil;
 
 /**
  * 
- *  Last modified: $Date: 2009/01/06 10:35:15 $ by $Author: valdas $
+ *  Last modified: $Date: 2009/01/10 12:24:34 $ by $Author: valdas $
  * 
  * @author <a href="mailto:gummi@idega.com">Gudmundur Agust Saemundsson</a>
- * @version $Revision: 1.22 $
+ * @version $Revision: 1.23 $
  */
 public class ArticleUtil {
 
@@ -113,11 +113,7 @@ public class ArticleUtil {
 		List<String> css = new ArrayList<String>(2);
 		Web2Business web2 = ELUtil.getInstance().getBean(Web2Business.class);
 		
-		try {
-			css.add(web2.getThickboxStyleFilePath());			//	ThickBox
-		} catch (RemoteException e) {
-			e.printStackTrace();
-		}
+		css.add(web2.getBundleURIToFancyBoxStyleFile());		//	FancyBox
 		css.add(ContentUtil.getBundle().getVirtualPathWithFileNameString("style/content-admin.css"));
 		return css;
 	}
@@ -130,12 +126,8 @@ public class ArticleUtil {
 		javaScript.add(getBundle().getVirtualPathWithFileNameString("javascript/ArticleCategoriesHelper.js"));
 		javaScript.add(CoreConstants.DWR_ENGINE_SCRIPT);
 		javaScript.add("/dwr/interface/ThemesEngine.js");
-		javaScript.add(web2.getBundleURIToJQueryLib());				//	jQuery
-		try {
-			javaScript.add(web2.getThickboxScriptFilePath());		//	ThickBox
-		} catch (RemoteException e) {
-			e.printStackTrace();
-		}
+		javaScript.add(web2.getBundleURIToJQueryLib());					//	jQuery
+		javaScript.addAll(web2.getBundleURIsToFancyBoxScriptFiles());	//	FancyBox
 		javaScript.add(ContentUtil.getBundle().getVirtualPathWithFileNameString("javascript/ContentAdmin.js"));
 		
 		return javaScript;

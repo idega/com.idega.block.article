@@ -65,6 +65,9 @@ public class ArticleEditor extends Block {
 		
 		IFrame frame = new IFrame(EditArticleView.class.getSimpleName(), uri);
 		frame.setStyleClass("contentItemEditorFrameStyle");
+		frame.setStyleAttribute("width", "100%");
+		frame.setStyleAttribute("height", "99%");
+		
 		container.add(frame);
 	}
 	

@@ -37,7 +37,7 @@ public class ArticleDeleter extends Block {
 		}
 		
 		IWResourceBundle iwrb = getResourceBundle(iwc);
-		String closeAction = "tb_remove();";
+		String closeAction = "window.parent.ArticleEditorHelper.closeAllObjects();";
 		if (!action.equals(ContentConstants.CONTENT_ITEM_ACTION_DELETE) || resource == null || nullValue.equals(resource)) {
 			container.add(new Heading1(iwrb.getLocalizedString("undefined_action", "Sorry, can not delete article.")));
 			
@@ -57,8 +57,8 @@ public class ArticleDeleter extends Block {
 		
 		container.add(buttons);
 		GenericButton delete = new GenericButton(iwrb.getLocalizedString("delete", "Delete"));
-		delete.setOnClick(new StringBuffer("showLoadingMessage('").append(iwrb.getLocalizedString("deleting", "Deleting..."))
-							.append("'); ArticleEditorHelper.deleteSelectedArticle('").append(resource).append("', ").append(fromArticleListParameter)
+		delete.setOnClick(new StringBuffer("window.parent.showLoadingMessage('").append(iwrb.getLocalizedString("deleting", "Deleting..."))
+							.append("'); window.parent.ArticleEditorHelper.deleteSelectedArticle('").append(resource).append("', ").append(fromArticleListParameter)
 							.append(");").toString());
 		buttons.add(delete);
 		

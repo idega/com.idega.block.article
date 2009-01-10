@@ -1,5 +1,5 @@
 /*
- * $Id: EditArticleView.java,v 1.54 2009/01/06 10:35:15 valdas Exp $
+ * $Id: EditArticleView.java,v 1.55 2009/01/10 12:24:34 valdas Exp $
  *
  * Copyright (C) 2004 Idega. All Rights Reserved.
  *
@@ -79,10 +79,10 @@ import com.idega.webface.htmlarea.HTMLArea;
  * <p>
  * This is the part for the editor of article is inside the admin interface
  * </p>
- * Last modified: $Date: 2009/01/06 10:35:15 $ by $Author: valdas $
+ * Last modified: $Date: 2009/01/10 12:24:34 $ by $Author: valdas $
  *
  * @author Joakim,Tryggvi Larusson
- * @version $Revision: 1.54 $
+ * @version $Revision: 1.55 $
  */
 public class EditArticleView extends IWBaseComponent implements ManagedContentBeans, ActionListener, ValueChangeListener {
 	private static final Log log = LogFactory.getLog(EditArticleView.class);
@@ -128,6 +128,8 @@ public class EditArticleView extends IWBaseComponent implements ManagedContentBe
 	boolean clearOnInit = false;
 	private boolean fromArticleItemListViewer = false;
 	private boolean needsForm = false;
+	
+	private String editorOpener = "window.parent.parent";
 
 	public EditArticleView() {}
 
@@ -181,7 +183,7 @@ public class EditArticleView extends IWBaseComponent implements ManagedContentBe
 			
 			//	JavaScript
 			Script script = new Script();
-			script.addScriptLine("function addActionAfterArticleIsSavedAndEditorClosed() {window.parent.ArticleEditorHelper.addActionAfterArticleIsSavedAndEditorClosed();}");
+			script.addScriptLine("function addActionAfterArticleIsSavedAndEditorClosed() {"+editorOpener+".ArticleEditorHelper.addActionAfterArticleIsSavedAndEditorClosed();}");
 			f.getChildren().add(script);
 			
 			//	Save state for bean
@@ -193,7 +195,7 @@ public class EditArticleView extends IWBaseComponent implements ManagedContentBe
 		
 		//	JavaScript
 		Script closeLoadingMessages = new Script();
-		closeLoadingMessages.addScriptLine("try {window.parent.closeAllLoadingMessages();} catch(e) {}");
+		closeLoadingMessages.addScriptLine("try {"+editorOpener+".closeAllLoadingMessages();} catch(e) {}");
 		managementComponent.getChildren().add(closeLoadingMessages);
 		
 		Script checkFieldsIfNotEmpty = new Script();
@@ -446,7 +448,7 @@ public class EditArticleView extends IWBaseComponent implements ManagedContentBe
 			IWResourceBundle iwrb = iwc.getIWMainApplication().getBundle(ArticleConstants.IW_BUNDLE_IDENTIFIER).getResourceBundle(iwc);
 			StringBuffer action = new StringBuffer("if (checkIfValidArticleEditorFields(['").append(headlineInput.getId()).append("'], '");
 			action.append(iwrb.getLocalizedString("error_headline_empty", "Heading must be entered.")).append("')) {");
-			action.append("window.parent.showLoadingMessage('").append(iwrb.getLocalizedString("saving", "Saving...")).append("');");
+			action.append(editorOpener).append(".showLoadingMessage('").append(iwrb.getLocalizedString("saving", "Saving...")).append("');");
 			action.append(" addActionAfterArticleIsSavedAndEditorClosed();} else {return false;}");
 			saveButton.setOnclick(action.toString());
 		}
@@ -490,7 +492,7 @@ public class EditArticleView extends IWBaseComponent implements ManagedContentBe
 		StringBuffer action = new StringBuffer();
 		if (needsForm) {
 			IWResourceBundle iwrb = iwc.getIWMainApplication().getBundle(ArticleConstants.IW_BUNDLE_IDENTIFIER).getResourceBundle(iwc);
-			action.append("window.parent.showLoadingMessage('").append(iwrb.getLocalizedString("loading", "Loading...")).append("'); ");
+			action.append(editorOpener).append(".showLoadingMessage('").append(iwrb.getLocalizedString("loading", "Loading...")).append("'); ");
 		}
 		action.append("submit();");
 		langDropdown.setOnchange(action.toString());
@@ -650,7 +652,7 @@ public class EditArticleView extends IWBaseComponent implements ManagedContentBe
 				if (comp == null) {
 					String action = null;
 					if (fromArticleItemListViewer && !StringUtil.isEmpty(containerId)) {
-						action = PresentationUtil.getJavaScriptAction(new StringBuilder("window.parent.ArticleEditorHelper.reloadArticlesList('").append(containerId)
+						action = PresentationUtil.getJavaScriptAction(new StringBuilder(editorOpener).append(".ArticleEditorHelper.reloadArticlesList('").append(containerId)
 								.append("');").toString());
 					}
 					else {
@@ -668,13 +670,13 @@ public class EditArticleView extends IWBaseComponent implements ManagedContentBe
 								mode = new StringBuilder("'").append(mode).append("'").toString();
 							}
 							
-							action = PresentationUtil.getJavaScriptAction(new StringBuilder("window.parent.ArticleEditorHelper.reloadArticle('")
+							action = PresentationUtil.getJavaScriptAction(new StringBuilder(editorOpener).append(".ArticleEditorHelper.reloadArticle('")
 							.append(resourcePath).append("', '").append(ContentConstants.CONTENT_ITEM_IDENTIFIER_STYLE_CLASS).append("', ")
 							.append(StringUtil.isEmpty(mode) ? "null" : mode).append(");").toString());
 						}
 					}
 					if (action == null) {
-						action = PresentationUtil.getJavaScriptAction(new StringBuilder("window.parent.ArticleEditorHelper.needReload = true;")
+						action = PresentationUtil.getJavaScriptAction(new StringBuilder(editorOpener).append(".ArticleEditorHelper.needReload = true;")
 																		.toString());
 					}
 					

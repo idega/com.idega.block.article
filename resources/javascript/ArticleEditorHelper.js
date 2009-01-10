@@ -9,36 +9,39 @@ ArticleEditorHelper.initializeJavaScriptActionsForEditingAndCreatingArticles = f
 ArticleEditorHelper.registerArticleActions = function() {
 	var editButtons = jQuery('a.edit');
 	jQuery.each(editButtons, function() {
-		ArticleEditorHelper.checkArticleLinkAndRegisterIfItsCorrect(this);
+		ArticleEditorHelper.checkArticleLinkAndRegisterIfItsCorrect(this, true);
 	});
 	
 	var createButtons = jQuery('a.create');
 	jQuery.each(createButtons, function() {
-		ArticleEditorHelper.checkArticleLinkAndRegisterIfItsCorrect(this);
+		ArticleEditorHelper.checkArticleLinkAndRegisterIfItsCorrect(this, true);
 	});
 
 	var deleteButtons = jQuery('a.delete');
 	jQuery.each(deleteButtons, function() {
-		ArticleEditorHelper.checkArticleLinkAndRegisterIfItsCorrect(this);
+		ArticleEditorHelper.checkArticleLinkAndRegisterIfItsCorrect(this, false);
 	});
 }
 
-ArticleEditorHelper.checkArticleLinkAndRegisterIfItsCorrect = function(link) {
+ArticleEditorHelper.checkArticleLinkAndRegisterIfItsCorrect = function(link, bigWindow) {
 	if (link == null || link.length == 0) {
 		return false;
 	}
 	
-	var fakeJS = 'javascript:void(0);';
-	var uri = jQuery(link).attr('href');
-	if (uri == fakeJS) {
+	if (jQuery(link).hasClass('articleEditorInitializedForLink')) {
 		return false;
 	}
-	jQuery(link).attr('href', fakeJS);
-	uri += '&height=' + (windowinfo.getWindowHeight() * 0.8) + '&width=' + (windowinfo.getWindowWidth() * 0.8);
-	jQuery(link).bind('click', function(e) {
-		tb_show('', uri, null, function() {
+	
+	var heightMultiplier = bigWindow ? 0.8 : 0.2;
+	var widthMultiplier = bigWindow ? 0.8 : 0.28;
+	
+	jQuery(link).addClass('articleEditorInitializedForLink');
+	jQuery(link).fancybox({
+		frameWidth: windowinfo.getWindowWidth() * widthMultiplier,
+		frameHeight: windowinfo.getWindowHeight() * heightMultiplier,
+		onCloseCallback: function() {
 			ArticleEditorHelper.addActionAfterArticleIsSavedAndEditorClosed();
-		});
+		}
 	});
 }
 
@@ -46,6 +49,12 @@ ArticleEditorHelper.addActionAfterArticleIsSavedAndEditorClosed = function() {
 	if (ArticleEditorHelper.needReload) {
 		reloadPage();
 	}
+}
+
+ArticleEditorHelper.closeAllObjects = function() {
+	closeAllLoadingMessages();
+	
+	jQuery.fn.fancybox.close();
 }
 
 ArticleEditorHelper.deleteSelectedArticle = function(resource, fromArticleList) {
@@ -69,15 +78,16 @@ ArticleEditorHelper.deleteSelectedArticle = function(resource, fromArticleList) 
 						
 						if (container == null) {
 							ArticleEditorHelper.needReload = true;
+							ArticleEditorHelper.closeAllObjects();
 							return false;
 						}
-						ArticleEditorHelper.reloadArticlesList(jQuery(container).attr('id'), function() { closeAllLoadingMessages(); tb_remove(); });
+						ArticleEditorHelper.reloadArticlesList(jQuery(container).attr('id'), function() { ArticleEditorHelper.closeAllObjects(); });
 					}
 					else {
 						var info = {header: '', body: '', teaser: '', date: '', author: ''};
 						ArticleEditorHelper.updateArticleFields(info, parents);
 						
-						ArticleEditorHelper.addToolbarButtons(resource, 'delete', parents, false, function() { closeAllLoadingMessages(); tb_remove(); });
+						ArticleEditorHelper.addToolbarButtons(resource, 'delete', parents, false, function() { ArticleEditorHelper.closeAllObjects(); });
 					}
 				}
 				else {
