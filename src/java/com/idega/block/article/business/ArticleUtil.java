@@ -1,5 +1,5 @@
 /*
- * $Id: ArticleUtil.java,v 1.23 2009/01/10 12:24:34 valdas Exp $
+ * $Id: ArticleUtil.java,v 1.24 2009/01/13 10:44:22 valdas Exp $
  * Created on 7.2.2005
  *
  * Copyright (C) 2005 Idega Software hf. All Rights Reserved.
@@ -39,10 +39,10 @@ import com.idega.webface.WFUtil;
 
 /**
  * 
- *  Last modified: $Date: 2009/01/10 12:24:34 $ by $Author: valdas $
+ *  Last modified: $Date: 2009/01/13 10:44:22 $ by $Author: valdas $
  * 
  * @author <a href="mailto:gummi@idega.com">Gudmundur Agust Saemundsson</a>
- * @version $Revision: 1.23 $
+ * @version $Revision: 1.24 $
  */
 public class ArticleUtil {
 
@@ -125,7 +125,7 @@ public class ArticleUtil {
 		javaScript.add(getBundle().getVirtualPathWithFileNameString("javascript/ArticleEditorHelper.js"));
 		javaScript.add(getBundle().getVirtualPathWithFileNameString("javascript/ArticleCategoriesHelper.js"));
 		javaScript.add(CoreConstants.DWR_ENGINE_SCRIPT);
-		javaScript.add("/dwr/interface/ThemesEngine.js");
+		javaScript.add("/dwr/interface/LucidEngine.js");
 		javaScript.add(web2.getBundleURIToJQueryLib());					//	jQuery
 		javaScript.addAll(web2.getBundleURIsToFancyBoxScriptFiles());	//	FancyBox
 		javaScript.add(ContentUtil.getBundle().getVirtualPathWithFileNameString("javascript/ContentAdmin.js"));

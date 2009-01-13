@@ -58,7 +58,7 @@ ArticleEditorHelper.closeAllObjects = function() {
 }
 
 ArticleEditorHelper.deleteSelectedArticle = function(resource, fromArticleList) {
-	ThemesEngine.deleteArticle(resource, {
+	LucidEngine.deleteArticle(resource, {
 		callback: function(result) {
 			LazyLoader.loadMultiple(['/dwr/engine.js', '/dwr/interface/ArticleItemInfoFetcher.js'], function() {
 				if (result) {
