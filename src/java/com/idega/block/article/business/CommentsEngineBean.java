@@ -975,13 +975,17 @@ public class CommentsEngineBean extends IBOSessionBean implements CommentsEngine
 		}
 		
 		BuilderService service = getBuilderService();
-		if (!uri.startsWith(CoreConstants.CONTENT_PATH)) {
+		
+		//	Checking uri start: must be /files/...
+		if (!uri.startsWith(new StringBuilder(CoreConstants.PATH_FILES_ROOT).append(CoreConstants.SLASH).toString())) {
 			if (!uri.startsWith(CoreConstants.SLASH)) {
 				uri = new StringBuffer(CoreConstants.SLASH).append(uri).toString();
 			}
-			
 			uri = new StringBuffer(CoreConstants.CONTENT_PATH).append(CoreConstants.SLASH).append(ContentConstants.COMMENT_SCOPE).append(uri).toString();
-			
+		}
+		
+		//	Checking end
+		if (!uri.endsWith(".xml")) {
 			String fileName = new StringBuffer(instanceId).append(CoreConstants.DOT).append("xml").toString();
 			if (!uri.endsWith(fileName)) {
 				if (!uri.endsWith(CoreConstants.SLASH)) {
@@ -990,19 +994,24 @@ public class CommentsEngineBean extends IBOSessionBean implements CommentsEngine
 				
 				uri = new StringBuffer(uri).append(fileName).toString();
 			}
+		}
 			
-			char[] leaveAsIs = {'-', '_', '/', '.', '0','1','2','3','4','5','6','7','8','9'};
-			uri = StringHandler.stripNonRomanCharacters(uri, leaveAsIs);
-			
-			if (service != null) {
+		char[] leaveAsIs = {'-', '_', '/', '.', '0','1','2','3','4','5','6','7','8','9'};
+		uri = StringHandler.stripNonRomanCharacters(uri, leaveAsIs);
+		
+		if (service != null) {
+			try {
 				int pageId = iwc.getCurrentIBPageID();
 				if (pageId > -1) {
 					String pageKey = String.valueOf(pageId);
 					service.setModuleProperty(pageKey, instanceId, ":method:1:implied:void:setLinkToComments:java.lang.String:", new String[] {uri});
 				}
+			} catch(Exception e) {
+				logger.log(Level.WARNING, "Unable to set URI property for CommentsViewer: " + uri, e);
 			}
 		}
 		
+		System.out.println(uri);
 		return uri;
 	}
 	

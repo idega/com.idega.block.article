@@ -149,7 +149,7 @@ public class CommentsViewer extends Block {
 				.toString(), "javascript:void(0)");
 		link.setId(commentsId + "CommentsLabelWithCount");
 		StringBuffer getCommentsAction = new StringBuffer("getCommentsList('").append(linkToComments).append(SEPARATOR);
-		getCommentsAction.append(commentsId).append("'); return false;");
+		getCommentsAction.append(commentsId).append("');");
 		link.setOnClick(getCommentsAction.toString());
 		articleComments.add(link);
 		
@@ -184,7 +184,7 @@ public class CommentsViewer extends Block {
 			delete.setStyleClass("deleteCommentsImage");
 			delete.setId(new StringBuffer(commentsId).append("delete_article_comments").toString());
 			StringBuffer deleteAction = new StringBuffer("deleteComments('").append(commentsId).append("', null, '");
-			deleteAction.append(linkToComments).append("', ").append(isNewestEntriesOnTop()).append("); return false;");
+			deleteAction.append(linkToComments).append("', ").append(isNewestEntriesOnTop()).append(");");
 			delete.setOnClick(deleteAction.toString());
 			articleComments.add(delete);
 		}
@@ -360,7 +360,6 @@ public class CommentsViewer extends Block {
 		container.add(new Text(ContentConstants.SPACE));
 	}
 	
-	@SuppressWarnings("unchecked")
 	private boolean findLinkToComments(String resourcePathFromRequest, String viewerIdentifier) {
 		UIComponent region = this.getParent();
 		if (region == null) {
@@ -493,7 +492,7 @@ public class CommentsViewer extends Block {
 			.append(SEPARATOR).append(moduleId).append("', ").append(StringUtil.isEmpty(springBeanIdentifier) ? "null" : new StringBuilder("'")
 			.append(springBeanIdentifier).append("'").toString()).append(", ").append(StringUtil.isEmpty(identifier) ? "null" : new StringBuilder("'")
 			.append(identifier).append("'").toString()).append(", ").append(newestEntriesOnTop).append(", ").append(getUsersEmail(iwc))
-			.append("); return false;");
+			.append(");");
 		label.setOnClick(action.toString());
 		addComments.add(label);
 		return addComments;
