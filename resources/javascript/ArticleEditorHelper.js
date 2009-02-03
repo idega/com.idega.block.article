@@ -142,7 +142,7 @@ ArticleEditorHelper.reloadArticlesList = function(id, callback) {
 		if (callback) {
 			callback();
 		}
-	});
+	}, null);
 	
 	return false;
 }

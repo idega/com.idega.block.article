@@ -127,17 +127,21 @@ public class CommentsViewer extends Block {
 			showCommentsList = false;
 		}
 
+		List<String> jsFiles = getJavaScriptSources(iwc);
 		if (CoreUtil.isSingleComponentRenderingProcess(iwc)) {
-			container.add(PresentationUtil.getJavaScriptSourceLines(getJavaScriptSources(iwc)));
+			container.add(PresentationUtil.getJavaScriptSourceLines(jsFiles));
 		}
 		else {
-			PresentationUtil.addJavaScriptSourcesLinesToHeader(iwc, getJavaScriptSources(iwc));
+			PresentationUtil.addJavaScriptSourcesLinesToHeader(iwc, jsFiles);
 		}
 		
 		int commentsCount = getCommentsCount(iwc);
 		
-		// Enable comments container
-		addEnableCommentsCheckboxContainer(iwc, container, hasValidRights, null);
+		boolean contentEditor = ContentUtil.hasContentEditorRoles(iwc);
+		if (contentEditor) {
+			// Enable comments container
+			addEnableCommentsCheckboxContainer(iwc, container);
+		}
 		
 		// Comments label
 		Layer comments = new Layer();
@@ -163,7 +167,7 @@ public class CommentsViewer extends Block {
 		}
 		
 		// Link - Atom feed
-		Link linkToFeed = new Link(CoreConstants.EMPTY);
+		Link linkToFeed = new Link(CoreConstants.SPACE);
 		linkToFeed.setTitle(iwrb.getLocalizedString("comments_viewer.atom_feed", "Atom feed"));
 		linkToFeed.setStyleClass("articleCommentsAtomFeedLinkStyle");
 		makeCommentsFeedIfNotExists(iwc);
@@ -173,7 +177,7 @@ public class CommentsViewer extends Block {
 		comments.add(linkToFeed);
 		
 		// Delete comments image
-		if (ContentUtil.hasContentEditorRoles(iwc)) {
+		if (contentEditor) {
 			Image delete = new Image(bundle.getVirtualPathWithFileNameString(DELETE_IMAGE),
 					iwrb.getLocalizedString("comments_viewer.delete_all_comments", "Delete all comments"));
 			delete.setStyleClass("deleteCommentsImage");
@@ -408,12 +412,12 @@ public class CommentsViewer extends Block {
 		return pageKey;
 	}
 	
-	private void addEnableCommentsCheckboxContainer(IWContext iwc, Layer container, boolean hasValidRights, String cacheKey) {
-		if (!showViewController || !hasValidRights || isUsedInArticleList()) {
+	private void addEnableCommentsCheckboxContainer(IWContext iwc, Layer container) {
+		if (!showViewController || isUsedInArticleList()) {
 			return;
 		}
 		
-		container.add(getCommentsController(iwc, cacheKey, moduleId, isShowCommentsForAllUsers(), SHOW_COMMENTS_PROPERTY));
+		container.add(getCommentsController(iwc, null, moduleId, isShowCommentsForAllUsers(), SHOW_COMMENTS_PROPERTY));
 	}
 	
 	protected Layer getCommentsController(IWContext iwc, String cacheKey, String moduleId, boolean enabled, String propertyName) {
