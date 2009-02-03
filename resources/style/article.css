@@ -610,8 +610,10 @@ form.editArticleForm .wf_block .articleCategories input {
 	padding: 8px 14px !important;
 }
 
-a.articleCommentsAtomFeedLinkStyle {
-	background:transparent url(../images/feed.png) no-repeat scroll left top;
+.articleCommentsAtomFeedLinkStyle {
+	text-decoration: none !important;
+	height: 16px;
+	background: url(../images/feed.png) no-repeat;
 	padding-left: 12px;
 	padding-right: 5px;
 	padding-bottom: 5px;
