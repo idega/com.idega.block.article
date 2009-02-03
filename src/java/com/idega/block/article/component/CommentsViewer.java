@@ -33,7 +33,6 @@ import com.idega.presentation.IWContext;
 import com.idega.presentation.Image;
 import com.idega.presentation.Layer;
 import com.idega.presentation.text.Link;
-import com.idega.presentation.text.Text;
 import com.idega.presentation.ui.CheckBox;
 import com.idega.presentation.ui.Label;
 import com.idega.slide.business.IWSlideService;
@@ -114,7 +113,6 @@ public class CommentsViewer extends Block {
 			return;
 		}
 		
-		ThemesHelper helper = ThemesHelper.getInstance();
 		IWBundle bundle = getBundle(iwc);
 		IWResourceBundle iwrb = bundle.getResourceBundle(iwc);
 		
@@ -123,11 +121,12 @@ public class CommentsViewer extends Block {
 		Layer container = new Layer();
 		container.setId(new StringBuffer(commentsId).append(COMMENTS_BLOCK_ID).toString());
 		container.setStyleClass(styleClass);
-		this.add(container);
+		add(container);
 		
 		if (isUsedInArticleList()) {
 			showCommentsList = false;
 		}
+
 		if (CoreUtil.isSingleComponentRenderingProcess(iwc)) {
 			container.add(PresentationUtil.getJavaScriptSourceLines(getJavaScriptSources(iwc)));
 		}
@@ -136,22 +135,20 @@ public class CommentsViewer extends Block {
 		}
 		
 		int commentsCount = getCommentsCount(iwc);
-		String linkToAtomFeedImage = bundle.getVirtualPathWithFileNameString(FEED_IMAGE);
 		
 		// Enable comments container
 		addEnableCommentsCheckboxContainer(iwc, container, hasValidRights, null);
 		
 		// Comments label
-		Layer articleComments = new Layer();
-		articleComments.setId(new StringBuffer(commentsId).append("article_comments_link_label_container").toString());
+		Layer comments = new Layer();
+		comments.setId(new StringBuffer(commentsId).append("article_comments_link_label_container").toString());
+		container.add(comments);
 		
 		Link link = new Link(new StringBuffer(iwrb.getLocalizedString("comments_viewer.comments", "Comments")).append("(").append(commentsCount).append(")")
 				.toString(), "javascript:void(0)");
 		link.setId(commentsId + "CommentsLabelWithCount");
-		StringBuffer getCommentsAction = new StringBuffer("getCommentsList('").append(linkToComments).append(SEPARATOR);
-		getCommentsAction.append(commentsId).append("');");
-		link.setOnClick(getCommentsAction.toString());
-		articleComments.add(link);
+		link.setOnClick(new StringBuilder("getCommentsList('").append(linkToComments).append(SEPARATOR).append(commentsId).append("');").toString());
+		comments.add(link);
 		
 		RSSBusiness rss = null;
 		if (isAddLoginbyUUIDOnRSSFeedLink()) {
@@ -166,19 +163,17 @@ public class CommentsViewer extends Block {
 		}
 		
 		// Link - Atom feed
-		Image atom = new Image(linkToAtomFeedImage, iwrb.getLocalizedString("comments_viewer.atom_feed", "Atom feed"));
-		Link linkToFeed = new Link();
+		Link linkToFeed = new Link(CoreConstants.EMPTY);
+		linkToFeed.setTitle(iwrb.getLocalizedString("comments_viewer.atom_feed", "Atom feed"));
 		linkToFeed.setStyleClass("articleCommentsAtomFeedLinkStyle");
-		linkToFeed.setId(new StringBuffer(commentsId).append("article_comments_link_to_feed").toString());
-		linkToFeed.setImage(atom);
 		makeCommentsFeedIfNotExists(iwc);
-		linkToFeed.setURL(new StringBuilder(helper.getFullServerName(iwc)).append(CoreConstants.WEBDAV_SERVLET_URI)
-				.append(isAddLoginbyUUIDOnRSSFeedLink() ? rss.getLinkToFeedWithUUIDParameters(linkToComments, getUser(iwc)) : linkToComments).toString());
-		articleComments.add(linkToFeed);
+		String uri = new StringBuilder().append(CoreConstants.WEBDAV_SERVLET_URI)
+			.append(isAddLoginbyUUIDOnRSSFeedLink() ? rss.getLinkToFeedWithUUIDParameters(linkToComments, getUser(iwc)) : linkToComments).toString();
+		linkToFeed.setURL(uri);
+		comments.add(linkToFeed);
 		
 		// Delete comments image
 		if (ContentUtil.hasContentEditorRoles(iwc)) {
-			addSimpleSpace(articleComments);
 			Image delete = new Image(bundle.getVirtualPathWithFileNameString(DELETE_IMAGE),
 					iwrb.getLocalizedString("comments_viewer.delete_all_comments", "Delete all comments"));
 			delete.setStyleClass("deleteCommentsImage");
@@ -186,10 +181,8 @@ public class CommentsViewer extends Block {
 			StringBuffer deleteAction = new StringBuffer("deleteComments('").append(commentsId).append("', null, '");
 			deleteAction.append(linkToComments).append("', ").append(isNewestEntriesOnTop()).append(");");
 			delete.setOnClick(deleteAction.toString());
-			articleComments.add(delete);
+			comments.add(delete);
 		}
-		
-		container.add(articleComments);
 		
 		// Add comment block
 		container.add(getAddCommentBlock(iwc, commentsId));
@@ -353,11 +346,6 @@ public class CommentsViewer extends Block {
 			}
 		}
 		return sources;
-	}
-		
-	private void addSimpleSpace(Layer container) {
-		//	Simple space
-		container.add(new Text(ContentConstants.SPACE));
 	}
 	
 	private boolean findLinkToComments(String resourcePathFromRequest, String viewerIdentifier) {
