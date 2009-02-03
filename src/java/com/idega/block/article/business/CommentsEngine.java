@@ -49,7 +49,7 @@ public interface CommentsEngine extends IBOSession {
 	/**
 	 * @see com.idega.block.article.business.CommentsEngineBean#getFixedCommentsUri
 	 */
-	public String getFixedCommentsUri(IWContext iwc, String uri, String instanceId);
+	public String getFixedCommentsUri(IWContext iwc, String uri, String instanceId, String currentPageUri);
 	
 	/**
 	 * @see com.idega.block.article.business.CommentsEngineBean#getCommentsFromUris

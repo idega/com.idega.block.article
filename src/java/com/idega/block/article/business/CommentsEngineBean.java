@@ -115,7 +115,7 @@ public class CommentsEngineBean extends IBOSessionBean implements CommentsEngine
 		CommentsPersistenceManager commentsManager = getCommentsManager(properties.getSpringBeanIdentifier());
 		
 		if (commentsManager == null) {
-			uri = getFixedCommentsUri(iwc, uri, instanceId);
+			uri = getFixedCommentsUri(iwc, uri, instanceId, properties.getCurrentPageUri());
 		}
 		
 		String language = ThemesHelper.getInstance().getCurrentLanguage(iwc);
@@ -969,7 +969,7 @@ public class CommentsEngineBean extends IBOSessionBean implements CommentsEngine
 		return defaultValue;
 	}
 	
-	public String getFixedCommentsUri(IWContext iwc, String uri, String instanceId) {
+	public String getFixedCommentsUri(IWContext iwc, String uri, String instanceId, String currentPageUri) {
 		if (uri == null) {
 			uri = String.valueOf(new Date().getTime());
 		}
@@ -999,19 +999,19 @@ public class CommentsEngineBean extends IBOSessionBean implements CommentsEngine
 		char[] leaveAsIs = {'-', '_', '/', '.', '0','1','2','3','4','5','6','7','8','9'};
 		uri = StringHandler.stripNonRomanCharacters(uri, leaveAsIs);
 		
-		if (service != null) {
+		if (service != null && !StringUtil.isEmpty(currentPageUri)) {
 			try {
-				int pageId = iwc.getCurrentIBPageID();
-				if (pageId > -1) {
-					String pageKey = String.valueOf(pageId);
-					service.setModuleProperty(pageKey, instanceId, ":method:1:implied:void:setLinkToComments:java.lang.String:", new String[] {uri});
+				String pageKey = getBuilderService().getPageKeyByURI(currentPageUri);
+				
+				String method = ":method:1:implied:void:setLinkToComments:java.lang.String:";
+				if (!StringUtil.isEmpty(pageKey) && !service.isPropertySet(pageKey, instanceId, method, iwc.getIWMainApplication())) {
+					service.setModuleProperty(pageKey, instanceId, method, new String[] {uri});
 				}
 			} catch(Exception e) {
-				logger.log(Level.WARNING, "Unable to set URI property for CommentsViewer: " + uri, e);
+				logger.log(Level.INFO, "Unable to set URI property for CommentsViewer: " + uri, e);
 			}
 		}
 		
-		System.out.println(uri);
 		return uri;
 	}
 	

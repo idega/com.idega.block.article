@@ -14,6 +14,8 @@ public class CommentsViewerProperties {
 	private String title;
 	private String subtitle;
 	
+	private String currentPageUri;
+	
 	private boolean notify;
 	private boolean newestEntriesOnTop;
 	private boolean actionSuccess;
@@ -137,6 +139,14 @@ public class CommentsViewerProperties {
 
 	public void setAddLoginbyUUIDOnRSSFeedLink(boolean addLoginbyUUIDOnRSSFeedLink) {
 		this.addLoginbyUUIDOnRSSFeedLink = addLoginbyUUIDOnRSSFeedLink;
+	}
+
+	public String getCurrentPageUri() {
+		return currentPageUri;
+	}
+
+	public void setCurrentPageUri(String currentPageUri) {
+		this.currentPageUri = currentPageUri;
 	}
 	
 }

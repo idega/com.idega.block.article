@@ -97,7 +97,7 @@ public class CommentsViewer extends Block {
 				if (!findLinkToComments(iwc.getParameter(ContentViewer.PARAMETER_CONTENT_RESOURCE),
 						iwc.getParameter(ContentConstants.CONTENT_ITEM_VIEWER_IDENTIFIER_PARAMETER))) {
 					if (isStandAlone(iwc)) {
-						linkToComments = commentsEngine.getFixedCommentsUri(iwc, null, moduleId);
+						linkToComments = commentsEngine.getFixedCommentsUri(iwc, null, moduleId, iwc.getRequestURI());
 					}
 					else {
 						return;
@@ -260,6 +260,9 @@ public class CommentsViewer extends Block {
 		StringBuilder action = new StringBuilder("addCommentStartInfo('").append(linkToComments).append(SEPARATOR).append(moduleId).append("', ")
 		.append(showCommentsList).append(", ").append(isNewestEntriesOnTop()).append(", '").append(springBean).append(SEPARATOR).append(identifier)
 		.append("', ").append(isAddLoginbyUUIDOnRSSFeedLink()).append(");");
+		if (!CoreUtil.isSingleComponentRenderingProcess(iwc)) {
+			action = new StringBuilder("window.addEvent('load', function() {").append(action.toString()).append("});");
+		}
 		container.add(PresentationUtil.getJavaScriptAction(action.toString()));
 	}
 	

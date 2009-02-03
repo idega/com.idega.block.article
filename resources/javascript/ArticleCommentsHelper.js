@@ -324,6 +324,8 @@ function CommentsViewerProperties(user, subject, email, body, uri, id, instanceI
 	this.springBeanIdentifier = springBeanIdentifier || null;
 	this.identifier = identifier || null;
 	
+	this.currentPageUri = window.location.pathname;
+	
 	this.notify = notify || false;
 	this.newestEntriesOnTop = newestEntriesOnTop || false;
 	this.addLoginbyUUIDOnRSSFeedLink = addLoginbyUUIDOnRSSFeedLink || false;
