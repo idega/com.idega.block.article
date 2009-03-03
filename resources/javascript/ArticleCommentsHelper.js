@@ -640,7 +640,7 @@ function enableReverseAjax() {
 function setReverseAjaxForComments() {
 	if (!SET_REVERSE_AJAX) {
 		SET_REVERSE_AJAX = true;
-		DWREngine.setActiveReverseAjax(true);
+		dwr.engine.setActiveReverseAjax(true);
 	}
 	if (ENABLE_REVERSE_AJAX_TIME_OUT_ID != 0) {
 		window.clearTimeout(ENABLE_REVERSE_AJAX_TIME_OUT_ID);
