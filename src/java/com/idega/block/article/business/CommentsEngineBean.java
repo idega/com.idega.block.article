@@ -5,11 +5,9 @@ import java.rmi.RemoteException;
 import java.sql.Timestamp;
 import java.text.DateFormat;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -21,8 +19,6 @@ import org.apache.webdav.lib.WebdavResource;
 import org.directwebremoting.ScriptBuffer;
 import org.directwebremoting.WebContext;
 import org.directwebremoting.WebContextFactory;
-import org.directwebremoting.impl.DefaultScriptSession;
-
 import com.idega.block.article.ArticleCacher;
 import com.idega.block.article.bean.ArticleComment;
 import com.idega.block.article.bean.CommentsViewerProperties;
@@ -39,7 +35,7 @@ import com.idega.core.accesscontrol.business.NotLoggedOnException;
 import com.idega.core.builder.business.BuilderService;
 import com.idega.core.builder.business.BuilderServiceFactory;
 import com.idega.core.cache.IWCacheManager2;
-import com.idega.dwr.business.ScriptCaller;
+import com.idega.dwr.reverse.ScriptCaller;
 import com.idega.idegaweb.IWMainApplication;
 import com.idega.idegaweb.IWResourceBundle;
 import com.idega.presentation.IWContext;
@@ -157,7 +153,7 @@ public class CommentsEngineBean extends IBOSessionBean implements CommentsEngine
 		//	Updating clients with the newest comments
 		ScriptCaller scriptCaller = new ScriptCaller(WebContextFactory.get(), new ScriptBuffer("getUpdatedCommentsFromServer(").appendData(properties.getId())
 				.appendScript(");"), true);
-		scriptCaller.run();	//	Not thread!
+		executeScriptForAllPages(scriptCaller, false);
 		
 		//	Sending notifications (if needed) about new comment
 		sendNotification(comments, email, iwc);
@@ -423,20 +419,6 @@ public class CommentsEngineBean extends IBOSessionBean implements CommentsEngine
 					.appendData(getCommentsList(uri, springBeanIdentifier, identifier, true, newestEntriesOnTop, addLoginbyUUIDOnRSSFeedLink))
 					.appendScript(", ").appendData(id).appendScript(", ").appendData(uri).appendScript(");");
 		return script;
-	}
-	
-	@SuppressWarnings("unchecked")
-	private Collection getAllCurrentPageSessions() {
-		WebContext wctx = WebContextFactory.get();
-		if (wctx == null) {
-			return null;
-		}
-		Collection pages = wctx.getScriptSessionsByPage(wctx.getCurrentPage());
-		if (pages == null) {
-			return null;
-		}
-
-		return pages;
 	}
 	
 	public List<List<ArticleComment>> getCommentsFromUris(List<CommentsViewerProperties> commentsProperties) {
@@ -810,21 +792,22 @@ public class CommentsEngineBean extends IBOSessionBean implements CommentsEngine
 		return true; // Need to reload page (disable component)
 	}
 	
-	@SuppressWarnings("unchecked")
 	private boolean executeScriptForAllPages(ScriptBuffer script) {
-		Collection allPages = getAllCurrentPageSessions();
-		if (allPages == null) {
-			return false;
+		return executeScriptForAllPages(script, Boolean.FALSE);
+	}
+	
+	private boolean executeScriptForAllPages(ScriptBuffer script, boolean useThreading) {
+		return executeScriptForAllPages(new ScriptCaller(WebContextFactory.get(), script), useThreading);
+	}
+	
+	private boolean executeScriptForAllPages(ScriptCaller scriptCaller, boolean useThreading) {
+		if (useThreading) {
+			Thread thread = new Thread(scriptCaller);
+			thread.start();
+		} else {
+			scriptCaller.run();
 		}
-		Object o = null;
-		DefaultScriptSession session = null;
-		for (Iterator it = allPages.iterator(); it.hasNext(); ) {
-			o = it.next();
-			if (o instanceof DefaultScriptSession) {
-	            session = (DefaultScriptSession) o;
-	            session.addScript(script);
-	        }
-		}
+		
 		return true;
 	}
 	
@@ -833,7 +816,7 @@ public class CommentsEngineBean extends IBOSessionBean implements CommentsEngine
 	 */
 	private void closeLoadingMessage() {
 		ScriptBuffer script = new ScriptBuffer("closeAllLoadingMessages();");
-		executeScriptForAllPages(script);
+		executeScriptForAllPages(script, true);
 	}
 	
 	public CommentsViewerProperties deleteComments(CommentsViewerProperties properties) {
