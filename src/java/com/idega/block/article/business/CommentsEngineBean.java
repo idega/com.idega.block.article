@@ -23,7 +23,6 @@ import com.idega.block.article.ArticleCacher;
 import com.idega.block.article.bean.ArticleComment;
 import com.idega.block.article.bean.CommentsViewerProperties;
 import com.idega.block.rss.business.RSSBusiness;
-import com.idega.builder.business.BuilderLogicWrapper;
 import com.idega.business.IBOLookup;
 import com.idega.business.IBOLookupException;
 import com.idega.business.IBOSessionBean;
@@ -163,11 +162,7 @@ public class CommentsEngineBean extends IBOSessionBean implements CommentsEngine
 	
 	@SuppressWarnings("unchecked")
 	private void clearArticleCache(IWContext iwc) {
-		BuilderLogicWrapper builder = ELUtil.getInstance().getBean(BuilderLogicWrapper.SPRING_BEAN_NAME_BUILDER_LOGIC_WRAPPER);
-		Map articlesCache = null;
-		if (builder != null) {
-			articlesCache = getArticlesCache(iwc);
-		}
+		Map articlesCache = getArticlesCache(iwc);
 		if (articlesCache == null) {
 			Logger.getLogger(CommentsEngineBean.class.getName()).log(Level.WARNING, "Aticle cache is null, can not clear it!");
 		}
