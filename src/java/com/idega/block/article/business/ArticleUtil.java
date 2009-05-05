@@ -1,5 +1,5 @@
 /*
- * $Id: ArticleUtil.java,v 1.24 2009/01/13 10:44:22 valdas Exp $
+ * $Id: ArticleUtil.java,v 1.25 2009/05/05 09:00:53 valdas Exp $
  * Created on 7.2.2005
  *
  * Copyright (C) 2005 Idega Software hf. All Rights Reserved.
@@ -15,9 +15,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import javax.el.ValueExpression;
 import javax.faces.component.UIComponent;
 import javax.faces.context.FacesContext;
-import javax.faces.el.ValueBinding;
 
 import org.apache.myfaces.custom.savestate.UISaveState;
 
@@ -32,6 +32,7 @@ import com.idega.idegaweb.IWBundle;
 import com.idega.presentation.IWContext;
 import com.idega.presentation.Script;
 import com.idega.util.CoreConstants;
+import com.idega.util.CoreUtil;
 import com.idega.util.PresentationUtil;
 import com.idega.util.StringUtil;
 import com.idega.util.expression.ELUtil;
@@ -39,10 +40,10 @@ import com.idega.webface.WFUtil;
 
 /**
  * 
- *  Last modified: $Date: 2009/01/13 10:44:22 $ by $Author: valdas $
+ *  Last modified: $Date: 2009/05/05 09:00:53 $ by $Author: valdas $
  * 
  * @author <a href="mailto:gummi@idega.com">Gudmundur Agust Saemundsson</a>
- * @version $Revision: 1.24 $
+ * @version $Revision: 1.25 $
  */
 public class ArticleUtil {
 
@@ -118,6 +119,7 @@ public class ArticleUtil {
 		return css;
 	}
 	
+	@SuppressWarnings("deprecation")
 	public static final List<String> getJavaScriptFilesForArticle() {
 		List<String> javaScript = new ArrayList<String>(6);
 		Web2Business web2 = ELUtil.getInstance().getBean(Web2Business.class);
@@ -158,9 +160,10 @@ public class ArticleUtil {
 	
 	public static UISaveState getBeanSaveState(String beanId) {
 		UISaveState beanSaveState = new UISaveState();
-		ValueBinding binding = WFUtil.createValueBinding(new StringBuilder("#{").append(beanId).append("}").toString());
+		ValueExpression binding = WFUtil.createValueExpression(CoreUtil.getIWContext().getELContext(), new StringBuilder("#{").append(beanId).append("}")
+				.toString(), Object.class);
 		beanSaveState.setId(new StringBuilder(beanId).append("SaveState").toString());
-		beanSaveState.setValueBinding("value", binding);
+		beanSaveState.setValueExpression("value", binding);
 		return beanSaveState;
 	}
 	
