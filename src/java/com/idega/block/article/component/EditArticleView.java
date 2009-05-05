@@ -1,5 +1,5 @@
 /*
- * $Id: EditArticleView.java,v 1.57 2009/05/05 09:02:06 valdas Exp $
+ * $Id: EditArticleView.java,v 1.58 2009/05/05 09:09:46 valdas Exp $
  *
  * Copyright (C) 2004 Idega. All Rights Reserved.
  *
@@ -12,6 +12,8 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.faces.component.UIComponent;
 import javax.faces.component.UISelectItems;
@@ -31,9 +33,8 @@ import javax.faces.event.ValueChangeEvent;
 import javax.faces.event.ValueChangeListener;
 import javax.faces.model.SelectItem;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.apache.myfaces.custom.stylesheet.Stylesheet;
+
 import com.idega.block.article.IWBundleStarter;
 import com.idega.block.article.bean.ArticleItemBean;
 import com.idega.block.article.bean.ArticleStoreException;
@@ -77,13 +78,13 @@ import com.idega.webface.htmlarea.HTMLArea;
  * <p>
  * This is the part for the editor of article is inside the admin interface
  * </p>
- * Last modified: $Date: 2009/05/05 09:02:06 $ by $Author: valdas $
+ * Last modified: $Date: 2009/05/05 09:09:46 $ by $Author: valdas $
  *
  * @author Joakim,Tryggvi Larusson
- * @version $Revision: 1.57 $
+ * @version $Revision: 1.58 $
  */
 public class EditArticleView extends IWBaseComponent implements ManagedContentBeans, ActionListener, ValueChangeListener {
-	private static final Log log = LogFactory.getLog(EditArticleView.class);
+	private static final Logger LOGGER = Logger.getLogger(EditArticleView.class.getName());
 	
 	public final static String EDIT_ARTICLE_BLOCK_ID = "edit_article_view";
 	private final static String P = EDIT_ARTICLE_BLOCK_ID+"_"; // Id prefix
@@ -527,7 +528,7 @@ public class EditArticleView extends IWBaseComponent implements ManagedContentBe
 		return categoriesUI;
 	}
 	
-	private UIComponent findEditArticleComponent(UIComponent comp, Class<?> classToSearch, String id) {
+	private UIComponent findEditArticleComponent(UIComponent comp, Class<? extends UIComponent> classToSearch, String id) {
 		if (comp == null) {
 			return null;
 		}
@@ -552,7 +553,7 @@ public class EditArticleView extends IWBaseComponent implements ManagedContentBe
 		return findEditArticleComponent(comp.getParent(), classToSearch, id);
 	}
 	
-	private UIComponent findEditArticleComponent(List<UIComponent> children, Class<?> classToSearch, String id, boolean checkChildren) {
+	private UIComponent findEditArticleComponent(List<UIComponent> children, Class<? extends UIComponent> classToSearch, String id, boolean checkChildren) {
 		if (children == null) {
 			return null;
 		}
@@ -611,7 +612,7 @@ public class EditArticleView extends IWBaseComponent implements ManagedContentBe
 				}
 			}
 			else {
-				log.warn("categoriesUI == null");
+				LOGGER.warning("categoriesUI == null");
 			}
 			saveSuccessful = editArticle.storeArticle();
 			if (saveSuccessful) {
@@ -632,7 +633,7 @@ public class EditArticleView extends IWBaseComponent implements ManagedContentBe
 							((WFFormItem) o).setStyleAttribute("display", displayValue);
 						}
 					} catch (RuntimeException re) {
-						re.printStackTrace();
+						LOGGER.log(Level.WARNING, "Error saving categories", re);
 					}
 				}
 				
@@ -713,7 +714,8 @@ public class EditArticleView extends IWBaseComponent implements ManagedContentBe
 				return false;
 			}
 			WFUtil.addErrorMessageVB(message,ArticleConstants.IW_BUNDLE_IDENTIFIER, errorKey);
-			e.printStackTrace();
+			
+			LOGGER.log(Level.WARNING, "Error storing article", e);
 		}
 		return false;
 	}
@@ -743,7 +745,7 @@ public class EditArticleView extends IWBaseComponent implements ManagedContentBe
 			setMessageMode();
 		}
 		else{
-			log.info("user_message component is null. Message out: " + ref);
+			LOGGER.info("user_message component is null. Message out: " + ref);
 		}
 	}
 	
@@ -888,7 +890,7 @@ public class EditArticleView extends IWBaseComponent implements ManagedContentBe
 				article.load();
 			}
 			catch (Exception e) {
-				e.printStackTrace();
+				LOGGER.log(Level.WARNING, "Error loading article", e);
 			}
 		}
 		
@@ -910,7 +912,7 @@ public class EditArticleView extends IWBaseComponent implements ManagedContentBe
 				categoriesUI.setResourcePath(resourcePath);
 			}
 			catch (Exception e) {
-				e.printStackTrace();
+				LOGGER.log(Level.WARNING, "Error loading article", e);
 			}
 		}
 	}
@@ -927,7 +929,7 @@ public class EditArticleView extends IWBaseComponent implements ManagedContentBe
 				return;
 			}
 			
-			log.debug("Language value has changed from "+event.getOldValue()+" to "+event.getNewValue());
+			LOGGER.info("Language value has changed from "+event.getOldValue()+" to "+event.getNewValue());
 			
 			ArticleItemBean bean = getArticleItemBean();
 			String articlePath = bean.getResourcePath();
@@ -935,11 +937,11 @@ public class EditArticleView extends IWBaseComponent implements ManagedContentBe
 				//Article has not been stored previously, so nothing has to be done
 				return;
 			}
-			log.info("Article path: " + articlePath);
+			LOGGER.info("Article path: " + articlePath);
 			String langChange = event.getNewValue().toString();
 			bean.setLanguageChange(langChange);
 			bean.setLocale(LocaleUtil.getLocale(langChange));
-			log.info("Changed to other language "+langChange);
+			LOGGER.info("Changed to other language "+langChange);
 		}
 		else if(event.getComponent().getId().equals(BODY_ID)){
 			String newBodyValue = event.getNewValue().toString();
