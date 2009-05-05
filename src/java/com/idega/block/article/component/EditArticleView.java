@@ -1,5 +1,5 @@
 /*
- * $Id: EditArticleView.java,v 1.56 2009/03/10 16:26:48 laddi Exp $
+ * $Id: EditArticleView.java,v 1.57 2009/05/05 09:02:06 valdas Exp $
  *
  * Copyright (C) 2004 Idega. All Rights Reserved.
  *
@@ -10,7 +10,6 @@ package com.idega.block.article.component;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 
@@ -25,7 +24,6 @@ import javax.faces.component.html.HtmlOutputLabel;
 import javax.faces.component.html.HtmlOutputText;
 import javax.faces.component.html.HtmlSelectOneMenu;
 import javax.faces.context.FacesContext;
-import javax.faces.el.ValueBinding;
 import javax.faces.event.AbortProcessingException;
 import javax.faces.event.ActionEvent;
 import javax.faces.event.ActionListener;
@@ -79,10 +77,10 @@ import com.idega.webface.htmlarea.HTMLArea;
  * <p>
  * This is the part for the editor of article is inside the admin interface
  * </p>
- * Last modified: $Date: 2009/03/10 16:26:48 $ by $Author: laddi $
+ * Last modified: $Date: 2009/05/05 09:02:06 $ by $Author: valdas $
  *
  * @author Joakim,Tryggvi Larusson
- * @version $Revision: 1.56 $
+ * @version $Revision: 1.57 $
  */
 public class EditArticleView extends IWBaseComponent implements ManagedContentBeans, ActionListener, ValueChangeListener {
 	private static final Log log = LogFactory.getLog(EditArticleView.class);
@@ -129,7 +127,7 @@ public class EditArticleView extends IWBaseComponent implements ManagedContentBe
 	private boolean fromArticleItemListViewer = false;
 	private boolean needsForm = false;
 	
-	private String editorOpener = "window.parent.parent";
+	private String editorOpener = "window.parent";
 
 	public EditArticleView() {}
 
@@ -183,7 +181,8 @@ public class EditArticleView extends IWBaseComponent implements ManagedContentBe
 			
 			//	JavaScript
 			Script script = new Script();
-			script.addScriptLine("function addActionAfterArticleIsSavedAndEditorClosed() {"+editorOpener+".ArticleEditorHelper.addActionAfterArticleIsSavedAndEditorClosed();}");
+			script.addScriptLine("function addActionAfterArticleIsSavedAndEditorClosed() {"+editorOpener+
+					".ArticleEditorHelper.addActionAfterArticleIsSavedAndEditorClosed();}");
 			f.getChildren().add(script);
 			
 			//	Save state for bean
@@ -200,13 +199,6 @@ public class EditArticleView extends IWBaseComponent implements ManagedContentBe
 		
 		Script checkFieldsIfNotEmpty = new Script();
 		StringBuffer checkAction = new StringBuffer("function checkIfValidArticleEditorFields(ids, message) {\n");
-			/*checkAction.append("if (ids == null || message == null) return true;\n");
-			checkAction.append("for (var i = 0; i < ids.length; i++) {\n");
-				checkAction.append("var input = document.getElementById(ids[i]);\n");
-				checkAction.append("if (input != null) {\n");
-					checkAction.append("if (input.value == null || input.value == '') {alert(message); return false;}");
-				checkAction.append("}\n");
-			checkAction.append("}\n");*/
 			checkAction.append("return true;");
 		checkAction.append("}");
 		checkFieldsIfNotEmpty.addScriptLine(checkAction.toString());
@@ -469,12 +461,10 @@ public class EditArticleView extends IWBaseComponent implements ManagedContentBe
 	 * @return
 	 */
 	private UIComponent getLanguageDropdownMenu(IWContext iwc) {
-		Iterator<Locale> iter = ICLocaleBusiness.getListOfLocalesJAVA().iterator();
 		HtmlSelectOneMenu langDropdown = new HtmlSelectOneMenu();
 		langDropdown.setId(LOCALE_ID);
 		List<SelectItem> arrayList = new ArrayList<SelectItem>();
-		while(iter.hasNext()) {
-			Locale locale = iter.next();
+		for (Locale locale: ICLocaleBusiness.getListOfLocalesJAVA()) {
 			String keyStr = locale.getLanguage();
 			String langStr = locale.getDisplayLanguage();
 			SelectItem itemTemp = new SelectItem(keyStr, langStr, keyStr, false);
@@ -484,9 +474,7 @@ public class EditArticleView extends IWBaseComponent implements ManagedContentBe
 		UISelectItems items = new UISelectItems();
 		items.setValue(arrayList);
 		langDropdown.getChildren().add(items);
-		ValueBinding vb = WFUtil.createValueBinding("#{" + ref +"language" + "}");
-		langDropdown.setValueBinding("value", vb);
-		langDropdown.getValue();
+		langDropdown.setValueExpression("value", WFUtil.createValueExpression(iwc.getELContext(), "#{" + ref +"language" + "}", String.class));
 		langDropdown.addValueChangeListener(this);
 		langDropdown.setImmediate(true);
 		StringBuffer action = new StringBuffer();
@@ -652,8 +640,8 @@ public class EditArticleView extends IWBaseComponent implements ManagedContentBe
 				if (comp == null) {
 					String action = null;
 					if (fromArticleItemListViewer && !StringUtil.isEmpty(containerId)) {
-						action = PresentationUtil.getJavaScriptAction(new StringBuilder(editorOpener).append(".ArticleEditorHelper.reloadArticlesList('").append(containerId)
-								.append("');").toString());
+						action = PresentationUtil.getJavaScriptAction(new StringBuilder(editorOpener).append(".ArticleEditorHelper.reloadArticlesList('")
+								.append(containerId).append("');").toString());
 					}
 					else {
 						String resourcePath = articleItemBean.getResourcePath();

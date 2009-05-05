@@ -9,21 +9,21 @@ ArticleEditorHelper.initializeJavaScriptActionsForEditingAndCreatingArticles = f
 ArticleEditorHelper.registerArticleActions = function() {
 	var editButtons = jQuery('a.edit');
 	jQuery.each(editButtons, function() {
-		ArticleEditorHelper.checkArticleLinkAndRegisterIfItsCorrect(this, true);
+		ArticleEditorHelper.checkArticleLinkAndRegisterIfItsCorrect(this, 0.8);
 	});
 	
 	var createButtons = jQuery('a.create');
 	jQuery.each(createButtons, function() {
-		ArticleEditorHelper.checkArticleLinkAndRegisterIfItsCorrect(this, true);
+		ArticleEditorHelper.checkArticleLinkAndRegisterIfItsCorrect(this, 0.8);
 	});
 
 	var deleteButtons = jQuery('a.delete');
 	jQuery.each(deleteButtons, function() {
-		ArticleEditorHelper.checkArticleLinkAndRegisterIfItsCorrect(this, false);
+		ArticleEditorHelper.checkArticleLinkAndRegisterIfItsCorrect(this, 0.35);
 	});
 }
 
-ArticleEditorHelper.checkArticleLinkAndRegisterIfItsCorrect = function(link, bigWindow) {
+ArticleEditorHelper.checkArticleLinkAndRegisterIfItsCorrect = function(link, windowResizeIndex) {
 	if (link == null || link.length == 0) {
 		return false;
 	}
@@ -32,13 +32,10 @@ ArticleEditorHelper.checkArticleLinkAndRegisterIfItsCorrect = function(link, big
 		return false;
 	}
 	
-	var heightMultiplier = bigWindow ? 0.8 : 0.2;
-	var widthMultiplier = bigWindow ? 0.8 : 0.28;
-	
 	jQuery(link).addClass('articleEditorInitializedForLink');
 	jQuery(link).fancybox({
-		frameWidth: windowinfo.getWindowWidth() * widthMultiplier,
-		frameHeight: windowinfo.getWindowHeight() * heightMultiplier,
+		frameWidth: windowinfo.getWindowWidth() * windowResizeIndex,
+		frameHeight: windowinfo.getWindowHeight() * windowResizeIndex,
 		onCloseCallback: function() {
 			ArticleEditorHelper.addActionAfterArticleIsSavedAndEditorClosed();
 		}
