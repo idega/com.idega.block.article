@@ -8,7 +8,8 @@ public class CommentsEngineHomeImpl extends IBOHomeImpl implements CommentsEngin
 
 	private static final long serialVersionUID = -4510081484490343119L;
 
-	public Class getBeanInterfaceClass() {
+	@Override
+	public Class<CommentsEngine> getBeanInterfaceClass() {
 		return CommentsEngine.class;
 	}
 
