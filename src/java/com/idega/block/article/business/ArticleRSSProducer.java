@@ -177,7 +177,7 @@ public class ArticleRSSProducer extends RSSAbstractProducer implements RSSProduc
 		Date now = new Date();
 		long time = now.getTime();
 		try {
-			rss = (RSSBusiness) IBOLookup.getServiceInstance(iwc,RSSBusiness.class);			
+			rss = IBOLookup.getServiceInstance(iwc,RSSBusiness.class);			
 		} catch (IBOLookupException e1) {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();

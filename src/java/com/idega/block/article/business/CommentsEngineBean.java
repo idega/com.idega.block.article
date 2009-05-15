@@ -377,7 +377,7 @@ public class CommentsEngineBean extends IBOSessionBean implements CommentsEngine
 	private RSSBusiness getRSSBusiness() {
 		if (rss == null) {
 			try {
-				rss = (RSSBusiness) IBOLookup.getServiceInstance(IWMainApplication.getDefaultIWApplicationContext(), RSSBusiness.class);
+				rss = IBOLookup.getServiceInstance(IWMainApplication.getDefaultIWApplicationContext(), RSSBusiness.class);
 			} catch (IBOLookupException e) {
 				e.printStackTrace();
 				return null;
@@ -927,7 +927,7 @@ public class CommentsEngineBean extends IBOSessionBean implements CommentsEngine
 	
 	private IWSlideService getSlideService() {
 		try {
-			return (IWSlideService) IBOLookup.getServiceInstance(IWMainApplication.getDefaultIWApplicationContext(), IWSlideService.class);
+			return IBOLookup.getServiceInstance(IWMainApplication.getDefaultIWApplicationContext(), IWSlideService.class);
 		} catch (IBOLookupException e) {
 			e.printStackTrace();
 		}

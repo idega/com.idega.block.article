@@ -157,7 +157,7 @@ public class CommentsViewer extends Block {
 		RSSBusiness rss = null;
 		if (isAddLoginbyUUIDOnRSSFeedLink()) {
 			try {
-				rss = (RSSBusiness) IBOLookup.getServiceInstance(iwc, RSSBusiness.class);
+				rss = IBOLookup.getServiceInstance(iwc, RSSBusiness.class);
 			} catch (IBOLookupException e) {
 				e.printStackTrace();
 			}
@@ -283,7 +283,7 @@ public class CommentsViewer extends Block {
 	private void makeCommentsFeedIfNotExists(IWContext iwc) {
 		IWSlideService slide = null;
 		try {
-			slide = (IWSlideService) IBOLookup.getServiceInstance(iwc, IWSlideService.class);
+			slide = IBOLookup.getServiceInstance(iwc, IWSlideService.class);
 		} catch (IBOLookupException e) {
 			e.printStackTrace();
 		}
@@ -506,7 +506,7 @@ public class CommentsViewer extends Block {
 		
 		UserBusiness userBusiness = null;
 		try {
-			userBusiness = (UserBusiness) IBOLookup.getServiceInstance(iwc, UserBusiness.class);
+			userBusiness = IBOLookup.getServiceInstance(iwc, UserBusiness.class);
 		} catch (IBOLookupException e) {
 			e.printStackTrace();
 		}
@@ -534,7 +534,7 @@ public class CommentsViewer extends Block {
 	private CommentsEngine getCommentsEngine(IWApplicationContext iwac) {
 		if (commentsEngine == null) {
 			try {
-				commentsEngine = (CommentsEngine) IBOLookup.getServiceInstance(iwac, CommentsEngine.class);
+				commentsEngine = IBOLookup.getServiceInstance(iwac, CommentsEngine.class);
 			} catch (IBOLookupException e) {
 				e.printStackTrace();
 			}

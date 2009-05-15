@@ -1,5 +1,5 @@
 /*
- * $Id: IWBundleStarter.java,v 1.26 2008/10/23 06:02:52 laddi Exp $
+ * $Id: IWBundleStarter.java,v 1.27 2009/05/15 07:23:50 valdas Exp $
  * Created on 2.11.2004
  *
  * Copyright (C) 2004 Idega Software hf. All Rights Reserved.
@@ -29,10 +29,10 @@ import com.idega.slide.business.IWSlideService;
 
 /**
  * 
- *  Last modified: $Date: 2008/10/23 06:02:52 $ by $Author: laddi $
+ *  Last modified: $Date: 2009/05/15 07:23:50 $ by $Author: valdas $
  * 
  * @author <a href="mailto:tryggvil@idega.com">Tryggvi Larusson</a>
- * @version $Revision: 1.26 $
+ * @version $Revision: 1.27 $
  */
 public class IWBundleStarter implements IWBundleStartable {
 	//private static final String STYLE_SHEET_URL = "/style/article.css";
@@ -119,7 +119,7 @@ public class IWBundleStarter implements IWBundleStartable {
 		
 		 IWApplicationContext iwac = starterBundle.getApplication().getIWApplicationContext();
 	        try {
-	            IWSlideService service = (IWSlideService) IBOLookup.getServiceInstance(iwac,IWSlideService.class);
+	            IWSlideService service = IBOLookup.getServiceInstance(iwac,IWSlideService.class);
 	            service.addIWSlideChangeListeners(articleProducer);
 	        } catch (IBOLookupException e) {
 	            e.printStackTrace();
