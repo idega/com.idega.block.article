@@ -1,5 +1,5 @@
 /*
- * $Id: ArticleVersionBlock.java,v 1.6 2007/05/30 15:03:03 gediminas Exp $
+ * $Id: ArticleVersionBlock.java,v 1.7 2009/05/27 16:10:06 valdas Exp $
  *
  * Copyright (C) 2004 Idega. All Rights Reserved.
  *
@@ -27,12 +27,14 @@ import com.idega.webface.convert.WFCommaSeparatedListConverter;
 /**
  * Block for listing article versions.   
  * <p>
- * Last modified: $Date: 2007/05/30 15:03:03 $ by $Author: gediminas $
+ * Last modified: $Date: 2009/05/27 16:10:06 $ by $Author: valdas $
  *
  * @author Anders Lindman
- * @version $Revision: 1.6 $
+ * @version $Revision: 1.7 $
  */
 public class ArticleVersionBlock extends WFBlock implements ManagedContentBeans, ActionListener, Serializable {
+
+	private static final long serialVersionUID = 5089595729194766138L;
 
 	public final static String ARTICLE_VERSION_BLOCK_ID = "search_article_block";
 	
