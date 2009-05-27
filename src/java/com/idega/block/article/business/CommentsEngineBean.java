@@ -19,10 +19,14 @@ import org.apache.webdav.lib.WebdavResource;
 import org.directwebremoting.ScriptBuffer;
 import org.directwebremoting.WebContext;
 import org.directwebremoting.WebContextFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import com.idega.block.article.ArticleCacher;
 import com.idega.block.article.bean.ArticleComment;
+import com.idega.block.article.bean.CommentEntry;
 import com.idega.block.article.bean.CommentsViewerProperties;
+import com.idega.block.article.data.Comment;
 import com.idega.block.rss.business.RSSBusiness;
+import com.idega.builder.business.BuilderLogicWrapper;
 import com.idega.business.IBOLookup;
 import com.idega.business.IBOLookupException;
 import com.idega.business.IBOSessionBean;
@@ -32,7 +36,6 @@ import com.idega.content.business.ContentUtil;
 import com.idega.content.themes.helpers.business.ThemesHelper;
 import com.idega.core.accesscontrol.business.NotLoggedOnException;
 import com.idega.core.builder.business.BuilderService;
-import com.idega.core.builder.business.BuilderServiceFactory;
 import com.idega.core.cache.IWCacheManager2;
 import com.idega.dwr.reverse.ScriptCaller;
 import com.idega.idegaweb.IWMainApplication;
@@ -73,7 +76,8 @@ public class CommentsEngineBean extends IBOSessionBean implements CommentsEngine
 	
 	private List<String> parsedEmails = new ArrayList<String>();
 	
-	private volatile BuilderService builder = null;
+	@Autowired
+	private BuilderLogicWrapper builderLogicWrapper;
 
 	public boolean addComment(CommentsViewerProperties properties) {
 		if (properties == null) {
@@ -106,16 +110,20 @@ public class CommentsEngineBean extends IBOSessionBean implements CommentsEngine
 			logger.log(Level.SEVERE, errorMessage);
 			return false;
 		}
+		if (iwc.isLoggedOn()) {
+			properties.setAuthor(iwc.getCurrentUser());
+		}
 		
 		CommentsPersistenceManager commentsManager = getCommentsManager(properties.getSpringBeanIdentifier());
 		
 		if (commentsManager == null) {
 			uri = getFixedCommentsUri(iwc, uri, instanceId, properties.getCurrentPageUri());
+			properties.setUri(uri);
 		}
 		
 		String language = ThemesHelper.getInstance().getCurrentLanguage(iwc);
 		Timestamp date = IWTimestamp.getTimestampRightNow();
-		Feed comments = getCommentsFeed(uri, properties.getSpringBeanIdentifier(), properties.getIdentifier(), iwc, properties.isAddLoginbyUUIDOnRSSFeedLink());
+		Feed comments = getCommentsFeed(iwc, properties);
 		if (comments == null) {
 			String feedTitle = commentsManager == null ? properties.getTitle() : commentsManager.getFeedTitle(iwc, properties.getIdentifier());
 			String feedSubtitle = commentsManager == null ? properties.getSubtitle() : commentsManager.getFeedSubtitle(iwc, properties.getIdentifier());
@@ -126,10 +134,12 @@ public class CommentsEngineBean extends IBOSessionBean implements CommentsEngine
 			return false;
 		}
 		
-		if (!addNewEntry(comments, subject, uri, date, body, user, language, email, notify)) {
+		String entryId = addNewEntry(comments, subject, uri, date, body, user, language, email, notify);
+		if (entryId == null) {
 			logger.log(Level.SEVERE, errorMessage);
 			return false;
 		}
+		properties.setEntryId(entryId);
 		
 		//	Caching XML
 		if (commentsManager == null) {
@@ -144,6 +154,20 @@ public class CommentsEngineBean extends IBOSessionBean implements CommentsEngine
 		//	Uploading changed XML for comments
 		boolean finisheSuccessfully = commentsManager == null ? uploadFeed(uri, comments, iwc, true) :
 																commentsManager.storeFeed(properties.getIdentifier(), comments);
+		if (!finisheSuccessfully) {
+			logger.log(Level.SEVERE, errorMessage);
+			return false;
+		}
+		
+		//	Adding entry to DB about new comment
+		if (commentsManager != null) {
+			Object commentId = commentsManager.addComment(properties);
+			if (commentId == null) {
+				logger.warning("Unable to add entry to " + Comment.class + " by properties: " + properties);
+				finisheSuccessfully = false;
+			}
+		}
+		
 		if (!finisheSuccessfully) {
 			logger.log(Level.SEVERE, errorMessage);
 			return false;
@@ -237,10 +261,9 @@ public class CommentsEngineBean extends IBOSessionBean implements CommentsEngine
 		return emails;
 	}
 	
-	private boolean addNewEntry(Feed feed, String subject, String uri, Timestamp date, String body, String user, String language,
-			String email, boolean notify) {
+	private String addNewEntry(Feed feed, String subject, String uri, Timestamp date, String body, String user, String language, String email, boolean notify) {
 		if (feed == null) {
-			return false;
+			return null;
 		}
 		
 		List<Entry> entries = initEntries(feed.getEntries());
@@ -280,7 +303,8 @@ public class CommentsEngineBean extends IBOSessionBean implements CommentsEngine
 		entry.setAuthors(authors);
 		
 		// ID
-		entry.setId(ThemesHelper.getInstance().getUniqueIdByNumberAndDate(ContentConstants.COMMENT_SCOPE));
+		String id = ThemesHelper.getInstance().getUniqueIdByNumberAndDate(ContentConstants.COMMENT_SCOPE);
+		entry.setId(id);
 		
 		// URI
 		Link link = new Link();
@@ -291,17 +315,16 @@ public class CommentsEngineBean extends IBOSessionBean implements CommentsEngine
 		
 		entries.add(entry);
 		feed.setEntries(entries);
-		return true;
+		
+		return id;
 	}
 	
 	@SuppressWarnings("unchecked")
 	private List<Entry> initEntries(List oldEntries) {
-		if (oldEntries == null) {
+		if (ListUtil.isEmpty(oldEntries)) {
 			return new ArrayList<Entry>();
 		}
-		if (oldEntries.size() == 0) {
-			return new ArrayList<Entry>();
-		}
+		
 		List<Entry> entries = new ArrayList<Entry>();
 		Object o = null;
 		for (int i = 0; i < oldEntries.size(); i++) {
@@ -402,17 +425,8 @@ public class CommentsEngineBean extends IBOSessionBean implements CommentsEngine
 			return null;
 		}
 		
-		String id = properties.getInstanceId();
-		String uri = properties.getUri();
-		String identifier = properties.getIdentifier();
-		boolean newestEntriesOnTop = properties.isNewestEntriesOnTop();
-		boolean addLoginbyUUIDOnRSSFeedLink = properties.isAddLoginbyUUIDOnRSSFeedLink();
-		String springBeanIdentifier = properties.getSpringBeanIdentifier();
-		
 		ScriptBuffer script = new ScriptBuffer();
-		script = new ScriptBuffer("getCommentsCallback(")
-					.appendData(getCommentsList(uri, springBeanIdentifier, identifier, true, newestEntriesOnTop, addLoginbyUUIDOnRSSFeedLink))
-					.appendScript(", ").appendData(id).appendScript(", ").appendData(uri).appendScript(");");
+		script = new ScriptBuffer("getCommentsCallback(").appendData(getCommentsList(properties)).appendScript(");");
 		return script;
 	}
 	
@@ -423,8 +437,8 @@ public class CommentsEngineBean extends IBOSessionBean implements CommentsEngine
 		
 		List<List<ArticleComment>> allComments = new ArrayList<List<ArticleComment>>();
 		for (CommentsViewerProperties commentProperty: commentsProperties) {
-			allComments.add(getCommentsList(commentProperty.getUri(), commentProperty.getSpringBeanIdentifier(), commentProperty.getIdentifier(), false,
-					commentProperty.isNewestEntriesOnTop(), commentProperty.isAddLoginbyUUIDOnRSSFeedLink()));
+			commentProperty.setAddNulls(false);
+			allComments.add(getCommentsEntries(commentProperty));
 		}
 		return allComments;
 	}
@@ -438,35 +452,53 @@ public class CommentsEngineBean extends IBOSessionBean implements CommentsEngine
 			return null;
 		}
 		
-		return getCommentsList(properties.getUri(), properties.getSpringBeanIdentifier(), properties.getIdentifier(), true, properties.isNewestEntriesOnTop(),
-								properties.isAddLoginbyUUIDOnRSSFeedLink());
+		properties.setAddNulls(true);
+		return getCommentsEntries(properties);
+	}
+	
+	private List<ArticleComment> getCommentsEntries(CommentsViewerProperties properties) {
+		List<ArticleComment> fake = new ArrayList<ArticleComment>();
+		if (properties.getUri() == null) {
+			if (properties.isAddNulls()) {
+				return null;
+			}
+			return fake;
+		}
+		
+		List<? extends Entry> entriesToFormat = getEntriesToFormat(properties);
+		if (entriesToFormat == null) {
+			if (properties.isAddNulls()) {
+				return null;
+			}
+			return fake;
+		}
+		
+		List<ArticleComment> articleComments = getFormattedEntries(getEntriesToFormat(properties), properties);
+		return articleComments == null ? properties.isAddNulls() ? null : fake : articleComments;
 	}
 	
 	@SuppressWarnings("unchecked")
-	private List<ArticleComment> getCommentsList(String uri, String springBeanIdentifier, String identifier, boolean addNulls, boolean newestEntriesOnTop,
-													boolean addLoginbyUUIDOnRSSFeedLink) {
-		List<ArticleComment> fake = new ArrayList<ArticleComment>();
-		if (uri == null) {
-			if (addNulls) {
-				return null;
-			}
-			return fake;
-		}
-		
-		Feed comments = getCommentsFeed(uri, springBeanIdentifier, identifier, CoreUtil.getIWContext(), addLoginbyUUIDOnRSSFeedLink);
+	private List<? extends Entry> getEntriesToFormat(CommentsViewerProperties properties) {
+		Feed comments = getCommentsFeed(properties);
 		if (comments == null) {
-			if (addNulls) {
-				return null;
-			}
-			return fake;
+			return null;
 		}
 		
-		List entries = comments.getEntries();
-		if (ListUtil.isEmpty(entries)) {
-			if (addNulls) {
-				return null;
+		if (StringUtil.isEmpty(properties.getSpringBeanIdentifier())) {
+			return comments.getEntries();
+		} else {
+			CommentsPersistenceManager manager = getCommentsManager(properties.getSpringBeanIdentifier());
+			if (manager != null) {
+				return manager.getEntriesToFormat(comments, properties);
 			}
-			return fake;
+		}
+		
+		return null;
+	}
+	
+	private List<ArticleComment> getFormattedEntries(List<? extends Entry> entriesToFormat, CommentsViewerProperties properties) {
+		if (ListUtil.isEmpty(entriesToFormat)) {
+			return null;
 		}
 		
 		Locale locale = null;
@@ -480,64 +512,68 @@ public class CommentsEngineBean extends IBOSessionBean implements CommentsEngine
 		
 		List<ArticleComment> items = new ArrayList<ArticleComment>();
 		ArticleComment comment = null;
-		Object o = null;
-		Entry entry = null;
 		Content content = null;
 		Person author = null;
 		IWTimestamp posted = null;
-		for (int i = 0; i < entries.size(); i++) {
-			o = entries.get(i);
-			if (o instanceof Entry) {
-				comment = new ArticleComment();
-				entry = (Entry) o;
-				
-				//	Number
-				comment.setListNumber(i + 1);
-				
-				// ID
-				comment.setId(entry.getId());
+		int number = 0;
+		for (Entry entry: entriesToFormat) {
+			comment = new ArticleComment();
+			
+			//	Number
+			comment.setListNumber(number + 1);
+			
+			// ID
+			comment.setId(entry.getId());
 
-				// Author
-				try {
-					if (entry.getAuthors() != null) {
-						author = (Person) entry.getAuthors().get(0);
-						comment.setUser(author.getName());
-					}
-					else {
-						comment.setUser(ContentConstants.EMPTY);
-					}
-				} catch(ClassCastException e) {
-					comment.setUser(ContentConstants.EMPTY);
-				} catch (IndexOutOfBoundsException e) {
+			// Author
+			try {
+				if (entry.getAuthors() != null) {
+					author = (Person) entry.getAuthors().get(0);
+					comment.setUser(author.getName());
+				}
+				else {
 					comment.setUser(ContentConstants.EMPTY);
 				}
-				
-				// Subject
-				comment.setSubject(StringUtil.isEmpty(entry.getTitle()) ? CoreConstants.EMPTY : entry.getTitle());
-				
-				// Content
-				try {
-					if (entry.getContents() != null) {
-						content = (Content) entry.getContents().get(0);
-						comment.setComment(content.getValue());
-					}
-					else {
-						comment.setComment(ContentConstants.EMPTY);
-					}
-				} catch (ClassCastException e) {
-					comment.setComment(ContentConstants.EMPTY);
-				} catch (IndexOutOfBoundsException e) {
-					comment.setComment(ContentConstants.EMPTY);
-				}
-				
-				// Date of creation
-				posted = new IWTimestamp(entry.getPublished());
-				comment.setPosted(posted.getLocaleDateAndTime(locale, DateFormat.FULL, DateFormat.MEDIUM));
-				items.add(comment);
+			} catch(ClassCastException e) {
+				comment.setUser(ContentConstants.EMPTY);
+			} catch (IndexOutOfBoundsException e) {
+				comment.setUser(ContentConstants.EMPTY);
 			}
+			
+			// Subject
+			comment.setSubject(StringUtil.isEmpty(entry.getTitle()) ? CoreConstants.EMPTY : entry.getTitle());
+			
+			// Content
+			try {
+				if (entry.getContents() != null) {
+					content = (Content) entry.getContents().get(0);
+					comment.setComment(content.getValue());
+				}
+				else {
+					comment.setComment(ContentConstants.EMPTY);
+				}
+			} catch (ClassCastException e) {
+				comment.setComment(ContentConstants.EMPTY);
+			} catch (IndexOutOfBoundsException e) {
+				comment.setComment(ContentConstants.EMPTY);
+			}
+			
+			// Date of creation
+			posted = new IWTimestamp(entry.getPublished());
+			comment.setPosted(posted.getLocaleDateAndTime(locale, DateFormat.FULL, DateFormat.MEDIUM));
+			
+			if (entry instanceof CommentEntry) {
+				CommentEntry commentEntry = (CommentEntry) entry;
+				
+				comment.setCanBePublished(commentEntry.isPublishable());
+				comment.setPrimaryKey(commentEntry.getPrimaryKey());
+			}
+			
+			items.add(comment);
+			number++;
 		}
 		
-		Collections.sort(items, new ArticleCommentComparator(locale, DateFormat.FULL, DateFormat.MEDIUM, newestEntriesOnTop));
+		Collections.sort(items, new ArticleCommentComparator(locale, DateFormat.FULL, DateFormat.MEDIUM, properties.isNewestEntriesOnTop()));
 		
 		return items;
 	}
@@ -557,37 +593,42 @@ public class CommentsEngineBean extends IBOSessionBean implements CommentsEngine
 	}
 	
 	public int getCommentsCount(String uri, String springBeanIdentifier, String identifier, IWContext iwc, boolean addLoginbyUUIDOnRSSFeedLink) {
-		Feed comments = getCommentsFeed(uri, springBeanIdentifier, identifier, iwc, addLoginbyUUIDOnRSSFeedLink);
-		if (comments == null) {
-			return 0;
-		}
-		if (comments.getEntries() == null) {
-			return 0;
-		}
-		return comments.getEntries().size();
+		CommentsViewerProperties properties = new CommentsViewerProperties();
+		properties.setUri(uri);
+		properties.setSpringBeanIdentifier(springBeanIdentifier);
+		properties.setIdentifier(identifier);
+		properties.setAddLoginbyUUIDOnRSSFeedLink(addLoginbyUUIDOnRSSFeedLink);
+		
+		List<? extends Entry> entries = getEntriesToFormat(properties);
+		return entries == null ? 0 : entries.size();
 	}
 	
-	private synchronized Feed getCommentsFeed(String uri, String springBeanIdentifier, String identifier, IWContext iwc, boolean addLoginbyUUIDOnRSSFeedLink) {
-		CommentsPersistenceManager commentsManager = getCommentsManager(springBeanIdentifier);
+	private Feed getCommentsFeed(CommentsViewerProperties properties) {
+		return getCommentsFeed(CoreUtil.getIWContext(), properties);
+	}
+	
+	private synchronized Feed getCommentsFeed(IWContext iwc, CommentsViewerProperties properties) {
+		CommentsPersistenceManager commentsManager = getCommentsManager(properties.getSpringBeanIdentifier());
 		if (commentsManager != null) {
-			return commentsManager.getCommentsFeed(iwc, identifier);
+			return commentsManager.getCommentsFeed(iwc, properties.getIdentifier());
 		}
 		
-		Feed cachedFeed = getFeedFromCache(uri, iwc);
+		if (StringUtil.isEmpty(properties.getUri())) {
+			return null;
+		}
+		
+		Feed cachedFeed = getFeedFromCache(properties.getUri(), iwc);
 		if (cachedFeed != null) {
 			return cachedFeed;
 		}
-		
-		if (StringUtil.isEmpty(uri)) {
-			return null;
-		}
+
 		IWSlideService slide = getSlideService();
 		if (slide == null) {
 			return null;
 		}
 		WebdavResource commentsResource = null;
 		try {
-			commentsResource = slide.getWebdavResourceAuthenticatedAsRoot(uri);
+			commentsResource = slide.getWebdavResourceAuthenticatedAsRoot(properties.getUri());
 		} catch (HttpException e) {
 			e.printStackTrace();
 		} catch (RemoteException e) {
@@ -607,20 +648,22 @@ public class CommentsEngineBean extends IBOSessionBean implements CommentsEngine
 		try {
 			currentUser = iwc == null ? null : iwc.getCurrentUser();
 		} catch(NotLoggedOnException e) {}
-		if (addLoginbyUUIDOnRSSFeedLink && currentUser == null) {
+		if (properties.isAddLoginbyUUIDOnRSSFeedLink() && currentUser == null) {
 			logger.log(Level.WARNING, "User must be looged to get comments feed!");
 			return null;
 		}
 		
-		String pathToComments = new StringBuilder(ThemesHelper.getInstance().getFullWebRoot()).append(uri).toString();
-		SyndFeed comments = addLoginbyUUIDOnRSSFeedLink ? rss.getFeedAuthenticatedByUser(pathToComments, currentUser) : rss.getFeed(pathToComments);
+		String pathToComments = new StringBuilder(ThemesHelper.getInstance().getFullWebRoot()).append(properties.getUri()).toString();
+		SyndFeed comments = properties.isAddLoginbyUUIDOnRSSFeedLink() ?
+				rss.getFeedAuthenticatedByUser(pathToComments, currentUser) :
+				rss.getFeed(pathToComments);
 		if (comments == null) {
 			return null;
 		}
 		Object abstractFeed = comments.createWireFeed();
 		if (abstractFeed instanceof Feed) {
 			Feed realFeed = (Feed) abstractFeed;
-			putFeedToCache(realFeed, uri, iwc);
+			putFeedToCache(realFeed, properties.getUri(), iwc);
 			return realFeed;
 		}
 		return null;
@@ -694,18 +737,6 @@ public class CommentsEngineBean extends IBOSessionBean implements CommentsEngine
 		return CoreUtil.getDecodedValue(email);
 	}
 	
-	private BuilderService getBuilderService() {
-		if (builder == null) {
-			try {
-				builder = BuilderServiceFactory.getBuilderService(IWMainApplication.getDefaultIWApplicationContext());
-			} catch (RemoteException e) {
-				e.printStackTrace();
-				return null;
-			}
-		}
-		return builder;
-	}
-	
 	public boolean setModuleProperty(String pageKey, String moduleId, String propName, String propValue, String cacheKey) {
 		BuilderService builder = getBuilderService();
 		if (builder == null) {
@@ -727,8 +758,7 @@ public class CommentsEngineBean extends IBOSessionBean implements CommentsEngine
 		return executeScriptForAllPages(script);
 	}
 	
-	@SuppressWarnings("unchecked")
-	private Map getArticlesCache(IWContext iwc) {
+	private Map<String, String> getArticlesCache(IWContext iwc) {
 		if (iwc == null) {
 			return null;
 		}
@@ -746,13 +776,12 @@ public class CommentsEngineBean extends IBOSessionBean implements CommentsEngine
 		return null;
 	}
 	
-	@SuppressWarnings("unchecked")
 	private void decacheComponent(String cacheKey, IWContext iwc) {
 		if (cacheKey == null || iwc == null) {
 			return;
 		}
 		
-		Map articles = getArticlesCache(iwc);
+		Map<String, String> articles = getArticlesCache(iwc);
 		if (articles == null) {
 			return;
 		}
@@ -830,8 +859,7 @@ public class CommentsEngineBean extends IBOSessionBean implements CommentsEngine
 		String linkToComments = properties.getUri();
 		String commentId = properties.getId();
 		
-		Feed comments = getCommentsFeed(linkToComments, properties.getSpringBeanIdentifier(), properties.getIdentifier(), iwc,
-										properties.isAddLoginbyUUIDOnRSSFeedLink());
+		Feed comments = getCommentsFeed(iwc, properties);
 		if (comments == null) {
 			return null;
 		}
@@ -979,7 +1007,7 @@ public class CommentsEngineBean extends IBOSessionBean implements CommentsEngine
 		
 		if (service != null && !StringUtil.isEmpty(currentPageUri)) {
 			try {
-				String pageKey = getBuilderService().getPageKeyByURI(currentPageUri);
+				String pageKey = service.getPageKeyByURI(currentPageUri);
 				
 				String method = ":method:1:implied:void:setLinkToComments:java.lang.String:";
 				if (!StringUtil.isEmpty(pageKey) && !service.isPropertySet(pageKey, instanceId, method, iwc.getIWMainApplication())) {
@@ -993,4 +1021,51 @@ public class CommentsEngineBean extends IBOSessionBean implements CommentsEngine
 		return uri;
 	}
 	
+	public BuilderLogicWrapper getBuilderLogicWrapper() {
+		if (builderLogicWrapper == null) {
+			ELUtil.getInstance().autowire(this);
+		}
+		return builderLogicWrapper;
+	}
+	
+	private BuilderService getBuilderService() {
+		return getBuilderLogicWrapper().getBuilderService(IWMainApplication.getDefaultIWApplicationContext());
+	}
+
+	public void setBuilderLogicWrapper(BuilderLogicWrapper builderLogicWrapper) {
+		this.builderLogicWrapper = builderLogicWrapper;
+	}
+
+	public boolean markAsRead(Object primaryKey, String beanIdentifier) {
+		if (StringUtil.isEmpty(beanIdentifier)) {
+			return false;
+		}
+		
+		CommentsPersistenceManager manager = getCommentsManager(beanIdentifier);
+		if (manager == null) {
+			return false;
+		}
+		
+		return manager.markCommentAsRead(primaryKey);
+	}
+
+	public boolean setCommentPublished(CommentsViewerProperties properties) {
+		if (properties == null) {
+			return false;
+		}
+		
+		CommentsPersistenceManager manager = getCommentsManager(properties.getSpringBeanIdentifier());
+		if (manager == null) {
+			return false;
+		}
+		
+		if (manager.hasFullRightsForComments(properties.getIdentifier())) {
+			if (manager.setCommentPublished(properties.getPrimaryKey())) {
+				getCommentsForAllPages(properties);
+				return true;
+			}
+		}
+		
+		return false;
+	}
 }

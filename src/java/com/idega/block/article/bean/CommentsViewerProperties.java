@@ -1,5 +1,7 @@
 package com.idega.block.article.bean;
 
+import com.idega.user.data.User;
+
 public class CommentsViewerProperties {
 
 	private String user;
@@ -20,6 +22,33 @@ public class CommentsViewerProperties {
 	private boolean newestEntriesOnTop;
 	private boolean actionSuccess;
 	private boolean addLoginbyUUIDOnRSSFeedLink;
+	private boolean addNulls;
+	
+	private boolean privateComment;
+	private boolean announcedToPublic;
+	
+	private Integer replyForComment;
+	
+	private String entryId;
+	private String primaryKey;
+	
+	private User author;
+
+	public boolean isPrivateComment() {
+		return privateComment;
+	}
+
+	public void setPrivateComment(boolean privateComment) {
+		this.privateComment = privateComment;
+	}
+
+	public boolean isAnnouncedToPublic() {
+		return announcedToPublic;
+	}
+
+	public void setAnnouncedToPublic(boolean announcedToPublic) {
+		this.announcedToPublic = announcedToPublic;
+	}
 
 	public String getUser() {
 		return user;
@@ -147,6 +176,46 @@ public class CommentsViewerProperties {
 
 	public void setCurrentPageUri(String currentPageUri) {
 		this.currentPageUri = currentPageUri;
+	}
+
+	public User getAuthor() {
+		return author;
+	}
+
+	public void setAuthor(User author) {
+		this.author = author;
+	}
+
+	public Integer getReplyForComment() {
+		return replyForComment;
+	}
+
+	public void setReplyForComment(Integer replyForComment) {
+		this.replyForComment = replyForComment;
+	}
+
+	public boolean isAddNulls() {
+		return addNulls;
+	}
+
+	public void setAddNulls(boolean addNulls) {
+		this.addNulls = addNulls;
+	}
+
+	public String getEntryId() {
+		return entryId;
+	}
+
+	public void setEntryId(String entryId) {
+		this.entryId = entryId;
+	}
+
+	public String getPrimaryKey() {
+		return primaryKey;
+	}
+
+	public void setPrimaryKey(String primaryKey) {
+		this.primaryKey = primaryKey;
 	}
 	
 }

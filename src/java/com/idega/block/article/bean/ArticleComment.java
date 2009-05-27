@@ -9,7 +9,11 @@ public class ArticleComment {
 	private String posted = null;
 	private String id = null;
 	
+	private String primaryKey;
+	
 	private int listNumber = 1;
+	
+	private boolean canBePublished;
 	
 	public String getComment() {
 		return comment;
@@ -52,6 +56,18 @@ public class ArticleComment {
 	}
 	public void setListNumber(int listNumber) {
 		this.listNumber = listNumber;
+	}
+	public boolean isCanBePublished() {
+		return canBePublished;
+	}
+	public void setCanBePublished(boolean canBePublished) {
+		this.canBePublished = canBePublished;
+	}
+	public String getPrimaryKey() {
+		return primaryKey;
+	}
+	public void setPrimaryKey(String primaryKey) {
+		this.primaryKey = primaryKey;
 	}
 
 }

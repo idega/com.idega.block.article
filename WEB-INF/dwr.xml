@@ -12,6 +12,7 @@
 			<include method="deleteComments"/>
 			<include method="getCommentsForAllPages"/>
 			<include method="addComment"/>
+			<include method="setCommentPublished"/>
 		</create>
 		
 		<create javascript="ArticleItemInfoFetcher" creator="jsf">
@@ -39,6 +40,7 @@
 			CommentsEngine.getCommentsForAllPages(CommentsViewerProperties);
 			CommentsEngine.getComments(CommentsViewerProperties);
 			List<List<ArticleComment>> CommentsEngine.getCommentsFromUris(List<CommentsViewerProperties>);
+			CommentsEngine.setCommentPublished(CommentsViewerProperties);
 			
 			ArticleFields ArticleItemInfoFetcher.getArticleInfo(String);
 		]]>

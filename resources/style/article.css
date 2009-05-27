@@ -130,6 +130,14 @@
 	font-weight: bold;
 }
 
+.publishCommentImage:HOVER {
+	cursor: pointer;
+}
+
+.publishCommentImage {
+	margin-left: 5px;
+}
+
 .comment_list_item {
 	margin-top:5px;
 	border: 1px #ababab solid;

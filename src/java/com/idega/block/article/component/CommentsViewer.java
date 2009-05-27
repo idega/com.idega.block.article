@@ -8,7 +8,6 @@ import javax.faces.component.UIComponent;
 import javax.faces.context.FacesContext;
 
 import org.apache.webdav.lib.WebdavResource;
-
 import com.idega.block.article.business.ArticleConstants;
 import com.idega.block.article.business.ArticleUtil;
 import com.idega.block.article.business.CommentsEngine;
@@ -77,6 +76,8 @@ public class CommentsViewer extends Block {
 	
 	private CommentsEngine commentsEngine = null;
 	
+	private boolean fullCommentsRights;
+	
 	@Override
 	public void main(IWContext iwc) {
 		getCommentsEngine(iwc);
@@ -90,7 +91,7 @@ public class CommentsViewer extends Block {
 		}
 		
 		PresentationUtil.addStyleSheetToHeader(iwc, ArticleUtil.getBundle().getVirtualPathWithFileNameString("style/article.css"));
-		getModuleId(iwc);
+		resolveModuleId(iwc);
 		
 		if (linkToComments == null) {
 			if (StringUtil.isEmpty(springBeanIdentifier)) {
@@ -166,15 +167,23 @@ public class CommentsViewer extends Block {
 			}
 		}
 		
+		boolean addAtomLink = true;
+		CommentsPersistenceManager manager = getCommentsEngine(iwc).getCommentsManager(springBeanIdentifier);
+		if (manager != null) {
+			fullCommentsRights = manager.hasFullRightsForComments(identifier);
+			addAtomLink = fullCommentsRights;
+		}
 		// Link - Atom feed
-		Link linkToFeed = new Link(CoreConstants.SPACE);
-		linkToFeed.setTitle(iwrb.getLocalizedString("comments_viewer.atom_feed", "Atom feed"));
-		linkToFeed.setStyleClass("articleCommentsAtomFeedLinkStyle");
-		makeCommentsFeedIfNotExists(iwc);
-		String uri = new StringBuilder().append(CoreConstants.WEBDAV_SERVLET_URI)
-			.append(isAddLoginbyUUIDOnRSSFeedLink() ? rss.getLinkToFeedWithUUIDParameters(linkToComments, getUser(iwc)) : linkToComments).toString();
-		linkToFeed.setURL(uri);
-		comments.add(linkToFeed);
+		if (addAtomLink) {
+			Link linkToFeed = new Link(CoreConstants.SPACE);
+			linkToFeed.setTitle(iwrb.getLocalizedString("comments_viewer.atom_feed", "Atom feed"));
+			linkToFeed.setStyleClass("articleCommentsAtomFeedLinkStyle");
+			makeCommentsFeedIfNotExists(iwc);
+			String uri = new StringBuilder().append(CoreConstants.WEBDAV_SERVLET_URI)
+				.append(isAddLoginbyUUIDOnRSSFeedLink() ? rss.getLinkToFeedWithUUIDParameters(linkToComments, getUser(iwc)) : linkToComments).toString();
+			linkToFeed.setURL(uri);
+			comments.add(linkToFeed);
+		}
 		
 		// Delete comments image
 		if (contentEditor) {
@@ -240,6 +249,8 @@ public class CommentsViewer extends Block {
 							.append(iwrb.getLocalizedString("comments_viewer.delete_all_comments", "Delete comments"))
 							.append("', deleteComment: '")
 							.append(iwrb.getLocalizedString("comments_viewer.delete_comment", "Delete this comment"))
+							.append("', publishComment: '")
+							.append(iwrb.getLocalizedString("comments_viewer.publish_comment", "Publish comment"))
 		.append("'});");
 		PresentationUtil.addJavaScriptActionToBody(iwc, localization.toString());
 		
@@ -259,7 +270,7 @@ public class CommentsViewer extends Block {
 		String identifier = getIdentifier() == null ? CoreConstants.EMPTY : getIdentifier();
 		StringBuilder action = new StringBuilder("addCommentStartInfo('").append(linkToComments).append(SEPARATOR).append(moduleId).append("', ")
 		.append(showCommentsList).append(", ").append(isNewestEntriesOnTop()).append(", '").append(springBean).append(SEPARATOR).append(identifier)
-		.append("', ").append(isAddLoginbyUUIDOnRSSFeedLink()).append(");");
+		.append("', ").append(isAddLoginbyUUIDOnRSSFeedLink()).append(", ").append(fullCommentsRights).append(");");
 		if (!CoreUtil.isSingleComponentRenderingProcess(iwc)) {
 			action = new StringBuilder("window.addEvent('load', function() {").append(action.toString()).append("});");
 		}
@@ -683,7 +694,7 @@ public class CommentsViewer extends Block {
 		return true;
 	}
 	
-	private void getModuleId(IWContext iwc) {
+	private void resolveModuleId(IWContext iwc) {
 		BuilderService service = null;
 		try {
 			service = getBuilderService(iwc);

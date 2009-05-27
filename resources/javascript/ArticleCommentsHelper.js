@@ -67,8 +67,11 @@ var COMMENTS_BLOCK_LIST_ID = 'comments_block_list';
 var GLOBAL_COMMENTS_MARK_ID = null;
 var ENABLE_REVERSE_AJAX_TIME_OUT_ID = 0;
 
-function addCommentStartInfo(linkToComments, commentsId, showCommentsListOnLoad, newestEntriesOnTop, springBeanIdentifier, identifier, addLoginbyUUIDOnRSSFeedLink) {
-	var commentsInfo = new SingleCommentInfo(linkToComments, commentsId, springBeanIdentifier, identifier, showCommentsListOnLoad, newestEntriesOnTop, addLoginbyUUIDOnRSSFeedLink);
+function addCommentStartInfo(linkToComments, commentsId, showCommentsListOnLoad, newestEntriesOnTop, springBeanIdentifier, identifier,
+	addLoginbyUUIDOnRSSFeedLink, fullCommentsRights) {
+	
+	var commentsInfo = new SingleCommentInfo(linkToComments, commentsId, springBeanIdentifier, identifier, showCommentsListOnLoad, newestEntriesOnTop,
+		addLoginbyUUIDOnRSSFeedLink, fullCommentsRights);
 	CommentsViewer.commentInfo.push(commentsInfo);
 
 	if (showCommentsListOnLoad) {
@@ -76,7 +79,9 @@ function addCommentStartInfo(linkToComments, commentsId, showCommentsListOnLoad,
 	}
 }
 
-function SingleCommentInfo(linkToComments, commentsId, springBeanIdentifier, identifier, showCommentsList, newestEntriesOnTop, addLoginbyUUIDOnRSSFeedLink) {
+function SingleCommentInfo(linkToComments, commentsId, springBeanIdentifier, identifier, showCommentsList, newestEntriesOnTop, addLoginbyUUIDOnRSSFeedLink,
+	fullCommentsRights) {
+	
 	this.linkToComments = linkToComments;
 	this.commentsId = commentsId;
 	this.springBeanIdentifier = springBeanIdentifier;
@@ -87,6 +92,8 @@ function SingleCommentInfo(linkToComments, commentsId, springBeanIdentifier, ide
 	this.addLoginbyUUIDOnRSSFeedLink = addLoginbyUUIDOnRSSFeedLink;
 	
 	this.commentsListOpened = false;
+	
+	this.fullCommentsRights = fullCommentsRights;
 }
 
 function setCommentValues(user, subject, email, body) {
@@ -400,18 +407,43 @@ function addComment(index, articleComment, commentsId, linkToComments, newestEnt
 	var commentValue = new Element('div');
 	commentValue.addClass('commentItem');
 	
-	if (CommentsViewer.info.hasValidRights) {
-		var deleteImage = new Element('img');
-		deleteImage.setProperty('id', commentsId + 'delete_article_comment' + articleComment.id);
-		deleteImage.setProperty('src', CommentsViewer.info.deleteCommentImage);
-		deleteImage.setProperty('title', CommentsViewer.localizations.deleteComment);
-		deleteImage.setProperty('alt', CommentsViewer.localizations.deleteComment);
-		deleteImage.setProperty('name', CommentsViewer.localizations.deleteComment);
-		deleteImage.addClass('deleteCommentsImage');
-		deleteImage.addEvent('click', function() {
-			deleteComments(commentsId, articleComment.id, linkToComments, getCommentsInfo(linkToComments).newestEntriesOnTop);
-		});
-		commentContainer.appendChild(deleteImage);
+	if (CommentsViewer.info.hasValidRights || getCommentsInfo(linkToComments).fullCommentsRights) {
+		if (CommentsViewer.info.hasValidRights) {
+			var deleteImage = new Element('img');
+			deleteImage.setProperty('id', commentsId + 'delete_article_comment' + articleComment.id);
+			deleteImage.setProperty('src', CommentsViewer.info.deleteCommentImage);
+			deleteImage.setProperty('title', CommentsViewer.localizations.deleteComment);
+			deleteImage.setProperty('alt', CommentsViewer.localizations.deleteComment);
+			deleteImage.setProperty('name', CommentsViewer.localizations.deleteComment);
+			deleteImage.addClass('deleteCommentsImage');
+			deleteImage.addEvent('click', function() {
+				deleteComments(commentsId, articleComment.id, linkToComments, getCommentsInfo(linkToComments).newestEntriesOnTop);
+			});
+			commentContainer.appendChild(deleteImage);
+		}
+		
+		if (getCommentsInfo(linkToComments).fullCommentsRights) {
+			if (articleComment.canBePublished) {
+				var publishImage = new Element('img');
+				publishImage.setProperty('src', '/idegaweb/bundles/com.idega.block.article/resources/images/publish.png');
+				publishImage.setProperty('title', CommentsViewer.localizations.publishComment);
+				publishImage.addClass('publishCommentImage');
+				publishImage.addEvent('click', function() {
+					var info = getCommentsInfo(linkToComments);
+					var properties = new CommentsViewerProperties(null, null, null, null, null, articleComment.id, null, info.springBeanIdentifier,
+						info.identifier, true, info.newestEntriesOnTop, info.addLoginbyUUIDOnRSSFeedLink);
+					properties.primaryKey = articleComment.primaryKey;
+					CommentsEngine.setCommentPublished(properties, {
+						callback: function(result) {
+							if (result) {
+								publishImage.remove();
+							}
+						}
+					});
+				});
+				commentContainer.appendChild(publishImage);
+			}
+		}
 	}
 	
 	var number = new Element('div');
