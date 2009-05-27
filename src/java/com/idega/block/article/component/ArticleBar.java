@@ -1,5 +1,5 @@
 /*
- * $Id: ArticleBar.java,v 1.8 2005/12/07 21:39:05 tryggvil Exp $
+ * $Id: ArticleBar.java,v 1.9 2009/05/27 16:09:37 valdas Exp $
  *
  * Copyright (C) 2004 Idega. All Rights Reserved.
  *
@@ -9,7 +9,6 @@
 package com.idega.block.article.component;
 
 import java.io.Serializable;
-import java.util.Iterator;
 import javax.faces.component.html.HtmlOutputLink;
 import javax.faces.context.FacesContext;
 import com.idega.core.view.KeyboardShortcut;
@@ -20,13 +19,15 @@ import com.idega.webface.WFMenu;
 import com.idega.webface.WFTabBar;
 
 /**
- * Last modified: $Date: 2005/12/07 21:39:05 $ by $Author: tryggvil $
+ * Last modified: $Date: 2009/05/27 16:09:37 $ by $Author: valdas $
  *
  * @author Joakim
- * @version $Revision: 1.8 $
+ * @version $Revision: 1.9 $
  */
 public class ArticleBar extends WFContainer implements  Serializable{
 
+	private static final long serialVersionUID = 6585576699010701325L;
+	
 	private final static String P = "article_page_"; // Parameter prefix
 	private final static String MAIN_TASKBAR_ID = P + "main_taskbar";
 	private static String STYLE_CLASS="wf_workspacebar";
@@ -35,6 +36,7 @@ public class ArticleBar extends WFContainer implements  Serializable{
 		super();
 	}
 	
+	@Override
 	public void initializeComponent(FacesContext context){
 		setStyleClass(STYLE_CLASS);
 		addApplicationDecoration();
@@ -67,8 +69,7 @@ public class ArticleBar extends WFContainer implements  Serializable{
 		ViewNode workspaceNode = viewManager.getViewNodeForContext(context);
 //		IWMainApplication iwma = IWMainApplication.getIWMainApplication(context);
 		
-		for (Iterator iter = workspaceNode.getParent().getChildren().iterator(); iter.hasNext();) {
-			ViewNode subNode = (ViewNode) iter.next();
+		for (ViewNode subNode: workspaceNode.getParent().getChildren()) {
 			String url = subNode.getURIWithContextPath();
 			HtmlOutputLink link =  tb.addLink(subNode.getName(),url);
 			

@@ -63,7 +63,7 @@ public class ArticleRSSProducer extends RSSAbstractProducer implements RSSProduc
 	public static final String RSS_FILE_NAME = "articlefeed.xml";
 
 	public static final String PATH = CoreConstants.WEBDAV_SERVLET_URI + ContentUtil.getContentBaseFolderPath() + "/article/";//"/files/cms/article";
-	private List rssFileURIsCacheList = new ArrayList();
+	private List<String> rssFileURIsCacheList = new ArrayList<String>();
 	private static Log log = LogFactory.getLog(ContentItemRssProducer.class);
 	
 	private int numberOfDaysDisplayed = 0;
@@ -131,7 +131,9 @@ public class ArticleRSSProducer extends RSSAbstractProducer implements RSSProduc
 			}
 		}
 	}
-	public void searchForArticles(RSSRequest rssRequest, String feedParentPath, String feedFileName, List categories, List<String> articles, String extraURI) {
+	@SuppressWarnings("unchecked")
+	public void searchForArticles(RSSRequest rssRequest, String feedParentPath, String feedFileName, List<String> categories, List<String> articles,
+			String extraURI) {
 		IWContext iwc = getIWContext(rssRequest);
 		//TODO fix serverName
 		boolean getAllArticles = false;
@@ -143,21 +145,14 @@ public class ArticleRSSProducer extends RSSAbstractProducer implements RSSProduc
 		String serverName = iwc.getServerURL();
 		serverName = serverName.substring(0, serverName.length()-1);
 		
-		Collection results = getArticleSearchResults(PATH, categories, iwc);
+		Collection<SearchResult> results = getArticleSearchResults(PATH, categories, iwc);
 		if (results == null) {
 			log.error("ContentSearch.doSimpleDASLSearch returned results Collection, which is null: " + results);
 			return;
 		}
-		Iterator it = results.iterator();
-		List <String> urisToArticles = new ArrayList<String>();
-		String uri = null;
-		Object o = null;
-		while (it.hasNext()) {
-			o = it.next();
-			if (o instanceof SearchResult) {
-				uri = ((SearchResult) o).getSearchResultURI();
-				urisToArticles.add(uri);
-			}
+		List<String> urisToArticles = new ArrayList<String>();
+		for (SearchResult result: results) {
+			urisToArticles.add(result.getSearchResultURI());
 		}
 		if(!articles.isEmpty()){
 			if(categories.isEmpty()){
@@ -263,7 +258,7 @@ public class ArticleRSSProducer extends RSSAbstractProducer implements RSSProduc
 		return uri;
 	}
 
-	public Collection getArticleSearchResults(String folder, List categories, IWContext iwc) {
+	public Collection<SearchResult> getArticleSearchResults(String folder, List<String> categories, IWContext iwc) {
 		if (folder == null) {
 			return null;
 		}
@@ -312,7 +307,7 @@ public class ArticleRSSProducer extends RSSAbstractProducer implements RSSProduc
 		Search search = searchBusiness.createSearch(articleSearch);
 		return search.getSearchResults();
 	}
-	public SearchRequest getSearchRequest(String scope, Locale locale, IWTimestamp oldest, List categoryList) throws SearchException {
+	public SearchRequest getSearchRequest(String scope, Locale locale, IWTimestamp oldest, List<String> categoryList) throws SearchException {
 		SearchRequest s = new SearchRequest();
 		s.addSelection(IWSlideConstants.PROPERTY_DISPLAY_NAME);
 		s.addSelection(IWSlideConstants.PROPERTY_CREATION_DATE);
@@ -333,15 +328,14 @@ public class ArticleRSSProducer extends RSSAbstractProducer implements RSSProduc
 		
 		List<CompareExpression> categoryExpressions = new ArrayList<CompareExpression>();
 		if(categoryList != null){
-			for (Iterator iter = categoryList.iterator(); iter.hasNext();) {
-				String categoryName = (String) iter.next();
+			for (String categoryName: categoryList) {
 				categoryExpressions.add(s.compare(CompareOperator.LIKE,IWSlideConstants.PROPERTY_CATEGORY,"%,"+categoryName+",%"));
 			}
-			Iterator expr = categoryExpressions.iterator();
+			Iterator<CompareExpression> expr = categoryExpressions.iterator();
 			if(expr.hasNext()){
-				SearchExpression categoryExpression = (SearchExpression)expr.next();
+				SearchExpression categoryExpression = expr.next();
 				while(expr.hasNext()){
-					categoryExpression = s.or(categoryExpression,(SearchExpression)expr.next());
+					categoryExpression = s.or(categoryExpression,expr.next());
 				}
 				expression = s.and(expression,categoryExpression);
 			}
@@ -354,7 +348,7 @@ public class ArticleRSSProducer extends RSSAbstractProducer implements RSSProduc
 	/**
 	 * @return Returns the rssFileURIsCacheList.
 	 */
-	protected List getrssFileURIsCacheList() {
+	protected List<String> getrssFileURIsCacheList() {
 		return rssFileURIsCacheList;
 	}
 	public String getCategory(String extraURI){

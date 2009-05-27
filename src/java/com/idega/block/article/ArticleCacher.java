@@ -18,10 +18,10 @@ import com.idega.idegaweb.IWMainApplication;
  * <p>
  * TODO tryggvil Describe Type ArticleCacher
  * </p>
- *  Last modified: $Date: 2007/06/07 21:17:26 $ by $Author: palli $
+ *  Last modified: $Date: 2009/05/27 16:10:48 $ by $Author: valdas $
  * 
  * @author <a href="mailto:tryggvil@idega.com">tryggvil</a>
- * @version $Revision: 1.7 $
+ * @version $Revision: 1.8 $
  */
 public class ArticleCacher extends UIComponentCacher {
 	
@@ -44,7 +44,9 @@ public class ArticleCacher extends UIComponentCacher {
 		return instance;
 	}
 	
-	public Map getCacheMap() {
+	@SuppressWarnings("unchecked")
+	@Override
+	public Map<String, String> getCacheMap() {
 		IWCacheManager2 iwcm = IWCacheManager2.getInstance(this.iwma);
 		
 		return iwcm.getCache("article",defaultCacheSize,overFlowToDisk,eternal,defaultTTLSeconds,defaultTTLSeconds);
@@ -56,6 +58,7 @@ public class ArticleCacher extends UIComponentCacher {
 	/* (non-Javadoc)
 	 * @see com.idega.core.cache.UIComponentCacher#getCacheKey(javax.faces.component.UIComponent, javax.faces.context.FacesContext)
 	 */
+	@Override
 	protected StringBuffer getCacheKeyStringBuffer(UIComponent component, FacesContext context) {
 		StringBuffer keyBuffer = super.getCacheKeyStringBuffer(component, context);
 		/*if(component instanceof ArticleItemViewer){
@@ -78,6 +81,7 @@ public class ArticleCacher extends UIComponentCacher {
 	/* (non-Javadoc)
 	 * @see com.idega.core.cache.UIComponentCacher#isCacheEnbled(javax.faces.component.UIComponent, javax.faces.context.FacesContext)
 	 */
+	@Override
 	public boolean isCacheEnbled(UIComponent component, FacesContext context) {
 		
 		IWMainApplication iwma = IWMainApplication.getIWMainApplication(context);
