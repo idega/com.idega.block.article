@@ -39,7 +39,7 @@ public class DefaultCommentsPersistenceManager implements CommentsPersistenceMan
 			comment.setReplyForCommentId(properties.getReplyForComment());
 			comment.setAnnouncedToPublic(hasFullRightsForComments && !privateComment);
 			
-			User author = properties.getAuthor();
+			User author = getLoggedInUser();
 			if (author != null) {
 				comment.setAuthorId(Integer.valueOf(author.getId()));
 			}

@@ -1,7 +1,5 @@
 package com.idega.block.article.bean;
 
-import com.idega.user.data.User;
-
 public class CommentsViewerProperties {
 
 	private String user;
@@ -31,8 +29,6 @@ public class CommentsViewerProperties {
 	
 	private String entryId;
 	private String primaryKey;
-	
-	private User author;
 
 	public boolean isPrivateComment() {
 		return privateComment;
@@ -176,14 +172,6 @@ public class CommentsViewerProperties {
 
 	public void setCurrentPageUri(String currentPageUri) {
 		this.currentPageUri = currentPageUri;
-	}
-
-	public User getAuthor() {
-		return author;
-	}
-
-	public void setAuthor(User author) {
-		this.author = author;
 	}
 
 	public Integer getReplyForComment() {

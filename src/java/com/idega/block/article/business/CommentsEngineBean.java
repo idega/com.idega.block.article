@@ -110,9 +110,6 @@ public class CommentsEngineBean extends IBOSessionBean implements CommentsEngine
 			logger.log(Level.SEVERE, errorMessage);
 			return false;
 		}
-		if (iwc.isLoggedOn()) {
-			properties.setAuthor(iwc.getCurrentUser());
-		}
 		
 		CommentsPersistenceManager commentsManager = getCommentsManager(properties.getSpringBeanIdentifier());
 		
@@ -152,9 +149,9 @@ public class CommentsEngineBean extends IBOSessionBean implements CommentsEngine
 		}
 		
 		//	Uploading changed XML for comments
-		boolean finisheSuccessfully = commentsManager == null ? uploadFeed(uri, comments, iwc, true) :
+		boolean finishedSuccessfully = commentsManager == null ? uploadFeed(uri, comments, iwc, true) :
 																commentsManager.storeFeed(properties.getIdentifier(), comments);
-		if (!finisheSuccessfully) {
+		if (!finishedSuccessfully) {
 			logger.log(Level.SEVERE, errorMessage);
 			return false;
 		}
@@ -164,11 +161,11 @@ public class CommentsEngineBean extends IBOSessionBean implements CommentsEngine
 			Object commentId = commentsManager.addComment(properties);
 			if (commentId == null) {
 				logger.warning("Unable to add entry to " + Comment.class + " by properties: " + properties);
-				finisheSuccessfully = false;
+				finishedSuccessfully = false;
 			}
 		}
 		
-		if (!finisheSuccessfully) {
+		if (!finishedSuccessfully) {
 			logger.log(Level.SEVERE, errorMessage);
 			return false;
 		}
@@ -181,7 +178,7 @@ public class CommentsEngineBean extends IBOSessionBean implements CommentsEngine
 		//	Sending notifications (if needed) about new comment
 		sendNotification(comments, email, iwc);
 		
-		return finisheSuccessfully;
+		return finishedSuccessfully;
 	}
 	
 	@SuppressWarnings("unchecked")
