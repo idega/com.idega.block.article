@@ -138,6 +138,22 @@
 	margin-left: 5px;
 }
 
+.readCommentsImage:HOVER {
+	cursor: pointer;
+}
+
+.readCommentsImage {
+	margin-left: 5px;
+}
+
+.replyCommentsImage:HOVER {
+	cursor: pointer;
+}
+
+.replyCommentsImage {
+	margin-left: 5px;
+}
+
 .comment_list_item {
 	margin-top:5px;
 	border: 1px #ababab solid;
@@ -145,6 +161,11 @@
 	font-size: 11px;
 	overflow: hidden;
 	position: relative;
+}
+
+.commentCanBeRead {
+	border: 1px #0011ff solid;
+	font-weight: bold;
 }
 
 .comment_list_item.even {

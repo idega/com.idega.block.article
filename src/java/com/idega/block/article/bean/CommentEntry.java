@@ -9,7 +9,9 @@ public class CommentEntry extends Entry {
 	private String primaryKey;
 	
 	private boolean publishable;
-
+	private boolean readable;
+	private boolean replyable;
+	
 	public CommentEntry(Entry entry) {
 		this.setAlternateLinks(entry.getAlternateLinks());
 		this.setAuthors(entry.getAuthors());
@@ -47,6 +49,22 @@ public class CommentEntry extends Entry {
 
 	public void setPublishable(boolean publishable) {
 		this.publishable = publishable;
+	}
+
+	public boolean isReadable() {
+		return readable;
+	}
+
+	public void setReadable(boolean readable) {
+		this.readable = readable;
+	}
+
+	public boolean isReplyable() {
+		return replyable;
+	}
+
+	public void setReplyable(boolean replyable) {
+		this.replyable = replyable;
 	}
 
 }

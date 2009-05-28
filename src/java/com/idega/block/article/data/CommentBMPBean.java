@@ -9,7 +9,9 @@ import com.idega.data.IDOAddRelationshipException;
 import com.idega.data.IDORelationshipException;
 import com.idega.data.IDORemoveRelationshipException;
 import com.idega.data.query.Column;
+import com.idega.data.query.Criteria;
 import com.idega.data.query.MatchCriteria;
+import com.idega.data.query.OR;
 import com.idega.data.query.SelectQuery;
 import com.idega.data.query.Table;
 import com.idega.user.data.User;
@@ -131,6 +133,7 @@ public class CommentBMPBean extends GenericEntity implements Comment {
 		
 		query.addCriteria(new MatchCriteria(new Column(table, COLUMN_AUTHOR), MatchCriteria.EQUALS, author.getId()));
 		query.addCriteria(new MatchCriteria(new Column(table, COLUMN_COMMENT_HOLDER), MatchCriteria.EQUALS, commentHolder));
+		addNotDeletedCriteria(query, table);
 		
 		return this.idoFindPKsByQuery(query);
 	}
@@ -141,7 +144,14 @@ public class CommentBMPBean extends GenericEntity implements Comment {
 		query.addColumn(new Column(table, getIDColumnName()));
 		
 		query.addCriteria(new MatchCriteria(new Column(table, COLUMN_COMMENT_HOLDER), MatchCriteria.EQUALS, commentHolder));
+		addNotDeletedCriteria(query, table);
 		
 		return this.idoFindPKsByQuery(query);
+	}
+	
+	private void addNotDeletedCriteria(SelectQuery query, Table table) {
+		Criteria isNull = new MatchCriteria(new Column(table, COLUMN_DELETED), MatchCriteria.IS, MatchCriteria.NULL);
+		Criteria isFalse = new MatchCriteria(new Column(table, COLUMN_DELETED), MatchCriteria.EQUALS, Boolean.FALSE);
+		query.addCriteria(new OR(isNull, isFalse));
 	}
 }

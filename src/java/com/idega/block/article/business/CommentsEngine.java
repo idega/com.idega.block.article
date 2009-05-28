@@ -62,4 +62,6 @@ public interface CommentsEngine extends IBOSession {
 	public CommentsPersistenceManager getCommentsManager(String springBeanIdentifier);
 	
 	public boolean setCommentPublished(CommentsViewerProperties properties);
+	
+	public boolean setReadComment(CommentsViewerProperties properties);
 }

@@ -30,7 +30,8 @@ public class DefaultCommentsPersistenceManager implements CommentsPersistenceMan
 			
 			comment.setEntryId(properties.getEntryId());
 			comment.setCommentHolder(String.valueOf(properties.getIdentifier()));
-			comment.setPrivateComment(!hasFullRightsForComments(properties.getIdentifier()));
+			boolean hasReplyToId = properties.getReplyForComment() == null ? false : properties.getReplyForComment() < 0 ? false : true;
+			comment.setPrivateComment(hasReplyToId || !hasFullRightsForComments(properties.getIdentifier()));
 			comment.setReplyForCommentId(properties.getReplyForComment());
 			
 			User author = properties.getAuthor();
@@ -88,7 +89,7 @@ public class DefaultCommentsPersistenceManager implements CommentsPersistenceMan
 		throw new UnsupportedOperationException("This method is not implemented by default manager");
 	}
 
-	private Comment getComment(Object primaryKey) {
+	protected Comment getComment(Object primaryKey) {
 		if (primaryKey == null) {
 			return null;
 		}
@@ -144,6 +145,27 @@ public class DefaultCommentsPersistenceManager implements CommentsPersistenceMan
 		
 		comment.setAnnouncedToPublic(Boolean.TRUE);
 		comment.store();
+		
+		return true;
+	}
+
+	public boolean setCommentRead(Object primaryKey) {
+		Comment comment = getComment(primaryKey);
+		if (comment == null) {
+			return false;
+		}
+		
+		User currentUser = getLoggedInUser();
+		if (currentUser == null) {
+			return false;
+		}
+		
+		try {
+			comment.addReadBy(currentUser);
+			comment.store();
+		} catch(Exception e) {
+			LOGGER.log(Level.WARNING, "Error adding user " + currentUser + " as have red comment: " + primaryKey, e);
+		}
 		
 		return true;
 	}

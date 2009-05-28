@@ -14,6 +14,8 @@ public class ArticleComment {
 	private int listNumber = 1;
 	
 	private boolean canBePublished;
+	private boolean canBeRead;
+	private boolean canBeReplied;
 	
 	public String getComment() {
 		return comment;
@@ -68,6 +70,18 @@ public class ArticleComment {
 	}
 	public void setPrimaryKey(String primaryKey) {
 		this.primaryKey = primaryKey;
+	}
+	public boolean isCanBeRead() {
+		return canBeRead;
+	}
+	public void setCanBeRead(boolean canBeRead) {
+		this.canBeRead = canBeRead;
+	}
+	public boolean isCanBeReplied() {
+		return canBeReplied;
+	}
+	public void setCanBeReplied(boolean canBeReplied) {
+		this.canBeReplied = canBeReplied;
 	}
 
 }

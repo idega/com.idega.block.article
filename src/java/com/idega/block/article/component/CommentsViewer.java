@@ -2,17 +2,21 @@ package com.idega.block.article.component;
 
 import java.rmi.RemoteException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import javax.faces.component.UIComponent;
 import javax.faces.context.FacesContext;
 
 import org.apache.webdav.lib.WebdavResource;
+import org.springframework.beans.factory.annotation.Autowired;
+
 import com.idega.block.article.business.ArticleConstants;
 import com.idega.block.article.business.ArticleUtil;
 import com.idega.block.article.business.CommentsEngine;
 import com.idega.block.article.business.CommentsPersistenceManager;
 import com.idega.block.rss.business.RSSBusiness;
+import com.idega.block.web2.business.JQuery;
 import com.idega.block.web2.business.Web2Business;
 import com.idega.business.IBOLookup;
 import com.idega.business.IBOLookupException;
@@ -78,8 +82,15 @@ public class CommentsViewer extends Block {
 	
 	private boolean fullCommentsRights;
 	
+	@Autowired
+	private JQuery jQuery;
+	@Autowired
+	private Web2Business web2;
+	
 	@Override
 	public void main(IWContext iwc) {
+		ELUtil.getInstance().autowire(this);
+		
 		getCommentsEngine(iwc);
 		if (commentsEngine == null) {
 			return;
@@ -90,7 +101,11 @@ public class CommentsViewer extends Block {
 			return;
 		}
 		
-		PresentationUtil.addStyleSheetToHeader(iwc, ArticleUtil.getBundle().getVirtualPathWithFileNameString("style/article.css"));
+		PresentationUtil.addStyleSheetsToHeader(iwc, Arrays.asList(
+				ArticleUtil.getBundle().getVirtualPathWithFileNameString("style/article.css"),
+				web2.getBundleUriToHumanizedMessagesStyleSheet()
+		));
+		
 		resolveModuleId(iwc);
 		
 		if (linkToComments == null) {
@@ -129,6 +144,8 @@ public class CommentsViewer extends Block {
 		}
 
 		List<String> jsFiles = getJavaScriptSources(iwc);
+		jsFiles.add(jQuery.getBundleURIToJQueryLib());
+		jsFiles.add(web2.getBundleUriToHumanizedMessagesScript());
 		if (CoreUtil.isSingleComponentRenderingProcess(iwc)) {
 			container.add(PresentationUtil.getJavaScriptSourceLines(jsFiles));
 		}
@@ -251,6 +268,18 @@ public class CommentsViewer extends Block {
 							.append(iwrb.getLocalizedString("comments_viewer.delete_comment", "Delete this comment"))
 							.append("', publishComment: '")
 							.append(iwrb.getLocalizedString("comments_viewer.publish_comment", "Publish comment"))
+							.append("', commentWasPublished: '")
+							.append(iwrb.getLocalizedString("comments_viewer.comment_was_published", "Comment was successfully published"))
+							.append("', readComment: '")
+							.append(iwrb.getLocalizedString("comments_viewer.mark_as_read_comment", "Mark as read"))
+							.append("', commentWasRead: '")
+							.append(iwrb.getLocalizedString("comments_viewer.comment_was_marked_as_read", "Comment was successfully marked as read"))
+							.append("', reply: '")
+							.append(iwrb.getLocalizedString("comments_viewer.reply_to_comment", "Reply to comment"))
+							.append("', replyFor: '")
+							.append(iwrb.getLocalizedString("comments_viewer.reply_for", "Reply for"))
+							.append("', replyForMessage: '")
+							.append(iwrb.getLocalizedString("comments_viewer.reply_for_message", "Reply for message"))
 		.append("'});");
 		PresentationUtil.addJavaScriptActionToBody(iwc, localization.toString());
 		
@@ -355,13 +384,10 @@ public class CommentsViewer extends Block {
 		sources.add(COMMENTS_ENGINE);
 		sources.add(CoreConstants.DWR_ENGINE_SCRIPT);
 		sources.add(getBundle(iwc).getVirtualPathWithFileNameString(COMMENTS_HELPER));
-		Web2Business web2 = ELUtil.getInstance().getBean(Web2Business.class);
-		if (web2 != null) {
-			try {
-				sources.add(web2.getBundleURIToMootoolsLib());
-			} catch (RemoteException e) {
-				e.printStackTrace();
-			}
+		try {
+			sources.add(web2.getBundleURIToMootoolsLib());
+		} catch (RemoteException e) {
+			e.printStackTrace();
 		}
 		return sources;
 	}
@@ -477,6 +503,7 @@ public class CommentsViewer extends Block {
 		Layer addComments = new Layer();
 		addComments.setId(new StringBuffer(commentsId).append("add_comment_block").toString());
 		Link label = new Link(iwrb.getLocalizedString("comments_viewer.add_your_comment", "Add your comment"), "javascript:void(0)");
+		label.setStyleClass("addCommentFormLinkInCommentsViewer");
 		String user = iwrb.getLocalizedString("comments_viewer.name", "Name");
 		String subject = iwrb.getLocalizedString("comments_viewer.subject", "Subject");
 		String comment = iwrb.getLocalizedString("comments_viewer.comment_body", "Comment");

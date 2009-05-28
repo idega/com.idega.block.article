@@ -20,7 +20,10 @@ CommentsViewer.info = {
 	feedImage: '/idegaweb/bundles/com.idega.block.article.bundle/resources/images/feed.png',
 	deleteImage: '/idegaweb/bundles/com.idega.block.article.bundle/resources/images/comments_delete.png',
 	deleteCommentImage: '/idegaweb/bundles/com.idega.block.article.bundle/resources/images/comment_delete.png',
-	hasValidRights: false
+	hasValidRights: false,
+	replyFor: null,
+	replySubject: null,
+	replyMessage: null
 }
 
 CommentsViewer.commentInfo = [];
@@ -173,7 +176,8 @@ function getCommentPane(linkToComments, addEmail, commentsId, instanceId, spring
 	tbBody.appendChild(createTableLine(LABEL_USER + ':', userId, 'text', LOGGED_USER, 'comment_input_style'));
 
 	// Subject
-	tbBody.appendChild(createTableLine(LABEL_SUBJECT + ':', subjectId, 'text', '', 'comment_input_style'));
+	tbBody.appendChild(createTableLine(LABEL_SUBJECT + ':', subjectId, 'text', CommentsViewer.info.replyFor == null ? '' : CommentsViewer.info.replySubject,
+		'comment_input_style'));
 	
 	//Email
 	//if (addEmail) {
@@ -192,6 +196,9 @@ function getCommentPane(linkToComments, addEmail, commentsId, instanceId, spring
 	bodyValue.addClass('comment_comment_style');
 	bodyValue.setProperty('rows', '10');
 	bodyValue.setProperty('cols', '40');
+	if (CommentsViewer.info.replyFor != null) {
+		bodyValue.setProperty('value', CommentsViewer.info.replyMessage);
+	}
 	bodyInput.appendChild(bodyValue);
 	bodyLine.appendChild(bodyInput);
 	tbBody.appendChild(bodyLine);
@@ -311,9 +318,11 @@ function closeCommentPanelAndSendComment(userId, subjectId, emailId, bodyId, lin
 	var commentsInfo = getCommentsInfo(linkToComments);
 	var commentProperties = new CommentsViewerProperties(USER, SUBJECT, EMAIL, BODY, linkToComments, commentsId, instanceId, springBeanIdentifier, identifier,
 								NEED_TO_NOTIFY, newestEntriesOnTop, commentsInfo == null ? false : commentsInfo.addLoginbyUUIDOnRSSFeedLink);
+	commentProperties.replyForComment = CommentsViewer.info.replyFor;
 	GLOBAL_COMMENTS_MARK_ID = commentsId;
 	CommentsEngine.addComment(commentProperties, {
 		callback: function(result) {
+			CommentsViewer.info.replyFor = null;
 			closeAllLoadingMessages();
 		}
 	});
@@ -436,6 +445,8 @@ function addComment(index, articleComment, commentsId, linkToComments, newestEnt
 					CommentsEngine.setCommentPublished(properties, {
 						callback: function(result) {
 							if (result) {
+								humanMsg.displayMsg(CommentsViewer.localizations.commentWasPublished, null);
+								jQuery('img.replyCommentsImage', jQuery(publishImage).parent()).remove();
 								publishImage.remove();
 							}
 						}
@@ -444,6 +455,44 @@ function addComment(index, articleComment, commentsId, linkToComments, newestEnt
 				commentContainer.appendChild(publishImage);
 			}
 		}
+	}
+	
+	if (articleComment.canBeRead) {
+		var readImage = new Element('img');
+		readImage.setProperty('src', '/idegaweb/bundles/com.idega.block.article.bundle/resources/images/read.png');
+		readImage.setProperty('title', CommentsViewer.localizations.readComment);
+		readImage.addClass('readCommentsImage');
+		readImage.addEvent('click', function() {
+			var info = getCommentsInfo(linkToComments);
+			var properties = new CommentsViewerProperties(null, null, null, null, null, articleComment.id, null, info.springBeanIdentifier,
+				info.identifier, true, info.newestEntriesOnTop, info.addLoginbyUUIDOnRSSFeedLink);
+			properties.primaryKey = articleComment.primaryKey;
+			CommentsEngine.setReadComment(properties, {
+				callback: function(result) {
+					if (result) {
+						humanMsg.displayMsg(CommentsViewer.localizations.commentWasRead, null);
+						readImage.remove();
+						commentContainer.removeClass('commentCanBeRead');
+					}
+				}
+			});
+		});
+		commentContainer.appendChild(readImage);
+		commentContainer.addClass('commentCanBeRead');
+	}
+	
+	if (articleComment.canBeReplied) {
+		var replyImage = new Element('img');
+		replyImage.setProperty('src', '/idegaweb/bundles/com.idega.block.article.bundle/resources/images/reply.png');
+		replyImage.setProperty('title', CommentsViewer.localizations.reply);
+		replyImage.addClass('replyCommentsImage');
+		replyImage.addEvent('click', function() {
+			CommentsViewer.info.replyFor = articleComment.primaryKey;
+			CommentsViewer.info.replySubject = CommentsViewer.localizations.replyFor + ': ' + articleComment.subject;
+			CommentsViewer.info.replyMessage = CommentsViewer.localizations.replyForMessage + ': "' + articleComment.comment + '"\n';
+			jQuery('a.addCommentFormLinkInCommentsViewer').trigger('click');
+		});
+		commentContainer.appendChild(replyImage);
 	}
 	
 	var number = new Element('div');
