@@ -1,5 +1,9 @@
 package com.idega.block.article.bean;
 
+import java.util.List;
+
+import com.idega.builder.bean.AdvancedProperty;
+
 public class ArticleComment {
 	
 	private String user = null;
@@ -16,6 +20,8 @@ public class ArticleComment {
 	private boolean canBePublished;
 	private boolean canBeRead;
 	private boolean canBeReplied;
+	
+	private List<AdvancedProperty> readers;
 	
 	public String getComment() {
 		return comment;
@@ -82,6 +88,12 @@ public class ArticleComment {
 	}
 	public void setCanBeReplied(boolean canBeReplied) {
 		this.canBeReplied = canBeReplied;
+	}
+	public List<AdvancedProperty> getReaders() {
+		return readers;
+	}
+	public void setReaders(List<AdvancedProperty> readers) {
+		this.readers = readers;
 	}
 
 }

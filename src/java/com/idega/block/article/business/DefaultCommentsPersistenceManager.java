@@ -25,14 +25,19 @@ public class DefaultCommentsPersistenceManager implements CommentsPersistenceMan
 		}
 		
 		try {
+			boolean hasFullRightsForComments = hasFullRightsForComments(properties.getIdentifier());
+			
 			CommentHome commentHome = (CommentHome) IDOLookup.getHome(Comment.class);
 			Comment comment = commentHome.create();
 			
 			comment.setEntryId(properties.getEntryId());
 			comment.setCommentHolder(String.valueOf(properties.getIdentifier()));
+			
 			boolean hasReplyToId = properties.getReplyForComment() == null ? false : properties.getReplyForComment() < 0 ? false : true;
-			comment.setPrivateComment(hasReplyToId || !hasFullRightsForComments(properties.getIdentifier()));
+			boolean privateComment = hasReplyToId || !hasFullRightsForComments;
+			comment.setPrivateComment(privateComment);
 			comment.setReplyForCommentId(properties.getReplyForComment());
+			comment.setAnnouncedToPublic(hasFullRightsForComments && !privateComment);
 			
 			User author = properties.getAuthor();
 			if (author != null) {

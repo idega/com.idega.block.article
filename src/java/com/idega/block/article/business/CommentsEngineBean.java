@@ -568,6 +568,7 @@ public class CommentsEngineBean extends IBOSessionBean implements CommentsEngine
 				comment.setCanBePublished(commentEntry.isPublishable());
 				comment.setCanBeRead(commentEntry.isReadable());
 				comment.setCanBeReplied(commentEntry.isReplyable());
+				comment.setReaders(commentEntry.getReaders());
 				
 				comment.setPrimaryKey(commentEntry.getPrimaryKey());
 			}
@@ -1082,6 +1083,11 @@ public class CommentsEngineBean extends IBOSessionBean implements CommentsEngine
 			return false;
 		}
 		
-		return manager.setCommentRead(properties.getPrimaryKey());
+		if (manager.setCommentRead(properties.getPrimaryKey())) {
+			getCommentsForAllPages(properties);
+			return true;
+		}
+		
+		return false;
 	}
 }

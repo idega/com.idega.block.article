@@ -280,6 +280,8 @@ public class CommentsViewer extends Block {
 							.append(iwrb.getLocalizedString("comments_viewer.reply_for", "Reply for"))
 							.append("', replyForMessage: '")
 							.append(iwrb.getLocalizedString("comments_viewer.reply_for_message", "Reply for message"))
+							.append("', commentRedBy: '")
+							.append(iwrb.getLocalizedString("comments_viewer.comment_red_by", "Comment was red by"))
 		.append("'});");
 		PresentationUtil.addJavaScriptActionToBody(iwc, localization.toString());
 		

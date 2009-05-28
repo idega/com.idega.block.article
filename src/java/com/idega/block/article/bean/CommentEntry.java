@@ -1,5 +1,9 @@
 package com.idega.block.article.bean;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import com.idega.builder.bean.AdvancedProperty;
 import com.sun.syndication.feed.atom.Entry;
 
 public class CommentEntry extends Entry {
@@ -11,6 +15,8 @@ public class CommentEntry extends Entry {
 	private boolean publishable;
 	private boolean readable;
 	private boolean replyable;
+	
+	private List<AdvancedProperty> readers;
 	
 	public CommentEntry(Entry entry) {
 		this.setAlternateLinks(entry.getAlternateLinks());
@@ -67,4 +73,18 @@ public class CommentEntry extends Entry {
 		this.replyable = replyable;
 	}
 
+	public List<AdvancedProperty> getReaders() {
+		return readers;
+	}
+
+	public void setReaders(List<AdvancedProperty> readers) {
+		this.readers = readers;
+	}
+
+	public void addReader(AdvancedProperty readerInfo) {
+		if (readers == null) {
+			readers = new ArrayList<AdvancedProperty>();
+		}
+		readers.add(readerInfo);
+	}
 }

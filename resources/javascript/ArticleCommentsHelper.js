@@ -515,6 +515,25 @@ function addComment(index, articleComment, commentsId, linkToComments, newestEnt
 	user.appendText(articleComment.user);
 	commentValue.appendChild(user);
 	
+	if (articleComment.readers != null) {
+		var readers = new Element('div');
+		readers.addClass('commentItemReaders');
+		readers.appendText(CommentsViewer.localizations.commentRedBy + ':');
+		commentValue.appendChild(readers);
+		for (var readerIndex = 0; readerIndex < articleComment.readers.length; readerIndex++) {
+			var readerInfo = articleComment.readers[readerIndex];
+			
+			var readerInfoContainer = new Element('div');
+			readerInfoContainer.addClass('commentItemReaderInfo');
+			readers.appendChild(readerInfoContainer);
+			if (readerInfo.value == null) {
+				readerInfoContainer.appendText((readerIndex + 1) + '. ' + readerInfo.id);
+			} else {
+				jQuery(readerInfoContainer).html((readerIndex + 1) + '. ' + '<a href=\'mailto:'+readerInfo.value+'\'>'+readerInfo.id+'</a>');
+			}
+		}
+	}
+	
 	var posted = new Element('div');
 	posted.addClass('commentItemCreated');
 	posted.appendText(articleComment.posted);
