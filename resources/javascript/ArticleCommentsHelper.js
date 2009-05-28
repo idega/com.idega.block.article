@@ -425,7 +425,7 @@ function addComment(index, articleComment, commentsId, linkToComments, newestEnt
 		if (getCommentsInfo(linkToComments).fullCommentsRights) {
 			if (articleComment.canBePublished) {
 				var publishImage = new Element('img');
-				publishImage.setProperty('src', '/idegaweb/bundles/com.idega.block.article/resources/images/publish.png');
+				publishImage.setProperty('src', '/idegaweb/bundles/com.idega.block.article.bundle/resources/images/publish.png');
 				publishImage.setProperty('title', CommentsViewer.localizations.publishComment);
 				publishImage.addClass('publishCommentImage');
 				publishImage.addEvent('click', function() {
