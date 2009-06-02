@@ -22,6 +22,7 @@ public class ArticleComment {
 	private boolean canBeReplied;
 	
 	private List<AdvancedProperty> readers;
+	private List<AdvancedProperty> attachments;
 	
 	public String getComment() {
 		return comment;
@@ -94,6 +95,12 @@ public class ArticleComment {
 	}
 	public void setReaders(List<AdvancedProperty> readers) {
 		this.readers = readers;
+	}
+	public List<AdvancedProperty> getAttachments() {
+		return attachments;
+	}
+	public void setAttachments(List<AdvancedProperty> attachments) {
+		this.attachments = attachments;
 	}
 
 }

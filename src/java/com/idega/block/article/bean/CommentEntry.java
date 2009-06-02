@@ -17,6 +17,7 @@ public class CommentEntry extends Entry {
 	private boolean replyable;
 	
 	private List<AdvancedProperty> readers;
+	private List<AdvancedProperty> attachments;
 	
 	public CommentEntry(Entry entry) {
 		this.setAlternateLinks(entry.getAlternateLinks());
@@ -86,5 +87,20 @@ public class CommentEntry extends Entry {
 			readers = new ArrayList<AdvancedProperty>();
 		}
 		readers.add(readerInfo);
+	}
+
+	public List<AdvancedProperty> getAttachments() {
+		return attachments;
+	}
+
+	public void setAttachments(List<AdvancedProperty> attachments) {
+		this.attachments = attachments;
+	}
+	
+	public void addAttachment(AdvancedProperty attachment) {
+		if (attachments == null) {
+			attachments = new ArrayList<AdvancedProperty>();
+		}
+		attachments.add(attachment);
 	}
 }

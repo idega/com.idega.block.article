@@ -39,4 +39,6 @@ public interface CommentsPersistenceManager {
 	public boolean setCommentPublished(Object primaryKey);
 	
 	public boolean setCommentRead(Object primaryKey);
+	
+	public String getCommentFilesPath(CommentsViewerProperties properties);
 }

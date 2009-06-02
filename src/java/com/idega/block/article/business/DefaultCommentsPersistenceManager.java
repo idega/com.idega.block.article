@@ -1,5 +1,6 @@
 package com.idega.block.article.business;
 
+import java.net.URLEncoder;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -8,9 +9,13 @@ import com.idega.block.article.bean.CommentsViewerProperties;
 import com.idega.block.article.data.Comment;
 import com.idega.block.article.data.CommentHome;
 import com.idega.core.accesscontrol.business.LoginSession;
+import com.idega.core.file.data.ICFile;
+import com.idega.core.file.data.ICFileHome;
 import com.idega.data.IDOLookup;
 import com.idega.presentation.IWContext;
 import com.idega.user.data.User;
+import com.idega.util.CoreConstants;
+import com.idega.util.ListUtil;
 import com.idega.util.expression.ELUtil;
 import com.sun.syndication.feed.atom.Entry;
 import com.sun.syndication.feed.atom.Feed;
@@ -43,8 +48,9 @@ public class DefaultCommentsPersistenceManager implements CommentsPersistenceMan
 			if (author != null) {
 				comment.setAuthorId(Integer.valueOf(author.getId()));
 			}
-			
 			comment.store();
+			
+			addAttachment(properties, comment);
 			
 			return comment.getPrimaryKey();
 		} catch(Exception e) {
@@ -52,6 +58,35 @@ public class DefaultCommentsPersistenceManager implements CommentsPersistenceMan
 		}
 		
 		return null;
+	}
+	
+	private boolean addAttachment(CommentsViewerProperties properties, Comment comment) {
+		if (ListUtil.isEmpty(properties.getUploadedFiles())) {
+			return true;
+		}
+		
+		try {
+			ICFileHome fileHome = (ICFileHome) IDOLookup.getHome(ICFile.class);
+			for (String uploadedFile: properties.getUploadedFiles()) {
+				if (!uploadedFile.startsWith(CoreConstants.WEBDAV_SERVLET_URI)) {
+					uploadedFile = new StringBuilder(CoreConstants.WEBDAV_SERVLET_URI).append(uploadedFile).toString();
+				}
+				
+				ICFile file = fileHome.create();
+				
+				file.setName(URLEncoder.encode(uploadedFile.substring(uploadedFile.lastIndexOf(CoreConstants.SLASH) + 1), CoreConstants.ENCODING_UTF8));
+				file.setFileUri(URLEncoder.encode(uploadedFile, CoreConstants.ENCODING_UTF8));
+				
+				file.store();
+				
+				comment.addAttachment(file);
+			}
+			comment.store();
+			return true;
+		} catch(Exception e) {
+			LOGGER.log(Level.WARNING, "Unable to add attachments: " + properties.getUploadedFiles(), e);
+		}
+		return false;
 	}
 
 	public Feed getCommentsFeed(IWContext iwc, String processInstanceId) {
@@ -173,6 +208,10 @@ public class DefaultCommentsPersistenceManager implements CommentsPersistenceMan
 		}
 		
 		return true;
+	}
+
+	public String getCommentFilesPath(CommentsViewerProperties properties) {
+		throw new UnsupportedOperationException("This method is not implemented by default manager");
 	}
 	
 }

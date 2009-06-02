@@ -1,5 +1,7 @@
 package com.idega.block.article.bean;
 
+import java.util.List;
+
 public class CommentsViewerProperties {
 
 	private String user;
@@ -29,7 +31,9 @@ public class CommentsViewerProperties {
 	
 	private String entryId;
 	private String primaryKey;
-
+	
+	private List<String> uploadedFiles;
+	
 	public boolean isPrivateComment() {
 		return privateComment;
 	}
@@ -204,6 +208,14 @@ public class CommentsViewerProperties {
 
 	public void setPrimaryKey(String primaryKey) {
 		this.primaryKey = primaryKey;
+	}
+
+	public List<String> getUploadedFiles() {
+		return uploadedFiles;
+	}
+
+	public void setUploadedFiles(List<String> uploadedFiles) {
+		this.uploadedFiles = uploadedFiles;
 	}
 	
 }

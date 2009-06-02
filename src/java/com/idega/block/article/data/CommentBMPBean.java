@@ -4,6 +4,7 @@ import java.util.Collection;
 
 import javax.ejb.FinderException;
 
+import com.idega.core.file.data.ICFile;
 import com.idega.data.GenericEntity;
 import com.idega.data.IDOAddRelationshipException;
 import com.idega.data.IDORelationshipException;
@@ -31,6 +32,7 @@ public class CommentBMPBean extends GenericEntity implements Comment {
 	private static final String COLUMN_ENTRY_ID = "ENTRY_ID";
 	
 	private static final String COMMENT_READERS = TABLE_NAME + "_READERS";
+	private static final String COMMENT_ATTACHMENTS = TABLE_NAME + "_ATTACHMENTS";
 	
 	@Override
 	public String getEntityName() {
@@ -50,6 +52,7 @@ public class CommentBMPBean extends GenericEntity implements Comment {
 		addAttribute(COLUMN_ENTRY_ID, "Entry ID", String.class);
 		
 		addManyToManyRelationShip(User.class, COMMENT_READERS);
+		addManyToManyRelationShip(ICFile.class, COMMENT_ATTACHMENTS);
 	}
 
 	public boolean isAnnouncedToPublic() {
@@ -153,5 +156,23 @@ public class CommentBMPBean extends GenericEntity implements Comment {
 		Criteria isNull = new MatchCriteria(new Column(table, COLUMN_DELETED), MatchCriteria.IS, MatchCriteria.NULL);
 		Criteria isFalse = new MatchCriteria(new Column(table, COLUMN_DELETED), MatchCriteria.EQUALS, Boolean.FALSE);
 		query.addCriteria(new OR(isNull, isFalse));
+	}
+
+	public void addAttachment(ICFile attachment) throws IDOAddRelationshipException {
+		this.idoAddTo(attachment);		
+	}
+
+	@SuppressWarnings("unchecked")
+	public Collection<ICFile> getAllAttachments() {
+		try {
+			return super.idoGetRelatedEntities(ICFile.class);
+		} catch (IDORelationshipException e) {
+			e.printStackTrace();
+		}
+		return null;
+	}
+
+	public void removeAtttachment(ICFile attachment) throws IDORemoveRelationshipException {
+		this.idoRemoveFrom(attachment);
 	}
 }
