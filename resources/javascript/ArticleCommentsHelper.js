@@ -183,7 +183,7 @@ function closeCommentPanelAndSendComment(userId, subjectId, emailId, bodyId, lin
 	}
 	if (NEED_TO_NOTIFY) {
 		if (emailValue == '') {
-			alert(CommentsViewer.localizations.enterEmail);
+			humanMsg.displayMsg(CommentsViewer.localizations.enterEmail, null);
 			return false;
 		}
 	}
@@ -424,7 +424,7 @@ function addComment(index, articleComment, commentsId, linkToComments, newestEnt
 			var attachmentInfoContainer = new Element('div');
 			attachmentInfoContainer.addClass('commentItemAttachmentInfo');
 			attachmentsContainer.appendChild(attachmentInfoContainer);
-			jQuery(attachmentInfoContainer).html('<a href=\''+attachmentInfo.value+'\'>' + (attachmentIndex + 1) + '. ' + attachmentInfo.id + '</a>');
+			jQuery(attachmentInfoContainer).html((attachmentIndex + 1) + '. ' + '<a href=\''+attachmentInfo.value+'\'>' + attachmentInfo.id + '</a>');
 		}
 	}
 	
