@@ -24,6 +24,7 @@ import com.idega.block.article.ArticleCacher;
 import com.idega.block.article.bean.ArticleComment;
 import com.idega.block.article.bean.CommentEntry;
 import com.idega.block.article.bean.CommentsViewerProperties;
+import com.idega.block.article.component.CommentCreator;
 import com.idega.block.article.data.Comment;
 import com.idega.block.rss.business.RSSBusiness;
 import com.idega.builder.business.BuilderLogicWrapper;
@@ -566,6 +567,7 @@ public class CommentsEngineBean extends IBOSessionBean implements CommentsEngine
 				comment.setCanBeRead(commentEntry.isReadable());
 				comment.setCanBeReplied(commentEntry.isReplyable());
 				comment.setReaders(commentEntry.getReaders());
+				comment.setAttachments(commentEntry.getAttachments());
 				
 				comment.setPrimaryKey(commentEntry.getPrimaryKey());
 			}
@@ -1086,5 +1088,25 @@ public class CommentsEngineBean extends IBOSessionBean implements CommentsEngine
 		}
 		
 		return false;
+	}
+
+	public String getCommentCreator(CommentsViewerProperties properties) {
+		if (properties == null) {
+			return null;
+		}
+		IWContext iwc = CoreUtil.getIWContext();
+		if (iwc == null) {
+			return null;
+		}
+		
+		CommentCreator commentCreator = new CommentCreator();
+		commentCreator.setProperties(properties);
+		CommentsPersistenceManager manager = getCommentsManager(properties.getSpringBeanIdentifier());
+		if (manager != null) {
+			commentCreator.setAddUploader(true);
+			commentCreator.setUploadPath(manager.getCommentFilesPath(properties));
+		}
+		
+		return getBuilderService().getRenderedComponent(commentCreator, iwc, true);
 	}
 }

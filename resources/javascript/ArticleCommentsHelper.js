@@ -132,149 +132,25 @@ function addCommentPanel(id, linkToComments, lblUser, lblSubject, lblComment, lb
 	if (container == null) {
 		return false;
 	}
-	container.appendChild(getCommentPane(linkToComments, addEmail, commentsId, instanceId, springBeanIdentifier, identifier, newestEntriesOnTop, emailAddress));
-}
-
-function getCommentPane(linkToComments, addEmail, commentsId, instanceId, springBeanIdentifier, identifier, newestEntriesOnTop, emailAddress) {
-	var userId = 'comment_user_value';
-	var subjectId = 'comment_subject_value';
-	var emailId = 'comment_email_value';
-	var bodyId = 'comment_comment_value';
-	var secretInputId= 'secretCommentsInput';
 	
-	var container = new Element('div');
-	container.setProperty('id', commentsId + COMMENT_PANEL_ID);
-	container.addClass('commentsContainer');
+	jQuery('div.commentsContainer', jQuery(container)).remove();
+	jQuery(container).append('<div class=\'commentsContainer\' ></div>');
 	
-	var fieldset = new Element('fieldset');
-	fieldset.addClass('comment_fieldset');
-	container.appendChild(fieldset);
-	
-	var legend = new Element('legend');
-	legend.addClass('comment_legend');
-	legend.appendText(LABEL_COMMENT_FORM);
-	fieldset.appendChild(legend);
-	
-	var mainCommentContainer = new Element('div');
-	fieldset.appendChild(mainCommentContainer);
-	
-	var table = new Element('table');
-	table.addClass('add_comment_table');
-	var tbBody = new Element('tbody');
-	
-	var secretInput = new Element('input');
-	secretInput.setProperty('id', secretInputId);
-	secretInput.addClass('secretCommentsInputStyle');
-	secretInput.setProperty('value', '');
-	secretInput.setProperty('type', 'text');
-	mainCommentContainer.appendChild(secretInput);
-	
-	table.appendChild(tbBody);
-	mainCommentContainer.appendChild(table);
-	
-	// User
-	tbBody.appendChild(createTableLine(LABEL_USER + ':', userId, 'text', LOGGED_USER, 'comment_input_style'));
-
-	// Subject
-	tbBody.appendChild(createTableLine(LABEL_SUBJECT + ':', subjectId, 'text', CommentsViewer.info.replyFor == null ? '' : CommentsViewer.info.replySubject,
-		'comment_input_style'));
-	
-	//Email
-	//if (addEmail) {
-		tbBody.appendChild(createTableLine(LABEL_EMAIL + ':', emailId, 'text', emailAddress == null ? '' : emailAddress, 'comment_input_style'));
-	//}
-	
-	// Comment
-	var bodyLine = new Element('tr');
-	var bodyLabel = new Element('td');
-	bodyLabel.addClass('comments_table_cell');
-	bodyLabel.appendText(LABEL_COMMENT + ':');
-	bodyLine.appendChild(bodyLabel);
-	var bodyInput = new Element('td');
-	var bodyValue = new Element('textarea');
-	bodyValue.setProperty('id', bodyId);
-	bodyValue.addClass('comment_comment_style');
-	bodyValue.setProperty('rows', '10');
-	bodyValue.setProperty('cols', '40');
-	if (CommentsViewer.info.replyFor != null) {
-		bodyValue.setProperty('value', CommentsViewer.info.replyMessage);
-	}
-	bodyInput.appendChild(bodyValue);
-	bodyLine.appendChild(bodyInput);
-	tbBody.appendChild(bodyLine);
-	
-	//if (addEmail) {
-		NEED_TO_NOTIFY = false;
-		
-		var needToNotifyContainer = new Element('div');
-		needToNotifyContainer.addClass('commentsNotify');
-		
-		var notificationTextContainer = new Element('div');
-		notificationTextContainer.appendText(CommentsViewer.localizations.addNotification);
-		needToNotifyContainer.appendChild(notificationTextContainer);
-		
-		needToNotifyContainer.appendChild(new Element('div').addClass('spacer'));
-
-		var sendNotificationContainer = new Element('div');
-		sendNotificationContainer.addClass('commentsSendNotification');
-		var sendNotification = new Element('input');
-		sendNotification.setProperty('id', 'comments_send_notifications');
-		sendNotification.setProperty('type', 'radio');
-		sendNotification.setProperty('name', 'comments_confirm_want_notifications');
-		sendNotification.addEvent('click', function() {
-			setNeedToNotify('comments_send_notifications', 'comments_not_send_notifications');
-		});
-		sendNotificationContainer.appendChild(sendNotification);
-		
-		var sendNotificationLabel = new Element('label');
-		sendNotificationLabel.setProperty('for', 'comments_send_notifications');
-		sendNotificationLabel.appendText(CommentsViewer.localizations.yes);
-		sendNotificationContainer.appendChild(sendNotificationLabel);
-		
-		var notSendNotification = new Element('input');
-		notSendNotification.setProperty('id', 'comments_not_send_notifications');
-		notSendNotification.setProperty('type', 'radio');
-		notSendNotification.setProperty('name', 'comments_confirm_want_notifications');
-		if (IE) {
-			notSendNotification.setProperty('defaultChecked', true);
+	var info = getCommentsInfo(linkToComments);
+	var properties = new CommentsViewerProperties(null, CommentsViewer.info.replyFor == null ? '' : CommentsViewer.info.replySubject, null,
+		CommentsViewer.info.replyFor == null ? '' : CommentsViewer.info.replyMessage, linkToComments, commentsId, instanceId, info.springBeanIdentifier,
+		info.identifier, NEED_TO_NOTIFY, info.newestEntriesOnTop, info.addLoginbyUUIDOnRSSFeedLink);
+	CommentsEngine.getCommentCreator(properties, {
+		callback: function(html) {
+			if (html == null) {
+				return false;
+			}
+			
+			jQuery('div.commentsContainer', jQuery(container)).html(html);
+			jQuery('div.commentsContainer', jQuery(container)).attr('id', commentsId + COMMENT_PANEL_ID);
+			IS_COMMENT_PANEL_ADDED = true;
 		}
-		else {
-			notSendNotification.setProperty('checked', true);
-		}
-		notSendNotification.addEvent('click', function() {
-			setNeedToNotify('comments_not_send_notifications', 'comments_send_notifications');
-		});
-		sendNotificationContainer.appendChild(notSendNotification);
-		
-		var notSendNotificationLabel = new Element('label');
-		notSendNotificationLabel.setProperty('for', 'comments_not_send_notifications');
-		notSendNotificationLabel.appendText(CommentsViewer.localizations.no);
-		sendNotificationContainer.appendChild(notSendNotificationLabel);
-		
-		needToNotifyContainer.appendChild(sendNotificationContainer);
-		mainCommentContainer.appendChild(needToNotifyContainer);
-	//}
-	
-	// Send button
-	var sendButtonContainer = new Element('div');
-	sendButtonContainer.setStyle('float', 'right');
-	var send = createInput('send_comment', 'button', LABEL_SEND, 'send_comment_button');
-	send.addEvent('click', function() {
-		closeCommentPanelAndSendComment(userId, subjectId, emailId, bodyId, linkToComments, secretInputId, commentsId, instanceId, springBeanIdentifier,
-		identifier, newestEntriesOnTop);
 	});
-	sendButtonContainer.appendChild(send);
-	mainCommentContainer.appendChild(sendButtonContainer);
-	
-	if (isSafariBrowser()) {
-		var fakeInput = new Element('input');
-		fakeInput.setProperty('type', 'text');
-		fakeInput.setStyle('visibility', 'hidden');
-		fieldset.appendChild(fakeInput);
-	}
-	
-	IS_COMMENT_PANEL_ADDED = true;
-	return container;
 }
 
 function closeCommentPanelAndSendComment(userId, subjectId, emailId, bodyId, linkToComments, secretInputId, commentsId, instanceId, springBeanIdentifier,
@@ -322,6 +198,7 @@ function closeCommentPanelAndSendComment(userId, subjectId, emailId, bodyId, lin
 	GLOBAL_COMMENTS_MARK_ID = commentsId;
 	CommentsEngine.addComment(commentProperties, {
 		callback: function(result) {
+			CommentsViewer.resetAllUploadedFiles();
 			CommentsViewer.info.replyFor = null;
 			closeAllLoadingMessages();
 		}
@@ -345,6 +222,18 @@ function CommentsViewerProperties(user, subject, email, body, uri, id, instanceI
 	this.notify = notify || false;
 	this.newestEntriesOnTop = newestEntriesOnTop || false;
 	this.addLoginbyUUIDOnRSSFeedLink = addLoginbyUUIDOnRSSFeedLink || false;
+	
+	this.uploadedFiles = CommentsViewer.getAllUploadedFiles();
+}
+
+CommentsViewer.getAllUploadedFiles = function() {
+	return typeof FileUploadHelper == 'undefined' ? null : FileUploadHelper.allUploadedFiles;
+}
+
+CommentsViewer.resetAllUploadedFiles = function() {
+	if (typeof FileUploadHelper != 'undefined') {
+		FileUploadHelper.allUploadedFiles = [];
+	}
 }
 
 function changeCommentsCount(linkId, change, finalCount) {
@@ -515,6 +404,21 @@ function addComment(index, articleComment, commentsId, linkToComments, newestEnt
 	user.appendText(articleComment.user);
 	commentValue.appendChild(user);
 	
+	if (articleComment.attachments != null) {
+		var attachmentsContainer = new Element('div');
+		attachmentsContainer.addClass('contentItemAttachments');
+		attachmentsContainer.appendText(CommentsViewer.localizations.commentAttachments + ':');
+		commentValue.appendChild(attachmentsContainer);
+		for (var attachmentIndex = 0; attachmentIndex < articleComment.attachments.length; attachmentIndex++) {
+			var attachmentInfo = articleComment.attachments[attachmentIndex];
+			
+			var attachmentInfoContainer = new Element('div');
+			attachmentInfoContainer.addClass('commentItemAttachmentInfo');
+			attachmentsContainer.appendChild(attachmentInfoContainer);
+			jQuery(attachmentInfoContainer).html('<a href=\''+attachmentInfo.value+'\'>' + attachmentInfo.id + '</a>');
+		}
+	}
+	
 	if (articleComment.readers != null) {
 		var readers = new Element('div');
 		readers.addClass('commentItemReaders');
@@ -653,39 +557,6 @@ function getCommentsCallback(comments, id, linkToComments, newestEntriesOnTop, f
 	for (var i = 0; i < comments.length; i++) {
 		addComment(i, comments[i], id, linkToComments, newestEntriesOnTop, forceToOpen);
 	}
-}
-
-function createLabel(value, id, style) {
-	var textLabel = new Element('label');
-	textLabel.setProperty('id', id);
-	textLabel.addClass(style);
-	textLabel.appendText(value);
-	return textLabel;
-}
-
-function createInput(id, type, value, style) {
-	var input = new Element('input');
-	input.setProperty('id', id);
-	if (style != null) {
-		input.addClass(style);
-	}
-	if (type != null) {
-		input.setProperty('type', type);
-	}
-	input.setProperty('value', value);
-	return input;
-}
-
-function createTableLine(cellLabel, inputId, inputType, inputValue, inputStyle) {
-	var line = new Element('tr');
-	var labelCell = new Element('td');
-	labelCell.addClass('comments_table_cell');
-	labelCell.appendText(cellLabel);
-	line.appendChild(labelCell);
-	var inputCell = new Element('td');
-	inputCell.appendChild(createInput(inputId, inputType, inputValue, inputStyle));
-	line.appendChild(inputCell);
-	return line;
 }
 
 function removeCommentsList(commentId, totalComments) {
@@ -947,4 +818,15 @@ function needToShowCommentsList(commentsId) {
 function getUpdatedCommentsFromServer(commentsId) {
 	GLOBAL_COMMENTS_MARK_ID = commentsId;
 	getAllComments();
+}
+
+CommentsViewer.sendComment = function(properties) {
+	var userId = 'comment_user_value';
+	var subjectId = 'comment_subject_value';
+	var emailId = 'comment_email_value';
+	var bodyId = 'comment_comment_value';
+	var secretInputId= 'secretCommentsInput';
+	
+	closeCommentPanelAndSendComment(userId, subjectId, emailId, bodyId, properties.linkToComments, secretInputId, properties.commentsId, properties.instanceId,
+		properties.springBeanIdentifier, properties.identifier, properties.newestEntriesOnTop);
 }
