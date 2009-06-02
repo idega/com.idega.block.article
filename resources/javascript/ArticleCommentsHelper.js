@@ -198,7 +198,12 @@ function closeCommentPanelAndSendComment(userId, subjectId, emailId, bodyId, lin
 	GLOBAL_COMMENTS_MARK_ID = commentsId;
 	CommentsEngine.addComment(commentProperties, {
 		callback: function(result) {
-			CommentsViewer.resetAllUploadedFiles();
+			CommentsViewer.resetAllUploadedFiles(false);
+			CommentsViewer.info.replyFor = null;
+			closeAllLoadingMessages();
+		},
+		errorHandler: function(param1, param2) {
+			CommentsViewer.resetAllUploadedFiles(true);
 			CommentsViewer.info.replyFor = null;
 			closeAllLoadingMessages();
 		}
@@ -230,9 +235,13 @@ CommentsViewer.getAllUploadedFiles = function() {
 	return typeof FileUploadHelper == 'undefined' ? null : FileUploadHelper.allUploadedFiles;
 }
 
-CommentsViewer.resetAllUploadedFiles = function() {
+CommentsViewer.resetAllUploadedFiles = function(deleteFiles) {
 	if (typeof FileUploadHelper != 'undefined') {
-		FileUploadHelper.allUploadedFiles = [];
+		if (deleteFiles) {
+			FileUploadHelper.removeAllUploadedFiles();
+		} else {
+			FileUploadHelper.allUploadedFiles = [];
+		}
 	}
 }
 
