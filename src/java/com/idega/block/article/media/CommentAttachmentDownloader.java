@@ -5,7 +5,6 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
-import java.util.Collection;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -23,10 +22,8 @@ import com.idega.io.DownloadWriter;
 import com.idega.io.MediaWritable;
 import com.idega.presentation.IWContext;
 import com.idega.slide.business.IWSlideService;
-import com.idega.user.data.User;
 import com.idega.util.CoreConstants;
 import com.idega.util.FileUtil;
-import com.idega.util.ListUtil;
 
 public class CommentAttachmentDownloader extends DownloadWriter implements MediaWritable {
 
@@ -41,7 +38,6 @@ public class CommentAttachmentDownloader extends DownloadWriter implements Media
 
 	@Override
 	public void init(HttpServletRequest req, IWContext iwc) {
-		String commentId = iwc.getParameter(ArticleCommentAttachmentStatisticsViewer.COMMENT_ID_PARAMETER);
 		String attachmentId = iwc.getParameter(ArticleCommentAttachmentStatisticsViewer.COMMENT_ATTACHMENT_ID_PARAMETER);
 		
 		ICFile attachment = getAttachment(attachmentId);
@@ -66,12 +62,7 @@ public class CommentAttachmentDownloader extends DownloadWriter implements Media
 			return;
 		}
 		
-		if (!markFileAsDownloaded(iwc, commentId, attachment)) {
-			Logger.getLogger(getClass().getName()).log(Level.SEVERE, "Error while marking attachment as downloaded: " + attachment.getFileUri());
-			return;
-		}
-		
-		setAsDownload(iwc, name, Long.valueOf(attachedFile.getGetContentLength()).intValue());
+		setAsDownload(iwc, name, Long.valueOf(attachedFile.getGetContentLength()).intValue(), attachment.getHash());
 	}
 
 	@Override
@@ -83,28 +74,6 @@ public class CommentAttachmentDownloader extends DownloadWriter implements Media
 		out.flush();
 		out.close();
 		in.close();
-	}
-	
-	private boolean markFileAsDownloaded(IWContext iwc, String commentId, ICFile attachment) {
-		User user = iwc.isLoggedOn() ? iwc.getCurrentUser() : null;
-		if (user == null) {
-			return false;
-		}
-		
-		Collection<User> downloadedBy = attachment.getDownloadedBy();
-		if (!ListUtil.isEmpty(downloadedBy) && downloadedBy.contains(user)) {
-			return true;
-		}
-		
-		try {
-			attachment.addDownloadedBy(user);
-			attachment.store();
-			return true;
-		} catch(Exception e) {
-			e.printStackTrace();
-		}
-		
-		return false;
 	}
 	
 	private boolean setResource(IWContext iwc, ICFile attachment) {
