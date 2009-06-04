@@ -199,6 +199,7 @@ function closeCommentPanelAndSendComment(userId, subjectId, emailId, bodyId, lin
 	CommentsEngine.addComment(commentProperties, {
 		callback: function(result) {
 			CommentsViewer.resetAllUploadedFiles(false);
+			CommentsViewer.doExternalActions(commentProperties);
 			CommentsViewer.info.replyFor = null;
 			closeAllLoadingMessages();
 		},
@@ -208,6 +209,12 @@ function closeCommentPanelAndSendComment(userId, subjectId, emailId, bodyId, lin
 			closeAllLoadingMessages();
 		}
 	});
+}
+
+CommentsViewer.doExternalActions = function(properties) {
+	if (properties.identifier != null && typeof CasesBPMAssets != 'undefined') {
+		CasesBPMAssets.reloadDocumentsGrid();
+	}
 }
 
 function CommentsViewerProperties(user, subject, email, body, uri, id, instanceId, springBeanIdentifier, identifier, notify, newestEntriesOnTop,
