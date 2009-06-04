@@ -3,6 +3,7 @@ package com.idega.block.article.business;
 import java.util.List;
 
 import com.idega.block.article.bean.CommentsViewerProperties;
+import com.idega.block.article.data.Comment;
 import com.idega.presentation.IWContext;
 import com.idega.user.data.User;
 import com.sun.syndication.feed.atom.Entry;
@@ -41,4 +42,6 @@ public interface CommentsPersistenceManager {
 	public boolean setCommentRead(Object primaryKey);
 	
 	public String getCommentFilesPath(CommentsViewerProperties properties);
+	
+	public Comment getComment(Object primaryKey);
 }

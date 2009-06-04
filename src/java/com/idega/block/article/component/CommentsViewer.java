@@ -146,12 +146,6 @@ public class CommentsViewer extends Block {
 		List<String> jsFiles = getJavaScriptSources(iwc);
 		jsFiles.add(jQuery.getBundleURIToJQueryLib());
 		jsFiles.add(web2.getBundleUriToHumanizedMessagesScript());
-		if (CoreUtil.isSingleComponentRenderingProcess(iwc)) {
-			container.add(PresentationUtil.getJavaScriptSourceLines(jsFiles));
-		}
-		else {
-			PresentationUtil.addJavaScriptSourcesLinesToHeader(iwc, jsFiles);
-		}
 		
 		int commentsCount = getCommentsCount(iwc);
 		
@@ -189,7 +183,20 @@ public class CommentsViewer extends Block {
 		if (manager != null) {
 			fullCommentsRights = manager.hasFullRightsForComments(identifier);
 			addAtomLink = fullCommentsRights;
+			
+			if (fullCommentsRights) {
+				PresentationUtil.addStyleSheetToHeader(iwc, web2.getBundleURIToFancyBoxStyleFile());
+				jsFiles.addAll(web2.getBundleURIsToFancyBoxScriptFiles());
+			}
 		}
+		
+		if (CoreUtil.isSingleComponentRenderingProcess(iwc)) {
+			container.add(PresentationUtil.getJavaScriptSourceLines(jsFiles));
+		}
+		else {
+			PresentationUtil.addJavaScriptSourcesLinesToHeader(iwc, jsFiles);
+		}
+		
 		// Link - Atom feed
 		if (addAtomLink) {
 			Link linkToFeed = new Link(CoreConstants.SPACE);
@@ -284,6 +291,8 @@ public class CommentsViewer extends Block {
 							.append(iwrb.getLocalizedString("comments_viewer.comment_red_by", "Comment was red by"))
 							.append("', commentAttachments: '")
 							.append(iwrb.getLocalizedString("comments_viewer.comment_attachments", "Attachments"))
+							.append("', commentAttachmentDownloadInfo: '")
+							.append(iwrb.getLocalizedString("comments_viewer.comment_attachment_download_info", "Download statistics"))
 		.append("'});");
 		PresentationUtil.addJavaScriptActionToBody(iwc, localization.toString());
 		

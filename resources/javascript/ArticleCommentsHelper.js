@@ -321,7 +321,10 @@ function addComment(index, articleComment, commentsId, linkToComments, newestEnt
 	var commentValue = new Element('div');
 	commentValue.addClass('commentItem');
 	
-	if (CommentsViewer.info.hasValidRights || getCommentsInfo(linkToComments).fullCommentsRights) {
+	var commentInfo = getCommentsInfo(linkToComments);
+	var hasFullCommentsRights = commentInfo.fullCommentsRights;
+	
+	if (CommentsViewer.info.hasValidRights || hasFullCommentsRights) {
 		if (CommentsViewer.info.hasValidRights) {
 			var deleteImage = new Element('img');
 			deleteImage.setProperty('id', commentsId + 'delete_article_comment' + articleComment.id);
@@ -331,19 +334,19 @@ function addComment(index, articleComment, commentsId, linkToComments, newestEnt
 			deleteImage.setProperty('name', CommentsViewer.localizations.deleteComment);
 			deleteImage.addClass('deleteCommentsImage');
 			deleteImage.addEvent('click', function() {
-				deleteComments(commentsId, articleComment.id, linkToComments, getCommentsInfo(linkToComments).newestEntriesOnTop);
+				deleteComments(commentsId, articleComment.id, linkToComments, commentInfo.newestEntriesOnTop);
 			});
 			commentContainer.appendChild(deleteImage);
 		}
 		
-		if (getCommentsInfo(linkToComments).fullCommentsRights) {
+		if (hasFullCommentsRights) {
 			if (articleComment.canBePublished) {
 				var publishImage = new Element('img');
 				publishImage.setProperty('src', '/idegaweb/bundles/com.idega.block.article.bundle/resources/images/publish.png');
 				publishImage.setProperty('title', CommentsViewer.localizations.publishComment);
 				publishImage.addClass('publishCommentImage');
 				publishImage.addEvent('click', function() {
-					var info = getCommentsInfo(linkToComments);
+					var info = commentInfo;
 					var properties = new CommentsViewerProperties(null, null, null, null, null, articleComment.id, null, info.springBeanIdentifier,
 						info.identifier, true, info.newestEntriesOnTop, info.addLoginbyUUIDOnRSSFeedLink);
 					properties.primaryKey = articleComment.primaryKey;
@@ -368,7 +371,7 @@ function addComment(index, articleComment, commentsId, linkToComments, newestEnt
 		readImage.setProperty('title', CommentsViewer.localizations.readComment);
 		readImage.addClass('readCommentsImage');
 		readImage.addEvent('click', function() {
-			var info = getCommentsInfo(linkToComments);
+			var info = commentInfo;
 			var properties = new CommentsViewerProperties(null, null, null, null, null, articleComment.id, null, info.springBeanIdentifier,
 				info.identifier, true, info.newestEntriesOnTop, info.addLoginbyUUIDOnRSSFeedLink);
 			properties.primaryKey = articleComment.primaryKey;
@@ -431,7 +434,16 @@ function addComment(index, articleComment, commentsId, linkToComments, newestEnt
 			var attachmentInfoContainer = new Element('div');
 			attachmentInfoContainer.addClass('commentItemAttachmentInfo');
 			attachmentsContainer.appendChild(attachmentInfoContainer);
-			jQuery(attachmentInfoContainer).html((attachmentIndex + 1) + '. ' + '<a href=\''+attachmentInfo.value+'\'>' + attachmentInfo.id + '</a>');
+			
+			var html = (attachmentIndex + 1) + '. ' + '<a href=\''+attachmentInfo.uri+'\'>' + attachmentInfo.name + '</a>';
+			if (hasFullCommentsRights) {
+				var link = "<a class='commentItemAttachmentDownloadInfo' title='" + CommentsViewer.localizations.commentAttachmentDownloadInfo + "' "+
+					"href='" + attachmentInfo.statisticsUri + "'>" +
+					"<img src='/idegaweb/bundles/com.idega.block.article.bundle/resources/images/comment_info.png'></img></a>";
+				html = html + link;
+			}
+			jQuery(attachmentInfoContainer).html(html);
+			CommentsViewer.initializeAttachmentStatisticsLink(jQuery(attachmentInfoContainer));
 		}
 	}
 	
@@ -461,6 +473,21 @@ function addComment(index, articleComment, commentsId, linkToComments, newestEnt
 	
 	commentContainer.appendChild(commentValue);
 	commentsList.appendChild(commentContainer);
+}
+
+CommentsViewer.initializeAttachmentStatisticsLink = function(container) {
+	jQuery('a.commentItemAttachmentDownloadInfo', jQuery(container)).each(function() {
+		var link = jQuery(this);
+		
+		if (!link.hasClass('commentItemAttachmentDownloadInfoLinkInitialized')) {
+			link.fancybox({
+				frameWidth:		400,
+				frameHeight:	300,
+				hideOnContentClick: false
+			});
+			link.addClass('commentItemAttachmentDownloadInfoLinkInitialized');
+		}
+	});
 }
 
 function closeCommentsPanel(commentId) {

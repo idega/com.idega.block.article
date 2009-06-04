@@ -13,6 +13,7 @@ import javax.servlet.http.HttpServletRequest;
 
 import org.apache.webdav.lib.WebdavResource;
 
+import com.idega.block.article.component.ArticleCommentAttachmentStatisticsViewer;
 import com.idega.business.IBOLookup;
 import com.idega.core.file.data.ICFile;
 import com.idega.core.file.data.ICFileHome;
@@ -29,9 +30,6 @@ import com.idega.util.ListUtil;
 
 public class CommentAttachmentDownloader extends DownloadWriter implements MediaWritable {
 
-	public static final String COMMENT_ID_PARAMETER = "commentId";
-	public static final String COMMENT_ATTACHMENT_ID_PARAMETER = "commentAttachmentId";
-	
 	private String mimeType;
 	
 	private WebdavResource attachedFile;
@@ -43,8 +41,8 @@ public class CommentAttachmentDownloader extends DownloadWriter implements Media
 
 	@Override
 	public void init(HttpServletRequest req, IWContext iwc) {
-		String commentId = iwc.getParameter(COMMENT_ID_PARAMETER);
-		String attachmentId = iwc.getParameter(COMMENT_ATTACHMENT_ID_PARAMETER);
+		String commentId = iwc.getParameter(ArticleCommentAttachmentStatisticsViewer.COMMENT_ID_PARAMETER);
+		String attachmentId = iwc.getParameter(ArticleCommentAttachmentStatisticsViewer.COMMENT_ATTACHMENT_ID_PARAMETER);
 		
 		ICFile attachment = getAttachment(attachmentId);
 		if (attachment == null) {

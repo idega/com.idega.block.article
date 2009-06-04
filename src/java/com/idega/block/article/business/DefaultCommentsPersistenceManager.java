@@ -129,7 +129,7 @@ public class DefaultCommentsPersistenceManager implements CommentsPersistenceMan
 		throw new UnsupportedOperationException("This method is not implemented by default manager");
 	}
 
-	protected Comment getComment(Object primaryKey) {
+	public Comment getComment(Object primaryKey) {
 		if (primaryKey == null) {
 			return null;
 		}
