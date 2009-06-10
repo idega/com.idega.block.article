@@ -154,7 +154,7 @@ public class CommentBMPBean extends GenericEntity implements Comment {
 	
 	private void addNotDeletedCriteria(SelectQuery query, Table table) {
 		Criteria isNull = new MatchCriteria(new Column(table, COLUMN_DELETED), MatchCriteria.IS, MatchCriteria.NULL);
-		Criteria isFalse = new MatchCriteria(new Column(table, COLUMN_DELETED), MatchCriteria.EQUALS, Boolean.FALSE);
+		Criteria isFalse = new MatchCriteria(new Column(table, COLUMN_DELETED), MatchCriteria.EQUALS, false);
 		query.addCriteria(new OR(isNull, isFalse));
 	}
 
