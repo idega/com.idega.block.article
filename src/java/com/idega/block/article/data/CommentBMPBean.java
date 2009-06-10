@@ -21,7 +21,7 @@ public class CommentBMPBean extends GenericEntity implements Comment {
 
 	private static final long serialVersionUID = 4322088004402422054L;
 
-	private static final String TABLE_NAME = "COMMENT";
+	private static final String TABLE_NAME = "IC_COMMENT";
 	
 	private static final String COLUMN_ANNOUNCED_TO_PUBLIC = "ANNOUNCED_TO_PUBLIC";
 	private static final String COLUMN_AUTHOR = "AUTHOR";
