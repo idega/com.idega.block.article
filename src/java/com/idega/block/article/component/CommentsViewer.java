@@ -87,6 +87,9 @@ public class CommentsViewer extends Block {
 	@Autowired
 	private Web2Business web2;
 	
+	@Autowired
+	private ThemesHelper themesHelper;
+	
 	@Override
 	public void main(IWContext iwc) {
 		ELUtil.getInstance().autowire(this);
@@ -297,7 +300,7 @@ public class CommentsViewer extends Block {
 		PresentationUtil.addJavaScriptActionToBody(iwc, localization.toString());
 		
 		StringBuilder info = new StringBuilder("CommentsViewer.setStartInfo({commentsServer: '")
-							.append(ThemesHelper.getInstance().getFullServerName(iwc) + CoreConstants.WEBDAV_SERVLET_URI)
+							.append(themesHelper.getFullServerName(iwc) + CoreConstants.WEBDAV_SERVLET_URI)
 							.append("', feedImage: '")
 							.append(bundle.getVirtualPathWithFileNameString(CommentsViewer.FEED_IMAGE))
 							.append("', deleteImage: '")
@@ -388,7 +391,7 @@ public class CommentsViewer extends Block {
 			feedTitle = iwrb.getLocalizedString("comments_viewer.article_comments", "Comments of Article");
 			feedSubtitle = iwrb.getLocalizedString("comments_viewer.all_article_comments", "All comments");
 		}
-		commentsEngine.initCommentsFeed(iwc, linkToComments, user, IWTimestamp.getTimestampRightNow(), ThemesHelper.getInstance().getCurrentLanguage(iwc),
+		commentsEngine.initCommentsFeed(iwc, linkToComments, user, IWTimestamp.getTimestampRightNow(), themesHelper.getCurrentLanguage(iwc),
 				feedTitle, feedSubtitle, commentsManager);
 	}
 	

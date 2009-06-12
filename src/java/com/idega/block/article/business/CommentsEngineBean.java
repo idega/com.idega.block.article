@@ -67,6 +67,9 @@ public class CommentsEngineBean extends IBOSessionBean implements CommentsEngine
 	
 	private static final String COMMENTS_CACHE_NAME = "article_comments_feeds_cache";
 	
+	@Autowired
+	private ThemesHelper themesHelper;
+	
 	private RSSBusiness rss = null;
 	private WireFeedOutput wfo = new WireFeedOutput();
 	
@@ -119,7 +122,7 @@ public class CommentsEngineBean extends IBOSessionBean implements CommentsEngine
 			properties.setUri(uri);
 		}
 		
-		String language = ThemesHelper.getInstance().getCurrentLanguage(iwc);
+		String language = getThemesHelper().getCurrentLanguage(iwc);
 		Timestamp date = IWTimestamp.getTimestampRightNow();
 		Feed comments = getCommentsFeed(iwc, properties);
 		if (comments == null) {
@@ -200,7 +203,7 @@ public class CommentsEngineBean extends IBOSessionBean implements CommentsEngine
 		
 		StringBuffer body = new StringBuffer(newCommentMessage).append(CoreConstants.COLON).append(CoreConstants.SPACE);
 		WebContext wctx = WebContextFactory.get();
-		body.append(ThemesHelper.getInstance().getFullServerName(iwc)).append(wctx.getCurrentPage());
+		body.append(getThemesHelper().getFullServerName(iwc)).append(wctx.getCurrentPage());
 		String host = iwc.getApplicationSettings().getProperty(CoreConstants.PROP_SYSTEM_SMTP_MAILSERVER);
 //		if (host == null) {
 //			host = "smtp.emailsrvr.com";
@@ -301,7 +304,7 @@ public class CommentsEngineBean extends IBOSessionBean implements CommentsEngine
 		entry.setAuthors(authors);
 		
 		// ID
-		String id = ThemesHelper.getInstance().getUniqueIdByNumberAndDate(ContentConstants.COMMENT_SCOPE);
+		String id = getThemesHelper().getUniqueIdByNumberAndDate(ContentConstants.COMMENT_SCOPE);
 		entry.setId(id);
 		
 		// URI
@@ -336,7 +339,7 @@ public class CommentsEngineBean extends IBOSessionBean implements CommentsEngine
 	
 	private Feed createFeed(String uri, String user, Timestamp date, String language, IWContext iwc, String feedTitle, String feedSubtitle,
 							CommentsPersistenceManager commentsManager) {
-		String serverName = ThemesHelper.getInstance().getFullServerName(iwc);
+		String serverName = getThemesHelper().getFullServerName(iwc);
 		
 		articeComments = StringUtil.isEmpty(feedTitle) ? getLocalizedString(iwc, "comments_viewer.article_comments", "Comments of Article") : feedTitle;
 		allArticleComments = StringUtil.isEmpty(feedSubtitle) ? getLocalizedString(iwc, "comments_viewer.all_article_comments", "All comments"): feedSubtitle;
@@ -656,7 +659,7 @@ public class CommentsEngineBean extends IBOSessionBean implements CommentsEngine
 			return null;
 		}
 		
-		String pathToComments = new StringBuilder(ThemesHelper.getInstance().getFullWebRoot()).append(properties.getUri()).toString();
+		String pathToComments = new StringBuilder(getThemesHelper().getFullWebRoot()).append(properties.getUri()).toString();
 		SyndFeed comments = properties.isAddLoginbyUUIDOnRSSFeedLink() ?
 				rss.getFeedAuthenticatedByUser(pathToComments, currentUser) :
 				rss.getFeed(pathToComments);
@@ -1108,5 +1111,12 @@ public class CommentsEngineBean extends IBOSessionBean implements CommentsEngine
 		}
 		
 		return getBuilderService().getRenderedComponent(commentCreator, iwc, true);
+	}
+	
+	private ThemesHelper getThemesHelper() {
+		if (themesHelper == null) {
+			ELUtil.getInstance().autowire(this);
+		}
+		return themesHelper;
 	}
 }
