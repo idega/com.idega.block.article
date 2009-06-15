@@ -1,5 +1,7 @@
 package com.idega.block.article.bean;
 
+import java.io.Serializable;
+
 import org.directwebremoting.annotations.DataTransferObject;
 import org.directwebremoting.annotations.RemoteProperty;
 import org.springframework.beans.factory.config.BeanDefinition;
@@ -11,8 +13,10 @@ import com.idega.dwr.business.DWRAnnotationPersistance;
 @DataTransferObject
 @Service
 @Scope(BeanDefinition.SCOPE_PROTOTYPE)
-public class ArticleCommentAttachmentInfo implements DWRAnnotationPersistance {
+public class ArticleCommentAttachmentInfo implements Serializable, DWRAnnotationPersistance {
 
+	private static final long serialVersionUID = 1754733914959572714L;
+	
 	@RemoteProperty
 	private String commentId;
 	@RemoteProperty
