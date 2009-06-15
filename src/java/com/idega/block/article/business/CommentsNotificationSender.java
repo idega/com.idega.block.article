@@ -25,9 +25,10 @@ public class CommentsNotificationSender implements Runnable {
 		if (emails == null) {
 			return;
 		}
-		for (int i = 0; i < emails.size(); i++) {
+		
+		for (String email: emails) {
 			try {
-				SendMail.send(emailFieldFrom, emails.get(i), null, null, mailServerHost, emailFieldSubject, emailFieldBody);
+				SendMail.send(emailFieldFrom, email, null, null, mailServerHost, emailFieldSubject, emailFieldBody);
 			} catch (Exception e) {
 				e.printStackTrace();
 			}

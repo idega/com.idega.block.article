@@ -880,6 +880,7 @@ CommentsViewer.sendNotificationsToDownloadDocument = function(properties) {
 	}
 	
 	properties.url = window.location.href;
+	properties.server = properties.url.substring(0, properties.url.indexOf(window.location.pathname));
 	CommentsEngine.sendNotificationsToDownloadDocument(properties, {
 		callback: function(result) {
 			if (result == null) {

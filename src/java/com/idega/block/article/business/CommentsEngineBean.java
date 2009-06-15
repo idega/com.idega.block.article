@@ -7,6 +7,7 @@ import java.rmi.RemoteException;
 import java.sql.Timestamp;
 import java.text.DateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
@@ -622,6 +623,10 @@ public class CommentsEngineBean extends IBOSessionBean implements CommentsEngine
 		return null;
 	}
 	
+	private CommentsPersistenceManager getDefaultCommentsManager() {
+		return getCommentsManager(DefaultCommentsPersistenceManager.BEAN_IDENTIFIER);
+	}
+	
 	public int getCommentsCount(String uri, String springBeanIdentifier, String identifier, IWContext iwc, boolean addLoginbyUUIDOnRSSFeedLink) {
 		CommentsViewerProperties properties = new CommentsViewerProperties();
 		properties.setUri(uri);
@@ -1161,7 +1166,7 @@ public class CommentsEngineBean extends IBOSessionBean implements CommentsEngine
 		if (StringUtil.isEmpty(fileId)) {
 			return result;
 		}
-		CommentsPersistenceManager manager = getCommentsManager(DefaultCommentsPersistenceManager.BEAN_IDENTIFIER);
+		CommentsPersistenceManager manager = getDefaultCommentsManager();
 		if (manager == null) {
 			return result;
 		}
@@ -1175,8 +1180,8 @@ public class CommentsEngineBean extends IBOSessionBean implements CommentsEngine
 			return result;
 		}
 		
-		List<String> emails = getEmails(properties.getUsers());
-		if (ListUtil.isEmpty(emails)) {
+		List<AdvancedProperty> emailsAndLinks = getEmails(properties.getUsers(), file, properties.getComment(), properties.getServer());
+		if (ListUtil.isEmpty(emailsAndLinks)) {
 			return result;
 		}
 		
@@ -1187,18 +1192,22 @@ public class CommentsEngineBean extends IBOSessionBean implements CommentsEngine
 		} catch(UnsupportedEncodingException e) {
 			LOGGER.log(Level.WARNING, "Error decoding: " + file.getName(), e);
 		}
-		StringBuilder message = new StringBuilder(getLocalizedString(iwc, "comments_viewer.reminder_message_for_document_to_download",
-				"Please download document. You can find it: ")).append(properties.getUrl());
 		
-		if (sendNotification(emails, subject, message.toString())) {
-			result.setId(Boolean.TRUE.toString());
-			result.setValue(getLocalizedString(iwc, "comments_viewer.reminders_sent_successfully", "Reminders were sent successfully"));
+		String pageMessage = new StringBuilder(getLocalizedString(iwc, "comments_viewer.reminder_message_for_document_to_download",
+			"Please download document. You can find it: ")).append(properties.getUrl()).append(". ")
+			.append(getLocalizedString(iwc, "comments_viewer.or_directly_download", "Or directly download from: ")).toString();
+		for (AdvancedProperty emailAndLink: emailsAndLinks) {
+			if (!sendNotification(Arrays.asList(emailAndLink.getId()), subject, new StringBuilder(pageMessage).append(emailAndLink.getValue()).toString())) {
+				return result;
+			}
 		}
 		
+		result.setId(Boolean.TRUE.toString());
+		result.setValue(getLocalizedString(iwc, "comments_viewer.reminders_sent_successfully", "Reminders were sent successfully"));
 		return result;
 	}
 	
-	private List<String> getEmails(List<String> usersIds) {
+	private List<AdvancedProperty> getEmails(List<String> usersIds, ICFile attachment, String commentId, String server) {
 		UserBusiness userBusiness = null;
 		try {
 			userBusiness = getServiceInstance(UserBusiness.class);
@@ -1209,19 +1218,23 @@ public class CommentsEngineBean extends IBOSessionBean implements CommentsEngine
 			return null;
 		}
 		
-		List<String> emails = new ArrayList<String>(usersIds.size());
+		CommentsPersistenceManager defaultManager = getDefaultCommentsManager();
+		List<AdvancedProperty> emailsAndLinks = new ArrayList<AdvancedProperty>(usersIds.size());
 		for (String userId: usersIds) {
+			User user = null;
 			Email email = null;
 			try {
-				email = userBusiness.getEmailHome().findMainEmailForUser(userBusiness.getUser(Integer.valueOf(userId)));
+				user = userBusiness.getUser(Integer.valueOf(userId));
+				email = userBusiness.getEmailHome().findMainEmailForUser(user);
 			} catch(Exception e) {
 				LOGGER.log(Level.WARNING, "Error getting email for user: " + userId, e);
 			}
-			if (email != null) {
-				emails.add(email.getEmailAddress());
+			if (user != null && email != null) {
+				emailsAndLinks.add(new AdvancedProperty(email.getEmailAddress(),
+						new StringBuilder(server).append(defaultManager.getUriToAttachment(commentId, attachment, user)).toString()));
 			}
 		}
 		
-		return emails;
+		return emailsAndLinks;
 	}
 }

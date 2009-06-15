@@ -10,16 +10,22 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
 
 import com.idega.block.article.bean.CommentsViewerProperties;
+import com.idega.block.article.component.ArticleCommentAttachmentStatisticsViewer;
 import com.idega.block.article.data.Comment;
 import com.idega.block.article.data.CommentHome;
+import com.idega.block.article.media.CommentAttachmentDownloader;
+import com.idega.core.accesscontrol.business.LoginBusinessBean;
 import com.idega.core.accesscontrol.business.LoginSession;
 import com.idega.core.file.data.ICFile;
 import com.idega.core.file.data.ICFileHome;
 import com.idega.data.IDOLookup;
+import com.idega.idegaweb.IWMainApplication;
+import com.idega.io.MediaWritable;
 import com.idega.presentation.IWContext;
 import com.idega.user.data.User;
 import com.idega.util.CoreConstants;
 import com.idega.util.ListUtil;
+import com.idega.util.URIUtil;
 import com.idega.util.expression.ELUtil;
 import com.sun.syndication.feed.atom.Entry;
 import com.sun.syndication.feed.atom.Feed;
@@ -237,6 +243,21 @@ public class DefaultCommentsPersistenceManager implements CommentsPersistenceMan
 			LOGGER.log(Level.WARNING, "Error getting ICFile: " + icFileId, e);
 		}
 		return null;
+	}
+
+	public String getUriToAttachment(String commentId, ICFile attachment, User user) {
+		URIUtil uri = new URIUtil(IWMainApplication.getDefaultIWMainApplication().getMediaServletURI());
+		
+		uri.setParameter(MediaWritable.PRM_WRITABLE_CLASS, IWMainApplication.getEncryptedClassName(CommentAttachmentDownloader.class));
+		uri.setParameter(ArticleCommentAttachmentStatisticsViewer.COMMENT_ID_PARAMETER, commentId);
+		uri.setParameter(ArticleCommentAttachmentStatisticsViewer.COMMENT_ATTACHMENT_ID_PARAMETER, attachment.getPrimaryKey().toString());
+		
+		if (user != null) {
+			uri.setParameter(LoginBusinessBean.PARAM_LOGIN_BY_UNIQUE_ID, user.getUniqueId());
+			uri.setParameter(LoginBusinessBean.LoginStateParameter, LoginBusinessBean.LOGIN_EVENT_LOGIN);
+		}
+		
+		return uri.getUri();
 	}
 	
 }

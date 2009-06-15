@@ -51,4 +51,6 @@ public interface CommentsPersistenceManager {
 	public String getTaskNameForAttachments();
 	
 	public ICFile getCommentAttachment(String icFileId);
+	
+	public String getUriToAttachment(String commentId, ICFile attachment, User user);
 }

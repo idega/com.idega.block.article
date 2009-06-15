@@ -24,6 +24,8 @@ public class CommentAttachmentNotifyBean implements Serializable, DWRAnnotationP
 	private String file;
 	@RemoteProperty
 	private String url;
+	@RemoteProperty
+	private String server;
 	
 	@RemoteProperty
 	private List<String> users;
@@ -58,6 +60,14 @@ public class CommentAttachmentNotifyBean implements Serializable, DWRAnnotationP
 
 	public void setUrl(String url) {
 		this.url = url;
+	}
+
+	public String getServer() {
+		return server;
+	}
+
+	public void setServer(String server) {
+		this.server = server;
 	}
 	
 }
