@@ -136,12 +136,18 @@ public class CommentCreator extends Block {
 		sendComment.setOnClick(new StringBuilder("CommentsViewer.sendComment({linkToComments: '").append(properties.getUri())
 			.append("', commentsId: '").append(properties.getId())
 			.append("', instanceId: '").append(properties.getInstanceId())
-			.append("', springBeanIdentifier: ").append(StringUtil.isEmpty(properties.getSpringBeanIdentifier()) ? "null" :
-				"'" + properties.getSpringBeanIdentifier() + "'")
-			.append(", identifier: ").append(StringUtil.isEmpty(properties.getIdentifier()) ? "null" :
-				"'" + properties.getIdentifier() + "'")
+			.append("', springBeanIdentifier: ").append(getJavaScriptParameter(properties.getSpringBeanIdentifier()))
+			.append(", identifier: ").append(getJavaScriptParameter(properties.getIdentifier()))
 			.append(", newestEntriesOnTop: ").append(properties.isNewestEntriesOnTop())
 		.append("});").toString());
+	}
+	
+	private String getJavaScriptParameter(String value) {
+		if (StringUtil.isEmpty(value)) {
+			return "null";
+		}
+		
+		return new StringBuilder(CoreConstants.QOUTE_SINGLE_MARK).append(value).append(CoreConstants.QOUTE_SINGLE_MARK).toString();
 	}
 	
 	private void addNotificationButton(Layer container, String id, String label, boolean setChecked) {
