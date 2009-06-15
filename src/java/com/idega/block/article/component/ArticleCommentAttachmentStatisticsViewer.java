@@ -1,8 +1,9 @@
 package com.idega.block.article.component;
 
 import java.net.URLDecoder;
+import java.util.ArrayList;
 import java.util.Collection;
-
+import java.util.Iterator;
 import com.idega.block.article.business.ArticleConstants;
 import com.idega.block.article.business.CommentsPersistenceManager;
 import com.idega.block.article.data.Comment;
@@ -21,6 +22,7 @@ import com.idega.presentation.text.Heading1;
 import com.idega.presentation.text.Heading3;
 import com.idega.presentation.text.Link;
 import com.idega.presentation.text.Text;
+import com.idega.presentation.ui.GenericButton;
 import com.idega.user.data.User;
 import com.idega.util.CoreConstants;
 import com.idega.util.ListUtil;
@@ -70,6 +72,7 @@ public class ArticleCommentAttachmentStatisticsViewer extends Block {
 		Collection<User> downloaders = attachment.getDownloadedBy();
 		if (ListUtil.isEmpty(downloaders)) {
 			container.add(new Heading1(iwrb.getLocalizedString("attachment_stats.no_downloads_yet", "File was not downloaded yet")));
+			addNotifier(iwc, container, comment, attachment, null);
 			return;
 		}
 		
@@ -102,6 +105,52 @@ public class ArticleCommentAttachmentStatisticsViewer extends Block {
 			
 			index++;
 		}
+		
+		addNotifier(iwc, container, comment, attachment, downloaders);
+	}
+	
+	private void addNotifier(IWContext iwc, Layer container, Comment comment, ICFile attachment, Collection<User> downloaders) {
+		IWResourceBundle iwrb = getResourceBundle(iwc);
+		
+		Layer notificationContainer = new Layer();
+		container.add(notificationContainer);
+		notificationContainer.setStyleClass("articleCommentAttachmentNotificationContainer");
+		
+		Collection<User> readers = comment.getReadBy();
+		if (ListUtil.isEmpty(readers)) {
+			notificationContainer.add(new Heading3(iwrb.getLocalizedString("attachment_stats.there_are_no_readers_for_comment", "Comment was not red yet")));
+			return;
+		}
+		
+		Collection<User> usersToInform = null;
+		if (ListUtil.isEmpty(downloaders)) {
+			usersToInform = readers;
+		} else {
+			usersToInform = new ArrayList<User>();
+			for (User reader: readers) {
+				if (!downloaders.contains(reader)) {
+					usersToInform.add(reader);
+				}
+			}
+		}
+		if (ListUtil.isEmpty(usersToInform)) {
+			return;
+		}
+		
+		GenericButton sendNotification = new GenericButton("sendNotifications",
+				iwrb.getLocalizedString("attachment_stats.send_remind", "Remind readers to download this document"));
+		notificationContainer.add(sendNotification);
+		StringBuilder action = new StringBuilder("CommentsViewer.sendNotificationsToDownloadDocument({comment: '").append(comment.getPrimaryKey().toString())
+		.append("', file: '").append(attachment.getId()).append("', users: [");
+		for (Iterator<User> usersIter = usersToInform.iterator(); usersIter.hasNext();) {
+			action.append(CoreConstants.QOUTE_SINGLE_MARK).append(usersIter.next().getId()).append(CoreConstants.QOUTE_SINGLE_MARK);
+			
+			if (usersIter.hasNext()) {
+				action.append(CoreConstants.COMMA);
+			}
+		}
+		action.append("]});");
+		notificationContainer.setOnClick(action.toString());
 	}
 	
 	@SuppressWarnings("unchecked")

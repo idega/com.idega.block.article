@@ -4,6 +4,7 @@ import java.util.List;
 
 import com.idega.block.article.bean.CommentsViewerProperties;
 import com.idega.block.article.data.Comment;
+import com.idega.core.file.data.ICFile;
 import com.idega.presentation.IWContext;
 import com.idega.user.data.User;
 import com.sun.syndication.feed.atom.Entry;
@@ -48,4 +49,6 @@ public interface CommentsPersistenceManager {
 	public boolean useFilesUploader(CommentsViewerProperties properties);
 	
 	public String getTaskNameForAttachments();
+	
+	public ICFile getCommentAttachment(String icFileId);
 }

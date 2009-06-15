@@ -873,3 +873,21 @@ CommentsViewer.sendComment = function(properties) {
 	closeCommentPanelAndSendComment(userId, subjectId, emailId, bodyId, properties.linkToComments, secretInputId, properties.commentsId, properties.instanceId,
 		properties.springBeanIdentifier, properties.identifier, properties.newestEntriesOnTop);
 }
+
+CommentsViewer.sendNotificationsToDownloadDocument = function(properties) {
+	if (properties == null) {
+		return;
+	}
+	
+	properties.url = window.location.href;
+	CommentsEngine.sendNotificationsToDownloadDocument(properties, {
+		callback: function(result) {
+			if (result == null) {
+				return false;
+			}
+			
+			humanMsg.displayMsg(result.value, null);
+		}, errorHandler: function(o1, o2) {
+		}
+	});
+}

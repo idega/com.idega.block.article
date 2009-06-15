@@ -5,6 +5,10 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import org.springframework.beans.factory.config.BeanDefinition;
+import org.springframework.context.annotation.Scope;
+import org.springframework.stereotype.Service;
+
 import com.idega.block.article.bean.CommentsViewerProperties;
 import com.idega.block.article.data.Comment;
 import com.idega.block.article.data.CommentHome;
@@ -20,8 +24,11 @@ import com.idega.util.expression.ELUtil;
 import com.sun.syndication.feed.atom.Entry;
 import com.sun.syndication.feed.atom.Feed;
 
+@Scope(BeanDefinition.SCOPE_SINGLETON)
+@Service(DefaultCommentsPersistenceManager.BEAN_IDENTIFIER)
 public class DefaultCommentsPersistenceManager implements CommentsPersistenceManager {
 
+	static final String BEAN_IDENTIFIER = "defaultCommentsPersistenceManager";
 	private static final Logger LOGGER = Logger.getLogger(DefaultCommentsPersistenceManager.class.getName());
 	
 	public Object addComment(CommentsViewerProperties properties) {
@@ -220,6 +227,16 @@ public class DefaultCommentsPersistenceManager implements CommentsPersistenceMan
 
 	public String getTaskNameForAttachments() {
 		throw new UnsupportedOperationException("This method is not implemented by default manager");
+	}
+
+	public ICFile getCommentAttachment(String icFileId) {
+		try {
+			ICFileHome fileHome = (ICFileHome) IDOLookup.getHome(ICFile.class);
+			return fileHome.findByPrimaryKey(icFileId);
+		} catch(Exception e) {
+			LOGGER.log(Level.WARNING, "Error getting ICFile: " + icFileId, e);
+		}
+		return null;
 	}
 	
 }

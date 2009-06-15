@@ -1,6 +1,8 @@
 package com.idega.block.article.business;
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
 import java.rmi.RemoteException;
 import java.sql.Timestamp;
 import java.text.DateFormat;
@@ -22,11 +24,13 @@ import org.directwebremoting.WebContextFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import com.idega.block.article.ArticleCacher;
 import com.idega.block.article.bean.ArticleComment;
+import com.idega.block.article.bean.CommentAttachmentNotifyBean;
 import com.idega.block.article.bean.CommentEntry;
 import com.idega.block.article.bean.CommentsViewerProperties;
 import com.idega.block.article.component.CommentCreator;
 import com.idega.block.article.data.Comment;
 import com.idega.block.rss.business.RSSBusiness;
+import com.idega.builder.bean.AdvancedProperty;
 import com.idega.builder.business.BuilderLogicWrapper;
 import com.idega.business.IBOLookup;
 import com.idega.business.IBOLookupException;
@@ -38,11 +42,15 @@ import com.idega.content.themes.helpers.business.ThemesHelper;
 import com.idega.core.accesscontrol.business.NotLoggedOnException;
 import com.idega.core.builder.business.BuilderService;
 import com.idega.core.cache.IWCacheManager2;
+import com.idega.core.contact.data.Email;
+import com.idega.core.file.data.ICFile;
 import com.idega.dwr.reverse.ScriptCaller;
 import com.idega.idegaweb.IWMainApplication;
+import com.idega.idegaweb.IWMainApplicationSettings;
 import com.idega.idegaweb.IWResourceBundle;
 import com.idega.presentation.IWContext;
 import com.idega.slide.business.IWSlideService;
+import com.idega.user.business.UserBusiness;
 import com.idega.user.data.User;
 import com.idega.util.CoreConstants;
 import com.idega.util.CoreUtil;
@@ -72,11 +80,6 @@ public class CommentsEngineBean extends IBOSessionBean implements CommentsEngine
 	
 	private RSSBusiness rss = null;
 	private WireFeedOutput wfo = new WireFeedOutput();
-	
-	private String newComment = "New comment";
-	private String newCommentMessage = "New comment was entered. You can read all comments at";
-	private String articeComments = "Comments of Article";
-	private String allArticleComments = "All comments";
 	
 	private List<String> parsedEmails = new ArrayList<String>();
 	
@@ -198,23 +201,40 @@ public class CommentsEngineBean extends IBOSessionBean implements CommentsEngine
 	
 	private boolean sendNotification(Feed comments, String email, IWContext iwc) {
 		List<String> emails = getEmails(comments, email);
-		newCommentMessage = getLocalizedString(iwc, "comments_viewer.new_comment_message", "New comment was entered. You can read all comments at");
-		newComment = getLocalizedString(iwc, "comments_viewer.new_comment", "New comment");
 		
-		StringBuffer body = new StringBuffer(newCommentMessage).append(CoreConstants.COLON).append(CoreConstants.SPACE);
+		String newCommentMessage = getLocalizedString(iwc, "comments_viewer.new_comment_message", "New comment was entered. You can read all comments at");
+		String newComment = getLocalizedString(iwc, "comments_viewer.new_comment", "New comment");
+		
+		StringBuilder body = new StringBuilder(newCommentMessage).append(CoreConstants.COLON).append(CoreConstants.SPACE);
 		WebContext wctx = WebContextFactory.get();
 		body.append(getThemesHelper().getFullServerName(iwc)).append(wctx.getCurrentPage());
-		String host = iwc.getApplicationSettings().getProperty(CoreConstants.PROP_SYSTEM_SMTP_MAILSERVER);
-//		if (host == null) {
-//			host = "smtp.emailsrvr.com";
-//		}
-		String from = iwc.getApplicationSettings().getProperty(CoreConstants.PROP_SYSTEM_MAIL_FROM_ADDRESS);
-//		if (from == null) {
-//			from = "comments@idega.com";
-//		}
-		Thread sender = new Thread(new CommentsNotificationSender(emails, from, newComment,	body.toString(), host));
-		sender.start();
-		return true;
+		
+		return sendNotification(emails, newComment, body.toString());
+	}
+	
+	private boolean sendNotification(List<String> emails, String subject, String message) {
+		if (ListUtil.isEmpty(emails) || StringUtil.isEmpty(subject) || StringUtil.isEmpty(message)) {
+			return false;
+		}
+		
+		try {
+			IWMainApplicationSettings settings = IWMainApplication.getDefaultIWMainApplication().getSettings();
+			String host = settings.getProperty(CoreConstants.PROP_SYSTEM_SMTP_MAILSERVER);
+			if (StringUtil.isEmpty(host)) {
+				return false;
+			}
+			String from = settings.getProperty(CoreConstants.PROP_SYSTEM_MAIL_FROM_ADDRESS);
+			if (StringUtil.isEmpty(from)) {
+				return false;
+			}
+			
+			Thread sender = new Thread(new CommentsNotificationSender(emails, from, subject,	message, host));
+			sender.start();
+			return true;
+		} catch(Exception e) {
+			LOGGER.log(Level.WARNING, "Error sending message: " + subject + " to: " + emails, e);
+		}
+		return false;
 	}
 	
 	@SuppressWarnings("unchecked")
@@ -341,8 +361,10 @@ public class CommentsEngineBean extends IBOSessionBean implements CommentsEngine
 							CommentsPersistenceManager commentsManager) {
 		String serverName = getThemesHelper().getFullServerName(iwc);
 		
-		articeComments = StringUtil.isEmpty(feedTitle) ? getLocalizedString(iwc, "comments_viewer.article_comments", "Comments of Article") : feedTitle;
-		allArticleComments = StringUtil.isEmpty(feedSubtitle) ? getLocalizedString(iwc, "comments_viewer.all_article_comments", "All comments"): feedSubtitle;
+		String articeComments = StringUtil.isEmpty(feedTitle) ? getLocalizedString(iwc, "comments_viewer.article_comments", "Comments of Article") : feedTitle;
+		String allArticleComments = StringUtil.isEmpty(feedSubtitle) ?
+				getLocalizedString(iwc, "comments_viewer.all_article_comments", "All comments") :
+				feedSubtitle;
 		
 		Feed comments = new Feed();
 		comments.setFeedType(ContentItemFeedBean.FEED_TYPE_ATOM_1);
@@ -439,6 +461,7 @@ public class CommentsEngineBean extends IBOSessionBean implements CommentsEngine
 		List<List<ArticleComment>> allComments = new ArrayList<List<ArticleComment>>();
 		for (CommentsViewerProperties commentProperty: commentsProperties) {
 			commentProperty.setAddNulls(false);
+			commentProperty.setFetchFully(true);
 			allComments.add(getCommentsEntries(commentProperty));
 		}
 		return allComments;
@@ -454,6 +477,7 @@ public class CommentsEngineBean extends IBOSessionBean implements CommentsEngine
 		}
 		
 		properties.setAddNulls(true);
+		properties.setFetchFully(true);
 		return getCommentsEntries(properties);
 	}
 	
@@ -474,7 +498,7 @@ public class CommentsEngineBean extends IBOSessionBean implements CommentsEngine
 			return fake;
 		}
 		
-		List<ArticleComment> articleComments = getFormattedEntries(getEntriesToFormat(properties), properties);
+		List<ArticleComment> articleComments = getFormattedEntries(entriesToFormat, properties);
 		return articleComments == null ? properties.isAddNulls() ? null : fake : articleComments;
 	}
 	
@@ -604,6 +628,7 @@ public class CommentsEngineBean extends IBOSessionBean implements CommentsEngine
 		properties.setSpringBeanIdentifier(springBeanIdentifier);
 		properties.setIdentifier(identifier);
 		properties.setAddLoginbyUUIDOnRSSFeedLink(addLoginbyUUIDOnRSSFeedLink);
+		properties.setFetchFully(false);
 		
 		List<? extends Entry> entries = getEntriesToFormat(properties);
 		return entries == null ? 0 : entries.size();
@@ -1118,5 +1143,85 @@ public class CommentsEngineBean extends IBOSessionBean implements CommentsEngine
 			ELUtil.getInstance().autowire(this);
 		}
 		return themesHelper;
+	}
+
+	public AdvancedProperty sendNotificationsToDownloadDocument(CommentAttachmentNotifyBean properties) {
+		AdvancedProperty result = new AdvancedProperty(Boolean.FALSE.toString(), "Unable to send reminders");
+		
+		if (properties == null) {
+			return result;
+		}
+		
+		IWContext iwc = CoreUtil.getIWContext();
+		if (iwc == null) {
+			return result;
+		}
+		
+		String fileId = properties.getFile();
+		if (StringUtil.isEmpty(fileId)) {
+			return result;
+		}
+		CommentsPersistenceManager manager = getCommentsManager(DefaultCommentsPersistenceManager.BEAN_IDENTIFIER);
+		if (manager == null) {
+			return result;
+		}
+		ICFile file = manager.getCommentAttachment(fileId);
+		if (file == null) {
+			return result;
+		}
+		
+		List<String> usersIds = properties.getUsers();
+		if (ListUtil.isEmpty(usersIds)) {
+			return result;
+		}
+		
+		List<String> emails = getEmails(properties.getUsers());
+		if (ListUtil.isEmpty(emails)) {
+			return result;
+		}
+		
+		String subject = CoreConstants.EMPTY;
+		try {
+			subject = new StringBuilder(getLocalizedString(iwc, "comments_viewer.reminder_to_download_document", "Reminder to download document"))
+				.append(": ").append(URLDecoder.decode(file.getName(), CoreConstants.ENCODING_UTF8)).toString();
+		} catch(UnsupportedEncodingException e) {
+			LOGGER.log(Level.WARNING, "Error decoding: " + file.getName(), e);
+		}
+		StringBuilder message = new StringBuilder(getLocalizedString(iwc, "comments_viewer.reminder_message_for_document_to_download",
+				"Please download document. You can find it: ")).append(properties.getUrl());
+		
+		if (sendNotification(emails, subject, message.toString())) {
+			result.setId(Boolean.TRUE.toString());
+			result.setValue(getLocalizedString(iwc, "comments_viewer.reminders_sent_successfully", "Reminders were sent successfully"));
+		}
+		
+		return result;
+	}
+	
+	private List<String> getEmails(List<String> usersIds) {
+		UserBusiness userBusiness = null;
+		try {
+			userBusiness = getServiceInstance(UserBusiness.class);
+		} catch (IBOLookupException e) {
+			LOGGER.log(Level.WARNING, "Error getting UserBusiness", e);
+		}
+		if (userBusiness == null) {
+			return null;
+		}
+		
+		List<String> emails = new ArrayList<String>(usersIds.size());
+		for (String userId: usersIds) {
+			Email email = null;
+			try {
+				email = userBusiness.getEmailHome().findMainEmailForUser(userBusiness.getUser(Integer.valueOf(userId)));
+			} catch(Exception e) {
+				LOGGER.log(Level.WARNING, "Error getting email for user: " + userId, e);
+			}
+			if (email != null) {
+				emails.add(email.getEmailAddress());
+			}
+		}
+		
+		return emails;
 	}
 }

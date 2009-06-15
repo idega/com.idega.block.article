@@ -658,3 +658,9 @@ form.editArticleForm .wf_block .articleCategories input {
 	margin-right: 5px;
 	bottom: 5px;
 }
+
+.articleCommentAttachmentNotificationContainer {
+	margin-top: 15px;
+	margin-right: 5px;
+	float: right;
+}

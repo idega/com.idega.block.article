@@ -6,7 +6,9 @@ import java.sql.Timestamp;
 import java.util.List;
 
 import com.idega.block.article.bean.ArticleComment;
+import com.idega.block.article.bean.CommentAttachmentNotifyBean;
 import com.idega.block.article.bean.CommentsViewerProperties;
+import com.idega.builder.bean.AdvancedProperty;
 import com.idega.business.IBOSession;
 import com.idega.presentation.IWContext;
 
@@ -67,4 +69,6 @@ public interface CommentsEngine extends IBOSession {
 	public boolean setReadComment(CommentsViewerProperties properties);
 	
 	public String getCommentCreator(CommentsViewerProperties properties);
+	
+	public AdvancedProperty sendNotificationsToDownloadDocument(CommentAttachmentNotifyBean properties);
 }

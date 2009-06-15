@@ -62,7 +62,8 @@ public class CommentAttachmentDownloader extends DownloadWriter implements Media
 			return;
 		}
 		
-		setAsDownload(iwc, name, Long.valueOf(attachedFile.getGetContentLength()).intValue(), attachment.getHash());
+		setAsDownload(iwc, name, Long.valueOf(attachedFile.getGetContentLength()).intValue(), attachment.getHash() == null ? attachment.getId() :
+			attachment.getHash());
 	}
 
 	@Override

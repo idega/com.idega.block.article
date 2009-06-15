@@ -15,6 +15,7 @@
 			<include method="setCommentPublished"/>
 			<include method="setReadComment"/>
 			<include method="getCommentCreator"/>
+			<include method="sendNotificationsToDownloadDocument"/>
 		</create>
 		
 		<create javascript="ArticleItemInfoFetcher" creator="jsf">
@@ -32,10 +33,13 @@
 	<signatures>
 		<![CDATA[
 			import java.util.List;
+			
+			import com.idega.builder.bean.AdvancedProperty;
+			
 			import com.idega.block.article.bean.CommentsViewerProperties;
 			import com.idega.block.article.bean.ArticleComment;
-			
 			import com.idega.block.article.bean.ArticleFields;
+			import com.idega.block.article.bean.CommentAttachmentNotifyBean;
 
 			CommentsEngine.addComment(CommentsViewerProperties);
 			CommentsViewerProperties CommentsEngine.deleteComments(CommentsViewerProperties);
@@ -44,6 +48,7 @@
 			List<List<ArticleComment>> CommentsEngine.getCommentsFromUris(List<CommentsViewerProperties>);
 			CommentsEngine.setCommentPublished(CommentsViewerProperties);
 			CommentsEngine.setReadComment(CommentsViewerProperties);
+			AdvancedProperty CommentsEngine.sendNotificationsToDownloadDocument(CommentAttachmentNotifyBean);
 			
 			ArticleFields ArticleItemInfoFetcher.getArticleInfo(String);
 		]]>

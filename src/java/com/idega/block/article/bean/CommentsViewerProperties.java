@@ -23,6 +23,7 @@ public class CommentsViewerProperties {
 	private boolean actionSuccess;
 	private boolean addLoginbyUUIDOnRSSFeedLink;
 	private boolean addNulls;
+	private boolean fetchFully;
 	
 	private boolean privateComment;
 	private boolean announcedToPublic;
@@ -216,6 +217,14 @@ public class CommentsViewerProperties {
 
 	public void setUploadedFiles(List<String> uploadedFiles) {
 		this.uploadedFiles = uploadedFiles;
+	}
+
+	public boolean isFetchFully() {
+		return fetchFully;
+	}
+
+	public void setFetchFully(boolean fetchFully) {
+		this.fetchFully = fetchFully;
 	}
 	
 }
