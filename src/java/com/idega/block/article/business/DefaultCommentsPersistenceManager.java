@@ -213,5 +213,13 @@ public class DefaultCommentsPersistenceManager implements CommentsPersistenceMan
 	public String getCommentFilesPath(CommentsViewerProperties properties) {
 		throw new UnsupportedOperationException("This method is not implemented by default manager");
 	}
+
+	public boolean useFilesUploader(CommentsViewerProperties properties) {
+		throw new UnsupportedOperationException("This method is not implemented by default manager");
+	}
+
+	public String getTaskNameForAttachments() {
+		throw new UnsupportedOperationException("This method is not implemented by default manager");
+	}
 	
 }

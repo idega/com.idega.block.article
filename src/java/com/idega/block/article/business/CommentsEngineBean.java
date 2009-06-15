@@ -63,7 +63,7 @@ import com.sun.syndication.io.WireFeedOutput;
 public class CommentsEngineBean extends IBOSessionBean implements CommentsEngine {
 
 	private static final long serialVersionUID = 7299800648381936213L;
-	private static final Logger logger = Logger.getLogger(CommentsEngineBean.class.getName());
+	private static final Logger LOGGER = Logger.getLogger(CommentsEngineBean.class.getName());
 	
 	private static final String COMMENTS_CACHE_NAME = "article_comments_feeds_cache";
 	
@@ -85,7 +85,7 @@ public class CommentsEngineBean extends IBOSessionBean implements CommentsEngine
 
 	public boolean addComment(CommentsViewerProperties properties) {
 		if (properties == null) {
-			logger.log(Level.INFO, "Comment properties are undefined!");
+			LOGGER.log(Level.INFO, "Comment properties are undefined!");
 			return false;
 		}
 		
@@ -100,18 +100,18 @@ public class CommentsEngineBean extends IBOSessionBean implements CommentsEngine
 		
 		if (uri == null) {
 			closeLoadingMessage();
-			logger.log(Level.SEVERE, errorMessage);
+			LOGGER.log(Level.SEVERE, errorMessage);
 			return false;
 		}
 		if (ContentConstants.EMPTY.equals(uri)) {
 			closeLoadingMessage();
-			logger.log(Level.SEVERE, errorMessage);
+			LOGGER.log(Level.SEVERE, errorMessage);
 			return false;
 		}
 		
 		IWContext iwc = CoreUtil.getIWContext();
 		if (iwc == null) {
-			logger.log(Level.SEVERE, errorMessage);
+			LOGGER.log(Level.SEVERE, errorMessage);
 			return false;
 		}
 		
@@ -131,13 +131,13 @@ public class CommentsEngineBean extends IBOSessionBean implements CommentsEngine
 			comments = createFeed(uri, user, date, language, iwc, feedTitle, feedSubtitle, commentsManager);
 		}
 		if (comments == null) {
-			logger.log(Level.SEVERE, errorMessage);
+			LOGGER.log(Level.SEVERE, errorMessage);
 			return false;
 		}
 		
 		String entryId = addNewEntry(comments, subject, uri, date, body, user, language, email, notify);
 		if (entryId == null) {
-			logger.log(Level.SEVERE, errorMessage);
+			LOGGER.log(Level.SEVERE, errorMessage);
 			return false;
 		}
 		properties.setEntryId(entryId);
@@ -156,7 +156,7 @@ public class CommentsEngineBean extends IBOSessionBean implements CommentsEngine
 		boolean finishedSuccessfully = commentsManager == null ? uploadFeed(uri, comments, iwc, true) :
 																commentsManager.storeFeed(properties.getIdentifier(), comments);
 		if (!finishedSuccessfully) {
-			logger.log(Level.SEVERE, errorMessage);
+			LOGGER.log(Level.SEVERE, errorMessage);
 			return false;
 		}
 		
@@ -164,13 +164,13 @@ public class CommentsEngineBean extends IBOSessionBean implements CommentsEngine
 		if (commentsManager != null) {
 			Object commentId = commentsManager.addComment(properties);
 			if (commentId == null) {
-				logger.warning("Unable to add entry to " + Comment.class + " by properties: " + properties);
+				LOGGER.warning("Unable to add entry to " + Comment.class + " by properties: " + properties);
 				finishedSuccessfully = false;
 			}
 		}
 		
 		if (!finishedSuccessfully) {
-			logger.log(Level.SEVERE, errorMessage);
+			LOGGER.log(Level.SEVERE, errorMessage);
 			return false;
 		}
 		
@@ -422,7 +422,7 @@ public class CommentsEngineBean extends IBOSessionBean implements CommentsEngine
 	
 	private ScriptBuffer getScriptForCommentsList(CommentsViewerProperties properties) {
 		if (properties == null) {
-			logger.log(Level.WARNING, "Can not create ScriptBuffer: properties unknown");
+			LOGGER.log(Level.WARNING, "Can not create ScriptBuffer: properties unknown");
 			return null;
 		}
 		
@@ -592,7 +592,7 @@ public class CommentsEngineBean extends IBOSessionBean implements CommentsEngine
 		try {
 			return ELUtil.getInstance().getBean(springBeanIdentifier);
 		} catch(Exception e) {
-			logger.log(Level.SEVERE, "Error getting specified Spring bean: " + springBeanIdentifier, e);
+			LOGGER.log(Level.SEVERE, "Error getting specified Spring bean: " + springBeanIdentifier, e);
 		}
 		
 		return null;
@@ -655,7 +655,7 @@ public class CommentsEngineBean extends IBOSessionBean implements CommentsEngine
 			currentUser = iwc == null ? null : iwc.getCurrentUser();
 		} catch(NotLoggedOnException e) {}
 		if (properties.isAddLoginbyUUIDOnRSSFeedLink() && currentUser == null) {
-			logger.log(Level.WARNING, "User must be looged to get comments feed!");
+			LOGGER.log(Level.WARNING, "User must be looged to get comments feed!");
 			return null;
 		}
 		
@@ -858,7 +858,7 @@ public class CommentsEngineBean extends IBOSessionBean implements CommentsEngine
 			return null;
 		}
 		if (!ContentUtil.hasContentEditorRoles(iwc)) {
-			logger.log(Level.WARNING, "Current user doesn't have enough rights to delete comment(s)!");
+			LOGGER.log(Level.WARNING, "Current user doesn't have enough rights to delete comment(s)!");
 			return null;
 		}
 		
@@ -1020,7 +1020,7 @@ public class CommentsEngineBean extends IBOSessionBean implements CommentsEngine
 					service.setModuleProperty(pageKey, instanceId, method, new String[] {uri});
 				}
 			} catch(Exception e) {
-				logger.log(Level.INFO, "Unable to set URI property for CommentsViewer: " + uri, e);
+				LOGGER.log(Level.INFO, "Unable to set URI property for CommentsViewer: " + uri, e);
 			}
 		}
 		
@@ -1105,7 +1105,7 @@ public class CommentsEngineBean extends IBOSessionBean implements CommentsEngine
 		CommentCreator commentCreator = new CommentCreator();
 		commentCreator.setProperties(properties);
 		CommentsPersistenceManager manager = getCommentsManager(properties.getSpringBeanIdentifier());
-		if (manager != null) {
+		if (manager != null && manager.useFilesUploader(properties)) {
 			commentCreator.setAddUploader(true);
 			commentCreator.setUploadPath(manager.getCommentFilesPath(properties));
 		}

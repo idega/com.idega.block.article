@@ -44,4 +44,8 @@ public interface CommentsPersistenceManager {
 	public String getCommentFilesPath(CommentsViewerProperties properties);
 	
 	public Comment getComment(Object primaryKey);
+	
+	public boolean useFilesUploader(CommentsViewerProperties properties);
+	
+	public String getTaskNameForAttachments();
 }
