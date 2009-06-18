@@ -32,11 +32,14 @@ import com.idega.user.business.NoEmailFoundException;
 import com.idega.user.business.UserBusiness;
 import com.idega.user.data.User;
 import com.idega.util.CoreConstants;
+import com.idega.util.PresentationUtil;
 import com.idega.util.StringUtil;
 
 public class CommentCreator extends Block {
 	
 	private boolean addUploader;
+	private boolean autoEnableNotifications;
+	
 	private String uploadPath;
 	
 	private CommentsViewerProperties properties;
@@ -120,8 +123,11 @@ public class CommentCreator extends Block {
 		needToNotifyContainer.add(sendNotificationContainer);
 		sendNotificationContainer.setStyleClass("commentsSendNotification");
 		
-		addNotificationButton(sendNotificationContainer, "comments_send_notifications", iwrb.getLocalizedString("yes", "Yes"), false);
-		addNotificationButton(sendNotificationContainer, "comments_not_send_notifications", iwrb.getLocalizedString("no", "No"), true);
+		addNotificationButton(sendNotificationContainer, "comments_send_notifications", iwrb.getLocalizedString("yes", "Yes"), isAutoEnableNotifications());
+		addNotificationButton(sendNotificationContainer, "comments_not_send_notifications", iwrb.getLocalizedString("no", "No"), !isAutoEnableNotifications());
+		if (isAutoEnableNotifications()) {
+			PresentationUtil.addJavaScriptActionToBody(iwc, getNotificationsEnabledFunction());
+		}
 		
 		//	Buttons
 		Layer buttons = new Layer();
@@ -153,14 +159,19 @@ public class CommentCreator extends Block {
 	private void addNotificationButton(Layer container, String id, String label, boolean setChecked) {
 		RadioButton radio = new RadioButton("comments_confirm_want_notifications");
 		radio.setId(id);
-		radio.setOnClick(setChecked ?
-				"setNeedToNotify('comments_not_send_notifications', 'comments_send_notifications');" :
-				"setNeedToNotify('comments_send_notifications', 'comments_not_send_notifications');"
-		);
+		radio.setOnClick(setChecked ? getNotificationsEnabledFunction() : getNotificationsDisabledFunction());
 		radio.setSelected(setChecked);
 		container.add(radio);
 		Label sendLabel = new Label(label, radio);
 		container.add(sendLabel);
+	}
+	
+	private String getNotificationsEnabledFunction() {
+		return "setNeedToNotify('comments_send_notifications', 'comments_not_send_notifications');";
+	}
+	
+	private String getNotificationsDisabledFunction() {
+		return "setNeedToNotify('comments_not_send_notifications', 'comments_send_notifications');";
 	}
 	
 	private String getUserEmail(IWContext iwc, User currentUser) {
@@ -277,6 +288,14 @@ public class CommentCreator extends Block {
 
 	public void setProperties(CommentsViewerProperties properties) {
 		this.properties = properties;
+	}
+
+	public boolean isAutoEnableNotifications() {
+		return autoEnableNotifications;
+	}
+
+	public void setAutoEnableNotifications(boolean autoEnableNotifications) {
+		this.autoEnableNotifications = autoEnableNotifications;
 	}
 
 }

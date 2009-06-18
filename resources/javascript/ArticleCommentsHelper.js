@@ -133,22 +133,37 @@ function addCommentPanel(id, linkToComments, lblUser, lblSubject, lblComment, lb
 		return false;
 	}
 	
-	jQuery('div.commentsContainer', jQuery(container)).remove();
-	jQuery(container).append('<div class=\'commentsContainer\' ></div>');
+	var parentContainer = jQuery('div.commentsContainer', jQuery(container));
+	if (parentContainer.length > 0) {
+		parentContainer.hide('fast', function() {
+			parentContainer.remove();
+			jQuery(container).append('<div class=\'commentsContainer\' ></div>');
+		});
+		return;
+	} else {
+		jQuery(container).append('<div class=\'commentsContainer\' ></div>');
+	}
 	
 	var info = getCommentsInfo(linkToComments);
 	var properties = new CommentsViewerProperties(null, CommentsViewer.info.replyFor == null ? '' : CommentsViewer.info.replySubject, null,
 		CommentsViewer.info.replyFor == null ? '' : CommentsViewer.info.replyMessage, linkToComments, commentsId, instanceId, info.springBeanIdentifier,
 		info.identifier, NEED_TO_NOTIFY, info.newestEntriesOnTop, info.addLoginbyUUIDOnRSSFeedLink);
 	CommentsEngine.getCommentCreator(properties, {
-		callback: function(html) {
-			if (html == null) {
+		callback: function(component) {
+			if (component == null) {
 				return false;
 			}
 			
-			jQuery('div.commentsContainer', jQuery(container)).html(html);
-			jQuery('div.commentsContainer', jQuery(container)).attr('id', commentsId + COMMENT_PANEL_ID);
-			IS_COMMENT_PANEL_ADDED = true;
+			var commentCreatorContainer = jQuery('div.commentsContainer', jQuery(container));
+			
+			IWCORE.insertRenderedComponent(component, {
+				callback: function() {
+					commentCreatorContainer.attr('id', commentsId + COMMENT_PANEL_ID);
+					IS_COMMENT_PANEL_ADDED = true;
+				},
+				container: commentCreatorContainer,
+				rewrite: true
+			});
 		}
 	});
 }
@@ -195,6 +210,7 @@ function closeCommentPanelAndSendComment(userId, subjectId, emailId, bodyId, lin
 	var commentProperties = new CommentsViewerProperties(USER, SUBJECT, EMAIL, BODY, linkToComments, commentsId, instanceId, springBeanIdentifier, identifier,
 								NEED_TO_NOTIFY, newestEntriesOnTop, commentsInfo == null ? false : commentsInfo.addLoginbyUUIDOnRSSFeedLink);
 	commentProperties.replyForComment = CommentsViewer.info.replyFor;
+	commentProperties.commentsPageUrl = window.location.href;
 	GLOBAL_COMMENTS_MARK_ID = commentsId;
 	CommentsEngine.addComment(commentProperties, {
 		callback: function(result) {

@@ -259,5 +259,9 @@ public class DefaultCommentsPersistenceManager implements CommentsPersistenceMan
 		
 		return uri.getUri();
 	}
+
+	public boolean isNotificationsAutoEnabled(CommentsViewerProperties properties) {
+		return false;
+	}
 	
 }

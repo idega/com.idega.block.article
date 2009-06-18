@@ -53,4 +53,6 @@ public interface CommentsPersistenceManager {
 	public ICFile getCommentAttachment(String icFileId);
 	
 	public String getUriToAttachment(String commentId, ICFile attachment, User user);
+	
+	public boolean isNotificationsAutoEnabled(CommentsViewerProperties properties);
 }

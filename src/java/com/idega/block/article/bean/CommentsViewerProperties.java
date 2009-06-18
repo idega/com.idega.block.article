@@ -9,6 +9,7 @@ public class CommentsViewerProperties {
 	private String email;
 	private String body;
 	private String uri;
+	private String commentsPageUrl;
 	private String id;
 	private String instanceId;
 	private String springBeanIdentifier;
@@ -225,6 +226,14 @@ public class CommentsViewerProperties {
 
 	public void setFetchFully(boolean fetchFully) {
 		this.fetchFully = fetchFully;
+	}
+
+	public String getCommentsPageUrl() {
+		return commentsPageUrl;
+	}
+
+	public void setCommentsPageUrl(String commentsPageUrl) {
+		this.commentsPageUrl = commentsPageUrl;
 	}
 	
 }

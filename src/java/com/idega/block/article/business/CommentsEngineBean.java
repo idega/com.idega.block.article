@@ -20,9 +20,9 @@ import java.util.logging.Logger;
 import org.apache.commons.httpclient.HttpException;
 import org.apache.webdav.lib.WebdavResource;
 import org.directwebremoting.ScriptBuffer;
-import org.directwebremoting.WebContext;
 import org.directwebremoting.WebContextFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+
 import com.idega.block.article.ArticleCacher;
 import com.idega.block.article.bean.ArticleComment;
 import com.idega.block.article.bean.CommentAttachmentNotifyBean;
@@ -43,6 +43,7 @@ import com.idega.content.themes.helpers.business.ThemesHelper;
 import com.idega.core.accesscontrol.business.NotLoggedOnException;
 import com.idega.core.builder.business.BuilderService;
 import com.idega.core.cache.IWCacheManager2;
+import com.idega.core.component.bean.RenderedComponent;
 import com.idega.core.contact.data.Email;
 import com.idega.core.file.data.ICFile;
 import com.idega.dwr.reverse.ScriptCaller;
@@ -81,9 +82,7 @@ public class CommentsEngineBean extends IBOSessionBean implements CommentsEngine
 	
 	private RSSBusiness rss = null;
 	private WireFeedOutput wfo = new WireFeedOutput();
-	
-	private List<String> parsedEmails = new ArrayList<String>();
-	
+		
 	@Autowired
 	private BuilderLogicWrapper builderLogicWrapper;
 
@@ -184,7 +183,7 @@ public class CommentsEngineBean extends IBOSessionBean implements CommentsEngine
 		executeScriptForAllPages(scriptCaller, false);
 		
 		//	Sending notifications (if needed) about new comment
-		sendNotification(comments, email, iwc);
+		sendNotification(comments, email, iwc, properties);
 		
 		return finishedSuccessfully;
 	}
@@ -200,15 +199,25 @@ public class CommentsEngineBean extends IBOSessionBean implements CommentsEngine
 		}
 	}
 	
-	private boolean sendNotification(Feed comments, String email, IWContext iwc) {
-		List<String> emails = getEmails(comments, email);
+	@SuppressWarnings("unchecked")
+	private boolean sendNotification(Feed comments, String email, IWContext iwc, CommentsViewerProperties properties) {
+		if (comments == null) {
+			return false;
+		}
+		
+		List<String> emails = null;
+		properties.setFetchFully(false);
+		CommentsPersistenceManager manager = getCommentsManager(properties.getSpringBeanIdentifier());
+		emails = getEmails(manager == null ? comments.getEntries() : manager.getEntriesToFormat(comments, properties), email);
+		if (ListUtil.isEmpty(emails)) {
+			return false;
+		}
 		
 		String newCommentMessage = getLocalizedString(iwc, "comments_viewer.new_comment_message", "New comment was entered. You can read all comments at");
 		String newComment = getLocalizedString(iwc, "comments_viewer.new_comment", "New comment");
 		
 		StringBuilder body = new StringBuilder(newCommentMessage).append(CoreConstants.COLON).append(CoreConstants.SPACE);
-		WebContext wctx = WebContextFactory.get();
-		body.append(getThemesHelper().getFullServerName(iwc)).append(wctx.getCurrentPage());
+		body.append(properties.getCommentsPageUrl());
 		
 		return sendNotification(emails, newComment, body.toString());
 	}
@@ -229,7 +238,7 @@ public class CommentsEngineBean extends IBOSessionBean implements CommentsEngine
 				return false;
 			}
 			
-			Thread sender = new Thread(new CommentsNotificationSender(emails, from, subject,	message, host));
+			Thread sender = new Thread(new CommentsNotificationSender(emails, from, subject, message, host));
 			sender.start();
 			return true;
 		} catch(Exception e) {
@@ -239,47 +248,29 @@ public class CommentsEngineBean extends IBOSessionBean implements CommentsEngine
 	}
 	
 	@SuppressWarnings("unchecked")
-	private List<String> getEmails(Feed comments, String email) {
-		List<String> emails = new ArrayList<String>();
-		if (comments == null) {
-			return emails;
-		}
-		List<Entry> entries = comments.getEntries();
+	private List<String> getEmails(List<? extends Entry> entries, String commentAuthorEmail) {
 		if (entries == null) {
-			return emails;
+			return null;
 		}
-		Entry entry = null;
-		Object o = null;
-		Object oo = null;
+		
+		List<String> emails = new ArrayList<String>();
 		List<Person> authors = null;
-		Person author = null;
-		String mail = null;
-		parsedEmails = new ArrayList<String>();
-		for (int i = 0; i < entries.size(); i++) {
-			o = entries.get(i);
-			if (o instanceof Entry) {
-				entry = (Entry) o;
-				authors = entry.getAuthors();
-				if (authors != null) {
-					for (int j = 0; j < authors.size(); j++) {
-						oo = authors.get(j);
-						if (oo instanceof Person) {
-							author = (Person) oo;
-							mail = author.getEmail();
-							if (mail != null) {
-								mail = decodeMail(mail);
-								if (!mail.equals(email)) {
-									if (!parsedEmails.contains(mail)) {
-										parsedEmails.add(mail);
-										emails.add(mail);
-									}
-								}
-							}
+		String email = null;
+		for (Entry entry: entries) {
+			authors = entry.getAuthors();
+			if (authors != null) {
+				for (Person author: authors) {
+					email = author.getEmail();
+					if (email != null) {
+						email = decodeMail(email);
+						if (!email.equals(commentAuthorEmail) && !emails.contains(email)) {
+							emails.add(email);
 						}
 					}
 				}
 			}
 		}
+		
 		return emails;
 	}
 	
@@ -1097,8 +1088,7 @@ public class CommentsEngineBean extends IBOSessionBean implements CommentsEngine
 		
 		if (manager.hasFullRightsForComments(properties.getIdentifier())) {
 			if (manager.setCommentPublished(properties.getPrimaryKey())) {
-				getCommentsForAllPages(properties);
-				return true;
+				return executeScriptForAllPages(new ScriptBuffer("getAllComments();"), true);
 			}
 		}
 		
@@ -1116,14 +1106,13 @@ public class CommentsEngineBean extends IBOSessionBean implements CommentsEngine
 		}
 		
 		if (manager.setCommentRead(properties.getPrimaryKey())) {
-			getCommentsForAllPages(properties);
-			return true;
+			return executeScriptForAllPages(new ScriptBuffer("getAllComments();"), true);
 		}
 		
 		return false;
 	}
 
-	public String getCommentCreator(CommentsViewerProperties properties) {
+	public RenderedComponent getCommentCreator(CommentsViewerProperties properties) {
 		if (properties == null) {
 			return null;
 		}
@@ -1138,9 +1127,10 @@ public class CommentsEngineBean extends IBOSessionBean implements CommentsEngine
 		if (manager != null && manager.useFilesUploader(properties)) {
 			commentCreator.setAddUploader(true);
 			commentCreator.setUploadPath(manager.getCommentFilesPath(properties));
+			commentCreator.setAutoEnableNotifications(manager.isNotificationsAutoEnabled(properties));
 		}
 		
-		return getBuilderService().getRenderedComponent(commentCreator, iwc, true);
+		return getBuilderService().getRenderedComponent(commentCreator, null);
 	}
 	
 	private ThemesHelper getThemesHelper() {
