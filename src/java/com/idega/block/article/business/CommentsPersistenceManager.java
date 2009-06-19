@@ -55,4 +55,10 @@ public interface CommentsPersistenceManager {
 	public String getUriToAttachment(String commentId, ICFile attachment, User user);
 	
 	public boolean isNotificationsAutoEnabled(CommentsViewerProperties properties);
+	
+	public List<String> getPersonsToNotifyAboutComment(CommentsViewerProperties properties, Object commentId, boolean justPublished);
+	
+	public String getHandlerRoleKey();
+	
+	public List<String> getEmails(List<? extends Entry> entries, String commentAuthorEmail);
 }

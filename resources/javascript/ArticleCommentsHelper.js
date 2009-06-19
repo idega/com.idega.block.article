@@ -210,7 +210,6 @@ function closeCommentPanelAndSendComment(userId, subjectId, emailId, bodyId, lin
 	var commentProperties = new CommentsViewerProperties(USER, SUBJECT, EMAIL, BODY, linkToComments, commentsId, instanceId, springBeanIdentifier, identifier,
 								NEED_TO_NOTIFY, newestEntriesOnTop, commentsInfo == null ? false : commentsInfo.addLoginbyUUIDOnRSSFeedLink);
 	commentProperties.replyForComment = CommentsViewer.info.replyFor;
-	commentProperties.commentsPageUrl = window.location.href;
 	GLOBAL_COMMENTS_MARK_ID = commentsId;
 	CommentsEngine.addComment(commentProperties, {
 		callback: function(result) {
@@ -252,6 +251,8 @@ function CommentsViewerProperties(user, subject, email, body, uri, id, instanceI
 	this.addLoginbyUUIDOnRSSFeedLink = addLoginbyUUIDOnRSSFeedLink || false;
 	
 	this.uploadedFiles = CommentsViewer.getAllUploadedFiles();
+	
+	this.commentsPageUrl = window.location.href;
 }
 
 CommentsViewer.getAllUploadedFiles = function() {

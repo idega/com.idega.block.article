@@ -52,6 +52,7 @@ import com.idega.idegaweb.IWMainApplicationSettings;
 import com.idega.idegaweb.IWResourceBundle;
 import com.idega.presentation.IWContext;
 import com.idega.slide.business.IWSlideService;
+import com.idega.user.business.NoEmailFoundException;
 import com.idega.user.business.UserBusiness;
 import com.idega.user.data.User;
 import com.idega.util.CoreConstants;
@@ -97,7 +98,7 @@ public class CommentsEngineBean extends IBOSessionBean implements CommentsEngine
 		String user = properties.getUser();
 		String instanceId = properties.getInstanceId();
 		String body = properties.getBody();
-		String email = properties.getEmail();
+		String commentAuthorEmail = properties.getEmail();
 		String errorMessage = "Unable to add comment: '" + subject + "' by: " + user;
 		boolean notify = properties.isNotify();
 		
@@ -138,7 +139,7 @@ public class CommentsEngineBean extends IBOSessionBean implements CommentsEngine
 			return false;
 		}
 		
-		String entryId = addNewEntry(comments, subject, uri, date, body, user, language, email, notify);
+		String entryId = addNewEntry(comments, subject, uri, date, body, user, language, commentAuthorEmail, notify);
 		if (entryId == null) {
 			LOGGER.log(Level.SEVERE, errorMessage);
 			return false;
@@ -164,8 +165,9 @@ public class CommentsEngineBean extends IBOSessionBean implements CommentsEngine
 		}
 		
 		//	Adding entry to DB about new comment
+		Object commentId = null;
 		if (commentsManager != null) {
-			Object commentId = commentsManager.addComment(properties);
+			commentId = commentsManager.addComment(properties);
 			if (commentId == null) {
 				LOGGER.warning("Unable to add entry to " + Comment.class + " by properties: " + properties);
 				finishedSuccessfully = false;
@@ -183,7 +185,11 @@ public class CommentsEngineBean extends IBOSessionBean implements CommentsEngine
 		executeScriptForAllPages(scriptCaller, false);
 		
 		//	Sending notifications (if needed) about new comment
-		sendNotification(comments, email, iwc, properties);
+		if (commentsManager == null) {
+			sendNotification(comments, commentAuthorEmail, iwc, properties);
+		} else {
+			sendNotification(commentsManager.getPersonsToNotifyAboutComment(properties, commentId, false), commentAuthorEmail, iwc, properties);
+		}
 		
 		return finishedSuccessfully;
 	}
@@ -200,30 +206,47 @@ public class CommentsEngineBean extends IBOSessionBean implements CommentsEngine
 	}
 	
 	@SuppressWarnings("unchecked")
-	private boolean sendNotification(Feed comments, String email, IWContext iwc, CommentsViewerProperties properties) {
+	private boolean sendNotification(Feed comments, String commentAuthorEmail, IWContext iwc, CommentsViewerProperties properties) {
 		if (comments == null) {
 			return false;
 		}
 		
-		List<String> emails = null;
-		properties.setFetchFully(false);
-		CommentsPersistenceManager manager = getCommentsManager(properties.getSpringBeanIdentifier());
-		emails = getEmails(manager == null ? comments.getEntries() : manager.getEntriesToFormat(comments, properties), email);
-		if (ListUtil.isEmpty(emails)) {
+		List<String> recipients = getDefaultCommentsManager().getEmails(comments.getEntries(), commentAuthorEmail);
+		return sendNotification(recipients, commentAuthorEmail, iwc, properties);
+	}
+	
+	private boolean sendNotification(List<String> recipients, String commentAuthorEmail, IWContext iwc, CommentsViewerProperties properties) {
+		return sendNotification(recipients, commentAuthorEmail, iwc, properties, false);
+	}
+	
+	private boolean sendNotification(List<String> recipients, String commentAuthorEmail, IWContext iwc, CommentsViewerProperties properties,
+			boolean useAuthorEmailAsFrom) {
+		if (ListUtil.isEmpty(recipients)) {
 			return false;
+		}
+		
+		if (!StringUtil.isEmpty(commentAuthorEmail) && recipients.contains(commentAuthorEmail)) {
+			recipients.remove(commentAuthorEmail);
 		}
 		
 		String newCommentMessage = getLocalizedString(iwc, "comments_viewer.new_comment_message", "New comment was entered. You can read all comments at");
 		String newComment = getLocalizedString(iwc, "comments_viewer.new_comment", "New comment");
-		
+		if (!StringUtil.isEmpty(properties.getSubject())) {
+			newComment = new StringBuilder(newComment).append(": ").append(properties.getSubject()).toString();
+		}	
+	
 		StringBuilder body = new StringBuilder(newCommentMessage).append(CoreConstants.COLON).append(CoreConstants.SPACE);
 		body.append(properties.getCommentsPageUrl());
 		
-		return sendNotification(emails, newComment, body.toString());
+		return sendNotification(recipients, newComment, body.toString(), useAuthorEmailAsFrom ? commentAuthorEmail : null);
 	}
 	
-	private boolean sendNotification(List<String> emails, String subject, String message) {
-		if (ListUtil.isEmpty(emails) || StringUtil.isEmpty(subject) || StringUtil.isEmpty(message)) {
+	private boolean sendNotification(List<String> recipients, String subject, String message) {
+		return sendNotification(recipients, subject, message, null);
+	}
+	
+	private boolean sendNotification(List<String> recipients, String subject, String message, String from) {
+		if (ListUtil.isEmpty(recipients) || StringUtil.isEmpty(subject) || StringUtil.isEmpty(message)) {
 			return false;
 		}
 		
@@ -231,47 +254,22 @@ public class CommentsEngineBean extends IBOSessionBean implements CommentsEngine
 			IWMainApplicationSettings settings = IWMainApplication.getDefaultIWMainApplication().getSettings();
 			String host = settings.getProperty(CoreConstants.PROP_SYSTEM_SMTP_MAILSERVER);
 			if (StringUtil.isEmpty(host)) {
+				LOGGER.warning("Host server is not defined, unable to send message: " + subject + " to: " + recipients);
 				return false;
 			}
-			String from = settings.getProperty(CoreConstants.PROP_SYSTEM_MAIL_FROM_ADDRESS);
+			from = StringUtil.isEmpty(from) ? settings.getProperty(CoreConstants.PROP_SYSTEM_MAIL_FROM_ADDRESS) : from;
 			if (StringUtil.isEmpty(from)) {
+				LOGGER.warning("Address 'from' is not defined, unable to send message: " + subject + " to: " + recipients);
 				return false;
 			}
 			
-			Thread sender = new Thread(new CommentsNotificationSender(emails, from, subject, message, host));
+			Thread sender = new Thread(new CommentsNotificationSender(recipients, from, subject, message, host));
 			sender.start();
 			return true;
 		} catch(Exception e) {
-			LOGGER.log(Level.WARNING, "Error sending message: " + subject + " to: " + emails, e);
+			LOGGER.log(Level.WARNING, "Error sending message: " + subject + " to: " + recipients, e);
 		}
 		return false;
-	}
-	
-	@SuppressWarnings("unchecked")
-	private List<String> getEmails(List<? extends Entry> entries, String commentAuthorEmail) {
-		if (entries == null) {
-			return null;
-		}
-		
-		List<String> emails = new ArrayList<String>();
-		List<Person> authors = null;
-		String email = null;
-		for (Entry entry: entries) {
-			authors = entry.getAuthors();
-			if (authors != null) {
-				for (Person author: authors) {
-					email = author.getEmail();
-					if (email != null) {
-						email = decodeMail(email);
-						if (!email.equals(commentAuthorEmail) && !emails.contains(email)) {
-							emails.add(email);
-						}
-					}
-				}
-			}
-		}
-		
-		return emails;
 	}
 	
 	private String addNewEntry(Feed feed, String subject, String uri, Timestamp date, String body, String user, String language, String email, boolean notify) {
@@ -760,10 +758,6 @@ public class CommentsEngineBean extends IBOSessionBean implements CommentsEngine
 		return CoreUtil.getEncodedValue(email);
 	}
 	
-	private String decodeMail(String email) {
-		return CoreUtil.getDecodedValue(email);
-	}
-	
 	public boolean setModuleProperty(String pageKey, String moduleId, String propName, String propValue, String cacheKey) {
 		BuilderService builder = getBuilderService();
 		if (builder == null) {
@@ -1088,11 +1082,38 @@ public class CommentsEngineBean extends IBOSessionBean implements CommentsEngine
 		
 		if (manager.hasFullRightsForComments(properties.getIdentifier())) {
 			if (manager.setCommentPublished(properties.getPrimaryKey())) {
+				IWContext iwc = CoreUtil.getIWContext();
+				
+				if (iwc == null) {
+					LOGGER.warning("Unable to send notification about published comment: " + properties.getPrimaryKey());
+				} else {
+					String handlerEmail = getCurrentUserEmailAddress(iwc);
+					sendNotification(manager.getPersonsToNotifyAboutComment(properties, properties.getPrimaryKey(), true), handlerEmail, iwc, properties, true);
+				}
+				
 				return executeScriptForAllPages(new ScriptBuffer("getAllComments();"), true);
 			}
 		}
 		
 		return false;
+	}
+	
+	private String getCurrentUserEmailAddress(IWContext iwc) {
+		User currentUser = iwc.isLoggedOn() ? iwc.getCurrentUser() : null;
+		if (currentUser == null) {
+			return null;
+		}
+		
+		try {
+			UserBusiness userBusiness = getServiceInstance(UserBusiness.class);
+			Email email = userBusiness.getUsersMainEmail(currentUser);
+			return email == null ? null : email.getEmailAddress();
+		} catch(NoEmailFoundException e) {
+			LOGGER.warning(currentUser + " doesn't have email!");
+		} catch(Exception e) {
+			LOGGER.log(Level.WARNING, "Error getting user's main email", e);
+		}
+		return null;
 	}
 
 	public boolean setReadComment(CommentsViewerProperties properties) {

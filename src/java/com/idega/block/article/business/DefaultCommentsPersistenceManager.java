@@ -1,6 +1,8 @@
 package com.idega.block.article.business;
 
 import java.net.URLEncoder;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -14,21 +16,32 @@ import com.idega.block.article.component.ArticleCommentAttachmentStatisticsViewe
 import com.idega.block.article.data.Comment;
 import com.idega.block.article.data.CommentHome;
 import com.idega.block.article.media.CommentAttachmentDownloader;
+import com.idega.business.IBOLookup;
+import com.idega.business.IBOLookupException;
+import com.idega.core.accesscontrol.business.AccessController;
 import com.idega.core.accesscontrol.business.LoginBusinessBean;
 import com.idega.core.accesscontrol.business.LoginSession;
+import com.idega.core.contact.data.Email;
 import com.idega.core.file.data.ICFile;
 import com.idega.core.file.data.ICFileHome;
 import com.idega.data.IDOLookup;
+import com.idega.idegaweb.IWApplicationContext;
 import com.idega.idegaweb.IWMainApplication;
 import com.idega.io.MediaWritable;
 import com.idega.presentation.IWContext;
+import com.idega.user.business.NoEmailFoundException;
+import com.idega.user.business.UserBusiness;
+import com.idega.user.data.Group;
 import com.idega.user.data.User;
 import com.idega.util.CoreConstants;
+import com.idega.util.CoreUtil;
 import com.idega.util.ListUtil;
+import com.idega.util.StringUtil;
 import com.idega.util.URIUtil;
 import com.idega.util.expression.ELUtil;
 import com.sun.syndication.feed.atom.Entry;
 import com.sun.syndication.feed.atom.Feed;
+import com.sun.syndication.feed.atom.Person;
 
 @Scope(BeanDefinition.SCOPE_SINGLETON)
 @Service(DefaultCommentsPersistenceManager.BEAN_IDENTIFIER)
@@ -263,5 +276,165 @@ public class DefaultCommentsPersistenceManager implements CommentsPersistenceMan
 	public boolean isNotificationsAutoEnabled(CommentsViewerProperties properties) {
 		return false;
 	}
+
+	public List<String> getPersonsToNotifyAboutComment(CommentsViewerProperties properties, Object commentId, boolean justPublished) {
+		throw new UnsupportedOperationException("This method is not implemented by default manager");
+	}
 	
+	@SuppressWarnings("unchecked")
+	public List<String> getEmails(List<? extends Entry> entries, String commentAuthorEmail) {
+		if (entries == null) {
+			return null;
+		}
+		
+		if (commentAuthorEmail == null) {
+			commentAuthorEmail = CoreConstants.EMPTY;
+		}
+		
+		List<String> emails = new ArrayList<String>();
+		List<Person> authors = null;
+		String email = null;
+		for (Entry entry: entries) {
+			authors = entry.getAuthors();
+			if (authors != null) {
+				for (Person author: authors) {
+					email = author.getEmail();
+					if (email != null) {
+						email = CoreUtil.getDecodedValue(email);
+						if (!email.equals(commentAuthorEmail) && !emails.contains(email)) {
+							emails.add(email);
+						}
+					}
+				}
+			}
+		}
+		
+		return emails;
+	}
+	
+	@SuppressWarnings("unchecked")
+	protected List<String> getAllFeedSubscribers(String processInstanceId, Integer authorId) {
+		IWContext iwc = CoreUtil.getIWContext();
+		Feed comments = getCommentsFeed(iwc, processInstanceId);
+		if (comments == null) {
+			return null;
+		}
+		
+		return getEmails(comments.getEntries(), getUserMail(authorId));
+	}
+	
+	protected String getUserMail(Integer userId) {
+		if (userId == null) {
+			return null;
+		}
+		
+		UserBusiness userBusiness = getUserBusiness();
+		if (userBusiness == null) {
+			return null;
+		}
+		
+		User user = null;
+		try {
+			user = userBusiness.getUser(userId);
+		} catch(Exception e) {
+			LOGGER.log(Level.WARNING, "Error getting user by id: " + userId, e);
+		}
+		if (user == null) {
+			return null;
+		}
+		
+		Email email = getEmail(user);
+		return email == null ? null : email.getEmailAddress();
+	}
+	
+	private Email getEmail(User user) {
+		try {
+			return getUserBusiness().getUsersMainEmail(user);
+		} catch(NoEmailFoundException e) {
+		} catch(Exception e) {
+			LOGGER.log(Level.WARNING, "Error getting main email for user: " + user, e);
+		}
+		return null;
+	}
+	
+	protected List<String> getEmails(Collection<User> users) {
+		if (ListUtil.isEmpty(users)) {
+			return null;
+		}
+		
+		UserBusiness userBusiness = getUserBusiness();
+		if (userBusiness == null) {
+			return null;
+		}
+		
+		List<String> emails = new ArrayList<String>(users.size());
+		for (User user: users) {
+			Email email = getEmail(user);
+			String emailAddress = email == null ? null : email.getEmailAddress();
+			if (!StringUtil.isEmpty(emailAddress) && !emails.contains(emailAddress)) {
+				emails.add(emailAddress);
+			}
+		}
+		
+		return emails;
+	}
+	
+	@SuppressWarnings("unchecked")
+	protected List<User> getUsersByRoleKey() {
+		String roleKey = getHandlerRoleKey();
+		if (StringUtil.isEmpty(roleKey)) {
+			return null;
+		}
+		
+		IWApplicationContext iwac = IWMainApplication.getDefaultIWApplicationContext();
+		AccessController accessControler = IWMainApplication.getDefaultIWMainApplication().getAccessController();
+		Collection<Group> groupsWithRole = accessControler.getAllGroupsForRoleKey(roleKey, iwac);
+		if (ListUtil.isEmpty(groupsWithRole)) {
+			return null;
+		}
+
+		UserBusiness userBusiness = getUserBusiness();
+		if (userBusiness == null) {
+			return null;
+		}
+		
+		List<User> users = new ArrayList<User>();
+		for (Group group: groupsWithRole) {
+			if (group instanceof User) {
+				User user = (User) group;
+				if (!users.contains(user)) {
+					users.add(user);
+				}
+			} else {
+				Collection<User> usersInGroup = null;
+				try {
+					usersInGroup = userBusiness.getUsersInGroup(group);
+				} catch(Exception e) {
+					LOGGER.log(Level.WARNING, "Error getting users in group: " + group, e);
+				}
+				if (!ListUtil.isEmpty(usersInGroup)) {
+					for (User user: usersInGroup) {
+						if (!users.contains(user)) {
+							users.add(user);
+						}					
+					}
+				}
+			}
+		}
+		
+		return users;
+	}
+	
+	private UserBusiness getUserBusiness() {
+		try {
+			return IBOLookup.getServiceInstance(IWMainApplication.getDefaultIWApplicationContext(), UserBusiness.class);
+		} catch (IBOLookupException e) {
+			LOGGER.log(Level.WARNING, "Error getting UserBusiness", e);
+		}
+		return null;
+	}
+
+	public String getHandlerRoleKey() {
+		throw new UnsupportedOperationException("This method is not implemented by default manager");
+	}
 }
