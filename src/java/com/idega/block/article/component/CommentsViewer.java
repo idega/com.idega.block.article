@@ -106,7 +106,7 @@ public class CommentsViewer extends Block {
 		
 		PresentationUtil.addStyleSheetsToHeader(iwc, Arrays.asList(
 				ArticleUtil.getBundle().getVirtualPathWithFileNameString("style/article.css"),
-				web2.getBundleUriToHumanizedMessagesStyleSheet()
+				getWeb2().getBundleUriToHumanizedMessagesStyleSheet()
 		));
 		
 		resolveModuleId(iwc);
@@ -147,8 +147,8 @@ public class CommentsViewer extends Block {
 		}
 
 		List<String> jsFiles = getJavaScriptSources(iwc);
-		jsFiles.add(jQuery.getBundleURIToJQueryLib());
-		jsFiles.add(web2.getBundleUriToHumanizedMessagesScript());
+		jsFiles.add(getJQuery().getBundleURIToJQueryLib());
+		jsFiles.add(getWeb2().getBundleUriToHumanizedMessagesScript());
 		
 		int commentsCount = getCommentsCount(iwc);
 		
@@ -188,8 +188,8 @@ public class CommentsViewer extends Block {
 			addAtomLink = fullCommentsRights;
 			
 			if (fullCommentsRights) {
-				PresentationUtil.addStyleSheetToHeader(iwc, web2.getBundleURIToFancyBoxStyleFile());
-				jsFiles.addAll(web2.getBundleURIsToFancyBoxScriptFiles());
+				PresentationUtil.addStyleSheetToHeader(iwc, getWeb2().getBundleURIToFancyBoxStyleFile());
+				jsFiles.addAll(getWeb2().getBundleURIsToFancyBoxScriptFiles());
 			}
 		}
 		
@@ -401,8 +401,8 @@ public class CommentsViewer extends Block {
 		sources.add(CoreConstants.DWR_ENGINE_SCRIPT);
 		sources.add(getBundle(iwc).getVirtualPathWithFileNameString(COMMENTS_HELPER));
 		try {
-			sources.add(web2.getBundleURIToMootoolsLib());
-		} catch (RemoteException e) {
+			sources.add(getWeb2().getBundleURIToMootoolsLib());
+		} catch (Exception e) {
 			e.printStackTrace();
 		}
 		return sources;
@@ -791,6 +791,28 @@ public class CommentsViewer extends Block {
 
 	public void setAddLoginbyUUIDOnRSSFeedLink(boolean addLoginbyUUIDOnRSSFeedLink) {
 		this.addLoginbyUUIDOnRSSFeedLink = addLoginbyUUIDOnRSSFeedLink;
+	}
+
+	public JQuery getJQuery() {
+		if (jQuery == null) {
+			ELUtil.getInstance().autowire(this);
+		}
+		return jQuery;
+	}
+
+	public void setJQuery(JQuery query) {
+		jQuery = query;
+	}
+
+	public Web2Business getWeb2() {
+		if (web2 == null) {
+			ELUtil.getInstance().autowire(this);
+		}
+		return web2;
+	}
+
+	public void setWeb2(Web2Business web2) {
+		this.web2 = web2;
 	}
 
 }
