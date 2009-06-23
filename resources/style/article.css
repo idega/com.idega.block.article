@@ -664,3 +664,7 @@ form.editArticleForm .wf_block .articleCategories input {
 	margin-right: 5px;
 	float: right;
 }
+
+.articleCommentAttachmentNotificationContainerCommentWasNotRed {
+	margin-top: 15px;
+}

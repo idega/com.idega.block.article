@@ -114,13 +114,15 @@ public class ArticleCommentAttachmentStatisticsViewer extends Block {
 		
 		Layer notificationContainer = new Layer();
 		container.add(notificationContainer);
-		notificationContainer.setStyleClass("articleCommentAttachmentNotificationContainer");
 		
 		Collection<User> readers = comment.getReadBy();
 		if (ListUtil.isEmpty(readers)) {
+			notificationContainer.setStyleClass("articleCommentAttachmentNotificationContainerCommentWasNotRed");
 			notificationContainer.add(new Heading3(iwrb.getLocalizedString("attachment_stats.there_are_no_readers_for_comment", "Comment was not red yet")));
 			return;
 		}
+		
+		notificationContainer.setStyleClass("articleCommentAttachmentNotificationContainer");
 		
 		Collection<User> usersToInform = null;
 		if (ListUtil.isEmpty(downloaders)) {
