@@ -1145,10 +1145,12 @@ public class CommentsEngineBean extends IBOSessionBean implements CommentsEngine
 		CommentCreator commentCreator = new CommentCreator();
 		commentCreator.setProperties(properties);
 		CommentsPersistenceManager manager = getCommentsManager(properties.getSpringBeanIdentifier());
-		if (manager != null && manager.useFilesUploader(properties)) {
-			commentCreator.setAddUploader(true);
-			commentCreator.setUploadPath(manager.getCommentFilesPath(properties));
+		if (manager != null) {
 			commentCreator.setAutoEnableNotifications(manager.isNotificationsAutoEnabled(properties));
+			if (manager.useFilesUploader(properties)) {
+				commentCreator.setAddUploader(true);
+				commentCreator.setUploadPath(manager.getCommentFilesPath(properties));
+			}
 		}
 		
 		return getBuilderService().getRenderedComponent(commentCreator, null);
