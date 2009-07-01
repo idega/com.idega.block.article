@@ -1,11 +1,16 @@
 package com.idega.block.article.component;
 
 import java.rmi.RemoteException;
+import java.util.Arrays;
 
 import javax.faces.component.UIComponent;
 
+import org.springframework.beans.factory.annotation.Autowired;
+
 import com.idega.block.article.bean.CommentsViewerProperties;
 import com.idega.block.article.business.ArticleConstants;
+import com.idega.block.web2.business.JQuery;
+import com.idega.block.web2.business.JQueryPlugin;
 import com.idega.business.IBOLookup;
 import com.idega.business.IBOLookupException;
 import com.idega.content.upload.presentation.FileUploadViewer;
@@ -34,6 +39,7 @@ import com.idega.user.data.User;
 import com.idega.util.CoreConstants;
 import com.idega.util.PresentationUtil;
 import com.idega.util.StringUtil;
+import com.idega.util.expression.ELUtil;
 
 public class CommentCreator extends Block {
 	
@@ -44,13 +50,23 @@ public class CommentCreator extends Block {
 	
 	private CommentsViewerProperties properties;
 	
+	@Autowired
+	private JQuery jQuery;
+	
 	@Override
 	public void main(IWContext iwc) {
 		if (properties == null) {
 			return;
 		}
+	
+		ELUtil.getInstance().autowire(this);
 		
 		IWResourceBundle iwrb = getResourceBundle(iwc);
+		
+		PresentationUtil.addJavaScriptSourcesLinesToHeader(iwc, Arrays.asList(
+				jQuery.getBundleURIToJQueryLib(),
+				jQuery.getBundleURIToJQueryPlugin(JQueryPlugin.AUTO_RESIZE)
+		));
 		
 		Layer container = new Layer();
 		add(container);
@@ -146,6 +162,8 @@ public class CommentCreator extends Block {
 			.append(", identifier: ").append(getJavaScriptParameter(properties.getIdentifier()))
 			.append(", newestEntriesOnTop: ").append(properties.isNewestEntriesOnTop())
 		.append("});").toString());
+		
+		PresentationUtil.addJavaScriptActionOnLoad(iwc, "CommentsViewer.initializeTextAreasAutoResize();");
 	}
 	
 	private String getJavaScriptParameter(String value) {
@@ -207,16 +225,6 @@ public class CommentCreator extends Block {
 	}
 	
 	private void addLine(TableBodyRowGroup tableBody, String label, String value, String styleClass, String id, boolean textArea, UIComponent component) {
-//		var line = new Element('tr');
-//		var labelCell = new Element('td');
-//		labelCell.addClass('comments_table_cell');
-//		labelCell.appendText(cellLabel);
-//		line.appendChild(labelCell);
-//		var inputCell = new Element('td');
-//		inputCell.appendChild(createInput(inputId, inputType, inputValue, inputStyle));
-//		line.appendChild(inputCell);
-//		return line;
-		
 		TableRow row = tableBody.createRow();
 		TableCell2 labelCell = row.createCell();
 		labelCell.setStyleClass("comments_table_cell");
@@ -235,21 +243,12 @@ public class CommentCreator extends Block {
 		if (value != null) {
 			area.setContent(value);
 		}
+		
+		area.setStyleClass("commentCreatorMessageAreaStyle");
 		return area;
 	}
 	
 	private TextInput getInput(String id, String value, String styleClass) {
-//		var input = new Element('input');
-//		input.setProperty('id', id);
-//		if (style != null) {
-//			input.addClass(style);
-//		}
-//		if (type != null) {
-//			input.setProperty('type', type);
-//		}
-//		input.setProperty('value', value);
-//		return input;
-		
 		TextInput input = new TextInput();
 		input.setId(id);
 		if (styleClass != null) {

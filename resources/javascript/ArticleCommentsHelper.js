@@ -909,3 +909,23 @@ CommentsViewer.sendNotificationsToDownloadDocument = function(properties) {
 		}
 	});
 }
+
+CommentsViewer.initializeTextAreasAutoResize = function() {
+	jQuery.each(jQuery('textarea.commentCreatorMessageAreaStyle'), function() {
+		var textarea = jQuery(this);
+		
+		var autoResizerInitializedStyleClass = 'autoResizerInitializedStyleClass';
+		if (!textarea.hasClass(autoResizerInitializedStyleClass)) {
+			textarea.autoResize({
+				animateDuration: 250,
+				extraSpace: 20
+			});
+			
+			if (textarea.attr('value') != '') {
+				textarea.triggerHandler('keydown');
+			}
+			
+			textarea.addClass(autoResizerInitializedStyleClass);
+		}
+	});
+}
