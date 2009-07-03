@@ -872,7 +872,14 @@ public class CommentsEngineBean extends IBOSessionBean implements CommentsEngine
 		if (iwc == null) {
 			return null;
 		}
-		if (!ContentUtil.hasContentEditorRoles(iwc)) {
+		
+		CommentsPersistenceManager commentsManager = getCommentsManager(properties.getSpringBeanIdentifier());
+		if (commentsManager == null) {
+			if (!ContentUtil.hasContentEditorRoles(iwc)) {
+				LOGGER.log(Level.WARNING, "Current user doesn't have enough rights to delete comment(s)!");
+				return null;
+			}
+		} else if (!commentsManager.hasFullRightsForComments(properties.getIdentifier())) {
 			LOGGER.log(Level.WARNING, "Current user doesn't have enough rights to delete comment(s)!");
 			return null;
 		}
@@ -893,16 +900,19 @@ public class CommentsEngineBean extends IBOSessionBean implements CommentsEngine
 			comments.setEntries(getUpdatedEntries(initEntries(comments.getEntries()), commentId));
 		}
 		
-		CommentsPersistenceManager commentsManager = getCommentsManager(properties.getSpringBeanIdentifier());
 		if (commentsManager == null) {
 			clearArticleCache(iwc);
-			
 			putFeedToCache(comments, linkToComments, iwc);
 		}
 		
 		String identifier = properties.getIdentifier();
 		boolean deleted = commentsManager == null ? uploadFeed(linkToComments, comments, iwc, true) : commentsManager.storeFeed(identifier, comments);
 		properties.setActionSuccess(deleted);
+		
+		if (deleted) {
+			invokeToReceiveComments();
+		}
+		
 		return properties;
 	}
 	
@@ -1091,7 +1101,8 @@ public class CommentsEngineBean extends IBOSessionBean implements CommentsEngine
 					sendNotification(manager.getPersonsToNotifyAboutComment(properties, properties.getPrimaryKey(), true), handlerEmail, iwc, properties, true);
 				}
 				
-				return executeScriptForAllPages(new ScriptBuffer("getAllComments();"), true);
+				invokeToReceiveComments();
+				return true;
 			}
 		}
 		
@@ -1127,7 +1138,8 @@ public class CommentsEngineBean extends IBOSessionBean implements CommentsEngine
 		}
 		
 		if (manager.setCommentRead(properties.getPrimaryKey())) {
-			return executeScriptForAllPages(new ScriptBuffer("getAllComments();"), true);
+			invokeToReceiveComments();
+			return true;
 		}
 		
 		return false;
@@ -1249,5 +1261,9 @@ public class CommentsEngineBean extends IBOSessionBean implements CommentsEngine
 		}
 		
 		return emailsAndLinks;
+	}
+	
+	private void invokeToReceiveComments() {
+		executeScriptForAllPages(new ScriptBuffer("getAllComments();"), true);
 	}
 }

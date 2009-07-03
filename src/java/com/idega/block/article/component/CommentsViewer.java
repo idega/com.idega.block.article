@@ -210,7 +210,7 @@ public class CommentsViewer extends Block {
 		}
 		
 		// Delete comments image
-		if (contentEditor) {
+		if (contentEditor || fullCommentsRights) {
 			Image delete = new Image(bundle.getVirtualPathWithFileNameString(DELETE_IMAGE),
 					iwrb.getLocalizedString("comments_viewer.delete_all_comments", "Delete all comments"));
 			delete.setStyleClass("deleteCommentsImage");
@@ -304,7 +304,7 @@ public class CommentsViewer extends Block {
 							.append(bundle.getVirtualPathWithFileNameString(CommentsViewer.DELETE_IMAGE))
 							.append("', deleteCommentImage: '")
 							.append(bundle.getVirtualPathWithFileNameString(CommentsViewer.DELETE_COMMENT_IMAGE))
-							.append("', hasValidRights: ").append(ContentUtil.hasContentEditorRoles(iwc))
+							.append("', hasValidRights: ").append(ContentUtil.hasContentEditorRoles(iwc) || fullCommentsRights)
 		.append("});");
 		PresentationUtil.addJavaScriptActionToBody(iwc, info.toString());
 		
