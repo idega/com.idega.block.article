@@ -1,13 +1,10 @@
 package com.idega.block.article.business;
 
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-import java.net.URLDecoder;
 import java.rmi.RemoteException;
 import java.sql.Timestamp;
 import java.text.DateFormat;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
@@ -36,6 +33,7 @@ import com.idega.builder.business.BuilderLogicWrapper;
 import com.idega.business.IBOLookup;
 import com.idega.business.IBOLookupException;
 import com.idega.business.IBOSessionBean;
+import com.idega.business.file.FileDownloadNotifier;
 import com.idega.content.bean.ContentItemFeedBean;
 import com.idega.content.business.ContentConstants;
 import com.idega.content.business.ContentUtil;
@@ -45,7 +43,6 @@ import com.idega.core.builder.business.BuilderService;
 import com.idega.core.cache.IWCacheManager2;
 import com.idega.core.component.bean.RenderedComponent;
 import com.idega.core.contact.data.Email;
-import com.idega.core.file.data.ICFile;
 import com.idega.dwr.reverse.ScriptCaller;
 import com.idega.idegaweb.IWMainApplication;
 import com.idega.idegaweb.IWMainApplicationSettings;
@@ -80,6 +77,8 @@ public class CommentsEngineBean extends IBOSessionBean implements CommentsEngine
 	
 	@Autowired
 	private ThemesHelper themesHelper;
+	
+	private FileDownloadNotifier downloadNotifier;
 	
 	private RSSBusiness rss = null;
 	private WireFeedOutput wfo = new WireFeedOutput();
@@ -239,10 +238,6 @@ public class CommentsEngineBean extends IBOSessionBean implements CommentsEngine
 		body.append(properties.getCommentsPageUrl());
 		
 		return sendNotification(recipients, newComment, body.toString(), useAuthorEmailAsFrom ? commentAuthorEmail : null);
-	}
-	
-	private boolean sendNotification(List<String> recipients, String subject, String message) {
-		return sendNotification(recipients, subject, message, null);
 	}
 	
 	private boolean sendNotification(List<String> recipients, String subject, String message, String from) {
@@ -413,7 +408,7 @@ public class CommentsEngineBean extends IBOSessionBean implements CommentsEngine
 	private RSSBusiness getRSSBusiness() {
 		if (rss == null) {
 			try {
-				rss = IBOLookup.getServiceInstance(IWMainApplication.getDefaultIWApplicationContext(), RSSBusiness.class);
+				rss = IBOLookup.getServiceInstance(getIWApplicationContext(), RSSBusiness.class);
 			} catch (IBOLookupException e) {
 				e.printStackTrace();
 				return null;
@@ -1174,93 +1169,21 @@ public class CommentsEngineBean extends IBOSessionBean implements CommentsEngine
 		}
 		return themesHelper;
 	}
+	
+	private FileDownloadNotifier getFileDownloadNotifier() {
+		if (downloadNotifier == null) {
+			downloadNotifier = ELUtil.getInstance().getBean(CommentAttachmentDownloadNotifier.BEAN_IDENTIFIER);
+		}
+		return downloadNotifier;
+	}
 
 	public AdvancedProperty sendNotificationsToDownloadDocument(CommentAttachmentNotifyBean properties) {
-		AdvancedProperty result = new AdvancedProperty(Boolean.FALSE.toString(), "Unable to send reminders");
-		
-		if (properties == null) {
-			return result;
-		}
-		
-		IWContext iwc = CoreUtil.getIWContext();
-		if (iwc == null) {
-			return result;
-		}
-		
-		String fileId = properties.getFile();
-		if (StringUtil.isEmpty(fileId)) {
-			return result;
-		}
-		CommentsPersistenceManager manager = getDefaultCommentsManager();
-		if (manager == null) {
-			return result;
-		}
-		ICFile file = manager.getCommentAttachment(fileId);
-		if (file == null) {
-			return result;
-		}
-		
-		List<String> usersIds = properties.getUsers();
-		if (ListUtil.isEmpty(usersIds)) {
-			return result;
-		}
-		
-		List<AdvancedProperty> emailsAndLinks = getEmails(properties.getUsers(), file, properties.getComment(), properties.getServer());
-		if (ListUtil.isEmpty(emailsAndLinks)) {
-			return result;
-		}
-		
-		String subject = CoreConstants.EMPTY;
-		try {
-			subject = new StringBuilder(getLocalizedString(iwc, "comments_viewer.reminder_to_download_document", "Reminder to download document"))
-				.append(": ").append(URLDecoder.decode(file.getName(), CoreConstants.ENCODING_UTF8)).toString();
-		} catch(UnsupportedEncodingException e) {
-			LOGGER.log(Level.WARNING, "Error decoding: " + file.getName(), e);
-		}
-		
-		String pageMessage = new StringBuilder(getLocalizedString(iwc, "comments_viewer.reminder_message_for_document_to_download",
-			"Please download document. You can find it: ")).append(properties.getUrl()).append(". ")
-			.append(getLocalizedString(iwc, "comments_viewer.or_directly_download", "Or directly download from: ")).toString();
-		for (AdvancedProperty emailAndLink: emailsAndLinks) {
-			if (!sendNotification(Arrays.asList(emailAndLink.getId()), subject, new StringBuilder(pageMessage).append(emailAndLink.getValue()).toString())) {
-				return result;
-			}
-		}
-		
-		result.setId(Boolean.TRUE.toString());
-		result.setValue(getLocalizedString(iwc, "comments_viewer.reminders_sent_successfully", "Reminders were sent successfully"));
-		return result;
-	}
-	
-	private List<AdvancedProperty> getEmails(List<String> usersIds, ICFile attachment, String commentId, String server) {
-		UserBusiness userBusiness = null;
-		try {
-			userBusiness = getServiceInstance(UserBusiness.class);
-		} catch (IBOLookupException e) {
-			LOGGER.log(Level.WARNING, "Error getting UserBusiness", e);
-		}
-		if (userBusiness == null) {
+		FileDownloadNotifier downloadNotifier = getFileDownloadNotifier();
+		if (downloadNotifier == null) {
 			return null;
 		}
 		
-		CommentsPersistenceManager defaultManager = getDefaultCommentsManager();
-		List<AdvancedProperty> emailsAndLinks = new ArrayList<AdvancedProperty>(usersIds.size());
-		for (String userId: usersIds) {
-			User user = null;
-			Email email = null;
-			try {
-				user = userBusiness.getUser(Integer.valueOf(userId));
-				email = userBusiness.getEmailHome().findMainEmailForUser(user);
-			} catch(Exception e) {
-				LOGGER.log(Level.WARNING, "Error getting email for user: " + userId, e);
-			}
-			if (user != null && email != null) {
-				emailsAndLinks.add(new AdvancedProperty(email.getEmailAddress(),
-						new StringBuilder(server).append(defaultManager.getUriToAttachment(commentId, attachment, user)).toString()));
-			}
-		}
-		
-		return emailsAndLinks;
+		return downloadNotifier.sendNotifications(properties);
 	}
 	
 	private void invokeToReceiveComments() {

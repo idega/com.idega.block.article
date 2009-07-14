@@ -896,7 +896,12 @@ CommentsViewer.sendNotificationsToDownloadDocument = function(properties) {
 		return;
 	}
 	
-	properties.url = window.location.href;
+	var fullHref = window.location.href;
+	properties.server = fullHref.substring(0, fullHref.indexOf(window.location.pathname));
+	properties.url = properties.server + window.location.pathname;
+	if (typeof CasesBPMAssets != 'undefined') {
+		properties.url += '?prm_case_pk=' + CasesBPMAssets.openedCase.caseId;
+	}
 	properties.server = properties.url.substring(0, properties.url.indexOf(window.location.pathname));
 	CommentsEngine.sendNotificationsToDownloadDocument(properties, {
 		callback: function(result) {
