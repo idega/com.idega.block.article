@@ -245,7 +245,8 @@ public class DefaultCommentsPersistenceManager implements CommentsPersistenceMan
 	}
 
 	public String getTaskNameForAttachments() {
-		throw new UnsupportedOperationException("This method is not implemented by default manager");
+		LOGGER.info("This method is not implemented by default manager");
+		return null;
 	}
 
 	public ICFile getCommentAttachment(String icFileId) {
