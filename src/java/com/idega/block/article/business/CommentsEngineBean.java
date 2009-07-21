@@ -409,8 +409,8 @@ public class CommentsEngineBean extends IBOSessionBean implements CommentsEngine
 		if (rss == null) {
 			try {
 				rss = IBOLookup.getServiceInstance(getIWApplicationContext(), RSSBusiness.class);
-			} catch (IBOLookupException e) {
-				e.printStackTrace();
+			} catch (Exception e) {
+				LOGGER.log(Level.SEVERE, "Error getting: " + RSSBusiness.class, e);
 				return null;
 			}
 		}
