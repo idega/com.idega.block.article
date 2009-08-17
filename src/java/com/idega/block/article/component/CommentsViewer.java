@@ -11,6 +11,7 @@ import javax.faces.context.FacesContext;
 import org.apache.webdav.lib.WebdavResource;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import com.idega.block.article.bean.CommentsViewerProperties;
 import com.idega.block.article.business.ArticleConstants;
 import com.idega.block.article.business.ArticleUtil;
 import com.idega.block.article.business.CommentsEngine;
@@ -222,7 +223,11 @@ public class CommentsViewer extends Block {
 		}
 		
 		// Add comment block
-		container.add(getAddCommentBlock(iwc, commentsId));
+		CommentsViewerProperties properties = new CommentsViewerProperties();
+		properties.setIdentifier(identifier);
+		if (manager.canWriteComments(properties)) {
+			container.add(getAddCommentBlock(iwc, commentsId));
+		}
 	
 		addInitInfo(iwc, container);
 	}

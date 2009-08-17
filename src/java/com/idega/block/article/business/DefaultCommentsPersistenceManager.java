@@ -438,4 +438,8 @@ public class DefaultCommentsPersistenceManager implements CommentsPersistenceMan
 	public String getHandlerRoleKey() {
 		throw new UnsupportedOperationException("This method is not implemented by default manager");
 	}
+
+	public boolean canWriteComments(CommentsViewerProperties properties) {
+		return true;
+	}
 }

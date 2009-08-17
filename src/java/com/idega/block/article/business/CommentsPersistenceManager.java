@@ -61,4 +61,6 @@ public interface CommentsPersistenceManager {
 	public String getHandlerRoleKey();
 	
 	public List<String> getEmails(List<? extends Entry> entries, String commentAuthorEmail);
+	
+	public boolean canWriteComments(CommentsViewerProperties properties);
 }
