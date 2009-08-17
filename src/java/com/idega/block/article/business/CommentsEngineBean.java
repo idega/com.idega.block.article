@@ -224,6 +224,8 @@ public class CommentsEngineBean extends IBOSessionBean implements CommentsEngine
 			return false;
 		}
 		
+		recipients = new ArrayList<String>(recipients);
+		
 		if (!StringUtil.isEmpty(commentAuthorEmail) && recipients.contains(commentAuthorEmail)) {
 			recipients.remove(commentAuthorEmail);
 		}
