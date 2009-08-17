@@ -123,6 +123,10 @@ function addCommentPanel(id, linkToComments, lblUser, lblSubject, lblComment, lb
 	LABEL_COMMENT_FORM = lblCommentForm;
 	
 	if (closeCommentsPanel(commentsId)) {
+		CommentsViewer.info.replyFor = null;
+		CommentsViewer.info.replySubject = null;
+		CommentsViewer.info.replyMessage = null;
+		
 		return false;
 	}
 	if (id == null || linkToComments == null) {
