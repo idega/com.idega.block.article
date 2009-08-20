@@ -16,6 +16,7 @@ import com.idega.block.article.component.ArticleCommentAttachmentStatisticsViewe
 import com.idega.block.article.data.Comment;
 import com.idega.block.article.data.CommentHome;
 import com.idega.block.article.media.CommentAttachmentDownloader;
+import com.idega.builder.bean.AdvancedProperty;
 import com.idega.business.IBOLookup;
 import com.idega.business.IBOLookupException;
 import com.idega.core.accesscontrol.business.AccessController;
@@ -426,7 +427,7 @@ public class DefaultCommentsPersistenceManager implements CommentsPersistenceMan
 		return users;
 	}
 	
-	private UserBusiness getUserBusiness() {
+	protected UserBusiness getUserBusiness() {
 		try {
 			return IBOLookup.getServiceInstance(IWMainApplication.getDefaultIWApplicationContext(), UserBusiness.class);
 		} catch (IBOLookupException e) {
@@ -441,5 +442,17 @@ public class DefaultCommentsPersistenceManager implements CommentsPersistenceMan
 
 	public boolean canWriteComments(CommentsViewerProperties properties) {
 		return true;
+	}
+
+	public List<AdvancedProperty> getLinksForRecipients(List<String> recipients, CommentsViewerProperties properties) {
+		List<AdvancedProperty> links = new ArrayList<AdvancedProperty>(recipients.size());
+		for (String recipient: recipients) {
+			links.add(new AdvancedProperty(recipient, getLinkForRecipient(recipient, properties)));
+		}
+		return links;
+	}
+	
+	protected String getLinkForRecipient(String recipient, CommentsViewerProperties properties) {
+		return properties.getCommentsPageUrl();
 	}
 }

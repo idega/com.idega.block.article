@@ -237,12 +237,16 @@ public class CommentsEngineBean extends IBOSessionBean implements CommentsEngine
 		}	
 	
 		StringBuilder body = new StringBuilder(newCommentMessage).append(CoreConstants.COLON).append(CoreConstants.SPACE);
-		body.append(properties.getCommentsPageUrl());
+		CommentsPersistenceManager manager = getCommentsManager(properties.getSpringBeanIdentifier());
+		if (manager == null) {
+			manager = getDefaultCommentsManager();
+		}
+		List<AdvancedProperty> recipientsWithLinks = manager.getLinksForRecipients(recipients, properties);
 		
-		return sendNotification(recipients, newComment, body.toString(), useAuthorEmailAsFrom ? commentAuthorEmail : null);
+		return sendNotification(recipientsWithLinks, newComment, body.toString(), useAuthorEmailAsFrom ? commentAuthorEmail : null);
 	}
 	
-	private boolean sendNotification(List<String> recipients, String subject, String message, String from) {
+	private boolean sendNotification(List<AdvancedProperty> recipients, String subject, String message, String from) {
 		if (ListUtil.isEmpty(recipients) || StringUtil.isEmpty(subject) || StringUtil.isEmpty(message)) {
 			return false;
 		}

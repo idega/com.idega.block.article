@@ -4,6 +4,7 @@ import java.util.List;
 
 import com.idega.block.article.bean.CommentsViewerProperties;
 import com.idega.block.article.data.Comment;
+import com.idega.builder.bean.AdvancedProperty;
 import com.idega.core.file.data.ICFile;
 import com.idega.presentation.IWContext;
 import com.idega.user.data.User;
@@ -63,4 +64,6 @@ public interface CommentsPersistenceManager {
 	public List<String> getEmails(List<? extends Entry> entries, String commentAuthorEmail);
 	
 	public boolean canWriteComments(CommentsViewerProperties properties);
+	
+	public List<AdvancedProperty> getLinksForRecipients(List<String> recipients, CommentsViewerProperties properties);
 }
