@@ -165,6 +165,7 @@ public class CommentsViewer extends Block {
 				.toString(), "javascript:void(0)");
 		link.setId(commentsId + "CommentsLabelWithCount");
 		link.setOnClick(new StringBuilder("getCommentsList('").append(linkToComments).append(SEPARATOR).append(commentsId).append("');").toString());
+		link.setStyleClass("view_comments_link");
 		comments.add(link);
 		
 		RSSBusiness rss = null;
