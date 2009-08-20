@@ -200,6 +200,8 @@ function closeCommentPanelAndSendComment(userId, subjectId, emailId, bodyId, lin
 	if (body == null) {
 		return false;
 	}
+	
+	NEED_TO_NOTIFY = CommentsViewer.isNeedToNotify();
 	if (NEED_TO_NOTIFY) {
 		if (emailValue == '') {
 			humanMsg.displayMsg(CommentsViewer.localizations.enterEmail, null);
@@ -717,6 +719,12 @@ function setNeedToNotify(id, otherId) {
 	}
 }
 
+CommentsViewer.isNeedToNotify = function() {
+	var checkedAttribute = jQuery('#comments_send_notifications').attr('checked') + '';
+	var notify = checkedAttribute == 'true' || checkedAttribute == 'checked';
+	return notify;
+}
+
 function enableComments(enable, pageKey, moduleId, propName, cacheKey) {
 	CHECKED_BOX_MANUALY = true;
 	showLoadingMessage(CommentsViewer.localizations.saving);
@@ -889,7 +897,7 @@ CommentsViewer.sendComment = function(properties) {
 	var subjectId = 'comment_subject_value';
 	var emailId = 'comment_email_value';
 	var bodyId = 'comment_comment_value';
-	var secretInputId= 'secretCommentsInput';
+	var secretInputId = 'secretCommentsInput';
 	
 	closeCommentPanelAndSendComment(userId, subjectId, emailId, bodyId, properties.linkToComments, secretInputId, properties.commentsId, properties.instanceId,
 		properties.springBeanIdentifier, properties.identifier, properties.newestEntriesOnTop);
