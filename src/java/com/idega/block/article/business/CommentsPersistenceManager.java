@@ -46,7 +46,7 @@ public interface CommentsPersistenceManager {
 	
 	public Comment getComment(Object primaryKey);
 	
-	public boolean useFilesUploader(CommentsViewerProperties properties);
+	public boolean isCommentsCreationEnabled(CommentsViewerProperties properties);
 	
 	public String getTaskNameForAttachments();
 	

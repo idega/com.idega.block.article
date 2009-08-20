@@ -240,8 +240,8 @@ public class DefaultCommentsPersistenceManager implements CommentsPersistenceMan
 		throw new UnsupportedOperationException("This method is not implemented by default manager");
 	}
 
-	public boolean useFilesUploader(CommentsViewerProperties properties) {
-		throw new UnsupportedOperationException("This method is not implemented by default manager");
+	public boolean isCommentsCreationEnabled(CommentsViewerProperties properties) {
+		return true;
 	}
 
 	public String getTaskNameForAttachments() {
