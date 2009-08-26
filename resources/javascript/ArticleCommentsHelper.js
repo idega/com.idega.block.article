@@ -711,11 +711,11 @@ function setNeedToNotify(id, otherId) {
 	else {
 		NEED_TO_NOTIFY = false;
 	}
-	if (IE) {
-		var element = $(id);
-		element.setProperty('checked', !element.getProperty('checked'));
-		var otherElement = $(otherId);
-		otherElement.setProperty('checked', !otherElement.getProperty('checked'));
+
+	if (NEED_TO_NOTIFY) {
+		jQuery('#comments_send_notifications').attr('checked', true);
+	} else {
+		jQuery('#comments_not_send_notifications').attr('checked', true);
 	}
 }
 
@@ -928,21 +928,24 @@ CommentsViewer.sendNotificationsToDownloadDocument = function(properties) {
 }
 
 CommentsViewer.initializeTextAreasAutoResize = function() {
-	jQuery.each(jQuery('textarea.commentCreatorMessageAreaStyle'), function() {
-		var textarea = jQuery(this);
-		
+	try {
 		var autoResizerInitializedStyleClass = 'autoResizerInitializedStyleClass';
-		if (!textarea.hasClass(autoResizerInitializedStyleClass)) {
-			textarea.autoResize({
-				animateDuration: 250,
-				extraSpace: 20
-			});
+		jQuery.each(jQuery('textarea.commentCreatorMessageAreaStyle'), function() {
+			var textarea = jQuery(this);
 			
-			if (textarea.attr('value') != '') {
-				textarea.triggerHandler('keydown');
+			if (!textarea.hasClass(autoResizerInitializedStyleClass)) {
+				textarea.autoResize({
+					animateDuration: 250,
+					extraSpace: 20
+				});
+				
+				var realValue = textarea.attr('value');
+				if (realValue != null && realValue != '') {
+					textarea.trigger('keydown');
+				}
+				
+				textarea.addClass(autoResizerInitializedStyleClass);
 			}
-			
-			textarea.addClass(autoResizerInitializedStyleClass);
-		}
-	});
+		});
+	} catch(e) {}
 }
