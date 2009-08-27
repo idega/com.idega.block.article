@@ -20,7 +20,7 @@ public class CommentAttachmentNotifyBean extends FileDownloadNotificationPropert
 
 	@RemoteProperty
 	private String comment;
-
+	
 	public String getComment() {
 		return comment;
 	}
@@ -52,6 +52,11 @@ public class CommentAttachmentNotifyBean extends FileDownloadNotificationPropert
 	public List<String> getUsers() {
 		return super.getUsers();
 	}
-	
+
+	@Override
+	@RemoteProperty
+	public String getCommentsManagerIdentifier() {
+		return super.getCommentsManagerIdentifier();
+	}
 	
 }

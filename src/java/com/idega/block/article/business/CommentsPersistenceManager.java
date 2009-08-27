@@ -1,10 +1,12 @@
 package com.idega.block.article.business;
 
 import java.util.List;
+import java.util.Map;
 
 import com.idega.block.article.bean.CommentsViewerProperties;
 import com.idega.block.article.data.Comment;
 import com.idega.builder.bean.AdvancedProperty;
+import com.idega.business.file.FileDownloadNotificationProperties;
 import com.idega.core.file.data.ICFile;
 import com.idega.presentation.IWContext;
 import com.idega.user.data.User;
@@ -66,4 +68,6 @@ public interface CommentsPersistenceManager {
 	public boolean canWriteComments(CommentsViewerProperties properties);
 	
 	public List<AdvancedProperty> getLinksForRecipients(List<String> recipients, CommentsViewerProperties properties);
+	
+	public Map<String, String> getUriToDocument(FileDownloadNotificationProperties properties, String identifier , List<User> users);
 }

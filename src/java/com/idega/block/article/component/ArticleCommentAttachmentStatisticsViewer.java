@@ -12,6 +12,7 @@ import com.idega.presentation.file.FileDownloadStatisticsViewer;
 import com.idega.user.data.User;
 import com.idega.util.CoreConstants;
 import com.idega.util.ListUtil;
+import com.idega.util.StringUtil;
 import com.idega.util.expression.ELUtil;
 
 public class ArticleCommentAttachmentStatisticsViewer extends FileDownloadStatisticsViewer {
@@ -32,6 +33,8 @@ public class ArticleCommentAttachmentStatisticsViewer extends FileDownloadStatis
 			return CoreConstants.EMPTY;
 		}
 		
+		String managerIdentifier = iwc.getParameter(BEAN_IDENTIFIER_PARAMETER);
+		
 		StringBuilder action = new StringBuilder("CommentsViewer.sendNotificationsToDownloadDocument({comment: '").append(comment.getPrimaryKey().toString())
 		.append("', file: '").append(attachment.getId()).append("', users: [");
 		for (Iterator<User> usersIter = usersToInform.iterator(); usersIter.hasNext();) {
@@ -41,7 +44,7 @@ public class ArticleCommentAttachmentStatisticsViewer extends FileDownloadStatis
 				action.append(CoreConstants.COMMA);
 			}
 		}
-		action.append("]});");
+		action.append("], commentsManagerIdentifier: ").append(StringUtil.isEmpty(managerIdentifier) ? "null" : "'"+managerIdentifier+"'").append("});");
 		
 		return action.toString();
 	}

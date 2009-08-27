@@ -3,7 +3,9 @@ package com.idega.block.article.business;
 import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -19,6 +21,7 @@ import com.idega.block.article.media.CommentAttachmentDownloader;
 import com.idega.builder.bean.AdvancedProperty;
 import com.idega.business.IBOLookup;
 import com.idega.business.IBOLookupException;
+import com.idega.business.file.FileDownloadNotificationProperties;
 import com.idega.core.accesscontrol.business.AccessController;
 import com.idega.core.accesscontrol.business.LoginBusinessBean;
 import com.idega.core.accesscontrol.business.LoginSession;
@@ -458,5 +461,17 @@ public class DefaultCommentsPersistenceManager implements CommentsPersistenceMan
 	
 	protected String getLinkForRecipient(String recipient, CommentsViewerProperties properties) {
 		return properties.getCommentsPageUrl();
+	}
+
+	public Map<String, String> getUriToDocument(FileDownloadNotificationProperties properties, String identifier, List<User> users) {
+		if (properties == null || ListUtil.isEmpty(users)) {
+			return null;
+		}
+		
+		Map<String, String> uris = new HashMap<String, String>(users.size());
+		for (User user: users) {
+			uris.put(user.getId(), properties.getUrl());
+		}
+		return uris;
 	}
 }
