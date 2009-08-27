@@ -177,7 +177,6 @@ public class CommentCreator extends Block {
 	private void addNotificationButton(Layer container, String id, String label, boolean setChecked) {
 		RadioButton radio = new RadioButton("comments_confirm_want_notifications");
 		radio.setId(id);
-		radio.setOnClick(setChecked ? getNotificationsEnabledFunction() : getNotificationsDisabledFunction());
 		radio.setSelected(setChecked);
 		container.add(radio);
 		Label sendLabel = new Label(label, radio);
@@ -186,10 +185,6 @@ public class CommentCreator extends Block {
 	
 	private String getNotificationsEnabledFunction() {
 		return "setNeedToNotify('comments_send_notifications', 'comments_not_send_notifications');";
-	}
-	
-	private String getNotificationsDisabledFunction() {
-		return "setNeedToNotify('comments_not_send_notifications', 'comments_send_notifications');";
 	}
 	
 	private String getUserEmail(IWContext iwc, User currentUser) {
