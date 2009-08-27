@@ -254,10 +254,6 @@ public class CommentsEngineBean extends IBOSessionBean implements CommentsEngine
 		try {
 			IWMainApplicationSettings settings = IWMainApplication.getDefaultIWMainApplication().getSettings();
 			String host = settings.getProperty(CoreConstants.PROP_SYSTEM_SMTP_MAILSERVER);
-			if (StringUtil.isEmpty(host)) {
-				LOGGER.warning("Host server is not defined, unable to send message: " + subject + " to: " + recipients);
-				return false;
-			}
 			from = StringUtil.isEmpty(from) ? settings.getProperty(CoreConstants.PROP_SYSTEM_MAIL_FROM_ADDRESS) : from;
 			if (StringUtil.isEmpty(from)) {
 				LOGGER.warning("Address 'from' is not defined, unable to send message: " + subject + " to: " + recipients);

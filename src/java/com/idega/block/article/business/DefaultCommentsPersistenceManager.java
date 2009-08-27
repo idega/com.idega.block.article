@@ -382,7 +382,7 @@ public class DefaultCommentsPersistenceManager implements CommentsPersistenceMan
 	}
 	
 	@SuppressWarnings("unchecked")
-	protected List<User> getUsersByRoleKey() {
+	protected List<User> getUsersHavingHandlerRole() {
 		String roleKey = getHandlerRoleKey();
 		if (StringUtil.isEmpty(roleKey)) {
 			return null;
@@ -425,6 +425,10 @@ public class DefaultCommentsPersistenceManager implements CommentsPersistenceMan
 		}
 		
 		return users;
+	}
+	
+	protected List<User> getCaseHandlers(String identifier) {
+		throw new UnsupportedOperationException("This method is not implemented by default manager");
 	}
 	
 	protected UserBusiness getUserBusiness() {
