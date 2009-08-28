@@ -6,6 +6,7 @@ import java.util.Iterator;
 import com.idega.block.article.business.ArticleConstants;
 import com.idega.block.article.business.CommentsPersistenceManager;
 import com.idega.block.article.data.Comment;
+import com.idega.builder.bean.AdvancedProperty;
 import com.idega.core.file.data.ICFile;
 import com.idega.presentation.IWContext;
 import com.idega.presentation.file.FileDownloadStatisticsViewer;
@@ -27,7 +28,7 @@ public class ArticleCommentAttachmentStatisticsViewer extends FileDownloadStatis
 	private CommentsPersistenceManager manager;
 	
 	@Override
-	public String getNotifierAction(IWContext iwc, ICFile attachment, Collection<User> usersToInform) {
+	public String getNotifierAction(IWContext iwc, AdvancedProperty attachment, Collection<User> usersToInform) {
 		Comment comment = getComment(iwc);
 		if (comment == null) {
 			return CoreConstants.EMPTY;
@@ -50,8 +51,8 @@ public class ArticleCommentAttachmentStatisticsViewer extends FileDownloadStatis
 	}
 	
 	@Override
-	protected ICFile getFile(IWContext iwc) {
-		ICFile attachment = super.getFile(iwc);
+	protected ICFile getRealFile(IWContext iwc) {
+		ICFile attachment = super.getRealFile(iwc);
 		if (attachment != null) {
 			return attachment;
 		}
@@ -68,7 +69,7 @@ public class ArticleCommentAttachmentStatisticsViewer extends FileDownloadStatis
 		
 		attachment = getAttachment(attachments, iwc.getParameter(COMMENT_ATTACHMENT_ID_PARAMETER));
 		if (attachment != null) {
-			setFile(attachment);
+			setRealFile(attachment);
 		}
 		
 		return attachment;
@@ -136,4 +137,10 @@ public class ArticleCommentAttachmentStatisticsViewer extends FileDownloadStatis
 		
 		return potentialReaders;
 	}
+
+	@Override
+	public String getMessageNobodyIsInterested(IWContext iwc) {
+		return getResourceBundle(iwc).getLocalizedString("there_are_no_users_interested_in_this_file", "There are no users interesed in this file");
+	}
+	
 }
