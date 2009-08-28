@@ -9,12 +9,14 @@ import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import org.directwebremoting.WebContextFactory;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
 
 import com.idega.block.article.bean.CommentsViewerProperties;
 import com.idega.block.article.component.ArticleCommentAttachmentStatisticsViewer;
+import com.idega.block.article.component.CommentsViewer;
 import com.idega.block.article.data.Comment;
 import com.idega.block.article.data.CommentHome;
 import com.idega.block.article.media.CommentAttachmentDownloader;
@@ -474,4 +476,16 @@ public class DefaultCommentsPersistenceManager implements CommentsPersistenceMan
 		}
 		return uris;
 	}
+
+	public String getUriForCommentLink(CommentsViewerProperties properties) {
+		try {
+			URIUtil uri = new URIUtil(WebContextFactory.get().getCurrentPage());
+			uri.setParameter(CommentsViewer.AUTO_SHOW_COMMENTS, Boolean.TRUE.toString());
+			return uri.getUri();
+		} catch (Exception e) {
+			LOGGER.log(Level.WARNING, "Error getting link for comment", e);
+		}
+		return null;
+	}
+	
 }

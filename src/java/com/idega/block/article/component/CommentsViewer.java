@@ -87,6 +87,7 @@ public class CommentsViewer extends Block {
 	private JQuery jQuery;
 	@Autowired
 	private Web2Business web2;
+	public static final String AUTO_SHOW_COMMENTS = "autoShowComments";
 	
 	@Override
 	public void main(IWContext iwc) {
@@ -100,6 +101,10 @@ public class CommentsViewer extends Block {
 		boolean hasValidRights = isCommentsViewerVisible(iwc);
 		if (!hasValidRights) {
 			return;
+		}
+		
+		if (iwc.isParameterSet(CommentsViewer.AUTO_SHOW_COMMENTS)) {
+			setShowCommentsList(iwc.getParameter(CommentsViewer.AUTO_SHOW_COMMENTS).equals(Boolean.TRUE.toString()));
 		}
 		
 		PresentationUtil.addStyleSheetsToHeader(iwc, Arrays.asList(
@@ -226,7 +231,8 @@ public class CommentsViewer extends Block {
 		// Add comment block
 		CommentsViewerProperties properties = new CommentsViewerProperties();
 		properties.setIdentifier(identifier);
-		if (manager.canWriteComments(properties)) {
+		boolean canWriteComments = manager == null || manager.canWriteComments(properties);
+		if (canWriteComments) {
 			container.add(getAddCommentBlock(iwc, commentsId));
 		}
 	
@@ -234,12 +240,7 @@ public class CommentsViewer extends Block {
 	}
 	
 	private User getUser(IWContext iwc) {
-		User currentUser = null;
-		try {
-			currentUser = iwc.getCurrentUser();
-		} catch(NotLoggedOnException e) {
-			e.printStackTrace();
-		}
+		User currentUser = iwc.isLoggedOn() ? iwc.getCurrentUser() : null;
 		if (currentUser == null) {
 			return null;
 		}

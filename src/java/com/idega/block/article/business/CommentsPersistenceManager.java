@@ -70,4 +70,6 @@ public interface CommentsPersistenceManager {
 	public List<AdvancedProperty> getLinksForRecipients(List<String> recipients, CommentsViewerProperties properties);
 	
 	public Map<String, String> getUriToDocument(FileDownloadNotificationProperties properties, String identifier , List<User> users);
+	
+	public String getUriForCommentLink(CommentsViewerProperties properties);
 }

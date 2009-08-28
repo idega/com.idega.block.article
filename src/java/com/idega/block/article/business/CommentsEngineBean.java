@@ -138,7 +138,7 @@ public class CommentsEngineBean extends IBOSessionBean implements CommentsEngine
 			return false;
 		}
 		
-		String entryId = addNewEntry(comments, subject, uri, date, body, user, language, commentAuthorEmail, notify);
+		String entryId = addNewEntry(comments, subject, getUriForCommentLink(properties), date, body, user, language, commentAuthorEmail, notify);
 		if (entryId == null) {
 			LOGGER.log(Level.SEVERE, errorMessage);
 			return false;
@@ -191,6 +191,14 @@ public class CommentsEngineBean extends IBOSessionBean implements CommentsEngine
 		}
 		
 		return finishedSuccessfully;
+	}
+	
+	private String getUriForCommentLink(CommentsViewerProperties properties) {
+		CommentsPersistenceManager commentsManager = getCommentsManager(properties.getSpringBeanIdentifier());
+		if (commentsManager == null) {
+			commentsManager = getDefaultCommentsManager();
+		}
+		return commentsManager.getUriForCommentLink(properties);
 	}
 	
 	@SuppressWarnings("unchecked")
@@ -314,12 +322,14 @@ public class CommentsEngineBean extends IBOSessionBean implements CommentsEngine
 		String id = getThemesHelper().getUniqueIdByNumberAndDate(ContentConstants.COMMENT_SCOPE);
 		entry.setId(id);
 		
-		// URI
-		Link link = new Link();
-		link.setHref(uri);
-		List<Link> links = new ArrayList<Link>();
-		links.add(link);
-		entry.setAlternateLinks(links);
+		if (!StringUtil.isEmpty(uri)) {
+			// URI
+			Link link = new Link();
+			link.setHref(uri);
+			List<Link> links = new ArrayList<Link>();
+			links.add(link);
+			entry.setAlternateLinks(links);
+		}
 		
 		entries.add(entry);
 		feed.setEntries(entries);
