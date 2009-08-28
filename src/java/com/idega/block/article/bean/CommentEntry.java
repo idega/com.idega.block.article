@@ -13,6 +13,7 @@ public class CommentEntry extends Entry {
 	private String primaryKey;
 	
 	private boolean publishable;
+	private boolean published;
 	private boolean readable;
 	private boolean replyable;
 	
@@ -103,4 +104,13 @@ public class CommentEntry extends Entry {
 		}
 		attachments.add(attachment);
 	}
+
+	public boolean isPublished() {
+		return published;
+	}
+
+	public void setPublished(boolean published) {
+		this.published = published;
+	}
+	
 }

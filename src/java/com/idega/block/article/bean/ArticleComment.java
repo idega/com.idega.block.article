@@ -17,6 +17,7 @@ public class ArticleComment {
 	
 	private int listNumber = 1;
 	
+	private boolean published;
 	private boolean canBePublished;
 	private boolean canBeRead;
 	private boolean canBeReplied;
@@ -101,6 +102,12 @@ public class ArticleComment {
 	}
 	public void setAttachments(List<ArticleCommentAttachmentInfo> attachments) {
 		this.attachments = attachments;
+	}
+	public boolean isPublished() {
+		return published;
+	}
+	public void setPublished(boolean published) {
+		this.published = published;
 	}
 
 }

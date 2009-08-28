@@ -207,13 +207,13 @@ public class DefaultCommentsPersistenceManager implements CommentsPersistenceMan
 		return null;
 	}
 
-	public boolean setCommentPublished(Object primaryKey) {
+	public boolean setCommentPublished(Object primaryKey, boolean makePublic) {
 		Comment comment = getComment(primaryKey);
 		if (comment == null) {
 			return false;
 		}
 		
-		comment.setAnnouncedToPublic(Boolean.TRUE);
+		comment.setAnnouncedToPublic(makePublic);
 		comment.store();
 		
 		return true;

@@ -41,7 +41,7 @@ public interface CommentsPersistenceManager {
 	
 	public List<? extends Entry> getEntriesToFormat(Feed comments, CommentsViewerProperties properties);
 	
-	public boolean setCommentPublished(Object primaryKey);
+	public boolean setCommentPublished(Object primaryKey, boolean makePublic);
 	
 	public boolean setCommentRead(Object primaryKey);
 	

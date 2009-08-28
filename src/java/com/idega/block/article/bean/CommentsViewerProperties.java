@@ -34,6 +34,8 @@ public class CommentsViewerProperties {
 	private String entryId;
 	private String primaryKey;
 	
+	private boolean makePublic;
+	
 	private List<String> uploadedFiles;
 	
 	public boolean isPrivateComment() {
@@ -235,5 +237,14 @@ public class CommentsViewerProperties {
 	public void setCommentsPageUrl(String commentsPageUrl) {
 		this.commentsPageUrl = commentsPageUrl;
 	}
+
+	public boolean isMakePublic() {
+		return makePublic;
+	}
+
+	public void setMakePublic(boolean makePublic) {
+		this.makePublic = makePublic;
+	}
+	
 	
 }

@@ -577,6 +577,7 @@ public class CommentsEngineBean extends IBOSessionBean implements CommentsEngine
 			if (entry instanceof CommentEntry) {
 				CommentEntry commentEntry = (CommentEntry) entry;
 				
+				comment.setPublished(commentEntry.isPublished());
 				comment.setCanBePublished(commentEntry.isPublishable());
 				comment.setCanBeRead(commentEntry.isReadable());
 				comment.setCanBeReplied(commentEntry.isReplyable());
@@ -1088,16 +1089,18 @@ public class CommentsEngineBean extends IBOSessionBean implements CommentsEngine
 		}
 		
 		if (manager.hasFullRightsForComments(properties.getIdentifier())) {
-			if (manager.setCommentPublished(properties.getPrimaryKey())) {
-				IWContext iwc = CoreUtil.getIWContext();
-				
-				if (iwc == null) {
-					LOGGER.warning("Unable to send notification about published comment: " + properties.getPrimaryKey());
-				} else {
-					String handlerEmail = getCurrentUserEmailAddress(iwc);
-					sendNotification(manager.getPersonsToNotifyAboutComment(properties, properties.getPrimaryKey(), true), handlerEmail, iwc, properties, true);
+			if (manager.setCommentPublished(properties.getPrimaryKey(), properties.isMakePublic())) {
+				if (properties.isMakePublic()) {
+					IWContext iwc = CoreUtil.getIWContext();
+					
+					if (iwc == null) {
+						LOGGER.warning("Unable to send notification about published comment: " + properties.getPrimaryKey());
+					} else {
+						String handlerEmail = getCurrentUserEmailAddress(iwc);
+						sendNotification(manager.getPersonsToNotifyAboutComment(properties, properties.getPrimaryKey(), true), handlerEmail, iwc, properties,
+								true);
+					}
 				}
-				
 				invokeToReceiveComments();
 				return true;
 			}

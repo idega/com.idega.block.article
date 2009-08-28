@@ -364,21 +364,32 @@ function addComment(index, articleComment, commentsId, linkToComments, newestEnt
 		
 		if (hasFullCommentsRights) {
 			if (articleComment.canBePublished) {
+				var isPublished = articleComment.published;
+				
 				var publishImage = new Element('img');
-				publishImage.setProperty('src', '/idegaweb/bundles/com.idega.block.article.bundle/resources/images/publish.png');
-				publishImage.setProperty('title', CommentsViewer.localizations.publishComment);
+				var publishImageSrc = '/idegaweb/bundles/com.idega.block.article.bundle/resources/images/' +
+					(isPublished ? 'comment_unpublish.png' : 'comment_publish.png');
+				publishImage.setProperty('src', publishImageSrc);
+				publishImage.setProperty('title', isPublished ? CommentsViewer.localizations.unPublishComment : CommentsViewer.localizations.publishComment);
 				publishImage.addClass('publishCommentImage');
 				publishImage.addEvent('click', function() {
 					var info = commentInfo;
 					var properties = new CommentsViewerProperties(null, null, null, null, null, articleComment.id, null, info.springBeanIdentifier,
 						info.identifier, true, info.newestEntriesOnTop, info.addLoginbyUUIDOnRSSFeedLink);
 					properties.primaryKey = articleComment.primaryKey;
+					properties.makePublic = !isPublished;
 					CommentsEngine.setCommentPublished(properties, {
 						callback: function(result) {
 							if (result) {
-								humanMsg.displayMsg(CommentsViewer.localizations.commentWasPublished, null);
+								humanMsg.displayMsg(isPublished ? CommentsViewer.localizations.commentWasUnPublished :
+									CommentsViewer.localizations.commentWasPublished, null);
 								jQuery('img.replyCommentsImage', jQuery(publishImage).parent()).remove();
-								publishImage.remove();
+								
+								var newPublishImageSrc = '/idegaweb/bundles/com.idega.block.article.bundle/resources/images/' +
+									(isPublished ? 'comment_publish.png' : 'comment_unpublish.png');
+								publishImage.setProperty('src', newPublishImageSrc);
+								publishImage.setProperty('title', isPublished ?
+									CommentsViewer.localizations.publishComment : CommentsViewer.localizations.unPublishComment);
 							}
 						}
 					});
@@ -390,7 +401,7 @@ function addComment(index, articleComment, commentsId, linkToComments, newestEnt
 	
 	if (articleComment.canBeRead) {
 		var readImage = new Element('img');
-		readImage.setProperty('src', '/idegaweb/bundles/com.idega.block.article.bundle/resources/images/read.png');
+		readImage.setProperty('src', '/idegaweb/bundles/com.idega.block.article.bundle/resources/images/comment_read.png');
 		readImage.setProperty('title', CommentsViewer.localizations.readComment);
 		readImage.addClass('readCommentsImage');
 		readImage.addEvent('click', function() {
@@ -414,7 +425,7 @@ function addComment(index, articleComment, commentsId, linkToComments, newestEnt
 	
 	if (articleComment.canBeReplied) {
 		var replyImage = new Element('img');
-		replyImage.setProperty('src', '/idegaweb/bundles/com.idega.block.article.bundle/resources/images/reply.png');
+		replyImage.setProperty('src', '/idegaweb/bundles/com.idega.block.article.bundle/resources/images/comment_reply.png');
 		replyImage.setProperty('title', CommentsViewer.localizations.reply);
 		replyImage.addClass('replyCommentsImage');
 		replyImage.addEvent('click', function() {
