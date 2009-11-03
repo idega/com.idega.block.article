@@ -33,7 +33,6 @@ import org.w3c.tidy.Tidy;
 
 import com.idega.block.article.business.ArticleConstants;
 import com.idega.block.article.component.ArticleItemViewer;
-import com.idega.block.rss.business.RSSBusiness;
 import com.idega.block.rss.business.RSSBusinessBean;
 import com.idega.content.bean.ContentItem;
 import com.idega.content.bean.ContentItemBean;
@@ -578,7 +577,7 @@ public class ArticleLocalizedItemBean extends ContentItemBean implements Seriali
 			WebdavResource theArticle = webdavResource;
 			if (theArticle != null && !theArticle.isCollection()) {
 				setResourcePath(theArticle.getPath());
-				stream = theArticle.getMethodData();
+				stream = getStream(theArticle);
 				bodyDoc = new XMLDocument(XmlUtil.getJDOMXMLDocument(stream));
 			} else {
 				bodyDoc = null;
