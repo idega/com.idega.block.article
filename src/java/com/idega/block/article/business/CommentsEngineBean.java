@@ -1,7 +1,5 @@
 package com.idega.block.article.business;
 
-import java.io.IOException;
-import java.rmi.RemoteException;
 import java.sql.Timestamp;
 import java.text.DateFormat;
 import java.util.ArrayList;
@@ -14,8 +12,6 @@ import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import org.apache.commons.httpclient.HttpException;
-import org.apache.webdav.lib.WebdavResource;
 import org.directwebremoting.ScriptBuffer;
 import org.directwebremoting.WebContextFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -659,17 +655,13 @@ public class CommentsEngineBean extends IBOSessionBean implements CommentsEngine
 		if (slide == null) {
 			return null;
 		}
-		WebdavResource commentsResource = null;
+
 		try {
-			commentsResource = slide.getWebdavResourceAuthenticatedAsRoot(properties.getUri());
-		} catch (HttpException e) {
-			e.printStackTrace();
-		} catch (RemoteException e) {
-			e.printStackTrace();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-		if (commentsResource == null || !commentsResource.getExistence()) {
+			if (!slide.getExistence(properties.getUri())) {
+				return null;
+			}
+		} catch (Exception e) {
+			LOGGER.log(Level.WARNING, "Error while checking if file exists: " + properties.getUri(), e);
 			return null;
 		}
 		

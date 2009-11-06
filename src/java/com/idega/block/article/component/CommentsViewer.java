@@ -8,7 +8,6 @@ import java.util.List;
 import javax.faces.component.UIComponent;
 import javax.faces.context.FacesContext;
 
-import org.apache.webdav.lib.WebdavResource;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.idega.block.article.bean.CommentsViewerProperties;
@@ -356,19 +355,11 @@ public class CommentsViewer extends Block {
 		}
 		
 		boolean makeEmptyComments = false;
-		WebdavResource commentsFeed = null;
 		try {
-			commentsFeed = slide.getWebdavResourceAuthenticatedAsRoot(CoreConstants.WEBDAV_SERVLET_URI + linkToComments);
+			makeEmptyComments = !slide.getExistence(linkToComments);
 		} catch (Exception e) {
-			makeEmptyComments = true;
+			e.printStackTrace();
 		}
-		if (commentsFeed == null) {
-			makeEmptyComments = true;
-		}
-		if (!makeEmptyComments) {
-			makeEmptyComments = !commentsFeed.getExistence();
-		}
-		
 		if (!makeEmptyComments) {
 			return;
 		}
