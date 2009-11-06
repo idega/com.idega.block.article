@@ -140,7 +140,7 @@ public class ArticleCommentAttachmentStatisticsViewer extends FileDownloadStatis
 
 	@Override
 	public String getMessageNobodyIsInterested(IWContext iwc) {
-		return getResourceBundle(iwc).getLocalizedString("there_are_no_users_interested_in_this_file", "There are no users interesed in this file");
+		return getResourceBundle(iwc).getLocalizedString("there_are_no_users_interested_in_this_file", "There are no users interested in this file");
 	}
 	
 }
