@@ -606,7 +606,6 @@ public class ArticleLocalizedItemBean extends ContentItemBean implements Seriali
 			Node theArticle = webdavResource;
 			if (theArticle != null && !theArticle.getPrimaryNodeType().isNodeType(RepositoryHelper.NODE_TYPE_FOLDER)) {
 				setResourcePath(theArticle.getPath());
-				//stream = theArticle.getMethodData();
 				stream = RepositoryHelper.getFileContents(theArticle);
 				bodyDoc = new XMLDocument(XmlUtil.getJDOMXMLDocument(stream));
 			} else {
@@ -622,9 +621,9 @@ public class ArticleLocalizedItemBean extends ContentItemBean implements Seriali
 	}
 	
 	private boolean parseXMLDocument(XMLDocument bodyDoc) {
-		if (bodyDoc == null) {
+		if (bodyDoc == null || bodyDoc.getDocument() == null) {
 			//	Article not found
-			LOGGER.warning("Article xml file was not found");
+			LOGGER.warning("XML file was not found for aticle: " + getResourcePath());
 			setRendered(false);
 			return false;
 		}
