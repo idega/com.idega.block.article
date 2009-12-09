@@ -694,7 +694,6 @@ public class CommentsEngineBean extends IBOSessionBean implements CommentsEngine
 		return null;
 	}
 	
-	@SuppressWarnings("unchecked")
 	private void putFeedToCache(Feed comments, String uri, IWContext iwc) {
 		if (comments == null || uri == null) {
 			return;
@@ -718,7 +717,6 @@ public class CommentsEngineBean extends IBOSessionBean implements CommentsEngine
 		return;
 	}
 	
-	@SuppressWarnings("unchecked")
 	private Feed getFeedFromCache(String uri, IWContext iwc) {
 		if (uri == null) {
 			return null;
@@ -733,7 +731,7 @@ public class CommentsEngineBean extends IBOSessionBean implements CommentsEngine
 		if (cache == null) {
 			return null;
 		}
-		Map comments = null;
+		Map<String, Feed> comments = null;
 		try {
 			comments = cache.getCache(COMMENTS_CACHE_NAME);
 		} catch(Exception e) {
@@ -742,16 +740,7 @@ public class CommentsEngineBean extends IBOSessionBean implements CommentsEngine
 		if (comments == null) {
 			return null;
 		}
-		Object o = comments.get(uri);
-		if (o == null) {
-			return null;
-		}
-		try {
-			return (Feed) o;
-		} catch (ClassCastException e) {
-			e.printStackTrace();
-			return null;
-		}
+		return comments.get(uri);
 	}
 	
 	private String encodeMail(String email) {

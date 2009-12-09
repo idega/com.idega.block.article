@@ -44,15 +44,11 @@ public class ArticleCacher extends UIComponentCacher {
 		return instance;
 	}
 	
-	@SuppressWarnings("unchecked")
 	@Override
 	public Map<String, String> getCacheMap() {
 		IWCacheManager2 iwcm = IWCacheManager2.getInstance(this.iwma);
 		
 		return iwcm.getCache("article",defaultCacheSize,overFlowToDisk,eternal,defaultTTLSeconds,defaultTTLSeconds);
-		
-		//IWCacheManager cm = IWCacheManager.getInstance(IWMainApplication.getDefaultIWMainApplication());
-		//return cm.getCacheMap();
 	}
 
 	/* (non-Javadoc)
