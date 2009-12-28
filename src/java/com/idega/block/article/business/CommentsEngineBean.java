@@ -117,8 +117,13 @@ public class CommentsEngineBean extends IBOSessionBean implements CommentsEngine
 		CommentsPersistenceManager commentsManager = getCommentsManager(properties.getSpringBeanIdentifier());
 		
 		if (commentsManager == null) {
+			LOGGER.info("No comments manager will be used to add comment: " + properties.getSubject() + ": " + properties.getBody() + " @ " + uri);
+			
 			uri = getFixedCommentsUri(iwc, uri, instanceId, properties.getCurrentPageUri());
 			properties.setUri(uri);
+		} else {
+			LOGGER.info("Comments manager (" + commentsManager + ") will be used to add comment: " + properties.getSubject() + ": " + properties.getBody() +
+					" @ " + uri);
 		}
 		
 		String language = getThemesHelper().getCurrentLanguage(iwc);
@@ -273,6 +278,7 @@ public class CommentsEngineBean extends IBOSessionBean implements CommentsEngine
 		return false;
 	}
 	
+	@SuppressWarnings("unchecked")
 	private String addNewEntry(Feed feed, String subject, String uri, Timestamp date, String body, String user, String language, String email, boolean notify) {
 		if (feed == null) {
 			return null;
@@ -329,6 +335,9 @@ public class CommentsEngineBean extends IBOSessionBean implements CommentsEngine
 		
 		entries.add(entry);
 		feed.setEntries(entries);
+		
+		List totalEntries = feed.getEntries();	//	TODO: remove
+		LOGGER.info("Total entries in feed (" + feed + "): " + (ListUtil.isEmpty(totalEntries) ? 0 : totalEntries.size()));
 		
 		return id;
 	}
