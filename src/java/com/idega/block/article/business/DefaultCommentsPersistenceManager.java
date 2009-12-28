@@ -21,16 +21,14 @@ import com.idega.block.article.data.Comment;
 import com.idega.block.article.data.CommentHome;
 import com.idega.block.article.media.CommentAttachmentDownloader;
 import com.idega.builder.bean.AdvancedProperty;
-import com.idega.business.IBOLookup;
-import com.idega.business.IBOLookupException;
 import com.idega.business.file.FileDownloadNotificationProperties;
 import com.idega.core.accesscontrol.business.AccessController;
 import com.idega.core.accesscontrol.business.LoginBusinessBean;
 import com.idega.core.accesscontrol.business.LoginSession;
+import com.idega.core.business.DefaultSpringBean;
 import com.idega.core.contact.data.Email;
 import com.idega.core.file.data.ICFile;
 import com.idega.core.file.data.ICFileHome;
-import com.idega.data.IDOLookup;
 import com.idega.idegaweb.IWApplicationContext;
 import com.idega.idegaweb.IWMainApplication;
 import com.idega.io.MediaWritable;
@@ -51,20 +49,21 @@ import com.sun.syndication.feed.atom.Person;
 
 @Scope(BeanDefinition.SCOPE_SINGLETON)
 @Service(DefaultCommentsPersistenceManager.BEAN_IDENTIFIER)
-public class DefaultCommentsPersistenceManager implements CommentsPersistenceManager {
+public class DefaultCommentsPersistenceManager extends DefaultSpringBean implements CommentsPersistenceManager {
 
 	static final String BEAN_IDENTIFIER = "defaultCommentsPersistenceManager";
 	private static final Logger LOGGER = Logger.getLogger(DefaultCommentsPersistenceManager.class.getName());
 	
 	public Object addComment(CommentsViewerProperties properties) {
 		if (properties == null || properties.getEntryId() == null) {
+			LOGGER.warning("Properties are not provided or entry ID is unknown: " + properties);
 			return null;
 		}
 		
 		try {
 			boolean hasFullRightsForComments = hasFullRightsForComments(properties.getIdentifier());
 			
-			CommentHome commentHome = (CommentHome) IDOLookup.getHome(Comment.class);
+			CommentHome commentHome = getCommentHome();
 			Comment comment = commentHome.create();
 			
 			comment.setEntryId(properties.getEntryId());
@@ -84,7 +83,9 @@ public class DefaultCommentsPersistenceManager implements CommentsPersistenceMan
 			
 			addAttachment(properties, comment);
 			
-			return comment.getPrimaryKey();
+			Object pk = comment.getPrimaryKey();
+			LOGGER.info("Comment with PK " + pk + " was created in DB");
+			return pk;
 		} catch(Exception e) {
 			LOGGER.log(Level.WARNING, "Error creating " + Comment.class, e);
 		}
@@ -98,7 +99,7 @@ public class DefaultCommentsPersistenceManager implements CommentsPersistenceMan
 		}
 		
 		try {
-			ICFileHome fileHome = (ICFileHome) IDOLookup.getHome(ICFile.class);
+			ICFileHome fileHome = getFileHome();
 			for (String uploadedFile: properties.getUploadedFiles()) {
 				if (!uploadedFile.startsWith(CoreConstants.WEBDAV_SERVLET_URI)) {
 					uploadedFile = new StringBuilder(CoreConstants.WEBDAV_SERVLET_URI).append(uploadedFile).toString();
@@ -160,13 +161,17 @@ public class DefaultCommentsPersistenceManager implements CommentsPersistenceMan
 	public boolean storeFeed(String processInstanceId, Feed comments) {
 		throw new UnsupportedOperationException("This method is not implemented by default manager");
 	}
+	
+	private CommentHome getCommentHome() {
+		return getHomeForEntity(Comment.class);
+	}
 
 	public Comment getComment(Object primaryKey) {
 		if (primaryKey == null) {
 			return null;
 		}
 		try {
-			return ((CommentHome) IDOLookup.getHome(Comment.class)).findByPrimaryKey(primaryKey);
+			return getCommentHome().findByPrimaryKey(primaryKey);
 		} catch (Exception e) {
 			LOGGER.log(Level.WARNING, "Nothing found by: " + primaryKey, e);
 		}
@@ -255,9 +260,13 @@ public class DefaultCommentsPersistenceManager implements CommentsPersistenceMan
 		return null;
 	}
 
+	private ICFileHome getFileHome() {
+		return getHomeForEntity(ICFile.class);
+	}
+	
 	public ICFile getCommentAttachment(String icFileId) {
 		try {
-			ICFileHome fileHome = (ICFileHome) IDOLookup.getHome(ICFile.class);
+			ICFileHome fileHome = getFileHome();
 			return fileHome.findByPrimaryKey(icFileId);
 		} catch(Exception e) {
 			LOGGER.log(Level.WARNING, "Error getting ICFile: " + icFileId, e);
@@ -437,12 +446,7 @@ public class DefaultCommentsPersistenceManager implements CommentsPersistenceMan
 	}
 	
 	protected UserBusiness getUserBusiness() {
-		try {
-			return IBOLookup.getServiceInstance(IWMainApplication.getDefaultIWApplicationContext(), UserBusiness.class);
-		} catch (IBOLookupException e) {
-			LOGGER.log(Level.WARNING, "Error getting UserBusiness", e);
-		}
-		return null;
+		return getServiceInstance(UserBusiness.class);
 	}
 
 	public String getHandlerRoleKey() {
