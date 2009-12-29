@@ -31,7 +31,7 @@ public interface CommentsPersistenceManager {
 	
 	public boolean storeFeed(String identifier, Feed comments);
 	
-	public Feed getCommentsFeed(IWContext iwc, String identifier);
+	public Feed getCommentsFeed(String identifier);
 	
 	public User getUserAvailableToReadWriteCommentsFeed(IWContext iwc);
 	
@@ -72,4 +72,6 @@ public interface CommentsPersistenceManager {
 	public Map<String, String> getUriToDocument(FileDownloadNotificationProperties properties, String identifier , List<User> users);
 	
 	public String getUriForCommentLink(CommentsViewerProperties properties);
+	
+	public String getFeedContent(Feed feed);
 }

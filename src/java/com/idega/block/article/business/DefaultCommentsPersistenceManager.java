@@ -3,6 +3,7 @@ package com.idega.block.article.business;
 import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -46,13 +47,19 @@ import com.idega.util.expression.ELUtil;
 import com.sun.syndication.feed.atom.Entry;
 import com.sun.syndication.feed.atom.Feed;
 import com.sun.syndication.feed.atom.Person;
+import com.sun.syndication.feed.module.DCModule;
+import com.sun.syndication.feed.module.Module;
+import com.sun.syndication.io.WireFeedOutput;
 
 @Scope(BeanDefinition.SCOPE_SINGLETON)
 @Service(DefaultCommentsPersistenceManager.BEAN_IDENTIFIER)
 public class DefaultCommentsPersistenceManager extends DefaultSpringBean implements CommentsPersistenceManager {
 
 	static final String BEAN_IDENTIFIER = "defaultCommentsPersistenceManager";
+	
 	private static final Logger LOGGER = Logger.getLogger(DefaultCommentsPersistenceManager.class.getName());
+	
+	private WireFeedOutput wfo = new WireFeedOutput();
 	
 	public Object addComment(CommentsViewerProperties properties) {
 		if (properties == null || properties.getEntryId() == null) {
@@ -122,7 +129,7 @@ public class DefaultCommentsPersistenceManager extends DefaultSpringBean impleme
 		return false;
 	}
 
-	public Feed getCommentsFeed(IWContext iwc, String processInstanceId) {
+	public Feed getCommentsFeed(String processInstanceId) {
 		throw new UnsupportedOperationException("This method is not implemented by default manager");
 	}
 
@@ -330,8 +337,7 @@ public class DefaultCommentsPersistenceManager extends DefaultSpringBean impleme
 	
 	@SuppressWarnings("unchecked")
 	protected List<String> getAllFeedSubscribers(String processInstanceId, Integer authorId) {
-		IWContext iwc = CoreUtil.getIWContext();
-		Feed comments = getCommentsFeed(iwc, processInstanceId);
+		Feed comments = getCommentsFeed(processInstanceId);
 		if (comments == null) {
 			return null;
 		}
@@ -491,5 +497,30 @@ public class DefaultCommentsPersistenceManager extends DefaultSpringBean impleme
 		}
 		return null;
 	}
-	
+
+	@SuppressWarnings("unchecked")
+	public String getFeedContent(Feed feed) {
+		if (feed == null) {
+			LOGGER.warning("Feed is unknown!");
+			return null;
+		}
+		
+		Date updated = new Date(System.currentTimeMillis());
+		feed.setUpdated(updated);
+		List<Module> modules = feed.getModules();
+		if (!ListUtil.isEmpty(modules)) {
+			for (Module module: modules) {
+				if (module instanceof DCModule) {
+					((DCModule) module).setDate(updated);
+				}
+			}
+		}
+		
+		try {
+			return wfo.outputString(feed);
+		} catch (Exception e) {
+			LOGGER.log(Level.WARNING, "Error while outputing feed to string: " + feed, e);
+			return null;
+		}
+	}
 }

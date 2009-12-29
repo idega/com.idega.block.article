@@ -118,7 +118,7 @@ public class CommentsViewer extends Block {
 				if (!findLinkToComments(iwc.getParameter(ContentViewer.PARAMETER_CONTENT_RESOURCE),
 						iwc.getParameter(ContentConstants.CONTENT_ITEM_VIEWER_IDENTIFIER_PARAMETER))) {
 					if (isStandAlone(iwc)) {
-						linkToComments = commentsEngine.getFixedCommentsUri(iwc, null, moduleId, iwc.getRequestURI());
+						linkToComments = commentsEngine.getFixedCommentsUri(null, moduleId, iwc.getRequestURI());
 					}
 					else {
 						return;
