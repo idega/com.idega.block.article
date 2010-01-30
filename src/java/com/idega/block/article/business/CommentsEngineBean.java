@@ -40,7 +40,6 @@ import com.idega.core.cache.IWCacheManager2;
 import com.idega.core.component.bean.RenderedComponent;
 import com.idega.core.contact.data.Email;
 import com.idega.dwr.reverse.ScriptCaller;
-import com.idega.idegaweb.IWApplicationContext;
 import com.idega.idegaweb.IWMainApplication;
 import com.idega.idegaweb.IWMainApplicationSettings;
 import com.idega.idegaweb.IWResourceBundle;
@@ -77,8 +76,6 @@ public class CommentsEngineBean extends IBOSessionBean implements CommentsEngine
 	
 	private FileDownloadNotifier downloadNotifier;
 	
-	private RSSBusiness rss = null;
-		
 	@Autowired
 	private BuilderLogicWrapper builderLogicWrapper;
 
@@ -420,15 +417,12 @@ public class CommentsEngineBean extends IBOSessionBean implements CommentsEngine
 	}
 	
 	private RSSBusiness getRSSBusiness() {
-		if (rss == null) {
-			try {
-				rss = IBOLookup.getServiceInstance(getIWApplicationContext(), RSSBusiness.class);
-			} catch (Exception e) {
-				LOGGER.log(Level.SEVERE, "Error getting: " + RSSBusiness.class, e);
-				return null;
-			}
+		try {
+			return IBOLookup.getServiceInstance(getIWApplicationContext(), RSSBusiness.class);
+		} catch (Exception e) {
+			LOGGER.log(Level.SEVERE, "Error getting: " + RSSBusiness.class, e);
 		}
-		return rss;
+		return null;
 	}
 	
 	/**
@@ -720,11 +714,6 @@ public class CommentsEngineBean extends IBOSessionBean implements CommentsEngine
 		}
 		
 		return iwma == null ? IWMainApplication.getDefaultIWMainApplication() : iwma;
-	}
-	
-	@Override
-	public IWApplicationContext getIWApplicationContext() {
-		return getIWMainApplication().getIWApplicationContext();
 	}
 	
 	private Feed getFeedFromCache(String uri) {
