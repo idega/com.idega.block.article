@@ -40,6 +40,7 @@ import com.idega.core.cache.IWCacheManager2;
 import com.idega.core.component.bean.RenderedComponent;
 import com.idega.core.contact.data.Email;
 import com.idega.dwr.reverse.ScriptCaller;
+import com.idega.idegaweb.IWApplicationContext;
 import com.idega.idegaweb.IWMainApplication;
 import com.idega.idegaweb.IWMainApplicationSettings;
 import com.idega.idegaweb.IWResourceBundle;
@@ -707,6 +708,23 @@ public class CommentsEngineBean extends IBOSessionBean implements CommentsEngine
 		commentsMap.put(uri, comments);
 		
 		return;
+	}
+	
+	@Override
+	protected IWMainApplication getIWMainApplication() {
+		IWMainApplication iwma = null;
+		try {
+			iwma = super.getIWMainApplication();
+		} catch (Exception e) {
+			LOGGER.log(Level.WARNING, "Error getting IWMainApplication from IBOSessionBean, will use default application", e);
+		}
+		
+		return iwma == null ? IWMainApplication.getDefaultIWMainApplication() : iwma;
+	}
+	
+	@Override
+	public IWApplicationContext getIWApplicationContext() {
+		return getIWMainApplication().getIWApplicationContext();
 	}
 	
 	private Feed getFeedFromCache(String uri) {
