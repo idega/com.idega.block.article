@@ -90,9 +90,7 @@ public class DefaultCommentsPersistenceManager extends DefaultSpringBean impleme
 			
 			addAttachment(properties, comment);
 			
-			Object pk = comment.getPrimaryKey();
-			LOGGER.info("Comment with PK " + pk + " was created in DB");
-			return pk;
+			return comment.getPrimaryKey();
 		} catch(Exception e) {
 			LOGGER.log(Level.WARNING, "Error creating " + Comment.class, e);
 		}
