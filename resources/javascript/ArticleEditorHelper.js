@@ -34,8 +34,10 @@ ArticleEditorHelper.checkArticleLinkAndRegisterIfItsCorrect = function(link, win
 	
 	jQuery(link).addClass('articleEditorInitializedForLink');
 	jQuery(link).fancybox({
-		frameWidth: windowinfo.getWindowWidth() * windowResizeIndex,
-		frameHeight: windowinfo.getWindowHeight() * windowResizeIndex,
+		autoScale: false,
+		autoDimensions: false,
+		width: windowinfo.getWindowWidth() * windowResizeIndex,
+		height: windowinfo.getWindowHeight() * windowResizeIndex,
 		onCloseCallback: function() {
 			ArticleEditorHelper.addActionAfterArticleIsSavedAndEditorClosed();
 		}

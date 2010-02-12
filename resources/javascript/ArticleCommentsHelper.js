@@ -515,8 +515,10 @@ CommentsViewer.initializeAttachmentStatisticsLink = function(container) {
 		
 		if (!link.hasClass('commentItemAttachmentDownloadInfoLinkInitialized')) {
 			link.fancybox({
-				frameWidth:		400,
-				frameHeight:	300,
+				autoScale: false,
+				autoDimensions: false,
+				width:	400,
+				height:	300,
 				hideOnContentClick: false
 			});
 			link.addClass('commentItemAttachmentDownloadInfoLinkInitialized');
