@@ -523,7 +523,7 @@ public class ArticleItemViewer extends ContentItemViewer {
 
 			if (CoreUtil.isSingleComponentRenderingProcess(iwc)) {
 				Layer script = new Layer();
-				script.add(ArticleUtil.getSourcesAndActionForArticleEditor(iwc));
+				script.add(ArticleUtil.getSourcesAndActionForArticleEditor());
 				getFacets().put(ContentItemViewer.FACET_JAVA_SCRIPT, script);
 			}
 			else {
