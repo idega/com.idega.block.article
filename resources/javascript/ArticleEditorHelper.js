@@ -36,6 +36,7 @@ ArticleEditorHelper.checkArticleLinkAndRegisterIfItsCorrect = function(link, win
 	jQuery(link).fancybox({
 		autoScale: false,
 		autoDimensions: false,
+		hideOnOverlayClick: false,
 		width: windowinfo.getWindowWidth() * windowResizeIndex,
 		height: windowinfo.getWindowHeight() * windowResizeIndex,
 		onCloseCallback: function() {
