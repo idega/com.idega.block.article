@@ -114,23 +114,23 @@ public class ArticleUtil {
 		List<String> css = new ArrayList<String>(2);
 		Web2Business web2 = ELUtil.getInstance().getBean(Web2Business.class);
 		
-		css.add(web2.getBundleURIToFancyBoxStyleFile());		//	FancyBox
+		css.add(web2.getBundleURIToFancyBoxStyleFile());				//	FancyBox
 		css.add(ContentUtil.getBundle().getVirtualPathWithFileNameString("style/content-admin.css"));
 		return css;
 	}
 	
 	@SuppressWarnings("deprecation")
 	public static final List<String> getJavaScriptFilesForArticle() {
-		List<String> javaScript = new ArrayList<String>(6);
+		List<String> javaScript = new ArrayList<String>();
 		Web2Business web2 = ELUtil.getInstance().getBean(Web2Business.class);
 		
-		javaScript.add(getBundle().getVirtualPathWithFileNameString("javascript/ArticleEditorHelper.js"));
-		javaScript.add(getBundle().getVirtualPathWithFileNameString("javascript/ArticleCategoriesHelper.js"));
 		javaScript.add(CoreConstants.DWR_ENGINE_SCRIPT);
 		javaScript.add("/dwr/interface/LucidEngine.js");
 		javaScript.add(web2.getBundleURIToJQueryLib());					//	jQuery
 		javaScript.addAll(web2.getBundleURIsToFancyBoxScriptFiles());	//	FancyBox
 		javaScript.add(ContentUtil.getBundle().getVirtualPathWithFileNameString("javascript/ContentAdmin.js"));
+		javaScript.add(getBundle().getVirtualPathWithFileNameString("javascript/ArticleEditorHelper.js"));
+		javaScript.add(getBundle().getVirtualPathWithFileNameString("javascript/ArticleCategoriesHelper.js"));
 		
 		return javaScript;
 	}
@@ -143,11 +143,7 @@ public class ArticleUtil {
 		return action;
 	}
 	
-	public static final String getSourcesAndActionForArticleEditor(IWContext iwc) {
-		if (iwc == null) {
-			return null;
-		}
-		
+	public static final String getSourcesAndActionForArticleEditor() {
 		List<String> sources = new ArrayList<String>();
 		//	CSS
 		sources.addAll(getCSSFilesForArticle());
