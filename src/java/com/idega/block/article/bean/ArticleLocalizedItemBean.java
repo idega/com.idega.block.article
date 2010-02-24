@@ -449,7 +449,7 @@ public class ArticleLocalizedItemBean extends ContentItemBean implements Seriali
 		//WebdavRootResource rootResource = session.getWebdavRootResource();
 		RepositoryHelper helper = getRepositoryHelper();
 		Node fileNode = null;
-		boolean success = false;
+		//boolean success = false;
 		try {
 			stream = StringHandler.getStreamFromString(article);
 		
@@ -460,7 +460,7 @@ public class ArticleLocalizedItemBean extends ContentItemBean implements Seriali
 			//not quite clear...
 			fileNode = helper.updateFileContents(session, filePath, stream);
 			fileNode.setProperty(ArticleItemBean.CONTENT_TYPE_WITH_PREFIX, CoreConstants.ARTICLE_FILENAME_SCOPE);
-			success=true;
+			//success=true;
 			//success = rootResource.putMethod(stream, stream);
 			
 			//rootResource.close();
