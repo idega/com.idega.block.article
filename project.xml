@@ -112,7 +112,7 @@
     <dependency>
       <groupId>bundles</groupId>
       <artifactId>com.idega.core</artifactId>
-      <version>3.1.71</version>
+      <version>3.1.94</version>
       <type>jar</type>
       <url>http://www.idega.com/</url>
       <properties>
@@ -132,7 +132,7 @@
     <dependency>
       <groupId>bundles</groupId>
       <artifactId>com.idega.content</artifactId>
-      <version>3.1.17</version>
+      <version>3.1.23</version>
       <type>jar</type>
       <url>http://www.idega.com/</url>
       <properties>
@@ -146,7 +146,7 @@
     <dependency>
       <groupId>bundles</groupId>
       <artifactId>com.idega.slide</artifactId>
-      <version>3.1.3</version>
+      <version>3.1.10</version>
       <type>jar</type>
       <url>http://www.idega.com/</url>
       <properties>
