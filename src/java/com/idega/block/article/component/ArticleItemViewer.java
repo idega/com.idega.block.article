@@ -178,7 +178,7 @@ public class ArticleItemViewer extends ContentItemViewer {
 				((HtmlOutputText) creationDate).setConverter(new WFTimestampConverter(datePattern, showDate, showTime));
 			}
 		}
-		addFeed(IWContext.getIWContext(context));
+		//addFeed(IWContext.getIWContext(context));
 	}
 
 	private boolean canInitField(String attribute) {
@@ -454,9 +454,9 @@ public class ArticleItemViewer extends ContentItemViewer {
 		setValue(ArticleLocalizedItemBean.FIELDNAME_LINK_TO_COMMENT, linkToComments);
 	}
 	
-	private boolean addFeed(IWContext iwc) {
+	/*private boolean addFeed(IWContext iwc) {
 		return ArticleUtil.addArticleFeedFacet(iwc, getFacets());
-	}
+	}*/
 
 	protected boolean isAddCommentsViewer() {
 		return addCommentsViewer;
