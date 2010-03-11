@@ -54,7 +54,7 @@ ArticleEditorHelper.addActionAfterArticleIsSavedAndEditorClosed = function() {
 ArticleEditorHelper.closeAllObjects = function() {
 	closeAllLoadingMessages();
 	
-	jQuery.fn.fancybox.close();
+	jQuery.fancybox.close();
 }
 
 ArticleEditorHelper.deleteSelectedArticle = function(resource, fromArticleList) {
