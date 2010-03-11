@@ -21,6 +21,7 @@ import javax.faces.context.FacesContext;
 
 import org.apache.myfaces.custom.savestate.UISaveState;
 
+import com.idega.block.article.ArticleCacher;
 import com.idega.block.web2.business.Web2Business;
 import com.idega.content.business.ContentUtil;
 import com.idega.content.presentation.ContentItemViewer;
@@ -34,6 +35,7 @@ import com.idega.presentation.Script;
 import com.idega.util.CoreConstants;
 import com.idega.util.CoreUtil;
 import com.idega.util.PresentationUtil;
+import com.idega.util.StringHandler;
 import com.idega.util.StringUtil;
 import com.idega.util.expression.ELUtil;
 import com.idega.webface.WFUtil;
@@ -202,5 +204,26 @@ public class ArticleUtil {
 		facets.put(ContentItemViewer.FACET_FEED_SCRIPT, script);
 		
 		return true;
+	}
+	
+	public static void removeLazyScript(IWContext iwc, UIComponent component) {
+		if (iwc == null || component == null) {
+			return;
+		}
+		
+		ArticleCacher cacher = ArticleCacher.getInstance(iwc.getIWMainApplication());
+		if (cacher.existsInCache(component, iwc)) {
+			String key = cacher.getCacheKey(component, iwc);
+			String content = cacher.getCacheMap().get(key);
+			if (!StringUtil.isEmpty(content)) {
+				String lazyScript = ArticleUtil.getSourcesAndActionForArticleEditor();
+				content = StringHandler.remove(content, lazyScript);
+				cacher.getCacheMap().put(key, content);
+			}
+		}
+		
+		if (component.getFacets().containsKey(ContentItemViewer.FACET_JAVA_SCRIPT)) {
+			component.getFacets().remove(ContentItemViewer.FACET_JAVA_SCRIPT);
+		}
 	}
 }

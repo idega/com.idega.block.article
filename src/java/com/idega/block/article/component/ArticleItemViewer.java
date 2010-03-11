@@ -527,6 +527,8 @@ public class ArticleItemViewer extends ContentItemViewer {
 				getFacets().put(ContentItemViewer.FACET_JAVA_SCRIPT, script);
 			}
 			else {
+				ArticleUtil.removeLazyScript(iwc, this);
+				
 				if (renderingArticlesList == null || !((Boolean) renderingArticlesList)) {
 					PresentationUtil.addStyleSheetsToHeader(iwc, ArticleUtil.getCSSFilesForArticle());
 					PresentationUtil.addJavaScriptSourcesLinesToHeader(iwc, ArticleUtil.getJavaScriptFilesForArticle());

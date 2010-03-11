@@ -314,6 +314,8 @@ public class ArticleListViewer extends ContentItemListViewer {
 				getFacets().put(ContentItemViewer.FACET_JAVA_SCRIPT, script);
 			}
 			else {
+				ArticleUtil.removeLazyScript(iwc, this);
+				
 				PresentationUtil.addStyleSheetsToHeader(iwc, ArticleUtil.getCSSFilesForArticle());
 				PresentationUtil.addJavaScriptSourcesLinesToHeader(iwc, ArticleUtil.getJavaScriptFilesForArticle());
 				PresentationUtil.addJavaScriptActionToBody(iwc, ArticleUtil.getArticleEditorInitializerAction(true));
