@@ -67,7 +67,6 @@ ArticleEditorHelper.deleteSelectedArticle = function(resource, fromArticleList) 
 						var container = null;
 						while ((parents != null && parents.length > 0) && container == null) {
 							var uuids = jQuery('input.contentLisItemsIdentifierStyleClass[type=\'hidden\']', parents);
-							
 							if (uuids != null && uuids.length > 0) {
 								container = jQuery(uuids[0]).parent();
 							}
@@ -75,7 +74,7 @@ ArticleEditorHelper.deleteSelectedArticle = function(resource, fromArticleList) 
 								parents = parents.parent();
 							}
 						}
-						
+
 						if (container == null) {
 							ArticleEditorHelper.needReload = true;
 							ArticleEditorHelper.closeAllObjects();

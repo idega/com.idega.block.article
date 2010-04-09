@@ -358,10 +358,10 @@ public class ArticleListViewer extends ContentItemListViewer {
 			return false;
 		}
 		
-		if (contentEditor && ArticleUtil.isPageTypeBlog(iwc)) {
+		/*if (contentEditor && ArticleUtil.isPageTypeBlog(iwc)) {
 			//	Always showing comments if page is blog type and user has editor rights
 			return true;
-		}
+		}*/
 
 		return showComments;
 	}

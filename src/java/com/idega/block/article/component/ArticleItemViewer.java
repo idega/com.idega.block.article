@@ -10,6 +10,7 @@ package com.idega.block.article.component;
 
 import java.io.IOException;
 import java.sql.Timestamp;
+
 import javax.faces.component.UIComponent;
 import javax.faces.component.html.HtmlOutputText;
 import javax.faces.context.FacesContext;
@@ -25,7 +26,6 @@ import com.idega.content.business.ContentUtil;
 import com.idega.content.presentation.ContentItemToolbar;
 import com.idega.content.presentation.ContentItemViewer;
 import com.idega.content.presentation.ContentViewer;
-import com.idega.core.accesscontrol.business.StandardRoles;
 import com.idega.core.cache.UIComponentCacher;
 import com.idega.idegaweb.IWMainApplication;
 import com.idega.presentation.IWContext;
@@ -119,25 +119,6 @@ public class ArticleItemViewer extends ContentItemViewer {
 	protected UIComponent createFieldComponent(String attribute){
 		if (ContentConstants.ATTRIBUTE_BODY.equals(attribute)) {
 			WFHtml body = new WFHtml();
-			
-			IWContext iwc = CoreUtil.getIWContext();
-			if (iwc != null && (iwc.hasRole(StandardRoles.ROLE_KEY_AUTHOR) || iwc.hasRole(StandardRoles.ROLE_KEY_EDITOR))) {
-				String resourcePath = getResourcePath();
-				
-				if (!StringUtil.isEmpty(resourcePath)) {
-					if (resourcePath.startsWith(CoreConstants.WEBDAV_SERVLET_URI)) {
-						resourcePath = resourcePath.replaceFirst(CoreConstants.WEBDAV_SERVLET_URI, CoreConstants.EMPTY);
-					}
-					if (!resourcePath.endsWith(CoreConstants.SLASH)) {
-						resourcePath = new StringBuilder(resourcePath).append(CoreConstants.SLASH).toString();
-					}
-						
-					HiddenInput identifier = new HiddenInput(ContentConstants.CONTENT_ITEM_IDENTIFIER_NAME, resourcePath);
-					identifier.setStyleClass(ContentConstants.CONTENT_ITEM_IDENTIFIER_STYLE_CLASS);
-					this.getFacets().put(ContentConstants.CONTENT_ITEM_IDENTIFIER_NAME, identifier);
-				}
-			}
-			
 			return body;
 		}
 		else if (ContentConstants.ATTRIBUTE_TEASER.equals(attribute)) {
@@ -484,11 +465,11 @@ public class ArticleItemViewer extends ContentItemViewer {
 			setResourcePath(resourcePathFromRequest);
 		}
 		
-		String articileItemViewerFilter = getArticleItemViewerFilter();
+		String articleItemViewerFilter = getArticleItemViewerFilter();
 		String viewerIdentifierFromRequest = iwc.getParameter(ContentConstants.CONTENT_ITEM_VIEWER_IDENTIFIER_PARAMETER);
 		if (viewerIdentifierFromRequest != null) {
 			//	Identifier is set in request! Checking if it matches with object's parameter
-			if (articileItemViewerFilter != null && viewerIdentifierFromRequest.equals(articileItemViewerFilter)) {
+			if (articleItemViewerFilter != null && viewerIdentifierFromRequest.equals(articleItemViewerFilter)) {
 				//	Identifiers match, checking if new resource path is provided
 				if (!isPartOfArticlesList()) {	//	If part of list (and identifiers matches) then we can not change list's item
 					if (resourcePathFromRequest != null) {
@@ -499,7 +480,7 @@ public class ArticleItemViewer extends ContentItemViewer {
 			}
 		}
 		else {
-			if (articileItemViewerFilter == null) {
+			if (articleItemViewerFilter == null) {
 				//	No identifier set, checking if resource path is provided in request
 				if (resourcePathFromRequest != null) {
 					//	New resource path is set
@@ -534,6 +515,20 @@ public class ArticleItemViewer extends ContentItemViewer {
 					PresentationUtil.addJavaScriptSourcesLinesToHeader(iwc, ArticleUtil.getJavaScriptFilesForArticle());
 					PresentationUtil.addJavaScriptActionToBody(iwc, ArticleUtil.getArticleEditorInitializerAction(true));
 				}
+			}
+
+			String resourcePath = getResourcePath();
+			if (!StringUtil.isEmpty(resourcePath)) {
+				if (resourcePath.startsWith(CoreConstants.WEBDAV_SERVLET_URI)) {
+					resourcePath = resourcePath.replaceFirst(CoreConstants.WEBDAV_SERVLET_URI, CoreConstants.EMPTY);
+				}
+				if (!resourcePath.endsWith(CoreConstants.SLASH)) {
+					resourcePath = new StringBuilder(resourcePath).append(CoreConstants.SLASH).toString();
+				}
+					
+				HiddenInput identifier = new HiddenInput(ContentConstants.CONTENT_ITEM_IDENTIFIER_NAME, resourcePath);
+				identifier.setStyleClass(ContentConstants.CONTENT_ITEM_IDENTIFIER_STYLE_CLASS);
+				this.getFacets().put(ContentConstants.CONTENT_ITEM_IDENTIFIER_NAME, identifier);
 			}
 		}
 		
