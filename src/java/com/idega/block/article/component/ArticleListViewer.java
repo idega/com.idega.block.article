@@ -238,10 +238,6 @@ public class ArticleListViewer extends ContentItemListViewer {
 		this.linkToRSS = linkToRSS;
 	}
 	
-	protected void initializeComponent(FacesContext context) {
-		addFeed(IWContext.getIWContext(context));
-	}
-	
 	private void addCommentsController(IWContext iwc, CommentsViewer comments) {
 		if (!needAddCommentsStuff(iwc, true)) {
 			return;
@@ -325,6 +321,7 @@ public class ArticleListViewer extends ContentItemListViewer {
 			identifier.setStyleClass("contentLisItemsIdentifierStyleClass");
 			getFacets().put(ContentConstants.CONTENT_LIST_ITEMS_IDENTIFIER_NAME, identifier);
 		}
+		addFeed(IWContext.getIWContext(context));
 		
 		super.encodeBegin(context);
 	}

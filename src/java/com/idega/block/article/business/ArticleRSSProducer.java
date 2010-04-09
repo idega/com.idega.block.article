@@ -45,6 +45,7 @@ import com.idega.slide.business.IWSlideSession;
 import com.idega.slide.util.IWSlideConstants;
 import com.idega.util.CoreConstants;
 import com.idega.util.IWTimestamp;
+import com.idega.util.ListUtil;
 import com.idega.util.StringUtil;
 import com.sun.syndication.feed.synd.SyndEntry;
 import com.sun.syndication.feed.synd.SyndFeed;
@@ -103,8 +104,9 @@ public class ArticleRSSProducer extends RSSAbstractProducer implements RSSProduc
 			feedParentFolder = "/files/cms/article/rss/page/"+extraURI;
 			feedFile = "feed_"+iwc.getLocale().getLanguage()+".xml";
 			categories = getCategoriesByURI(extraURI, iwc);
-			if (categories != null)
+			if (categories.isEmpty()) {
 				articles = getArticlesByURI(extraURI, iwc);
+			}
 		}
 		String realURI = CoreConstants.WEBDAV_SERVLET_URI+feedParentFolder+feedFile;		
 		
@@ -257,8 +259,12 @@ public class ArticleRSSProducer extends RSSAbstractProducer implements RSSProduc
 			return null;
 		}
 		if (iwc == null) {
-			return null;
+			iwc = IWContext.getInstance();
+			if (iwc == null) {
+				return null;
+			}
 		}
+		
 		IWTimestamp oldest = null;
 		
 		if (this.numberOfDaysDisplayed > 0) {
@@ -296,7 +302,6 @@ public class ArticleRSSProducer extends RSSAbstractProducer implements RSSProduc
 		}
 		ContentSearch searchBusiness = new ContentSearch(iwc.getIWMainApplication());
 		searchBusiness.setToUseRootAccessForSearch(true);
-		
 		searchBusiness.setToUseDescendingOrder(true);
 		Search search = searchBusiness.createSearch(articleSearch);
 		return search.getSearchResults();
@@ -309,8 +314,7 @@ public class ArticleRSSProducer extends RSSAbstractProducer implements RSSProduc
 		s.addScope(new SearchScope(scope));
 		SearchExpression expression = null;
 		
-		
-		String localeString = "";
+		String localeString = CoreConstants.EMPTY;
 		SearchExpression namePatternExpression = s.compare(CompareOperator.LIKE, IWSlideConstants.PROPERTY_DISPLAY_NAME,"%"+localeString+".article");
 		expression = namePatternExpression;
 		
@@ -321,19 +325,21 @@ public class ArticleRSSProducer extends RSSAbstractProducer implements RSSProduc
 		}
 		
 		List<CompareExpression> categoryExpressions = new ArrayList<CompareExpression>();
-		if(categoryList != null){
-			for (String categoryName: categoryList) {
+		if (categoryList != null) {
+			for (Iterator<String> iter = categoryList.iterator(); iter.hasNext();) {
+				String categoryName = iter.next();
 				categoryExpressions.add(s.compare(CompareOperator.LIKE,IWSlideConstants.PROPERTY_CATEGORY,"%,"+categoryName+",%"));
 			}
 			Iterator<CompareExpression> expr = categoryExpressions.iterator();
 			if(expr.hasNext()){
 				SearchExpression categoryExpression = expr.next();
-				while(expr.hasNext()){
-					categoryExpression = s.or(categoryExpression,expr.next());
+				while (expr.hasNext()) {
+					categoryExpression = s.or(categoryExpression, expr.next());
 				}
 				expression = s.and(expression,categoryExpression);
 			}
 		}
+		
 		s.setWhereExpression(expression);
 		return s;
 	}	
@@ -381,10 +387,18 @@ public class ArticleRSSProducer extends RSSAbstractProducer implements RSSProduc
 		if (moduleId != null){
 			for (int i = 0; i < moduleId.size(); i++) {
 				property = bservice.getProperty(pageKey, moduleId.get(i), "categories");
-				if (property != null){
-					categories.add(property);	
+				if (property != null) {
+					if (property.indexOf(",") != -1) {
+						Collection<String> strings = ListUtil.convertCommaSeparatedStringToList(property);
+						for (String string : strings) {
+							categories.add(string);
+						}
+					}
+					else {
+						categories.add(property);	
+					}
 				}
-				else{
+				else {
 					//Article list viewer without property - displaying all pages
 					categories = null;
 				}
