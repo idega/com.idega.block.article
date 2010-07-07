@@ -61,9 +61,6 @@ public class ArticleItemInfoFetcher {
 			articleBean.setResourcePath(resourcePath);
 			
 		}
-		if (articleBean == null) {
-			return null;
-		}
 		
 		boolean needToLoad = false;
 		String currentResourcePath = articleBean.getResourcePath();
