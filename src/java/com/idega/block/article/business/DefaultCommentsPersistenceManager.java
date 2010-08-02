@@ -399,7 +399,6 @@ public class DefaultCommentsPersistenceManager extends DefaultSpringBean impleme
 		return emails;
 	}
 	
-	@SuppressWarnings("unchecked")
 	protected List<User> getUsersHavingHandlerRole() {
 		String roleKey = getHandlerRoleKey();
 		if (StringUtil.isEmpty(roleKey)) {
