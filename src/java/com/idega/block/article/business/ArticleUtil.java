@@ -30,8 +30,8 @@ import com.idega.core.builder.business.BuilderServiceFactory;
 import com.idega.core.builder.data.ICPage;
 import com.idega.core.localisation.business.LocaleSwitcher;
 import com.idega.idegaweb.IWBundle;
+import com.idega.idegaweb.include.AtomLink;
 import com.idega.presentation.IWContext;
-import com.idega.presentation.Script;
 import com.idega.util.CoreConstants;
 import com.idega.util.CoreUtil;
 import com.idega.util.PresentationUtil;
@@ -198,10 +198,8 @@ public class ArticleUtil {
 		String linkToFeed = new StringBuilder(serverName).append("rss/article").append(feedUri).append("?").append(LocaleSwitcher.languageParameterString)
 							.append(CoreConstants.EQ).append(iwc.getCurrentLocale().toString()).toString();
 		
-		Script script = new Script();
-		script.addScriptLine(new StringBuilder("registerEvent(window, 'load', function(){addFeedSymbolInHeader('").append(linkToFeed)
-								.append("', 'atom', 'Atom 1.0');});").toString());
-		facets.put(ContentItemViewer.FACET_FEED_SCRIPT, script);
+		AtomLink atomFeed = new AtomLink(linkToFeed);
+		PresentationUtil.addFeedLink(iwc, atomFeed);
 		
 		return true;
 	}

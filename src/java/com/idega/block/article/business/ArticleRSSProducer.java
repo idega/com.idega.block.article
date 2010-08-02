@@ -5,15 +5,14 @@ import java.rmi.RemoteException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.servlet.ServletException;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.apache.webdav.lib.search.CompareOperator;
 import org.apache.webdav.lib.search.SearchException;
 import org.apache.webdav.lib.search.SearchExpression;
@@ -29,7 +28,6 @@ import com.idega.block.rss.business.RSSProducer;
 import com.idega.block.rss.data.RSSRequest;
 import com.idega.business.IBOLookup;
 import com.idega.business.IBOLookupException;
-import com.idega.content.business.ContentItemRssProducer;
 import com.idega.content.business.ContentSearch;
 import com.idega.content.business.ContentUtil;
 import com.idega.core.builder.business.BuilderService;
@@ -60,13 +58,18 @@ import com.sun.syndication.feed.synd.SyndFeed;
  */
 public class ArticleRSSProducer extends RSSAbstractProducer implements RSSProducer, IWSlideChangeListener {	
 
+	private static final Logger LOGGER = Logger.getLogger(ArticleRSSProducer.class.getName());
+	
+	private static final String ARTICLE = ContentUtil.getContentBaseFolderPath() + "/article/";
+	private static final String ARTICLE_RSS = ARTICLE + "rss/";
+	
 	protected static final String ARTICLE_SEARCH_KEY = "*.xml*";
+
 	public static final String RSS_FOLDER_NAME = "rss";
 	public static final String RSS_FILE_NAME = "articlefeed.xml";
-
-	public static final String PATH = CoreConstants.WEBDAV_SERVLET_URI + ContentUtil.getContentBaseFolderPath() + "/article/";
+	public static final String PATH = CoreConstants.WEBDAV_SERVLET_URI + ARTICLE;
+	
 	private List<String> rssFileURIsCacheList = new ArrayList<String>();
-	private static Log log = LogFactory.getLog(ContentItemRssProducer.class);
 	
 	private int numberOfDaysDisplayed = 0;
 	
@@ -80,66 +83,67 @@ public class ArticleRSSProducer extends RSSAbstractProducer implements RSSProduc
 		String feedFile = null;
 		String category = getCategory(rssRequest.getExtraUri());
 		String extraURI = rssRequest.getExtraUri();
-		if(extraURI == null){
-			extraURI = "";
+		if (extraURI == null) {
+			extraURI = CoreConstants.EMPTY;
 		}
-			if((!extraURI.endsWith("/")) && (extraURI.length() != 0)){
-				extraURI = extraURI.concat("/");
-			}
+		if ((!extraURI.endsWith(CoreConstants.SLASH)) && (extraURI.length() != 0)) {
+			extraURI = extraURI.concat(CoreConstants.SLASH);
+		}
 		
 		List<String> categories = new ArrayList<String>();
 		List<String> articles = new ArrayList<String>();
 		if (category != null)
 			categories.add(category);
+		
 		IWContext iwc = getIWContext(rssRequest);
-		if(extraURI.length() ==0){
-			feedParentFolder = "/files/cms/article/rss/";
-			feedFile = "all_"+iwc.getLocale().getLanguage()+".xml";			
-		}
-		else if(category != null){		
-			feedParentFolder = "/files/cms/article/rss/category/"+category+"/";
-			feedFile = "feed_"+iwc.getLocale().getLanguage()+".xml";			
-		}
-		else{	//have page URI
-			feedParentFolder = "/files/cms/article/rss/page/"+extraURI;
-			feedFile = "feed_"+iwc.getLocale().getLanguage()+".xml";
+		String language = iwc.getLocale().getLanguage();
+		
+		if (StringUtil.isEmpty(extraURI)) {
+			feedParentFolder = ARTICLE_RSS;
+			feedFile = "all_".concat(language).concat(".xml");			
+		} else if (category != null) {		
+			feedParentFolder = ARTICLE_RSS.concat("category/").concat(category).concat(CoreConstants.SLASH);
+			feedFile = "feed_.".concat(language).concat(".xml");			
+		} else {
+			//	Have page URI
+			feedParentFolder = ARTICLE_RSS.concat("page/").concat(extraURI);
+			feedFile = "feed_".concat(language).concat(".xml");
 			categories = getCategoriesByURI(extraURI, iwc);
-			if (categories.isEmpty()) {
+			if (ListUtil.isEmpty(categories)) {
 				articles = getArticlesByURI(extraURI, iwc);
 			}
 		}
-		String realURI = CoreConstants.WEBDAV_SERVLET_URI+feedParentFolder+feedFile;		
 		
-		if(rssFileURIsCacheList.contains(feedFile)){
+		String realURI = CoreConstants.WEBDAV_SERVLET_URI+feedParentFolder+feedFile;		
+		if (rssFileURIsCacheList.contains(feedFile)) {
 			try {
 				this.dispatch(realURI, rssRequest);
 			} catch (ServletException e) {
-				e.printStackTrace();
+				LOGGER.log(Level.WARNING, "Error dispatching: " + realURI, e);
 			}
-		}
-		else{
-			//generate rss and store and the dispatch to it
-			//and add a listener to that directory
+		} else {
+			//	Generate RSS and store and the dispatch to it and add a listener to that directory
 			try {
 				//todo code the 3 different cases (see description)
-				searchForArticles(rssRequest,feedParentFolder,feedFile, categories, articles, extraURI);
+				searchForArticles(rssRequest, feedParentFolder, feedFile, categories, articles, extraURI);
 				rssFileURIsCacheList.add(feedFile);
-					
+				
 				this.dispatch(realURI, rssRequest);
 			} catch (Exception e) {
-				e.printStackTrace();
+				LOGGER.log(Level.WARNING, "Error while searching or dispatching: " + realURI, e);
 				throw new IOException(e.getMessage());
 			}
 		}
 	}
+	
 	@SuppressWarnings("unchecked")
 	public void searchForArticles(RSSRequest rssRequest, String feedParentPath, String feedFileName, List<String> categories, List<String> articles,
 			String extraURI) {
+		
 		IWContext iwc = getIWContext(rssRequest);
-		//TODO fix serverName
 		boolean getAllArticles = false;
 		
-		if(extraURI.length() ==0){
+		if (StringUtil.isEmpty(extraURI)) {
 			getAllArticles = true;
 		}
 		
@@ -147,43 +151,41 @@ public class ArticleRSSProducer extends RSSAbstractProducer implements RSSProduc
 		serverName = serverName.substring(0, serverName.length()-1);
 		
 		Collection<SearchResult> results = getArticleSearchResults(PATH, categories, iwc);
-		if (results == null) {
-			log.error("ContentSearch.doSimpleDASLSearch returned results Collection, which is null: " + results);
+		if (ListUtil.isEmpty(results)) {
+			LOGGER.warning("No results found in: " + PATH + " by the categories: " + categories);
 			return;
 		}
+		
 		List<String> urisToArticles = new ArrayList<String>();
 		for (SearchResult result: results) {
 			urisToArticles.add(result.getSearchResultURI());
 		}
-		if(!articles.isEmpty()){
-			if(categories.isEmpty()){
+		
+		if (!ListUtil.isEmpty(articles)) {
+			if (ListUtil.isEmpty(categories)) {
 				urisToArticles = articles;
-			}
-			else{
+			} else {
 				urisToArticles.addAll(articles);
 			}
 		}
 		
-		
-		if(!articles.isEmpty() && categories.isEmpty())			
+		if (!ListUtil.isEmpty(articles) && ListUtil.isEmpty(categories))			
 			urisToArticles = articles;
 		
 		RSSBusiness rss = null;
 		SyndFeed articleFeed = null;
-		Date now = new Date();
-		long time = now.getTime();
+		long time = System.currentTimeMillis();
 		try {
-			rss = IBOLookup.getServiceInstance(iwc,RSSBusiness.class);			
-		} catch (IBOLookupException e1) {
-			e1.printStackTrace();
+			rss = IBOLookup.getServiceInstance(iwc, RSSBusiness.class);			
+		} catch (IBOLookupException e) {
+			LOGGER.log(Level.WARNING, "Error getting " + RSSBusiness.class, e);
 		}
 
-		String description = "";
-		String title = "";
-		if ((results.isEmpty()) && !getAllArticles){
+		String description = CoreConstants.EMPTY;
+		String title = CoreConstants.EMPTY;
+		if (ListUtil.isEmpty(results) && !getAllArticles) {
 			description = "No articles found. Empty feed";
-		}
-		else{
+		} else {
 			description = "Article feed generated by IdegaWeb ePlatform, Idega Software, http://www.idega.com";
 			
 			BuilderService bservice = null;
@@ -191,21 +193,20 @@ public class ArticleRSSProducer extends RSSAbstractProducer implements RSSProduc
 			try {
 				if (!StringUtil.isEmpty(extraURI)) {
 					bservice = BuilderServiceFactory.getBuilderService(iwc);
-					pageKey = bservice.getExistingPageKeyByURI("/"+extraURI);
+					pageKey = bservice.getExistingPageKeyByURI(CoreConstants.SLASH + extraURI);
 					ICPage icpage = bservice.getICPage(pageKey);
 					title = icpage.getName();
 				}			
-			} catch (RemoteException e1) {
-				e1.printStackTrace();
+			} catch (Exception e) {
+				LOGGER.log(Level.WARNING, "Error getting page name from: " + extraURI, e);
 			}			
 
-			SyndFeed allArticles = rss.createNewFeed(title, serverName , description, "atom_1.0", iwc.getCurrentLocale().getLanguage(), new Timestamp(time));
+			String lang = iwc.getCurrentLocale().getLanguage();
+			SyndFeed allArticles = rss.createNewFeed(title, serverName , description, "atom_1.0", lang, new Timestamp(time));
 				
 			List<SyndEntry> allEntries = new ArrayList<SyndEntry>();
 			for (int i = 0; i < urisToArticles.size(); i++) {
-				String lang = iwc.getCurrentLocale().getLanguage();
-		
-				String articleURL = serverName + urisToArticles.get(i)+"/"+lang+".xml";
+				String articleURL = serverName.concat(urisToArticles.get(i)).concat(CoreConstants.SLASH).concat(lang).concat(".xml");
 				articleFeed = rss.getFeed(articleURL);
 				if (articleFeed != null)
 					allEntries.addAll(articleFeed.getEntries());
@@ -215,27 +216,27 @@ public class ArticleRSSProducer extends RSSAbstractProducer implements RSSProduc
 			String allArticlesContent = null;
 			try {
 				allArticlesContent = rss.convertFeedToAtomXMLString(allArticles);
-			} catch (RemoteException e) {
-				e.printStackTrace();
+			} catch (Exception e) {
+				LOGGER.log(Level.WARNING, "Error converting to Atom from: " + allArticles, e);
 			}
 			
 			try {
 				IWSlideService service = this.getIWSlideService(rssRequest);		
 				service.uploadFileAndCreateFoldersFromStringAsRoot(feedParentPath, feedFileName, allArticlesContent, RSSAbstractProducer.RSS_CONTENT_TYPE, true);
 			} catch (RemoteException e) {
-				e.printStackTrace();
+				LOGGER.log(Level.WARNING, "Error uploading to: " + feedParentPath + feedFileName + " file: " + allArticlesContent, e);
 			}
 		}
 	}
 	
 	public void onSlideChange(IWContentEvent contentEvent) {
-//			On a file change this code checks if an rss file already exists and if so updates it (overwrites) with a new folder list
-			String URI = contentEvent.getContentEvent().getUri();
-			//only do it for articles (whenever something changes in the articles folder)
-			if(URI.indexOf("/cms/article/")>-1){
-				//TODO dont remove cache on COmments change, just check the URI for commentesrss.
-				getrssFileURIsCacheList().clear();
-			}
+		//	On a file change this code checks if RSS file already exists and if so updates it (overwrites) with a new folder list
+		String uri = contentEvent.getContentEvent().getUri();
+		//	Only do it for articles (whenever something changes in the articles folder)
+		if (!StringUtil.isEmpty(uri) && uri.indexOf("/cms/article/") >-1  ) {
+			// TODO don't remove cache on comments change, just check the URI for comments RSS.
+			getrssFileURIsCacheList().clear();
+		}
 	}	
 	
 	/**
@@ -243,9 +244,9 @@ public class ArticleRSSProducer extends RSSAbstractProducer implements RSSProduc
 	 * @return
 	 */
 	protected String fixURI(RSSRequest rssRequest) {
-		String uri = "/"+rssRequest.getExtraUri();
-		if(!uri.endsWith("/")){
-			uri+="/";
+		String uri = CoreConstants.SLASH+rssRequest.getExtraUri();
+		if(!uri.endsWith(CoreConstants.SLASH)){
+			uri+=CoreConstants.SLASH;
 		}
 		
 		if(!uri.startsWith(CoreConstants.PATH_FILES_ROOT)){
@@ -289,7 +290,7 @@ public class ArticleRSSProducer extends RSSAbstractProducer implements RSSProduc
 			if(folder.startsWith(webDavUri)){
 				folder = folder.substring(webDavUri.length());
 			}
-			if(folder.startsWith("/")){
+			if(folder.startsWith(CoreConstants.SLASH)){
 				folder = folder.substring(1);
 			}
 		}
@@ -306,6 +307,7 @@ public class ArticleRSSProducer extends RSSAbstractProducer implements RSSProduc
 		Search search = searchBusiness.createSearch(articleSearch);
 		return search.getSearchResults();
 	}
+	
 	public SearchRequest getSearchRequest(String scope, Locale locale, IWTimestamp oldest, List<String> categoryList) throws SearchException {
 		SearchRequest s = new SearchRequest();
 		s.addSelection(IWSlideConstants.PROPERTY_DISPLAY_NAME);
@@ -344,13 +346,13 @@ public class ArticleRSSProducer extends RSSAbstractProducer implements RSSProduc
 		return s;
 	}	
 	
-
 	/**
 	 * @return Returns the rssFileURIsCacheList.
 	 */
 	protected List<String> getrssFileURIsCacheList() {
 		return rssFileURIsCacheList;
 	}
+	
 	public String getCategory(String extraURI){
 		String category = null;
 		if(extraURI == null)
@@ -360,14 +362,13 @@ public class ArticleRSSProducer extends RSSAbstractProducer implements RSSProduc
 		if(extraURI.startsWith("category/"))
 			category = extraURI.substring("category/".length(), extraURI.length());
 		else return null;
-		if(category.endsWith("/"))
+		if(category.endsWith(CoreConstants.SLASH))
 			category = category.substring(0, category.length()-1);
 		return category;
 	}
 
 	public String getPageURI(String extraURI){
-//		String pageURI = nuell;
-		if(extraURI.endsWith("/"))
+		if(extraURI.endsWith(CoreConstants.SLASH))
 			return extraURI.substring(0, extraURI.length()-1);
 		else 
 			return extraURI;
@@ -382,7 +383,7 @@ public class ArticleRSSProducer extends RSSAbstractProducer implements RSSProduc
 		} catch (RemoteException e) {
 			e.printStackTrace();
 		}
-		String pageKey = bservice.getExistingPageKeyByURI("/"+URI);		
+		String pageKey = bservice.getExistingPageKeyByURI(CoreConstants.SLASH+URI);		
 		List<String> moduleId = bservice.getModuleId(pageKey, ArticleListViewer.class.getName());
 		if (moduleId != null){
 			for (int i = 0; i < moduleId.size(); i++) {
@@ -415,7 +416,7 @@ public class ArticleRSSProducer extends RSSAbstractProducer implements RSSProduc
 		} catch (RemoteException e) {
 			e.printStackTrace();
 		}
-		String pageKey = bservice.getExistingPageKeyByURI("/"+URI);
+		String pageKey = bservice.getExistingPageKeyByURI(CoreConstants.SLASH+URI);
 		
 		List<String> moduleId = bservice.getModuleId(pageKey, ArticleItemViewer.class.getName());
 

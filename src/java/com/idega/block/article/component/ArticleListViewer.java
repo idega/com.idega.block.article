@@ -389,7 +389,7 @@ public class ArticleListViewer extends ContentItemListViewer {
 	public void setArticleItemViewerFilter(String articleItemViewerFilter) {
 		super.setArticleItemViewerFilter(articleItemViewerFilter);
 	}
-	
+
 	@Override
 	public boolean isShowAllItems() {
 		return super.isShowAllItems();
