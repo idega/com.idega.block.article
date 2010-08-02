@@ -194,9 +194,8 @@ public class CommentsEngineBean extends IBOSessionBean implements CommentsEngine
 		return commentsManager.getUriForCommentLink(properties);
 	}
 	
-	@SuppressWarnings("unchecked")
 	private void clearArticleCache() {
-		Map articlesCache = getArticlesCache();
+		Map<String, String> articlesCache = getArticlesCache();
 		if (articlesCache == null) {
 			Logger.getLogger(CommentsEngineBean.class.getName()).log(Level.WARNING, "Aticle cache is null, can not clear it!");
 		}
@@ -336,8 +335,7 @@ public class CommentsEngineBean extends IBOSessionBean implements CommentsEngine
 		return id;
 	}
 	
-	@SuppressWarnings("unchecked")
-	private List<Entry> initEntries(List oldEntries) {
+	private List<Entry> initEntries(@SuppressWarnings("rawtypes") List oldEntries) {
 		if (ListUtil.isEmpty(oldEntries)) {
 			return new ArrayList<Entry>();
 		}
