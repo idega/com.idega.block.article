@@ -24,7 +24,6 @@ import java.util.logging.Logger;
 
 import javax.jcr.Node;
 import javax.jcr.RepositoryException;
-import javax.jcr.Session;
 
 import org.apache.commons.httpclient.HttpException;
 import org.apache.webdav.lib.WebdavResource;
@@ -41,7 +40,6 @@ import com.idega.content.bean.ContentItemFeedBean;
 import com.idega.content.bean.ContentItemField;
 import com.idega.content.bean.ContentItemFieldBean;
 import com.idega.content.business.categories.CategoryBean;
-import com.idega.core.content.RepositoryHelper;
 import com.idega.data.IDOStoreException;
 import com.idega.presentation.IWContext;
 import com.idega.slide.business.IWSlideSession;
@@ -49,6 +47,7 @@ import com.idega.slide.util.WebdavExtendedResource;
 import com.idega.slide.util.WebdavRootResource;
 import com.idega.util.CoreConstants;
 import com.idega.util.CoreUtil;
+import com.idega.util.IOUtil;
 import com.idega.util.StringHandler;
 import com.idega.util.StringUtil;
 import com.idega.util.xml.XmlUtil;
@@ -59,7 +58,7 @@ import com.idega.xml.XMLNamespace;
 
 /**
  * <p>
- * This is a JSF managed bean that manages each article xml document 
+ * This is a JSF managed bean that manages each article xml document
  * instance per language/locale.
  * <p>
  * Last modified: $Date: 2009/01/06 15:17:14 $ by $Author: tryggvil $
@@ -68,18 +67,15 @@ import com.idega.xml.XMLNamespace;
  * @version $Revision: 1.31 $
  */
 public class ArticleLocalizedItemBean extends ContentItemBean implements Serializable, ContentItem {
-	
-	/**
-	 * Comment for <code>serialVersionUID</code>
-	 */
+
 	private static final long serialVersionUID = -7871069835129148485L;
 
 	private static final Logger LOGGER = Logger.getLogger(ArticleLocalizedItemBean.class.getName());
-	
+
 	private boolean _isUpdated = false;
-	
+
 	private static final String ROOT_ELEMENT_NAME_ARTICLE = "article";
-	
+
 	public final static String FIELDNAME_AUTHOR = "author";
 	public final static String FIELDNAME_HEADLINE = "headline";
 	public final static String FIELDNAME_TEASER = "teaser";
@@ -92,30 +88,25 @@ public class ArticleLocalizedItemBean extends ContentItemBean implements Seriali
 	public final static String FIELDNAME_FILENAME = "filename";
 	public final static String FIELDNAME_FOLDER_LOCATION = "folder_location"; // ../cms/article/YYYY/MM/
 	public final static String FIELDNAME_CONTENT_LANGUAGE = "content_language";
-	//public final static String FIELDNAME_LANGUAGE_CHANGE = "language_change";
-	
-	
-	private final static String[] ATTRIBUTE_ARRAY = new String[] {FIELDNAME_AUTHOR,FIELDNAME_CREATION_DATE,FIELDNAME_HEADLINE,FIELDNAME_TEASER,ContentItemBean.FIELDNAME_BODY};
-	//private final static String[] ACTION_ARRAY = new String[] {"edit","delete"};
+
+	private final static String[] ATTRIBUTE_ARRAY = new String[] {
+		FIELDNAME_AUTHOR, FIELDNAME_CREATION_DATE, FIELDNAME_HEADLINE, FIELDNAME_TEASER, ContentItemBean.FIELDNAME_BODY
+	};
 
 	transient XMLNamespace idegaXMLName = new XMLNamespace("http://xmlns.idega.com/block/article/xml");
 	String xIdegaXMLNameSpace = "http://xmlns.idega.com/block/article/xml";
-	//private String baseFolderLocation = null;
 	private ArticleItemBean articleItem;
-	
+
 	private XMLNamespace atomNamespace = new XMLNamespace("http://www.w3.org/2005/Atom");
 	private XMLNamespace dcNamespace = new XMLNamespace("http://purl.org/dc/elements/1.1/");
 	private XMLNamespace commentNamespace = new XMLNamespace("http://wellformedweb.org/CommentAPI/");
-	
+
 	private String articleCategories = null; // This string should be set in EditArticleView, parsing submitted categories
-	
-	/**
-	 * Default constructor.
-	 */
+
 	public ArticleLocalizedItemBean() {
 		clear();
 	}
-	
+
 	public ArticleLocalizedItemBean(Locale locale) {
 		setLocale(locale);
 		clear();
@@ -125,13 +116,12 @@ public class ArticleLocalizedItemBean extends ContentItemBean implements Seriali
 	public String[] getContentFieldNames(){
 		return ATTRIBUTE_ARRAY;
 	}
-	
+
 	@Override
 	public String[] getToolbarActions(){
-		//return ACTION_ARRAY;
 		return super.getToolbarActions();
 	}
-	
+
 	public String getHeadline() { return (String)getValue(FIELDNAME_HEADLINE); }
 	public String getTeaser() { return (String)getValue(FIELDNAME_TEASER); }
 	public String getBody() { return (String)getValue(ContentItemBean.FIELDNAME_BODY); }
@@ -139,55 +129,37 @@ public class ArticleLocalizedItemBean extends ContentItemBean implements Seriali
 	public String getSource() { return (String)getValue(FIELDNAME_SOURCE); }
 	public String getComment() { return (String)getValue(FIELDNAME_COMMENT); }
 	public String getLinkToComments() { return (String)getValue(FIELDNAME_LINK_TO_COMMENT); }
-	public List getImages() { return getItemFields(FIELDNAME_IMAGES); }
-	//public String getFilename() { return (String)getValue(FIELDNAME_FILENAME); }
-	
+	public List<ContentItemField> getImages() { return getItemFields(FIELDNAME_IMAGES); }
 
-//	public void setArticleResourcePath(String path) {
-//		if(path!=null){
-//			if(path.indexOf("."+ARTICLE_FILENAME_SCOPE) < 0 || !path.endsWith(ARTICLE_SUFFIX)){
-//				throw new RuntimeException("["+this.getClass().getName()+"]: setArticleResourcePath("+path+") path is not valid article path!");
-//			}
-//		}
-//		setResourcePath(path);
-//	}
-	
 	public String getContentLanguage() {
-		//String setContentLanguage = (String)getValue(FIELDNAME_CONTENT_LANGUAGE);
-		//if(setContentLanguage!=null){
-		//	return setContentLanguage;
-		//}
-		//else{
-			return getLanguage();
-		//}
+		return getLanguage();
 	}
-	//public String getLanguageChange() { return (String)getValue(FIELDNAME_LANGUAGE_CHANGE); }
 
 	public void setHeadline(String s) { setValue(FIELDNAME_HEADLINE, s); }
-	public void setHeadline(Object o) { setValue(FIELDNAME_HEADLINE, o.toString()); } 
-	public void setTeaser(String s) { setValue(FIELDNAME_TEASER, s); } 
+	public void setHeadline(Object o) { setValue(FIELDNAME_HEADLINE, o.toString()); }
+	public void setTeaser(String s) { setValue(FIELDNAME_TEASER, s); }
 	public void setBody(String body) {
 		setValue(ContentItemBean.FIELDNAME_BODY, body);
-	} 
-	public void setAuthor(String s) { setValue(FIELDNAME_AUTHOR, s); } 
+	}
+	public void setAuthor(String s) { setValue(FIELDNAME_AUTHOR, s); }
 	public void setSource(String s) { setValue(FIELDNAME_SOURCE, s); }
-	
+
 	public void setComment(String comment) {
 		setValue(FIELDNAME_COMMENT, comment);
 	}
-	
+
 	public void setLinkToComments(String linkToComments) {
 		setValue(FIELDNAME_LINK_TO_COMMENT, linkToComments);
 	}
-	
-	public void setImages(List l) { setItemFields(FIELDNAME_IMAGES, l); }
-	
+
+	public void setImages(List<ContentItemField> l) { setItemFields(FIELDNAME_IMAGES, l); }
+
 	@Override
 	public void setPublishedDate(Timestamp date) { super.setPublishedDate(date); }
-	
+
 	@Override
 	public Timestamp getPublishedDate() { return super.getPublishedDate(); }
-	
+
 	@Override
 	public void setLanguage(String lang){
 		super.setLanguage(lang);
@@ -197,9 +169,9 @@ public class ArticleLocalizedItemBean extends ContentItemBean implements Seriali
 	public boolean isUpdated() { return this._isUpdated; }
 	public void setUpdated(boolean b) { this._isUpdated = b; }
 	public void setUpdated(Boolean b) { this._isUpdated = b.booleanValue(); }
-	
+
 	/**
-	 * Clears all all attributes for this bean. 
+	 * Clears all all attributes for this bean.
 	 */
 	@Override
 	public void clear() {
@@ -212,19 +184,16 @@ public class ArticleLocalizedItemBean extends ContentItemBean implements Seriali
 		setSource(null);
 		setComment(null);
 		setImages(null);
-		//setFilename(null);
-//		setFolderLocation(null);
 		this._isUpdated = false;
-		//setBaseFolderLocation(null);
 	}
-	
+
 	/**
 	 * Adds an image to this article item.
 	 */
 	public void addImage(byte[] imageData, String contentType) {
-		List l = getImages();
+		List<ContentItemField> l = getImages();
 		if (l == null) {
-			l = new ArrayList();
+			l = new ArrayList<ContentItemField>();
 		}
 		ContentItemField field = new ContentItemFieldBean();
 		field.setBinaryValue(imageData);
@@ -233,52 +202,37 @@ public class ArticleLocalizedItemBean extends ContentItemBean implements Seriali
 		l.add(field);
 		setImages(l);
 	}
-	
+
 	/**
 	 * Removes the image with the specified image number from this article item.
 	 */
 	public void removeImage(Integer imageNumber) {
 		int imageNo = imageNumber.intValue();
 		try {
-			List l = getImages();
+			List<ContentItemField> l = getImages();
 			l.remove(imageNo);
 			for (int i = 0; i < l.size(); i++) {
-				ContentItemField field = (ContentItemField) l.get(i);
+				ContentItemField field = l.get(i);
 				field.setOrderNo(i);
 			}
 		} catch (Exception e) {
 			//No action...
 		}
 	}
-	
+
 	/**
 	 * <p>
 	 * Try to publish the article if it's
 	 * </p>
 	 */
 	protected void tryPublish(){
-		//TODO: Implement publishing here:
 		setPublished();
 	}
-	
+
 	protected void setPublished(){
 		setStatus(ContentItemCase.STATUS_PUBLISHED);
 	}
-	
-	private boolean closeInputStream(InputStream stream) {
-		if (stream == null) {
-			return true;
-		}
-		
-		try {
-			stream.close();
-		} catch (IOException e) {
-			e.printStackTrace();
-			return false;
-		}
-		return true;
-	}
-	
+
 	/**
 	 * Returns the Article Item as an XML-formatted string
 	 * @return the XML string
@@ -289,12 +243,12 @@ public class ArticleLocalizedItemBean extends ContentItemBean implements Seriali
 		//	Remove absolute references for example
 		prettifyBody();
 		prettifyTeaser();
-		
+
 		String body = getBody();
 		if (body == null) {
 			body = ArticleConstants.EMPTY;
 		}
-		
+
 		String teaser = getTeaser();
 		if (teaser == null) {
 			teaser = ArticleConstants.EMPTY;
@@ -307,7 +261,7 @@ public class ArticleLocalizedItemBean extends ContentItemBean implements Seriali
 		String comment = getComment();
 		String moduleClass = ArticleItemViewer.class.getName();
 		String linkToComments = getLinkToComments();
-		
+
 		try{
 			IWContext iwc = CoreUtil.getIWContext();
 			return getFeedEntryAsXML(iwc, feedTitle, feedDescription, feedTitle, teaser, body, author, categories, source, comment,
@@ -332,16 +286,16 @@ public class ArticleLocalizedItemBean extends ContentItemBean implements Seriali
 	 */
 /*	public String getAsXMLFromXMLBeans() {
 		ArticleDocument articleDoc = ArticleDocument.Factory.newInstance();
-	    
+
 	    ArticleDocument.Article article =  articleDoc.addNewArticle();
-	    
+
 		article.setHeadline(getHeadline());
 		article.setBody(getBody());
 		article.setTeaser(getTeaser());
 		article.setAuthor(getAuthor());
 		article.setSource(getSource());
 		article.setComment(getComment());
-		
+
 		return articleDoc.toString();
 	}
 */
@@ -352,10 +306,10 @@ public class ArticleLocalizedItemBean extends ContentItemBean implements Seriali
 		InputStream stream = null;
 		try {
 
-	
+
 			//	Setting the path for creating new file/creating localized version/updating existing file
 			String filePath = getResourcePath();
-			
+
 			String article = getAsXML();
 			if (article == null) {
 				return;
@@ -372,14 +326,14 @@ public class ArticleLocalizedItemBean extends ContentItemBean implements Seriali
 			}
 			try {
 				ArticleLocalizedItemBean newBean = new ArticleLocalizedItemBean(getLocale());
-				try {
-					if(isPersistToJCR() && this.getSession()!=null){
-						newBean.setSession(this.getSession());
-					}
-				} catch (RepositoryException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
+//				try {
+//					if(isPersistToJCR() && this.getSession()!=null){
+//						newBean.setSession(this.getSession());
+//					}
+//				} catch (RepositoryException e) {
+//					// TODO Auto-generated catch block
+//					e.printStackTrace();
+//				}
 				newBean.setArticleItem(this.getArticleItem());
 				newBean.setResourcePath(filePath);
 				newBean.load();
@@ -394,7 +348,7 @@ public class ArticleLocalizedItemBean extends ContentItemBean implements Seriali
 		catch (XMLException e) {
 			throw new RuntimeException(e);
 		}
-	
+
 		if (getRequestedStatus() != null) {
 			setStatus(getRequestedStatus());
 			setRequestedStatus(null);
@@ -406,22 +360,22 @@ public class ArticleLocalizedItemBean extends ContentItemBean implements Seriali
 		IWContext iwc = CoreUtil.getIWContext();
 		IWSlideSession session = getIWSlideSession(iwc);
 		WebdavRootResource rootResource = session.getWebdavRootResource();
-		
+
 		boolean success = false;
 		try {
 			stream = StringHandler.getStreamFromString(article);
-		
+
 			//Conflict fix: uri for creating but path for updating
 			//Note! This is a patch to what seems to be a bug in WebDav
 			//Apparently in verion below works in some cases and the other in other cases.
 			//Seems to be connected to creating files in folders created in same tomcat session or similar
 			//not quite clear...
-		
+
 			success = rootResource.putMethod(filePath, stream);
 		} catch(Exception e) {
 			e.printStackTrace();
 		} finally {
-			closeInputStream(stream);
+			IOUtil.close(stream);
 		}
 		if (success) {
 			rootResource.proppatchMethod(filePath, ArticleItemBean.PROPERTY_CONTENT_TYPE,CoreConstants.ARTICLE_FILENAME_SCOPE,true);
@@ -435,64 +389,34 @@ public class ArticleLocalizedItemBean extends ContentItemBean implements Seriali
 			} catch(Exception e) {
 				e.printStackTrace();
 			} finally {
-				closeInputStream(stream);
+				IOUtil.close(stream);
 			}
 		}
-		
+
 		rootResource.close();
 	}
-	
-	protected void storeToJCR(InputStream stream, String filePath,
-			String article) throws RepositoryException, IOException {
-		//IWContext iwc = CoreUtil.getIWContext();
-		Session session = getSession();
-		//WebdavRootResource rootResource = session.getWebdavRootResource();
-		RepositoryHelper helper = getRepositoryHelper();
+
+	protected void storeToJCR(InputStream stream, String filePath, String article) throws RepositoryException, IOException {
 		Node fileNode = null;
-		//boolean success = false;
 		try {
 			stream = StringHandler.getStreamFromString(article);
-		
+
 			//Conflict fix: uri for creating but path for updating
 			//Note! This is a patch to what seems to be a bug in WebDav
 			//Apparently in verion below works in some cases and the other in other cases.
 			//Seems to be connected to creating files in folders created in same tomcat session or similar
 			//not quite clear...
-			fileNode = helper.updateFileContents(session, filePath, stream);
+			fileNode = getRepositoryService().updateFileContents(filePath, stream);//helper.updateFileContents(session, filePath, stream);
 			fileNode.setProperty(ArticleItemBean.CONTENT_TYPE_WITH_PREFIX, CoreConstants.ARTICLE_FILENAME_SCOPE);
-			//success=true;
-			//success = rootResource.putMethod(stream, stream);
-			
-			//rootResource.close();
-			if(fileNode!=null){
-				fileNode.save();
-			}
-			
 		} catch(Exception e) {
 			e.printStackTrace();
 		} finally {
-			closeInputStream(stream);
+			IOUtil.close(stream);
 		}
-		/*if (success) {
-			rootResource.proppatchMethod(filePath, ArticleItemBean.PROPERTY_CONTENT_TYPE,CoreConstants.ARTICLE_FILENAME_SCOPE,true);
-		}
-		else {
-			try {
-				stream = StringHandler.getStreamFromString(article);
-				String fixedURL = session.getURI(filePath);
-				rootResource.putMethod(fixedURL, stream);
-				rootResource.proppatchMethod(fixedURL, ArticleItemBean.PROPERTY_CONTENT_TYPE,CoreConstants.ARTICLE_FILENAME_SCOPE,true);
-			} catch(Exception e) {
-				e.printStackTrace();
-			} finally {
-				closeInputStream(stream);
-			}
-		}*/
-		
 	}
-	
+
 	/**
-	 * 
+	 *
 	 */
 	protected void prettifyBody() {
 		String s = prettify(getBody());
@@ -507,12 +431,12 @@ public class ArticleLocalizedItemBean extends ContentItemBean implements Seriali
 			setTeaser(s);
 		}
 	}
-	
+
 	protected String prettify(String toPrettify) {
 		if (toPrettify == null) {
 			return null;
 		}
-		
+
 		String text = toPrettify;
 		//	Use JTidy to clean up the HTML
 		Tidy tidy = new Tidy();
@@ -525,21 +449,21 @@ public class ArticleLocalizedItemBean extends ContentItemBean implements Seriali
 		try {
 			stream = StringHandler.getStreamFromString(text);
 			baos = new ByteArrayOutputStream();
-			
+
 			tidy.parse(stream, baos);
 			text = baos.toString(CoreConstants.ENCODING_UTF8);
 		}
 		catch (Exception e) {
 			e.printStackTrace();
 		} finally {
-			closeInputStream(stream);
+			IOUtil.close(stream);
 			closeOutputStream(baos);
 		}
 		if (StringUtil.isEmpty(text)) {
 			return toPrettify;
 		}
 		text = removeAbsoluteReferences(text);
-		
+
 		return getOnlyBodyContent(text);
 	}
 
@@ -547,21 +471,21 @@ public class ArticleLocalizedItemBean extends ContentItemBean implements Seriali
 		if (outputStream == null) {
 			return false;
 		}
-		
+
 		try {
 			outputStream.close();
 		} catch (IOException e) {
 			e.printStackTrace();
 			return false;
 		}
-		
+
 		return true;
 	}
-	
+
 	private String removeAbsoluteReferences(String text) {
 		return StringHandler.removeAbsoluteReferencies(text);
 	}
-	
+
 	/**
 	 * Loads an xml file specified by the webdav resource
 	 * The beans atributes are then set according to the information in the XML file
@@ -585,9 +509,9 @@ public class ArticleLocalizedItemBean extends ContentItemBean implements Seriali
 		} catch (Exception e) {
 			LOGGER.log(Level.SEVERE, "Can not load article", e);  //To change body of catch statement use File | Settings | File Templates.
 		} finally {
-			closeInputStream(stream);
+			IOUtil.close(stream);
 		}
-		
+
 		return parseXMLDocument(bodyDoc);
 	}
 
@@ -600,13 +524,10 @@ public class ArticleLocalizedItemBean extends ContentItemBean implements Seriali
 		XMLDocument bodyDoc = null;
 		InputStream stream = null;
 		try {
-			if (webdavResource.getPrimaryNodeType().isNodeType(RepositoryHelper.NODE_TYPE_FOLDER)) {
-				throw new RuntimeException(webdavResource+" is folder but should be file");
-			}
 			Node theArticle = webdavResource;
-			if (theArticle != null && !theArticle.getPrimaryNodeType().isNodeType(RepositoryHelper.NODE_TYPE_FOLDER)) {
+			if (theArticle != null) {
 				setResourcePath(theArticle.getPath());
-				stream = RepositoryHelper.getFileContents(theArticle);
+				stream = getRepositoryService().getFileContents(theArticle);
 				bodyDoc = new XMLDocument(XmlUtil.getJDOMXMLDocument(stream));
 			} else {
 				bodyDoc = null;
@@ -614,12 +535,12 @@ public class ArticleLocalizedItemBean extends ContentItemBean implements Seriali
 		} catch (Exception e) {
 			LOGGER.log(Level.SEVERE, "Can not load article", e);  //To change body of catch statement use File | Settings | File Templates.
 		} finally {
-			closeInputStream(stream);
+			IOUtil.close(stream);
 		}
-		
+
 		return parseXMLDocument(bodyDoc);
 	}
-	
+
 	private boolean parseXMLDocument(XMLDocument bodyDoc) {
 		if (bodyDoc == null || bodyDoc.getDocument() == null) {
 			//	Article not found
@@ -628,16 +549,16 @@ public class ArticleLocalizedItemBean extends ContentItemBean implements Seriali
 			return false;
 		}
 		XMLElement rootElement = bodyDoc.getRootElement();
-		
+
 		boolean isOldArticleXMLFile = true;
 		if (!ROOT_ELEMENT_NAME_ARTICLE.equals(rootElement.getName())) {
 			isOldArticleXMLFile = false;
 		}
-		
+
 		if (!isOldArticleXMLFile) {
 			return loadArticleFromFeed(rootElement);
 		}
-	
+
 		//	Language
 		try {
 			XMLElement language  = rootElement.getChild(FIELDNAME_CONTENT_LANGUAGE, getIdegaXMLNameSpace());
@@ -646,10 +567,10 @@ public class ArticleLocalizedItemBean extends ContentItemBean implements Seriali
 			} else {
 				setLanguage(language.getText());
 			}
-		} catch(Exception e) {	
+		} catch(Exception e) {
 			setLanguage(null);
 		}
-		
+
 		//	Headline
 		try {
 			XMLElement headline = rootElement.getChild(FIELDNAME_HEADLINE,getIdegaXMLNameSpace());
@@ -662,7 +583,7 @@ public class ArticleLocalizedItemBean extends ContentItemBean implements Seriali
 			LOGGER.log(Level.WARNING, "Can not load headline", e);
 			setHeadline(CoreConstants.EMPTY);
 		}
-		
+
 		//	Teaser
 		try {
 			XMLNamespace htmlNamespace = new XMLNamespace("http://www.w3.org/1999/xhtml");
@@ -672,7 +593,7 @@ public class ArticleLocalizedItemBean extends ContentItemBean implements Seriali
 				setTeaser(bodyElement.getText());
 			} else {
 				XMLElement htmlBodyElement = htmlElement.getChild("body",htmlNamespace);
-				
+
 				String bodyValue = htmlBodyElement.getContentAsString();
 				setTeaser(bodyValue);
 			}
@@ -680,7 +601,7 @@ public class ArticleLocalizedItemBean extends ContentItemBean implements Seriali
 			LOGGER.log(Level.WARNING, "Can not load teaser", e);
 			setTeaser(CoreConstants.EMPTY);
 		}
-		
+
 		//	Author
 		try {
 			XMLElement author = rootElement.getChild(FIELDNAME_AUTHOR, getIdegaXMLNameSpace());
@@ -700,14 +621,14 @@ public class ArticleLocalizedItemBean extends ContentItemBean implements Seriali
 			XMLElement bodyElement = rootElement.getChild(ContentItemBean.FIELDNAME_BODY, getIdegaXMLNameSpace());
 			XMLElement htmlElement = bodyElement.getChild("html", htmlNamespace);
 			XMLElement htmlBodyElement = htmlElement.getChild("body", htmlNamespace);
-			
+
 			String bodyValue = htmlBodyElement.getContentAsString();
 			setBody(bodyValue);
 		} catch(Exception e) {
 			LOGGER.log(Level.WARNING, "Can not load body", e);
 			setBody(CoreConstants.EMPTY);
 		}
-		
+
 		//	Source
 		try {
 			XMLElement source = rootElement.getChild(FIELDNAME_SOURCE, getIdegaXMLNameSpace());
@@ -720,7 +641,7 @@ public class ArticleLocalizedItemBean extends ContentItemBean implements Seriali
 			LOGGER.log(Level.WARNING, "Can not load source", e);
 			setSource(CoreConstants.EMPTY);
 		}
-		
+
 		//	Comment
 		try {
 			XMLElement comment = rootElement.getChild(FIELDNAME_ARTICLE_COMMENT, getIdegaXMLNameSpace());
@@ -733,41 +654,41 @@ public class ArticleLocalizedItemBean extends ContentItemBean implements Seriali
 			LOGGER.log(Level.WARNING, "Can not load comment", e);
 			setComment(CoreConstants.EMPTY);
 		}
-		
+
 		return true;
 	}
-	
+
 	private boolean loadArticleFromFeed(XMLElement root) {
 		if (root == null) {
 			return false;
 		}
-		
+
 		XMLElement entry =  root.getChild("entry", atomNamespace);
 		if (entry == null) {
 			return false;
 		}
-		
+
 		XMLElement headline = entry.getChild("title", atomNamespace);
 		if (headline != null) {
 			if (headline.getValue() != null) {
 				setHeadline(headline.getValue());
 			}
 		}
-		
+
 		XMLElement summary = entry.getChild("summary", atomNamespace);
 		if (summary != null) {
 			if (summary.getValue() != null) {
 				setTeaser(getOnlyBodyContent(summary.getValue()));
 			}
 		}
-		
+
 		XMLElement content = entry.getChild("content", atomNamespace);
 		if (content != null) {
 			if (content.getValue() != null) {
 				setBody(getOnlyBodyContent(content.getValue()));
 			}
 		}
-		
+
 		XMLElement author = entry.getChild("author", atomNamespace);
 		if (author != null) {
 			XMLElement authorName = author.getChild("name", atomNamespace);
@@ -775,7 +696,7 @@ public class ArticleLocalizedItemBean extends ContentItemBean implements Seriali
 				setAuthor(authorName.getValue() == null ? CoreConstants.EMPTY : authorName.getValue());
 			}
 		}
-		
+
 		XMLElement creator = entry.getChild("creator", dcNamespace);
 		if (creator != null) {
 			String creatorId = creator.getValue();
@@ -787,57 +708,57 @@ public class ArticleLocalizedItemBean extends ContentItemBean implements Seriali
 				setCreatedByUserId(convertedCreatorId);
 			}
 		}
-		
+
 		XMLElement language = entry.getChild("language", dcNamespace);
 		if (language != null) {
 			if (language.getValue() != null) {
 				setLanguage(language.getValue());
 			}
 		}
-		
+
 		XMLElement published = entry.getChild("published", atomNamespace);
 		if (published != null) {
 			if (published.getValue() != null) {
 				setPublishedDate(getParsedDateFromFeed(published.getValue()));
 			}
 		}
-		
+
 		XMLElement updated = entry.getChild("updated", atomNamespace);
 		if (updated != null) {
 			if (updated.getValue() != null) {
 				setLastModifiedDate(getParsedDateFromFeed(updated.getValue()));
 			}
 		}
-		
+
 		XMLElement source = entry.getChild("source", dcNamespace);
 		if (source != null) {
 			if (source.getValue() != null) {
 				setSource(source.getValue());
 			}
 		}
-		
+
 		XMLElement comment = entry.getChild("comment", commentNamespace);
 		if (comment != null) {
 			if (comment.getValue() != null) {
 				setComment(comment.getValue());
 			}
 		}
-		
+
 		XMLElement linkToComments = entry.getChild("commentRss", commentNamespace);
 		if (linkToComments != null) {
 			if (linkToComments.getValue() != null) {
 				setLinkToComments(linkToComments.getValue());
 			}
 		}
-		
+
 		return true;
 	}
-	
+
 	private String getOnlyBodyContent(String html) {
 		if (StringUtil.isEmpty(html)) {
 			return null;
 		}
-		
+
 		//	Getting content from <body>...</body>
 		String bodyStartTag = "<body>";
 		int startIndex = html.indexOf(bodyStartTag);
@@ -847,44 +768,22 @@ public class ArticleLocalizedItemBean extends ContentItemBean implements Seriali
 			//	Didn't find valid body structure
 			return html;
 		}
-		
+
 		return html.substring(startIndex + bodyStartTag.length(), endIndex);
 	}
-	
-/*
- * The old XMLBean way of loading data
-	public void loadOld(File file) throws XmlException, IOException{
-		ArticleDocument articleDoc;
-		
-		articleDoc = ArticleDocument.Factory.parse(file);
-		
-	    ArticleDocument.Article article =  articleDoc.getArticle();
-	    setHeadline(article.getHeadline());
-	    setBody(article.getBody());
-	    setTeaser(article.getTeaser());
-	    setAuthor(article.getAuthor());
-	    setSource(article.getSource());
-	    setComment(article.getComment());
-	}
-*/
-	/* (non-Javadoc)
-	 * @see com.idega.content.bean.ContentItem#getContentItemPrefix()
-	 */
+
 	public String getContentItemPrefix() {
 		return "article_";
 	}
-	
-	
+
 	ArticleItemBean getArticleItem(){
 		return this.articleItem;
 	}
-	
-	
+
 	void setArticleItem(ArticleItemBean item){
 		this.articleItem=item;
 	}
-	
-	
+
 	protected XMLNamespace getIdegaXMLNameSpace(){
 		if(this.idegaXMLName==null){
 			this.idegaXMLName = new XMLNamespace(this.xIdegaXMLNameSpace);
@@ -899,7 +798,7 @@ public class ArticleLocalizedItemBean extends ContentItemBean implements Seriali
 	protected void setArticleCategories(String articleCategories) {
 		this.articleCategories = articleCategories;
 	}
-	
+
 	private List<String> getCategories() {
 		if (articleCategories == null) {
 			return null;
@@ -919,7 +818,7 @@ public class ArticleLocalizedItemBean extends ContentItemBean implements Seriali
 		}
 		return categories;
 	}
-	
+
 	@Override
 	public boolean isSetPublishedDateByDefault() {
 		return super.isSetPublishedDateByDefault();

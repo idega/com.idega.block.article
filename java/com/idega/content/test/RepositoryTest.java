@@ -26,15 +26,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
-import com.idega.core.content.IdegaRepository;
 import com.idega.core.test.base.IdegaBaseTest;
+import com.idega.repository.RepositoryService;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration
-public class RepositoryTest extends IdegaBaseTest{
+public class RepositoryTest extends IdegaBaseTest {
 	
 	@Autowired
-	private IdegaRepository repository;
+	private RepositoryService repository;
 	private Session session;
 	Credentials credentials = new SimpleCredentials("root","".toCharArray());
 
