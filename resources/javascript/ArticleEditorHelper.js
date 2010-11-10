@@ -39,7 +39,7 @@ ArticleEditorHelper.checkArticleLinkAndRegisterIfItsCorrect = function(link, win
 		hideOnOverlayClick: false,
 		width: windowinfo.getWindowWidth() * windowResizeIndex,
 		height: windowinfo.getWindowHeight() * windowResizeIndex,
-		onCloseCallback: function() {
+		onClosed: function() {
 			ArticleEditorHelper.addActionAfterArticleIsSavedAndEditorClosed();
 		}
 	});
