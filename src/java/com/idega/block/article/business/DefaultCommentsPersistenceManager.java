@@ -520,4 +520,10 @@ public class DefaultCommentsPersistenceManager extends DefaultSpringBean impleme
 			return null;
 		}
 	}
+
+	@Override
+	public boolean hasRightsToWriteComments(Long identifier) {
+		User currentUser = getCurrentUser();
+		return currentUser != null;
+	}
 }
