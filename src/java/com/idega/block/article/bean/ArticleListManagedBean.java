@@ -219,6 +219,10 @@ public class ArticleListManagedBean implements ContentListViewerManagedBean {
 		//	User has "little" role
 		Timestamp publishedDate = article.getPublishedDate();
 		if (publishedDate == null) {
+			publishedDate = (Timestamp) article.getCreationDate();
+		}
+		
+		if (publishedDate == null) {
 			//	Article is not published
 			User currentUser = null;
 			try {
@@ -251,8 +255,9 @@ public class ArticleListManagedBean implements ContentListViewerManagedBean {
 			
 			return userId.intValue() == creatorId;
 		}
-		
-		return true;
+		else {
+			return IWTimestamp.RightNow().isLaterThanOrEquals(new IWTimestamp(publishedDate));
+		}
 	}
 
 	/**
