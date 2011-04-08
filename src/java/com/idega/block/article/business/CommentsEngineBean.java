@@ -29,7 +29,6 @@ import com.idega.block.rss.business.RSSBusiness;
 import com.idega.builder.bean.AdvancedProperty;
 import com.idega.builder.business.BuilderLogicWrapper;
 import com.idega.business.IBOLookup;
-import com.idega.business.IBOLookupException;
 import com.idega.business.IBOSessionBean;
 import com.idega.business.file.FileDownloadNotifier;
 import com.idega.content.bean.ContentItemFeedBean;
@@ -45,7 +44,6 @@ import com.idega.idegaweb.IWMainApplication;
 import com.idega.idegaweb.IWMainApplicationSettings;
 import com.idega.idegaweb.IWResourceBundle;
 import com.idega.presentation.IWContext;
-import com.idega.slide.business.IWSlideService;
 import com.idega.user.business.NoEmailFoundException;
 import com.idega.user.business.UserBusiness;
 import com.idega.user.data.User;
@@ -652,13 +650,8 @@ public class CommentsEngineBean extends IBOSessionBean implements CommentsEngine
 			return cachedFeed;
 		}
 
-		IWSlideService slide = getSlideService();
-		if (slide == null) {
-			return null;
-		}
-
 		try {
-			if (!slide.getExistence(properties.getUri())) {
+			if (!getRepositoryService().getExistence(properties.getUri())) {
 				return null;
 			}
 		} catch (Exception e) {
@@ -944,11 +937,6 @@ public class CommentsEngineBean extends IBOSessionBean implements CommentsEngine
 			return false;
 		}
 
-		IWSlideService service = getSlideService();
-		if (service == null) {
-			return false;
-		}
-
 		String commentsContent = getDefaultCommentsManager().getFeedContent(comments);
 		if (commentsContent == null) {
 			return false;
@@ -961,7 +949,7 @@ public class CommentsEngineBean extends IBOSessionBean implements CommentsEngine
 			fileBase = uri.substring(0, index + 1);
 			fileName = uri.substring(index + 1);
 		}
-		Thread uploader = new Thread(new CommentsFeedUploader(service, fileBase, fileName, commentsContent));
+		Thread uploader = new Thread(new CommentsFeedUploader(fileBase, fileName, commentsContent));
 		if (useThread) {
 			uploader.start();
 		}
@@ -970,15 +958,6 @@ public class CommentsEngineBean extends IBOSessionBean implements CommentsEngine
 		}
 
 		return true;
-	}
-
-	private IWSlideService getSlideService() {
-		try {
-			return IBOLookup.getServiceInstance(IWMainApplication.getDefaultIWApplicationContext(), IWSlideService.class);
-		} catch (IBOLookupException e) {
-			e.printStackTrace();
-		}
-		return null;
 	}
 
 	private String getLocalizedString(IWContext iwc, String key, String defaultValue) {

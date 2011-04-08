@@ -1,11 +1,11 @@
 /*
  * $Id: SearchArticleBean.java,v 1.21 2007/09/24 15:03:44 valdas Exp $
- * 
+ *
  * Copyright (C) 2004 Idega. All Rights Reserved.
- * 
+ *
  * This software is the proprietary information of Idega. Use is subject to
  * license terms.
- * 
+ *
  */
 package com.idega.block.article.bean;
 
@@ -15,33 +15,27 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
-import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+
 import javax.faces.component.UIComponent;
 import javax.faces.component.html.HtmlOutputLink;
 import javax.faces.component.html.HtmlOutputText;
 import javax.faces.event.ActionListener;
-import org.apache.webdav.lib.search.CompareOperator;
-import org.apache.webdav.lib.search.SearchException;
-import org.apache.webdav.lib.search.SearchExpression;
-import org.apache.webdav.lib.search.SearchRequest;
-import org.apache.webdav.lib.search.SearchScope;
+import javax.jcr.RepositoryException;
+import javax.jcr.query.QueryResult;
+import javax.mail.search.SearchException;
+
 import org.apache.xmlbeans.XmlException;
+
 import com.idega.block.article.business.ArticleUtil;
-import com.idega.business.IBOLookup;
 import com.idega.content.bean.ContentItemBeanComparator;
 import com.idega.content.business.ContentSearch;
 import com.idega.content.business.categories.CategoryBean;
 import com.idega.content.data.ContentCategory;
-import com.idega.core.search.business.Search;
-import com.idega.core.search.business.SearchResult;
 import com.idega.presentation.IWContext;
-import com.idega.slide.business.IWSlideSession;
-import com.idega.slide.util.IWSlideConstants;
-import com.idega.util.IWTimestamp;
 import com.idega.webface.WFUtil;
 import com.idega.webface.bean.AbstractWFEditableListManagedBean;
 import com.idega.webface.bean.WFEditableListCellWrapper;
@@ -52,7 +46,7 @@ import com.idega.webface.bean.WFListBean;
  * Bean for searching articles.
  * <p>
  * Last modified: $Date: 2007/09/24 15:03:44 $ by $Author: valdas $
- * 
+ *
  * @author Anders Lindman
  * @version $Revision: 1.21 $
  */
@@ -80,7 +74,7 @@ public class SearchArticleBean extends AbstractWFEditableListManagedBean impleme
 
 	private Date _searchPublishedTo = null;
 
-	private Map _allCategories = null;
+	private Map<String, String> _allCategories = null;
 
 	private boolean searching = false;
 
@@ -153,13 +147,13 @@ public class SearchArticleBean extends AbstractWFEditableListManagedBean impleme
 	/**
 	 * Returns all categories available for articles.
 	 */
-	public Map getCategories() {
+	public Map<String, String> getCategories() {
 		if (this._allCategories == null) {
 			final CategoryBean catBean = CategoryBean.getInstance();
 			Collection<ContentCategory> cats = catBean.getCategories();
 			if (cats != null && !cats.isEmpty()) {
-				this._allCategories = new LinkedHashMap();
-				this._allCategories.put("-1", ArticleUtil.getBundle().getLocalizedText("All categories"));
+				this._allCategories = new LinkedHashMap<String, String>();
+				this._allCategories.put("-1", ArticleUtil.getBundle().getLocalizedString("all_categories", "All categories"));
 				for (ContentCategory cat : cats) {
 					String category = catBean.getCategoryName(cat.getId());
 					this._allCategories.put(cat.getId(), category);
@@ -167,7 +161,7 @@ public class SearchArticleBean extends AbstractWFEditableListManagedBean impleme
 			}
 		}
 		if (this._allCategories == null) {
-			return new LinkedHashMap();
+			return new LinkedHashMap<String, String>();
 		}
 		return this._allCategories;
 	}
@@ -184,9 +178,10 @@ public class SearchArticleBean extends AbstractWFEditableListManagedBean impleme
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see com.idega.webface.bean.AbstractWFEditableListManagedBean#getData()
 	 */
+	@Override
 	public WFEditableListDataBean[] getData() {
 		List beans = getContentItems();
 		if (beans != null) {
@@ -197,13 +192,15 @@ public class SearchArticleBean extends AbstractWFEditableListManagedBean impleme
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see com.idega.webface.bean.AbstractWFEditableListManagedBean#getNumberOfColumns()
 	 */
+	@Override
 	public int getNumberOfColumns() {
 		return 6;
 	}
 
+	@Override
 	public UIComponent createCellWrapper(String var, int columnIndex) {
 		// Overridden because of value binding
 		WFEditableListCellWrapper component = constructWFEditableListCellWrapper(var, columnIndex);
@@ -213,10 +210,11 @@ public class SearchArticleBean extends AbstractWFEditableListManagedBean impleme
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see com.idega.webface.bean.AbstractWFEditableListManagedBean#getUIComponent(java.lang.String,
 	 *      int)
 	 */
+	@Override
 	public UIComponent getUIComponent(String var, int columnIndex) {
 		HtmlOutputLink namePreviewLink = new HtmlOutputLink();
 		namePreviewLink.setId("columnIndex" + columnIndex + "_preview");
@@ -231,16 +229,17 @@ public class SearchArticleBean extends AbstractWFEditableListManagedBean impleme
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see com.idega.webface.bean.AbstractWFEditableListManagedBean#getHeader(int)
 	 */
+	@Override
 	public UIComponent getHeader(int columnIndex) {
 		return ArticleUtil.getBundle().getLocalizedText(this.localizationKey[columnIndex]);
 	}
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see com.idega.content.bean.ContentListViewerManagedBean#getContentItems()
 	 */
 	public List getContentItems() {
@@ -262,41 +261,40 @@ public class SearchArticleBean extends AbstractWFEditableListManagedBean impleme
 		return new ArrayList();
 	}
 
-	public List listArticles() throws XmlException, IOException {
-		List list = new ArrayList();
+	public List<ArticleItemBean> listArticles() throws XmlException, IOException {
+		List<ArticleItemBean> list = new ArrayList<ArticleItemBean>();
 		IWContext iwc = IWContext.getInstance();
-		try {
+//		try {
 			String scope = ArticleUtil.getArticleBaseFolderPath();
-			IWSlideSession session = (IWSlideSession) IBOLookup.getSessionInstance(iwc, IWSlideSession.class);
 			if (scope != null) {
-				if (scope.startsWith(session.getWebdavServerURI())) {
-					scope = scope.substring(session.getWebdavServerURI().length());
-				}
-				if (scope.startsWith("/")) {
-					scope = scope.substring(1);
-				}
+//				if (scope.startsWith(session.getWebdavServerURI())) {
+//					scope = scope.substring(session.getWebdavServerURI().length());
+//				}
+//				if (scope.startsWith("/")) {
+//					scope = scope.substring(1);
+//				}
 			}
 			ContentSearch searchBusiness = new ContentSearch(iwc.getIWMainApplication());
-			Search search = searchBusiness.createSearch(getSearchRequest(scope, iwc.getCurrentLocale()));
-			Collection results = search.getSearchResults();
-			if (results != null) {
-				for (Iterator iter = results.iterator(); iter.hasNext();) {
-					SearchResult result = (SearchResult) iter.next();
-					try {
-						System.out.println("Attempting to load " + result.getSearchResultURI());
-						ArticleItemBean article = new ArticleSearchResultBean();
-						article.load(result.getSearchResultURI());
-						list.add(article);
-					}
-					catch (Exception e) {
-						e.printStackTrace();
-					}
-				}
-			}
-		}
-		catch (SearchException e1) {
-			e1.printStackTrace();
-		}
+//			Search search = searchBusiness.createSearch(getSearchRequest(scope, iwc.getCurrentLocale()));
+//			Collection results = search.getSearchResults();
+//			if (results != null) {
+//				for (Iterator iter = results.iterator(); iter.hasNext();) {
+//					SearchResult result = (SearchResult) iter.next();
+//					try {
+//						System.out.println("Attempting to load " + result.getSearchResultURI());
+//						ArticleItemBean article = new ArticleSearchResultBean();
+//						article.load(result.getSearchResultURI());
+//						list.add(article);
+//					}
+//					catch (Exception e) {
+//						e.printStackTrace();
+//					}
+//				}
+//			}
+//		}
+//		catch (SearchException e1) {
+//			e1.printStackTrace();
+//		}
 		return list;
 	}
 
@@ -307,60 +305,63 @@ public class SearchArticleBean extends AbstractWFEditableListManagedBean impleme
 	 * @param categoryList
 	 * @throws SearchException
 	 */
-	public SearchRequest getSearchRequest(String scope, Locale locale) throws SearchException {
-		SearchRequest s = new SearchRequest();
-		s.addSelection(IWSlideConstants.PROPERTY_CREATION_DATE);
-		s.addSelection(IWSlideConstants.PROPERTY_CATEGORY);
-		s.addScope(new SearchScope(scope));
-		SearchExpression whereExpression = null;
-		// TODO create search input for language
-		SearchExpression namePatternExpression = s.compare(CompareOperator.LIKE,
-				IWSlideConstants.PROPERTY_DISPLAY_NAME, "%.article");
-		// todo search by the content type
-		whereExpression = namePatternExpression;
-		SearchExpression creationDateFromExpression = null;
-		if (getSearchPublishedFrom() != null) {
-			Date from = getSearchPublishedFrom();
-			IWTimestamp stamp = new IWTimestamp(from);
-			// the date's time is at 24:00 so anything from that day will not be
-			// found. So be back up a day to 24:00
-			stamp.addDays(-1);
-			from = stamp.getDate();
-			creationDateFromExpression = s.compare(CompareOperator.GTE, IWSlideConstants.PROPERTY_CREATION_DATE, from);
-			whereExpression = s.and(whereExpression, creationDateFromExpression);
-		}
-		SearchExpression creationDateToExpression = null;
-		if (getSearchPublishedTo() != null) {
-			creationDateToExpression = s.compare(CompareOperator.LTE, IWSlideConstants.PROPERTY_CREATION_DATE,
-					getSearchPublishedTo());
-			whereExpression = s.and(whereExpression, creationDateToExpression);
-		}
-		if (!("-1").equals(getSearchCategory())) {
-			SearchExpression categoryExpression = s.compare(CompareOperator.LIKE, IWSlideConstants.PROPERTY_CATEGORY,
-					"," + getSearchCategory() + ",");
-			whereExpression = s.and(whereExpression, categoryExpression);
-		}
-		String author = getSearchAuthor();
-		if (author != null && !"".equals(author)) {
-			SearchExpression authorExpression = s.compare(CompareOperator.LIKE,
-					IWSlideConstants.PROPERTY_CREATOR_DISPLAY_NAME, "%" + author + "%");
-			whereExpression = s.and(whereExpression, authorExpression);
-		}
-		SearchExpression containsExpression = null;
-		if (getSearchText() != null && !"".equals(getSearchText())) {
-			containsExpression = s.contains(getSearchText());
-			if (whereExpression != null) {
-				whereExpression = s.and(whereExpression, containsExpression);
-			}
-			else {
-				whereExpression = containsExpression;
-			}
-		}
-		s.setWhereExpression(whereExpression);
-		System.out.println("------------------------");
-		System.out.println(s.asString());
-		System.out.println("------------------------");
-		return s;
+	public QueryResult getSearchRequest(String scope, Locale locale) throws RepositoryException {
+//		SearchRequest s = new SearchRequest();
+//		s.addSelection(IWSlideConstants.PROPERTY_CREATION_DATE);
+//		s.addSelection(IWSlideConstants.PROPERTY_CATEGORY);
+//		s.addScope(new SearchScope(scope));
+//		SearchExpression whereExpression = null;
+//		// TODO create search input for language
+//		SearchExpression namePatternExpression = s.compare(CompareOperator.LIKE,
+//				IWSlideConstants.PROPERTY_DISPLAY_NAME, "%.article");
+//		// todo search by the content type
+//		whereExpression = namePatternExpression;
+//		SearchExpression creationDateFromExpression = null;
+//		if (getSearchPublishedFrom() != null) {
+//			Date from = getSearchPublishedFrom();
+//			IWTimestamp stamp = new IWTimestamp(from);
+//			// the date's time is at 24:00 so anything from that day will not be
+//			// found. So be back up a day to 24:00
+//			stamp.addDays(-1);
+//			from = stamp.getDate();
+//			creationDateFromExpression = s.compare(CompareOperator.GTE, IWSlideConstants.PROPERTY_CREATION_DATE, from);
+//			whereExpression = s.and(whereExpression, creationDateFromExpression);
+//		}
+//		SearchExpression creationDateToExpression = null;
+//		if (getSearchPublishedTo() != null) {
+//			creationDateToExpression = s.compare(CompareOperator.LTE, IWSlideConstants.PROPERTY_CREATION_DATE,
+//					getSearchPublishedTo());
+//			whereExpression = s.and(whereExpression, creationDateToExpression);
+//		}
+//		if (!("-1").equals(getSearchCategory())) {
+//			SearchExpression categoryExpression = s.compare(CompareOperator.LIKE, IWSlideConstants.PROPERTY_CATEGORY,
+//					"," + getSearchCategory() + ",");
+//			whereExpression = s.and(whereExpression, categoryExpression);
+//		}
+//		String author = getSearchAuthor();
+//		if (author != null && !"".equals(author)) {
+//			SearchExpression authorExpression = s.compare(CompareOperator.LIKE,
+//					IWSlideConstants.PROPERTY_CREATOR_DISPLAY_NAME, "%" + author + "%");
+//			whereExpression = s.and(whereExpression, authorExpression);
+//		}
+//		SearchExpression containsExpression = null;
+//		if (getSearchText() != null && !"".equals(getSearchText())) {
+//			containsExpression = s.contains(getSearchText());
+//			if (whereExpression != null) {
+//				whereExpression = s.and(whereExpression, containsExpression);
+//			}
+//			else {
+//				whereExpression = containsExpression;
+//			}
+//		}
+//		s.setWhereExpression(whereExpression);
+//		System.out.println("------------------------");
+//		System.out.println(s.asString());
+//		System.out.println("------------------------");
+//		return s;
+
+		//	TODO
+		return null;
 	}
 
 	public boolean getShowSearchResults() {

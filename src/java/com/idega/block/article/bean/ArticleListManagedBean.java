@@ -10,30 +10,25 @@
 package com.idega.block.article.bean;
 
 import java.io.IOException;
-import java.rmi.RemoteException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 
 import javax.faces.component.html.HtmlOutputLink;
+import javax.jcr.Node;
+import javax.jcr.NodeIterator;
+import javax.jcr.RepositoryException;
+import javax.jcr.query.QueryResult;
+import javax.mail.search.SearchException;
 
-import org.apache.webdav.lib.search.CompareOperator;
-import org.apache.webdav.lib.search.SearchException;
-import org.apache.webdav.lib.search.SearchExpression;
-import org.apache.webdav.lib.search.SearchRequest;
-import org.apache.webdav.lib.search.SearchScope;
-import org.apache.webdav.lib.search.expressions.CompareExpression;
 import org.apache.xmlbeans.XmlException;
 
 import com.idega.block.article.business.ArticleActionURIHandler;
 import com.idega.block.article.business.ArticleUtil;
 import com.idega.block.article.component.ArticleItemViewer;
-import com.idega.business.IBOLookup;
-import com.idega.business.IBOLookupException;
 import com.idega.content.bean.ContentItemBeanComparator;
 import com.idega.content.bean.ContentListViewerManagedBean;
 import com.idega.content.business.ContentConstants;
@@ -41,20 +36,15 @@ import com.idega.content.business.ContentSearch;
 import com.idega.content.presentation.ContentItemViewer;
 import com.idega.content.presentation.ContentViewer;
 import com.idega.core.accesscontrol.business.StandardRoles;
-import com.idega.core.search.business.Search;
-import com.idega.core.search.business.SearchResult;
 import com.idega.presentation.IWContext;
-import com.idega.slide.business.IWSlideSession;
-import com.idega.slide.util.IWSlideConstants;
 import com.idega.user.data.User;
-import com.idega.util.CoreConstants;
 import com.idega.util.CoreUtil;
 import com.idega.util.IWTimestamp;
 
 /**
- * 
+ *
  *  Last modified: $Date: 2008/06/06 16:22:46 $ by $Author: valdas $
- * 
+ *
  * @author <a href="mailto:gummi@idega.com">Gudmundur Agust Saemundsson</a>
  * @version $Revision: 1.28 $
  */
@@ -68,10 +58,10 @@ public class ArticleListManagedBean implements ContentListViewerManagedBean {
 	private String datePattern = null;
 	private String resourcePath;
 	private String articleItemViewerFilter = null;
-	
+
 	private int numberOfDaysDisplayed = 0;
 	private int maxNumberOfDisplayed = -1;
-	
+
 	private boolean headlineAsLink=false;
 	private boolean showDate = true;
 	private boolean showTime = true;
@@ -85,15 +75,13 @@ public class ArticleListManagedBean implements ContentListViewerManagedBean {
 	private Boolean showDetailsCommand = null;
 
 	/**
-	 * 
+	 *
 	 */
 	public ArticleListManagedBean() {
 		super();
 	}
 
-	/* (non-Javadoc)
-	 * @see com.idega.content.bean.ContentListViewerManagedBean#getContentItems()
-	 */
+	@Override
 	public List<ArticleItemBean> getContentItems() {
 		try {
 			List<ArticleItemBean> l = loadAllArticlesInFolder(ArticleUtil.getArticleBaseFolderPath());
@@ -110,7 +98,7 @@ public class ArticleListManagedBean implements ContentListViewerManagedBean {
 		}
 		return new ArrayList<ArticleItemBean>();
 	}
-	
+
 	/**
 	 * Loads all xml files in the given folder
 	 * @param folder
@@ -119,31 +107,35 @@ public class ArticleListManagedBean implements ContentListViewerManagedBean {
 	 * @throws IOException
 	 */
 	public List<ArticleItemBean> loadAllArticlesInFolder(String folder) throws XmlException, IOException{
-		List<ArticleItemBean> list = new ArrayList<ArticleItemBean>();		
-			
+		List<ArticleItemBean> list = new ArrayList<ArticleItemBean>();
+
 		IWContext iwc = CoreUtil.getIWContext();
 		String resourcePathFromRequest = iwc.getParameter(ContentViewer.PARAMETER_CONTENT_RESOURCE);
 		String identifierFromRequest = iwc.getParameter(ContentConstants.CONTENT_ITEM_VIEWER_IDENTIFIER_PARAMETER);
-		
-		Collection<SearchResult> results = getArticleSearcResults(folder, this.categories, iwc);
+
+		Collection<QueryResult> results = getArticleSearcResults(folder, this.categories, iwc);
 		if (results == null) {
 			return list;
 		}
-		
+
 		int count = 0;
 		ArticleItemBean article = null;
-		for (SearchResult result: results) {
+		for (QueryResult result: results) {
 			try {
-				article = new ArticleItemBean();
-				article.setResourcePath(result.getSearchResultURI());
-				article.load();
-				if (canShowArticle(article, iwc, resourcePathFromRequest, identifierFromRequest)) {
-					int maxNumber = getMaxNumberOfDisplayed();
-					if (maxNumber < 0 || count < maxNumber) {
-						list.add(article);
-						count++;
-						if (count == maxNumber) {
-							break;
+				for (NodeIterator nodesIter = result.getNodes(); nodesIter.hasNext();) {
+					Node node = nodesIter.nextNode();
+
+					article = new ArticleItemBean();
+					article.setResourcePath(node.getPath());	//	TODO: test
+					article.load();
+					if (canShowArticle(article, iwc, resourcePathFromRequest, identifierFromRequest)) {
+						int maxNumber = getMaxNumberOfDisplayed();
+						if (maxNumber < 0 || count < maxNumber) {
+							list.add(article);
+							count++;
+							if (count == maxNumber) {
+								break;
+							}
 						}
 					}
 				}
@@ -151,10 +143,10 @@ public class ArticleListManagedBean implements ContentListViewerManagedBean {
 				e.printStackTrace();
 			}
 		}
-			
+
 		return list;
 	}
-	
+
 	private boolean canShowArticle(ArticleItemBean article, IWContext iwc, String resourcePathFromRequest, String identifierFromRequest) {
 		if (!hasUserRightToViewArticle(article, iwc)) {
 			return false;
@@ -171,7 +163,7 @@ public class ArticleListManagedBean implements ContentListViewerManagedBean {
 				return false;
 			}
 		}
-		
+
 		if (getArticleItemViewerFilter() == null) {
 			//	No identifier set as property. Will check resource paths
 			if (identifierFromRequest != null) {
@@ -187,16 +179,16 @@ public class ArticleListManagedBean implements ContentListViewerManagedBean {
 				//	No identifier in request, nothing to match
 				return true;
 			}
-			
+
 			if (identifierFromRequest.equals(getArticleItemViewerFilter())) {
 				//	Identifiers match, checking resource paths
-				
+
 				if (!isIdentifierAutoGenerated()) {
 					//	We can not modify current list - identifiers match, but it's NOT AUTO generated, displaying all available (for current list) articles
 					article.setPartOfArticleList(true);
 					return true;
 				}
-				
+
 				//	Identifier is auto generated, proceeding checking
 				if (resourcePathFromRequest == null) {
 					//	No custom resource path provided, can show article
@@ -205,17 +197,17 @@ public class ArticleListManagedBean implements ContentListViewerManagedBean {
 				//	Showing ONLY selected article
 				return article.getResourcePath().equals(resourcePathFromRequest);
 			}
-			
+
 			//	Identifiers do not match, can show article
 			return true;
 		}
 	}
-	
+
 	private boolean hasUserRightToViewArticle(ArticleItemBean article, IWContext iwc) {
 		if (iwc.hasRole(StandardRoles.ROLE_KEY_EDITOR)) {
 			return true;
 		}
-		
+
 		//	User has "little" role
 		Timestamp publishedDate = article.getPublishedDate();
 		if (publishedDate == null) {
@@ -227,12 +219,12 @@ public class ArticleListManagedBean implements ContentListViewerManagedBean {
 			if (currentUser == null) {
 				return false;
 			}
-			
+
 			int creatorId = article.getCreatedByUserId();
 			if (creatorId < 0) {
 				return false;
 			}
-			
+
 			Integer userId = null;
 			try {
 				userId = Integer.valueOf(currentUser.getId());
@@ -248,10 +240,10 @@ public class ArticleListManagedBean implements ContentListViewerManagedBean {
 				}
 				return articleAuthor.equals(userName);
 			}
-			
+
 			return userId.intValue() == creatorId;
 		}
-		
+
 		return true;
 	}
 
@@ -262,47 +254,51 @@ public class ArticleListManagedBean implements ContentListViewerManagedBean {
 	 * @param categoryList
 	 * @throws SearchException
 	 */
-	public SearchRequest getSearchRequest(String scope, Locale locale, IWTimestamp oldest, List<String> categoryList) throws SearchException {
-		SearchRequest s = new SearchRequest();
-		s.addSelection(IWSlideConstants.PROPERTY_DISPLAY_NAME);
-		s.addSelection(IWSlideConstants.PROPERTY_CREATION_DATE);
-		s.addSelection(IWSlideConstants.PROPERTY_CATEGORY);
-		s.addScope(new SearchScope(scope));
-		SearchExpression expression = null;
-		
-		String localeString = CoreConstants.EMPTY;
-		SearchExpression namePatternExpression = s.compare(CompareOperator.LIKE, IWSlideConstants.PROPERTY_DISPLAY_NAME,"%"+localeString+".article");
-		expression = namePatternExpression;
-		
-		SearchExpression creationDateExpression = null;		
-		if(oldest != null){
-			creationDateExpression = s.compare(CompareOperator.GTE, IWSlideConstants.PROPERTY_CREATION_DATE,oldest.getDate());
-			expression = s.and(expression,creationDateExpression);
-		}
-		
-		List<CompareExpression> categoryExpressions = new ArrayList<CompareExpression>();
-		if (categoryList != null) {
-			for (Iterator<String> iter = categoryList.iterator(); iter.hasNext();) {
-				String categoryName = iter.next();
-				categoryExpressions.add(s.compare(CompareOperator.LIKE,IWSlideConstants.PROPERTY_CATEGORY,"%,"+categoryName+",%"));
-			}
-			Iterator<CompareExpression> expr = categoryExpressions.iterator();
-			if(expr.hasNext()){
-				SearchExpression categoryExpression = expr.next();
-				while (expr.hasNext()) {
-					categoryExpression = s.or(categoryExpression, expr.next());
-				}
-				expression = s.and(expression,categoryExpression);
-			}
-		}
-		
-		s.setWhereExpression(expression);
-		return s;
+	public QueryResult getSearchRequest(String scope, Locale locale, IWTimestamp oldest, List<String> categoryList) throws RepositoryException {
+//		SearchRequest s = new SearchRequest();
+//		s.addSelection(IWSlideConstants.PROPERTY_DISPLAY_NAME);
+//		s.addSelection(IWSlideConstants.PROPERTY_CREATION_DATE);
+//		s.addSelection(IWSlideConstants.PROPERTY_CATEGORY);
+//		s.addScope(new SearchScope(scope));
+//		SearchExpression expression = null;
+//
+//		String localeString = CoreConstants.EMPTY;
+//		SearchExpression namePatternExpression = s.compare(CompareOperator.LIKE, IWSlideConstants.PROPERTY_DISPLAY_NAME,"%"+localeString+".article");
+//		expression = namePatternExpression;
+//
+//		SearchExpression creationDateExpression = null;
+//		if(oldest != null){
+//			creationDateExpression = s.compare(CompareOperator.GTE, IWSlideConstants.PROPERTY_CREATION_DATE,oldest.getDate());
+//			expression = s.and(expression,creationDateExpression);
+//		}
+//
+//		List<CompareExpression> categoryExpressions = new ArrayList<CompareExpression>();
+//		if (categoryList != null) {
+//			for (Iterator<String> iter = categoryList.iterator(); iter.hasNext();) {
+//				String categoryName = iter.next();
+//				categoryExpressions.add(s.compare(CompareOperator.LIKE,IWSlideConstants.PROPERTY_CATEGORY,"%,"+categoryName+",%"));
+//			}
+//			Iterator<CompareExpression> expr = categoryExpressions.iterator();
+//			if(expr.hasNext()){
+//				SearchExpression categoryExpression = expr.next();
+//				while (expr.hasNext()) {
+//					categoryExpression = s.or(categoryExpression, expr.next());
+//				}
+//				expression = s.and(expression,categoryExpression);
+//			}
+//		}
+//
+//		s.setWhereExpression(expression);
+//		return s;
+
+		//	TODO: implement
+		return null;
 	}
 
 	/* (non-Javadoc)
 	 * @see com.idega.content.bean.ContentListViewerManagedBean#getContentViewer()
 	 */
+	@Override
 	public ContentItemViewer getContentViewer() {
 		ArticleItemViewer viewer = new ArticleItemViewer();
 		viewer.setDatePattern(getDatePattern());
@@ -320,31 +316,33 @@ public class ArticleListManagedBean implements ContentListViewerManagedBean {
 		if (isShowDetailsCommand() != null) {
 			viewer.setShowDetailsCommand(isShowDetailsCommand().booleanValue());
 		}
-		
+
 		if (this.detailsViewerPath != null) {
 			viewer.setDetailsViewerPath(this.detailsViewerPath);
 			HtmlOutputLink moreLink = viewer.getEmptyMoreLink();
 			moreLink.getChildren().add(ArticleUtil.getBundle().getLocalizedText(this.LOCALIZEDKEY_MORE));
 			viewer.setDetailsCommand(moreLink);
 		}
-		
+
 		return viewer;
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see com.idega.content.bean.ContentListViewerManagedBean#getAttachmentViewers()
 	 */
-	public List getAttachmentViewers() {
+	@Override
+	public List<ContentItemViewer> getAttachmentViewers() {
 		return null;
 	}
 
 	/* (non-Javadoc)
 	 * @see com.idega.content.bean.ContentListViewerManagedBean#setDetailsViewerPath(java.lang.String)
 	 */
+	@Override
 	public void setDetailsViewerPath(String path) {
 		this.detailsViewerPath = path;
 	}
-	
+
 	/**
 	 * @return Returns the categories.
 	 */
@@ -354,6 +352,7 @@ public class ArticleListManagedBean implements ContentListViewerManagedBean {
 	/**
 	 * @param categories The categories to set.
 	 */
+	@Override
 	public void setCategories(List<String> categories) {
 		this.categories = categories;
 	}
@@ -361,6 +360,7 @@ public class ArticleListManagedBean implements ContentListViewerManagedBean {
 	/* (non-Javadoc)
 	 * @see com.idega.content.bean.ContentListViewerManagedBean#getIWActionURIHandlerIdentifier()
 	 */
+	@Override
 	public String getIWActionURIHandlerIdentifier() {
 		return ArticleActionURIHandler.HANDLER_IDENTIFIER;
 	}
@@ -380,7 +380,7 @@ public class ArticleListManagedBean implements ContentListViewerManagedBean {
 	public void setShowCreationDate(boolean showCreationDate) {
 		this.showCreationDate = showCreationDate;
 	}
-	
+
 	public boolean isShowHeadline() {
 		return showHeadline;
 	}
@@ -404,7 +404,7 @@ public class ArticleListManagedBean implements ContentListViewerManagedBean {
 	public void setShowBody(boolean showBody) {
 		this.showBody = showBody;
 	}
-	
+
 	public Boolean isShowDetailsCommand() {
 		return showDetailsCommand;
 	}
@@ -419,7 +419,7 @@ public class ArticleListManagedBean implements ContentListViewerManagedBean {
 	public void setHeadlineAsLink(boolean headlineAsLink) {
 		this.headlineAsLink=headlineAsLink;
 	}
-	
+
 	public boolean getHeadlineAsLink(){
 		return this.headlineAsLink;
 	}
@@ -451,6 +451,7 @@ public class ArticleListManagedBean implements ContentListViewerManagedBean {
 	/* (non-Javadoc)
 	 * @see com.idega.content.bean.ContentListViewerManagedBean#setResourcePath(java.lang.String)
 	 */
+	@Override
 	public void setBaseFolderPath(String path) {
 		this.resourcePath=path;
 	}
@@ -458,6 +459,7 @@ public class ArticleListManagedBean implements ContentListViewerManagedBean {
 	/* (non-Javadoc)
 	 * @see com.idega.content.bean.ContentListViewerManagedBean#getResourcePath()
 	 */
+	@Override
 	public String getBaseFolderPath() {
 		return this.resourcePath;
 	}
@@ -465,6 +467,7 @@ public class ArticleListManagedBean implements ContentListViewerManagedBean {
 	/* (non-Javadoc)
 	 * @see com.idega.content.bean.ContentListViewerManagedBean#setMaxNumberOfDisplayed(int)
 	 */
+	@Override
 	public void setMaxNumberOfDisplayed(int maxItems) {
 		this.maxNumberOfDisplayed=maxItems;
 	}
@@ -472,11 +475,12 @@ public class ArticleListManagedBean implements ContentListViewerManagedBean {
 	/* (non-Javadoc)
 	 * @see com.idega.content.bean.ContentListViewerManagedBean#getMaxNumberOfDisplayed()
 	 */
+	@Override
 	public int getMaxNumberOfDisplayed() {
 		return this.maxNumberOfDisplayed;
 	}
-	
-	public Collection<SearchResult> getArticleSearcResults(String folder, List<String> categories, IWContext iwc) {
+
+	public Collection<QueryResult> getArticleSearcResults(String folder, List<String> categories, IWContext iwc) {
 		if (folder == null) {
 			return null;
 		}
@@ -486,27 +490,15 @@ public class ArticleListManagedBean implements ContentListViewerManagedBean {
 				return null;
 			}
 		}
-		
+
 		IWTimestamp oldest = null;
-		
+
 		if (this.numberOfDaysDisplayed > 0) {
 			oldest = IWTimestamp.RightNow();
 			oldest.addDays(-this.numberOfDaysDisplayed);
 		}
-		
-		IWSlideSession session = null;
-		try {
-			session = (IWSlideSession) IBOLookup.getSessionInstance(iwc,IWSlideSession.class);
-		} catch (IBOLookupException e) {
-			e.printStackTrace();
-			return null;
-		}
-		String webDavUri = null;
-		try {
-			webDavUri = session.getWebdavServerURI();
-		} catch (RemoteException e) {
-			e.printStackTrace();
-		}
+
+		String webDavUri = null;	//session.getWebdavServerURI();
 		if (webDavUri != null) {
 			if(folder.startsWith(webDavUri)){
 				folder = folder.substring(webDavUri.length());
@@ -515,18 +507,21 @@ public class ArticleListManagedBean implements ContentListViewerManagedBean {
 				folder = folder.substring(1);
 			}
 		}
-		SearchRequest articleSearch = null;
+		QueryResult articleSearch = null;
 		try {
 			articleSearch = getSearchRequest(folder, iwc.getCurrentLocale(), oldest, categories);
-		} catch (SearchException e) {
+		} catch (RepositoryException e) {
 			e.printStackTrace();
 			return null;
 		}
 		ContentSearch searchBusiness = new ContentSearch(iwc.getIWMainApplication());
 		searchBusiness.setToUseRootAccessForSearch(true);
 		searchBusiness.setToUseDescendingOrder(true);
-		Search search = searchBusiness.createSearch(articleSearch);
-		return search.getSearchResults();
+//		Search search = searchBusiness.createSearch(articleSearch);
+//		return search.getSearchResults();
+
+		//	TODO: implement
+		return null;
 	}
 
 	public String getArticleItemViewerFilter() {
@@ -537,6 +532,7 @@ public class ArticleListManagedBean implements ContentListViewerManagedBean {
 		this.articleItemViewerFilter = articleItemViewerFilter;
 	}
 
+	@Override
 	public void setViewerIdentifier(String viewerIdentifier) {
 		this.setArticleItemViewerFilter(viewerIdentifier);
 	}

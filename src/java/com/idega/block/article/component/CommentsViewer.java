@@ -38,7 +38,6 @@ import com.idega.presentation.Layer;
 import com.idega.presentation.text.Link;
 import com.idega.presentation.ui.CheckBox;
 import com.idega.presentation.ui.Label;
-import com.idega.slide.business.IWSlideService;
 import com.idega.user.business.NoEmailFoundException;
 import com.idega.user.business.UserBusiness;
 import com.idega.user.data.User;
@@ -50,21 +49,21 @@ import com.idega.util.StringUtil;
 import com.idega.util.expression.ELUtil;
 
 public class CommentsViewer extends Block {
-	
+
 	private static final String FEED_IMAGE = "images/feed.png";
 	private static final String DELETE_IMAGE = "images/comments_delete.png";
 	private static final String DELETE_COMMENT_IMAGE = "images/comment_delete.png";
-	
+
 	private static final String COMMENTS_BLOCK_ID = "comments_block";
 	private static final String SHOW_COMMENTS_PROPERTY = "showCommentsForAllUsers";
-	
+
 	private String styleClass = "content_item_comments_style";
 	private String linkToComments = null;
 	private String springBeanIdentifier;
-	private String identifier; 
-	
+	private String identifier;
+
 	private String moduleId = null;
-	
+
 	private boolean showCommentsForAllUsers = true;
 	private boolean showCommentsList = true; // If expand list on page load
 	private boolean isForumPage = false;
@@ -72,47 +71,48 @@ public class CommentsViewer extends Block {
 	private boolean showViewController = true;
 	private boolean newestEntriesOnTop = false;
 	private boolean addLoginbyUUIDOnRSSFeedLink = false;
-	
+
 	private String COMMENTS_ENGINE = "/dwr/interface/CommentsEngine.js";
 	private String COMMENTS_HELPER = "javascript/ArticleCommentsHelper.js";
-	
+
 	private static final String SEPARATOR = "', '";
-	
+
 	private CommentsEngine commentsEngine = null;
-	
+
 	private boolean fullCommentsRights;
-	
+
 	@Autowired
 	private JQuery jQuery;
 	@Autowired
 	private Web2Business web2;
+
 	public static final String AUTO_SHOW_COMMENTS = "autoShowComments";
-	
+
 	@Override
 	public void main(IWContext iwc) {
 		ELUtil.getInstance().autowire(this);
-		
+
 		getCommentsEngine(iwc);
 		if (commentsEngine == null) {
 			return;
 		}
-		
+
 		boolean hasValidRights = isCommentsViewerVisible(iwc);
 		if (!hasValidRights) {
 			return;
 		}
-		
+
 		if (iwc.isParameterSet(CommentsViewer.AUTO_SHOW_COMMENTS)) {
 			setShowCommentsList(iwc.getParameter(CommentsViewer.AUTO_SHOW_COMMENTS).equals(Boolean.TRUE.toString()));
 		}
-		
+
 		PresentationUtil.addStyleSheetsToHeader(iwc, Arrays.asList(
 				ArticleUtil.getBundle().getVirtualPathWithFileNameString("style/article.css"),
 				getWeb2().getBundleUriToHumanizedMessagesStyleSheet()
 		));
-		
+
 		resolveModuleId(iwc);
-		
+
 		if (linkToComments == null) {
 			if (StringUtil.isEmpty(springBeanIdentifier)) {
 				if (!findLinkToComments(iwc.getParameter(ContentViewer.PARAMETER_CONTENT_RESOURCE),
@@ -133,17 +133,17 @@ public class CommentsViewer extends Block {
 		if (StringUtil.isEmpty(linkToComments)) {
 			return;
 		}
-		
+
 		IWBundle bundle = getBundle(iwc);
 		IWResourceBundle iwrb = bundle.getResourceBundle(iwc);
-		
+
 		String commentsId = moduleId;
-		
+
 		Layer container = new Layer();
 		container.setId(new StringBuffer(commentsId).append(COMMENTS_BLOCK_ID).toString());
 		container.setStyleClass(styleClass);
 		add(container);
-		
+
 		if (isUsedInArticleList()) {
 			showCommentsList = false;
 		}
@@ -151,27 +151,27 @@ public class CommentsViewer extends Block {
 		List<String> jsFiles = getJavaScriptSources(iwc);
 		jsFiles.add(getJQuery().getBundleURIToJQueryLib());
 		jsFiles.add(getWeb2().getBundleUriToHumanizedMessagesScript());
-		
+
 		int commentsCount = getCommentsCount(iwc);
-		
+
 		boolean contentEditor = ContentUtil.hasContentEditorRoles(iwc);
 		if (contentEditor) {
 			// Enable comments container
 			addEnableCommentsCheckboxContainer(iwc, container);
 		}
-		
+
 		// Comments label
 		Layer comments = new Layer();
 		comments.setId(new StringBuffer(commentsId).append("article_comments_link_label_container").toString());
 		container.add(comments);
-		
+
 		Link link = new Link(new StringBuffer(iwrb.getLocalizedString("comments_viewer.comments", "Comments")).append("(").append(commentsCount).append(")")
 				.toString(), "javascript:void(0)");
 		link.setId(commentsId + "CommentsLabelWithCount");
 		link.setOnClick(new StringBuilder("getCommentsList('").append(linkToComments).append(SEPARATOR).append(commentsId).append("');").toString());
 		link.setStyleClass("view_comments_link");
 		comments.add(link);
-		
+
 		RSSBusiness rss = null;
 		if (isAddLoginbyUUIDOnRSSFeedLink()) {
 			try {
@@ -183,26 +183,26 @@ public class CommentsViewer extends Block {
 				return;
 			}
 		}
-		
+
 		boolean addAtomLink = true;
 		CommentsPersistenceManager manager = getCommentsEngine(iwc).getCommentsManager(springBeanIdentifier);
 		if (manager != null) {
 			fullCommentsRights = manager.hasFullRightsForComments(identifier);
 			addAtomLink = fullCommentsRights;
-			
+
 			if (fullCommentsRights) {
 				PresentationUtil.addStyleSheetToHeader(iwc, getWeb2().getBundleURIToFancyBoxStyleFile());
 				jsFiles.addAll(getWeb2().getBundleURIsToFancyBoxScriptFiles());
 			}
 		}
-		
+
 		if (CoreUtil.isSingleComponentRenderingProcess(iwc)) {
 			container.add(PresentationUtil.getJavaScriptSourceLines(jsFiles));
 		}
 		else {
 			PresentationUtil.addJavaScriptSourcesLinesToHeader(iwc, jsFiles);
 		}
-		
+
 		// Link - Atom feed
 		if (addAtomLink) {
 			Link linkToFeed = new Link(CoreConstants.SPACE);
@@ -214,7 +214,7 @@ public class CommentsViewer extends Block {
 			linkToFeed.setURL(uri);
 			comments.add(linkToFeed);
 		}
-		
+
 		// Delete comments image
 		if (contentEditor || fullCommentsRights) {
 			Image delete = new Image(bundle.getVirtualPathWithFileNameString(DELETE_IMAGE),
@@ -226,7 +226,7 @@ public class CommentsViewer extends Block {
 			delete.setOnClick(deleteAction.toString());
 			comments.add(delete);
 		}
-		
+
 		// Add comment block
 		CommentsViewerProperties properties = new CommentsViewerProperties();
 		properties.setIdentifier(identifier);
@@ -234,27 +234,27 @@ public class CommentsViewer extends Block {
 		if (canWriteComments) {
 			container.add(getAddCommentBlock(iwc, commentsId));
 		}
-	
+
 		addInitInfo(iwc, container);
 	}
-	
+
 	private User getUser(IWContext iwc) {
 		User currentUser = iwc.isLoggedOn() ? iwc.getCurrentUser() : null;
 		if (currentUser == null) {
 			return null;
 		}
-		
+
 		if (StringUtil.isEmpty(getSpringBeanIdentifier())) {
 			return currentUser;
 		}
-		
+
 		return commentsEngine.getCommentsManager(getSpringBeanIdentifier()).getUserAvailableToReadWriteCommentsFeed(iwc);
 	}
-	
+
 	private void addInitInfo(IWContext iwc, Layer container) {
 		IWBundle bundle = getBundle(iwc);
 		IWResourceBundle iwrb = bundle.getResourceBundle(iwc);
-		
+
 		StringBuilder localization = new StringBuilder("CommentsViewer.setLocalization({posted: '")
 							.append(iwrb.getLocalizedString("comments_viewer.posted", "Posted")).append("', ")
 							.append("loadingComments: '")
@@ -305,7 +305,7 @@ public class CommentsViewer extends Block {
 							.append(iwrb.getLocalizedString("comments_viewer.comment_attachment_download_info", "Download statistics"))
 		.append("'});");
 		PresentationUtil.addJavaScriptActionToBody(iwc, localization.toString());
-		
+
 		StringBuilder info = new StringBuilder("CommentsViewer.setStartInfo({commentsServer: '")
 							.append(getThemesHelper().getFullServerName(iwc) + CoreConstants.WEBDAV_SERVLET_URI)
 							.append("', feedImage: '")
@@ -317,7 +317,7 @@ public class CommentsViewer extends Block {
 							.append("', hasValidRights: ").append(ContentUtil.hasContentEditorRoles(iwc) || fullCommentsRights)
 		.append("});");
 		PresentationUtil.addJavaScriptActionToBody(iwc, info.toString());
-		
+
 		String springBean = getSpringBeanIdentifier() == null ? CoreConstants.EMPTY : getSpringBeanIdentifier();
 		String identifier = getIdentifier() == null ? CoreConstants.EMPTY : getIdentifier();
 		StringBuilder action = new StringBuilder("addCommentStartInfo('").append(linkToComments).append(SEPARATOR).append(moduleId).append("', ")
@@ -328,47 +328,37 @@ public class CommentsViewer extends Block {
 		}
 		container.add(PresentationUtil.getJavaScriptAction(action.toString()));
 	}
-	
+
 	private boolean isCommentsViewerVisible(IWContext iwc) {
 		if (StringUtil.isEmpty(springBeanIdentifier)) {
 			boolean hasValidRights = ContentUtil.hasContentEditorRoles(iwc);
 			if (!hasValidRights && !showCommentsForAllUsers) {
 				return false;
 			}
-			
+
 			return true;
 		}
-		
+
 		CommentsPersistenceManager commentsManager = commentsEngine.getCommentsManager(getSpringBeanIdentifier());
 		return commentsManager == null ? false : commentsManager.hasRightsToViewComments(identifier);
 	}
-	
+
 	private void makeCommentsFeedIfNotExists(IWContext iwc) {
-		IWSlideService slide = null;
-		try {
-			slide = IBOLookup.getServiceInstance(iwc, IWSlideService.class);
-		} catch (IBOLookupException e) {
-			e.printStackTrace();
-		}
-		if (slide == null) {
-			return;
-		}
-		
 		boolean makeEmptyComments = false;
 		try {
-			makeEmptyComments = !slide.getExistence(linkToComments);
+			makeEmptyComments = !getRepositoryService().getExistence(linkToComments);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 		if (!makeEmptyComments) {
 			return;
 		}
-		
+
 		CommentsEngine commentsEngine = getCommentsEngine(iwc);
 		if (commentsEngine == null) {
 			return;
 		}
-		
+
 		String user = getResourceBundle(iwc).getLocalizedString("comments_viewer.anonymous", "Anonymous");
 		User currentUser = null;
 		try {
@@ -377,7 +367,7 @@ public class CommentsViewer extends Block {
 		if (currentUser != null) {
 			user = currentUser.getName();
 		}
-		
+
 		String feedTitle = null;
 		String feedSubtitle = null;
 		CommentsPersistenceManager commentsManager = commentsEngine.getCommentsManager(getSpringBeanIdentifier());
@@ -393,11 +383,11 @@ public class CommentsViewer extends Block {
 		commentsEngine.initCommentsFeed(iwc, linkToComments, user, IWTimestamp.getTimestampRightNow(), getThemesHelper().getCurrentLanguage(iwc),
 				feedTitle, feedSubtitle, commentsManager);
 	}
-	
+
 	private ThemesHelper getThemesHelper() {
 		return ELUtil.getInstance().getBean(ThemesHelper.class);
 	}
-	
+
 	protected List<String> getJavaScriptSources(IWContext iwc) {
 		List<String> sources = new ArrayList<String>();
 		sources.add(COMMENTS_ENGINE);
@@ -410,7 +400,7 @@ public class CommentsViewer extends Block {
 		}
 		return sources;
 	}
-	
+
 	private boolean findLinkToComments(String resourcePathFromRequest, String viewerIdentifier) {
 		UIComponent region = this.getParent();
 		if (region == null) {
@@ -426,7 +416,7 @@ public class CommentsViewer extends Block {
 			o = children.get(i);
 			if (o instanceof ArticleItemViewer) {
 				articleViewer = (ArticleItemViewer) o;
-				
+
 				UIComponent nextItem = null;	//	CommentsViewer is next to ArticleItemViewer
 				if (i + 1 < children.size()) {
 					nextItem = children.get(i + 1);
@@ -443,19 +433,19 @@ public class CommentsViewer extends Block {
 		}
 		return true;
 	}
-	
+
 	private boolean canInitComments(ArticleItemViewer articleViewer, String resourcePathFromRequest, String viewerIdentifier) {
 		if (!articleViewer.isCanInitAnyField()) {
 			return false;
 		}
-		
+
 		if (viewerIdentifier != null && !viewerIdentifier.equals(articleViewer.getArticleItemViewerFilter())) {
 			return false;
 		}
-		
+
 		return resourcePathFromRequest == null ? true : resourcePathFromRequest.equals(articleViewer.getResourcePath());
 	}
-	
+
 	protected String getThisPageKey(IWContext iwc) {
 		if (iwc == null) {
 			return null;
@@ -470,30 +460,30 @@ public class CommentsViewer extends Block {
 		}
 		return pageKey;
 	}
-	
+
 	private void addEnableCommentsCheckboxContainer(IWContext iwc, Layer container) {
 		if (!showViewController || isUsedInArticleList()) {
 			return;
 		}
-		
+
 		container.add(getCommentsController(iwc, null, moduleId, isShowCommentsForAllUsers(), SHOW_COMMENTS_PROPERTY));
 	}
-	
+
 	protected Layer getCommentsController(IWContext iwc, String cacheKey, String moduleId, boolean enabled, String propertyName) {
 		Layer commentsController = new Layer();
 		if (iwc == null || propertyName == null) {
 			return commentsController;
 		}
 		commentsController.setStyleClass("commentsController");
-		
+
 		String pageKey = getThisPageKey(iwc);
 		if (pageKey == null) {
 			return commentsController;
 		}
-		
+
 		Layer layer = new Layer();
 		layer.setStyleClass("commentsControllerInputs");
-		
+
 		CheckBox enableCheckBox = new CheckBox("enableComments");
 		enableCheckBox.setId(new StringBuffer(moduleId).append("manageCommentsBlockCheckBox").toString());
 		StringBuffer action = new StringBuffer("enableComments(this.checked, '");
@@ -506,19 +496,19 @@ public class CommentsViewer extends Block {
 		}
 		enableCheckBox.setOnClick(action.toString());
 		enableCheckBox.setChecked(enabled);
-		
+
 		Label label = new Label(getBundle(iwc).getLocalizedString("enable_comments"), enableCheckBox);
-		
+
 		layer.add(enableCheckBox);
 		layer.add(label);
 		commentsController.add(layer);
-		
+
 		return commentsController;
 	}
-	
+
 	private UIComponent getAddCommentBlock(IWContext iwc, String commentsId) {
 		IWResourceBundle iwrb = getResourceBundle(iwc);
-		
+
 		Layer addComments = new Layer();
 		addComments.setId(new StringBuffer(commentsId).append("add_comment_block").toString());
 		Link label = new Link(iwrb.getLocalizedString("comments_viewer.add_your_comment", "Add your comment"), "javascript:void(0)");
@@ -535,7 +525,7 @@ public class CommentsViewer extends Block {
 		} catch (NotLoggedOnException e) {
 			loggedUser = iwrb.getLocalizedString("anonymous", "Anonymous");
 		}
-		
+
 		StringBuilder action = new StringBuilder("addCommentPanel('").append(addComments.getId()).append(SEPARATOR).append(linkToComments).append(SEPARATOR)
 			.append(user).append(SEPARATOR).append(subject).append(SEPARATOR).append(comment).append(SEPARATOR).append(posted).append(SEPARATOR).append(send)
 			.append(SEPARATOR).append(sending).append(SEPARATOR).append(loggedUser).append(SEPARATOR)
@@ -549,10 +539,10 @@ public class CommentsViewer extends Block {
 		addComments.add(label);
 		return addComments;
 	}
-	
+
 	private String getUsersEmail(IWContext iwc) {
 		String emailAddress = "null";
-		
+
 		User currentUser = null;
 		try {
 			currentUser = iwc.getCurrentUser();
@@ -560,7 +550,7 @@ public class CommentsViewer extends Block {
 		if (currentUser == null) {
 			return emailAddress;
 		}
-		
+
 		UserBusiness userBusiness = null;
 		try {
 			userBusiness = IBOLookup.getServiceInstance(iwc, UserBusiness.class);
@@ -570,7 +560,7 @@ public class CommentsViewer extends Block {
 		if (userBusiness == null) {
 			return emailAddress;
 		}
-		
+
 		Email email = null;
 		try {
 			email = userBusiness.getUsersMainEmail(currentUser);
@@ -584,10 +574,10 @@ public class CommentsViewer extends Block {
 		if (StringUtil.isEmpty(emailAddress)) {
 			return "null";
 		}
-		
+
 		return new StringBuilder("'").append(emailAddress).append("'").toString();
 	}
-	
+
 	private CommentsEngine getCommentsEngine(IWApplicationContext iwac) {
 		if (commentsEngine == null) {
 			try {
@@ -598,13 +588,13 @@ public class CommentsViewer extends Block {
 		}
 		return commentsEngine;
 	}
-	
+
 	private int getCommentsCount(IWContext iwc) {
 		CommentsEngine comments = getCommentsEngine(iwc);
 		if (comments == null) {
 			return 0;
 		}
-		
+
 		try {
 			return comments.getCommentsCount(linkToComments, getSpringBeanIdentifier(), getIdentifier(), iwc, isAddLoginbyUUIDOnRSSFeedLink());
 		} catch (RemoteException e) {
@@ -612,7 +602,7 @@ public class CommentsViewer extends Block {
 			return 0;
 		}
 	}
-	
+
 	@Override
 	public Object saveState(FacesContext context) {
 		Object values[] = new Object[12];
@@ -689,7 +679,7 @@ public class CommentsViewer extends Block {
 	public void setLinkToComments(String linkToComments) {
 		this.linkToComments = linkToComments;
 	}
-	
+
 	@Override
 	public String getBuilderName(IWUserContext iwuc) {
 		String name = getBundle(iwuc).getComponentName(CommentsViewer.class);
@@ -706,18 +696,18 @@ public class CommentsViewer extends Block {
 	public void setUsedInArticleList(boolean usedInArticleList) {
 		this.usedInArticleList = usedInArticleList;
 	}
-	
+
 	@Override
 	public String getBundleIdentifier() {
 		return ArticleConstants.IW_BUNDLE_IDENTIFIER;
 	}
-	
+
 	private boolean isStandAlone(IWContext iwc) {
 		int id = iwc.getCurrentIBPageID();
 		if (id < 0) {
 			return false;
 		}
-		
+
 		String pageKey = String.valueOf(id);
 		BuilderService service = null;
 		try {
@@ -726,20 +716,20 @@ public class CommentsViewer extends Block {
 			e.printStackTrace();
 			return false;
 		}
-		
+
 		List<String> articleItems = service.getModuleId(pageKey, ArticleItemViewer.class.getName());
 		if (articleItems != null && articleItems.size() > 0) {
 			return false;
 		}
-		
+
 		List<String> articleViewers = service.getModuleId(pageKey, ArticleListViewer.class.getName());
 		if (articleViewers != null && articleViewers.size() > 0) {
 			return false;
 		}
-		
+
 		return true;
 	}
-	
+
 	private void resolveModuleId(IWContext iwc) {
 		BuilderService service = null;
 		try {
@@ -747,7 +737,7 @@ public class CommentsViewer extends Block {
 		} catch (RemoteException e) {
 			e.printStackTrace();
 		}
-		
+
 		if (service != null) {
 			moduleId = service.getInstanceId(this);
 			if (moduleId == null) {

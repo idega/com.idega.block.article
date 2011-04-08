@@ -5,20 +5,18 @@ import java.rmi.RemoteException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import javax.jcr.RepositoryException;
+import javax.jcr.observation.EventIterator;
+import javax.jcr.query.Query;
+import javax.jcr.query.QueryResult;
 import javax.servlet.ServletException;
 
-import org.apache.webdav.lib.search.CompareOperator;
-import org.apache.webdav.lib.search.SearchException;
-import org.apache.webdav.lib.search.SearchExpression;
-import org.apache.webdav.lib.search.SearchRequest;
-import org.apache.webdav.lib.search.SearchScope;
-import org.apache.webdav.lib.search.expressions.CompareExpression;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import com.idega.block.article.component.ArticleItemViewer;
 import com.idega.block.article.component.ArticleListViewer;
@@ -28,23 +26,18 @@ import com.idega.block.rss.business.RSSProducer;
 import com.idega.block.rss.data.RSSRequest;
 import com.idega.business.IBOLookup;
 import com.idega.business.IBOLookupException;
-import com.idega.content.business.ContentSearch;
 import com.idega.content.business.ContentUtil;
 import com.idega.core.builder.business.BuilderService;
 import com.idega.core.builder.business.BuilderServiceFactory;
 import com.idega.core.builder.data.ICPage;
-import com.idega.core.search.business.Search;
-import com.idega.core.search.business.SearchResult;
 import com.idega.presentation.IWContext;
-import com.idega.slide.business.IWContentEvent;
-import com.idega.slide.business.IWSlideChangeListener;
-import com.idega.slide.business.IWSlideService;
-import com.idega.slide.business.IWSlideSession;
-import com.idega.slide.util.IWSlideConstants;
+import com.idega.repository.RepositoryService;
+import com.idega.repository.event.RepositoryEventListener;
 import com.idega.util.CoreConstants;
 import com.idega.util.IWTimestamp;
 import com.idega.util.ListUtil;
 import com.idega.util.StringUtil;
+import com.idega.util.expression.ELUtil;
 import com.sun.syndication.feed.synd.SyndEntry;
 import com.sun.syndication.feed.synd.SyndFeed;
 
@@ -56,23 +49,26 @@ import com.sun.syndication.feed.synd.SyndFeed;
  * @author justinas
  *
  */
-public class ArticleRSSProducer extends RSSAbstractProducer implements RSSProducer, IWSlideChangeListener {	
+public class ArticleRSSProducer extends RSSAbstractProducer implements RSSProducer, RepositoryEventListener {
 
 	private static final Logger LOGGER = Logger.getLogger(ArticleRSSProducer.class.getName());
-	
+
 	private static final String ARTICLE = ContentUtil.getContentBaseFolderPath() + "/article/";
 	private static final String ARTICLE_RSS = ARTICLE + "rss/";
-	
+
 	protected static final String ARTICLE_SEARCH_KEY = "*.xml*";
 
 	public static final String RSS_FOLDER_NAME = "rss";
 	public static final String RSS_FILE_NAME = "articlefeed.xml";
 	public static final String PATH = CoreConstants.WEBDAV_SERVLET_URI + ARTICLE;
-	
+
 	private List<String> rssFileURIsCacheList = new ArrayList<String>();
-	
+
+	@Autowired
+	private RepositoryService repository;
+
 	private int numberOfDaysDisplayed = 0;
-	
+
 	public ArticleRSSProducer() {
 		super();
 	}
@@ -89,21 +85,21 @@ public class ArticleRSSProducer extends RSSAbstractProducer implements RSSProduc
 		if ((!extraURI.endsWith(CoreConstants.SLASH)) && (extraURI.length() != 0)) {
 			extraURI = extraURI.concat(CoreConstants.SLASH);
 		}
-		
+
 		List<String> categories = new ArrayList<String>();
 		List<String> articles = new ArrayList<String>();
 		if (category != null)
 			categories.add(category);
-		
+
 		IWContext iwc = getIWContext(rssRequest);
 		String language = iwc.getLocale().getLanguage();
-		
+
 		if (StringUtil.isEmpty(extraURI)) {
 			feedParentFolder = ARTICLE_RSS;
-			feedFile = "all_".concat(language).concat(".xml");			
-		} else if (category != null) {		
+			feedFile = "all_".concat(language).concat(".xml");
+		} else if (category != null) {
 			feedParentFolder = ARTICLE_RSS.concat("category/").concat(category).concat(CoreConstants.SLASH);
-			feedFile = "feed_.".concat(language).concat(".xml");			
+			feedFile = "feed_.".concat(language).concat(".xml");
 		} else {
 			//	Have page URI
 			feedParentFolder = ARTICLE_RSS.concat("page/").concat(extraURI);
@@ -113,8 +109,8 @@ public class ArticleRSSProducer extends RSSAbstractProducer implements RSSProduc
 				articles = getArticlesByURI(extraURI, iwc);
 			}
 		}
-		
-		String realURI = CoreConstants.WEBDAV_SERVLET_URI+feedParentFolder+feedFile;		
+
+		String realURI = CoreConstants.WEBDAV_SERVLET_URI+feedParentFolder+feedFile;
 		if (rssFileURIsCacheList.contains(feedFile)) {
 			try {
 				this.dispatch(realURI, rssRequest);
@@ -127,7 +123,7 @@ public class ArticleRSSProducer extends RSSAbstractProducer implements RSSProduc
 				//todo code the 3 different cases (see description)
 				searchForArticles(rssRequest, feedParentFolder, feedFile, categories, articles, extraURI);
 				rssFileURIsCacheList.add(feedFile);
-				
+
 				this.dispatch(realURI, rssRequest);
 			} catch (Exception e) {
 				LOGGER.log(Level.WARNING, "Error while searching or dispatching: " + realURI, e);
@@ -135,32 +131,33 @@ public class ArticleRSSProducer extends RSSAbstractProducer implements RSSProduc
 			}
 		}
 	}
-	
+
 	@SuppressWarnings("unchecked")
 	public void searchForArticles(RSSRequest rssRequest, String feedParentPath, String feedFileName, List<String> categories, List<String> articles,
 			String extraURI) {
-		
+
 		IWContext iwc = getIWContext(rssRequest);
 		boolean getAllArticles = false;
-		
+
 		if (StringUtil.isEmpty(extraURI)) {
 			getAllArticles = true;
 		}
-		
+
 		String serverName = iwc.getServerURL();
 		serverName = serverName.substring(0, serverName.length()-1);
-		
-		Collection<SearchResult> results = getArticleSearchResults(PATH, categories, iwc);
+
+		Collection<QueryResult> results = getArticleSearchResults(PATH, categories, iwc);
 		if (ListUtil.isEmpty(results)) {
 			LOGGER.warning("No results found in: " + PATH + " by the categories: " + categories);
 			return;
 		}
-		
+
 		List<String> urisToArticles = new ArrayList<String>();
-		for (SearchResult result: results) {
-			urisToArticles.add(result.getSearchResultURI());
+		for (QueryResult result: results) {
+			LOGGER.info("Manage the query result: " + result);	//	TODO
+//			urisToArticles.add(result.getSearchResultURI());
 		}
-		
+
 		if (!ListUtil.isEmpty(articles)) {
 			if (ListUtil.isEmpty(categories)) {
 				urisToArticles = articles;
@@ -168,15 +165,15 @@ public class ArticleRSSProducer extends RSSAbstractProducer implements RSSProduc
 				urisToArticles.addAll(articles);
 			}
 		}
-		
-		if (!ListUtil.isEmpty(articles) && ListUtil.isEmpty(categories))			
+
+		if (!ListUtil.isEmpty(articles) && ListUtil.isEmpty(categories))
 			urisToArticles = articles;
-		
+
 		RSSBusiness rss = null;
 		SyndFeed articleFeed = null;
 		long time = System.currentTimeMillis();
 		try {
-			rss = IBOLookup.getServiceInstance(iwc, RSSBusiness.class);			
+			rss = IBOLookup.getServiceInstance(iwc, RSSBusiness.class);
 		} catch (IBOLookupException e) {
 			LOGGER.log(Level.WARNING, "Error getting " + RSSBusiness.class, e);
 		}
@@ -187,7 +184,7 @@ public class ArticleRSSProducer extends RSSAbstractProducer implements RSSProduc
 			description = "No articles found. Empty feed";
 		} else {
 			description = "Article feed generated by IdegaWeb ePlatform, Idega Software, http://www.idega.com";
-			
+
 			BuilderService bservice = null;
 			String pageKey = null;
 			try {
@@ -196,14 +193,14 @@ public class ArticleRSSProducer extends RSSAbstractProducer implements RSSProduc
 					pageKey = bservice.getExistingPageKeyByURI(CoreConstants.SLASH + extraURI);
 					ICPage icpage = bservice.getICPage(pageKey);
 					title = icpage.getName();
-				}			
+				}
 			} catch (Exception e) {
 				LOGGER.log(Level.WARNING, "Error getting page name from: " + extraURI, e);
-			}			
+			}
 
 			String lang = iwc.getCurrentLocale().getLanguage();
 			SyndFeed allArticles = rss.createNewFeed(title, serverName , description, "atom_1.0", lang, new Timestamp(time));
-				
+
 			List<SyndEntry> allEntries = new ArrayList<SyndEntry>();
 			for (int i = 0; i < urisToArticles.size(); i++) {
 				String articleURL = serverName.concat(urisToArticles.get(i)).concat(CoreConstants.SLASH).concat(lang).concat(".xml");
@@ -211,7 +208,7 @@ public class ArticleRSSProducer extends RSSAbstractProducer implements RSSProduc
 				if (articleFeed != null)
 					allEntries.addAll(articleFeed.getEntries());
 			}
-			
+
 			allArticles.setEntries(allEntries);
 			String allArticlesContent = null;
 			try {
@@ -219,26 +216,16 @@ public class ArticleRSSProducer extends RSSAbstractProducer implements RSSProduc
 			} catch (Exception e) {
 				LOGGER.log(Level.WARNING, "Error converting to Atom from: " + allArticles, e);
 			}
-			
+
 			try {
-				IWSlideService service = this.getIWSlideService(rssRequest);		
-				service.uploadFileAndCreateFoldersFromStringAsRoot(feedParentPath, feedFileName, allArticlesContent, RSSAbstractProducer.RSS_CONTENT_TYPE, true);
-			} catch (RemoteException e) {
+				getRepositoryService().uploadFileAndCreateFoldersFromStringAsRoot(feedParentPath, feedFileName, allArticlesContent,
+						RSSAbstractProducer.RSS_CONTENT_TYPE);
+			} catch (RepositoryException e) {
 				LOGGER.log(Level.WARNING, "Error uploading to: " + feedParentPath + feedFileName + " file: " + allArticlesContent, e);
 			}
 		}
 	}
-	
-	public void onSlideChange(IWContentEvent contentEvent) {
-		//	On a file change this code checks if RSS file already exists and if so updates it (overwrites) with a new folder list
-		String uri = contentEvent.getContentEvent().getUri();
-		//	Only do it for articles (whenever something changes in the articles folder)
-		if (!StringUtil.isEmpty(uri) && uri.indexOf("/cms/article/") >-1  ) {
-			// TODO don't remove cache on comments change, just check the URI for comments RSS.
-			getrssFileURIsCacheList().clear();
-		}
-	}	
-	
+
 	/**
 	 * @param rssRequest
 	 * @return
@@ -248,14 +235,14 @@ public class ArticleRSSProducer extends RSSAbstractProducer implements RSSProduc
 		if(!uri.endsWith(CoreConstants.SLASH)){
 			uri+=CoreConstants.SLASH;
 		}
-		
+
 		if(!uri.startsWith(CoreConstants.PATH_FILES_ROOT)){
 			uri = CoreConstants.PATH_FILES_ROOT+uri;
 		}
 		return uri;
 	}
 
-	public Collection<SearchResult> getArticleSearchResults(String folder, List<String> categories, IWContext iwc) {
+	public Collection<QueryResult> getArticleSearchResults(String folder, List<String> categories, IWContext iwc) {
 		if (folder == null) {
 			return null;
 		}
@@ -265,98 +252,97 @@ public class ArticleRSSProducer extends RSSAbstractProducer implements RSSProduc
 				return null;
 			}
 		}
-		
+
 		IWTimestamp oldest = null;
-		
+
 		if (this.numberOfDaysDisplayed > 0) {
 			oldest = IWTimestamp.RightNow();
 			oldest.addDays(-this.numberOfDaysDisplayed);
 		}
-		
-		IWSlideSession session = null;
-		try {
-			session = (IWSlideSession) IBOLookup.getSessionInstance(iwc,IWSlideSession.class);
-		} catch (IBOLookupException e) {
-			e.printStackTrace();
-			return null;
-		}
-		String webDavUri = null;
-		try {
-			webDavUri = session.getWebdavServerURI();
-		} catch (RemoteException e) {
-			e.printStackTrace();
-		}
-		if (webDavUri != null) {
-			if(folder.startsWith(webDavUri)){
-				folder = folder.substring(webDavUri.length());
-			}
-			if(folder.startsWith(CoreConstants.SLASH)){
-				folder = folder.substring(1);
-			}
-		}
-		SearchRequest articleSearch = null;
-		try {
-			articleSearch = getSearchRequest(folder, iwc.getCurrentLocale(), oldest, categories);
-		} catch (SearchException e) {
-			e.printStackTrace();
-			return null;
-		}
-		ContentSearch searchBusiness = new ContentSearch(iwc.getIWMainApplication());
-		searchBusiness.setToUseRootAccessForSearch(true);
-		searchBusiness.setToUseDescendingOrder(true);
-		Search search = searchBusiness.createSearch(articleSearch);
-		return search.getSearchResults();
+
+//		String webDavUri = null;
+//		try {
+//			webDavUri = session.getWebdavServerURI();
+//		} catch (RemoteException e) {
+//			e.printStackTrace();
+//		}
+//		if (webDavUri != null) {
+//			if(folder.startsWith(webDavUri)){
+//				folder = folder.substring(webDavUri.length());
+//			}
+//			if(folder.startsWith(CoreConstants.SLASH)){
+//				folder = folder.substring(1);
+//			}
+//		}
+//		SearchRequest articleSearch = null;
+//		try {
+//			articleSearch = getSearchRequest(folder, iwc.getCurrentLocale(), oldest, categories);
+//		} catch (SearchException e) {
+//			e.printStackTrace();
+//			return null;
+//		}
+//		ContentSearch searchBusiness = new ContentSearch(iwc.getIWMainApplication());
+//		searchBusiness.setToUseRootAccessForSearch(true);
+//		searchBusiness.setToUseDescendingOrder(true);
+//		Search search = searchBusiness.createSearch(articleSearch);
+//		return search.getSearchResults();
+
+		//	TODO: implement
+		return null;
 	}
-	
-	public SearchRequest getSearchRequest(String scope, Locale locale, IWTimestamp oldest, List<String> categoryList) throws SearchException {
-		SearchRequest s = new SearchRequest();
-		s.addSelection(IWSlideConstants.PROPERTY_DISPLAY_NAME);
-		s.addSelection(IWSlideConstants.PROPERTY_CREATION_DATE);
-		s.addSelection(IWSlideConstants.PROPERTY_CATEGORY);
-		s.addScope(new SearchScope(scope));
-		SearchExpression expression = null;
-		
-		String localeString = CoreConstants.EMPTY;
-		SearchExpression namePatternExpression = s.compare(CompareOperator.LIKE, IWSlideConstants.PROPERTY_DISPLAY_NAME,"%"+localeString+".article");
-		expression = namePatternExpression;
-		
-		SearchExpression creationDateExpression = null;		
-		if(oldest != null){
-			creationDateExpression = s.compare(CompareOperator.GTE, IWSlideConstants.PROPERTY_CREATION_DATE,oldest.getDate());
-			expression = s.and(expression,creationDateExpression);
-		}
-		
-		List<CompareExpression> categoryExpressions = new ArrayList<CompareExpression>();
-		if (categoryList != null) {
-			for (Iterator<String> iter = categoryList.iterator(); iter.hasNext();) {
-				String categoryName = iter.next();
-				categoryExpressions.add(s.compare(CompareOperator.LIKE,IWSlideConstants.PROPERTY_CATEGORY,"%,"+categoryName+",%"));
-			}
-			Iterator<CompareExpression> expr = categoryExpressions.iterator();
-			if(expr.hasNext()){
-				SearchExpression categoryExpression = expr.next();
-				while (expr.hasNext()) {
-					categoryExpression = s.or(categoryExpression, expr.next());
-				}
-				expression = s.and(expression,categoryExpression);
-			}
-		}
-		
-		s.setWhereExpression(expression);
-		return s;
-	}	
-	
+
+	public Query getSearchRequest(String scope, Locale locale, IWTimestamp oldest, List<String> categoryList) throws RepositoryException {
+//		SearchRequest s = new SearchRequest();
+//		s.addSelection(IWSlideConstants.PROPERTY_DISPLAY_NAME);
+//		s.addSelection(IWSlideConstants.PROPERTY_CREATION_DATE);
+//		s.addSelection(IWSlideConstants.PROPERTY_CATEGORY);
+//		s.addScope(new SearchScope(scope));
+//		SearchExpression expression = null;
+//
+//		String localeString = CoreConstants.EMPTY;
+//		SearchExpression namePatternExpression = s.compare(CompareOperator.LIKE, IWSlideConstants.PROPERTY_DISPLAY_NAME,"%"+localeString+".article");
+//		expression = namePatternExpression;
+//
+//		SearchExpression creationDateExpression = null;
+//		if(oldest != null){
+//			creationDateExpression = s.compare(CompareOperator.GTE, IWSlideConstants.PROPERTY_CREATION_DATE,oldest.getDate());
+//			expression = s.and(expression,creationDateExpression);
+//		}
+//
+//		List<CompareExpression> categoryExpressions = new ArrayList<CompareExpression>();
+//		if (categoryList != null) {
+//			for (Iterator<String> iter = categoryList.iterator(); iter.hasNext();) {
+//				String categoryName = iter.next();
+//				categoryExpressions.add(s.compare(CompareOperator.LIKE,IWSlideConstants.PROPERTY_CATEGORY,"%,"+categoryName+",%"));
+//			}
+//			Iterator<CompareExpression> expr = categoryExpressions.iterator();
+//			if(expr.hasNext()){
+//				SearchExpression categoryExpression = expr.next();
+//				while (expr.hasNext()) {
+//					categoryExpression = s.or(categoryExpression, expr.next());
+//				}
+//				expression = s.and(expression,categoryExpression);
+//			}
+//		}
+//
+//		s.setWhereExpression(expression);
+//		return s;
+
+		//	TODO: implement
+		return null;
+	}
+
 	/**
 	 * @return Returns the rssFileURIsCacheList.
 	 */
 	protected List<String> getrssFileURIsCacheList() {
 		return rssFileURIsCacheList;
 	}
-	
+
 	public String getCategory(String extraURI){
 		String category = null;
 		if(extraURI == null)
-			return null;		
+			return null;
 		if(extraURI.length() == 0)
 			return null;
 		if(extraURI.startsWith("category/"))
@@ -370,7 +356,7 @@ public class ArticleRSSProducer extends RSSAbstractProducer implements RSSProduc
 	public String getPageURI(String extraURI){
 		if(extraURI.endsWith(CoreConstants.SLASH))
 			return extraURI.substring(0, extraURI.length()-1);
-		else 
+		else
 			return extraURI;
 	}
 
@@ -383,7 +369,7 @@ public class ArticleRSSProducer extends RSSAbstractProducer implements RSSProduc
 		} catch (RemoteException e) {
 			e.printStackTrace();
 		}
-		String pageKey = bservice.getExistingPageKeyByURI(CoreConstants.SLASH+URI);		
+		String pageKey = bservice.getExistingPageKeyByURI(CoreConstants.SLASH+URI);
 		List<String> moduleId = bservice.getModuleId(pageKey, ArticleListViewer.class.getName());
 		if (moduleId != null){
 			for (int i = 0; i < moduleId.size(); i++) {
@@ -396,7 +382,7 @@ public class ArticleRSSProducer extends RSSAbstractProducer implements RSSProduc
 						}
 					}
 					else {
-						categories.add(property);	
+						categories.add(property);
 					}
 				}
 				else {
@@ -404,10 +390,10 @@ public class ArticleRSSProducer extends RSSAbstractProducer implements RSSProduc
 					categories = null;
 				}
 			}
-		}	
+		}
 		return categories;
 	}
-	
+
 	public List<String> getArticlesByURI(String URI, IWContext iwc){
 		List<String> articles = new ArrayList<String>();
 		BuilderService bservice = null;
@@ -417,7 +403,7 @@ public class ArticleRSSProducer extends RSSAbstractProducer implements RSSProduc
 			e.printStackTrace();
 		}
 		String pageKey = bservice.getExistingPageKeyByURI(CoreConstants.SLASH+URI);
-		
+
 		List<String> moduleId = bservice.getModuleId(pageKey, ArticleItemViewer.class.getName());
 
 		if (moduleId != null){
@@ -426,8 +412,20 @@ public class ArticleRSSProducer extends RSSAbstractProducer implements RSSProduc
 				articleURI = articleURI.substring(0, articleURI.length());
 				articles.add(CoreConstants.WEBDAV_SERVLET_URI+ articleURI);
 			}
-		}		
+		}
 		return articles;
 	}
 
+	@Override
+	public void onEvent(EventIterator events) {
+		// TODO Auto-generated method stub
+
+	}
+
+	RepositoryService getRepositoryService() {
+		if (repository == null) {
+			ELUtil.getInstance().autowire(this);
+		}
+		return repository;
+	}
 }

@@ -26,10 +26,6 @@ import javax.jcr.Node;
 import javax.jcr.NodeIterator;
 import javax.jcr.RepositoryException;
 
-import org.apache.commons.httpclient.HttpException;
-import org.apache.webdav.lib.PropertyName;
-import org.apache.webdav.lib.WebdavResources;
-
 import com.idega.block.article.ArticleCacher;
 import com.idega.block.article.business.ArticleConstants;
 import com.idega.block.article.business.ArticleUtil;
@@ -44,12 +40,8 @@ import com.idega.core.builder.business.BuilderService;
 import com.idega.core.builder.business.BuilderServiceFactory;
 import com.idega.data.IDOStoreException;
 import com.idega.idegaweb.IWMainApplication;
-import com.idega.idegaweb.IWUserContext;
 import com.idega.idegaweb.UnavailableIWContext;
 import com.idega.presentation.IWContext;
-import com.idega.slide.business.IWSlideSession;
-import com.idega.slide.util.WebdavExtendedResource;
-import com.idega.slide.util.WebdavRootResource;
 import com.idega.util.CoreConstants;
 import com.idega.util.CoreUtil;
 import com.idega.util.StringHandler;
@@ -75,7 +67,7 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 	public final static String CONTENT_TYPE = "ContentType";
 	public final static String CONTENT_TYPE_WITH_PREFIX = TYPE_PREFIX+CONTENT_TYPE;
 
-	public static final PropertyName PROPERTY_CONTENT_TYPE = new PropertyName(TYPE_PREFIX,CONTENT_TYPE);
+//	public static final PropertyName PROPERTY_CONTENT_TYPE = new PropertyName(TYPE_PREFIX,CONTENT_TYPE);
 
 	private ArticleLocalizedItemBean localizedArticle;
 	private String baseFolderLocation;
@@ -159,6 +151,7 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 		return getLocalizedArticle().getContentFieldNames();
 	}
 
+	@Override
 	public String getContentItemPrefix() {
 		return getLocalizedArticle().getContentItemPrefix();
 	}
@@ -254,14 +247,10 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 		getLocalizedArticle().setUpdated(b);
 	}
 
+	@Override
 	public void store() throws IDOStoreException {
 		try {
-			if(isPersistToWebDav()){
-				storeToWebDav();
-			}
-			else if(isPersistToJCR()){
-				storeToJCR();
-			}
+			storeToJCR();
 			getLocalizedArticle().store();
 
 			IWMainApplication iwma = IWMainApplication.getDefaultIWMainApplication();
@@ -271,19 +260,16 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 
 				ContentUtil.removeCategoriesViewersFromCache();
 			}
-		}
-		catch(ArticleStoreException ase){
+		} catch(ArticleStoreException ase){
 			throw ase;
-		}
-		catch(Exception e){
+		} catch(Exception e){
 			throw new RuntimeException(e);
 		}
-		if(isPersistToJCR()){
-			try {
-				commitJCRStore();
-			} catch (RepositoryException e) {
-				throw new IDOStoreException(e.getMessage());
-			}
+
+		try {
+			commitJCRStore();
+		} catch (RepositoryException e) {
+			throw new IDOStoreException(e.getMessage());
 		}
 	}
 
@@ -291,25 +277,25 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 		//getSession().save();
 	}
 
-	private void storeToWebDav() throws HttpException, IOException,	RemoteException {
-		IWUserContext iwuc = IWContext.getInstance();
-		IWSlideSession session = getIWSlideSession(iwuc);
-		WebdavRootResource rootResource = session.getWebdavRootResource();
-
-		//	Setting the path for creating new file/creating localized version/updating existing file
-		String articleFolderPath = getResourcePath();
-
-		boolean hadToCreate = session.createAllFoldersInPath(articleFolderPath);
-		if (hadToCreate) {
-			String fixedFolderURL = session.getURI(articleFolderPath);
-			rootResource.proppatchMethod(fixedFolderURL, PROPERTY_CONTENT_TYPE, "LocalizedFile", true);
-		}
-		else{
-			rootResource.proppatchMethod(articleFolderPath, PROPERTY_CONTENT_TYPE, "LocalizedFile", true);
-		}
-
-		rootResource.close();
-	}
+//	private void storeToWebDav() throws HttpException, IOException,	RemoteException {
+//		IWUserContext iwuc = IWContext.getInstance();
+//		IWSlideSession session = getIWSlideSession(iwuc);
+//		WebdavRootResource rootResource = session.getWebdavRootResource();
+//
+//		//	Setting the path for creating new file/creating localized version/updating existing file
+//		String articleFolderPath = getResourcePath();
+//
+//		boolean hadToCreate = session.createAllFoldersInPath(articleFolderPath);
+//		if (hadToCreate) {
+//			String fixedFolderURL = session.getURI(articleFolderPath);
+//			rootResource.proppatchMethod(fixedFolderURL, PROPERTY_CONTENT_TYPE, "LocalizedFile", true);
+//		}
+//		else{
+//			rootResource.proppatchMethod(articleFolderPath, PROPERTY_CONTENT_TYPE, "LocalizedFile", true);
+//		}
+//
+//		rootResource.close();
+//	}
 
 	private void storeToJCR() throws IOException, RepositoryException{
 		//	Setting the path for creating new file/creating localized version/updating existing file
@@ -665,51 +651,48 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 		}
 	}
 
-	/**
-	 * Loads the article (folder)
-	 */
-	@Override
-	protected boolean load(WebdavExtendedResource webdavResource) throws IOException {
-		WebdavExtendedResource localizedArticleFile = null;
-		//First check if the resource is a folder, as it should be
-		if(webdavResource.isCollection()){
-
-			WebdavResources resources = webdavResource.getChildResources();
-			String userLanguageArticleResourcePath = getArticleDefaultLocalizedResourcePath();
-			if(resources.isThereResourceName(userLanguageArticleResourcePath)){ //the language that the user has selected
-				localizedArticleFile = (WebdavExtendedResource) resources.getResource(userLanguageArticleResourcePath);
-				setAvailableInSelectedLanguage();
-			}
-			else{
-				//selected language not available:
-				if(getAllowFallbackToSystemLanguage()){
-					String systemLanguageArticleResourcePath = getArticleDefaultLocalizedResourcePath(getSystemLanguage());//getArticleName(iwc.getIWMainApplication().getDefaultLocale());
-					if(resources.isThereResourceName(systemLanguageArticleResourcePath)){ //the language default in the system.
-						localizedArticleFile = (WebdavExtendedResource) resources.getResource(systemLanguageArticleResourcePath);
-						setAvailableInSelectedLanguage();
-					}
-					else{
-						setNotAvailableInSelectedLanguage();
-					}
-				}
-				else{
-					setNotAvailableInSelectedLanguage();
-				}
-
-			}
-		} else {
-			String path = getResourcePath();
-			setLanguageFromFilePath(path);
-			String parentFolder = webdavResource.getParentPath();
-			setResourcePath(parentFolder);
-			return load(parentFolder);
-		}
-		if(localizedArticleFile!=null){
-			return getLocalizedArticle().load(localizedArticleFile);
-		}
-		return false;
-	}
-
+//	/**
+//	 * Loads the article (folder)
+//	 */
+//	protected boolean load(RepositoryItem repositoryItem) throws IOException {
+//		RepositoryItem localizedArticleFile = null;
+//		//First check if the resource is a folder, as it should be
+//		if (repositoryItem.isCollection()) {
+//			Collection<RepositoryItem> resources = repositoryItem.getChildResources();
+//			String userLanguageArticleResourcePath = getArticleDefaultLocalizedResourcePath();
+//			if(resources.isThereResourceName(userLanguageArticleResourcePath)){ //the language that the user has selected
+//				localizedArticleFile = (WebdavExtendedResource) resources.getResource(userLanguageArticleResourcePath);
+//				setAvailableInSelectedLanguage();
+//			}
+//			else{
+//				//selected language not available:
+//				if(getAllowFallbackToSystemLanguage()){
+//					String systemLanguageArticleResourcePath = getArticleDefaultLocalizedResourcePath(getSystemLanguage());//getArticleName(iwc.getIWMainApplication().getDefaultLocale());
+//					if(resources.isThereResourceName(systemLanguageArticleResourcePath)){ //the language default in the system.
+//						localizedArticleFile = (WebdavExtendedResource) resources.getResource(systemLanguageArticleResourcePath);
+//						setAvailableInSelectedLanguage();
+//					}
+//					else{
+//						setNotAvailableInSelectedLanguage();
+//					}
+//				}
+//				else{
+//					setNotAvailableInSelectedLanguage();
+//				}
+//
+//			}
+//		} else {
+//			String path = getResourcePath();
+//			setLanguageFromFilePath(path);
+//			String parentFolder = webdavResource.getParentPath();
+//			setResourcePath(parentFolder);
+//			return load(parentFolder);
+//		}
+//		if(localizedArticleFile!=null){
+//			return getLocalizedArticle().load(localizedArticleFile);
+//		}
+//		return false;
+//	}
 
 	/**
 	 * Loads the article (folder)
@@ -842,6 +825,7 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 		ContentUtil.removeCategoriesViewersFromCache();
 	}
 
+	@Override
 	public void processValueChange(ValueChangeEvent event) throws AbortProcessingException {
 	}
 

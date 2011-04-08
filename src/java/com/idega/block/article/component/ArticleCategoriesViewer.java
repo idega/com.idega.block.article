@@ -8,6 +8,8 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
+import javax.jcr.query.QueryResult;
+
 import com.idega.block.article.bean.ArticleListManagedBean;
 import com.idega.block.article.business.ArticleConstants;
 import com.idega.block.article.business.ArticleUtil;
@@ -17,7 +19,6 @@ import com.idega.content.business.categories.CategoryBean;
 import com.idega.content.data.ContentCategory;
 import com.idega.content.presentation.ContentItemListViewer;
 import com.idega.core.builder.business.BuilderService;
-import com.idega.core.search.business.SearchResult;
 import com.idega.idegaweb.IWResourceBundle;
 import com.idega.idegaweb.IWUserContext;
 import com.idega.presentation.Block;
@@ -31,54 +32,54 @@ import com.idega.util.CoreUtil;
 import com.idega.util.PresentationUtil;
 
 public class ArticleCategoriesViewer extends Block {
-	
+
 	private final String blogLinkDisabled = "blog-category-link-disabled";
 	private final String blogLinkEnabled = "blog-category-link-enabled";
 	private final String opener = "(";
 	private final String closer = ")";
 	private String separator = "', '";
-	
+
 	private Map<String, Integer> countedCategories = null;
 	private Map<String, List<String>> availableCategories = null;
-	
+
 	private Boolean hasUserValidRights = Boolean.FALSE;
-	
+
 	public ArticleCategoriesViewer() {
 		setCacheable(getCacheKey());
-		
+
 		countedCategories = new HashMap<String, Integer>();
 		availableCategories = new HashMap<String, List<String>>();
 	}
-	
+
 	@Override
 	public String getCacheKey() {
 		return ContentConstants.ARTICLE_CATEGORIES_VIEWER_BLOCK_CACHE_KEY;
 	}
-	
+
 	@Override
 	protected String getCacheState(IWContext iwc, String cacheStatePrefix) {
 		return super.getCacheState(iwc, cacheStatePrefix);
 	}
-	
+
 	@Override
 	public void main(IWContext iwc) {
 		Locale currentLocale = iwc.getCurrentLocale();
 		if (currentLocale == null) {
 			currentLocale = Locale.ENGLISH;
 		}
-		
+
 		Layer container = new Layer();
 		add(container);
-		
+
 		hasUserValidRights = ContentUtil.hasContentEditorRoles(iwc);
 		if (hasUserValidRights) {
 			addScript(iwc, container);
 		}
-		
+
 		CategoryBean bean = CategoryBean.getInstance();
 		Collection<ContentCategory> categories = bean.getCategories(currentLocale);
 		countCategories(categories, iwc);
-		
+
 		String pageKey = getThisPageKey(iwc);
 		BuilderService service = null;
 		try {
@@ -93,7 +94,7 @@ public class ArticleCategoriesViewer extends Block {
 				markAvailableCategories(categories, pageKey, moduleIds.get(i), service);
 			}
 		}
-		
+
 		String lang = currentLocale.toString();
 		Layer disabledCategoryContainer = null;
 		boolean isCheckedAnyCategory = isCheckedAnyCategory();
@@ -127,7 +128,7 @@ public class ArticleCategoriesViewer extends Block {
 					if (isCheckedCategory(categoryKey) || hasUserValidRights) {
 						Text text = new Text(nameWithCount);
 						disabledCategoryContainer = new Layer();
-						if (hasUserValidRights) {	
+						if (hasUserValidRights) {
 							addCheckBox(pageKey, moduleIds, disabledCategoryContainer, iwc, categoryKey);
 						}
 						disabledCategoryContainer.setStyleClass(blogLinkDisabled);
@@ -146,19 +147,19 @@ public class ArticleCategoriesViewer extends Block {
 		scripts.add("/dwr/interface/BuilderService.js");
 		scripts.add(CoreConstants.DWR_ENGINE_SCRIPT);
 		scripts.add(ArticleUtil.getBundle().getVirtualPathWithFileNameString("javascript/ArticleCategoriesHelper.js"));
-		
+
 		if (CoreUtil.isSingleComponentRenderingProcess(iwc)) {
 			container.add(PresentationUtil.getJavaScriptSourceLines(scripts));
 			return;
 		}
 		PresentationUtil.addJavaScriptSourcesLinesToHeader(iwc, scripts);
 	}
-	
+
 	@Override
 	public String getBundleIdentifier() {
 		return ArticleConstants.IW_BUNDLE_IDENTIFIER;
 	}
-	
+
 	private void countCategories(Collection<ContentCategory> categories, IWContext iwc) {
 		if (categories == null) {
 			return;
@@ -167,7 +168,7 @@ public class ArticleCategoriesViewer extends Block {
 
 		ArticleListManagedBean bean = new ArticleListManagedBean();
 		List<String> categoriesList = null;
-		Collection<SearchResult> results = null;
+		Collection<QueryResult> results = null;
 		for (ContentCategory category : categories) {
 			categoriesList = new ArrayList<String>();
 			categoriesList.add(category.getId());
@@ -177,7 +178,7 @@ public class ArticleCategoriesViewer extends Block {
 			}
 		}
 	}
-	
+
 	private void markAvailableCategories(Collection<ContentCategory> categories, String pageKey, String moduleId, BuilderService service) {
 		if (categories == null) {
 			return;
@@ -195,7 +196,7 @@ public class ArticleCategoriesViewer extends Block {
 			}
 		}
 	}
-	
+
 	private void addCheckBox(String pageKey, List<String> moduleIds, Layer container, IWContext iwc, String category) {
 		if (!hasUserValidRights) {
 			return;
@@ -209,7 +210,7 @@ public class ArticleCategoriesViewer extends Block {
 
 		IWResourceBundle iwrb = getResourceBundle(iwc);
 		CheckBox box = new CheckBox(category);
-		
+
 		for (int i = 0; i < moduleIds.size(); i++) {
 			List<String> modules = availableCategories.get(category);
 			if (modules == null) {
@@ -219,7 +220,7 @@ public class ArticleCategoriesViewer extends Block {
 				box.setChecked(true);
 				box.setTitle(iwrb.getLocalizedString("set_category_invisible", "Set category invisible for common users"));
 			}
-				
+
 			StringBuilder action = new StringBuilder("setDisplayArticleCategory('").append(box.getId()).append(separator).append(pageKey);
 			action.append(getModulesParameter(moduleIds.get(i), modules)).append(iwrb.getLocalizedString("saving", "Saving...")).append(separator);
 			action.append(ContentConstants.ARTICLE_CATEGORIES_VIEWER_BLOCK_CACHE_KEY).append("');");
@@ -227,10 +228,10 @@ public class ArticleCategoriesViewer extends Block {
 		}
 		container.add(box);
 	}
-	
+
 	private String getModulesParameter(String currentModuleId, List<String> otherIds) {
 		StringBuilder param = new StringBuilder("', ['");
-		
+
 		if (otherIds == null || otherIds.size() == 0) {
 			param.append(currentModuleId);
 		}
@@ -242,10 +243,10 @@ public class ArticleCategoriesViewer extends Block {
 				}
 			}
 		}
-		
+
 		return param.append("'], '").toString();
 	}
-	
+
 	private String getThisPageKey(IWContext iwc) {
 		if (iwc == null) {
 			return null;
@@ -260,7 +261,7 @@ public class ArticleCategoriesViewer extends Block {
 		}
 		return pageKey;
 	}
-	
+
 	private boolean isCheckedCategory(String categoryKey) {
 		List<String> moduleIds = availableCategories.get(categoryKey);
 		if (moduleIds == null || moduleIds.size() == 0) {
@@ -268,7 +269,7 @@ public class ArticleCategoriesViewer extends Block {
 		}
 		return true;
 	}
-	
+
 	private boolean isCheckedAnyCategory() {
 		Collection<List<String>> checked = availableCategories.values();
 		if (checked == null) {
@@ -276,7 +277,7 @@ public class ArticleCategoriesViewer extends Block {
 		}
 		return checked.size() > 0;
 	}
-	
+
 	private void addLinkToCategory(String pageKey, List<String> moduleIds, Layer container, IWContext iwc, String category, String linkValue) {
 		Layer categoryContainer = new Layer();
 		container.add(categoryContainer);
@@ -286,7 +287,7 @@ public class ArticleCategoriesViewer extends Block {
 		link.addFirstParameter(ContentItemListViewer.ITEMS_CATEGORY_VIEW, category);
 		categoryContainer.add(link);
 	}
-	
+
 	@Override
 	public String getBuilderName(IWUserContext iwuc) {
 		String name = ArticleUtil.getBundle().getComponentName(ArticleCategoriesViewer.class);

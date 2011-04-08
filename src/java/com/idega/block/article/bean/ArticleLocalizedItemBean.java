@@ -14,7 +14,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.Serializable;
-import java.rmi.RemoteException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
@@ -25,8 +24,6 @@ import java.util.logging.Logger;
 import javax.jcr.Node;
 import javax.jcr.RepositoryException;
 
-import org.apache.commons.httpclient.HttpException;
-import org.apache.webdav.lib.WebdavResource;
 import org.w3c.tidy.Configuration;
 import org.w3c.tidy.Tidy;
 
@@ -42,9 +39,6 @@ import com.idega.content.bean.ContentItemFieldBean;
 import com.idega.content.business.categories.CategoryBean;
 import com.idega.data.IDOStoreException;
 import com.idega.presentation.IWContext;
-import com.idega.slide.business.IWSlideSession;
-import com.idega.slide.util.WebdavExtendedResource;
-import com.idega.slide.util.WebdavRootResource;
 import com.idega.util.CoreConstants;
 import com.idega.util.CoreUtil;
 import com.idega.util.IOUtil;
@@ -302,11 +296,10 @@ public class ArticleLocalizedItemBean extends ContentItemBean implements Seriali
 	/**
 	 * Stores this article file.
 	 */
+	@Override
 	public void store() throws IDOStoreException {
 		InputStream stream = null;
 		try {
-
-
 			//	Setting the path for creating new file/creating localized version/updating existing file
 			String filePath = getResourcePath();
 
@@ -314,16 +307,13 @@ public class ArticleLocalizedItemBean extends ContentItemBean implements Seriali
 			if (article == null) {
 				return;
 			}
-			if(isPersistToWebDav()){
-				storeToWebDav(stream, filePath, article);
+
+			try {
+				storeToJCR(stream, filePath, article);
+			} catch (RepositoryException e) {
+				throw new IDOStoreException(e.getMessage());
 			}
-			else if(isPersistToJCR()){
-				try {
-					storeToJCR(stream, filePath, article);
-				} catch (RepositoryException e) {
-					throw new IDOStoreException(e.getMessage());
-				}
-			}
+
 			try {
 				ArticleLocalizedItemBean newBean = new ArticleLocalizedItemBean(getLocale());
 //				try {
@@ -355,46 +345,46 @@ public class ArticleLocalizedItemBean extends ContentItemBean implements Seriali
 		}
 	}
 
-	protected void storeToWebDav(InputStream stream, String filePath,
-			String article) throws HttpException, IOException, RemoteException {
-		IWContext iwc = CoreUtil.getIWContext();
-		IWSlideSession session = getIWSlideSession(iwc);
-		WebdavRootResource rootResource = session.getWebdavRootResource();
-
-		boolean success = false;
-		try {
-			stream = StringHandler.getStreamFromString(article);
-
-			//Conflict fix: uri for creating but path for updating
-			//Note! This is a patch to what seems to be a bug in WebDav
-			//Apparently in verion below works in some cases and the other in other cases.
-			//Seems to be connected to creating files in folders created in same tomcat session or similar
-			//not quite clear...
-
-			success = rootResource.putMethod(filePath, stream);
-		} catch(Exception e) {
-			e.printStackTrace();
-		} finally {
-			IOUtil.close(stream);
-		}
-		if (success) {
-			rootResource.proppatchMethod(filePath, ArticleItemBean.PROPERTY_CONTENT_TYPE,CoreConstants.ARTICLE_FILENAME_SCOPE,true);
-		}
-		else {
-			try {
-				stream = StringHandler.getStreamFromString(article);
-				String fixedURL = session.getURI(filePath);
-				rootResource.putMethod(fixedURL, stream);
-				rootResource.proppatchMethod(fixedURL, ArticleItemBean.PROPERTY_CONTENT_TYPE,CoreConstants.ARTICLE_FILENAME_SCOPE,true);
-			} catch(Exception e) {
-				e.printStackTrace();
-			} finally {
-				IOUtil.close(stream);
-			}
-		}
-
-		rootResource.close();
-	}
+//	protected void storeToWebDav(InputStream stream, String filePath,
+//			String article) throws HttpException, IOException, RemoteException {
+//		IWContext iwc = CoreUtil.getIWContext();
+//		IWSlideSession session = getIWSlideSession(iwc);
+//		WebdavRootResource rootResource = session.getWebdavRootResource();
+//
+//		boolean success = false;
+//		try {
+//			stream = StringHandler.getStreamFromString(article);
+//
+//			//Conflict fix: uri for creating but path for updating
+//			//Note! This is a patch to what seems to be a bug in WebDav
+//			//Apparently in verion below works in some cases and the other in other cases.
+//			//Seems to be connected to creating files in folders created in same tomcat session or similar
+//			//not quite clear...
+//
+//			success = rootResource.putMethod(filePath, stream);
+//		} catch(Exception e) {
+//			e.printStackTrace();
+//		} finally {
+//			IOUtil.close(stream);
+//		}
+//		if (success) {
+//			rootResource.proppatchMethod(filePath, ArticleItemBean.PROPERTY_CONTENT_TYPE,CoreConstants.ARTICLE_FILENAME_SCOPE,true);
+//		}
+//		else {
+//			try {
+//				stream = StringHandler.getStreamFromString(article);
+//				String fixedURL = session.getURI(filePath);
+//				rootResource.putMethod(fixedURL, stream);
+//				rootResource.proppatchMethod(fixedURL, ArticleItemBean.PROPERTY_CONTENT_TYPE,CoreConstants.ARTICLE_FILENAME_SCOPE,true);
+//			} catch(Exception e) {
+//				e.printStackTrace();
+//			} finally {
+//				IOUtil.close(stream);
+//			}
+//		}
+//
+//		rootResource.close();
+//	}
 
 	protected void storeToJCR(InputStream stream, String filePath, String article) throws RepositoryException, IOException {
 		Node fileNode = null;
@@ -487,44 +477,15 @@ public class ArticleLocalizedItemBean extends ContentItemBean implements Seriali
 	}
 
 	/**
-	 * Loads an xml file specified by the webdav resource
-	 * The beans atributes are then set according to the information in the XML file
-	 */
-	@Override
-	protected boolean load(WebdavExtendedResource webdavResource) throws IOException {
-		XMLDocument bodyDoc = null;
-		InputStream stream = null;
-		try {
-			if (webdavResource.isCollection()) {
-				throw new RuntimeException(webdavResource+" is folder but should be file");
-			}
-			WebdavResource theArticle = webdavResource;
-			if (theArticle != null && !theArticle.isCollection()) {
-				setResourcePath(theArticle.getPath());
-				stream = getStream(theArticle);
-				bodyDoc = new XMLDocument(XmlUtil.getJDOMXMLDocument(stream));
-			} else {
-				bodyDoc = null;
-			}
-		} catch (Exception e) {
-			LOGGER.log(Level.SEVERE, "Can not load article", e);  //To change body of catch statement use File | Settings | File Templates.
-		} finally {
-			IOUtil.close(stream);
-		}
-
-		return parseXMLDocument(bodyDoc);
-	}
-
-	/**
 	 * Loads an xml file specified by the JCR Node resource
 	 * The beans atributes are then set according to the information in the XML file
 	 */
 	@Override
-	protected boolean load(Node webdavResource) throws IOException {
+	protected boolean load(Node articleXMLFile) throws IOException {
 		XMLDocument bodyDoc = null;
 		InputStream stream = null;
 		try {
-			Node theArticle = webdavResource;
+			Node theArticle = articleXMLFile;
 			if (theArticle != null) {
 				setResourcePath(theArticle.getPath());
 				stream = getRepositoryService().getFileContents(theArticle);
@@ -772,6 +733,7 @@ public class ArticleLocalizedItemBean extends ContentItemBean implements Seriali
 		return html.substring(startIndex + bodyStartTag.length(), endIndex);
 	}
 
+	@Override
 	public String getContentItemPrefix() {
 		return "article_";
 	}
