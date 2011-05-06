@@ -36,14 +36,13 @@ public class CategoryDaoImpl extends GenericDaoImpl implements CategoryDao, Appl
 		if (StringUtil.isEmpty(category)) {
 			return false;
 		}
-				
+		
 		if (!this.isCategoryExists(category)) {
 			CategoryEntity categoryEntity = new CategoryEntity();
 			categoryEntity.setCategory(category);
 			this.persist(categoryEntity);
 			return categoryEntity.getId() != null;
 		}
-		
 		return false;
 	}
 
@@ -137,9 +136,7 @@ public class CategoryDaoImpl extends GenericDaoImpl implements CategoryDao, Appl
 		if (ListUtil.isEmpty(categories))
 			return null;
 		
-//		System.out.println("#########################getNotExistingCategoriesFromThisList##########################");
 		List<String> nonExistingCategories = new ArrayList<String>(categories);
-//		System.out.println(nonExistingCategories.get(0));
 		List<CategoryEntity> categoryEntities = this.getCategories();
 		for (CategoryEntity s : categoryEntities) {
 			if (categories.contains(s.getCategory())) {
@@ -147,38 +144,20 @@ public class CategoryDaoImpl extends GenericDaoImpl implements CategoryDao, Appl
 			}
 		}
 		
-//		System.out.println("Perduotos kategorijos:");
-//		for (String s : categories) {
-//			System.out.println(s);
-//		}
-//		
-//		System.out.println("Karegorijos, kurios yra:");
-//		for (CategoryEntity s : categoryEntities) {
-//			System.out.println(s.getCategory());
-//		}
-//		
-//		System.out.println("Kategorijos, kurių nėra:");
-//		for (String s : nonExistingCategories) {
-//			System.out.println(s);
-//		}
-//		System.out.println("##########################getNotExistingCategoriesFromThisList########################");
-//		
 		return nonExistingCategories;
 	}
 
 	@Override
+	@Transactional(readOnly = false)
 	public void onApplicationEvent(ApplicationEvent event) {
-    	//System.out.println("##########################onApplicationEvent########################");
 
 		if (event instanceof CategoryDeletedEvent) {
-			this.deleteCategory(((CategoryDeletedEvent) event).getCategoryId());
+			System.out.println("Ar kategorija ištrinta?:" + this.deleteCategory(((CategoryDeletedEvent) event).getCategoryId()));
 		}
 		
 		if (event instanceof CategoryAddedEvent) {
-			//System.out.println(((CategoryAddedEvent) event).getCategoryId());
-			//System.out.println(this.addCategory(((CategoryAddedEvent) event).getCategoryId()));
+			System.out.println("Ar kategorija įdėta?:" + this.addCategory(((CategoryAddedEvent) event).getCategoryId()));
 		}
-		//System.out.println("##########################onApplicationEvent########################");
 	}
 
 }
