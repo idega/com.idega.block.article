@@ -20,12 +20,14 @@ import com.idega.core.persistence.impl.GenericDaoImpl;
 import com.idega.util.ListUtil;
 import com.idega.util.StringUtil;
 
+
 /**
- * 
  * @author martynas
- *
+ * Last changed: 2011.05.06
+ * You can report about problems to: martynas@idega.com
+ * AIM: lapiukshtiss
+ * Skype: lapiukshtiss
  */
-// TODO: Optimize logic
 @Repository
 @Scope(BeanDefinition.SCOPE_SINGLETON)
 public class CategoryDaoImpl extends GenericDaoImpl implements CategoryDao, ApplicationListener {
@@ -152,11 +154,11 @@ public class CategoryDaoImpl extends GenericDaoImpl implements CategoryDao, Appl
 	public void onApplicationEvent(ApplicationEvent event) {
 
 		if (event instanceof CategoryDeletedEvent) {
-			System.out.println("Ar kategorija ištrinta?:" + this.deleteCategory(((CategoryDeletedEvent) event).getCategoryId()));
+			this.deleteCategory(((CategoryDeletedEvent) event).getCategoryId());
 		}
 		
 		if (event instanceof CategoryAddedEvent) {
-			System.out.println("Ar kategorija įdėta?:" + this.addCategory(((CategoryAddedEvent) event).getCategoryId()));
+			this.addCategory(((CategoryAddedEvent) event).getCategoryId());
 		}
 	}
 
