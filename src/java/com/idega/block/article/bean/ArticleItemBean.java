@@ -1133,4 +1133,7 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 		super.setSetPublishedDateByDefault(setPublishedDateByDefault);
 	}
 
+	public List<String> getCategories() {
+		return getLocalizedArticle().getCategories();
+	}
 }
