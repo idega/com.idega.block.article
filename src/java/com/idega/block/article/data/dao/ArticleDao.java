@@ -1,13 +1,10 @@
 package com.idega.block.article.data.dao;
 
-import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 
 import com.idega.block.article.data.ArticleEntity;
 import com.idega.core.persistence.GenericDao;
-import com.idega.core.search.business.SearchResult;
-import com.idega.presentation.IWContext;
 
 public interface ArticleDao extends GenericDao{
 	

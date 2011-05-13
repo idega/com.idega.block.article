@@ -552,7 +552,7 @@ public class ArticleListManagedBean implements ContentListViewerManagedBean {
 	
 	public Collection<SearchResult> getArticleSearcResults(String folder, List<String> categories, IWContext iwc) {
 		if (iwc.getIWMainApplication().getSettings().getBoolean("load_articles_from_db", Boolean.TRUE)){
-			return getArticlesFromDatabase(folder, categories, iwc,-1,0);//TODO: add constant
+			return getArticlesFromDatabase(folder, categories, iwc,0,10);//TODO: add constant
 		}
 		
 		if (folder == null) {
