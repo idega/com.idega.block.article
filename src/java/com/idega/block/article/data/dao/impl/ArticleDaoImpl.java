@@ -5,24 +5,26 @@ import java.util.Date;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
-
 import com.idega.block.article.data.ArticleEntity;
 import com.idega.block.article.data.CategoryEntity;
 import com.idega.block.article.data.dao.ArticleDao;
 import com.idega.block.article.data.dao.CategoryDao;
 import com.idega.core.persistence.Param;
 import com.idega.core.persistence.impl.GenericDaoImpl;
-import com.idega.util.CoreConstants;
+import com.idega.data.SimpleQuerier;
 import com.idega.util.ListUtil;
+import java.util.Iterator;
+import com.idega.util.CoreConstants;
 import com.idega.util.StringUtil;
 
+
 /**
+ * Class for speeding up Articles searching
  * @author martynas
  * Last changed: 2011.05.12
  * You can report about problems to: martynas@idega.com
@@ -148,6 +150,46 @@ public class ArticleDaoImpl extends GenericDaoImpl implements ArticleDao {
 		return false;
 	}
 
+	public String[] getUrisByCategoriesAndAmount(
+			List<String> categories, int firstResult, int maxResults) {
+		
+		String inlineQuery = "SELECT a.URI FROM ic_article a";;
+		
+		
+		if(!ListUtil.isEmpty(categories)){
+			String set = "";
+			for (Iterator<String>iter = categories.iterator(); iter.hasNext(); ) {
+				String category = iter.next();
+			    set = set + "'" + category + "'";
+			    if(iter.hasNext()){
+			    	set = set + ", ";
+			    }
+			} 
+			inlineQuery += ", ic_category c, jnd_article_category j WHERE c.CATEGORY IN (" 
+				+ set +") AND a.id = j.ARTICLE_FK";
+		}
+		
+		inlineQuery = inlineQuery + " ORDER BY a.MODIFICATION_DATE DESC";
+		
+		if(firstResult <= 0){
+			firstResult = 0;
+		}
+		if(maxResults > 0){
+			inlineQuery = inlineQuery + " LIMIT " + String.valueOf(firstResult) + ", " +  String.valueOf(maxResults);
+		}
+		
+		String[] uris = null;
+		try{
+			uris = SimpleQuerier.executeStringQuery(inlineQuery);
+		}
+		catch(Exception e){
+			e.printStackTrace();
+			return null;
+		}
+		
+		return uris;
+	}
+	
 	/**
 	 * Tested cases:
 	 * Written article with name: "Name";
