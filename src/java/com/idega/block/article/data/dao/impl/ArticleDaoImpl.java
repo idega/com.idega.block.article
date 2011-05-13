@@ -1,8 +1,11 @@
 package com.idega.block.article.data.dao.impl;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.BeanDefinition;
@@ -10,13 +13,22 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
+
+
 import com.idega.block.article.data.ArticleEntity;
 import com.idega.block.article.data.CategoryEntity;
 import com.idega.block.article.data.dao.ArticleDao;
 import com.idega.block.article.data.dao.CategoryDao;
 import com.idega.core.persistence.Param;
+import com.idega.core.persistence.Query;
 import com.idega.core.persistence.impl.GenericDaoImpl;
+import com.idega.core.search.business.SearchResult;
+import com.idega.core.search.data.BasicSearchResult;
+import com.idega.data.SimpleQuerier;
 import com.idega.util.ListUtil;
+import java.util.Iterator;
+
+
 
 /**
  * Class for speeding up Articles searching
@@ -108,5 +120,48 @@ public class ArticleDaoImpl extends GenericDaoImpl implements ArticleDao {
 			return true;
 		}
 	}
+
+	@Override
+	public String[] getUrisByCategoriesAndAmount(
+			List<String> categories, int firstResult, int maxResults) {
+		// TODO Auto-generated method stub
+		
+		String inlineQuery = "SELECT a.URI FROM ic_article a";;
+		
+		
+		if(!ListUtil.isEmpty(categories)){
+			String set = "";
+			for (Iterator<String>iter = categories.iterator(); iter.hasNext(); ) {
+				String category = iter.next();
+			    set = set + "'" + category + "'";
+			    if(iter.hasNext()){
+			    	set = set + ", ";
+			    }
+			} 
+			inlineQuery += ", ic_category c, jnd_article_category j WHERE c.CATEGORY IN (" 
+				+ set +") AND a.id = j.ARTICLE_FK";
+		}
+		
+		inlineQuery = inlineQuery + " ORDER BY a.MODIFICATION_DATE DESC";
+		
+		if(firstResult <= 0){
+			firstResult = 0;
+		}
+		if(maxResults > 0){
+			inlineQuery = inlineQuery + " LIMIT " + String.valueOf(firstResult) + ", " +  String.valueOf(maxResults);
+		}
+		
+		String[] uris = null;
+		try{
+			uris = SimpleQuerier.executeStringQuery(inlineQuery);
+		}
+		catch(Exception e){
+			e.printStackTrace();
+			return null;
+		}
+		
+		return uris;
+	}
+	
 
 }
