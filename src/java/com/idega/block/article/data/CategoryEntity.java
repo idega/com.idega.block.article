@@ -70,4 +70,8 @@ public class CategoryEntity implements Serializable {
 	public static long getSerialversionuid() {
 		return serialVersionUID;
 	}
+	
+	public String toString() {
+		return this.category;
+	}
 }

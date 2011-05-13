@@ -5,6 +5,15 @@ import java.util.List;
 import com.idega.block.article.data.CategoryEntity;
 import com.idega.core.persistence.GenericDao;
 
+/**
+ * Data Access Object class for accessing "IC_CATEGORY" table in class {@link CategoryDaoImpl}
+ * @author martynas
+ * Last changed: 2011.05.12
+ * You can report about problems to: martynas@idega.com
+ * AIM: lapiukshtiss
+ * Skype: lapiukshtiss
+ * You can expect to find some test cases notice in the end of the file.
+ */
 public interface CategoryDao extends GenericDao {
 
 	/**
@@ -33,7 +42,7 @@ public interface CategoryDao extends GenericDao {
 	 * @param categories Category name
 	 * @return true, if all categories deleted
 	 */
-	public abstract List<String> deleteCategories(List<String> categories);
+	public abstract boolean deleteCategories(List<String> categories);
 	
 	/**
 	 * Returns all categories from database table "IC_CATEGORY"
@@ -68,4 +77,15 @@ public interface CategoryDao extends GenericDao {
 	 * @return Categories which does not exist in database, null, if empty list is passed, empty list, if all categories exist
 	 */
 	public abstract List<String> getNotExistingCategoriesFromThisList(List<String> categories);
+	
+	/**
+	 * Tested cases:
+	 * Created category with name: "Name";
+	 * Created category with name: "English fine name";
+	 * Modified category "Name" to category "Surname";
+	 * Modified category "English fine name" to "Spanish good surname";
+	 * Deleted category "Surname";
+	 * Deleted category "Spanish good surname";
+	 * Deleted category "SomeCategory" while not removed from article "New article"
+	 */
 }
