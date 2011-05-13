@@ -3,6 +3,8 @@ package com.idega.block.article.data.dao.impl;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.context.ApplicationEvent;
@@ -17,20 +19,24 @@ import com.idega.content.business.categories.event.CategoryAddedEvent;
 import com.idega.content.business.categories.event.CategoryDeletedEvent;
 import com.idega.core.persistence.Param;
 import com.idega.core.persistence.impl.GenericDaoImpl;
+import com.idega.data.SimpleQuerier;
 import com.idega.util.ListUtil;
 import com.idega.util.StringUtil;
 
-
 /**
+ * Data Access Object class for accessing "IC_CATEGORY" table
  * @author martynas
- * Last changed: 2011.05.06
+ * Last changed: 2011.05.12
  * You can report about problems to: martynas@idega.com
  * AIM: lapiukshtiss
  * Skype: lapiukshtiss
+ * You can expect to find some test cases notice in the end of the file.
  */
 @Repository
 @Scope(BeanDefinition.SCOPE_SINGLETON)
 public class CategoryDaoImpl extends GenericDaoImpl implements CategoryDao, ApplicationListener {
+	
+	private static Logger LOGGER = Logger.getLogger(CategoryDaoImpl.class.getName());
 	
 	@Override
 	@Transactional(readOnly = false)
@@ -42,7 +48,13 @@ public class CategoryDaoImpl extends GenericDaoImpl implements CategoryDao, Appl
 		if (!this.isCategoryExists(category)) {
 			CategoryEntity categoryEntity = new CategoryEntity();
 			categoryEntity.setCategory(category);
-			this.persist(categoryEntity);
+			
+			try {
+				this.persist(categoryEntity);
+			} catch (Exception e) {
+				LOGGER.log(Level.WARNING, "Failed to add category to database: " + categoryEntity, e);
+			}
+			
 			return categoryEntity.getId() != null;
 		}
 		return false;
@@ -70,30 +82,39 @@ public class CategoryDaoImpl extends GenericDaoImpl implements CategoryDao, Appl
 			return false;
 		}
 		
-		if (ListUtil.isEmpty(this.deleteCategories(Arrays.asList(category)))) {
-			return true;
-		}
-		
-		return false;
+		return this.deleteCategories(Arrays.asList(category));
 	}
 
 	@Override
 	@Transactional(readOnly = false)
-	public List<String> deleteCategories(List<String> categories) {
-		List<String> categoriesNotDeleted = new ArrayList<String>();
+	public boolean deleteCategories(List<String> categories) {
 		if (ListUtil.isEmpty(categories))
-			return null;
-
+			return false;
 		List<CategoryEntity> categoryEntitiesToDelete = this.getCategories(categories);
 		
-		for (CategoryEntity s : categoryEntitiesToDelete) {
-			if (!categories.contains(s.getCategory())) {
-				categoriesNotDeleted.add(s.getCategory());
+		
+		
+		String numbers = "";
+		for (CategoryEntity s : categoryEntitiesToDelete) {	
+			try {
+				numbers = numbers + s.getId()+",";
+				this.remove(s);
+			} catch (Exception e) {
+				LOGGER.log(Level.WARNING, "Failed to remove category from database: " + s, e);
+				return false;
 			}
-			
-			this.remove(s);
 		}
-		return categoriesNotDeleted;
+		numbers = numbers.substring(0, numbers.lastIndexOf(","));
+		
+		String query = "DELETE FROM jnd_article_category WHERE jnd_article_category.category_fk IN ("+ numbers +")";
+		try{
+			SimpleQuerier.executeUpdate(query, true);
+		} catch (Exception e) {
+			LOGGER.log(Level.WARNING, "Failed to remove connections between categories and articles from database: " + query, e);
+			return false;
+		}
+		
+		return true;
 	}
 
 	@Override
@@ -162,4 +183,14 @@ public class CategoryDaoImpl extends GenericDaoImpl implements CategoryDao, Appl
 		}
 	}
 
+	/**
+	 * Tested cases:
+	 * Created category with name: "Name";
+	 * Created category with name: "English fine name";
+	 * Modified category "Name" to category "Surname";
+	 * Modified category "English fine name" to "Spanish good surname";
+	 * Deleted category "Surname";
+	 * Deleted category "Spanish good surname";
+	 * Deleted category "SomeCategory" while not removed from article "New article"
+	 */
 }

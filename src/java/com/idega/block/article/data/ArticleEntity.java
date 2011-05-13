@@ -17,6 +17,8 @@ import javax.persistence.NamedQuery;
 import javax.persistence.Table;
 import org.hibernate.annotations.Index;
 
+import com.idega.util.ListUtil;
+
 /**
  * IC_ARTICLE table entity
  * @author martynas
@@ -26,12 +28,14 @@ import org.hibernate.annotations.Index;
 @Table(name = "IC_ARTICLE")
 @NamedQueries(
 	{ 
-		@NamedQuery(name = ArticleEntity.GET_BY_URI, query = "from ArticleEntity s where s.uri = :"+ArticleEntity.uriProp)
+		@NamedQuery(name = ArticleEntity.GET_BY_URI, query = "from ArticleEntity s where s.uri = :"+ArticleEntity.uriProp),
+		@NamedQuery(name = ArticleEntity.GET_ID_BY_URI, query = "select id from ArticleEntity s where s.uri = :"+ArticleEntity.uriProp)
 	}
 )
 public class ArticleEntity implements Serializable {
 
 	public static final String GET_BY_URI = "articleEntity.getByURI";
+	public static final String GET_ID_BY_URI = "articleEntity.getIDByURI";
 	
 	private static final long serialVersionUID = -8125483527520853214L;
 
@@ -87,10 +91,20 @@ public class ArticleEntity implements Serializable {
 	}
 	
 	public boolean addCategories(List<CategoryEntity> categories){
+		if (ListUtil.isEmpty(categories)) {
+			return true;
+		}
 		return this.categories.addAll(categories);
 	}
 	
 	public boolean removeCategories(List<CategoryEntity> categories){
+		if (ListUtil.isEmpty(categories)) {
+			return true;
+		}
 		return this.categories.removeAll(categories);
+	}
+	
+	public String toString(){
+		return this.id + " " + this.uri;
 	}
 }

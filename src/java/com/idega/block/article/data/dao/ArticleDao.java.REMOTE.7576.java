@@ -1,14 +1,20 @@
 package com.idega.block.article.data.dao;
 
-import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 
 import com.idega.block.article.data.ArticleEntity;
 import com.idega.core.persistence.GenericDao;
-import com.idega.core.search.business.SearchResult;
-import com.idega.presentation.IWContext;
 
+/**
+ * Data Access Object class for accessing "IC_ARTICLE", "JND_ARTICLE_CATEGORY" tables in class {@link ArticleDaoImpl}
+ * @author martynas
+ * Last changed: 2011.05.12
+ * You can report about problems to: martynas@idega.com
+ * AIM: lapiukshtiss
+ * Skype: lapiukshtiss
+ * You can expect to find some test cases notice in the end of the file.
+ */
 public interface ArticleDao extends GenericDao{
 	
 	/**
@@ -28,16 +34,7 @@ public interface ArticleDao extends GenericDao{
 	public abstract boolean deleteArticle(String uri);
 	
 	/**
-	 * Gets array of uris by categories, the maximum numbers
-	 * to select is specified by amount parameter
-	 * @param categories List of categories, if it is empty or null, than articles will be selected independent of it's category
-	 * @param firstResult the result from which other will be selected (including this), if less than zero then zero will be taken
-	 * @param maxResults max amount of articles that will be returned, if less than 1 returns all articles 
-	 */
-	public abstract String[] getUrisByCategoriesAndAmount(List<String> categories, int firstResult, int maxResults);
-	 
-	
-	 /** Returns one ArticleEntity from database
+	 * Returns one ArticleEntity from database
 	 * @param uri Path to article file named *.xml 
 	 * @return ArticleEntity having passed URI. 
 	 */
@@ -62,5 +59,4 @@ public interface ArticleDao extends GenericDao{
 	 * Removed category "Name" and added category "English good name" to article "Name";
 	 * Changed article name: "Name" to article name: "Surname".
 	 */
-
 }

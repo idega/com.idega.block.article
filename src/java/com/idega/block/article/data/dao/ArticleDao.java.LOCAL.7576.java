@@ -35,32 +35,4 @@ public interface ArticleDao extends GenericDao{
 	 * @param maxResults max amount of articles that will be returned, if less than 1 returns all articles 
 	 */
 	public abstract String[] getUrisByCategoriesAndAmount(List<String> categories, int firstResult, int maxResults);
-	 
-	
-	 /** Returns one ArticleEntity from database
-	 * @param uri Path to article file named *.xml 
-	 * @return ArticleEntity having passed URI. 
-	 */
-	public abstract ArticleEntity getArticle(String uri);
-	
-	/**
-	 * Returns id of an ArticleEntity from database
-	 * @param uri Path to article file named *.xml 
-	 * @return ArticleEntity having passed URI. 
-	 */	
-	public abstract Long getArticleIdByURI(String uri);
-	
-	/**
-	 * Tested cases:
-	 * Written article with name: "Name";
-	 * Written article with name: "SecondName" and category: "Name";
-	 * Added category "English good name" to article "SecondName";
-	 * Removed category "Name" from article "SecondName";
-	 * Removed category "English good name" from article "SecondName";
-	 * Removed "SecondName";
-	 * Added category "Name" to article "Name";
-	 * Removed category "Name" and added category "English good name" to article "Name";
-	 * Changed article name: "Name" to article name: "Surname".
-	 */
-
 }

@@ -5,7 +5,11 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+
 import java.util.Map;
+
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.BeanDefinition;
@@ -22,6 +26,7 @@ import com.idega.block.article.data.dao.CategoryDao;
 import com.idega.core.persistence.Param;
 import com.idega.core.persistence.Query;
 import com.idega.core.persistence.impl.GenericDaoImpl;
+
 import com.idega.core.search.business.SearchResult;
 import com.idega.core.search.data.BasicSearchResult;
 import com.idega.data.SimpleQuerier;
@@ -30,10 +35,19 @@ import java.util.Iterator;
 
 
 
+import com.idega.util.CoreConstants;
+import com.idega.util.ListUtil;
+import com.idega.util.StringUtil;
+
+
 /**
  * Class for speeding up Articles searching
  * @author martynas
- * 
+ * Last changed: 2011.05.12
+ * You can report about problems to: martynas@idega.com
+ * AIM: lapiukshtiss
+ * Skype: lapiukshtiss
+ * You can expect to find some test cases notice in the end of the file.
  */
 @Repository
 @Scope(BeanDefinition.SCOPE_SINGLETON)
@@ -42,10 +56,11 @@ public class ArticleDaoImpl extends GenericDaoImpl implements ArticleDao {
 	@Autowired
 	private CategoryDao categoryDao;
 	
+	private static Logger LOGGER = Logger.getLogger(ArticleDaoImpl.class.getName());
+	
 	@Override
 	@Transactional(readOnly=false)
 	public boolean updateArticle(Date timestamp, String uri, List<String> categories) {
-		// TODO Sutvarkyti tuos result
 		boolean result = true;
 		
 		if(!ListUtil.isEmpty(categories)){
@@ -58,7 +73,14 @@ public class ArticleDaoImpl extends GenericDaoImpl implements ArticleDao {
 			articleEntity.setUri(uri);
 			articleEntity.setModificationDate(timestamp);
 			articleEntity.setCategories(this.categoryDao.getCategories(categories));
-			persist(articleEntity);
+			
+			try {
+				persist(articleEntity);
+			} catch (Exception e) {
+				LOGGER.log(Level.WARNING, "Failed to add article to database: " + articleEntity, e);
+				return false;
+			}
+			
 		} else {
 			List<CategoryEntity> categoryEntitiesInArticle = articleEntity.getCategories();
 			List<CategoryEntity> categoryEntitiesToRemove = new ArrayList<CategoryEntity>(0);
@@ -81,44 +103,68 @@ public class ArticleDaoImpl extends GenericDaoImpl implements ArticleDao {
 			} else if((ListUtil.isEmpty(categoryEntitiesInArticle))&&(!ListUtil.isEmpty(categories))){
 				result = articleEntity.addCategories(this.categoryDao.getCategories(categories));
 			}
-			this.merge(articleEntity);
+			
+			try {
+				this.merge(articleEntity);
+			} catch (Exception e) {
+				LOGGER.log(Level.WARNING, "Failed to update article to database: " + articleEntity, e);
+				return false;
+			}
 		}
 		
 		if(result){
-			result = articleEntity != null && articleEntity.getId() != null;
+			return articleEntity != null && articleEntity.getId() != null;
 		}
 		
 		return result;
 	}
 	
-	/**
-	 * Returns one ArticleEntity from database
-	 * @param uri Path to article file named *.xml 
-	 * @return ArticleEntity having passed URI. 
-	 */
-	private ArticleEntity getArticle(String uri){
-		if(uri == null){
+	public ArticleEntity getArticle(String uri){
+		if(StringUtil.isEmpty(uri)){
 			return null;
 		}
-		List<ArticleEntity> articleEntityList = getResultList(ArticleEntity.GET_BY_URI, ArticleEntity.class, new Param(ArticleEntity.uriProp, uri));
 		
-		if(ListUtil.isEmpty(articleEntityList)){
-			return null;
-		} else {
-			return articleEntityList.get(0);
+		if (uri.contains(CoreConstants.WEBDAV_SERVLET_URI)) {
+			uri = uri.substring(CoreConstants.WEBDAV_SERVLET_URI.length());
 		}
+		
+		if (uri.endsWith(CoreConstants.SLASH)) {
+			uri = uri.substring(0, uri.lastIndexOf(CoreConstants.SLASH));
+		}
+		
+		return this.getSingleResult(ArticleEntity.GET_BY_URI, ArticleEntity.class, new Param(ArticleEntity.uriProp, uri));
+	}
+	
+	public Long getArticleIdByURI(String uri){
+		if (StringUtil.isEmpty(uri)) {
+			return new Long(-1);
+		}
+		
+		if (uri.contains(CoreConstants.WEBDAV_SERVLET_URI)) {
+			uri = uri.substring(CoreConstants.WEBDAV_SERVLET_URI.length());
+		}
+		
+		if (uri.endsWith(CoreConstants.SLASH)) {
+			uri = uri.substring(0, uri.lastIndexOf(CoreConstants.SLASH));
+		}
+		
+		return this.getSingleResult(ArticleEntity.GET_ID_BY_URI, Long.class, new Param(ArticleEntity.uriProp, uri));
 	}
 
 	@Override
 	@Transactional(readOnly=false)
 	public boolean deleteArticle(String uri) {
-		ArticleEntity articleEntity = this.getArticle(uri);
-		if(articleEntity == null){
+		final ArticleEntity article = getArticle(uri);
+		if (article == null)
 			return false;
-		} else {
-			this.remove(articleEntity);
+		try{
+			this.remove(article);
 			return true;
+		} catch (Exception e) {
+			LOGGER.log(Level.WARNING, "Failed to remove article from database: " + article, e);
 		}
+		
+		return false;
 	}
 
 	@Override
@@ -165,3 +211,16 @@ public class ArticleDaoImpl extends GenericDaoImpl implements ArticleDao {
 	
 
 }
+	/**
+	 * Tested cases:
+	 * Written article with name: "Name";
+	 * Written article with name: "SecondName" and category: "Name";
+	 * Added category "English good name" to article "SecondName";
+	 * Removed category "Name" from article "SecondName";
+	 * Removed category "English good name" from article "SecondName";
+	 * Removed "SecondName";
+	 * Added category "Name" to article "Name";
+	 * Removed category "Name" and added category "English good name" to article "Name";
+	 * Changed article name: "Name" to article name: "Surname".
+	 */
+
