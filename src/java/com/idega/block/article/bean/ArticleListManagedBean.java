@@ -13,6 +13,7 @@ import java.io.IOException;
 import java.rmi.RemoteException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -136,24 +137,24 @@ public class ArticleListManagedBean implements ContentListViewerManagedBean {
 	 * @throws XmlException
 	 * @throws IOException
 	 */
-	public List<ArticleItemBean> loadAllArticlesInFolder(String folder) throws XmlException, IOException{
-//		List<ArticleItemBean> list = new ArrayList<ArticleItemBean>();		
-//			
+	public List<ArticleItemBean> loadAllArticlesInFolder(String folder) throws XmlException, IOException{		
 		IWContext iwc = CoreUtil.getIWContext();
-//		String resourcePathFromRequest = iwc.getParameter(ContentViewer.PARAMETER_CONTENT_RESOURCE);
-//		String identifierFromRequest = iwc.getParameter(ContentConstants.CONTENT_ITEM_VIEWER_IDENTIFIER_PARAMETER);
 		
-		Collection<SearchResult> results = getArticleSearcResults(folder, this.categories, iwc);
-		if (results == null) {
-			return new ArrayList();
+		List<String> uris = null;
+		if (iwc.getIWMainApplication().getSettings().getBoolean("load_articles_from_db", Boolean.TRUE)){
+			String [] urisArray = getArticlesFromDatabase(folder, categories, iwc,0,10);//TODO: add constant
+			uris = Arrays.asList(urisArray);
+		}else{
+			Collection<SearchResult> results = getArticleSearcResults(folder, this.categories, iwc);
+			if (results == null) {
+				return new ArrayList<ArticleItemBean>();
+			}
+			//create uri list
+			uris = new ArrayList<String>();
+			for (SearchResult result: results) {
+				uris.add(result.getSearchResultURI());
+			}
 		}
-		
-		//create uri list
-		List<String> uris = new ArrayList();
-		for (SearchResult result: results) {
-			uris.add(result.getSearchResultURI());
-		}
-		
 		return getArticlesByURIs(uris,iwc);
 	}
 	
@@ -524,36 +525,16 @@ public class ArticleListManagedBean implements ContentListViewerManagedBean {
 	 * @return Collection<SearchResult> if results were found, null otherwise
 	 */
 	@Transactional(readOnly = true)
-	private Collection<SearchResult> getArticlesFromDatabase(String folder,List<String> categories, IWContext iwc,int firstResult, int maxResults){
+	private String [] getArticlesFromDatabase(String folder,List<String> categories, IWContext iwc,int firstResult, int maxResults){
 
-		String[]  articleEntities = this.getArticleDao().getUrisByCategoriesAndAmount(categories, firstResult, maxResults);
-				
-		if((articleEntities == null) || (articleEntities.length <= 0)){
-			return null;
-		}
-		
-		Collection<SearchResult> searchList = new ArrayList<SearchResult>();
-		for(int i = 0; i < articleEntities.length;i++){
-			BasicSearchResult result = new BasicSearchResult();
-			result.setSearchResultType("document");
-			result.setSearchResultURI(articleEntities[i]);
-			result.setSearchResultName("search by categories");
-			result.setSearchResultExtraInformation("results from " + String.valueOf(firstResult) + 
-					"to " + String.valueOf(maxResults));
-			
-			searchList.add(result);
-		}
-		
-		
-		
-		return searchList;
+		return this.getArticleDao().getUrisByCategoriesAndAmount(categories, firstResult, maxResults);
 		
 	}
 	
 	public Collection<SearchResult> getArticleSearcResults(String folder, List<String> categories, IWContext iwc) {
-		if (iwc.getIWMainApplication().getSettings().getBoolean("load_articles_from_db", Boolean.TRUE)){
-			return getArticlesFromDatabase(folder, categories, iwc,0,10);//TODO: add constant
-		}
+//		if (iwc.getIWMainApplication().getSettings().getBoolean("load_articles_from_db", Boolean.TRUE)){
+//			return getArticlesFromDatabase(folder, categories, iwc,0,10);//TODO: add constant
+//		}
 		
 		if (folder == null) {
 			return null;

@@ -153,7 +153,7 @@ public class ArticleDaoImpl extends GenericDaoImpl implements ArticleDao {
 	public String[] getUrisByCategoriesAndAmount(
 			List<String> categories, int firstResult, int maxResults) {
 		
-		String inlineQuery = "SELECT a.URI FROM ic_article a";;
+		String inlineQuery = "SELECT a.URI FROM ic_article a";
 		
 		
 		if(!ListUtil.isEmpty(categories)){
@@ -183,7 +183,7 @@ public class ArticleDaoImpl extends GenericDaoImpl implements ArticleDao {
 			uris = SimpleQuerier.executeStringQuery(inlineQuery);
 		}
 		catch(Exception e){
-			e.printStackTrace();
+			LOGGER.log(Level.WARNING, "Error executing sql statement " + inlineQuery, e);
 			return null;
 		}
 		
