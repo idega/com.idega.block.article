@@ -14,12 +14,15 @@ import com.idega.block.article.data.ArticleEntity;
 import com.idega.block.article.data.CategoryEntity;
 import com.idega.block.article.data.dao.ArticleDao;
 import com.idega.block.article.data.dao.CategoryDao;
+import com.idega.content.presentation.ContentViewer;
 import com.idega.core.persistence.Param;
 import com.idega.core.persistence.impl.GenericDaoImpl;
 import com.idega.data.SimpleQuerier;
+import com.idega.presentation.IWContext;
 import com.idega.util.ListUtil;
 import java.util.Iterator;
 import com.idega.util.CoreConstants;
+import com.idega.util.CoreUtil;
 import com.idega.util.StringUtil;
 
 
@@ -151,7 +154,7 @@ public class ArticleDaoImpl extends GenericDaoImpl implements ArticleDao {
 	}
 
 	public String[] getUrisByCategoriesAndAmount(
-			List<String> categories, int firstResult, int maxResults) {
+			List<String> categories, String uriFrom, int maxResults) {
 		
 		String inlineQuery = "SELECT a.URI FROM ic_article a";
 		
@@ -165,17 +168,26 @@ public class ArticleDaoImpl extends GenericDaoImpl implements ArticleDao {
 			    	set = set + ", ";
 			    }
 			} 
-			inlineQuery += ", ic_category c, jnd_article_category j WHERE c.CATEGORY IN (" 
-				+ set +") AND a.id = j.ARTICLE_FK";
+			inlineQuery = "SELECT a.URI FROM ic_article a, ic_category c, jnd_article_category j WHERE c.CATEGORY IN (" 
+				+ set +") AND a.id = j.ARTICLE_FK  AND c.id = j.CATEGORY_FK";	
 		}
+		
+		//adding first result check
+		if(uriFrom != null){
+			if(!ListUtil.isEmpty(categories)){
+				inlineQuery = inlineQuery + " AND ";
+			}else{
+				inlineQuery = inlineQuery + " WHERE ";
+			}
+			inlineQuery = inlineQuery + "a.MODIFICATION_DATE >= (SELECT art.MODIFICATION_DATE " +
+			"FROM ic_article art where art.URI = '" + uriFrom + "')";
+		}
+		
 		
 		inlineQuery = inlineQuery + " ORDER BY a.MODIFICATION_DATE DESC";
 		
-		if(firstResult <= 0){
-			firstResult = 0;
-		}
 		if(maxResults > 0){
-			inlineQuery = inlineQuery + " LIMIT " + String.valueOf(firstResult) + ", " +  String.valueOf(maxResults);
+			inlineQuery = inlineQuery + " LIMIT " + String.valueOf(0) + ", " +  String.valueOf(maxResults);
 		}
 		
 		String[] uris = null;

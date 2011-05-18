@@ -28,10 +28,10 @@ public interface ArticleDao extends GenericDao{
 	 * Gets array of uris by categories, the maximum numbers
 	 * to select is specified by amount parameter
 	 * @param categories List of categories, if it is empty or null, than articles will be selected independent of it's category
-	 * @param firstResult the result from which other will be selected (including this), if less than zero then zero will be taken
+	 * @param firstResult uri of the article from which the results will be taken
 	 * @param maxResults max amount of articles that will be returned, if less than 1 returns all articles 
 	 */
-	public abstract String[] getUrisByCategoriesAndAmount(List<String> categories, int firstResult, int maxResults);
+	public abstract String[] getUrisByCategoriesAndAmount(List<String> categories, String uriFrom, int maxResults);
 	 
 	
 	 /** Returns one ArticleEntity from database
