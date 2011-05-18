@@ -55,6 +55,7 @@ import com.idega.presentation.IWContext;
 import com.idega.slide.business.IWSlideSession;
 import com.idega.slide.util.IWSlideConstants;
 import com.idega.user.data.User;
+import com.idega.util.ArrayUtil;
 import com.idega.util.CoreConstants;
 import com.idega.util.CoreUtil;
 import com.idega.util.IWTimestamp;
@@ -142,8 +143,8 @@ public class ArticleListManagedBean implements ContentListViewerManagedBean {
 		
 		List<String> uris = null;
 		if (iwc.getIWMainApplication().getSettings().getBoolean("load_articles_from_db", Boolean.TRUE)){
-			String [] urisArray = getArticlesFromDatabase(folder, categories, iwc,0,10);//TODO: add constant
-			uris = Arrays.asList(urisArray);
+			String[] urisArray = getArticlesFromDatabase(folder, categories, iwc,0,10);//TODO: add constant
+			uris = ArrayUtil.isEmpty(urisArray) ? new ArrayList<String>(0) : Arrays.asList(urisArray);
 		}else{
 			Collection<SearchResult> results = getArticleSearcResults(folder, this.categories, iwc);
 			if (results == null) {
