@@ -29,6 +29,7 @@ public class ArticlesImporter extends DefaultSpringBean implements ApplicationLi
 		// TODO Sukurti application property bus naudojamas nustayti, pažiūrėti, ar jau importuota.
 		// TODO DefaultSpringBean pasinaudojant paslaugimis
 		// TODO Importuotojai turi būti du: kategorijoms ir articles
+		// TODO Pakomitinti
 		if (event instanceof IWMainSlideStartedEvent){
 			this.getApplication().getSettings().getBoolean("Is categories imported", Boolean.FALSE);
 			// TODO Šioje vietoje paleisti importerį, jei neimportuota.
