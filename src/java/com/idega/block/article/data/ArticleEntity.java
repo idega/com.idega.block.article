@@ -92,14 +92,14 @@ public class ArticleEntity implements Serializable {
 	
 	public boolean addCategories(List<CategoryEntity> categories){
 		if (ListUtil.isEmpty(categories)) {
-			return true;
+			return Boolean.TRUE;
 		}
 		return this.categories.addAll(categories);
 	}
 	
 	public boolean removeCategories(List<CategoryEntity> categories){
 		if (ListUtil.isEmpty(categories)) {
-			return true;
+			return Boolean.TRUE;
 		}
 		return this.categories.removeAll(categories);
 	}
