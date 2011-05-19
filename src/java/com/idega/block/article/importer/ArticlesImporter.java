@@ -19,6 +19,7 @@ import com.idega.content.data.ContentCategory;
 import com.idega.core.business.DefaultSpringBean;
 import com.idega.core.localisation.business.ICLocaleBusiness;
 import com.idega.idegaweb.IWMainSlideStartedEvent;
+import com.idega.util.ListUtil;
 
 /**
  * Imports articles and their categories to database.
@@ -54,6 +55,7 @@ public class ArticlesImporter extends DefaultSpringBean implements ApplicationLi
 			// TODO Šioje vietoje paleisti importerį, jei neimportuota.
 			if(!this.getApplication().getSettings().getBoolean("is_categories_imported", Boolean.FALSE)){
 				this.importCategories();
+				this.getApplication().getSettings().setProperty("is_categories_imported", Boolean.FALSE.toString());
 			}
 		}
 
@@ -64,6 +66,9 @@ public class ArticlesImporter extends DefaultSpringBean implements ApplicationLi
 		List<Locale> localeList = ICLocaleBusiness.getListOfLocalesJAVA();
 		for(Locale locale : localeList){
 			List<ContentCategory> categoryList = this.categoryEngine.getCategoriesByLocale(locale.toString());
+			if(ListUtil.isEmpty(categoryList)){
+				continue;
+			}
 			for(ContentCategory category : categoryList){
 				categoryDao.addCategory(category.getId());
 			}
