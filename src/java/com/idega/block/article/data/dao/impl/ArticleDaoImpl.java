@@ -2,27 +2,26 @@ package com.idega.block.article.data.dao.impl;
 
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.Iterator;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
+
 import com.idega.block.article.data.ArticleEntity;
 import com.idega.block.article.data.CategoryEntity;
 import com.idega.block.article.data.dao.ArticleDao;
 import com.idega.block.article.data.dao.CategoryDao;
-import com.idega.content.presentation.ContentViewer;
 import com.idega.core.persistence.Param;
 import com.idega.core.persistence.impl.GenericDaoImpl;
 import com.idega.data.SimpleQuerier;
-import com.idega.presentation.IWContext;
-import com.idega.util.ListUtil;
-import java.util.Iterator;
 import com.idega.util.CoreConstants;
-import com.idega.util.CoreUtil;
+import com.idega.util.ListUtil;
 import com.idega.util.StringUtil;
 
 
@@ -153,48 +152,38 @@ public class ArticleDaoImpl extends GenericDaoImpl implements ArticleDao {
 		return false;
 	}
 
-	public String[] getUrisByCategoriesAndAmount(
-			List<String> categories, String uriFrom, int maxResults) {
-		
-		String inlineQuery = "SELECT a.URI FROM ic_article a";
-		
+	public String[] getUrisByCategoriesAndAmount(List<String> categories, String uriFrom, int maxResults) {
+		StringBuilder inlineQuery = new StringBuilder("SELECT a.URI FROM ic_article a");
 		
 		if(!ListUtil.isEmpty(categories)){
-			String set = "";
+			StringBuilder set = new StringBuilder();
 			for (Iterator<String>iter = categories.iterator(); iter.hasNext(); ) {
 				String category = iter.next();
-			    set = set + "'" + category + "'";
+			    set.append(CoreConstants.QOUTE_SINGLE_MARK).append(category).append(CoreConstants.QOUTE_SINGLE_MARK);
 			    if(iter.hasNext()){
-			    	set = set + ", ";
+			    	set.append(CoreConstants.COMMA).append(CoreConstants.SPACE);
 			    }
 			} 
-			inlineQuery = "SELECT a.URI FROM ic_article a, ic_category c, jnd_article_category j WHERE c.CATEGORY IN (" 
-				+ set +") AND a.id = j.ARTICLE_FK  AND c.id = j.CATEGORY_FK";	
+			inlineQuery.append(", ic_category c, jnd_article_category j WHERE c.CATEGORY IN (").append(set.toString())
+				.append(") AND a.id = j.ARTICLE_FK AND c.id = j.CATEGORY_FK");	
 		}
 		
 		//adding first result check
-		if(uriFrom != null){
-			if(!ListUtil.isEmpty(categories)){
-				inlineQuery = inlineQuery + " AND ";
-			}else{
-				inlineQuery = inlineQuery + " WHERE ";
-			}
-			inlineQuery = inlineQuery + "a.MODIFICATION_DATE >= (SELECT art.MODIFICATION_DATE " +
-			"FROM ic_article art where art.URI = '" + uriFrom + "')";
+		if(!StringUtil.isEmpty(uriFrom)){
+			inlineQuery.append(ListUtil.isEmpty(categories) ? " WHERE " : " AND ");
+			inlineQuery.append("a.MODIFICATION_DATE <= (SELECT art.MODIFICATION_DATE FROM ic_article art where art.URI = '").append(uriFrom).append("')");
 		}
 		
-		
-		inlineQuery = inlineQuery + " ORDER BY a.MODIFICATION_DATE DESC";
+		inlineQuery.append(" ORDER BY a.MODIFICATION_DATE DESC");
 		
 		if(maxResults > 0){
-			inlineQuery = inlineQuery + " LIMIT " + String.valueOf(0) + ", " +  String.valueOf(maxResults);
+			inlineQuery.append(" LIMIT ").append(String.valueOf(0)).append(", ").append(String.valueOf(maxResults));
 		}
 		
 		String[] uris = null;
 		try{
-			uris = SimpleQuerier.executeStringQuery(inlineQuery);
-		}
-		catch(Exception e){
+			uris = SimpleQuerier.executeStringQuery(inlineQuery.toString());
+		} catch(Exception e){
 			LOGGER.log(Level.WARNING, "Error executing sql statement " + inlineQuery, e);
 			return null;
 		}
