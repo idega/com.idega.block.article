@@ -16,11 +16,9 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
-import java.util.Map;
 
 import javax.faces.component.html.HtmlOutputLink;
 
@@ -37,7 +35,6 @@ import org.springframework.transaction.annotation.Transactional;
 import com.idega.block.article.business.ArticleActionURIHandler;
 import com.idega.block.article.business.ArticleUtil;
 import com.idega.block.article.component.ArticleItemViewer;
-import com.idega.block.article.data.ArticleEntity;
 import com.idega.block.article.data.dao.ArticleDao;
 import com.idega.business.IBOLookup;
 import com.idega.business.IBOLookupException;
@@ -50,7 +47,6 @@ import com.idega.content.presentation.ContentViewer;
 import com.idega.core.accesscontrol.business.StandardRoles;
 import com.idega.core.search.business.Search;
 import com.idega.core.search.business.SearchResult;
-import com.idega.core.search.data.BasicSearchResult;
 import com.idega.presentation.IWContext;
 import com.idega.slide.business.IWSlideSession;
 import com.idega.slide.util.IWSlideConstants;
@@ -59,8 +55,6 @@ import com.idega.util.ArrayUtil;
 import com.idega.util.CoreConstants;
 import com.idega.util.CoreUtil;
 import com.idega.util.IWTimestamp;
-import com.idega.util.ListUtil;
-import com.idega.util.StringUtil;
 import com.idega.util.expression.ELUtil;
 
 /**
@@ -254,7 +248,7 @@ public class ArticleListManagedBean implements ContentListViewerManagedBean {
 		//	User has "little" role
 		Timestamp publishedDate = article.getPublishedDate();
 		if (publishedDate == null) {
-			publishedDate = (Timestamp) article.getCreationDate();
+			publishedDate = article.getCreationDate();
 		}
 		
 		if (publishedDate == null) {
