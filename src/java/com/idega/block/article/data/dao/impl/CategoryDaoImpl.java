@@ -35,26 +35,26 @@ import com.idega.util.StringUtil;
 @Repository
 @Scope(BeanDefinition.SCOPE_SINGLETON)
 public class CategoryDaoImpl extends GenericDaoImpl implements CategoryDao, ApplicationListener {
-	
+
 	private static Logger LOGGER = Logger.getLogger(CategoryDaoImpl.class.getName());
-	
+
 	@Override
 	@Transactional(readOnly = false)
 	public boolean addCategory(String category) {
 		if (StringUtil.isEmpty(category)) {
 			return false;
 		}
-		
+
 		if (!this.isCategoryExists(category)) {
 			CategoryEntity categoryEntity = new CategoryEntity();
 			categoryEntity.setCategory(category);
-			
+
 			try {
 				this.persist(categoryEntity);
 			} catch (Exception e) {
 				LOGGER.log(Level.WARNING, "Failed to add category to database: " + categoryEntity, e);
 			}
-			
+
 			return categoryEntity.getId() != null;
 		}
 		return false;
@@ -81,7 +81,7 @@ public class CategoryDaoImpl extends GenericDaoImpl implements CategoryDao, Appl
 		if (StringUtil.isEmpty(category)) {
 			return false;
 		}
-		
+
 		return this.deleteCategories(Arrays.asList(category));
 	}
 
@@ -91,11 +91,14 @@ public class CategoryDaoImpl extends GenericDaoImpl implements CategoryDao, Appl
 		if (ListUtil.isEmpty(categories))
 			return false;
 		List<CategoryEntity> categoryEntitiesToDelete = this.getCategories(categories);
-		
-		
-		
+
 		String numbers = "";
-		for (CategoryEntity s : categoryEntitiesToDelete) {	
+
+		if (ListUtil.isEmpty(categoryEntitiesToDelete)) {
+			return Boolean.FALSE;
+		}
+
+		for (CategoryEntity s : categoryEntitiesToDelete) {
 			try {
 				numbers = numbers + s.getId()+",";
 				this.remove(s);
@@ -105,7 +108,7 @@ public class CategoryDaoImpl extends GenericDaoImpl implements CategoryDao, Appl
 			}
 		}
 		numbers = numbers.substring(0, numbers.lastIndexOf(","));
-		
+
 		String query = "DELETE FROM jnd_article_category WHERE jnd_article_category.category_fk IN ("+ numbers +")";
 		try{
 			SimpleQuerier.executeUpdate(query, true);
@@ -113,7 +116,7 @@ public class CategoryDaoImpl extends GenericDaoImpl implements CategoryDao, Appl
 			LOGGER.log(Level.WARNING, "Failed to remove connections between categories and articles from database: " + query, e);
 			return false;
 		}
-		
+
 		return true;
 	}
 
@@ -137,7 +140,7 @@ public class CategoryDaoImpl extends GenericDaoImpl implements CategoryDao, Appl
 		categoryEntity = this.getSingleResult(CategoryEntity.GET_BY_NAME,
 				CategoryEntity.class, new Param(CategoryEntity.categoryProp,
 						category));
-		
+
 		return categoryEntity;
 	}
 
@@ -150,7 +153,7 @@ public class CategoryDaoImpl extends GenericDaoImpl implements CategoryDao, Appl
 
 		if (ListUtil.isEmpty(categoryEntities))
 			return true;
-		 
+
 		return false;
 	}
 
@@ -158,7 +161,7 @@ public class CategoryDaoImpl extends GenericDaoImpl implements CategoryDao, Appl
 	public List<String> getNotExistingCategoriesFromThisList(List<String> categories) {
 		if (ListUtil.isEmpty(categories))
 			return null;
-		
+
 		List<String> nonExistingCategories = new ArrayList<String>(categories);
 		List<CategoryEntity> categoryEntities = this.getCategories();
 		for (CategoryEntity s : categoryEntities) {
@@ -166,7 +169,7 @@ public class CategoryDaoImpl extends GenericDaoImpl implements CategoryDao, Appl
 				nonExistingCategories.remove(s.getCategory());
 			}
 		}
-		
+
 		return nonExistingCategories;
 	}
 
@@ -177,7 +180,7 @@ public class CategoryDaoImpl extends GenericDaoImpl implements CategoryDao, Appl
 		if (event instanceof CategoryDeletedEvent) {
 			this.deleteCategory(((CategoryDeletedEvent) event).getCategoryId());
 		}
-		
+
 		if (event instanceof CategoryAddedEvent) {
 			this.addCategory(((CategoryAddedEvent) event).getCategoryId());
 		}

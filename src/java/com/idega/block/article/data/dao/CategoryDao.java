@@ -18,14 +18,14 @@ public interface CategoryDao extends GenericDao {
 
 	/**
 	 * Creates new Category
-	 * @param category New category name
+	 * @param category New category id
 	 * @return true, if modification successfully completed, else false 
 	 */
 	public abstract boolean addCategory(String category);
 	
 	/**
 	 * Adds new categories, returns not added or existing ones
-	 * @param categories New categories names
+	 * @param categories New categories IDs
 	 * @return null, if empty list passed, empty list, if all categories added, list of missing categories, if some categories not added
 	 */
 	public abstract List<String> addCategories(List<String> categories);
