@@ -54,15 +54,15 @@ public class ArticlesImporter extends DefaultSpringBean implements ApplicationLi
 		if (event instanceof IWMainSlideStartedEvent){
 			// TODO Šioje vietoje paleisti importerį, jei neimportuota.
 			if(!this.getApplication().getSettings().getBoolean("is_categories_imported", Boolean.FALSE)){
-				this.importCategories();
-				this.getApplication().getSettings().setProperty("is_categories_imported", Boolean.FALSE.toString());
+				Boolean isImported = this.importCategories();
+				this.getApplication().getSettings().setProperty("is_categories_imported",isImported.toString());
 			}
 		}
 
 		// TODO Šioje klasėje padarome metoodus categorijoms ir articlams importinti
 	}
 
-	public void importCategories(){
+	public boolean importCategories(){
 		List<Locale> localeList = ICLocaleBusiness.getListOfLocalesJAVA();
 		for(Locale locale : localeList){
 			List<ContentCategory> categoryList = this.categoryEngine.getCategoriesByLocale(locale.toString());
@@ -70,9 +70,14 @@ public class ArticlesImporter extends DefaultSpringBean implements ApplicationLi
 				continue;
 			}
 			for(ContentCategory category : categoryList){
-				categoryDao.addCategory(category.getId());
+				Boolean isAdded = categoryDao.addCategory(category.getId());
+				if(!isAdded){
+					return Boolean.FALSE;
+				}
 			}
 		}
+		return Boolean.TRUE;
+
 	}
 
 }
