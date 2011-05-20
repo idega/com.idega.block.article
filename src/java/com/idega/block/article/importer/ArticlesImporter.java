@@ -77,11 +77,13 @@ public class ArticlesImporter extends DefaultSpringBean implements ApplicationLi
                 Boolean isImported = this.importArticles();
                 this.getApplication().getSettings().setProperty("is_articles_imported",isImported.toString());
             }
-			
-			System.out.println("###########################"+this.importArticles()+"##############################");
 		}
 	}
 
+	/**
+	 * Method for importing categories, which are in categories.xml, but not in database
+	 * @return true, if imported, false, if at least one category was not imported
+	 */
 	public boolean importCategories(){
 		List<Locale> localeList = ICLocaleBusiness.getListOfLocalesJAVA();
 		for(Locale locale : localeList){
@@ -99,6 +101,10 @@ public class ArticlesImporter extends DefaultSpringBean implements ApplicationLi
 		return Boolean.TRUE;
 	}
 
+	/**
+	 * Method for importing articles and their categories from default /files/cms/article path.
+	 * @return true, if imported, false if at least one article was not imported.
+	 */
     public boolean importArticles(){
 		 
         IWSlideService iWSlideService = getServiceInstance(IWSlideService.class);
@@ -111,7 +117,7 @@ public class ArticlesImporter extends DefaultSpringBean implements ApplicationLi
         } catch (RemoteException e) {
             LOGGER.log(Level.WARNING, "Failed to import articles cause of:", e);
         } catch (IOException e) {
-            LOGGER.log(Level.WARNING, "Failed to import articles cause of:", e);
+            LOGGER.log(Level.WARNING, "No such folder or you do not have a permission to access it: ", e);
         }
         return Boolean.FALSE;
     }
@@ -248,7 +254,6 @@ public class ArticlesImporter extends DefaultSpringBean implements ApplicationLi
                         return Boolean.FALSE;
                     }
                     size = size-1;
-                    System.out.println("Liko: " + size + " elementų");
                 }
             }
             
@@ -256,7 +261,7 @@ public class ArticlesImporter extends DefaultSpringBean implements ApplicationLi
         } catch (HttpException e) {
             LOGGER.log(Level.WARNING, "Failed to import articles cause of:", e);
         } catch (IOException e) {
-            LOGGER.log(Level.WARNING, "Failed to import articles cause of:", e);
+            LOGGER.log(Level.WARNING, "No such folder or you do not have a permission to access it: ", e);
         }
         
         return Boolean.FALSE;
@@ -295,5 +300,10 @@ public class ArticlesImporter extends DefaultSpringBean implements ApplicationLi
      * Passed null,
      * returned: false
      * imported: false
+     * 
+     * Test cases importArticles():
+     * Passed directory /files/cms/article/ with 669 articles in different folders, ~3 articles in one folder
+     * returned: true
+     * imported: true
      */
 }
