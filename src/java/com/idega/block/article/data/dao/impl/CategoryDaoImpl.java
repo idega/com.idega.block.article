@@ -57,7 +57,7 @@ public class CategoryDaoImpl extends GenericDaoImpl implements CategoryDao, Appl
 
 			return categoryEntity.getId() != null;
 		}
-		return false;
+		return true;
 	}
 
 	@Override

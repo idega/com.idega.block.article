@@ -35,8 +35,12 @@ import com.idega.content.data.ContentCategory;
 import com.idega.core.business.DefaultSpringBean;
 import com.idega.core.localisation.business.ICLocaleBusiness;
 import com.idega.idegaweb.IWMainSlideStartedEvent;
+
 import com.idega.slide.business.IWSlideService;
 import com.idega.util.CoreConstants;
+
+import com.idega.util.ListUtil;
+
 
 /**
  * Imports articles and their categories to database.
@@ -63,47 +67,45 @@ public class ArticlesImporter extends DefaultSpringBean implements ApplicationLi
     
     private static Logger LOGGER = Logger.getLogger(ArticleDaoImpl.class.getName());
 
-    /* (non-Javadoc)
-     * @see org.springframework.context.ApplicationListener#onApplicationEvent(org.springframework.context.ApplicationEvent)
-     */
-    @Override
-    public void onApplicationEvent(ApplicationEvent event) {
-        // TODO Imformuoja, kad galima naudotis /cms/file...
-        // TODO Sukurti application property bus naudojamas nustayti, pažiūrėti, ar jau importuota.
-        // TODO DefaultSpringBean pasinaudojant paslaugimis
-        // TODO Importuotojai turi būti du: kategorijoms ir articles
-        // TODO Pakomitinti
-        if (event instanceof IWMainSlideStartedEvent){
-            // TODO Šioje vietoje paleisti importerį, jei neimportuota.
-            //if(!this.getApplication().getSettings().getBoolean("is_categories_imported", Boolean.FALSE)){
-                //this.importCategories();
-            //}
-            
-            importArticles();
-//            if (!this.getApplication().getSettings().getBoolean("is_articles_imported", Boolean.FALSE)) {           
-//                this.getApplication().getSettings().getBoolean("is_articles_imported", importArticles());
-//            }
-            
-//            for (int i = 0; i<200; i++) {
-//                this.categoryEngine.addCategory("Category"+i, "en");
-//            }
-            
-            //
-        }
+	/* (non-Javadoc)
+	 * @see org.springframework.context.ApplicationListener#onApplicationEvent(org.springframework.context.ApplicationEvent)
+	 */
+	@Override
+	public void onApplicationEvent(ApplicationEvent event) {
+		// TODO Imformuoja, kad galima naudotis /cms/file...
+		// TODO Sukurti application property bus naudojamas nustayti, pažiūrėti, ar jau importuota.
+		// TODO DefaultSpringBean pasinaudojant paslaugimis
+		// TODO Importuotojai turi būti du: kategorijoms ir articles
+		// TODO Pakomitinti
+		if (event instanceof IWMainSlideStartedEvent){
+			// TODO Šioje vietoje paleisti importerį, jei neimportuota.
+			if(!this.getApplication().getSettings().getBoolean("is_categories_imported", Boolean.FALSE)){
+				Boolean isImported = this.importCategories();
+				this.getApplication().getSettings().setProperty("is_categories_imported",isImported.toString());
+			}
+		}
 
-        // TODO Šioje klasėje padarome metoodus categorijoms ir articlams importinti
-    }
+		// TODO Šioje klasėje padarome metoodus categorijoms ir articlams importinti
+	}
 
-    public void importCategories(){
-        List<Locale> localeList = ICLocaleBusiness.getListOfLocalesJAVA();
-        for(Locale locale : localeList){
-            List<ContentCategory> categoryList = this.categoryEngine.getCategoriesByLocale(locale.toString());
-            for(ContentCategory category : categoryList){
-                categoryDao.addCategory(category.getId());
-            }
-        }
-    }
-	
+	public boolean importCategories(){
+		List<Locale> localeList = ICLocaleBusiness.getListOfLocalesJAVA();
+		for(Locale locale : localeList){
+			List<ContentCategory> categoryList = this.categoryEngine.getCategoriesByLocale(locale.toString());
+			if(ListUtil.isEmpty(categoryList)){
+				continue;
+			}
+			for(ContentCategory category : categoryList){
+				Boolean isAdded = categoryDao.addCategory(category.getId());
+				if(!isAdded){
+					return Boolean.FALSE;
+				}
+			}
+		}
+		return Boolean.TRUE;
+
+	}
+
     public boolean importArticles(){
 		 
         IWSlideService iWSlideService = getServiceInstance(IWSlideService.class);
