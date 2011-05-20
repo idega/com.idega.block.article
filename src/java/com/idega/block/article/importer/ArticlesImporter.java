@@ -5,40 +5,33 @@ package com.idega.block.article.importer;
 
 import java.io.IOException;
 import java.rmi.RemoteException;
-import java.sql.Timestamp;
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Date;
 import java.util.Enumeration;
 import java.util.List;
 import java.util.Locale;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-
 import org.apache.commons.httpclient.HttpException;
 import org.apache.webdav.lib.PropertyName;
 import org.apache.webdav.lib.WebdavResource;
 import org.apache.webdav.lib.WebdavResources;
-import org.directwebremoting.export.Data;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.context.ApplicationEvent;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
-
 import com.idega.block.article.data.dao.ArticleDao;
 import com.idega.block.article.data.dao.CategoryDao;
 import com.idega.block.article.data.dao.impl.ArticleDaoImpl;
 import com.idega.content.business.categories.CategoriesEngine;
+import com.idega.content.business.categories.CategoryBean;
 import com.idega.content.data.ContentCategory;
 import com.idega.core.business.DefaultSpringBean;
 import com.idega.core.localisation.business.ICLocaleBusiness;
 import com.idega.idegaweb.IWMainSlideStartedEvent;
-
 import com.idega.slide.business.IWSlideService;
 import com.idega.util.CoreConstants;
-
 import com.idega.util.ListUtil;
 
 
@@ -72,20 +65,21 @@ public class ArticlesImporter extends DefaultSpringBean implements ApplicationLi
 	 */
 	@Override
 	public void onApplicationEvent(ApplicationEvent event) {
-		// TODO Imformuoja, kad galima naudotis /cms/file...
-		// TODO Sukurti application property bus naudojamas nustayti, pažiūrėti, ar jau importuota.
-		// TODO DefaultSpringBean pasinaudojant paslaugimis
-		// TODO Importuotojai turi būti du: kategorijoms ir articles
-		// TODO Pakomitinti
+
 		if (event instanceof IWMainSlideStartedEvent){
-			// TODO Šioje vietoje paleisti importerį, jei neimportuota.
+	    
 			if(!this.getApplication().getSettings().getBoolean("is_categories_imported", Boolean.FALSE)){
 				Boolean isImported = this.importCategories();
 				this.getApplication().getSettings().setProperty("is_categories_imported",isImported.toString());
 			}
+			
+			if(!this.getApplication().getSettings().getBoolean("is_articles_imported", Boolean.FALSE)){
+                Boolean isImported = this.importArticles();
+                this.getApplication().getSettings().setProperty("is_articles_imported",isImported.toString());
+            }
+			
+			System.out.println("###########################"+this.importArticles()+"##############################");
 		}
-
-		// TODO Šioje klasėje padarome metoodus categorijoms ir articlams importinti
 	}
 
 	public boolean importCategories(){
@@ -103,29 +97,15 @@ public class ArticlesImporter extends DefaultSpringBean implements ApplicationLi
 			}
 		}
 		return Boolean.TRUE;
-
 	}
 
     public boolean importArticles(){
 		 
         IWSlideService iWSlideService = getServiceInstance(IWSlideService.class);
         try {
-        /*Getting the articles folders*/
-            WebdavResource resource1 = iWSlideService.getWebdavResourceAuthenticatedAsRoot("/files/cms/article");
-            
-            /*/files/cms/article resources*/
-            WebdavResource[] folderResources1 = resource1.listWebdavResources();
-            this.importArticles(folderResources1[0]);
-            
-            /*/files/cms/article/2011 resources*/
-            WebdavResource[] folderResources2 = folderResources1[0].listWebdavResources();
-            this.importArticles(folderResources2[0]);
-            
-            /*/files/cms/article/2011/05 resources*/
-            WebdavResource[] folderResources3 = folderResources2[0].listWebdavResources();
-            this.importArticles(folderResources3[0]);
-            
-            return Boolean.TRUE;
+            /*Getting the articles folders*/
+            WebdavResource resource = iWSlideService.getWebdavResourceAuthenticatedAsRoot(CoreConstants.CONTENT_PATH+CoreConstants.ARTICLE_CONTENT_PATH);           
+            return this.importArticleFolders(resource);
         } catch (HttpException e) {
             LOGGER.log(Level.WARNING, "Failed to import articles cause of:", e);
         } catch (RemoteException e) {
@@ -134,6 +114,47 @@ public class ArticlesImporter extends DefaultSpringBean implements ApplicationLi
             LOGGER.log(Level.WARNING, "Failed to import articles cause of:", e);
         }
         return Boolean.FALSE;
+    }
+    
+    /**
+     * Browse recursively thought folders, searches for articles folders, imports articles if found some.
+     * @param resource Path where to start looking for articles to import.
+     * @return true, if articles found and imported, false if not all articles imported.
+     */
+    public boolean importArticleFolders(WebdavResource resource){
+        if (resource == null) {
+            return Boolean.FALSE;
+        }
+        
+        if (!resource.exists()) {
+            return Boolean.FALSE;
+        }
+        
+        if (this.importArticles(resource)) {
+            return Boolean.TRUE;
+        } else {
+            try {
+                WebdavResource[] foldersAndFilesResources = resource.listWebdavResources();               
+                if (foldersAndFilesResources == null) {
+                    return Boolean.FALSE;
+                }
+                
+                boolean result = Boolean.FALSE;
+                for (WebdavResource wr : foldersAndFilesResources) {
+                    if (this.importArticleFolders(wr)) {
+                        result = Boolean.TRUE;
+                    }
+                }
+
+                return result;
+            } catch (HttpException e) {
+                LOGGER.log(Level.WARNING, "Http:Exception: ",e);
+            } catch (IOException e) {
+                LOGGER.log(Level.WARNING, "No such folder or you do not have a permission to access it: ", e);
+            }
+        }
+        
+        return Boolean.FALSE;        
     }
     
     /**
@@ -177,7 +198,7 @@ public class ArticlesImporter extends DefaultSpringBean implements ApplicationLi
     }
     
     /**
-     * Imports articles to database table "IC_ARTICLE".
+     * Imports articles to database table "IC_ARTICLE" or updates it if exist.
      * @param resource Folder of articles folder.
      * @return true, if imported, false if failed or not articles folder.
      */
@@ -210,9 +231,22 @@ public class ArticlesImporter extends DefaultSpringBean implements ApplicationLi
                         uri = uri.substring(0, uri.lastIndexOf(CoreConstants.SLASH));
                     }
                     
-                    Enumeration enumeration = r.propfindMethod(uri, new PropertyName("DAV","categories").toString());
-                    List<String> enumerationList = Collections.list(enumeration);
-                    this.articleDao.updateArticle(new Date(r.getCreationDate()), uri, null);
+                    String propertyName = new PropertyName("DAV","categories").toString();
+                    
+                    @SuppressWarnings("unchecked")
+                    Enumeration<String> resourceEnumeration = r.propfindMethod(r.getPath(), propertyName);;
+                    if (resourceEnumeration == null) {
+                        return Boolean.FALSE;
+                    }
+                    
+                    List<String> enumerationList = null;
+                    while (resourceEnumeration.hasMoreElements()) {
+                        enumerationList = (List<String>) CategoryBean.getCategoriesFromString(resourceEnumeration.nextElement());
+                    }
+                    
+                    if(!this.articleDao.updateArticle(new Date(r.getCreationDate()), uri, enumerationList)){
+                        return Boolean.FALSE;
+                    }
                     size = size-1;
                     System.out.println("Liko: " + size + " elementų");
                 }
@@ -232,10 +266,15 @@ public class ArticlesImporter extends DefaultSpringBean implements ApplicationLi
      * Test cases isArticlesFolder(WebdavResource resource):
      * Passed articles folder, returned: true
      * Passed not articles folder, returned: false
-     * Passed null, returned: 
+     * Passed null, returned: false
      * 
      * Test cases importArticles(WebdavResource resource):
      * Passed articles folder, without categories, 
+     * returned: true;
+     * imported: true;
+     * 
+     * Test cases importArticles(WebdavResource resource):
+     * Passed articles folder, with category, 
      * returned: true;
      * imported: true;
      * 
@@ -244,12 +283,17 @@ public class ArticlesImporter extends DefaultSpringBean implements ApplicationLi
      * returned: true;
      * imported: true;
      * 
+     * Test cases importArticles(WebdavResource resource):
+     * Passed same as before articles folder, with categories, 
+     * returned: true;
+     * imported: false, changed nothing, but executed;
+     * 
      * Passed not articles folder, 
      * returned: false;
      * imported: false;
      * 
      * Passed null,
-     * returned:
-     * imported:
+     * returned: false
+     * imported: false
      */
 }
