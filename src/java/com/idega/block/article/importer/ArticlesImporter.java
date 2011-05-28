@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
 import org.apache.commons.httpclient.HttpException;
 import org.apache.webdav.lib.PropertyName;
 import org.apache.webdav.lib.WebdavResource;
@@ -21,6 +22,7 @@ import org.springframework.context.ApplicationEvent;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
+
 import com.idega.block.article.data.dao.ArticleDao;
 import com.idega.block.article.data.dao.CategoryDao;
 import com.idega.block.article.data.dao.impl.ArticleDaoImpl;
@@ -30,7 +32,6 @@ import com.idega.content.data.ContentCategory;
 import com.idega.core.business.DefaultSpringBean;
 import com.idega.core.localisation.business.ICLocaleBusiness;
 import com.idega.idegaweb.IWMainSlideStartedEvent;
-import com.idega.idegaweb.UnavailableIWContext;
 import com.idega.slide.business.IWSlideService;
 import com.idega.util.CoreConstants;
 import com.idega.util.ListUtil;
@@ -55,10 +56,10 @@ public class ArticlesImporter extends DefaultSpringBean implements ApplicationLi
 
     @Autowired
     private CategoryDao categoryDao;
-    
+
     @Autowired
     private ArticleDao articleDao;
-    
+
     private static Logger LOGGER = Logger.getLogger(ArticleDaoImpl.class.getName());
 
     /* (non-Javadoc)
@@ -68,44 +69,44 @@ public class ArticlesImporter extends DefaultSpringBean implements ApplicationLi
 	public void onApplicationEvent(ApplicationEvent event) {
 
 	    if (event instanceof IWMainSlideStartedEvent){
-	      
-//	        Boolean isCategoriesImported = false;
-//		    if(!this.getApplication().getSettings().getBoolean("is_categories_imported", Boolean.FALSE)){
-//		        isCategoriesImported = this.importCategories();
-//		        this.getApplication().getSettings().setProperty("is_categories_imported",isCategoriesImported.toString());
-//			}
-//			
-//		    Boolean isArticlesImported = false;
-//			if(!this.getApplication().getSettings().getBoolean("is_articles_imported", Boolean.FALSE)&&isCategoriesImported){
-//			    isArticlesImported = this.importArticles();
-//                this.getApplication().getSettings().setProperty("is_articles_imported",isArticlesImported.toString());
-//            }
+
+	        Boolean isCategoriesImported = false;
+		    if(!this.getApplication().getSettings().getBoolean("is_categories_imported", Boolean.FALSE)){
+		        isCategoriesImported = this.importCategories();
+		        this.getApplication().getSettings().setProperty("is_categories_imported",isCategoriesImported.toString());
+			}
+
+		    Boolean isArticlesImported = false;
+			if(!this.getApplication().getSettings().getBoolean("is_articles_imported", Boolean.FALSE)&&isCategoriesImported){
+			    isArticlesImported = this.importArticles();
+                this.getApplication().getSettings().setProperty("is_articles_imported",isArticlesImported.toString());
+            }
 		}
 	}
 
     /**
      * Method for importing categories, which are in categories.xml, but not in database
-     * @return true, if imported, false, if at least one category was not imported
+     * @return true, if imported, false, if there were problems importing categories
      */
     public boolean importCategories(){
         List<Locale> localeList = ICLocaleBusiness.getListOfLocalesJAVA();
         if (localeList == null) {
             return Boolean.FALSE;
         }
-        
+
         if (this.categoryEngine == null) {
             return Boolean.FALSE;
         }
-        
+
         for(Locale locale : localeList){
             List<ContentCategory> categoryList = null;
             try {
                 categoryList = this.categoryEngine.getCategoriesByLocale(locale.toString());
-            } catch (UnavailableIWContext e){
-                LOGGER.log(Level.WARNING, "Failed to import because categories.xml deos not exist", e);
+            } catch (Exception e){
+                LOGGER.log(Level.WARNING, "Failed to import articles categories, they may not exist.");
                 return Boolean.FALSE;
             }
-            
+
             if(ListUtil.isEmpty(categoryList)){
                 continue;
             }
@@ -323,7 +324,7 @@ public class ArticlesImporter extends DefaultSpringBean implements ApplicationLi
      * Passed directory /files/cms/article/ with 669 articles in different folders, ~3 articles in one folder
      * returned: true
      * imported: true
-     * 
+     *
      * Test cases importCategories():
      * Passed empty directory,
      * imported: false;
