@@ -67,12 +67,12 @@ public class ArticlesImporter extends DefaultSpringBean implements ApplicationLi
 	public void onApplicationEvent(ApplicationEvent event) {
 
 		if (event instanceof IWMainSlideStartedEvent){
-	    
+             
 			if(!this.getApplication().getSettings().getBoolean("is_categories_imported", Boolean.FALSE)){
 				Boolean isImported = this.importCategories();
 				this.getApplication().getSettings().setProperty("is_categories_imported",isImported.toString());
 			}
-			
+
 			if(!this.getApplication().getSettings().getBoolean("is_articles_imported", Boolean.FALSE)){
                 Boolean isImported = this.importArticles();
                 this.getApplication().getSettings().setProperty("is_articles_imported",isImported.toString());
