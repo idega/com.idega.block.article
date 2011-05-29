@@ -1,6 +1,3 @@
-/**
- *
- */
 package com.idega.block.article.importer;
 
 import java.io.IOException;
@@ -54,14 +51,14 @@ public class ArticlesImporter extends DefaultSpringBean implements ApplicationLi
     @Autowired
     private CategoryDao categoryDao;
     
-    @Autowired
+    @Autowired 
     private ArticleDao articleDao;
     
     private static Logger LOGGER = Logger.getLogger(ArticlesImporter.class.getName());
 
     /* (non-Javadoc)
-	 * @see org.springframework.context.ApplicationListener#onApplicationEvent(org.springframework.context.ApplicationEvent)
-	 */
+     * @see org.springframework.context.ApplicationListener#onApplicationEvent(org.springframework.context.ApplicationEvent)
+     */
     @Override
     public void onApplicationEvent(ApplicationEvent event) {
         if (event instanceof IWMainSlideStartedEvent){
@@ -70,14 +67,14 @@ public class ArticlesImporter extends DefaultSpringBean implements ApplicationLi
                 isCategoriesImported = this.importCategories();
                 this.getApplication().getSettings().setProperty("is_categories_imported",isCategoriesImported.toString());
             }
-	        
+
             Boolean isArticlesImported = false;
             if(!this.getApplication().getSettings().getBoolean("is_articles_imported", Boolean.FALSE)&&this.getApplication().getSettings().getBoolean("is_categories_imported")){
                 isArticlesImported = this.importArticles();
                 this.getApplication().getSettings().setProperty("is_articles_imported",isArticlesImported.toString());
             }
         }
-	}
+    }
 
     /**
      * Method for importing categories, which are in categories.xml, but not in database
@@ -120,11 +117,11 @@ public class ArticlesImporter extends DefaultSpringBean implements ApplicationLi
      * @return true, if imported, false if at least one article was not imported.
      */
     public boolean importArticles(){
-		 
+
         IWSlideService iWSlideService = getServiceInstance(IWSlideService.class);
         try {
             /*Getting the articles folders*/
-            WebdavResource resource = iWSlideService.getWebdavResourceAuthenticatedAsRoot(CoreConstants.CONTENT_PATH+CoreConstants.ARTICLE_CONTENT_PATH);           
+            WebdavResource resource = iWSlideService.getWebdavResourceAuthenticatedAsRoot(CoreConstants.CONTENT_PATH+CoreConstants.ARTICLE_CONTENT_PATH);
             boolean importResult = this.importArticleFolders(resource);
             resource.close();
             return importResult;
@@ -162,7 +159,7 @@ public class ArticlesImporter extends DefaultSpringBean implements ApplicationLi
                 }
                 
                 boolean result = Boolean.FALSE;
-                for (WebdavResource wr : foldersAndFilesResources) {                  
+                for (WebdavResource wr : foldersAndFilesResources) {
                     if (this.importArticleFolders(wr)) {
                         result = Boolean.TRUE;
                         wr.close();
@@ -292,7 +289,6 @@ public class ArticlesImporter extends DefaultSpringBean implements ApplicationLi
             }
             
             /*Trying to solve out of memory exception*/
-
             if (!isImportSuccesful) {
                 for (WebdavResource r : arrayOfResources){
                     if (r != null){
@@ -303,7 +299,7 @@ public class ArticlesImporter extends DefaultSpringBean implements ApplicationLi
             
             arrayOfResources = null;
             filesAndFolders = null;
-            resource = null;            
+            resource = null;
             return isImportSuccesful;
         } catch (HttpException e) {
             LOGGER.log(Level.WARNING, "Failed to import articles cause of:", e);
@@ -357,10 +353,9 @@ public class ArticlesImporter extends DefaultSpringBean implements ApplicationLi
      * returned: true
      * imported: true
      * 
+     * Test cases importCategories():
      * Passed empty directory,
      * imported: false;
      * returned: true;
-     * 
-     * 
      */
 }
