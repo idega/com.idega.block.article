@@ -23,7 +23,6 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
 import com.idega.block.article.data.dao.ArticleDao;
 import com.idega.block.article.data.dao.CategoryDao;
-import com.idega.block.article.data.dao.impl.ArticleDaoImpl;
 import com.idega.content.business.categories.CategoriesEngine;
 import com.idega.content.business.categories.CategoryBean;
 import com.idega.content.data.ContentCategory;
@@ -49,7 +48,6 @@ import com.idega.util.ListUtil;
 @Service
 @Scope(BeanDefinition.SCOPE_SINGLETON)
 public class ArticlesImporter extends DefaultSpringBean implements ApplicationListener {
-
     @Autowired
     private CategoriesEngine categoryEngine;
 
@@ -59,28 +57,26 @@ public class ArticlesImporter extends DefaultSpringBean implements ApplicationLi
     @Autowired
     private ArticleDao articleDao;
     
-    private static Logger LOGGER = Logger.getLogger(ArticleDaoImpl.class.getName());
+    private static Logger LOGGER = Logger.getLogger(ArticlesImporter.class.getName());
 
     /* (non-Javadoc)
 	 * @see org.springframework.context.ApplicationListener#onApplicationEvent(org.springframework.context.ApplicationEvent)
 	 */
     @Override
-	public void onApplicationEvent(ApplicationEvent event) {
-
-	    if (event instanceof IWMainSlideStartedEvent){
-	      
-//	        Boolean isCategoriesImported = false;
-//		    if(!this.getApplication().getSettings().getBoolean("is_categories_imported", Boolean.FALSE)){
-//		        isCategoriesImported = this.importCategories();
-//		        this.getApplication().getSettings().setProperty("is_categories_imported",isCategoriesImported.toString());
-//			}
-//			
-//		    Boolean isArticlesImported = false;
-//			if(!this.getApplication().getSettings().getBoolean("is_articles_imported", Boolean.FALSE)&&isCategoriesImported){
-//			    isArticlesImported = this.importArticles();
-//                this.getApplication().getSettings().setProperty("is_articles_imported",isArticlesImported.toString());
-//            }
-		}
+    public void onApplicationEvent(ApplicationEvent event) {
+        if (event instanceof IWMainSlideStartedEvent){
+            Boolean isCategoriesImported = false;
+            if(!this.getApplication().getSettings().getBoolean("is_categories_imported", Boolean.FALSE)){
+                isCategoriesImported = this.importCategories();
+                this.getApplication().getSettings().setProperty("is_categories_imported",isCategoriesImported.toString());
+            }
+	        
+            Boolean isArticlesImported = false;
+            if(!this.getApplication().getSettings().getBoolean("is_articles_imported", Boolean.FALSE)&&this.getApplication().getSettings().getBoolean("is_categories_imported")){
+                isArticlesImported = this.importArticles();
+                this.getApplication().getSettings().setProperty("is_articles_imported",isArticlesImported.toString());
+            }
+        }
 	}
 
     /**
@@ -129,7 +125,9 @@ public class ArticlesImporter extends DefaultSpringBean implements ApplicationLi
         try {
             /*Getting the articles folders*/
             WebdavResource resource = iWSlideService.getWebdavResourceAuthenticatedAsRoot(CoreConstants.CONTENT_PATH+CoreConstants.ARTICLE_CONTENT_PATH);           
-            return this.importArticleFolders(resource);
+            boolean importResult = this.importArticleFolders(resource);
+            resource.close();
+            return importResult;
         } catch (HttpException e) {
             LOGGER.log(Level.WARNING, "Failed to import articles cause of:", e);
         } catch (RemoteException e) {
@@ -158,17 +156,26 @@ public class ArticlesImporter extends DefaultSpringBean implements ApplicationLi
             return Boolean.TRUE;
         } else {
             try {
-                WebdavResource[] foldersAndFilesResources = resource.listWebdavResources();               
+                WebdavResource[] foldersAndFilesResources = resource.listWebdavResources();
                 if (foldersAndFilesResources == null) {
                     return Boolean.FALSE;
                 }
                 
                 boolean result = Boolean.FALSE;
-                for (WebdavResource wr : foldersAndFilesResources) {
+                for (WebdavResource wr : foldersAndFilesResources) {                  
                     if (this.importArticleFolders(wr)) {
                         result = Boolean.TRUE;
+                        wr.close();
+                    } else {
+                        if (wr != null) {
+                            wr.close();
+                        }
                     }
                 }
+                
+                /*Trying to solve out of memory exception*/
+                foldersAndFilesResources = null;
+                resource = null;
 
                 return result;
             } catch (HttpException e) {
@@ -178,6 +185,7 @@ public class ArticlesImporter extends DefaultSpringBean implements ApplicationLi
             }
         }
         
+        // TODO close resources on failure. Does possible to get failure here?
         return Boolean.FALSE;        
     }
     
@@ -212,6 +220,12 @@ public class ArticlesImporter extends DefaultSpringBean implements ApplicationLi
                     return Boolean.TRUE;
                 }
             }
+            
+            /*Trying to solve out of memory exception*/
+            arrayOfResourcesInStringRepresentation = null;
+            resource = null;
+            webdavResources = null;
+            
         } catch (HttpException e) {
             LOGGER.log(Level.WARNING, "Http:Exception: ",e);
         } catch (IOException e) {
@@ -243,6 +257,7 @@ public class ArticlesImporter extends DefaultSpringBean implements ApplicationLi
             }
             
             int size = arrayOfResources.length;
+            boolean isImportSuccesful = Boolean.TRUE;
             for (WebdavResource r : arrayOfResources) {
                 if (r.getName().endsWith(CoreConstants.ARTICLE_FILENAME_SCOPE)) {
                     String uri = r.getPath();
@@ -258,24 +273,38 @@ public class ArticlesImporter extends DefaultSpringBean implements ApplicationLi
                     String propertyName = new PropertyName("DAV","categories").toString();
                     
                     @SuppressWarnings("unchecked")
-                    Enumeration<String> resourceEnumeration = r.propfindMethod(r.getPath(), propertyName);;
-                    if (resourceEnumeration == null) {
-                        return Boolean.FALSE;
-                    }
-                    
+                    Enumeration<String> resourceEnumeration = r.propfindMethod(r.getPath(), propertyName);
                     List<String> enumerationList = null;
-                    while (resourceEnumeration.hasMoreElements()) {
-                        enumerationList = (List<String>) CategoryBean.getCategoriesFromString(resourceEnumeration.nextElement());
+                    
+                    if (resourceEnumeration != null){
+                        while (resourceEnumeration.hasMoreElements()) {
+                            enumerationList = (List<String>) CategoryBean.getCategoriesFromString(resourceEnumeration.nextElement());
+                        }
                     }
                     
                     if(!this.articleDao.updateArticle(new Date(r.getCreationDate()), uri, enumerationList)){
-                        return Boolean.FALSE;
+                        isImportSuccesful = Boolean.FALSE;
+                        break;
                     }
                     size = size-1;
+                    r.close();
                 }
             }
             
-            return Boolean.TRUE;
+            /*Trying to solve out of memory exception*/
+
+            if (!isImportSuccesful) {
+                for (WebdavResource r : arrayOfResources){
+                    if (r != null){
+                        r.close();
+                    }
+                }
+            }
+            
+            arrayOfResources = null;
+            filesAndFolders = null;
+            resource = null;            
+            return isImportSuccesful;
         } catch (HttpException e) {
             LOGGER.log(Level.WARNING, "Failed to import articles cause of:", e);
         } catch (IOException e) {
@@ -324,9 +353,14 @@ public class ArticlesImporter extends DefaultSpringBean implements ApplicationLi
      * returned: true
      * imported: true
      * 
-     * Test cases importCategories():
+     * Passed directory /files/cms/article/ with 999 articles in different folders, ~3 articles in one folder. Also different categories or no categories
+     * returned: true
+     * imported: true
+     * 
      * Passed empty directory,
      * imported: false;
-     * returned: false + exception stack trace;
+     * returned: true;
+     * 
+     * 
      */
 }
