@@ -1,6 +1,7 @@
 package com.idega.block.article.data.dao.impl;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
@@ -45,7 +46,7 @@ public class ArticleDaoImpl extends GenericDaoImpl implements ArticleDao {
 	
 	@Override
 	@Transactional(readOnly=false)
-	public boolean updateArticle(Date timestamp, String uri, List<String> categories) {
+	public boolean updateArticle(Date timestamp, String uri, Collection<String> categories) {
 		boolean result = true;
 		
 		if(!ListUtil.isEmpty(categories)){

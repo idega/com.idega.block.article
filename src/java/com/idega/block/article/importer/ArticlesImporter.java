@@ -2,12 +2,14 @@ package com.idega.block.article.importer;
 
 import java.io.IOException;
 import java.rmi.RemoteException;
+import java.util.Collection;
 import java.util.Date;
 import java.util.Enumeration;
 import java.util.List;
 import java.util.Locale;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
 import org.apache.commons.httpclient.HttpException;
 import org.apache.webdav.lib.PropertyName;
 import org.apache.webdav.lib.WebdavResource;
@@ -18,6 +20,7 @@ import org.springframework.context.ApplicationEvent;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
+
 import com.idega.block.article.data.dao.ArticleDao;
 import com.idega.block.article.data.dao.CategoryDao;
 import com.idega.content.business.categories.CategoriesEngine;
@@ -56,22 +59,25 @@ public class ArticlesImporter extends DefaultSpringBean implements ApplicationLi
     
     private static Logger LOGGER = Logger.getLogger(ArticlesImporter.class.getName());
 
+    private static final String CATEGORIES_IMPORTED_APP_PROP = "is_categories_imported",
+    							ARTICLES_IMPORTED_APP_PROP = "is_articles_imported";
+    
     /* (non-Javadoc)
      * @see org.springframework.context.ApplicationListener#onApplicationEvent(org.springframework.context.ApplicationEvent)
      */
     @Override
     public void onApplicationEvent(ApplicationEvent event) {
-        if (event instanceof IWMainSlideStartedEvent){
-            Boolean isCategoriesImported = false;
-            if(!this.getApplication().getSettings().getBoolean("is_categories_imported", Boolean.FALSE)){
-                isCategoriesImported = this.importCategories();
-                this.getApplication().getSettings().setProperty("is_categories_imported",isCategoriesImported.toString());
+        if (event instanceof IWMainSlideStartedEvent) {
+            Boolean isCategoriesImported = getApplication().getSettings().getBoolean(CATEGORIES_IMPORTED_APP_PROP, Boolean.FALSE);
+            if (!isCategoriesImported) {
+                isCategoriesImported = importCategories();
+                getApplication().getSettings().setProperty(CATEGORIES_IMPORTED_APP_PROP, isCategoriesImported.toString());
             }
 
-            Boolean isArticlesImported = false;
-            if(!this.getApplication().getSettings().getBoolean("is_articles_imported", Boolean.FALSE)&&this.getApplication().getSettings().getBoolean("is_categories_imported")){
+            Boolean isArticlesImported = getApplication().getSettings().getBoolean(ARTICLES_IMPORTED_APP_PROP, Boolean.FALSE);
+            if (!isArticlesImported && isCategoriesImported) {
                 isArticlesImported = this.importArticles();
-                this.getApplication().getSettings().setProperty("is_articles_imported",isArticlesImported.toString());
+                getApplication().getSettings().setProperty(ARTICLES_IMPORTED_APP_PROP, isArticlesImported.toString());
             }
         }
     }
@@ -140,7 +146,7 @@ public class ArticlesImporter extends DefaultSpringBean implements ApplicationLi
      * @param resource Path where to start looking for articles to import.
      * @return true, if articles found and imported, false if not all articles imported.
      */
-    public boolean importArticleFolders(WebdavResource resource){
+    public boolean importArticleFolders(WebdavResource resource) {
         if (resource == null) {
             return Boolean.FALSE;
         }
@@ -255,6 +261,7 @@ public class ArticlesImporter extends DefaultSpringBean implements ApplicationLi
             
             int size = arrayOfResources.length;
             boolean isImportSuccesful = Boolean.TRUE;
+            String propertyName = new PropertyName("DAV", "categories").toString();
             for (WebdavResource r : arrayOfResources) {
                 if (r.getName().endsWith(CoreConstants.ARTICLE_FILENAME_SCOPE)) {
                     String uri = r.getPath();
@@ -267,15 +274,13 @@ public class ArticlesImporter extends DefaultSpringBean implements ApplicationLi
                         uri = uri.substring(0, uri.lastIndexOf(CoreConstants.SLASH));
                     }
                     
-                    String propertyName = new PropertyName("DAV","categories").toString();
-                    
                     @SuppressWarnings("unchecked")
                     Enumeration<String> resourceEnumeration = r.propfindMethod(r.getPath(), propertyName);
-                    List<String> enumerationList = null;
+                    Collection<String> enumerationList = null;
                     
                     if (resourceEnumeration != null){
                         while (resourceEnumeration.hasMoreElements()) {
-                            enumerationList = (List<String>) CategoryBean.getCategoriesFromString(resourceEnumeration.nextElement());
+                            enumerationList = CategoryBean.getCategoriesFromString(resourceEnumeration.nextElement());
                         }
                     }
                     

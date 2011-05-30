@@ -2,6 +2,7 @@ package com.idega.block.article.data.dao.impl;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -62,7 +63,7 @@ public class CategoryDaoImpl extends GenericDaoImpl implements CategoryDao, Appl
 
 	@Override
 	@Transactional(readOnly = false)
-	public List<String> addCategories(List<String> categories) {
+	public List<String> addCategories(Collection<String> categories) {
 		if (ListUtil.isEmpty(categories))
 			return null;
 
@@ -126,7 +127,7 @@ public class CategoryDaoImpl extends GenericDaoImpl implements CategoryDao, Appl
 	}
 
 	@Override
-	public List<CategoryEntity> getCategories(List<String> categories) {
+	public List<CategoryEntity> getCategories(Collection<String> categories) {
 		if (ListUtil.isEmpty(categories))
 			return null;
 
