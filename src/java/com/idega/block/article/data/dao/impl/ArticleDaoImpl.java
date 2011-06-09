@@ -41,32 +41,32 @@ public class ArticleDaoImpl extends GenericDaoImpl implements ArticleDao {
 
 	@Autowired
 	private CategoryDao categoryDao;
-	
+
 	private static Logger LOGGER = Logger.getLogger(ArticleDaoImpl.class.getName());
-	
+
 	@Override
 	@Transactional(readOnly=false)
 	public boolean updateArticle(Date timestamp, String uri, Collection<String> categories) {
 		boolean result = true;
-		
+
 		if(!ListUtil.isEmpty(categories)){
 			this.categoryDao.addCategories(categories);
 		}
-		
+
 		ArticleEntity articleEntity = this.getArticle(uri);
 		if(articleEntity == null){
 			articleEntity = new ArticleEntity();
 			articleEntity.setUri(uri);
 			articleEntity.setModificationDate(timestamp);
 			articleEntity.setCategories(this.categoryDao.getCategories(categories));
-			
+
 			try {
 				persist(articleEntity);
 			} catch (Exception e) {
 				LOGGER.log(Level.WARNING, "Failed to add article to database: " + articleEntity, e);
 				return false;
 			}
-			
+
 		} else {
 			List<CategoryEntity> categoryEntitiesInArticle = articleEntity.getCategories();
 			List<CategoryEntity> categoryEntitiesToRemove = new ArrayList<CategoryEntity>(0);
@@ -79,7 +79,7 @@ public class ArticleDaoImpl extends GenericDaoImpl implements ArticleDao {
 						categoryEntitiesToRemove.add(o);
 					}
 				}
-				
+
 				/*Performing deletion of unused categories*/
 				result = articleEntity.removeCategories(categoryEntitiesToRemove);
 				/*Performing addition of new a categories*/
@@ -89,7 +89,7 @@ public class ArticleDaoImpl extends GenericDaoImpl implements ArticleDao {
 			} else if((ListUtil.isEmpty(categoryEntitiesInArticle))&&(!ListUtil.isEmpty(categories))){
 				result = articleEntity.addCategories(this.categoryDao.getCategories(categories));
 			}
-			
+
 			try {
 				this.merge(articleEntity);
 			} catch (Exception e) {
@@ -97,43 +97,45 @@ public class ArticleDaoImpl extends GenericDaoImpl implements ArticleDao {
 				return false;
 			}
 		}
-		
+
 		if(result){
 			return articleEntity != null && articleEntity.getId() != null;
 		}
-		
+
 		return result;
 	}
-	
+
+	@Override
 	public ArticleEntity getArticle(String uri){
 		if(StringUtil.isEmpty(uri)){
 			return null;
 		}
-		
+
 		if (uri.contains(CoreConstants.WEBDAV_SERVLET_URI)) {
 			uri = uri.substring(CoreConstants.WEBDAV_SERVLET_URI.length());
 		}
-		
+
 		if (uri.endsWith(CoreConstants.SLASH)) {
 			uri = uri.substring(0, uri.lastIndexOf(CoreConstants.SLASH));
 		}
-		
+
 		return this.getSingleResult(ArticleEntity.GET_BY_URI, ArticleEntity.class, new Param(ArticleEntity.uriProp, uri));
 	}
-	
+
+	@Override
 	public Long getArticleIdByURI(String uri){
 		if (StringUtil.isEmpty(uri)) {
 			return new Long(-1);
 		}
-		
+
 		if (uri.contains(CoreConstants.WEBDAV_SERVLET_URI)) {
 			uri = uri.substring(CoreConstants.WEBDAV_SERVLET_URI.length());
 		}
-		
+
 		if (uri.endsWith(CoreConstants.SLASH)) {
 			uri = uri.substring(0, uri.lastIndexOf(CoreConstants.SLASH));
 		}
-		
+
 		return this.getSingleResult(ArticleEntity.GET_ID_BY_URI, Long.class, new Param(ArticleEntity.uriProp, uri));
 	}
 
@@ -149,13 +151,15 @@ public class ArticleDaoImpl extends GenericDaoImpl implements ArticleDao {
 		} catch (Exception e) {
 			LOGGER.log(Level.WARNING, "Failed to remove article from database: " + article, e);
 		}
-		
+
 		return false;
 	}
 
+	@Override
 	public String[] getUrisByCategoriesAndAmount(List<String> categories, String uriFrom, int maxResults) {
+		//TODO: I will make it in hybernate later
 		StringBuilder inlineQuery = new StringBuilder("SELECT a.URI FROM ic_article a");
-		
+
 		if(!ListUtil.isEmpty(categories)){
 			StringBuilder set = new StringBuilder();
 			for (Iterator<String>iter = categories.iterator(); iter.hasNext(); ) {
@@ -164,23 +168,34 @@ public class ArticleDaoImpl extends GenericDaoImpl implements ArticleDao {
 			    if(iter.hasNext()){
 			    	set.append(CoreConstants.COMMA).append(CoreConstants.SPACE);
 			    }
-			} 
+			}
 			inlineQuery.append(", ic_category c, jnd_article_category j WHERE c.CATEGORY IN (").append(set.toString())
-				.append(") AND a.id = j.ARTICLE_FK AND c.id = j.CATEGORY_FK");	
+				.append(") AND a.id = j.ARTICLE_FK AND c.id = j.CATEGORY_FK");
 		}
-		
+
 		//adding first result check
 		if(!StringUtil.isEmpty(uriFrom)){
 			inlineQuery.append(ListUtil.isEmpty(categories) ? " WHERE " : " AND ");
 			inlineQuery.append("a.MODIFICATION_DATE <= (SELECT art.MODIFICATION_DATE FROM ic_article art where art.URI = '").append(uriFrom).append("')");
 		}
-		
+
 		inlineQuery.append(" ORDER BY a.MODIFICATION_DATE DESC");
-		
-		if(maxResults > 0){
-			inlineQuery.append(" LIMIT ").append(String.valueOf(0)).append(", ").append(String.valueOf(maxResults));
+
+		String databaseName = "";
+		try{
+			databaseName = SimpleQuerier.getConnection().getMetaData().getDatabaseProductName();
+		}catch(Exception e){
+
 		}
-		
+		if(maxResults > 0){
+			if(databaseName.contains("Oracle")){
+				inlineQuery.append(" rownum < ").append(String.valueOf(maxResults));
+			}else{
+				//this is the most common (MySQL, PostgreSQL...)
+				inlineQuery.append(" LIMIT ").append(String.valueOf(maxResults));
+			}
+		}
+
 		String[] uris = null;
 		try{
 			uris = SimpleQuerier.executeStringQuery(inlineQuery.toString());
@@ -188,10 +203,10 @@ public class ArticleDaoImpl extends GenericDaoImpl implements ArticleDao {
 			LOGGER.log(Level.WARNING, "Error executing sql statement " + inlineQuery, e);
 			return null;
 		}
-		
+
 		return uris;
 	}
-	
+
 	/**
 	 * Tested cases:
 	 * Written article with name: "Name";
