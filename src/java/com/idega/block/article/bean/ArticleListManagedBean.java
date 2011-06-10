@@ -13,7 +13,6 @@ import java.io.IOException;
 import java.rmi.RemoteException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
@@ -51,7 +50,6 @@ import com.idega.presentation.IWContext;
 import com.idega.slide.business.IWSlideSession;
 import com.idega.slide.util.IWSlideConstants;
 import com.idega.user.data.User;
-import com.idega.util.ArrayUtil;
 import com.idega.util.CoreConstants;
 import com.idega.util.CoreUtil;
 import com.idega.util.IWTimestamp;
@@ -138,8 +136,7 @@ public class ArticleListManagedBean implements ContentListViewerManagedBean {
 
 		List<String> uris = null;
 		if (iwc.getIWMainApplication().getSettings().getBoolean("load_articles_from_db", Boolean.TRUE)){
-			String[] urisArray = getArticlesFromDatabase(folder, categories, iwc,getMaxNumberOfDisplayed());
-			uris = ArrayUtil.isEmpty(urisArray) ? new ArrayList<String>(0) : Arrays.asList(urisArray);
+			uris = getArticlesFromDatabase(folder, categories, iwc,getMaxNumberOfDisplayed());
 		}else{
 			Collection<SearchResult> results = getArticleSearcResults(folder, this.categories, iwc);
 			if (results == null) {
@@ -530,9 +527,9 @@ public class ArticleListManagedBean implements ContentListViewerManagedBean {
 	 * @return Collection<SearchResult> if results were found, null otherwise
 	 */
 	@Transactional(readOnly = true)
-	private String [] getArticlesFromDatabase(String folder,List<String> categories, IWContext iwc, int maxResults){
+	private List<String> getArticlesFromDatabase(String folder,List<String> categories, IWContext iwc, int maxResults){
 		String uriFrom = iwc.getParameter(ContentViewer.PARAMETER_CONTENT_RESOURCE);
-		return this.getArticleDao().getUrisByCategoriesAndAmount(categories, uriFrom, 10);
+		return this.getArticleDao().getUrisByCategoriesAndAmount(categories, uriFrom, maxResults);
 	}
 
 	public Collection<SearchResult> getArticleSearcResults(String folder, List<String> categories, IWContext iwc) {

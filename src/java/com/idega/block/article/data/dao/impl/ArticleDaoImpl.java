@@ -3,7 +3,6 @@ package com.idega.block.article.data.dao.impl;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
-import java.util.Iterator;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -19,8 +18,8 @@ import com.idega.block.article.data.CategoryEntity;
 import com.idega.block.article.data.dao.ArticleDao;
 import com.idega.block.article.data.dao.CategoryDao;
 import com.idega.core.persistence.Param;
+import com.idega.core.persistence.Query;
 import com.idega.core.persistence.impl.GenericDaoImpl;
-import com.idega.data.SimpleQuerier;
 import com.idega.util.CoreConstants;
 import com.idega.util.ListUtil;
 import com.idega.util.StringUtil;
@@ -156,52 +155,40 @@ public class ArticleDaoImpl extends GenericDaoImpl implements ArticleDao {
 	}
 
 	@Override
-	public String[] getUrisByCategoriesAndAmount(List<String> categories, String uriFrom, int maxResults) {
-		//TODO: I will make it in hybernate later
-		StringBuilder inlineQuery = new StringBuilder("SELECT a.URI FROM ic_article a");
-
+	public List <String> getUrisByCategoriesAndAmount(List<String> categories, String uriFrom, int maxResults) {
+		StringBuilder inlineQuery = new StringBuilder("SELECT DISTINCT a.").append(ArticleEntity.uriProp).append(" FROM ArticleEntity a");
 		if(!ListUtil.isEmpty(categories)){
-			StringBuilder set = new StringBuilder();
-			for (Iterator<String>iter = categories.iterator(); iter.hasNext(); ) {
-				String category = iter.next();
-			    set.append(CoreConstants.QOUTE_SINGLE_MARK).append(category).append(CoreConstants.QOUTE_SINGLE_MARK);
-			    if(iter.hasNext()){
-			    	set.append(CoreConstants.COMMA).append(CoreConstants.SPACE);
-			    }
-			}
-			inlineQuery.append(", ic_category c, jnd_article_category j WHERE c.CATEGORY IN (").append(set.toString())
-				.append(") AND a.id = j.ARTICLE_FK AND c.id = j.CATEGORY_FK");
+			inlineQuery.append(" JOIN a.").append(ArticleEntity.categoriesProp).append(" c WHERE " +
+					"c.").append(CategoryEntity.categoryProp).append(" IN (:").append(ArticleEntity.categoriesProp).append(")");
 		}
 
-		//adding first result check
 		if(!StringUtil.isEmpty(uriFrom)){
 			inlineQuery.append(ListUtil.isEmpty(categories) ? " WHERE " : " AND ");
-			inlineQuery.append("a.MODIFICATION_DATE <= (SELECT art.MODIFICATION_DATE FROM ic_article art where art.URI = '").append(uriFrom).append("')");
+			inlineQuery.append("a.").append(ArticleEntity.modificationDateProp).append(" <= (SELECT art." + ArticleEntity.modificationDateProp +
+					" FROM ArticleEntity art where art.").append(ArticleEntity.uriProp).append(" = :").append(ArticleEntity.uriProp).append(")");
 		}
 
-		inlineQuery.append(" ORDER BY a.MODIFICATION_DATE DESC");
+		inlineQuery.append(" ORDER BY a.").append(ArticleEntity.modificationDateProp);
 
-		String databaseName = "";
-		try{
-			databaseName = SimpleQuerier.getConnection().getMetaData().getDatabaseProductName();
-		}catch(Exception e){
-
-		}
+		Query query = this.getQueryInline(inlineQuery.toString());
 		if(maxResults > 0){
-			if(databaseName.contains("Oracle")){
-				inlineQuery.append(" rownum < ").append(String.valueOf(maxResults));
-			}else{
-				//this is the most common (MySQL, PostgreSQL...)
-				inlineQuery.append(" LIMIT ").append(String.valueOf(maxResults));
-			}
+			query.setMaxResults(maxResults);
 		}
 
-		String[] uris = null;
-		try{
-			uris = SimpleQuerier.executeStringQuery(inlineQuery.toString());
-		} catch(Exception e){
-			LOGGER.log(Level.WARNING, "Error executing sql statement " + inlineQuery, e);
-			return null;
+		List <String> uris = null;
+		if(!ListUtil.isEmpty(categories)){
+			if(StringUtil.isEmpty(uriFrom)){
+				uris = query.getResultList(String.class, new Param(ArticleEntity.categoriesProp,categories));
+			}else{
+				uris = query.getResultList(String.class, new Param(ArticleEntity.categoriesProp,categories),
+						new Param(ArticleEntity.uriProp, uriFrom));
+			}
+		}else{
+			if(StringUtil.isEmpty(uriFrom)){
+				uris = query.getResultList(String.class);
+			}else{
+				uris = query.getResultList(String.class, new Param(ArticleEntity.uriProp, uriFrom));
+			}
 		}
 
 		return uris;
