@@ -76,5 +76,9 @@
       <version>4aug2000r7-dev-m1.0</version>
       <type>jar</type>
     </dependency>
+    <dependency>
+    	<groupId>com.idega.block.platform</groupId>
+    	<artifactId>com.idega.hibernate</artifactId>
+    </dependency>
   </dependencies>
 </project>

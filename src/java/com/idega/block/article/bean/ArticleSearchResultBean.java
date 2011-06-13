@@ -24,12 +24,10 @@ import com.idega.webface.bean.WFEditableListDataBean;
  */
 public class ArticleSearchResultBean extends ArticleItemBean implements WFEditableListDataBean {
 
-	/**
-	 * 
-	 */
+	private static final long serialVersionUID = -4189675732587747519L;
+
 	public ArticleSearchResultBean() {
 		super();
-		// TODO Auto-generated constructor stub
 	}
 	
 	/* (non-Javadoc)
@@ -44,7 +42,7 @@ public class ArticleSearchResultBean extends ArticleItemBean implements WFEditab
 	 */
 	public Object[] getValues() {
 //		"Headline", "Published", "Author", "Status"
-		List values = new ArrayList();
+		List<Object> values = new ArrayList<Object>();
 		values.add(getHeadline());
 		values.add(getAuthor());
 		values.add(getSource());

@@ -900,7 +900,7 @@ public class ArticleLocalizedItemBean extends ContentItemBean implements Seriali
 		this.articleCategories = articleCategories;
 	}
 	
-	private List<String> getCategories() {
+	public List<String> getCategories() {
 		if (articleCategories == null) {
 			return null;
 		}
