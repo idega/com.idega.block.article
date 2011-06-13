@@ -1,0 +1,33 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html 	xmlns="http://www.w3.org/1999/xhtml" 
+		xmlns:ui="http://java.sun.com/jsf/facelets"
+		xmlns:h="http://java.sun.com/jsf/html"
+		xmlns:f="http://java.sun.com/jsf/core"
+		xmlns:t="http://myfaces.apache.org/tomahawk"
+	    xmlns:wf="http://xmlns.idega.com/com.idega.webface"
+		xmlns:ws="http://xmlns.idega.com/com.idega.workspace"
+		xmlns:co="http://xmlns.idega.com/com.idega.content"
+        xmlns:article="http://xmlns.idega.com/com.idega.block.article" >
+
+    <head>
+    
+    </head>
+    
+    <body>
+		<f:view>
+			<ws:page id="listarticles1" javascripturls="#{articlesListerHelper.javaScriptUris}" stylesheeturls="#{articlesListerHelper.styleSheetsUris}">
+				<h:form styleClass="articleListContent" id="listarticlesform1">
+					<wf:block id="article_list_block" title="#{localizedStrings['com.idega.block.article']['list_articles']}" maximizedVertically="true">
+						<t:div styleClass="articleHeadings">
+							<t:div styleClass="articleDate"><h:outputText value="#{localizedStrings['com.idega.block.article']['article_date']}" /></t:div>
+							<t:div styleClass="articleTitle"><h:outputText value="#{localizedStrings['com.idega.block.article']['article_title']}" /></t:div>
+							<t:div styleClass="articleAuthor"><h:outputText value="#{localizedStrings['com.idega.block.article']['article_author']}" /></t:div>
+						</t:div>
+						<article:ArticleListViewer showAllItems="true" id="article_list" resourcePath="/files/cms/article" detailsViewerPath="/workspace/content/article/preview" showTeaser="false" headlineAsLink="true" showTime="false" showComments="false" />
+					</wf:block>
+					<t:div styleClass="articleListButtons"></t:div>
+				</h:form>
+			</ws:page>
+		</f:view>
+	</body>
+</html>

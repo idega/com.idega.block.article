@@ -72,34 +72,34 @@ public class IWBundleStarter implements IWBundleStartable {
 		ViewNode contentNode = cViewManager.getContentNode();
 		
 		DefaultViewNode articleNode = new DefaultViewNode("article",contentNode);
-		articleNode.setJspUri(bundle.getJSPURI("listarticles.jsp"));
+		articleNode.setFaceletUri(bundle.getFaceletURI("listarticles.xhtml"));
 		articleNode.setKeyboardShortcut(new KeyboardShortcut("a"));
 		articleNode.setName("#{localizedStrings['com.idega.block.article']['article']}");
 		
 		DefaultViewNode createNewArticleNode = new DefaultViewNode("create",articleNode);
-		String jspUri = bundle.getJSPURI("createarticle.jsp");
-		createNewArticleNode.setJspUri(jspUri);
+		String faceletUri = bundle.getFaceletURI("createarticle.xhtml");
+		createNewArticleNode.setFaceletUri(faceletUri);
 		createNewArticleNode.setVisibleInMenus(false);
 		createNewArticleNode.setName("#{localizedStrings['com.idega.block.article']['create_article']}");
 		
 		DefaultViewNode editNewArticleNode = new DefaultViewNode("edit",articleNode);
-		editNewArticleNode.setJspUri(bundle.getJSPURI("editarticle.jsp"));
+		editNewArticleNode.setFaceletUri(bundle.getFaceletURI("editarticle.xhtml"));
 		editNewArticleNode.setVisibleInMenus(false);
 		editNewArticleNode.setName("#{localizedStrings['com.idega.block.article']['edit']}");
 		
 		DefaultViewNode deleteArticleNode = new DefaultViewNode("delete",articleNode);
-		deleteArticleNode.setJspUri(bundle.getJSPURI("deletearticle.jsp"));
+		deleteArticleNode.setFaceletUri(bundle.getFaceletURI("deletearticle.xhtml"));
 		deleteArticleNode.setVisibleInMenus(false);
 		deleteArticleNode.setName("#{localizedStrings['com.idega.block.article']['delete']}");
 		
 		DefaultViewNode listArticlesNode = new DefaultViewNode("list",articleNode);
-		listArticlesNode.setJspUri(bundle.getJSPURI("listarticles.jsp"));
+		listArticlesNode.setFaceletUri(bundle.getFaceletURI("listarticles.xhtml"));
 		listArticlesNode.setVisibleInMenus(false);
 		listArticlesNode.setName("#{localizedStrings['com.idega.block.article']['list_articles']}");
 		
 		
 		DefaultViewNode previewArticlesNode = new DefaultViewNode("preview",articleNode);
-		previewArticlesNode.setJspUri(bundle.getJSPURI("previewarticle.jsp"));
+		previewArticlesNode.setFaceletUri(bundle.getFaceletURI("previewarticle.xhtml"));
 		previewArticlesNode.setVisibleInMenus(false);
 		previewArticlesNode.setName("#{localizedStrings['com.idega.block.article']['preview']}");
 
