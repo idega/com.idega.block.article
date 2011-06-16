@@ -26,13 +26,16 @@ public interface ArticleDao extends GenericDao {
 	public abstract boolean deleteArticle(String uri);
 
 	/**
-	 * Gets List of uris by categories, the maximum numbers
-	 * to select is specified by maxResults parameter
+	 * Gets List of ArticleEntity by categories, the maximum numbers
+	 * to select is specified by maxResults parameter, results are ordered
+	 * by modification date
 	 * @param categories List of categories, if it is empty or null, than articles will be selected independent of it's category
 	 * @param firstResult uri of the article from which the results will be taken
 	 * @param maxResults max amount of articles that will be returned, if less than 1 returns all articles
+	 *
+	 * @return the return is always List<ArticleEntity>, it is empty if no results were found
 	 */
-	public abstract List<String> getUrisByCategoriesAndAmount(List<String> categories, String uriFrom, int maxResults);
+	public abstract List<ArticleEntity> getArticlesByCategoriesAndAmount(List<String> categories, String uriFrom, int maxResults);
 
 
 	 /** Returns one ArticleEntity from database

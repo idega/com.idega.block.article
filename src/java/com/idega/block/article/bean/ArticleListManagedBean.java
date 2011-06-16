@@ -34,6 +34,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.idega.block.article.business.ArticleActionURIHandler;
 import com.idega.block.article.business.ArticleUtil;
 import com.idega.block.article.component.ArticleItemViewer;
+import com.idega.block.article.data.ArticleEntity;
 import com.idega.block.article.data.dao.ArticleDao;
 import com.idega.business.IBOLookup;
 import com.idega.business.IBOLookupException;
@@ -134,16 +135,18 @@ public class ArticleListManagedBean implements ContentListViewerManagedBean {
 	public List<ArticleItemBean> loadAllArticlesInFolder(String folder) throws XmlException, IOException{
 		IWContext iwc = CoreUtil.getIWContext();
 
-		List<String> uris = null;
+		List<String> uris = new ArrayList<String>();
 		if (iwc.getIWMainApplication().getSettings().getBoolean("load_articles_from_db", Boolean.TRUE)){
-			uris = getArticlesFromDatabase(folder, categories, iwc,getMaxNumberOfDisplayed());
+			List<ArticleEntity> entities = getArticlesFromDatabase(folder, categories, iwc,getMaxNumberOfDisplayed());
+			for(ArticleEntity a : entities){
+				uris.add(a.getUri());
+			}
 		}else{
 			Collection<SearchResult> results = getArticleSearcResults(folder, this.categories, iwc);
 			if (results == null) {
 				return new ArrayList<ArticleItemBean>();
 			}
 			//create uri list
-			uris = new ArrayList<String>();
 			for (SearchResult result: results) {
 				uris.add(result.getSearchResultURI());
 			}
@@ -517,19 +520,11 @@ public class ArticleListManagedBean implements ContentListViewerManagedBean {
 		return this.maxNumberOfDisplayed;
 	}
 
-	/**
-	 * Returns Collection<SearchResult> by categories and amount of how many result to returns
-	 * @param folder : String  - path to folder
-	 * @param categories : List<String>
-	 * @param iwc : IWContext
-	 * @param firstResult : int
-	 * @param maxResults : int
-	 * @return Collection<SearchResult> if results were found, null otherwise
-	 */
+
 	@Transactional(readOnly = true)
-	private List<String> getArticlesFromDatabase(String folder,List<String> categories, IWContext iwc, int maxResults){
+	private List<ArticleEntity> getArticlesFromDatabase(String folder,List<String> categories, IWContext iwc, int maxResults){
 		String uriFrom = iwc.getParameter(ContentViewer.PARAMETER_CONTENT_RESOURCE);
-		return this.getArticleDao().getUrisByCategoriesAndAmount(categories, uriFrom, maxResults);
+		return this.getArticleDao().getArticlesByCategoriesAndAmount(categories, uriFrom, maxResults);
 	}
 
 	public Collection<SearchResult> getArticleSearcResults(String folder, List<String> categories, IWContext iwc) {

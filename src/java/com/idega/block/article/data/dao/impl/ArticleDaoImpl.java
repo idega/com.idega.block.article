@@ -155,8 +155,8 @@ public class ArticleDaoImpl extends GenericDaoImpl implements ArticleDao {
 	}
 
 	@Override
-	public List <String> getUrisByCategoriesAndAmount(List<String> categories, String uriFrom, int maxResults) {
-		StringBuilder inlineQuery = new StringBuilder("SELECT DISTINCT a.").append(ArticleEntity.uriProp).append(" FROM ArticleEntity a");
+	public List <ArticleEntity> getArticlesByCategoriesAndAmount(List<String> categories, String uriFrom, int maxResults) {
+		StringBuilder inlineQuery = new StringBuilder("SELECT DISTINCT a").append(" FROM ArticleEntity a");
 		if(!ListUtil.isEmpty(categories)){
 			inlineQuery.append(" JOIN a.").append(ArticleEntity.categoriesProp).append(" c WHERE " +
 					"c.").append(CategoryEntity.categoryProp).append(" IN (:").append(ArticleEntity.categoriesProp).append(")");
@@ -175,23 +175,26 @@ public class ArticleDaoImpl extends GenericDaoImpl implements ArticleDao {
 			query.setMaxResults(maxResults);
 		}
 
-		List <String> uris = null;
+
+		List <ArticleEntity> entities = null;
 		if(!ListUtil.isEmpty(categories)){
 			if(StringUtil.isEmpty(uriFrom)){
-				uris = query.getResultList(String.class, new Param(ArticleEntity.categoriesProp,categories));
+				entities = query.getResultList(ArticleEntity.class, new Param(ArticleEntity.categoriesProp,categories));
 			}else{
-				uris = query.getResultList(String.class, new Param(ArticleEntity.categoriesProp,categories),
+				entities = query.getResultList(ArticleEntity.class, new Param(ArticleEntity.categoriesProp,categories),
 						new Param(ArticleEntity.uriProp, uriFrom));
 			}
 		}else{
 			if(StringUtil.isEmpty(uriFrom)){
-				uris = query.getResultList(String.class);
+				entities = query.getResultList(ArticleEntity.class);
 			}else{
-				uris = query.getResultList(String.class, new Param(ArticleEntity.uriProp, uriFrom));
+				entities = query.getResultList(ArticleEntity.class, new Param(ArticleEntity.uriProp, uriFrom));
 			}
 		}
 
-		return uris;
+
+		return entities;
+
 	}
 
 	/**
