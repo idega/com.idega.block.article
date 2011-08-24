@@ -1,7 +1,6 @@
 package com.idega.block.article.data.dao.impl;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 import java.util.logging.Level;
@@ -43,9 +42,12 @@ public class ArticleDaoImpl extends GenericDaoImpl implements ArticleDao {
 
 	private static Logger LOGGER = Logger.getLogger(ArticleDaoImpl.class.getName());
 
+	/**
+	 * @see com.idega.block.article.data.dao.ArticleDao#updateArticle(Date, String, List)
+	 */
 	@Override
 	@Transactional(readOnly=false)
-	public boolean updateArticle(Date timestamp, String uri, Collection<String> categories) {
+	public boolean updateArticle(Date timestamp, String uri, List<String> categories) {
 		boolean result = true;
 
 		if(!ListUtil.isEmpty(categories)){
@@ -104,6 +106,9 @@ public class ArticleDaoImpl extends GenericDaoImpl implements ArticleDao {
 		return result;
 	}
 
+	/**
+     * @see com.idega.block.article.data.dao.ArticleDao#getArticle(String)
+     */
 	@Override
 	public ArticleEntity getArticle(String uri){
 		if(StringUtil.isEmpty(uri)){
@@ -121,6 +126,9 @@ public class ArticleDaoImpl extends GenericDaoImpl implements ArticleDao {
 		return this.getSingleResult(ArticleEntity.GET_BY_URI, ArticleEntity.class, new Param(ArticleEntity.uriProp, uri));
 	}
 
+	/**
+     * @see com.idega.block.article.data.dao.ArticleDao#getArticleIdByURI(String)
+     */
 	@Override
 	public Long getArticleIdByURI(String uri){
 		if (StringUtil.isEmpty(uri)) {
@@ -138,6 +146,9 @@ public class ArticleDaoImpl extends GenericDaoImpl implements ArticleDao {
 		return this.getSingleResult(ArticleEntity.GET_ID_BY_URI, Long.class, new Param(ArticleEntity.uriProp, uri));
 	}
 
+	/**
+     * @see com.idega.block.article.data.dao.ArticleDao#deleteArticle(String)
+     */
 	@Override
 	@Transactional(readOnly=false)
 	public boolean deleteArticle(String uri) {
@@ -154,6 +165,9 @@ public class ArticleDaoImpl extends GenericDaoImpl implements ArticleDao {
 		return false;
 	}
 
+	/**
+     * @see com.idega.block.article.data.dao.ArticleDao#getArticlesByCategoriesAndAmount(List, String, int)
+     */
 	@Override
 	public List <ArticleEntity> getArticlesByCategoriesAndAmount(List<String> categories, String uriFrom, int maxResults) {
 		StringBuilder inlineQuery = new StringBuilder("SELECT DISTINCT a").append(" FROM ArticleEntity a");
@@ -175,7 +189,6 @@ public class ArticleDaoImpl extends GenericDaoImpl implements ArticleDao {
 			query.setMaxResults(maxResults);
 		}
 
-
 		List <ArticleEntity> entities = null;
 		if(!ListUtil.isEmpty(categories)){
 			if(StringUtil.isEmpty(uriFrom)){
@@ -192,21 +205,6 @@ public class ArticleDaoImpl extends GenericDaoImpl implements ArticleDao {
 			}
 		}
 
-
 		return entities;
-
 	}
-
-	/**
-	 * Tested cases:
-	 * Written article with name: "Name";
-	 * Written article with name: "SecondName" and category: "Name";
-	 * Added category "English good name" to article "SecondName";
-	 * Removed category "Name" from article "SecondName";
-	 * Removed category "English good name" from article "SecondName";
-	 * Removed "SecondName";
-	 * Added category "Name" to article "Name";
-	 * Removed category "Name" and added category "English good name" to article "Name";
-	 * Changed article name: "Name" to article name: "Surname".
-	 */
 }

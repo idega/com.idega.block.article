@@ -284,7 +284,7 @@ public class ArticlesImporter extends DefaultSpringBean implements ApplicationLi
                         }
                     }
                     
-                    if(!this.articleDao.updateArticle(new Date(r.getCreationDate()), uri, enumerationList)){
+                    if(!this.articleDao.updateArticle(new Date(r.getCreationDate()), uri, (List<String>) enumerationList)){
                         isImportSuccesful = Boolean.FALSE;
                         break;
                     }

@@ -1,6 +1,5 @@
 package com.idega.block.article.data.dao;
 
-import java.util.Collection;
 import java.util.List;
 
 import com.idega.block.article.data.CategoryEntity;
@@ -30,7 +29,7 @@ public interface CategoryDao extends GenericDao {
 	 * @param categories New categories IDs
 	 * @return null, if empty list passed, empty list, if all categories added, list of missing categories, if some categories not added
 	 */
-	public abstract List<String> addCategories(Collection<String> categories);
+	public abstract List<String> addCategories(List<String> categories);
 	
 	/**
 	 * Deletes category
@@ -57,7 +56,7 @@ public interface CategoryDao extends GenericDao {
 	 * @param categories String type list of one article category names.
 	 * @return Returns list of CategoryEntity objects, null if empty list is passed
 	 */
-	public List<CategoryEntity> getCategories(Collection<String> categories);
+	public List<CategoryEntity> getCategories(List<String> categories);
 	
 	/**
 	 * Returns category form database table "IC_CATEGORY", which matches given string
@@ -80,7 +79,7 @@ public interface CategoryDao extends GenericDao {
 	 */
 	public abstract List<String> getNotExistingCategoriesFromThisList(List<String> categories);
 	
-	/**
+	/*
 	 * Tested cases:
 	 * Created category with name: "Name";
 	 * Created category with name: "English fine name";

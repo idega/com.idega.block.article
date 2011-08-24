@@ -2,7 +2,6 @@ package com.idega.block.article.data.dao.impl;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -29,8 +28,6 @@ import com.idega.util.StringUtil;
  * @author martynas
  * Last changed: 2011.05.12
  * You can report about problems to: martynas@idega.com
- * AIM: lapiukshtiss
- * Skype: lapiukshtiss
  * You can expect to find some test cases notice in the end of the file.
  */
 @Repository
@@ -39,6 +36,9 @@ public class CategoryDaoImpl extends GenericDaoImpl implements CategoryDao, Appl
 
 	private static Logger LOGGER = Logger.getLogger(CategoryDaoImpl.class.getName());
 
+	/**
+     * @see com.idega.block.article.data.dao.CategoryDao#addCategory(java.lang.String)
+     */
 	@Override
 	@Transactional(readOnly = false)
 	public boolean addCategory(String category) {
@@ -61,9 +61,12 @@ public class CategoryDaoImpl extends GenericDaoImpl implements CategoryDao, Appl
 		return true;
 	}
 
+	/**
+     * @see com.idega.block.article.data.dao.CategoryDao#addCategories(java.util.List)
+     */
 	@Override
 	@Transactional(readOnly = false)
-	public List<String> addCategories(Collection<String> categories) {
+	public List<String> addCategories(List<String> categories) {
 		if (ListUtil.isEmpty(categories))
 			return null;
 
@@ -76,6 +79,9 @@ public class CategoryDaoImpl extends GenericDaoImpl implements CategoryDao, Appl
 		return categoriesNotAdded;
 	}
 
+	/**
+     * @see com.idega.block.article.data.dao.CategoryDao#deleteCategory(java.lang.String)
+     */
 	@Override
 	@Transactional(readOnly = false)
 	public boolean deleteCategory(String category) {
@@ -86,6 +92,9 @@ public class CategoryDaoImpl extends GenericDaoImpl implements CategoryDao, Appl
 		return this.deleteCategories(Arrays.asList(category));
 	}
 
+	/**
+     * @see com.idega.block.article.data.dao.CategoryDao#deleteCategories(java.util.List)
+     */
 	@Override
 	@Transactional(readOnly = false)
 	public boolean deleteCategories(List<String> categories) {
@@ -121,13 +130,19 @@ public class CategoryDaoImpl extends GenericDaoImpl implements CategoryDao, Appl
 		return true;
 	}
 
+	/**
+     * @see com.idega.block.article.data.dao.CategoryDao#getCategories()
+     */
 	@Override
 	public List<CategoryEntity> getCategories() {
 		return this.getResultList(CategoryEntity.GET_ALL, CategoryEntity.class);
 	}
 
+	/**
+     * @see com.idega.block.article.data.dao.CategoryDao#getCategories(java.util.List)
+     */
 	@Override
-	public List<CategoryEntity> getCategories(Collection<String> categories) {
+	public List<CategoryEntity> getCategories(List<String> categories) {
 		if (ListUtil.isEmpty(categories))
 			return null;
 
@@ -135,6 +150,9 @@ public class CategoryDaoImpl extends GenericDaoImpl implements CategoryDao, Appl
 				new Param(CategoryEntity.categoryProp, categories));
 	}
 
+	/**
+     * @see com.idega.block.article.data.dao.CategoryDao#getCategory(java.lang.String)
+     */
 	@Override
 	public CategoryEntity getCategory(String category) {
 		CategoryEntity categoryEntity = null;
@@ -145,6 +163,9 @@ public class CategoryDaoImpl extends GenericDaoImpl implements CategoryDao, Appl
 		return categoryEntity;
 	}
 
+	/**
+     * @see com.idega.block.article.data.dao.CategoryDao#isCategoryExists(java.lang.String)
+     */
 	@Override
 	public boolean isCategoryExists(String category) {
 		if (StringUtil.isEmpty(category))
@@ -158,6 +179,9 @@ public class CategoryDaoImpl extends GenericDaoImpl implements CategoryDao, Appl
 		return false;
 	}
 
+	/**
+     * @see com.idega.block.article.data.dao.CategoryDao#getNotExistingCategoriesFromThisList(java.util.List)
+     */
 	@Override
 	public List<String> getNotExistingCategoriesFromThisList(List<String> categories) {
 		if (ListUtil.isEmpty(categories))
@@ -165,8 +189,22 @@ public class CategoryDaoImpl extends GenericDaoImpl implements CategoryDao, Appl
 
 		List<String> nonExistingCategories = new ArrayList<String>(categories);
 		List<CategoryEntity> categoryEntities = this.getCategories();
+		
+		if (ListUtil.isEmpty(categoryEntities)) {
+		    return null;
+		}
+		
 		for (CategoryEntity s : categoryEntities) {
-			if (categories.contains(s.getCategory())) {
+		    if (s == null) {
+		        continue;
+		    }
+		    
+		    String category = s.getCategory();
+		    if (StringUtil.isEmpty(category)) {
+		        continue;
+		    }
+		    
+			if (categories.contains(category)) {
 				nonExistingCategories.remove(s.getCategory());
 			}
 		}
@@ -174,6 +212,9 @@ public class CategoryDaoImpl extends GenericDaoImpl implements CategoryDao, Appl
 		return nonExistingCategories;
 	}
 
+	/**
+     * @see com.idega.block.article.data.dao.CategoryDao#onApplicationEvent(org.springframework.context.ApplicationEvent)
+     */
 	@Override
 	@Transactional(readOnly = false)
 	public void onApplicationEvent(ApplicationEvent event) {
@@ -186,15 +227,4 @@ public class CategoryDaoImpl extends GenericDaoImpl implements CategoryDao, Appl
 			this.addCategory(((CategoryAddedEvent) event).getCategoryId());
 		}
 	}
-
-	/**
-	 * Tested cases:
-	 * Created category with name: "Name";
-	 * Created category with name: "English fine name";
-	 * Modified category "Name" to category "Surname";
-	 * Modified category "English fine name" to "Spanish good surname";
-	 * Deleted category "Surname";
-	 * Deleted category "Spanish good surname";
-	 * Deleted category "SomeCategory" while not removed from article "New article"
-	 */
 }
