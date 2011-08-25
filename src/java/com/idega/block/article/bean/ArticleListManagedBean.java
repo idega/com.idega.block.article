@@ -125,6 +125,7 @@ public class ArticleListManagedBean implements ContentListViewerManagedBean {
 		return new ArrayList<ArticleItemBean>();
 	}
 
+
 	/**
 	 * Loads all xml files in the given folder
 	 * @param folder
@@ -154,8 +155,15 @@ public class ArticleListManagedBean implements ContentListViewerManagedBean {
 		return getArticlesByURIs(uris,iwc);
 	}
 
+	//!important
+	/**
+	 * This method returns articles in same order as uris were given.
+	 * @param uris
+	 * @param iwc
+	 * @return
+	 */
 	//gets articles and loads them
-	private List<ArticleItemBean> getArticlesByURIs(List<String> uris, IWContext iwc) {
+	public List<ArticleItemBean> getArticlesByURIs(List<String> uris, IWContext iwc) {
 		List<ArticleItemBean> list = new ArrayList<ArticleItemBean>();
 		String resourcePathFromRequest = iwc.getParameter(ContentViewer.PARAMETER_CONTENT_RESOURCE);
 		String identifierFromRequest = iwc.getParameter(ContentConstants.CONTENT_ITEM_VIEWER_IDENTIFIER_PARAMETER);
