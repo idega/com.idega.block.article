@@ -129,7 +129,8 @@ public class CommentBMPBean extends GenericEntity implements Comment {
 		setColumn(COLUMN_ENTRY_ID, entryId);		
 	}
 	
-	Collection<?> ejbFindAllCommentsForUser(User author, String commentHolder) throws FinderException {
+	@SuppressWarnings("unchecked")
+	Collection<Object> ejbFindAllCommentsForUser(User author, String commentHolder) throws FinderException {
 		Table table = new Table(this);
 		SelectQuery query = new SelectQuery(table);
 		query.addColumn(new Column(table, getIDColumnName()));
@@ -141,7 +142,8 @@ public class CommentBMPBean extends GenericEntity implements Comment {
 		return this.idoFindPKsByQuery(query);
 	}
 	
-	Collection<?> ejbFindAllCommentsByHolder(String commentHolder) throws FinderException {
+	@SuppressWarnings("unchecked")
+	Collection<Object> ejbFindAllCommentsByHolder(String commentHolder) throws FinderException {
 		Table table = new Table(this);
 		SelectQuery query = new SelectQuery(table);
 		query.addColumn(new Column(table, getIDColumnName()));
