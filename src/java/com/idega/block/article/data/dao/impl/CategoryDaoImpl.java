@@ -191,7 +191,7 @@ public class CategoryDaoImpl extends GenericDaoImpl implements CategoryDao, Appl
 		List<CategoryEntity> categoryEntities = this.getCategories();
 		
 		if (ListUtil.isEmpty(categoryEntities)) {
-		    return null;
+		    return categories;
 		}
 		
 		for (CategoryEntity s : categoryEntities) {

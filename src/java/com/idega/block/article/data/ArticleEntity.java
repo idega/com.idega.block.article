@@ -95,6 +95,10 @@ public class ArticleEntity implements Serializable {
 		if (ListUtil.isEmpty(categories)) {
 			return Boolean.TRUE;
 		}
+		if(this.categories == null){
+		    this.categories = categories;
+		    return true;
+		}
 		return this.categories.addAll(categories);
 	}
 
