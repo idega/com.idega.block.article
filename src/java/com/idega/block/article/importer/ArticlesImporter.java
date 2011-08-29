@@ -40,8 +40,6 @@ import com.idega.util.ListUtil;
  * @author martynas
  * Last changed: 2011.05.18
  * You can report about problems to: <a href="mailto:martynas@idega.com">Martynas Stakė</a>
- * AIM: lapiukshtiss
- * Skype: lapiukshtiss
  * You can expect to find some test cases notice in the end of the file.
  */
 
@@ -62,7 +60,7 @@ public class ArticlesImporter extends DefaultSpringBean implements ApplicationLi
     private static final String CATEGORIES_IMPORTED_APP_PROP = "is_categories_imported",
     							ARTICLES_IMPORTED_APP_PROP = "is_articles_imported";
     
-    /* (non-Javadoc)
+    /**
      * @see org.springframework.context.ApplicationListener#onApplicationEvent(org.springframework.context.ApplicationEvent)
      */
     @Override
@@ -78,7 +76,7 @@ public class ArticlesImporter extends DefaultSpringBean implements ApplicationLi
             if (!isArticlesImported && isCategoriesImported) {
                 isArticlesImported = this.importArticles();
                 getApplication().getSettings().setProperty(ARTICLES_IMPORTED_APP_PROP, isArticlesImported.toString());
-            }
+            }        
         }
     }
 
@@ -109,6 +107,9 @@ public class ArticlesImporter extends DefaultSpringBean implements ApplicationLi
                 continue;
             }
             for(ContentCategory category : categoryList){
+                if (category == null || category.getId() == null)
+                    continue;
+                
                 Boolean isAdded = categoryDao.addCategory(category.getId());
                 if(!isAdded){
                     return Boolean.FALSE;
