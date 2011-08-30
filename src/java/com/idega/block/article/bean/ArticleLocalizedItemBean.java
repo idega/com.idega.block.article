@@ -17,6 +17,7 @@ import java.io.Serializable;
 import java.rmi.RemoteException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 import java.util.logging.Level;
@@ -89,6 +90,7 @@ public class ArticleLocalizedItemBean extends ContentItemBean implements Seriali
 	public final static String FIELDNAME_LINK_TO_COMMENT = "linkToComments";
 	//Note "comment" seems to be a reserved attribute in DAV so use "article_comment" for that!!!
 	public final static String FIELDNAME_ARTICLE_COMMENT = "article_comment";
+	public final static String FIELDNAME_ATTACHMENTS = "media:text";
 	public final static String FIELDNAME_IMAGES = "images";
 	public final static String FIELDNAME_FILENAME = "filename";
 	public final static String FIELDNAME_FOLDER_LOCATION = "folder_location"; // ../cms/article/YYYY/MM/
@@ -107,6 +109,7 @@ public class ArticleLocalizedItemBean extends ContentItemBean implements Seriali
 	private XMLNamespace atomNamespace = new XMLNamespace("http://www.w3.org/2005/Atom");
 	private XMLNamespace dcNamespace = new XMLNamespace("http://purl.org/dc/elements/1.1/");
 	private XMLNamespace commentNamespace = new XMLNamespace("http://wellformedweb.org/CommentAPI/");
+	private XMLNamespace attachmentNamespace = new XMLNamespace("http://search.yahoo.com/mrss/");
 
 	private String articleCategories = null; // This string should be set in EditArticleView, parsing submitted categories
 
@@ -747,6 +750,23 @@ public class ArticleLocalizedItemBean extends ContentItemBean implements Seriali
 			setComment(CoreConstants.EMPTY);
 		}
 
+//		Attachments
+		try {
+			List <XMLElement> attachments = rootElement.getChildren(FIELDNAME_ARTICLE_COMMENT);
+			if (attachments == null) {
+				setAttachment(Collections.EMPTY_LIST);
+			}else{
+				ArrayList <String> attachmentList = new ArrayList<String>();
+				for(XMLElement attachment : attachments){
+					attachmentList.add(attachment.getText());
+				}
+				setAttachment(attachmentList);
+			}
+		} catch(Exception e) {
+			LOGGER.log(Level.WARNING, "Can not load comment", e);
+			setComment(CoreConstants.EMPTY);
+		}
+
 		return true;
 	}
 
@@ -841,6 +861,18 @@ public class ArticleLocalizedItemBean extends ContentItemBean implements Seriali
 			if (linkToComments.getValue() != null) {
 				setLinkToComments(linkToComments.getValue());
 			}
+		}
+
+		List <XMLElement> attachments = entry.getChildren("text",attachmentNamespace);
+		if (attachments != null) {
+			ArrayList<String> attachmentList = new ArrayList<String>();
+			for(XMLElement attachment : attachments){
+				String value = attachment.getValue();
+				if (value != null) {
+					attachmentList.add(value);
+				}
+			}
+			setAttachment(attachmentList);
 		}
 
 		return true;
