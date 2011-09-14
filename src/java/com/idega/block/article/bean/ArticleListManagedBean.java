@@ -155,13 +155,6 @@ public class ArticleListManagedBean implements ContentListViewerManagedBean {
 		return getArticlesByURIs(uris,iwc);
 	}
 
-	//!important
-	/**
-	 * This method returns articles in same order as uris were given.
-	 * @param uris
-	 * @param iwc
-	 * @return
-	 */
 	//gets articles and loads them
 	public List<ArticleItemBean> getArticlesByURIs(List<String> uris, IWContext iwc) {
 		List<ArticleItemBean> list = new ArrayList<ArticleItemBean>();
