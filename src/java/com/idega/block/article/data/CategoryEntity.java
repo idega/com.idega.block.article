@@ -1,14 +1,13 @@
 package com.idega.block.article.data;
 
 import java.io.Serializable;
-import java.util.List;
+import java.util.Random;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.ManyToMany;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.Table;
@@ -41,11 +40,13 @@ public class CategoryEntity implements Serializable {
 	@Column(name="CATEGORY", nullable=false)
 	private String category;
 	
-	public static final String articlesProp = "articles";
-	@ManyToMany(mappedBy = "categories")
-	private List<ArticleEntity> articles;
+	private int hashCode;
 	
-	public CategoryEntity() { }
+	public CategoryEntity() {
+		super();
+		
+		hashCode = new Random().nextInt();
+	}
 
 	public Long getId(){
 		return id;
@@ -59,19 +60,31 @@ public class CategoryEntity implements Serializable {
 		this.category = category;
 	}
 
-	public List<ArticleEntity> getArticles() {
-		return articles;
-	}
-
-	public void setArticles(List<ArticleEntity> articles) {
-		this.articles = articles;
-	}
-
 	public static long getSerialversionuid() {
 		return serialVersionUID;
 	}
 	
+	@Override
 	public String toString() {
-		return this.category;
+		return getId() + " " + getCategory();
+	}
+	
+	@Override
+	public int hashCode() {
+		return hashCode;
+	}
+
+	@Override
+	public boolean equals(Object object) {
+		if (!(object instanceof CategoryEntity))
+			return false;
+		
+		CategoryEntity category = (CategoryEntity) object;
+		try {
+			return getCategory().equals(category.getCategory()) && getId().longValue() == category.getId().longValue();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return false;
 	}
 }

@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Random;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -62,7 +63,11 @@ public class ArticleEntity implements Serializable {
             inverseJoinColumns = @JoinColumn(name = "CATEGORY_FK"))
     private List<CategoryEntity> categories;
 
-    public ArticleEntity() { }
+    private int hashCode;
+    
+    public ArticleEntity() {
+    	hashCode = new Random().nextInt();
+    }
 
     public Long getId(){
         return id;
@@ -93,11 +98,10 @@ public class ArticleEntity implements Serializable {
     }
 
     public boolean addCategories(List<CategoryEntity> categories){
-        if (ListUtil.isEmpty(categories)) {
+        if (ListUtil.isEmpty(categories))
             return Boolean.TRUE;
-        }
 		
-        if(this.categories == null){
+        if (this.categories == null) {
             this.categories = new ArrayList<CategoryEntity>(categories);
             return Boolean.TRUE;
         }
@@ -110,15 +114,34 @@ public class ArticleEntity implements Serializable {
             return Boolean.TRUE;
         }
 		
-        if(this.categories == null){
+        if (this.categories == null)
             return Boolean.FALSE;
-        }
 		
         return this.categories.removeAll(categories);
     }
 
     @Override
     public String toString(){
-        return this.id + " " + this.uri;
+        return this.id + " " + this.uri + ", categories: " + getCategories();
     }
+
+	@Override
+	public boolean equals(Object obj) {
+		if (!(obj instanceof ArticleEntity))
+			return false;
+		
+		ArticleEntity article = (ArticleEntity) obj;
+		try {
+			return getUri().equals(article.getUri()) && getId().longValue() == article.getId().longValue();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return false;
+	}
+
+	@Override
+	public int hashCode() {
+		return hashCode;
+	}
+    
 }

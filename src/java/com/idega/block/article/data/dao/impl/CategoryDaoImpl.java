@@ -43,6 +43,7 @@ public class CategoryDaoImpl extends GenericDaoImpl implements CategoryDao, Appl
 	@Transactional(readOnly = false)
 	public boolean addCategory(String category) {
 		if (StringUtil.isEmpty(category)) {
+			LOGGER.warning("Category name is not provided!");
 			return false;
 		}
 

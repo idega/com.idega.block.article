@@ -48,23 +48,30 @@ public class ArticleDaoImpl extends GenericDaoImpl implements ArticleDao {
 	@Override
 	@Transactional(readOnly=false)
 	public boolean updateArticle(Date timestamp, String uri, List<String> categories) {
+		if (timestamp == null || StringUtil.isEmpty(uri)) {
+			LOGGER.warning("Can not update article because URI (" + uri + ") or modification date (" + timestamp + ") are not provided!");
+			return false;
+		}
+		
 		boolean result = true;
 
-		if(!ListUtil.isEmpty(categories)){
+		if (!ListUtil.isEmpty(categories))
 			this.categoryDao.addCategories(categories);
-		}
 
 		ArticleEntity articleEntity = this.getArticle(uri);
-		if(articleEntity == null){
+		if (articleEntity == null) {
+			List<CategoryEntity> categoriesForTheArticle = this.categoryDao.getCategories(categories);
+			
 			articleEntity = new ArticleEntity();
 			articleEntity.setUri(uri);
 			articleEntity.setModificationDate(timestamp);
-			articleEntity.setCategories(this.categoryDao.getCategories(categories));
+			if (!ListUtil.isEmpty(categoriesForTheArticle))
+				articleEntity.setCategories(categoriesForTheArticle);
 
 			try {
 				persist(articleEntity);
 			} catch (Exception e) {
-				LOGGER.log(Level.WARNING, "Failed to add article to database: " + articleEntity, e);
+				LOGGER.log(Level.WARNING, "Failed to add article to database: " + articleEntity + " with the categories: " + categoriesForTheArticle, e);
 				return false;
 			}
 
@@ -72,9 +79,9 @@ public class ArticleDaoImpl extends GenericDaoImpl implements ArticleDao {
 			List<CategoryEntity> categoryEntitiesInArticle = articleEntity.getCategories();
 			List<CategoryEntity> categoryEntitiesToRemove = new ArrayList<CategoryEntity>(0);
 			/*Deleting all used categories from temporary lists*/
-			if((!ListUtil.isEmpty(categoryEntitiesInArticle))&&(!ListUtil.isEmpty(categories))){
-				for(CategoryEntity o : categoryEntitiesInArticle){
-					if(categories.contains(o.getCategory())){
+			if (!ListUtil.isEmpty(categoryEntitiesInArticle) && !ListUtil.isEmpty(categories)) {
+				for (CategoryEntity o : categoryEntitiesInArticle) {
+					if (categories.contains(o.getCategory())) {
 						categories.remove(o.getCategory());
 					} else {
 						categoryEntitiesToRemove.add(o);
@@ -85,9 +92,9 @@ public class ArticleDaoImpl extends GenericDaoImpl implements ArticleDao {
 				result = articleEntity.removeCategories(categoryEntitiesToRemove);
 				/*Performing addition of new a categories*/
 				result = articleEntity.addCategories(this.categoryDao.getCategories(categories));
-			} else if((!ListUtil.isEmpty(categoryEntitiesInArticle))&&(ListUtil.isEmpty(categories))){
+			} else if (!ListUtil.isEmpty(categoryEntitiesInArticle) && ListUtil.isEmpty(categories)) {
 				result = articleEntity.removeCategories(categoryEntitiesInArticle);
-			} else if((ListUtil.isEmpty(categoryEntitiesInArticle))&&(!ListUtil.isEmpty(categories))){
+			} else if (ListUtil.isEmpty(categoryEntitiesInArticle) && !ListUtil.isEmpty(categories)) {
 				result = articleEntity.addCategories(this.categoryDao.getCategories(categories));
 			}
 
@@ -99,9 +106,8 @@ public class ArticleDaoImpl extends GenericDaoImpl implements ArticleDao {
 			}
 		}
 
-		if(result){
+		if (result)
 			return articleEntity != null && articleEntity.getId() != null;
-		}
 
 		return result;
 	}
@@ -111,17 +117,15 @@ public class ArticleDaoImpl extends GenericDaoImpl implements ArticleDao {
      */
 	@Override
 	public ArticleEntity getArticle(String uri){
-		if(StringUtil.isEmpty(uri)){
+		if (StringUtil.isEmpty(uri)) {
+			LOGGER.warning("Aricle URI is not provided");
 			return null;
 		}
 
-		if (uri.contains(CoreConstants.WEBDAV_SERVLET_URI)) {
+		if (uri.startsWith(CoreConstants.WEBDAV_SERVLET_URI))
 			uri = uri.substring(CoreConstants.WEBDAV_SERVLET_URI.length());
-		}
-
-		if (uri.endsWith(CoreConstants.SLASH)) {
+		if (uri.endsWith(CoreConstants.SLASH))
 			uri = uri.substring(0, uri.lastIndexOf(CoreConstants.SLASH));
-		}
 
 		return this.getSingleResult(ArticleEntity.GET_BY_URI, ArticleEntity.class, new Param(ArticleEntity.uriProp, uri));
 	}
@@ -131,19 +135,8 @@ public class ArticleDaoImpl extends GenericDaoImpl implements ArticleDao {
      */
 	@Override
 	public Long getArticleIdByURI(String uri){
-		if (StringUtil.isEmpty(uri)) {
-			return new Long(-1);
-		}
-
-		if (uri.contains(CoreConstants.WEBDAV_SERVLET_URI)) {
-			uri = uri.substring(CoreConstants.WEBDAV_SERVLET_URI.length());
-		}
-
-		if (uri.endsWith(CoreConstants.SLASH)) {
-			uri = uri.substring(0, uri.lastIndexOf(CoreConstants.SLASH));
-		}
-
-		return this.getSingleResult(ArticleEntity.GET_ID_BY_URI, Long.class, new Param(ArticleEntity.uriProp, uri));
+		ArticleEntity article = getArticle(uri);
+		return article == null ? Long.valueOf(-1) : article.getId();
 	}
 
 	/**
@@ -155,7 +148,8 @@ public class ArticleDaoImpl extends GenericDaoImpl implements ArticleDao {
 		final ArticleEntity article = getArticle(uri);
 		if (article == null)
 			return false;
-		try{
+		
+		try {
 			this.remove(article);
 			return true;
 		} catch (Exception e) {
