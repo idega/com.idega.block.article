@@ -55,8 +55,9 @@ public class ArticleDaoImpl extends GenericDaoImpl implements ArticleDao {
 		
 		boolean result = true;
 
-		if (!ListUtil.isEmpty(categories))
-			this.categoryDao.addCategories(categories);
+		if (!ListUtil.isEmpty(categories)) {
+		    this.categoryDao.addCategories(categories);
+		}
 
 		ArticleEntity articleEntity = this.getArticle(uri);
 		if (articleEntity == null) {

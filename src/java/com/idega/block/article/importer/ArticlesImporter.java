@@ -66,17 +66,23 @@ public class ArticlesImporter extends DefaultSpringBean implements ApplicationLi
     @Override
     public void onApplicationEvent(ApplicationEvent event) {
         if (event instanceof IWMainSlideStartedEvent) {
-            Boolean isCategoriesImported = getApplication().getSettings().getBoolean(CATEGORIES_IMPORTED_APP_PROP, Boolean.FALSE);
+            Boolean isCategoriesImported = getApplication().getSettings()
+                    .getBoolean(CATEGORIES_IMPORTED_APP_PROP, Boolean.FALSE);
+            
             if (!isCategoriesImported) {
                 isCategoriesImported = importCategories();
-                getApplication().getSettings().setProperty(CATEGORIES_IMPORTED_APP_PROP, isCategoriesImported.toString());
+                getApplication().getSettings().setProperty(CATEGORIES_IMPORTED_APP_PROP, 
+                        isCategoriesImported.toString());
             }
 
-            Boolean isArticlesImported = getApplication().getSettings().getBoolean(ARTICLES_IMPORTED_APP_PROP, Boolean.FALSE);
+            Boolean isArticlesImported = getApplication().getSettings()
+                    .getBoolean(ARTICLES_IMPORTED_APP_PROP, Boolean.FALSE);
+            
             if (!isArticlesImported && isCategoriesImported) {
                 isArticlesImported = this.importArticles();
-                getApplication().getSettings().setProperty(ARTICLES_IMPORTED_APP_PROP, isArticlesImported.toString());
-            }        
+                getApplication().getSettings().setProperty(ARTICLES_IMPORTED_APP_PROP, 
+                        isArticlesImported.toString());
+            }
         }
     }
 
@@ -99,13 +105,16 @@ public class ArticlesImporter extends DefaultSpringBean implements ApplicationLi
             try {
                 categoryList = this.categoryEngine.getCategoriesByLocale(locale.toString());
             } catch (UnavailableIWContext e){
-                LOGGER.log(Level.WARNING, "Failed to import because categories.xml deos not exist", e);
+                LOGGER.log(Level.WARNING, 
+                        "Failed to import because categories.xml deos not exist", 
+                        e);
                 return Boolean.FALSE;
             }
             
-            if(ListUtil.isEmpty(categoryList)){
+            if (ListUtil.isEmpty(categoryList)) {
                 continue;
             }
+            
             for(ContentCategory category : categoryList){
                 if (category == null || category.getId() == null)
                     continue;

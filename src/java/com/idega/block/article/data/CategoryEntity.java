@@ -15,7 +15,7 @@ import javax.persistence.Table;
 import org.hibernate.annotations.Index;
 
 @Entity
-@Table(name = "IC_CATEGORY")
+@Table(name = "ART_CATEGORY")
 @NamedQueries(
 	{ 
 		@NamedQuery(name = CategoryEntity.GET_BY_NAMES, query = "from CategoryEntity s where s.category in (:"+CategoryEntity.categoryProp+")"),

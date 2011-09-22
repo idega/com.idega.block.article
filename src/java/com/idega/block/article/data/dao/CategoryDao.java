@@ -66,7 +66,7 @@ public interface CategoryDao extends GenericDao {
 	public CategoryEntity getCategory(String category);
 
 	/**
-	 * Checks weather there is such category
+	 * Checks weather there is such category in database;
 	 * @param category Category name
 	 * @return true, if such category exists
 	 */

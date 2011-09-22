@@ -711,7 +711,7 @@ public class EditArticleView extends IWBaseComponent implements ManagedContentBe
 	        article.setSetPublishedDateByDefault(fromArticleItemListViewer);
 	        article.getLocalizedArticle().setSetPublishedDateByDefault(fromArticleItemListViewer);
 	        article.setBody("There is nothing interesting here.");
-	        article.setName("Article_" + index);
+	        article.setName("Article_x" + index);
 	        article.setAuthor("Martynas");
 	        article.setHeadline("Article_" + index);
 	        
@@ -732,7 +732,7 @@ public class EditArticleView extends IWBaseComponent implements ManagedContentBe
 	        
 	        WebDAVMetadataResource resource = (WebDAVMetadataResource) IBOLookup.getSessionInstance(iwc, WebDAVMetadataResource.class);
             
-	        resource.setCategories(article.getResourcePath(), categorylist.get(categoryNumber.nextInt(50)), true);
+	        resource.setCategories(article.getResourcePath(), categorylist.get(categoryNumber.nextInt(categorylist.size())), true);
 	        
 	        setEditMode(ContentConstants.CONTENT_ITEM_ACTION_EDIT);
 	        setUserMessage("article_saved");
@@ -749,7 +749,25 @@ public class EditArticleView extends IWBaseComponent implements ManagedContentBe
 	 * Returns false if save failed
 	 */
 	private boolean storeArticle() {
-		try {  
+		try {  	    
+		    
+		    /*This is for testing, I mean generating articles in slide without 
+		     * saving them to database */
+//		    List<String> categoryList = null;
+//		    for (int s=0; s<100; s++) {
+//		        
+//		        categoryList=new ArrayList<String>();
+//	            for (int k=0; k<30; k++) {
+//	                categoryList.add("Kategorija_"+k);
+//	            }
+//	            System.out.println("Article: "+s+"/"+"100");
+//	            System.out.println("With categories:");
+//	            for (String e : categoryList) {
+//	                System.out.println(e);
+//	            }
+//		        this.generateRandomArticle(s, IWContext.getInstance(), categoryList);
+//		        categoryList.clear();
+//		    }
 		    
 			ArticleItemBean article = getArticleItemBean();
 			article.setSetPublishedDateByDefault(fromArticleItemListViewer);
