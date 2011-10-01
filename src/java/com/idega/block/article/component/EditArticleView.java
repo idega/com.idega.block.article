@@ -711,15 +711,18 @@ public class EditArticleView extends IWBaseComponent implements ManagedContentBe
 	        article.setSetPublishedDateByDefault(fromArticleItemListViewer);
 	        article.getLocalizedArticle().setSetPublishedDateByDefault(fromArticleItemListViewer);
 	        article.setBody("There is nothing interesting here.");
-	        article.setName("Article_x" + index);
+	        article.setName("Article_d" + index);
 	        article.setAuthor("Martynas");
-	        article.setHeadline("Article_" + index);
+	        article.setHeadline("Article_d" + index);
+	        
+	        String passingCat = "";
+	        for (String s : categorylist){
+	            passingCat = passingCat + s + ",";  
+	        }
 	        
 	        Random year = new Random();
 	        Random month = new Random();
 	        Random date = new Random();
-	        Random categoryNumber = new Random();
-	        
 	                
 	        int randomYear = year.nextInt(30)+1970;
 	        int randomMonth = month.nextInt(11)+1;
@@ -729,12 +732,14 @@ public class EditArticleView extends IWBaseComponent implements ManagedContentBe
 	        article.setCreationDate(new Timestamp(calendar.getTimeInMillis()));
 	        article.setResourcePath("/files/cms/article/"+randomYear+"/"+randomMonth+"/"+randomYear+randomMonth+randomDay+"-151"+index+".article");        
 	        article.store();
-	        
 	        WebDAVMetadataResource resource = (WebDAVMetadataResource) IBOLookup.getSessionInstance(iwc, WebDAVMetadataResource.class);
             
-	        resource.setCategories(article.getResourcePath(), categorylist.get(categoryNumber.nextInt(categorylist.size())), true);
+	        resource.setCategories(article.getResourcePath(), passingCat, true);
 	        
 	        setEditMode(ContentConstants.CONTENT_ITEM_ACTION_EDIT);
+	        System.out.println("Generated article:" + "/files/cms/article/"+randomYear+"/"+randomMonth+"/"+randomYear+randomMonth+randomDay+"-151"+index+".article");
+            System.out.println("With categories: ");
+            System.out.println(passingCat);
 	        setUserMessage("article_saved");
 	        return true;
 	    } catch(Exception e){     
@@ -753,18 +758,17 @@ public class EditArticleView extends IWBaseComponent implements ManagedContentBe
 		    
 		    /*This is for testing, I mean generating articles in slide without 
 		     * saving them to database */
+//		    Random rn = new Random();
+//		    int variable = 0;
 //		    List<String> categoryList = null;
-//		    for (int s=0; s<100; s++) {
+//		    for (int s=0; s<10; s++) {
 //		        
 //		        categoryList=new ArrayList<String>();
-//	            for (int k=0; k<30; k++) {
+//		        variable = rn.nextInt(15);	            
+//		        for (int k=0; k<variable; k++) {
 //	                categoryList.add("Kategorija_"+k);
 //	            }
-//	            System.out.println("Article: "+s+"/"+"100");
-//	            System.out.println("With categories:");
-//	            for (String e : categoryList) {
-//	                System.out.println(e);
-//	            }
+//
 //		        this.generateRandomArticle(s, IWContext.getInstance(), categoryList);
 //		        categoryList.clear();
 //		    }

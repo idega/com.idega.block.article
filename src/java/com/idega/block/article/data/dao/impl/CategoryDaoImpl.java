@@ -24,7 +24,7 @@ import com.idega.util.ListUtil;
 import com.idega.util.StringUtil;
 
 /**
- * Data Access Object class for accessing "IC_CATEGORY" table
+ * Data Access Object class for accessing "ART_CATEGORY" table
  * @author martynas
  * Last changed: 2011.09.22
  * You can report about problems to: martynas@idega.com

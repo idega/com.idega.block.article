@@ -21,6 +21,7 @@ import org.springframework.context.ApplicationListener;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
 
+import com.idega.block.article.data.CategoryBugRemover;
 import com.idega.block.article.data.dao.ArticleDao;
 import com.idega.block.article.data.dao.CategoryDao;
 import com.idega.content.business.categories.CategoriesEngine;
@@ -60,12 +61,29 @@ public class ArticlesImporter extends DefaultSpringBean implements ApplicationLi
     private static final String CATEGORIES_IMPORTED_APP_PROP = "is_categories_imported",
     							ARTICLES_IMPORTED_APP_PROP = "is_articles_imported";
     
+    private static final String CATEGORIES_BUG_FIXED_PROP = "is_categories_bug_fixed";
+
+    
     /**
      * @see org.springframework.context.ApplicationListener#onApplicationEvent(org.springframework.context.ApplicationEvent)
      */
     @Override
     public void onApplicationEvent(ApplicationEvent event) {
         if (event instanceof IWMainSlideStartedEvent) {
+            if (!getApplication().getSettings()
+                    .getBoolean(CATEGORIES_BUG_FIXED_PROP)) {
+                CategoryBugRemover cbr = new CategoryBugRemover();
+                cbr.removeBug();
+                
+                getApplication().getSettings().setProperty(CATEGORIES_IMPORTED_APP_PROP, 
+                        Boolean.FALSE.toString());
+                
+                getApplication().getSettings().setProperty(ARTICLES_IMPORTED_APP_PROP, 
+                        Boolean.FALSE.toString());
+                
+                return;
+            }
+            
             Boolean isCategoriesImported = getApplication().getSettings()
                     .getBoolean(CATEGORIES_IMPORTED_APP_PROP, Boolean.FALSE);
             
@@ -198,7 +216,6 @@ public class ArticlesImporter extends DefaultSpringBean implements ApplicationLi
             }
         }
         
-        // TODO close resources on failure. Does possible to get failure here?
         return Boolean.FALSE;        
     }
     

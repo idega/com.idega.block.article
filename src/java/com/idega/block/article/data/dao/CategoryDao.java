@@ -7,7 +7,7 @@ import com.idega.block.article.data.dao.impl.CategoryDaoImpl;
 import com.idega.core.persistence.GenericDao;
 
 /**
- * Data Access Object class for accessing "IC_CATEGORY" table in class {@link CategoryDaoImpl}
+ * Data Access Object class for accessing "ART_CATEGORY" table in class {@link CategoryDaoImpl}
  * @author martynas
  * Last changed: 2011.05.12
  * You can report about problems to: martynas@idega.com
