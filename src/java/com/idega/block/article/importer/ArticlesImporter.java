@@ -2,6 +2,7 @@ package com.idega.block.article.importer;
 
 import java.io.IOException;
 import java.rmi.RemoteException;
+import java.sql.SQLException;
 import java.util.Collection;
 import java.util.Date;
 import java.util.Enumeration;
@@ -70,9 +71,18 @@ public class ArticlesImporter extends DefaultSpringBean implements ApplicationLi
     @Override
     public void onApplicationEvent(ApplicationEvent event) {
         if (event instanceof IWMainSlideStartedEvent) {
+            CategoryBugRemover cbr = new CategoryBugRemover();
+            
+            try {
+                if (!cbr.isBadColunmsExist()) {
+                    getApplication().getSettings().setProperty(CATEGORIES_BUG_FIXED_PROP, Boolean.TRUE.toString());
+                }
+            } catch (SQLException e) {
+                LOGGER.log(Level.SEVERE, "Failed to check for wrong tables", e);
+            }
+            
             if (!getApplication().getSettings()
                     .getBoolean(CATEGORIES_BUG_FIXED_PROP)) {
-                CategoryBugRemover cbr = new CategoryBugRemover();
                 cbr.removeBug();
                 
                 getApplication().getSettings().setProperty(CATEGORIES_IMPORTED_APP_PROP, 

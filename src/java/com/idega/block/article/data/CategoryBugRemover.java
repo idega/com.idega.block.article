@@ -129,18 +129,28 @@ public class CategoryBugRemover extends DefaultSpringBean implements Application
         }
         
         try {
-            SimpleQuerier.executeUpdate("DROP TABLE JND_ARTICLE_CATEGORY", 
-                    Boolean.TRUE);
-            SimpleQuerier.executeUpdate("DROP TABLE IC_ARTICLE", 
-                    Boolean.TRUE);
-            SimpleQuerier.executeUpdate("ALTER TABLE IC_CATEGORY DROP COLUMN ID", 
-                    Boolean.TRUE);
-            SimpleQuerier.executeUpdate("ALTER TABLE IC_CATEGORY DROP COLUMN CATEGORY", 
-                    Boolean.TRUE);
-            SimpleQuerier.executeUpdate("ALTER TABLE IC_CATEGORY DROP COLUMN HASHCODE", 
-                    Boolean.TRUE);
-            getApplication().getSettings().setProperty(CATEGORIES_BUG_FIXED_PROP, 
-                    Boolean.TRUE.toString());
+            if (isBadTableExist("JND_ARTICLE_CATEGORY")) {
+                SimpleQuerier.executeUpdate("DROP TABLE JND_ARTICLE_CATEGORY", Boolean.TRUE);
+            }
+            
+            if (isBadTableExist("IC_ARTICLE")) {
+                SimpleQuerier.executeUpdate("DROP TABLE IC_ARTICLE", Boolean.TRUE);
+            }
+            
+            if (isBadColunmExist("ID")) {
+                SimpleQuerier.executeUpdate("ALTER TABLE IC_CATEGORY DROP COLUMN ID", Boolean.TRUE);
+            }
+            
+            if (isBadColunmExist("CATEGORY")) {
+                SimpleQuerier.executeUpdate("ALTER TABLE IC_CATEGORY DROP COLUMN CATEGORY", Boolean.TRUE);
+            }
+            
+            if (isBadColunmExist("HASHCODE")) {
+                SimpleQuerier.executeUpdate("ALTER TABLE IC_CATEGORY DROP COLUMN HASHCODE", Boolean.TRUE);
+            }
+            
+            getApplication().getSettings().setProperty(CATEGORIES_BUG_FIXED_PROP, Boolean.TRUE.toString());
+            
             return Boolean.TRUE;
 
         } catch (SQLException e) {
@@ -151,7 +161,7 @@ public class CategoryBugRemover extends DefaultSpringBean implements Application
         }
     }
     
-    public boolean isBadColunmsExist() throws Exception {
+    public boolean isBadColunmsExist() throws SQLException {
         Boolean isCategoriesImported = getApplication().getSettings()
         .getBoolean(CATEGORIES_IMPORTED_APP_PROP);
         
@@ -166,7 +176,7 @@ public class CategoryBugRemover extends DefaultSpringBean implements Application
         try {
             conn = SimpleQuerier.getConnection();
             DatabaseMetaData meta = conn.getMetaData();
-            ResultSet columnsInfo = meta.getColumns(null, null, "IC_ARTICLE", null);
+            ResultSet columnsInfo = meta.getColumns(null, null, "IC_CATEGORY", null);
             while (columnsInfo.next()) {
                 String columnName = columnsInfo.getString("COLUMN_NAME");
                 if (columnName.equalsIgnoreCase("ID")) {
@@ -176,13 +186,56 @@ public class CategoryBugRemover extends DefaultSpringBean implements Application
                 if (columnName.equalsIgnoreCase("CATEGORY")) {
                     return Boolean.TRUE;
                 }
+                
+                if (columnName.equalsIgnoreCase("HASHCODE")) {
+                    return Boolean.TRUE;
+                }
             }
         } finally {
             if (conn != null)
                 conn.close();
         }
         
-        return Boolean.TRUE;
+        return Boolean.FALSE;
+    }
+    
+    public boolean isBadColunmExist(String column) throws SQLException {     
+        Connection conn = null;
+        try {
+            conn = SimpleQuerier.getConnection();
+            DatabaseMetaData meta = conn.getMetaData();
+            ResultSet columnsInfo = meta.getColumns(null, null, "IC_CATEGORY", null);
+            while (columnsInfo.next()) {
+                String columnName = columnsInfo.getString("COLUMN_NAME");
+                if (columnName.equalsIgnoreCase(column)) {
+                    return Boolean.TRUE;
+                }
+            }
+        } finally {
+            if (conn != null)
+                conn.close();
+        }
+       
+        return Boolean.FALSE;
+    }
+    
+    public boolean isBadTableExist(String tableName) throws SQLException {
+        Connection conn = null;
+        try {
+            conn = SimpleQuerier.getConnection();
+            DatabaseMetaData meta = conn.getMetaData();
+            ResultSet columnsInfo = meta.getColumns(null, null, tableName, null);
+            
+            if (columnsInfo.next()) {
+                return Boolean.TRUE;
+            } else {
+                return Boolean.FALSE;
+            }
+
+        } finally {
+            if (conn != null)
+                conn.close();
+        }
     }
 
     @Override
