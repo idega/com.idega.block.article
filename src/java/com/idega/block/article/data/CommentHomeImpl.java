@@ -26,18 +26,16 @@ public class CommentHomeImpl extends IDOFactory implements CommentHome {
 		return (Comment) super.findByPrimaryKeyIDO(primaryKey);
 	}
 
-	@SuppressWarnings("unchecked")
 	public Collection<Comment> findAllCommentsForUser(User author, String commentHolder) throws FinderException {
 		IDOEntity entity = this.idoCheckOutPooledEntity();
-		Collection<?> ids = ((CommentBMPBean) entity).ejbFindAllCommentsForUser(author, commentHolder);
+		Collection<Object> ids = ((CommentBMPBean) entity).ejbFindAllCommentsForUser(author, commentHolder);
 		this.idoCheckInPooledEntity(entity);
-		return this.getEntityCollectionForPrimaryKeys(ids);
+		return getEntityCollectionForPrimaryKeys(ids);
 	}
 
-	@SuppressWarnings("unchecked")
 	public Collection<Comment> findAllCommentsByHolder(String commentHolder) throws FinderException {
 		IDOEntity entity = this.idoCheckOutPooledEntity();
-		Collection<?> ids = ((CommentBMPBean) entity).ejbFindAllCommentsByHolder(commentHolder);
+		Collection<Object> ids = ((CommentBMPBean) entity).ejbFindAllCommentsByHolder(commentHolder);
 		this.idoCheckInPooledEntity(entity);
 		return this.getEntityCollectionForPrimaryKeys(ids);
 	}

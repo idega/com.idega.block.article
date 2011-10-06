@@ -51,7 +51,7 @@ import com.idega.xml.XMLException;
 /**
  * <p>
  * This is a JSF managed bean that manages each article instance and delegates
- * all calls to the correct localized instance.
+ * all calls to the correct localized instance. You can find all the articles at http://localhost:8080/workspace/content/article/
  * <p>
  * Last modified: $Date: 2009/01/10 12:24:10 $ by $Author: valdas $
  *
@@ -124,6 +124,10 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 		return getLocalizedArticle().getAsXML();
 	}
 
+	/**
+	 * @return Author name expressed in string
+	 * @see com.idega.block.article.bean.ArticleLocalizedItemBean#getAuthor()
+	 */
 	public String getAuthor() {
 		if (isDummyContentItem()) {
 			return ArticleConstants.EMPTY;
@@ -131,6 +135,10 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 		return getLocalizedArticle().getAuthor();
 	}
 
+	/**
+	 * @return Text body of an article
+	 * Method is modified to resolve if dummy article is being edited
+	 */
 	public String getBody() {
 		if (isDummyContentItem()) {
 			return ArticleConstants.EMPTY;
@@ -138,6 +146,10 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 		return getLocalizedArticle().getBody();
 	}
 
+	/**
+	 * @return Comments of an article
+	 * @see com.idega.block.article.bean.ArticleLocalizedItemBean#getComment()
+	 */
 	public String getComment() {
 		return getLocalizedArticle().getComment();
 	}
@@ -151,6 +163,9 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 		return getLocalizedArticle().getContentFieldNames();
 	}
 
+	/* (non-Javadoc)
+	 * @see com.idega.block.article.bean.ArticleLocalizedItemBean#getContentItemPrefix()
+	 */
 	@Override
 	public String getContentItemPrefix() {
 		return getLocalizedArticle().getContentItemPrefix();
@@ -160,6 +175,10 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 		return getLocalizedArticle().getContentLanguage();
 	}
 
+	/**
+	 * @return Text of article header.
+	 * @see com.idega.block.article.bean.ArticleLocalizedItemBean#getHeadline()
+	 */
 	public String getHeadline() {
 		if (isDummyContentItem()) {
 			return ArticleConstants.EMPTY;
@@ -199,14 +218,28 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 		getLocalizedArticle().removeImage(imageNumber);
 	}
 
+	/**
+	 * Add or change author name here.
+	 * @see com.idega.block.article.bean.ArticleLocalizedItemBean#setAuthor(java.lang.String)
+	 */
 	public void setAuthor(String s) {
 		getLocalizedArticle().setAuthor(s);
 	}
 
+	/**
+	 * Add or change an article body text here.
+	 * @param body Text, that should be saved.
+	 * @see com.idega.block.article.bean.ArticleLocalizedItemBean#setBody(java.lang.String)
+	 */
 	public void setBody(String body) {
 		getLocalizedArticle().setBody(body);
 	}
 
+	/**
+	 * Add or change an article comments here.
+	 * @param s Text, that should be saved.
+	 * @see com.idega.block.article.bean.ArticleLocalizedItemBean#setComment(java.lang.String)
+	 */
 	public void setComment(String s) {
 		getLocalizedArticle().setComment(s);
 	}
@@ -215,10 +248,20 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 		getLocalizedArticle().setLinkToComments(linkToComments);
 	}
 
+	/**
+	 * Add or change an article header here, which shown in article creation dialog.
+	 * @param o Some object. Article header will be set as o.toString() value.
+	 * @see com.idega.block.article.bean.ArticleLocalizedItemBean#setHeadline(java.lang.Object)
+	 */
 	public void setHeadline(Object o) {
 		getLocalizedArticle().setHeadline(o);
 	}
 
+	/**
+	 * Add or change an article header here, which shown in article creation dialog.
+	 * @param s Text of article header.
+	 * @see com.idega.block.article.bean.ArticleLocalizedItemBean#setHeadline(java.lang.String)
+	 */
 	public void setHeadline(String s) {
 		getLocalizedArticle().setHeadline(s);
 	}
@@ -235,6 +278,11 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 		getLocalizedArticle().setSource(s);
 	}
 
+	/**
+	 * Add or change an article teaser text here. Teaser is shown in the article creation form.
+	 * @param s Teaser text.
+	 * @see com.idega.block.article.bean.ArticleLocalizedItemBean#setTeaser(java.lang.String)
+	 */
 	public void setTeaser(String s) {
 		getLocalizedArticle().setTeaser(s);
 	}
@@ -247,6 +295,11 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 		getLocalizedArticle().setUpdated(b);
 	}
 
+	/**
+	 * Method to save an article to *.xml file at store/content/files/cms/article server directory
+	 * @throws IDOStoreException
+	 * @see com.idega.block.article.bean.ArticleLocalizedItemBean#store()
+	 */
 	@Override
 	public void store() throws IDOStoreException {
 		try {
@@ -297,9 +350,9 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 //		rootResource.close();
 //	}
 
-	private void storeToJCR() throws IOException, RepositoryException{
+	private void storeToJCR() throws IOException, RepositoryException {
 		//	Setting the path for creating new file/creating localized version/updating existing file
-		String articleFolderPath = getResourcePath();
+		String articleFolderPath = getResourcePath();//"/content/files/public/article.lalala";//getResourcePath();
 
 //		helper.createAllFoldersInPath(session,articleFolderPath);
 //		Node node = getNode();
@@ -310,10 +363,17 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 		getRepositoryService().setProperties(articleFolder, new AdvancedProperty(CONTENT_TYPE_WITH_PREFIX, "LocalizedFile"));
 	}
 
+	/* (non-Javadoc)
+	 * @see com.idega.block.article.bean.ArticleLocalizedItemBean#tryPublish()
+	 */
 	protected void tryPublish() {
 		getLocalizedArticle().tryPublish();
 	}
 
+	/**
+	 * @return Article name
+	 * @see com.idega.content.bean.ContentItemBean#getName()
+	 */
 	@Override
 	public String getName() {
 		return getLocalizedArticle().getName();
@@ -334,6 +394,11 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 		return getLocalizedArticle().getCreatedByUserId();
 	}
 
+	/**
+	 * Add or change an article name
+	 * @param s Article name
+	 * @see com.idega.content.bean.ContentItemBean#setName(java.lang.String)
+	 */
 	@Override
 	public void setName(String s) {
 		getLocalizedArticle().setName(s);
@@ -488,6 +553,7 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 			return ArticleUtil.getArticleBaseFolderPath();
 		}
 	}
+
 	/*
 	 * This sets the base folder for storing articles,
 	 * something like '/files/cms/article'
@@ -556,7 +622,7 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 	 * returns the path to the actual resource ../cms/article/YYYY/MM/YYYYMMDD-HHmm.article/lang.xml
 	 *
 	 * @see ContentItem#getResourcePath()
-	 * @return
+	 * @return Partial path of the article without the language part.
 	 */
 	@Override
 	public String getResourcePath() {
@@ -621,14 +687,66 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 		return service.generateResourcePath(getBaseFolderLocation(), CoreConstants.ARTICLE_FILENAME_SCOPE, CoreConstants.ARTICLE_FILENAME_SCOPE);
 	}
 
+	/* (non-Javadoc)
+	 * @see com.idega.block.article.bean.ArticleLocalizedItemBean#setLanguageChange(java.lang.String)
+	 */
 	public void setLanguageChange(String s) {
 		this.languageChange=s;
 	}
 
+	/* (non-Javadoc)
+	 * @see com.idega.block.article.bean.ArticleLocalizedItemBean#getLanguageChange()
+	 */
 	public String getLanguageChange() {
 		return this.languageChange;
 	}
 
+	/**
+	 * <p>
+	 * Makes sure the standard folder /cms/articles is created and that it has correct permissions.
+	 * </p>
+	 */
+	private void makesureStandardFolderisCreated() {
+		/*IWUserContext iwuc = CoreUtil.getIWContext();
+		IWSlideService slideService = getIWSlideService(iwuc);
+		String contentFolderPath = ArticleUtil.getContentRootPath();
+		String articlePath = ArticleUtil.getArticleBaseFolderPath();
+
+
+		try {
+			//first make the folder:
+			slideService.createAllFoldersInPathAsRoot(articlePath);
+
+			//was not used? slideService.getWebdavResourceAuthenticatedAsRoot(contentFolderPath);
+			AccessControlList aclList = slideService.getAccessControlList(contentFolderPath);
+			AuthenticationBusiness authBusiness = ((IWSlideServiceBean)slideService).getAuthenticationBusiness();
+
+			String editorRoleUri = authBusiness.getRoleURI(StandardRoles.ROLE_KEY_EDITOR);
+			Ace editorAce = new Ace(editorRoleUri);
+			editorAce.addPrivilege(Privilege.READ);
+			editorAce.addPrivilege(Privilege.WRITE);
+			AccessControlEntry editorEntry = new AccessControlEntry(editorAce,AccessControlEntry.PRINCIPAL_TYPE_ROLE);
+			aclList.add(editorEntry);
+
+			String authorRoleUri = authBusiness.getRoleURI(StandardRoles.ROLE_KEY_AUTHOR);
+			Ace authorAce = new Ace(authorRoleUri);
+			authorAce.addPrivilege(Privilege.READ);
+			authorAce.addPrivilege(Privilege.WRITE);
+			AccessControlEntry authorEntry = new AccessControlEntry(authorAce,AccessControlEntry.PRINCIPAL_TYPE_ROLE);
+			aclList.add(authorEntry);
+
+
+			slideService.storeAccessControlList(aclList);
+
+			//debug:
+			aclList = slideService.getAccessControlList(contentFolderPath);
+
+		}
+		catch (Exception e) {
+			e.printStackTrace();
+		}*/
+
+	}
 
 	/**
 	 * Loads the article (folder)
@@ -741,7 +859,6 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 		return false;
 	}
 
-
 	protected boolean containsChildResourceWithPath(NodeIterator resources,	String childFullPath) {
 		while (resources.hasNext()) {
 			Node child = resources.nextNode();
@@ -807,7 +924,7 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 	 * Returns true if this article is available for the language of the
 	 * locale set on this article item.
 	 * </p>
-	 * @return
+	 * @return true if this article is available for the language of the locale set on this article item.
 	 */
 	public boolean getAvailableInRequestedLanguage() {
 		return this.availableInRequestedLanguage;
@@ -839,6 +956,10 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 		getLocalizedArticle().setPublishedDate(date);
 	}
 
+	/**
+	 * Add or change categories of article here. Do not use UPPER case letters, use "-" instead of spaces. There should not be any simple spaces.
+	 * @param articleCategories Selected categories. Example: ",first-category,category,last-category,"
+	 */
 	public void setArticleCategories(String articleCategories) {
 		getLocalizedArticle().setArticleCategories(articleCategories);
 	}
@@ -853,4 +974,11 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 		super.setSetPublishedDateByDefault(setPublishedDateByDefault);
 	}
 
+	/**
+	 *
+	 * @return Categories of an article
+	 */
+	public List<String> getCategories() {
+		return getLocalizedArticle().getCategories();
+	}
 }

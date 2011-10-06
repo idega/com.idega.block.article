@@ -33,20 +33,23 @@ ArticleEditorHelper.checkArticleLinkAndRegisterIfItsCorrect = function(link, win
 	}
 	
 	jQuery(link).addClass('articleEditorInitializedForLink');
-	jQuery(link).fancybox({
-		autoScale: false,
-		autoDimensions: false,
-		hideOnOverlayClick: false,
-		width: windowinfo.getWindowWidth() * windowResizeIndex,
-		height: windowinfo.getWindowHeight() * windowResizeIndex,
-		onCloseCallback: function() {
-			ArticleEditorHelper.addActionAfterArticleIsSavedAndEditorClosed();
-		}
-	});
+	if (jQuery(link).fancybox) {
+		jQuery(link).fancybox({
+			autoScale: false,
+			autoDimensions: false,
+			hideOnOverlayClick: false,
+			width: windowinfo.getWindowWidth() * windowResizeIndex,
+			height: windowinfo.getWindowHeight() * windowResizeIndex,
+			onClosed: function() {
+				ArticleEditorHelper.addActionAfterArticleIsSavedAndEditorClosed();
+			}
+		});
+	}
 }
 
 ArticleEditorHelper.addActionAfterArticleIsSavedAndEditorClosed = function() {
 	if (ArticleEditorHelper.needReload) {
+		showLoadingMessage('');
 		reloadPage();
 	}
 }
@@ -69,8 +72,7 @@ ArticleEditorHelper.deleteSelectedArticle = function(resource, fromArticleList) 
 							var uuids = jQuery('input.contentLisItemsIdentifierStyleClass[type=\'hidden\']', parents);
 							if (uuids != null && uuids.length > 0) {
 								container = jQuery(uuids[0]).parent();
-							}
-							else {
+							} else {
 								parents = parents.parent();
 							}
 						}
@@ -80,16 +82,18 @@ ArticleEditorHelper.deleteSelectedArticle = function(resource, fromArticleList) 
 							ArticleEditorHelper.closeAllObjects();
 							return false;
 						}
-						ArticleEditorHelper.reloadArticlesList(jQuery(container).attr('id'), function() { ArticleEditorHelper.closeAllObjects(); });
-					}
-					else {
+						ArticleEditorHelper.reloadArticlesList(jQuery(container).attr('id'), function() {
+							ArticleEditorHelper.closeAllObjects();
+						});
+					} else {
 						var info = {header: '', body: '', teaser: '', date: '', author: ''};
 						ArticleEditorHelper.updateArticleFields(info, parents);
 						
-						ArticleEditorHelper.addToolbarButtons(resource, 'delete', parents, false, function() { ArticleEditorHelper.closeAllObjects(); });
+						ArticleEditorHelper.addToolbarButtons(resource, 'delete', parents, false, function() {
+							ArticleEditorHelper.closeAllObjects();
+						});
 					}
-				}
-				else {
+				} else {
 					ArticleItemInfoFetcher.getArticleWasNotDeletedMessage({
 						callback: function(resources) {
 							if (resources == null || resources.length == 0) {
@@ -124,24 +128,43 @@ ArticleEditorHelper.reloadArticlesList = function(id, callback) {
 		return false;
 	}
 	
-	var parentContainer = jQuery('#' + id);
+	var parentContainer = jQuery(document.getElementById(id));
 	if (parentContainer == null || parentContainer.length == 0) {
 		ArticleEditorHelper.needReload = true;
 		return false;
 	}
 	
-	var uuids = jQuery('input.contentLisItemsIdentifierStyleClass[type=\'hidden\']', parentContainer);
-	if (uuids == null || uuids.length == 0) {
-		ArticleEditorHelper.needReload = true;
-		return false;
-	}
-	
-	IWCORE.renderComponent(jQuery(uuids[0]).attr('value'), parentContainer[0], function() {
+	var callbackAfterRendered = function() {
 		ArticleEditorHelper.registerArticleActions();
 		if (callback) {
 			callback();
 		}
-	}, null);
+	}
+	if (id.indexOf('article_list') != -1) {
+		IWCORE.getRenderedComponentByClassName({
+			className: 'com.idega.block.article.component.ArticleListViewer',
+			properties: [
+				{id: 'setShowAllItems', value: 'true'},
+				{id: 'setId', value: 'article_list'},
+				{id: 'setResourcePath', value: '/files/cms/article'},
+				{id: 'setDetailsViewerPath', value: '/workspace/content/article/preview'},
+				{id: 'setShowTeaser', value: 'false'},
+				{id: 'setHeadlineAsLink', value: 'true'},
+				{id: 'setShowTime', value: 'false'},
+				{id: 'setShowToolbar', value: 'false'},
+				{id: 'setShowComments', value: 'false'}
+			],
+			container: parentContainer[0],
+			callback: callbackAfterRendered
+		});
+	} else {
+		var uuids = jQuery('input.contentLisItemsIdentifierStyleClass[type=\'hidden\']', parentContainer);
+		if (uuids == null || uuids.length == 0) {
+			ArticleEditorHelper.needReload = true;
+			return false;
+		}
+		IWCORE.renderComponent(jQuery(uuids[0]).attr('value'), parentContainer[0], callbackAfterRendered, null);
+	}
 	
 	return false;
 }

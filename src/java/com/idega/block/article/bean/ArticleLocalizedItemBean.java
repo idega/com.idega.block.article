@@ -16,6 +16,7 @@ import java.io.OutputStream;
 import java.io.Serializable;
 import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 import java.util.logging.Level;
@@ -29,6 +30,7 @@ import org.w3c.tidy.Tidy;
 
 import com.idega.block.article.business.ArticleConstants;
 import com.idega.block.article.component.ArticleItemViewer;
+import com.idega.block.rss.business.EntryData;
 import com.idega.block.rss.business.RSSBusinessBean;
 import com.idega.content.bean.ContentItem;
 import com.idega.content.bean.ContentItemBean;
@@ -42,6 +44,7 @@ import com.idega.presentation.IWContext;
 import com.idega.util.CoreConstants;
 import com.idega.util.CoreUtil;
 import com.idega.util.IOUtil;
+import com.idega.util.ListUtil;
 import com.idega.util.StringHandler;
 import com.idega.util.StringUtil;
 import com.idega.util.xml.XmlUtil;
@@ -78,6 +81,7 @@ public class ArticleLocalizedItemBean extends ContentItemBean implements Seriali
 	public final static String FIELDNAME_LINK_TO_COMMENT = "linkToComments";
 	//Note "comment" seems to be a reserved attribute in DAV so use "article_comment" for that!!!
 	public final static String FIELDNAME_ARTICLE_COMMENT = "article_comment";
+	public final static String FIELDNAME_ATTACHMENTS = "media:text";
 	public final static String FIELDNAME_IMAGES = "images";
 	public final static String FIELDNAME_FILENAME = "filename";
 	public final static String FIELDNAME_FOLDER_LOCATION = "folder_location"; // ../cms/article/YYYY/MM/
@@ -86,6 +90,9 @@ public class ArticleLocalizedItemBean extends ContentItemBean implements Seriali
 	private final static String[] ATTRIBUTE_ARRAY = new String[] {
 		FIELDNAME_AUTHOR, FIELDNAME_CREATION_DATE, FIELDNAME_HEADLINE, FIELDNAME_TEASER, ContentItemBean.FIELDNAME_BODY
 	};
+	//public final static String FIELDNAME_LANGUAGE_CHANGE = "language_change";
+
+	//private final static String[] ACTION_ARRAY = new String[] {"edit","delete"};
 
 	transient XMLNamespace idegaXMLName = new XMLNamespace("http://xmlns.idega.com/block/article/xml");
 	String xIdegaXMLNameSpace = "http://xmlns.idega.com/block/article/xml";
@@ -97,6 +104,11 @@ public class ArticleLocalizedItemBean extends ContentItemBean implements Seriali
 
 	private String articleCategories = null; // This string should be set in EditArticleView, parsing submitted categories
 
+	private XMLNamespace attachmentNamespace = new XMLNamespace("http://search.yahoo.com/mrss/");
+
+	/**
+	 * Default constructor.
+	 */
 	public ArticleLocalizedItemBean() {
 		clear();
 	}
@@ -124,6 +136,17 @@ public class ArticleLocalizedItemBean extends ContentItemBean implements Seriali
 	public String getComment() { return (String)getValue(FIELDNAME_COMMENT); }
 	public String getLinkToComments() { return (String)getValue(FIELDNAME_LINK_TO_COMMENT); }
 	public List<ContentItemField> getImages() { return getItemFields(FIELDNAME_IMAGES); }
+	//public String getFilename() { return (String)getValue(FIELDNAME_FILENAME); }
+
+
+//	public void setArticleResourcePath(String path) {
+//		if(path!=null){
+//			if(path.indexOf("."+ARTICLE_FILENAME_SCOPE) < 0 || !path.endsWith(ARTICLE_SUFFIX)){
+//				throw new RuntimeException("["+this.getClass().getName()+"]: setArticleResourcePath("+path+") path is not valid article path!");
+//			}
+//		}
+//		setResourcePath(path);
+//	}
 
 	public String getContentLanguage() {
 		return getLanguage();
@@ -256,22 +279,45 @@ public class ArticleLocalizedItemBean extends ContentItemBean implements Seriali
 		String moduleClass = ArticleItemViewer.class.getName();
 		String linkToComments = getLinkToComments();
 
+		EntryData entryData = new EntryData();
+		entryData.setTitle(feedTitle);
+		entryData.setDescription(teaser);
+		entryData.setBody(body);
+		entryData.setAuthor(author);
+		entryData.setCategories(categories);
+		entryData.setComment(comment);
+		entryData.setLinkToComments(linkToComments);
+		entryData.setSource(source);
+		entryData.setAttachments(getConvertedAttachments());
 		try{
 			IWContext iwc = CoreUtil.getIWContext();
-			return getFeedEntryAsXML(iwc, feedTitle, feedDescription, feedTitle, teaser, body, author, categories, source, comment,
-					moduleClass, linkToComments);
-		}
-		catch(Exception e){
+			return getFeedEntryAsXML(iwc,feedTitle, feedDescription, moduleClass, entryData);
+		} catch(Exception e){
 			//If error getting the IWContext:
-			String title=feedTitle;
-			Timestamp published=null;
-			Timestamp updated=null;
+			entryData.setTitle(feedTitle);
+			entryData.setPublished(null);
+			entryData.setUpdated(null);
 			String server=null;
-			String articleURL=null;
-			String creatorId=null;
+			entryData.setLink(null);
+			entryData.setCreator(null);
+			entryData.setDescription(teaser);
 			ContentItemFeedBean feedBean = new ContentItemFeedBean(new RSSBusinessBean(),ContentItemFeedBean.FEED_TYPE_ATOM_1);
-			return getFeedEntryAsXML(feedTitle,feedDescription,title,teaser,body,author,categories,source,comment,linkToComments,published,updated,server,articleURL,creatorId,feedBean);
+
+			return getFeedEntryAsXML(feedTitle,feedDescription,server,feedBean,entryData);
 		}
+	}
+
+	private List<String> getConvertedAttachments() {
+		List<ContentItemField> attachments = getAttachments();
+		if (ListUtil.isEmpty(attachments))
+			return Collections.emptyList();
+
+
+		List<String> uris = new ArrayList<String>(attachments.size());
+		for (ContentItemField attachment: attachments) {
+			uris.add(attachment.getValue().toString());
+		}
+		return uris;
 	}
 
 	/**
@@ -398,11 +444,34 @@ public class ArticleLocalizedItemBean extends ContentItemBean implements Seriali
 			//not quite clear...
 			fileNode = getRepositoryService().updateFileContents(filePath, stream);//helper.updateFileContents(session, filePath, stream);
 			fileNode.setProperty(ArticleItemBean.CONTENT_TYPE_WITH_PREFIX, CoreConstants.ARTICLE_FILENAME_SCOPE);
+			//success=true;
+			//success = rootResource.putMethod(stream, stream);
+
+			//rootResource.close();
+			if(fileNode!=null){
+				fileNode.save();
+			}
+
 		} catch(Exception e) {
 			e.printStackTrace();
 		} finally {
 			IOUtil.close(stream);
 		}
+		/*if (success) {
+			rootResource.proppatchMethod(filePath, ArticleItemBean.PROPERTY_CONTENT_TYPE,CoreConstants.ARTICLE_FILENAME_SCOPE,true);
+		}
+		else {
+			try {
+				stream = StringHandler.getStreamFromString(article);
+				String fixedURL = session.getURI(filePath);
+				rootResource.putMethod(fixedURL, stream);
+				rootResource.proppatchMethod(fixedURL, ArticleItemBean.PROPERTY_CONTENT_TYPE,CoreConstants.ARTICLE_FILENAME_SCOPE,true);
+			} catch(Exception e) {
+				e.printStackTrace();
+			} finally {
+				closeInputStream(stream);
+			}
+		}*/
 	}
 
 	/**
@@ -616,6 +685,29 @@ public class ArticleLocalizedItemBean extends ContentItemBean implements Seriali
 			setComment(CoreConstants.EMPTY);
 		}
 
+		//	Attachments
+		List<ContentItemField> resolvedAttachmens = null;
+		try {
+			@SuppressWarnings("unchecked")
+			List<XMLElement> attachments = rootElement.getChildren(FIELDNAME_ARTICLE_COMMENT);
+			if (attachments == null) {
+				resolvedAttachmens = Collections.emptyList();
+			} else {
+				int id = 0;
+				resolvedAttachmens = new ArrayList<ContentItemField>();
+				for (XMLElement attachment : attachments) {
+					String uri = attachment.getText();
+					ContentItemField resolvedAttachment = new ContentItemFieldBean(id, 0, uri, uri, id, ContentItemField.FIELD_TYPE_STRING);
+					resolvedAttachmens.add(resolvedAttachment);
+					id++;
+				}
+			}
+			setAttachment(resolvedAttachmens);
+		} catch(Exception e) {
+			LOGGER.log(Level.WARNING, "Can not load attachments", e);
+			setAttachment(resolvedAttachmens);
+		}
+
 		return true;
 	}
 
@@ -712,6 +804,22 @@ public class ArticleLocalizedItemBean extends ContentItemBean implements Seriali
 			}
 		}
 
+		List<XMLElement> attachments = entry.getChildren("text", attachmentNamespace);
+		if (attachments != null) {
+			int id = 0;
+			List<ContentItemField> attachmentList = new ArrayList<ContentItemField>();
+			for (XMLElement attachment : attachments) {
+				String value = attachment.getValue();
+				if (StringUtil.isEmpty(value))
+					continue;
+
+				ContentItemField attachmentObj = new ContentItemFieldBean(id, id, value, value, id, ContentItemField.FIELD_TYPE_STRING);
+				attachmentList.add(attachmentObj);
+				id++;
+			}
+			setAttachment(attachmentList);
+		}
+
 		return true;
 	}
 
@@ -733,6 +841,25 @@ public class ArticleLocalizedItemBean extends ContentItemBean implements Seriali
 		return html.substring(startIndex + bodyStartTag.length(), endIndex);
 	}
 
+/*
+ * The old XMLBean way of loading data
+	public void loadOld(File file) throws XmlException, IOException{
+		ArticleDocument articleDoc;
+
+		articleDoc = ArticleDocument.Factory.parse(file);
+
+	    ArticleDocument.Article article =  articleDoc.getArticle();
+	    setHeadline(article.getHeadline());
+	    setBody(article.getBody());
+	    setTeaser(article.getTeaser());
+	    setAuthor(article.getAuthor());
+	    setSource(article.getSource());
+	    setComment(article.getComment());
+	}
+*/
+	/* (non-Javadoc)
+	 * @see com.idega.content.bean.ContentItem#getContentItemPrefix()
+	 */
 	@Override
 	public String getContentItemPrefix() {
 		return "article_";
@@ -761,7 +888,7 @@ public class ArticleLocalizedItemBean extends ContentItemBean implements Seriali
 		this.articleCategories = articleCategories;
 	}
 
-	private List<String> getCategories() {
+	public List<String> getCategories() {
 		if (articleCategories == null) {
 			return null;
 		}

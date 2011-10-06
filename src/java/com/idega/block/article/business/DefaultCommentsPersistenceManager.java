@@ -421,7 +421,6 @@ public class DefaultCommentsPersistenceManager extends DefaultSpringBean impleme
 
 		IWApplicationContext iwac = IWMainApplication.getDefaultIWApplicationContext();
 		AccessController accessControler = IWMainApplication.getDefaultIWMainApplication().getAccessController();
-		@SuppressWarnings("deprecation")
 		Collection<Group> groupsWithRole = accessControler.getAllGroupsForRoleKeyLegacy(roleKey, iwac);
 		if (ListUtil.isEmpty(groupsWithRole)) {
 			return null;
@@ -551,5 +550,11 @@ public class DefaultCommentsPersistenceManager extends DefaultSpringBean impleme
 			LOGGER.log(Level.WARNING, "Error getting logged in user", e);
 		}
 		return null;
+	}
+
+	@Override
+	public boolean hasRightsToWriteComments(Long identifier) {
+		com.idega.user.data.bean.User currentUser = getCurrentUser();
+		return currentUser != null;
 	}
 }

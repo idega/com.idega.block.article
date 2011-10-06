@@ -19,6 +19,8 @@ public interface CommentsPersistenceManager {
 	
 	public boolean hasRightsToViewComments(Long identifier);
 	
+	public boolean hasRightsToWriteComments(Long identifier);
+	
 	public boolean hasFullRightsForComments(String identifier);
 	
 	public boolean hasFullRightsForComments(Long identifier);
