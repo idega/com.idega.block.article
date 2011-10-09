@@ -307,7 +307,7 @@ public class ArticleLocalizedItemBean extends ContentItemBean implements Seriali
 		}
 	}
 
-	private List<String> getConvertedAttachments() {
+	public List<String> getConvertedAttachments() {
 		List<ContentItemField> attachments = getAttachments();
 		if (ListUtil.isEmpty(attachments))
 			return Collections.emptyList();

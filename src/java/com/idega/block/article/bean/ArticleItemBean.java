@@ -449,6 +449,10 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 		return getLocalizedArticle().getAttachments();
 	}
 
+	public List<String> getAttachmentsUris() {
+		return getLocalizedArticle().getConvertedAttachments();
+	}
+
 	@Override
 	public void setAttachment(List<ContentItemField> l) {
 		getLocalizedArticle().setAttachment(l);
@@ -633,7 +637,6 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 		}
 		return sResourcePath;
 	}
-
 
 	public synchronized String createArticlePath() {
 		String resourcePath = getGeneratedArticleResourcePath();
