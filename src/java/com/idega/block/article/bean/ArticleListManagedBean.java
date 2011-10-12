@@ -93,15 +93,13 @@ public class ArticleListManagedBean implements ContentListViewerManagedBean {
 	private ArticleDao articleDao;
 
 	public ArticleDao getArticleDao(){
+		if (articleDao == null)
+			ELUtil.getInstance().autowire(this);
 		return this.articleDao;
 	}
-	/**
-	 *
-	 */
+	
 	public ArticleListManagedBean() {
 		super();
-
-		ELUtil.getInstance().autowire(this);
 	}
 
 	/* (non-Javadoc)
