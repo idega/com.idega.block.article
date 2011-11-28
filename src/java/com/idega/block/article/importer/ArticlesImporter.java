@@ -1,13 +1,11 @@
 package com.idega.block.article.importer;
 
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import javax.jcr.PropertyType;
 import javax.jcr.RepositoryException;
@@ -19,7 +17,6 @@ import org.springframework.context.ApplicationListener;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
 
-import com.idega.block.article.data.CategoryBugRemover;
 import com.idega.block.article.data.dao.ArticleDao;
 import com.idega.block.article.data.dao.CategoryDao;
 import com.idega.content.business.categories.CategoriesEngine;
@@ -27,14 +24,13 @@ import com.idega.content.business.categories.CategoryBean;
 import com.idega.content.data.ContentCategory;
 import com.idega.core.business.DefaultSpringBean;
 import com.idega.core.localisation.business.ICLocaleBusiness;
-import com.idega.idegaweb.IWMainSlideStartedEvent;
+import com.idega.idegaweb.RepositoryStartedEvent;
 import com.idega.idegaweb.UnavailableIWContext;
 import com.idega.repository.bean.RepositoryItem;
 import com.idega.repository.jcr.JCRItem;
 import com.idega.util.CoreConstants;
 import com.idega.util.ListUtil;
 import com.idega.util.StringUtil;
-
 
 /**
  * Imports articles and their categories to database.
@@ -47,7 +43,8 @@ import com.idega.util.StringUtil;
 @Service
 @Scope(BeanDefinition.SCOPE_SINGLETON)
 public class ArticlesImporter extends DefaultSpringBean implements ApplicationListener {
-    @Autowired
+
+	@Autowired
     private CategoriesEngine categoryEngine;
 
     @Autowired
@@ -56,45 +53,16 @@ public class ArticlesImporter extends DefaultSpringBean implements ApplicationLi
     @Autowired
     private ArticleDao articleDao;
 
-    private static Logger LOGGER = Logger.getLogger(ArticlesImporter.class.getName());
-
     private static final String CATEGORIES_IMPORTED_APP_PROP = "is_categories_imported",
     							ARTICLES_IMPORTED_APP_PROP = "is_articles_imported";
-
-    private static final String CATEGORIES_BUG_FIXED_PROP = "is_categories_bug_fixed";
-
 
     /**
      * @see org.springframework.context.ApplicationListener#onApplicationEvent(org.springframework.context.ApplicationEvent)
      */
     @Override
     public void onApplicationEvent(ApplicationEvent event) {
-        if (event instanceof IWMainSlideStartedEvent) {
-            CategoryBugRemover cbr = new CategoryBugRemover();
-
-            try {
-                if (!cbr.isBadColunmsExist()) {
-                    getApplication().getSettings().setProperty(CATEGORIES_BUG_FIXED_PROP, Boolean.TRUE.toString());
-                }
-            } catch (SQLException e) {
-                LOGGER.log(Level.SEVERE, "Failed to check for wrong tables", e);
-            }
-
-            if (!getApplication().getSettings()
-                    .getBoolean(CATEGORIES_BUG_FIXED_PROP)) {
-                cbr.removeBug();
-
-                getApplication().getSettings().setProperty(CATEGORIES_IMPORTED_APP_PROP,
-                        Boolean.FALSE.toString());
-
-                getApplication().getSettings().setProperty(ARTICLES_IMPORTED_APP_PROP,
-                        Boolean.FALSE.toString());
-
-                return;
-            }
-
-            Boolean isCategoriesImported = getApplication().getSettings()
-                    .getBoolean(CATEGORIES_IMPORTED_APP_PROP, Boolean.FALSE);
+        if (event instanceof RepositoryStartedEvent) {
+            Boolean isCategoriesImported = getApplication().getSettings().getBoolean(CATEGORIES_IMPORTED_APP_PROP, Boolean.FALSE);
 
             if (!isCategoriesImported) {
                 isCategoriesImported = importCategories();
@@ -132,7 +100,7 @@ public class ArticlesImporter extends DefaultSpringBean implements ApplicationLi
             try {
                 categoryList = this.categoryEngine.getCategoriesByLocale(locale.toString());
             } catch (UnavailableIWContext e){
-                LOGGER.log(Level.WARNING,
+                getLogger().log(Level.WARNING,
                         "Failed to import because categories.xml deos not exist",
                         e);
                 return Boolean.FALSE;
@@ -165,7 +133,7 @@ public class ArticlesImporter extends DefaultSpringBean implements ApplicationLi
             RepositoryItem resource = getRepositoryService().getRepositoryItemAsRootUser(CoreConstants.CONTENT_PATH+CoreConstants.ARTICLE_CONTENT_PATH);
             return this.importArticleFolders(resource);
         } catch (RepositoryException e) {
-            LOGGER.log(Level.WARNING, "Failed to import articles cause of:", e);
+            getLogger().log(Level.WARNING, "Failed to import articles cause of:", e);
         }
         return Boolean.FALSE;
     }
@@ -205,7 +173,7 @@ public class ArticlesImporter extends DefaultSpringBean implements ApplicationLi
 
                 return result;
             } catch (Exception e) {
-                LOGGER.log(Level.WARNING, "Failed to import articles from: " + resource.getPath(), e);
+                getLogger().log(Level.WARNING, "Failed to import articles from: " + resource.getPath(), e);
             }
         }
 
@@ -240,7 +208,7 @@ public class ArticlesImporter extends DefaultSpringBean implements ApplicationLi
             resource = null;
             webdavResources = null;
         } catch (Exception e) {
-            LOGGER.log(Level.WARNING, "Failed to detect if provided resource (" + resource.getPath() + ") is a folder", e);
+            getLogger().log(Level.WARNING, "Failed to detect if provided resource (" + resource.getPath() + ") is a folder", e);
         }
 
         return Boolean.FALSE;
@@ -296,7 +264,7 @@ public class ArticlesImporter extends DefaultSpringBean implements ApplicationLi
             resource = null;
             return isImportSuccesful;
         } catch (Exception e) {
-            LOGGER.log(Level.WARNING, "Failed to import an article: " + resource.getPath(), e);
+            getLogger().log(Level.WARNING, "Failed to import an article: " + resource.getPath(), e);
         }
 
         return Boolean.FALSE;
