@@ -95,6 +95,7 @@ import org.springframework.context.ApplicationListener;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
 
+import com.idega.block.article.importer.ArticlesImporter;
 import com.idega.core.business.DefaultSpringBean;
 import com.idega.data.SimpleQuerier;
 
@@ -108,23 +109,20 @@ import com.idega.data.SimpleQuerier;
  */
 @Service
 @Scope(BeanDefinition.SCOPE_SINGLETON)
-public class CategoryBugRemover extends DefaultSpringBean implements ApplicationListener{
+public class CategoryBugRemover extends DefaultSpringBean implements ApplicationListener {
+	
     private static Logger LOGGER = Logger.getLogger(CategoryBugRemover.class.getName());
-    private static final String CATEGORIES_BUG_FIXED_PROP = "is_categories_bug_fixed";
-    private static final String CATEGORIES_IMPORTED_APP_PROP = "is_categories_imported",
-                                ARTICLES_IMPORTED_APP_PROP = "is_articles_imported";    
     
     public boolean removeBug() {
         try {
             if (!isBadColunmsExist()) {
-                getApplication().getSettings().setProperty(CATEGORIES_BUG_FIXED_PROP, 
+                getApplication().getSettings().setProperty(ArticlesImporter.CATEGORIES_BUG_FIXED_PROP, 
                         Boolean.TRUE.toString());                
                 return Boolean.TRUE;
             }
         } catch (Exception e) {
             LOGGER.log(Level.SEVERE, "Failed to check for bug.", e);
-            getApplication().getSettings().setProperty(CATEGORIES_BUG_FIXED_PROP, 
-                    Boolean.FALSE.toString());
+            getApplication().getSettings().setProperty(ArticlesImporter.CATEGORIES_BUG_FIXED_PROP, Boolean.FALSE.toString());
             return Boolean.FALSE;
         }
         
@@ -146,27 +144,26 @@ public class CategoryBugRemover extends DefaultSpringBean implements Application
             }
             
             if (isBadColunmExist("HASHCODE")) {
-                SimpleQuerier.executeUpdate("ALTER TABLE IC_CATEGORY DROP COLUMN HASHCODE", Boolean.TRUE);
+            	try {
+            		SimpleQuerier.executeUpdate("ALTER TABLE IC_CATEGORY DROP COLUMN HASHCODE", Boolean.TRUE);
+            	} catch (Exception e) {
+            		getLogger().warning("Most probably IC_CATEGORY table was empty and this was an attempt to remove the last column of a table");
+            	}
             }
             
-            getApplication().getSettings().setProperty(CATEGORIES_BUG_FIXED_PROP, Boolean.TRUE.toString());
+            getApplication().getSettings().setProperty(ArticlesImporter.CATEGORIES_BUG_FIXED_PROP, Boolean.TRUE.toString());
             
             return Boolean.TRUE;
-
         } catch (SQLException e) {
             LOGGER.log(Level.SEVERE, "Failed to fix the bug.", e);
-            getApplication().getSettings().setProperty(CATEGORIES_BUG_FIXED_PROP, 
-                    Boolean.FALSE.toString());
+            getApplication().getSettings().setProperty(ArticlesImporter.CATEGORIES_BUG_FIXED_PROP, Boolean.FALSE.toString());
             return Boolean.FALSE;
         }
     }
     
     public boolean isBadColunmsExist() throws SQLException {
-        Boolean isCategoriesImported = getApplication().getSettings()
-        .getBoolean(CATEGORIES_IMPORTED_APP_PROP);
-        
-        Boolean isArticlesImported = getApplication().getSettings()
-        .getBoolean(ARTICLES_IMPORTED_APP_PROP);
+        Boolean isCategoriesImported = getApplication().getSettings().getBoolean(ArticlesImporter.CATEGORIES_IMPORTED_APP_PROP, false);
+        Boolean isArticlesImported = getApplication().getSettings().getBoolean(ArticlesImporter.ARTICLES_IMPORTED_APP_PROP, false);
       
         if (isArticlesImported || isCategoriesImported) {
             return Boolean.TRUE;

@@ -3,7 +3,9 @@ package com.idega.block.article.importer;
 import java.io.IOException;
 import java.rmi.RemoteException;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Date;
 import java.util.Enumeration;
 import java.util.List;
@@ -30,11 +32,14 @@ import com.idega.content.business.categories.CategoryBean;
 import com.idega.content.data.ContentCategory;
 import com.idega.core.business.DefaultSpringBean;
 import com.idega.core.localisation.business.ICLocaleBusiness;
+import com.idega.idegaweb.IWMainApplicationSettings;
 import com.idega.idegaweb.IWMainSlideStartedEvent;
 import com.idega.idegaweb.UnavailableIWContext;
 import com.idega.slide.business.IWSlideService;
+import com.idega.util.ArrayUtil;
 import com.idega.util.CoreConstants;
 import com.idega.util.ListUtil;
+import com.idega.util.StringUtil;
 
 
 /**
@@ -48,6 +53,7 @@ import com.idega.util.ListUtil;
 @Service
 @Scope(BeanDefinition.SCOPE_SINGLETON)
 public class ArticlesImporter extends DefaultSpringBean implements ApplicationListener {
+	
     @Autowired
     private CategoriesEngine categoryEngine;
 
@@ -59,11 +65,9 @@ public class ArticlesImporter extends DefaultSpringBean implements ApplicationLi
     
     private static Logger LOGGER = Logger.getLogger(ArticlesImporter.class.getName());
 
-    private static final String CATEGORIES_IMPORTED_APP_PROP = "is_categories_imported",
-    							ARTICLES_IMPORTED_APP_PROP = "is_articles_imported";
-    
-    private static final String CATEGORIES_BUG_FIXED_PROP = "is_categories_bug_fixed";
-
+    public static final String CATEGORIES_IMPORTED_APP_PROP = "is_categories_imported",
+    							ARTICLES_IMPORTED_APP_PROP = "articles_imported",
+    							CATEGORIES_BUG_FIXED_PROP = "is_categories_bug_fixed";
     
     /**
      * @see org.springframework.context.ApplicationListener#onApplicationEvent(org.springframework.context.ApplicationEvent)
@@ -71,46 +75,46 @@ public class ArticlesImporter extends DefaultSpringBean implements ApplicationLi
     @Override
     public void onApplicationEvent(ApplicationEvent event) {
         if (event instanceof IWMainSlideStartedEvent) {
+        	getLogger().info("Starting articles importer...");
+        	
+        	IWMainApplicationSettings settings = getApplication().getSettings();
+        	
             CategoryBugRemover cbr = new CategoryBugRemover();
-            
             try {
                 if (!cbr.isBadColunmsExist()) {
-                    getApplication().getSettings().setProperty(CATEGORIES_BUG_FIXED_PROP, Boolean.TRUE.toString());
+                	settings.setProperty(CATEGORIES_BUG_FIXED_PROP, Boolean.TRUE.toString());
                 }
             } catch (SQLException e) {
                 LOGGER.log(Level.SEVERE, "Failed to check for wrong tables", e);
             }
             
-            if (!getApplication().getSettings()
-                    .getBoolean(CATEGORIES_BUG_FIXED_PROP)) {
+            if (!settings.getBoolean(CATEGORIES_BUG_FIXED_PROP)) {
                 cbr.removeBug();
                 
-                getApplication().getSettings().setProperty(CATEGORIES_IMPORTED_APP_PROP, 
-                        Boolean.FALSE.toString());
+                settings.setProperty(CATEGORIES_IMPORTED_APP_PROP, Boolean.FALSE.toString());
+                settings.setProperty(ARTICLES_IMPORTED_APP_PROP, Boolean.FALSE.toString());
                 
-                getApplication().getSettings().setProperty(ARTICLES_IMPORTED_APP_PROP, 
-                        Boolean.FALSE.toString());
-                
+                getLogger().info("Articles importer bug is fixed, terminating the import - need to restart the server");
                 return;
             }
             
-            Boolean isCategoriesImported = getApplication().getSettings()
-                    .getBoolean(CATEGORIES_IMPORTED_APP_PROP, Boolean.FALSE);
-            
+            Boolean isCategoriesImported = settings.getBoolean(CATEGORIES_IMPORTED_APP_PROP, Boolean.FALSE);
             if (!isCategoriesImported) {
+            	getLogger().info("Importing the categories...");
                 isCategoriesImported = importCategories();
-                getApplication().getSettings().setProperty(CATEGORIES_IMPORTED_APP_PROP, 
-                        isCategoriesImported.toString());
+                getLogger().info("Finished importing the categories. The result is successfull: " + isCategoriesImported);
+                settings.setProperty(CATEGORIES_IMPORTED_APP_PROP, isCategoriesImported.toString());
             }
 
-            Boolean isArticlesImported = getApplication().getSettings()
-                    .getBoolean(ARTICLES_IMPORTED_APP_PROP, Boolean.FALSE);
-            
+            Boolean isArticlesImported = settings.getBoolean(ARTICLES_IMPORTED_APP_PROP, Boolean.FALSE);
             if (!isArticlesImported && isCategoriesImported) {
-                isArticlesImported = this.importArticles();
-                getApplication().getSettings().setProperty(ARTICLES_IMPORTED_APP_PROP, 
-                        isArticlesImported.toString());
+            	getLogger().info("Importing the articles...");
+                isArticlesImported = importArticles();
+                getLogger().info("Finished importing articles. The result is successfull: " + isArticlesImported);
+                settings.setProperty(ARTICLES_IMPORTED_APP_PROP, isArticlesImported.toString());
             }
+            
+            getLogger().info("Articles importer finished");
         }
     }
 
@@ -118,41 +122,53 @@ public class ArticlesImporter extends DefaultSpringBean implements ApplicationLi
      * Method for importing categories, which are in categories.xml, but not in database
      * @return true, if imported, false, if at least one category was not imported
      */
-    public boolean importCategories(){
+    public boolean importCategories() {
         List<Locale> localeList = ICLocaleBusiness.getListOfLocalesJAVA();
         if (localeList == null) {
+        	getLogger().warning("There are no locales in the system");
             return Boolean.FALSE;
         }
         
-        if (this.categoryEngine == null) {
+        if (categoryEngine == null) {
+        	getLogger().warning("Categories engine is not initialized");
             return Boolean.FALSE;
         }
         
-        for(Locale locale : localeList){
+        int numberOfImportedCategories = 0;
+        for (Locale locale : localeList) {
             List<ContentCategory> categoryList = null;
             try {
-                categoryList = this.categoryEngine.getCategoriesByLocale(locale.toString());
+                categoryList = categoryEngine.getCategoriesByLocale(locale.toString());
             } catch (UnavailableIWContext e){
-                LOGGER.log(Level.WARNING, 
-                        "Failed to import because categories.xml deos not exist", 
-                        e);
+                LOGGER.log(Level.WARNING,  "Failed to import because categories.xml does not exist", e);
                 return Boolean.FALSE;
             }
             
-            if (ListUtil.isEmpty(categoryList)) {
+            if (ListUtil.isEmpty(categoryList))
                 continue;
-            }
             
-            for(ContentCategory category : categoryList){
-                if (category == null || category.getId() == null)
+            for (ContentCategory category : categoryList){
+                if (category == null)
                     continue;
                 
-                Boolean isAdded = categoryDao.addCategory(category.getId());
-                if(!isAdded){
+                String categoryId = category.getId();
+                if (StringUtil.isEmpty(categoryId)) {
+                	getLogger().warning("Category " + category + " has no ID, unable to import it!");
+                	continue;
+                }
+                
+                Boolean isAdded = categoryDao.addCategory(categoryId);
+                if (isAdded) {
+                	getLogger().info("Category with ID '" + categoryId + "' was imported");
+                	numberOfImportedCategories++;
+                } else {
+                	getLogger().warning("Failed to import the category with ID '" + categoryId + "'. Number of successfully imported categories: " + numberOfImportedCategories);
                     return Boolean.FALSE;
                 }
             }
         }
+        
+        getLogger().info("Number of imported categories: " + numberOfImportedCategories);
         return Boolean.TRUE;
     }
 
@@ -160,13 +176,12 @@ public class ArticlesImporter extends DefaultSpringBean implements ApplicationLi
      * Method for importing articles and their categories from default /files/cms/article path.
      * @return true, if imported, false if at least one article was not imported.
      */
-    public boolean importArticles(){
-
+    public boolean importArticles() {
         IWSlideService iWSlideService = getServiceInstance(IWSlideService.class);
         try {
             /*Getting the articles folders*/
-            WebdavResource resource = iWSlideService.getWebdavResourceAuthenticatedAsRoot(CoreConstants.CONTENT_PATH+CoreConstants.ARTICLE_CONTENT_PATH);
-            boolean importResult = this.importArticleFolders(resource);
+            WebdavResource resource = iWSlideService.getWebdavResourceAuthenticatedAsRoot(CoreConstants.CONTENT_PATH.concat(CoreConstants.ARTICLE_CONTENT_PATH));
+            boolean importResult = importArticleFolders(resource);
             resource.close();
             return importResult;
         } catch (HttpException e) {
@@ -186,44 +201,51 @@ public class ArticlesImporter extends DefaultSpringBean implements ApplicationLi
      */
     public boolean importArticleFolders(WebdavResource resource) {
         if (resource == null) {
+        	getLogger().warning("Resource is undefined!");
             return Boolean.FALSE;
         }
         
         if (!resource.exists()) {
+        	getLogger().warning("Resource " + resource.getPath() + " does not exist!");
             return Boolean.FALSE;
         }
         
-        if (this.importArticles(resource)) {
-            return Boolean.TRUE;
-        } else {
-            try {
-                WebdavResource[] foldersAndFilesResources = resource.listWebdavResources();
-                if (foldersAndFilesResources == null) {
-                    return Boolean.FALSE;
-                }
-                
-                boolean result = Boolean.FALSE;
-                for (WebdavResource wr : foldersAndFilesResources) {
-                    if (this.importArticleFolders(wr)) {
-                        result = Boolean.TRUE;
-                        wr.close();
-                    } else {
-                        if (wr != null) {
-                            wr.close();
-                        }
-                    }
-                }
-                
-                /*Trying to solve out of memory exception*/
-                foldersAndFilesResources = null;
-                resource = null;
-
-                return result;
-            } catch (HttpException e) {
-                LOGGER.log(Level.WARNING, "Http:Exception: ",e);
-            } catch (IOException e) {
-                LOGGER.log(Level.WARNING, "No such folder or you do not have a permission to access it: ", e);
+        getLogger().info("Will try to import article(s) from " + resource.getPath() + " and it's folder(s)");
+        
+        //	Importing articles from the current folder
+        importArticles(resource);
+        
+        //	No will try to look for the articles in the current folder
+        try {
+        	WebdavResource[] foldersAndFilesResources = resource.listWebdavResources();
+            if (ArrayUtil.isEmpty(foldersAndFilesResources)) {
+            	getLogger().info("There are no files nor folders inside " + resource.getPath());
+                return Boolean.TRUE;
             }
+            
+            boolean result = Boolean.FALSE;
+            for (WebdavResource wr : foldersAndFilesResources) {
+            	if (wr == null)
+            		continue;
+            	
+            	if (importArticleFolders(wr)) {
+            		result = Boolean.TRUE;
+            		getLogger().info("SUCCESSFULLY imported article(s) from the folder: " + wr.getPath());
+            	}
+            	
+            	if (wr != null)
+            		wr.close();
+            }
+            
+            /*Trying to solve out of memory exception*/
+            foldersAndFilesResources = null;
+            resource = null;
+
+            return result;
+        } catch (HttpException e) {
+        	LOGGER.log(Level.WARNING, "Http:Exception: ",e);
+        } catch (IOException e) {
+            LOGGER.log(Level.WARNING, "No such folder or you do not have a permission to access it: ", e);
         }
         
         return Boolean.FALSE;        
@@ -235,20 +257,17 @@ public class ArticlesImporter extends DefaultSpringBean implements ApplicationLi
      * @return true, if it is folder of articles, false, if not.
      */
     public boolean isArticlesFolder(WebdavResource resource){
-        if (resource == null || !resource.exists()) {
+        if (resource == null || !resource.exists())
             return Boolean.FALSE;
-        }
         
         /*Checking is it folder*/
-        if (!resource.isCollection()) {
+        if (!resource.isCollection())
             return Boolean.FALSE;
-        }
         
         try {
             WebdavResources webdavResources = resource.getChildResources();
-            if (webdavResources == null) {
+            if (webdavResources == null)
                 return Boolean.FALSE;
-            }
             
             String[] arrayOfResourcesInStringRepresentation = webdavResources.list();
             if (arrayOfResourcesInStringRepresentation == null) {
@@ -265,7 +284,6 @@ public class ArticlesImporter extends DefaultSpringBean implements ApplicationLi
             arrayOfResourcesInStringRepresentation = null;
             resource = null;
             webdavResources = null;
-            
         } catch (HttpException e) {
             LOGGER.log(Level.WARNING, "Http:Exception: ",e);
         } catch (IOException e) {
@@ -281,18 +299,21 @@ public class ArticlesImporter extends DefaultSpringBean implements ApplicationLi
      * @return true, if imported, false if failed or not articles folder.
      */
     public boolean importArticles(WebdavResource resource){
-        if (!this.isArticlesFolder(resource)) {
+        if (!isArticlesFolder(resource)) {
+        	getLogger().warning("Folder " + resource.getPath() + " is not folder of articles!");
             return Boolean.FALSE;
         }
         
         try {
             WebdavResources filesAndFolders = resource.getChildResources();
             if (filesAndFolders == null) {
+            	getLogger().warning("There are no files nor folders inside the current folder: " + resource.getPath() + ". Skipping this folder");
                 return Boolean.FALSE;
             }
             
             WebdavResource[] arrayOfResources = filesAndFolders.listResources();
-            if (arrayOfResources == null) {
+            if (ArrayUtil.isEmpty(arrayOfResources)) {
+            	getLogger().warning("There are no files nor folders inside the current folder: " + resource.getPath() + ". Skipping this folder");
                 return Boolean.FALSE;
             }
             
@@ -303,28 +324,33 @@ public class ArticlesImporter extends DefaultSpringBean implements ApplicationLi
                 if (r.getName().endsWith(CoreConstants.ARTICLE_FILENAME_SCOPE)) {
                     String uri = r.getPath();
                         
-                    if (uri.contains(CoreConstants.WEBDAV_SERVLET_URI)) {
-                        uri = uri.substring(CoreConstants.WEBDAV_SERVLET_URI.length());
-                    }
-                        
-                    if (uri.endsWith(CoreConstants.SLASH)) {
-                        uri = uri.substring(0, uri.lastIndexOf(CoreConstants.SLASH));
-                    }
-                    
                     @SuppressWarnings("unchecked")
-                    Enumeration<String> resourceEnumeration = r.propfindMethod(r.getPath(), propertyName);
-                    Collection<String> enumerationList = null;
-                    
+                    Enumeration<String> resourceEnumeration = r.propfindMethod(uri, propertyName);
+                    Collection<String> articleCategories = null;
                     if (resourceEnumeration != null){
                         while (resourceEnumeration.hasMoreElements()) {
-                            enumerationList = CategoryBean.getCategoriesFromString(resourceEnumeration.nextElement());
+                            articleCategories = CategoryBean.getCategoriesFromString(resourceEnumeration.nextElement());
                         }
+                        if (!ListUtil.isEmpty(articleCategories))
+                        	getLogger().info("Found categories for the article (" + uri + "): " + articleCategories);
                     }
                     
-                    if(!this.articleDao.updateArticle(new Date(r.getCreationDate()), uri, (List<String>) enumerationList)){
+                    if (uri.contains(CoreConstants.WEBDAV_SERVLET_URI))
+                        uri = uri.substring(CoreConstants.WEBDAV_SERVLET_URI.length());
+                    if (uri.endsWith(CoreConstants.SLASH))
+                        uri = uri.substring(0, uri.lastIndexOf(CoreConstants.SLASH));
+                    if (ListUtil.isEmpty(articleCategories))
+                    	articleCategories = Collections.emptyList();
+                    else
+                    	articleCategories = new ArrayList<String>(articleCategories);
+                    if (articleDao.updateArticle(new Date(r.getCreationDate()), uri, articleCategories)) {
+                    	getLogger().info("Article " + uri + " was SUCCESSFULLY imported");
+                    } else {
+                    	getLogger().warning("FAILED to import the article: " + uri);
                         isImportSuccesful = Boolean.FALSE;
                         break;
                     }
+                    
                     size = size-1;
                     r.close();
                 }
@@ -332,8 +358,8 @@ public class ArticlesImporter extends DefaultSpringBean implements ApplicationLi
             
             /*Trying to solve out of memory exception*/
             if (!isImportSuccesful) {
-                for (WebdavResource r : arrayOfResources){
-                    if (r != null){
+                for (WebdavResource r : arrayOfResources) {
+                    if (r != null) {
                         r.close();
                     }
                 }
@@ -342,6 +368,7 @@ public class ArticlesImporter extends DefaultSpringBean implements ApplicationLi
             arrayOfResources = null;
             filesAndFolders = null;
             resource = null;
+            
             return isImportSuccesful;
         } catch (HttpException e) {
             LOGGER.log(Level.WARNING, "Failed to import articles cause of:", e);

@@ -1,6 +1,7 @@
 package com.idega.block.article.data.dao.impl;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 import java.util.logging.Level;
@@ -47,7 +48,7 @@ public class ArticleDaoImpl extends GenericDaoImpl implements ArticleDao {
 	 */
 	@Override
 	@Transactional(readOnly=false)
-	public boolean updateArticle(Date timestamp, String uri, List<String> categories) {
+	public boolean updateArticle(Date timestamp, String uri, Collection<String> categories) {
 		if (timestamp == null || StringUtil.isEmpty(uri)) {
 			LOGGER.warning("Can not update article because URI (" + uri + ") or modification date (" + timestamp + ") are not provided!");
 			return false;
