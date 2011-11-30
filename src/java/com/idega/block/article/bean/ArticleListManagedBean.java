@@ -18,6 +18,7 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
+import java.util.logging.Logger;
 
 import javax.faces.component.html.HtmlOutputLink;
 
@@ -65,6 +66,8 @@ import com.idega.util.expression.ELUtil;
  */
 public class ArticleListManagedBean implements ContentListViewerManagedBean {
 
+	private static final Logger LOGGER = Logger.getLogger(ArticleListManagedBean.class.getName());
+	
 	private List<String> categories = null;
 
 	private String LOCALIZEDKEY_MORE = "itemviewer.more";
@@ -165,7 +168,13 @@ public class ArticleListManagedBean implements ContentListViewerManagedBean {
 			try {
 				article = new ArticleItemBean();
 				article.setResourcePath(uri);
+				
+				long start = System.currentTimeMillis();
 				article.load();
+				long end = System.currentTimeMillis();
+				LOGGER.info("Took time to load the article (" + article.getResourcePath() + "): " + (end - start) + " ms");
+				
+				start = System.currentTimeMillis();
 				if (canShowArticle(article, iwc, resourcePathFromRequest, identifierFromRequest)) {
 					int maxNumber = getMaxNumberOfDisplayed();
 					if (maxNumber < 0 || count < maxNumber) {
@@ -176,6 +185,8 @@ public class ArticleListManagedBean implements ContentListViewerManagedBean {
 						}
 					}
 				}
+				end = System.currentTimeMillis();
+				LOGGER.info("Took time to decide wheter to show the article (" + article.getResourcePath() + "): " + (end - start) + " ms");
 			} catch(Exception e) {
 				e.printStackTrace();
 			}
