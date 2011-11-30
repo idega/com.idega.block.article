@@ -321,7 +321,13 @@ public class ArticlesImporter extends DefaultSpringBean implements ApplicationLi
             boolean isImportSuccesful = Boolean.TRUE;
             String propertyName = new PropertyName("DAV", "categories").toString();
             for (WebdavResource r : arrayOfResources) {
-                if (r.getName().endsWith(CoreConstants.ARTICLE_FILENAME_SCOPE)) {
+            	String name = r.getName();
+            	if (StringUtil.isEmpty(name)) {
+            		getLogger().warning("Name is undefined for the resource " + resource.getPath());
+            		continue;
+            	}
+            	
+                if (name.endsWith(CoreConstants.ARTICLE_FILENAME_SCOPE)) {
                     String uri = r.getPath();
                         
                     @SuppressWarnings("unchecked")
