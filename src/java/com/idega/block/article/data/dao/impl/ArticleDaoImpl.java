@@ -178,7 +178,7 @@ public class ArticleDaoImpl extends GenericDaoImpl implements ArticleDao {
 					" FROM ArticleEntity art where art.").append(ArticleEntity.uriProp).append(" = :").append(ArticleEntity.uriProp).append(")");
 		}
 
-		inlineQuery.append(" ORDER BY a.").append(ArticleEntity.modificationDateProp);
+		inlineQuery.append(" ORDER BY a.").append(ArticleEntity.modificationDateProp).append(" DESC");
 
 		Query query = this.getQueryInline(inlineQuery.toString());
 		if(maxResults > 0){

@@ -169,12 +169,12 @@ public class ArticleListManagedBean implements ContentListViewerManagedBean {
 				article = new ArticleItemBean();
 				article.setResourcePath(uri);
 				
-				long start = System.currentTimeMillis();
+				//long start = System.currentTimeMillis();
 				article.load();
-				long end = System.currentTimeMillis();
-				LOGGER.info("Took time to load the article (" + article.getResourcePath() + "): " + (end - start) + " ms");
+				//long end = System.currentTimeMillis();
+				//LOGGER.info("Took time to load the article (" + article.getResourcePath() + "): " + (end - start) + " ms");
 				
-				start = System.currentTimeMillis();
+				//start = System.currentTimeMillis();
 				if (canShowArticle(article, iwc, resourcePathFromRequest, identifierFromRequest)) {
 					int maxNumber = getMaxNumberOfDisplayed();
 					if (maxNumber < 0 || count < maxNumber) {
@@ -185,8 +185,8 @@ public class ArticleListManagedBean implements ContentListViewerManagedBean {
 						}
 					}
 				}
-				end = System.currentTimeMillis();
-				LOGGER.info("Took time to decide wheter to show the article (" + article.getResourcePath() + "): " + (end - start) + " ms");
+				//end = System.currentTimeMillis();
+				//LOGGER.info("Took time to decide wheter to show the article (" + article.getResourcePath() + "): " + (end - start) + " ms");
 			} catch(Exception e) {
 				e.printStackTrace();
 			}
