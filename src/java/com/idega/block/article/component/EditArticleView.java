@@ -136,7 +136,7 @@ public class EditArticleView extends IWBaseComponent implements ManagedContentBe
 	private boolean fromArticleItemListViewer = false;
 	private boolean needsForm = false;
 
-	private String editorOpener = "window.parent";
+	private String editorOpener = "window.parent.parent";
 
 	@Autowired
 	ArticleDao articleDAO;
@@ -654,7 +654,7 @@ public class EditArticleView extends IWBaseComponent implements ManagedContentBe
 				comp = editArticle.findComponent("articleUpdaterScriptCaller");
 				if (comp == null) {
 					String action = null;
-					if (fromArticleItemListViewer && !StringUtil.isEmpty(containerId)) {
+					if (fromArticleItemListViewer && !StringUtil.isEmpty(containerId) && !String.valueOf(-1).equals(containerId)) {
 						action = PresentationUtil.getJavaScriptAction(new StringBuilder(editorOpener).append(".ArticleEditorHelper.reloadArticlesList('")
 								.append(containerId).append("');").toString());
 					}
@@ -678,10 +678,8 @@ public class EditArticleView extends IWBaseComponent implements ManagedContentBe
 							.append(StringUtil.isEmpty(mode) ? "null" : mode).append(");").toString());
 						}
 					}
-					if (action == null) {
-						action = PresentationUtil.getJavaScriptAction(new StringBuilder(editorOpener).append(".ArticleEditorHelper.needReload = true;")
-																		.toString());
-					}
+					if (action == null)
+						action = PresentationUtil.getJavaScriptAction(new StringBuilder(editorOpener).append(".ArticleEditorHelper.needReload = true;").toString());
 
 					Layer script = new Layer();
 					script.setId("articleUpdaterScriptCaller");
@@ -698,7 +696,7 @@ public class EditArticleView extends IWBaseComponent implements ManagedContentBe
 			WFUtil.addMessageVB(editArticle.findComponent(DELETE_ID),ArticleConstants.IW_BUNDLE_IDENTIFIER, "delete_successful");
 		}
 	}
-	
+
 	/**
 	 * <p>Test method. Generates random article.</p>
 	 * @param index Number of article created.
@@ -714,38 +712,38 @@ public class EditArticleView extends IWBaseComponent implements ManagedContentBe
 	        article.setName("Article_d" + index);
 	        article.setAuthor("Martynas");
 	        article.setHeadline("Article_d" + index);
-	        
+
 	        String passingCat = "";
 	        for (String s : categorylist){
-	            passingCat = passingCat + s + ",";  
+	            passingCat = passingCat + s + ",";
 	        }
-	        
+
 	        Random year = new Random();
 	        Random month = new Random();
 	        Random date = new Random();
-	                
+
 	        int randomYear = year.nextInt(30)+1970;
 	        int randomMonth = month.nextInt(11)+1;
 	        int randomDay = date.nextInt(25);
 	        Calendar calendar = Calendar.getInstance();
 	        calendar.set(randomYear, randomMonth, randomDay);
 	        article.setCreationDate(new Timestamp(calendar.getTimeInMillis()));
-	        article.setResourcePath("/files/cms/article/"+randomYear+"/"+randomMonth+"/"+randomYear+randomMonth+randomDay+"-151"+index+".article");        
+	        article.setResourcePath("/files/cms/article/"+randomYear+"/"+randomMonth+"/"+randomYear+randomMonth+randomDay+"-151"+index+".article");
 	        article.store();
 	        WebDAVMetadataResource resource = (WebDAVMetadataResource) IBOLookup.getSessionInstance(iwc, WebDAVMetadataResource.class);
-            
+
 	        resource.setCategories(article.getResourcePath(), passingCat, true);
-	        
+
 	        setEditMode(ContentConstants.CONTENT_ITEM_ACTION_EDIT);
 	        System.out.println("Generated article:" + "/files/cms/article/"+randomYear+"/"+randomMonth+"/"+randomYear+randomMonth+randomDay+"-151"+index+".article");
             System.out.println("With categories: ");
             System.out.println(passingCat);
 	        setUserMessage("article_saved");
 	        return true;
-	    } catch(Exception e){     
+	    } catch(Exception e){
 	        LOGGER.log(Level.WARNING, "Error storing article", e);
 	    }
-	        
+
 	    return false;
 	}
 
@@ -754,17 +752,17 @@ public class EditArticleView extends IWBaseComponent implements ManagedContentBe
 	 * Returns false if save failed
 	 */
 	private boolean storeArticle() {
-		try {  	    
-		    
-		    /*This is for testing, I mean generating articles in slide without 
+		try {
+
+		    /*This is for testing, I mean generating articles in slide without
 		     * saving them to database */
 //		    Random rn = new Random();
 //		    int variable = 0;
 //		    List<String> categoryList = null;
 //		    for (int s=0; s<10; s++) {
-//		        
+//
 //		        categoryList=new ArrayList<String>();
-//		        variable = rn.nextInt(15);	            
+//		        variable = rn.nextInt(15);
 //		        for (int k=0; k<variable; k++) {
 //	                categoryList.add("Kategorija_"+k);
 //	            }
@@ -772,7 +770,7 @@ public class EditArticleView extends IWBaseComponent implements ManagedContentBe
 //		        this.generateRandomArticle(s, IWContext.getInstance(), categoryList);
 //		        categoryList.clear();
 //		    }
-		    
+
 			ArticleItemBean article = getArticleItemBean();
 			article.setSetPublishedDateByDefault(fromArticleItemListViewer);
 			article.getLocalizedArticle().setSetPublishedDateByDefault(fromArticleItemListViewer);
