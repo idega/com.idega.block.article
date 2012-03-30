@@ -10,6 +10,7 @@ package com.idega.block.article.component;
 
 import java.io.IOException;
 import java.sql.Timestamp;
+import java.util.Map;
 
 import javax.faces.component.UIComponent;
 import javax.faces.component.html.HtmlOutputText;
@@ -23,14 +24,18 @@ import com.idega.block.article.business.ArticleUtil;
 import com.idega.content.bean.ContentItem;
 import com.idega.content.business.ContentConstants;
 import com.idega.content.business.ContentUtil;
+import com.idega.content.business.IWCacheInvalidatorIWSlideListener;
 import com.idega.content.presentation.ContentItemToolbar;
 import com.idega.content.presentation.ContentItemViewer;
 import com.idega.content.presentation.ContentViewer;
+import com.idega.core.cache.IWCacheManager2;
 import com.idega.core.cache.UIComponentCacher;
+import com.idega.idegaweb.IWCacheManager;
 import com.idega.idegaweb.IWMainApplication;
 import com.idega.presentation.IWContext;
 import com.idega.presentation.Layer;
 import com.idega.presentation.ui.HiddenInput;
+import com.idega.user.data.User;
 import com.idega.util.CoreConstants;
 import com.idega.util.CoreUtil;
 import com.idega.util.PresentationUtil;
@@ -151,7 +156,12 @@ public class ArticleItemViewer extends ContentItemViewer {
 			}
 		}
 		
-		initializeToolbar();
+		ArticleItemBean articleItemBean = (ArticleItemBean) getContentItem();
+		if(articleItemBean.IsAllowedToEditByCurrentUser()){
+			initializeToolbar();
+		}
+		
+		
 		initializeComments(context);
 		if (isShowCreationDate()) {
 			UIComponent creationDate = getFieldViewerComponent(ContentConstants.ATTRIBUTE_CREATION_DATE);
@@ -161,7 +171,7 @@ public class ArticleItemViewer extends ContentItemViewer {
 		}
 		//addFeed(IWContext.getIWContext(context));
 	}
-
+	
 	private boolean canInitField(String attribute) {
 		if (attribute == null) {
 			return false;

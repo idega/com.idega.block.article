@@ -137,46 +137,40 @@ public class ArticleListManagedBean implements ContentListViewerManagedBean {
 	public List<ArticleItemBean> loadAllArticlesInFolder(String folder) throws XmlException, IOException{
 		IWContext iwc = CoreUtil.getIWContext();
 
-		List<String> uris = new ArrayList<String>();
+		List <ArticleItemBean> articleList = new ArrayList<ArticleItemBean>();
 		if (iwc.getIWMainApplication().getSettings().getBoolean("load_articles_from_db", Boolean.TRUE)){
 			List<ArticleEntity> entities = getArticlesFromDatabase(folder, categories, iwc,getMaxNumberOfDisplayed());
-			for(ArticleEntity a : entities){
-				uris.add(a.getUri());
+			User currentUser = iwc.isLoggedOn() ? iwc.getCurrentUser() : null;
+			for(ArticleEntity articleEntity : entities){
+				ArticleItemBean articleItemBean = loadArticle(articleEntity.getUri(), iwc);
+				articleItemBean.setArticleEntity(articleEntity);
+				articleItemBean.setAllowedToEditByCurrentUser(currentUser);
+				articleList.add(articleItemBean);
 			}
 		}else{
 			Collection<SearchResult> results = getArticleSearcResults(folder, this.categories, iwc);
 			if (results == null) {
-				return new ArrayList<ArticleItemBean>();
+				return Collections.emptyList();
 			}
 			//create uri list
+			List<String> uris = new ArrayList<String>(results.size());
 			for (SearchResult result: results) {
 				uris.add(result.getSearchResultURI());
 			}
+			articleList = getArticlesByURIs(uris,iwc);
 		}
-		return getArticlesByURIs(uris,iwc);
+		return articleList;
 	}
 
 	//gets articles and loads them
 	public List<ArticleItemBean> getArticlesByURIs(List<String> uris, IWContext iwc) {
 		List<ArticleItemBean> list = new ArrayList<ArticleItemBean>();
-		String resourcePathFromRequest = iwc.getParameter(ContentViewer.PARAMETER_CONTENT_RESOURCE);
-		String identifierFromRequest = iwc.getParameter(ContentConstants.CONTENT_ITEM_VIEWER_IDENTIFIER_PARAMETER);
-
 		int count = 0;
-		ArticleItemBean article = null;
+		int maxNumber = getMaxNumberOfDisplayed();
 		for (String uri: uris) {
 			try {
-				article = new ArticleItemBean();
-				article.setResourcePath(uri);
-				
-				//long start = System.currentTimeMillis();
-				article.load();
-				//long end = System.currentTimeMillis();
-				//LOGGER.info("Took time to load the article (" + article.getResourcePath() + "): " + (end - start) + " ms");
-				
-				//start = System.currentTimeMillis();
-				if (canShowArticle(article, iwc, resourcePathFromRequest, identifierFromRequest)) {
-					int maxNumber = getMaxNumberOfDisplayed();
+				ArticleItemBean article = loadArticle(uri, iwc);
+				if (article != null) {
 					if (maxNumber < 0 || count < maxNumber) {
 						list.add(article);
 						count++;
@@ -185,8 +179,6 @@ public class ArticleListManagedBean implements ContentListViewerManagedBean {
 						}
 					}
 				}
-				//end = System.currentTimeMillis();
-				//LOGGER.info("Took time to decide wheter to show the article (" + article.getResourcePath() + "): " + (end - start) + " ms");
 			} catch(Exception e) {
 				e.printStackTrace();
 			}
@@ -194,7 +186,21 @@ public class ArticleListManagedBean implements ContentListViewerManagedBean {
 
 		return list;
 	}
-
+	
+	
+	private ArticleItemBean loadArticle(String uri,IWContext iwc) throws IOException{
+		
+		ArticleItemBean article = new ArticleItemBean();
+		article.setResourcePath(uri);
+		
+		article.load();
+		
+		if (canShowArticle(article, iwc, iwc.getParameter(ContentViewer.PARAMETER_CONTENT_RESOURCE), iwc.getParameter(ContentConstants.CONTENT_ITEM_VIEWER_IDENTIFIER_PARAMETER))) {
+			return article;
+		}
+		return null;
+	}
+	
 	private boolean canShowArticle(ArticleItemBean article, IWContext iwc, String resourcePathFromRequest, String identifierFromRequest) {
 		if (!hasUserRightToViewArticle(article, iwc)) {
 			return false;

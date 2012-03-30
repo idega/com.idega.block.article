@@ -5,9 +5,11 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Random;
+import java.util.Set;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -18,6 +20,7 @@ import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.Table;
 
+import org.hibernate.annotations.CollectionOfElements;
 import org.hibernate.annotations.Index;
 
 import com.idega.util.ListUtil;
@@ -62,8 +65,33 @@ public class ArticleEntity implements Serializable {
             joinColumns = @JoinColumn(name = "ARTICLE_FK"),
             inverseJoinColumns = @JoinColumn(name = "CATEGORY_FK"))
     private List<CategoryEntity> categories;
+    
+    
+    public static final String receiversProp = "receiversProp";
+    @CollectionOfElements(fetch = FetchType.EAGER)
+    @JoinTable(name="article_editors_groups", joinColumns=@JoinColumn(name="ARTICLE_ID"))
+    @Column(name="EDITORS_GROUPS_IDS", nullable=false)
+    private Set<Integer> editors;
 
-    private int hashCode;
+    /**
+     * Returns group ids. Users of those groups are allowed to edit article.
+     * @return Groups ids
+     */
+    public Set<Integer> getEditors() {
+    	//TODO: check if can return null and return empty set if so
+		return editors;
+	}
+
+    /**
+     * Sets the ids of groups which users are allowed to edit articles.
+     * 
+     * @param editors The set of ids of groups which users are allowed to edit articles.
+     */
+	public void setEditors(Set<Integer> editors) {
+		this.editors = editors;
+	}
+
+	private int hashCode;
     
     public ArticleEntity() {
     	hashCode = new Random().nextInt();

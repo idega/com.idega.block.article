@@ -13,9 +13,12 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.rmi.RemoteException;
 import java.sql.Timestamp;
+import java.util.Collection;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.faces.context.FacesContext;
@@ -34,6 +37,10 @@ import org.apache.webdav.lib.WebdavResources;
 import com.idega.block.article.ArticleCacher;
 import com.idega.block.article.business.ArticleConstants;
 import com.idega.block.article.business.ArticleUtil;
+import com.idega.block.article.data.ArticleEntity;
+import com.idega.block.article.data.dao.ArticleDao;
+import com.idega.business.IBOLookup;
+import com.idega.business.IBOLookupException;
 import com.idega.content.bean.ContentItem;
 import com.idega.content.bean.ContentItemBean;
 import com.idega.content.bean.ContentItemCase;
@@ -42,6 +49,7 @@ import com.idega.content.business.ContentUtil;
 import com.idega.core.builder.business.BuilderService;
 import com.idega.core.builder.business.BuilderServiceFactory;
 import com.idega.core.content.RepositoryHelper;
+import com.idega.data.IDOLookup;
 import com.idega.data.IDOStoreException;
 import com.idega.idegaweb.IWMainApplication;
 import com.idega.idegaweb.IWUserContext;
@@ -50,10 +58,15 @@ import com.idega.presentation.IWContext;
 import com.idega.slide.business.IWSlideSession;
 import com.idega.slide.util.WebdavExtendedResource;
 import com.idega.slide.util.WebdavRootResource;
+import com.idega.user.business.GroupBusiness;
+import com.idega.user.data.Group;
+import com.idega.user.data.User;
 import com.idega.util.CoreConstants;
 import com.idega.util.CoreUtil;
+import com.idega.util.ListUtil;
 import com.idega.util.StringHandler;
 import com.idega.util.StringUtil;
+import com.idega.util.expression.ELUtil;
 import com.idega.xml.XMLException;
 
 /**
@@ -88,6 +101,90 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 	private boolean availableInRequestedLanguage=false;
 
 	private boolean isPartOfArticleList = false;
+	
+	
+	
+	//Request scope so this should work well and fast
+	private Boolean allowedToEditByCurrentUser = null;
+	
+	private ArticleEntity articleEntity = null;
+	
+	public Boolean IsAllowedToEditByCurrentUser() {
+		if(allowedToEditByCurrentUser != null){
+			return allowedToEditByCurrentUser;
+		}
+		
+		//This is expensive operation, it is better to have this value set
+		
+		IWContext iwc = CoreUtil.getIWContext();
+		if(!iwc.isLoggedOn()){
+			allowedToEditByCurrentUser = Boolean.FALSE;
+			return allowedToEditByCurrentUser;
+		}
+		
+		User currentUser = iwc.getCurrentUser();
+		return setAllowedToEditByCurrentUser(currentUser);
+		
+	}
+	
+	/**
+	 * Sets if this article is allowed to be eddited for the passed user, this property is
+	 * saved for this instance and later is returned by isAllowedToEditByCurrentUser.
+	 * 
+	 * @param currentUser the current user for which the check will be done
+	 * @return True if it is allowed to edit, false otherwise.
+	 */
+	public Boolean setAllowedToEditByCurrentUser(User currentUser) {
+		if(currentUser == null){
+			allowedToEditByCurrentUser = Boolean.FALSE;
+			return allowedToEditByCurrentUser;
+		}
+		ArticleEntity articleEntity = getArticleEntity();
+		if(articleEntity == null){
+			//By default there was permitted to edit any article by any user
+			return Boolean.TRUE;
+		}
+		Set<Integer> editors = articleEntity.getEditors();
+		Collection <Group> parentGroups;
+		try {
+			parentGroups = currentUser.getParentGroups();
+			
+			//TODO: this probably never happens
+			if(ListUtil.isEmpty(parentGroups)){
+				allowedToEditByCurrentUser = Boolean.FALSE;
+				return allowedToEditByCurrentUser;
+			}
+			
+		} catch (Exception e) {
+			Logger.getLogger(ArticleItemBean.class.getName()).log(Level.WARNING, "Failed getting is allowed to edit by current user "
+					+ currentUser.getId() + " article " + getResourcePath(), e);
+			return Boolean.FALSE;
+		}
+		allowedToEditByCurrentUser = Boolean.FALSE;
+		for(Group group : parentGroups){
+			if(editors.contains(group.getPrimaryKey())){
+				allowedToEditByCurrentUser = Boolean.TRUE;
+				break;
+			}
+		}
+		return allowedToEditByCurrentUser;
+	}
+
+	public void setIsAllowedToEditByCurrentUser(Boolean isAllowedToEditByCurrentUser) {
+		this.allowedToEditByCurrentUser = isAllowedToEditByCurrentUser;
+	}
+
+	public ArticleEntity getArticleEntity() {
+		if(articleEntity == null){
+			ArticleDao articleDao = ELUtil.getInstance().getBean(ArticleDao.class);
+			articleEntity = articleDao.getArticle(getResourcePath());
+		}
+		return articleEntity;
+	}
+
+	public void setArticleEntity(ArticleEntity articleEntity) {
+		this.articleEntity = articleEntity;
+	}
 
 	public boolean isPartOfArticleList() {
 		return isPartOfArticleList;
@@ -1164,4 +1261,5 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 	public List<String> getCategories() {
 		return getLocalizedArticle().getCategories();
 	}
+	
 }
