@@ -67,7 +67,7 @@ public class ArticleEntity implements Serializable {
     private List<CategoryEntity> categories;
     
     
-    public static final String receiversProp = "receiversProp";
+    public static final String receiversProp = "editorsProp";
     @CollectionOfElements(fetch = FetchType.EAGER)
     @JoinTable(name="article_editors_groups", joinColumns=@JoinColumn(name="ARTICLE_ID"))
     @Column(name="EDITORS_GROUPS_IDS", nullable=false)
