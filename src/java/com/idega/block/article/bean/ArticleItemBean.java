@@ -33,7 +33,6 @@ import javax.jcr.Session;
 import org.apache.commons.httpclient.HttpException;
 import org.apache.webdav.lib.PropertyName;
 import org.apache.webdav.lib.WebdavResources;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import com.idega.block.article.ArticleCacher;
 import com.idega.block.article.business.ArticleConstants;
@@ -78,10 +77,8 @@ import com.idega.xml.XMLException;
  */
 public class ArticleItemBean extends ContentItemBean implements Serializable, ContentItem, ValueChangeListener {
 
-	/**
-	 * Comment for <code>serialVersionUID</code>
-	 */
 	private static final long serialVersionUID = 4514851565086272678L;
+
 	private final static String ARTICLE_FILE_SUFFIX = ".xml";
 
 	public final static String TYPE_PREFIX = "IW:";
@@ -97,44 +94,44 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 	private String resourcePath;
 	private boolean availableInRequestedLanguage=false;
 
-	private boolean isPartOfArticleList = false;
-	
-	
-	
+	private boolean partOfArticleList = false;
+
 	//Request scope so this should work well and fast
 	private Boolean allowedToEditByCurrentUser = null;
-	
+
 	private ArticleEntity articleEntity;
-	
-	@Autowired
-	ArticleDao articleDao;
-	
-	public ArticleItemBean(){
-		ELUtil.getInstance().autowire(this);
+
+	public ArticleItemBean() {
+		super();
 	}
-	
+
+	private ArticleDao getArticleDAO() {
+		ArticleDao articleDAO = ELUtil.getInstance().getBean(ArticleDao.BEAN_NAME);
+		return articleDAO;
+	}
+
 	public Boolean isAllowedToEditByCurrentUser() {
 		if(allowedToEditByCurrentUser != null){
 			return allowedToEditByCurrentUser;
 		}
-		
+
 		//This is expensive operation, it is better to have this value set
-		
+
 		IWContext iwc = CoreUtil.getIWContext();
 		if(!iwc.isLoggedOn()){
 			allowedToEditByCurrentUser = Boolean.FALSE;
 			return allowedToEditByCurrentUser;
 		}
-		
+
 		User currentUser = iwc.getCurrentUser();
 		return setAllowedToEditByCurrentUser(currentUser);
-		
+
 	}
-	
+
 	/**
 	 * Sets if this article is allowed to be eddited for the passed user, this property is
 	 * saved for this instance and later is returned by isAllowedToEditByCurrentUser.
-	 * 
+	 *
 	 * @param currentUser the current user for which the check will be done
 	 * @return True if it is allowed to edit, false otherwise.
 	 */
@@ -152,13 +149,13 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 		Collection <Group> parentGroups;
 		try {
 			parentGroups = currentUser.getParentGroups();
-			
+
 			//TODO: this probably never happens
 			if(ListUtil.isEmpty(parentGroups)){
 				allowedToEditByCurrentUser = Boolean.FALSE;
 				return allowedToEditByCurrentUser;
 			}
-			
+
 		} catch (Exception e) {
 			Logger.getLogger(ArticleItemBean.class.getName()).log(Level.WARNING, "Failed getting is allowed to edit by current user "
 					+ currentUser.getId() + " article " + getResourcePath(), e);
@@ -179,9 +176,9 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 	}
 
 	public ArticleEntity getArticleEntity() {
-		if(articleEntity == null){
-			articleEntity = articleDao.getArticle(getResourcePath());
-		}
+		if (articleEntity == null)
+			articleEntity = getArticleDAO().getArticle(getResourcePath());
+
 		return articleEntity;
 	}
 
@@ -190,11 +187,11 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 	}
 
 	public boolean isPartOfArticleList() {
-		return isPartOfArticleList;
+		return partOfArticleList;
 	}
 
-	public void setPartOfArticleList(boolean isPartOfArticleList) {
-		this.isPartOfArticleList = isPartOfArticleList;
+	public void setPartOfArticleList(boolean partOfArticleList) {
+		this.partOfArticleList = partOfArticleList;
 	}
 
 	public ArticleLocalizedItemBean getLocalizedArticle(){
@@ -1264,5 +1261,5 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 	public List<String> getCategories() {
 		return getLocalizedArticle().getCategories();
 	}
-	
+
 }

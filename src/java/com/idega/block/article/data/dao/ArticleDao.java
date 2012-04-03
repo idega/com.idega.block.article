@@ -18,6 +18,8 @@ import com.idega.core.persistence.GenericDao;
  */
 public interface ArticleDao extends GenericDao {
 
+	public static final String BEAN_NAME = "articleDAO";
+
 	/**
 	 * Writes creation date, path, cateogries of an article to database.
 	 * @param timestamp Date type object with creation or modification date

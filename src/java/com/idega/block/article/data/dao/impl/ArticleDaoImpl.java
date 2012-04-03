@@ -34,7 +34,7 @@ import com.idega.util.StringUtil;
  * Skype: lapiukshtiss
  * You can expect to find some test cases notice in the end of the file.
  */
-@Repository
+@Repository(ArticleDao.BEAN_NAME)
 @Scope(BeanDefinition.SCOPE_SINGLETON)
 public class ArticleDaoImpl extends GenericDaoImpl implements ArticleDao {
 
@@ -53,7 +53,7 @@ public class ArticleDaoImpl extends GenericDaoImpl implements ArticleDao {
 			LOGGER.warning("Can not update article because URI (" + uri + ") or modification date (" + timestamp + ") are not provided!");
 			return false;
 		}
-		
+
 		boolean result = true;
 
 		if (!ListUtil.isEmpty(categories)) {
@@ -63,7 +63,7 @@ public class ArticleDaoImpl extends GenericDaoImpl implements ArticleDao {
 		ArticleEntity articleEntity = this.getArticle(uri);
 		if (articleEntity == null) {
 			List<CategoryEntity> categoriesForTheArticle = this.categoryDao.getCategories(categories);
-			
+
 			articleEntity = new ArticleEntity();
 			articleEntity.setUri(uri);
 			articleEntity.setModificationDate(timestamp);
@@ -150,7 +150,7 @@ public class ArticleDaoImpl extends GenericDaoImpl implements ArticleDao {
 		final ArticleEntity article = getArticle(uri);
 		if (article == null)
 			return false;
-		
+
 		try {
 			this.remove(article);
 			return true;
