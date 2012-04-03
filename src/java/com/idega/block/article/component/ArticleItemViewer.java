@@ -157,7 +157,7 @@ public class ArticleItemViewer extends ContentItemViewer {
 		}
 		
 		ArticleItemBean articleItemBean = (ArticleItemBean) getContentItem();
-		if(articleItemBean.IsAllowedToEditByCurrentUser()){
+		if(articleItemBean.isAllowedToEditByCurrentUser()){
 			initializeToolbar();
 		}
 		

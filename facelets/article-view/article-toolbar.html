@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<div
+			xmlns:ui="http://java.sun.com/jsf/facelets"
+	    	xmlns:h="http://java.sun.com/jsf/html"
+			xmlns:t="http://myfaces.apache.org/tomahawk"
+			xmlns:content="http://xmlns.idega.com/com.idega.content"
+			xmlns:f="http://java.sun.com/jsf/core"
+			xmlns:ic="http://xmlns.idega.com/com.idega.core"
+			xmlns="http://www.w3.org/1999/xhtml" 
+			var="item"
+			value="#{postRequestBean.posts}"
+			layout="unorderedList">
+		<a href="#idega-fb-layer"></a>
+		<a>#{localizedStrings['com.idega.block.article']['edit']}</a>
+		<a>#{localizedStrings['com.idega.block.article']['delete']}</a>
+		<div>
+			jQuery(document).ready(function(){
+			});
+		</div>
+</div>
