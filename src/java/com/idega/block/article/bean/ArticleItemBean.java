@@ -33,14 +33,13 @@ import javax.jcr.Session;
 import org.apache.commons.httpclient.HttpException;
 import org.apache.webdav.lib.PropertyName;
 import org.apache.webdav.lib.WebdavResources;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import com.idega.block.article.ArticleCacher;
 import com.idega.block.article.business.ArticleConstants;
 import com.idega.block.article.business.ArticleUtil;
 import com.idega.block.article.data.ArticleEntity;
 import com.idega.block.article.data.dao.ArticleDao;
-import com.idega.business.IBOLookup;
-import com.idega.business.IBOLookupException;
 import com.idega.content.bean.ContentItem;
 import com.idega.content.bean.ContentItemBean;
 import com.idega.content.bean.ContentItemCase;
@@ -49,7 +48,6 @@ import com.idega.content.business.ContentUtil;
 import com.idega.core.builder.business.BuilderService;
 import com.idega.core.builder.business.BuilderServiceFactory;
 import com.idega.core.content.RepositoryHelper;
-import com.idega.data.IDOLookup;
 import com.idega.data.IDOStoreException;
 import com.idega.idegaweb.IWMainApplication;
 import com.idega.idegaweb.IWUserContext;
@@ -58,7 +56,6 @@ import com.idega.presentation.IWContext;
 import com.idega.slide.business.IWSlideSession;
 import com.idega.slide.util.WebdavExtendedResource;
 import com.idega.slide.util.WebdavRootResource;
-import com.idega.user.business.GroupBusiness;
 import com.idega.user.data.Group;
 import com.idega.user.data.User;
 import com.idega.util.CoreConstants;
@@ -107,9 +104,16 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 	//Request scope so this should work well and fast
 	private Boolean allowedToEditByCurrentUser = null;
 	
-	private ArticleEntity articleEntity = null;
+	private ArticleEntity articleEntity;
 	
-	public Boolean IsAllowedToEditByCurrentUser() {
+	@Autowired
+	ArticleDao articleDao;
+	
+	public ArticleItemBean(){
+		ELUtil.getInstance().autowire(this);
+	}
+	
+	public Boolean isAllowedToEditByCurrentUser() {
 		if(allowedToEditByCurrentUser != null){
 			return allowedToEditByCurrentUser;
 		}
@@ -176,7 +180,6 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 
 	public ArticleEntity getArticleEntity() {
 		if(articleEntity == null){
-			ArticleDao articleDao = ELUtil.getInstance().getBean(ArticleDao.class);
 			articleEntity = articleDao.getArticle(getResourcePath());
 		}
 		return articleEntity;

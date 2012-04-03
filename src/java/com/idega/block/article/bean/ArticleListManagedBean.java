@@ -65,6 +65,8 @@ import com.idega.util.expression.ELUtil;
  * @version $Revision: 1.28 $
  */
 public class ArticleListManagedBean implements ContentListViewerManagedBean {
+	
+	public final static String BEAN_IDENTIFIER="articleItemListBean";
 
 	private static final Logger LOGGER = Logger.getLogger(ArticleListManagedBean.class.getName());
 	
@@ -143,6 +145,9 @@ public class ArticleListManagedBean implements ContentListViewerManagedBean {
 			User currentUser = iwc.isLoggedOn() ? iwc.getCurrentUser() : null;
 			for(ArticleEntity articleEntity : entities){
 				ArticleItemBean articleItemBean = loadArticle(articleEntity.getUri(), iwc);
+				if(articleItemBean == null){
+					continue;
+				}
 				articleItemBean.setArticleEntity(articleEntity);
 				articleItemBean.setAllowedToEditByCurrentUser(currentUser);
 				articleList.add(articleItemBean);
