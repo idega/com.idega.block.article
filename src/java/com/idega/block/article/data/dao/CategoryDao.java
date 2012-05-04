@@ -3,6 +3,10 @@ package com.idega.block.article.data.dao;
 import java.util.Collection;
 import java.util.List;
 
+import org.springframework.beans.factory.config.BeanDefinition;
+import org.springframework.context.annotation.Scope;
+import org.springframework.stereotype.Repository;
+
 import com.idega.block.article.data.CategoryEntity;
 import com.idega.block.article.data.dao.impl.CategoryDaoImpl;
 import com.idega.core.persistence.GenericDao;
@@ -16,8 +20,10 @@ import com.idega.core.persistence.GenericDao;
  * Skype: lapiukshtiss
  * You can expect to find some test cases notice in the end of the file.
  */
+@Repository(CategoryDao.BEAN_NAME)
+@Scope(BeanDefinition.SCOPE_SINGLETON)
 public interface CategoryDao extends GenericDao {
-
+	public static final String BEAN_NAME = "categoryDAO";
 	/**
 	 * Creates new Category
 	 * @param category New category id

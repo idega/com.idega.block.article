@@ -5,11 +5,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.idega.block.article.business.ArticleConstants;
+import com.idega.block.article.component.article_view.ArticleEdit;
 import com.idega.builder.bean.AdvancedProperty;
 import com.idega.content.business.ContentConstants;
 import com.idega.content.presentation.ContentItemToolbar;
 import com.idega.content.presentation.ContentViewer;
 import com.idega.core.builder.business.BuilderService;
+import com.idega.idegaweb.IWMainApplicationSettings;
 import com.idega.presentation.Block;
 import com.idega.presentation.IWContext;
 import com.idega.presentation.Layer;
@@ -61,7 +63,15 @@ public class ArticleEditor extends Block {
 		if (containerId != null) {
 			parameters.add(new AdvancedProperty(ContentConstants.CONTENT_LIST_ITEMS_IDENTIFIER, containerId));
 		}
-		String uri = service.getUriToObject(EditArticleView.class, parameters);
+		
+		IWMainApplicationSettings settings = iwc.getIWMainApplication().getSettings();
+		String uri;
+		if("true".equals(settings.getProperty("use_roles_in_article", "false"))){
+			uri = service.getUriToObject(ArticleEdit.class, parameters);
+		}else{
+			uri = service.getUriToObject(EditArticleView.class, parameters);
+		}
+		
 		
 		IFrame frame = new IFrame(EditArticleView.class.getSimpleName(), uri);
 		frame.setStyleClass("contentItemEditorFrameStyle");

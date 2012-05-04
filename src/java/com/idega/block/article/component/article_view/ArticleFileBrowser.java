@@ -20,9 +20,13 @@ import com.idega.util.CoreConstants;
 import com.idega.util.PresentationUtil;
 import com.idega.webface.WFUtil;
 
-
-public class ArticleEdit extends IWBaseComponent{
-
+/**
+ * Only uploads images for now
+ * @author alex
+ *
+ */
+public class ArticleFileBrowser extends IWBaseComponent {
+	public static final String PARAMETER_UPLOAD_PATH = "af-browser-upload-path";
 	
 	@Override
 	protected void initializeComponent(FacesContext context) {
@@ -32,7 +36,7 @@ public class ArticleEdit extends IWBaseComponent{
 		
 		IWBundle bundle = iwc.getIWMainApplication().getBundle(ArticleConstants.IW_BUNDLE_IDENTIFIER);
 		FaceletComponent facelet = (FaceletComponent)iwc.getApplication().createComponent(FaceletComponent.COMPONENT_TYPE);
-		facelet.setFaceletURI(bundle.getFaceletURI("article-view/article-edit.xhtml"));
+		facelet.setFaceletURI(bundle.getFaceletURI("article-view/file-browser.xhtml"));
 		
 		add(facelet);
 		
@@ -51,27 +55,17 @@ public class ArticleEdit extends IWBaseComponent{
 			JQuery  jQuery = web2.getJQuery();
 			scripts.add(jQuery.getBundleURIToJQueryLib());
 
-			scripts.addAll(web2.getBundleURIsToFancyBoxScriptFiles());
-			styles.add(web2.getBundleURIToFancyBoxStyleFile());
-
-			scripts.add(web2.getBundleUriToHumanizedMessagesScript());
-			styles.add(web2.getBundleUriToHumanizedMessagesStyleSheet());
-			
-			List<String> tinyMceFiles = Arrays.asList("tiny_mce.js");
+			List<String> tinyMceFiles = Arrays.asList("tiny_mce_popup.js");
 			scripts.addAll(web2.getBundleUrisToTinyMceScriptFiles("3.5b3",tinyMceFiles));
-			
 
 
 		}else{
-			Logger.getLogger(ArticleEdit.class.getName()).log(Level.WARNING, "Failed getting Web2Business no jQuery and it's plugins files were added");
+			Logger.getLogger("ContentShareComponent").log(Level.WARNING, "Failed getting Web2Business no jQuery and it's plugins files were added");
 		}
 
 		IWMainApplication iwma = iwc.getApplicationContext().getIWMainApplication();
 		IWBundle iwb = iwma.getBundle(ArticleConstants.IW_BUNDLE_IDENTIFIER);
-		scripts.add(iwb.getVirtualPathWithFileNameString("javascript/article-view/ArticleEditHelper.js"));
-		styles.add(iwb.getVirtualPathWithFileNameString("style/article-view/article-view.css"));
-//		styles.add(iwb.getVirtualPathWithFileNameString("style/article.css"));
-		scripts.add("/dwr/interface/ArticleServices.js");
+		scripts.add(iwb.getVirtualPathWithFileNameString("javascript/article-view/ArticleFileBrowserHelper.js"));
 
 		iwb = iwma.getBundle("com.idega.core");
 		scripts.add(iwb.getVirtualPathWithFileNameString("iw_core.js"));
@@ -79,7 +73,5 @@ public class ArticleEdit extends IWBaseComponent{
 		PresentationUtil.addJavaScriptSourcesLinesToHeader(iwc, scripts);
 		PresentationUtil.addStyleSheetsToHeader(iwc, styles);
 	}
-	
-	
 	
 }

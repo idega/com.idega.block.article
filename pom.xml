@@ -64,6 +64,10 @@
     </dependency>
     <dependency>
       <groupId>com.idega.block.platform</groupId>
+      <artifactId>com.idega.builder</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.idega.block.platform</groupId>
       <artifactId>com.idega.slide</artifactId>
     </dependency>
     <dependency>
@@ -79,6 +83,10 @@
     <dependency>
     	<groupId>com.idega.block.platform</groupId>
     	<artifactId>com.idega.hibernate</artifactId>
+    </dependency>
+    <dependency>
+    	<groupId>com.idega.block.platform</groupId>
+    	<artifactId>com.idega.user</artifactId>
     </dependency>
   </dependencies>
 </project>

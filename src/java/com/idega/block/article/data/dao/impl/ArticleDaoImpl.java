@@ -1,8 +1,8 @@
 package com.idega.block.article.data.dao.impl;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -43,75 +43,13 @@ public class ArticleDaoImpl extends GenericDaoImpl implements ArticleDao {
 
 	private static Logger LOGGER = Logger.getLogger(ArticleDaoImpl.class.getName());
 
+	
 	/**
 	 * @see com.idega.block.article.data.dao.ArticleDao#updateArticle(Date, String, List)
 	 */
 	@Override
-	@Transactional(readOnly=false)
 	public boolean updateArticle(Date timestamp, String uri, Collection<String> categories) {
-		if (timestamp == null || StringUtil.isEmpty(uri)) {
-			LOGGER.warning("Can not update article because URI (" + uri + ") or modification date (" + timestamp + ") are not provided!");
-			return false;
-		}
-
-		boolean result = true;
-
-		if (!ListUtil.isEmpty(categories)) {
-		    this.categoryDao.addCategories(categories);
-		}
-
-		ArticleEntity articleEntity = this.getArticle(uri);
-		if (articleEntity == null) {
-			List<CategoryEntity> categoriesForTheArticle = this.categoryDao.getCategories(categories);
-
-			articleEntity = new ArticleEntity();
-			articleEntity.setUri(uri);
-			articleEntity.setModificationDate(timestamp);
-			if (!ListUtil.isEmpty(categoriesForTheArticle))
-				articleEntity.setCategories(categoriesForTheArticle);
-
-			try {
-				persist(articleEntity);
-			} catch (Exception e) {
-				LOGGER.log(Level.WARNING, "Failed to add article to database: " + articleEntity + " with the categories: " + categoriesForTheArticle, e);
-				return false;
-			}
-
-		} else {
-			List<CategoryEntity> categoryEntitiesInArticle = articleEntity.getCategories();
-			List<CategoryEntity> categoryEntitiesToRemove = new ArrayList<CategoryEntity>(0);
-			/*Deleting all used categories from temporary lists*/
-			if (!ListUtil.isEmpty(categoryEntitiesInArticle) && !ListUtil.isEmpty(categories)) {
-				for (CategoryEntity o : categoryEntitiesInArticle) {
-					if (categories.contains(o.getCategory())) {
-						categories.remove(o.getCategory());
-					} else {
-						categoryEntitiesToRemove.add(o);
-					}
-				}
-
-				/*Performing deletion of unused categories*/
-				result = articleEntity.removeCategories(categoryEntitiesToRemove);
-				/*Performing addition of new a categories*/
-				result = articleEntity.addCategories(this.categoryDao.getCategories(categories));
-			} else if (!ListUtil.isEmpty(categoryEntitiesInArticle) && ListUtil.isEmpty(categories)) {
-				result = articleEntity.removeCategories(categoryEntitiesInArticle);
-			} else if (ListUtil.isEmpty(categoryEntitiesInArticle) && !ListUtil.isEmpty(categories)) {
-				result = articleEntity.addCategories(this.categoryDao.getCategories(categories));
-			}
-
-			try {
-				this.merge(articleEntity);
-			} catch (Exception e) {
-				LOGGER.log(Level.WARNING, "Failed to update article to database: " + articleEntity, e);
-				return false;
-			}
-		}
-
-		if (result)
-			return articleEntity != null && articleEntity.getId() != null;
-
-		return result;
+		return updateArticle(timestamp, uri, categories, null);
 	}
 
 	/**
@@ -203,4 +141,51 @@ public class ArticleDaoImpl extends GenericDaoImpl implements ArticleDao {
 
 		return entities;
 	}
+
+	@Override
+	@Transactional
+	public boolean updateArticle(Date timestamp, String uri,
+			Collection<String> categories, Collection<Integer> editors) {
+		if (timestamp == null || StringUtil.isEmpty(uri)) {
+			LOGGER.warning("Can not update article because URI (" + uri + ") or modification date (" + timestamp + ") are not provided!");
+			return false;
+		}
+
+		boolean result = true;
+		if (!ListUtil.isEmpty(categories)) {
+		    this.categoryDao.addCategories(categories);
+		}
+
+		ArticleEntity articleEntity = this.getArticle(uri);
+		if(articleEntity == null){
+			articleEntity = new ArticleEntity();
+		}
+		List<CategoryEntity> categoriesForTheArticle = this.categoryDao.getCategories(categories);
+		if(!ListUtil.isEmpty(categoriesForTheArticle)){
+			articleEntity.setCategories(categoriesForTheArticle);
+		}
+		
+		articleEntity.setUri(uri);
+		articleEntity.setModificationDate(timestamp);
+		if(!ListUtil.isEmpty(editors)){
+			articleEntity.setEditors(new HashSet<Integer>(editors));
+		}
+			
+		try {
+//			if(merge){
+				merge(articleEntity);
+//			}else{
+//				persist(articleEntity);
+//			}
+		} catch (Exception e) {
+			LOGGER.log(Level.WARNING, "Failed to add article to database: " + articleEntity + " with the categories: " + categoriesForTheArticle, e);
+			return false;
+		}
+		if (result)
+			return articleEntity != null && articleEntity.getId() != null;
+
+		return result;
+	}
+	
+	
 }

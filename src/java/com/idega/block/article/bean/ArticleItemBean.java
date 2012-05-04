@@ -13,7 +13,9 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.rmi.RemoteException;
 import java.sql.Timestamp;
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -37,28 +39,35 @@ import org.apache.webdav.lib.WebdavResources;
 import com.idega.block.article.ArticleCacher;
 import com.idega.block.article.business.ArticleConstants;
 import com.idega.block.article.business.ArticleUtil;
+import com.idega.block.article.component.ArticleItemViewer;
 import com.idega.block.article.data.ArticleEntity;
 import com.idega.block.article.data.dao.ArticleDao;
+import com.idega.block.article.data.dao.CategoryDao;
+import com.idega.business.IBOLookup;
 import com.idega.content.bean.ContentItem;
 import com.idega.content.bean.ContentItemBean;
 import com.idega.content.bean.ContentItemCase;
 import com.idega.content.business.ContentConstants;
 import com.idega.content.business.ContentUtil;
+import com.idega.core.accesscontrol.business.AccessController;
 import com.idega.core.builder.business.BuilderService;
 import com.idega.core.builder.business.BuilderServiceFactory;
 import com.idega.core.content.RepositoryHelper;
 import com.idega.data.IDOStoreException;
 import com.idega.idegaweb.IWMainApplication;
+import com.idega.idegaweb.IWMainApplicationSettings;
 import com.idega.idegaweb.IWUserContext;
 import com.idega.idegaweb.UnavailableIWContext;
 import com.idega.presentation.IWContext;
 import com.idega.slide.business.IWSlideSession;
 import com.idega.slide.util.WebdavExtendedResource;
 import com.idega.slide.util.WebdavRootResource;
+import com.idega.user.business.UserBusiness;
 import com.idega.user.data.Group;
 import com.idega.user.data.User;
 import com.idega.util.CoreConstants;
 import com.idega.util.CoreUtil;
+import com.idega.util.IWTimestamp;
 import com.idega.util.ListUtil;
 import com.idega.util.StringHandler;
 import com.idega.util.StringUtil;
@@ -99,7 +108,7 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 	//Request scope so this should work well and fast
 	private Boolean allowedToEditByCurrentUser = null;
 
-	private ArticleEntity articleEntity;
+	private ArticleEntity articleEntity = null;
 
 	public ArticleItemBean() {
 		super();
@@ -109,46 +118,75 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 		ArticleDao articleDAO = ELUtil.getInstance().getBean(ArticleDao.BEAN_NAME);
 		return articleDAO;
 	}
+	
+	private CategoryDao getCategoryDAO() {
+		CategoryDao categoryDAO = ELUtil.getInstance().getBean(CategoryDao.BEAN_NAME);
+		return categoryDAO;
+	}
 
 	public Boolean isAllowedToEditByCurrentUser() {
 		if(allowedToEditByCurrentUser != null){
 			return allowedToEditByCurrentUser;
 		}
 
-		//This is expensive operation, it is better to have this value set
+		//This is expensive operation, it is better to have called isAllowedToEditByCurrentUser(iwc) first
 
 		IWContext iwc = CoreUtil.getIWContext();
-		if(!iwc.isLoggedOn()){
-			allowedToEditByCurrentUser = Boolean.FALSE;
-			return allowedToEditByCurrentUser;
-		}
-
-		User currentUser = iwc.getCurrentUser();
-		return setAllowedToEditByCurrentUser(currentUser);
+		return isAllowedToEditByCurrentUser(iwc);
 
 	}
 
 	/**
-	 * Sets if this article is allowed to be eddited for the passed user, this property is
+	 * Sets if this article is allowed to be edited for the current user, this property is
 	 * saved for this instance and later is returned by isAllowedToEditByCurrentUser.
 	 *
 	 * @param currentUser the current user for which the check will be done
 	 * @return True if it is allowed to edit, false otherwise.
 	 */
-	public Boolean setAllowedToEditByCurrentUser(User currentUser) {
-		if(currentUser == null){
+	public Boolean isAllowedToEditByCurrentUser(IWContext iwc) {
+		IWMainApplicationSettings settings = iwc.getIWMainApplication().getSettings();
+		String uri;
+		if(!"true".equals(settings.getProperty("use_roles_in_article", "false"))){
+			allowedToEditByCurrentUser = Boolean.TRUE;
+			return allowedToEditByCurrentUser;
+		}
+		
+		if(allowedToEditByCurrentUser != null){
+			return allowedToEditByCurrentUser;
+		}
+		if(!iwc.isLoggedOn()){
 			allowedToEditByCurrentUser = Boolean.FALSE;
 			return allowedToEditByCurrentUser;
 		}
+		AccessController accessController = iwc.getAccessController();
+		try{
+			if(accessController.isAdmin(iwc)){
+				allowedToEditByCurrentUser = Boolean.TRUE;
+				return allowedToEditByCurrentUser;
+			}
+		}catch (Exception e) {
+			Logger.getLogger(ArticleItemViewer.class.getName()).log(Level.WARNING, "Failed to check is admin", e);
+			return Boolean.FALSE;
+		}
+		User currentUser = iwc.getCurrentUser();
+		
 		ArticleEntity articleEntity = getArticleEntity();
 		if(articleEntity == null){
 			//By default there was permitted to edit any article by any user
-			return Boolean.TRUE;
+			allowedToEditByCurrentUser = Boolean.TRUE;
+			return allowedToEditByCurrentUser;
 		}
 		Set<Integer> editors = articleEntity.getEditors();
+		if(ListUtil.isEmpty(editors)){
+			//By default there was permitted to edit any article by any user
+			allowedToEditByCurrentUser = Boolean.TRUE;
+			return allowedToEditByCurrentUser;
+		}
+		
 		Collection <Group> parentGroups;
 		try {
-			parentGroups = currentUser.getParentGroups();
+			UserBusiness userBusiness = IBOLookup.getServiceInstance(iwc, UserBusiness.class);
+			parentGroups = userBusiness.getUserGroups(currentUser);
 
 			//TODO: this probably never happens
 			if(ListUtil.isEmpty(parentGroups)){
@@ -171,14 +209,38 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 		return allowedToEditByCurrentUser;
 	}
 
-	public void setIsAllowedToEditByCurrentUser(Boolean isAllowedToEditByCurrentUser) {
-		this.allowedToEditByCurrentUser = isAllowedToEditByCurrentUser;
+	
+	public void setAllowedToEditByGroup(Group group){
+		List<Integer> groupsIds = Arrays.asList(Integer.valueOf(group.getId()));
+		setAllowedToEditByGroupsIds(groupsIds);
+	}
+	public void setAllowedToEditByGroups(Collection<Group> groups){
+		Collection<Integer> groupsIds = new HashSet<Integer>(groups.size());
+		for(Group group : groups){
+			groupsIds.add(Integer.valueOf(group.getId()));
+		}
+		setAllowedToEditByGroupsIds(groupsIds);
+	}
+	public void setAllowedToEditByGroupsIds(Collection<Integer> groupsIds){
+		if(ListUtil.isEmpty(groupsIds)){
+			return;
+		}
+		allowedToEditByCurrentUser = null;
+		ArticleEntity articleEntity = getArticleEntity();
+		if(groupsIds instanceof Set){
+			articleEntity.setEditors((Set<Integer>) groupsIds);
+		}else{
+			articleEntity.setEditors(new HashSet<Integer>(groupsIds));
+		}
 	}
 
 	public ArticleEntity getArticleEntity() {
-		if (articleEntity == null)
+		if (articleEntity == null){
 			articleEntity = getArticleDAO().getArticle(getResourcePath());
-
+		}
+		if(articleEntity == null){
+			articleEntity = new ArticleEntity();
+		}
 		return articleEntity;
 	}
 
@@ -454,13 +516,31 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 		getLocalizedArticle().setUpdated(b);
 	}
 
+	
+	@Override
+	public void store() throws IDOStoreException {
+		try {
+			storeToSlide();
+		}
+		catch(Exception e){
+			throw new IDOStoreException("Failed storing to slide", e);
+		}
+		ArticleEntity articleEntity = getArticleEntity();
+		if(articleEntity == null){
+			articleEntity = new ArticleEntity();
+		}
+		articleEntity.setModificationDate(getCreationDate());
+		articleEntity.setUri(getResourcePath());
+		ArticleDao articleDao = getArticleDAO();
+		articleDao.updateArticle(IWTimestamp.getTimestampRightNow(), getResourcePath(), getCategories(), articleEntity.getEditors());
+	}
+	
 	/**
 	 * Method to save an article to *.xml file at store/content/files/cms/article server directory
 	 * @throws IDOStoreException
 	 * @see com.idega.block.article.bean.ArticleLocalizedItemBean#store()
 	 */
-	@Override
-	public void store() throws IDOStoreException {
+	public void storeToSlide()  throws IDOStoreException {
 		try {
 			if(isPersistToWebDav()){
 				storeToWebDav();
@@ -1242,6 +1322,20 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 	 */
 	public void setArticleCategories(String articleCategories) {
 		getLocalizedArticle().setArticleCategories(articleCategories);
+	}
+	
+	public void setArticleCategories(Collection<String> categories){
+		if(ListUtil.isEmpty(categories)){
+			setArticleCategories(CoreConstants.EMPTY);
+		}
+		StringBuilder categoryString = new StringBuilder();
+		for(java.util.Iterator<String> iter = categories.iterator();iter.hasNext(); ){
+			categoryString.append(iter.next());
+			if(iter.hasNext()){
+				categoryString.append(CoreConstants.COMMA);
+			}
+		}
+		setArticleCategories(categoryString.toString());
 	}
 
 	@Override

@@ -20,6 +20,9 @@ public interface ArticleDao extends GenericDao {
 
 	public static final String BEAN_NAME = "articleDAO";
 
+	
+	public abstract boolean updateArticle(Date timestamp, String uri, Collection<String> categories,Collection<Integer> editors);
+	
 	/**
 	 * Writes creation date, path, cateogries of an article to database.
 	 * @param timestamp Date type object with creation or modification date

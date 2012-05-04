@@ -1,11 +1,13 @@
 package com.idega.block.article.data;
 
 import java.io.Serializable;
-import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Random;
 import java.util.Set;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -19,10 +21,13 @@ import javax.persistence.ManyToMany;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 
 import org.hibernate.annotations.CollectionOfElements;
 import org.hibernate.annotations.Index;
 
+import com.idega.hibernate.HibernateUtil;
+import com.idega.util.CoreConstants;
 import com.idega.util.ListUtil;
 
 /**
@@ -64,7 +69,7 @@ public class ArticleEntity implements Serializable {
     @JoinTable(name = "JND_ARTICLE_CATEGORY",
             joinColumns = @JoinColumn(name = "ARTICLE_FK"),
             inverseJoinColumns = @JoinColumn(name = "CATEGORY_FK"))
-    private List<CategoryEntity> categories;
+    private Set<CategoryEntity> categories;
     
     
     public static final String receiversProp = "editorsProp";
@@ -72,6 +77,8 @@ public class ArticleEntity implements Serializable {
     @JoinTable(name="article_editors_groups", joinColumns=@JoinColumn(name="ARTICLE_ID"))
     @Column(name="EDITORS_GROUPS_IDS", nullable=false)
     private Set<Integer> editors;
+    
+    
 
     /**
      * Returns group ids. Users of those groups are allowed to edit article.
@@ -91,7 +98,7 @@ public class ArticleEntity implements Serializable {
 		this.editors = editors;
 	}
 
-	private int hashCode;
+	private final int hashCode;
     
     public ArticleEntity() {
     	hashCode = new Random().nextInt();
@@ -114,14 +121,45 @@ public class ArticleEntity implements Serializable {
     }
 
     public void setUri(String uri) {
+    	if (uri.startsWith(CoreConstants.WEBDAV_SERVLET_URI)) {
+    		uri = uri.replaceFirst(CoreConstants.WEBDAV_SERVLET_URI, CoreConstants.EMPTY);
+		}
+
+		if (uri.endsWith(CoreConstants.SLASH)) {
+			uri = uri.substring(0, uri.lastIndexOf(CoreConstants.SLASH));
+		}
         this.uri = uri;
     }
-
-    public List<CategoryEntity> getCategories() {
-        return categories;
+    @Transient
+    private boolean categoriesLoaded = false;
+    public Set<CategoryEntity> getCategories() {
+    	if(categoriesLoaded){
+    		return categories;
+    	}
+    	try {
+			ArticleEntity articleEntity = (ArticleEntity) HibernateUtil.getInstance().loadLazyField(ArticleEntity.class.getMethod("getCategories",Boolean.class), this,Boolean.FALSE);
+			categories = articleEntity.getCategories(false);
+		} catch (Exception e) {
+			Logger.getLogger(ArticleEntity.class.getName()).log(Level.WARNING, "Failed loading article categories", e);
+			return null;
+		}
+    	categoriesLoaded = true;
+    	return categories;
+    }
+    
+    public Set<CategoryEntity> getCategories(Boolean reload){
+    	if(reload){
+    		categoriesLoaded = false;
+    		return getCategories();
+    	}
+    	return categories;
     }
 
     public void setCategories(List<CategoryEntity> categories) {
+        this.categories = new HashSet<CategoryEntity>(categories);
+    }
+    
+    public void setCategories(Set<CategoryEntity> categories) {
         this.categories = categories;
     }
 
@@ -129,12 +167,13 @@ public class ArticleEntity implements Serializable {
         if (ListUtil.isEmpty(categories))
             return Boolean.TRUE;
 		
-        if (this.categories == null) {
-            this.categories = new ArrayList<CategoryEntity>(categories);
+        Set<CategoryEntity> categoriesList = getCategories();
+        if (categoriesList == null) {
+            setCategories(categoriesList);
             return Boolean.TRUE;
         }
 		
-        return this.categories.addAll(categories);
+        return categoriesList.addAll(categories);
     }
 
     public boolean removeCategories(List<CategoryEntity> categories){

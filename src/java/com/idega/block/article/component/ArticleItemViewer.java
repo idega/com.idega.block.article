@@ -79,7 +79,7 @@ public class ArticleItemViewer extends ContentItemViewer {
 	 * @return Returns the cacheEnabled.
 	 */
 	public boolean isCacheEnabled() {
-		return this.cacheEnabled;
+		return false;//this.cacheEnabled;
 	}
 
 	/**
@@ -150,11 +150,8 @@ public class ArticleItemViewer extends ContentItemViewer {
 				initializeComponent(attr[i]);
 			}
 		}
-
-		ArticleItemBean articleItemBean = (ArticleItemBean) getContentItem();
-		if (articleItemBean.isAllowedToEditByCurrentUser())
-			initializeToolbar();
-
+		initializePermissionComponents(context);
+		
 		initializeComments(context);
 		if (isShowCreationDate()) {
 			UIComponent creationDate = getFieldViewerComponent(ContentConstants.ATTRIBUTE_CREATION_DATE);
@@ -163,6 +160,23 @@ public class ArticleItemViewer extends ContentItemViewer {
 			}
 		}
 		//addFeed(IWContext.getIWContext(context));
+	}
+
+	@Override
+	protected void updateComponent(FacesContext context) {
+		initializePermissionComponents(context);
+		super.updateComponent(context);
+	}
+	
+	private void initializePermissionComponents(FacesContext context){
+		IWContext iwc = IWContext.getIWContext(context);
+		ArticleItemBean articleItemBean = (ArticleItemBean) getContentItem();
+		if (articleItemBean.isAllowedToEditByCurrentUser(iwc)){
+			initializeToolbar();
+		}else{
+			ContentItemToolbar toolbar = new ContentItemToolbar(this.getClass().equals(CoreConstants.getArticleItemViewerClass()));
+			this.setToolbar(toolbar);
+		}
 	}
 
 	private boolean canInitField(String attribute) {
@@ -359,6 +373,8 @@ public class ArticleItemViewer extends ContentItemViewer {
 		}
 		super.updateToolbar();
 	}
+	
+	
 
 	/* (non-Javadoc)
 	 * @see com.idega.content.presentation.ContentItemListViewer#getCacher(javax.faces.context.FacesContext)

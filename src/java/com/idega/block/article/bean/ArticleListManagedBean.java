@@ -72,14 +72,14 @@ public class ArticleListManagedBean implements ContentListViewerManagedBean {
 	
 	private List<String> categories = null;
 
-	private String LOCALIZEDKEY_MORE = "itemviewer.more";
+	private final String LOCALIZEDKEY_MORE = "itemviewer.more";
 
 	private String detailsViewerPath = null;
 	private String datePattern = null;
 	private String resourcePath;
 	private String articleItemViewerFilter = null;
 
-	private int numberOfDaysDisplayed = 0;
+	private final int numberOfDaysDisplayed = 0;
 	private int maxNumberOfDisplayed = -1;
 
 	private boolean headlineAsLink=false;
@@ -149,7 +149,7 @@ public class ArticleListManagedBean implements ContentListViewerManagedBean {
 					continue;
 				}
 				articleItemBean.setArticleEntity(articleEntity);
-				articleItemBean.setAllowedToEditByCurrentUser(currentUser);
+				articleItemBean.isAllowedToEditByCurrentUser(iwc);
 				articleList.add(articleItemBean);
 			}
 		}else{

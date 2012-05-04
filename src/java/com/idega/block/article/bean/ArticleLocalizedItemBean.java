@@ -20,6 +20,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
+import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -29,13 +30,17 @@ import javax.jcr.Session;
 
 import org.apache.commons.httpclient.HttpException;
 import org.apache.webdav.lib.WebdavResource;
+import org.springframework.transaction.annotation.Transactional;
 import org.w3c.tidy.Configuration;
 import org.w3c.tidy.Tidy;
 
 import com.idega.block.article.business.ArticleConstants;
 import com.idega.block.article.component.ArticleItemViewer;
+import com.idega.block.article.data.ArticleEntity;
+import com.idega.block.article.data.CategoryEntity;
 import com.idega.block.rss.business.EntryData;
 import com.idega.block.rss.business.RSSBusinessBean;
+import com.idega.business.IBOLookup;
 import com.idega.content.bean.ContentItem;
 import com.idega.content.bean.ContentItemBean;
 import com.idega.content.bean.ContentItemCase;
@@ -44,13 +49,17 @@ import com.idega.content.bean.ContentItemField;
 import com.idega.content.bean.ContentItemFieldBean;
 import com.idega.content.business.categories.CategoryBean;
 import com.idega.core.content.RepositoryHelper;
+import com.idega.core.file.util.MimeTypeUtil;
 import com.idega.data.IDOStoreException;
+import com.idega.idegaweb.IWMainApplication;
 import com.idega.presentation.IWContext;
+import com.idega.slide.business.IWSlideService;
 import com.idega.slide.business.IWSlideSession;
 import com.idega.slide.util.WebdavExtendedResource;
 import com.idega.slide.util.WebdavRootResource;
 import com.idega.util.CoreConstants;
 import com.idega.util.CoreUtil;
+import com.idega.util.ListUtil;
 import com.idega.util.StringHandler;
 import com.idega.util.StringUtil;
 import com.idega.util.xml.XmlUtil;
@@ -75,6 +84,10 @@ public class ArticleLocalizedItemBean extends ContentItemBean implements Seriali
 	 * Comment for <code>serialVersionUID</code>
 	 */
 	private static final long serialVersionUID = -7871069835129148485L;
+	
+	
+	
+	
 
 	private static final Logger LOGGER = Logger.getLogger(ArticleLocalizedItemBean.class.getName());
 
@@ -106,10 +119,10 @@ public class ArticleLocalizedItemBean extends ContentItemBean implements Seriali
 	//private String baseFolderLocation = null;
 	private ArticleItemBean articleItem;
 
-	private XMLNamespace atomNamespace = new XMLNamespace("http://www.w3.org/2005/Atom");
-	private XMLNamespace dcNamespace = new XMLNamespace("http://purl.org/dc/elements/1.1/");
-	private XMLNamespace commentNamespace = new XMLNamespace("http://wellformedweb.org/CommentAPI/");
-	private XMLNamespace attachmentNamespace = new XMLNamespace("http://search.yahoo.com/mrss/");
+	private final XMLNamespace atomNamespace = new XMLNamespace("http://www.w3.org/2005/Atom");
+	private final XMLNamespace dcNamespace = new XMLNamespace("http://purl.org/dc/elements/1.1/");
+	private final XMLNamespace commentNamespace = new XMLNamespace("http://wellformedweb.org/CommentAPI/");
+	private final XMLNamespace attachmentNamespace = new XMLNamespace("http://search.yahoo.com/mrss/");
 
 	private String articleCategories = null; // This string should be set in EditArticleView, parsing submitted categories
 
@@ -433,7 +446,15 @@ public class ArticleLocalizedItemBean extends ContentItemBean implements Seriali
 			//Seems to be connected to creating files in folders created in same tomcat session or similar
 			//not quite clear...
 
-			success = rootResource.putMethod(filePath, stream);
+//			success = rootResource.putMethod(filePath, stream);
+			String folder = filePath.substring(0, filePath.lastIndexOf("/")+1);
+			String name = filePath.substring(filePath.lastIndexOf("/") + 1);
+			
+			
+			IWSlideService slide = IBOLookup.getServiceInstance(IWMainApplication.getDefaultIWMainApplication().getIWApplicationContext(), IWSlideService.class);
+			success = slide.uploadFile(folder, name, MimeTypeUtil.MIME_TYPE_XML, stream);
+//			success = slide.uploadXMLFileAndCreateFoldersFromStringAsRoot(folder, name, article);
+			
 		} catch(Exception e) {
 			e.printStackTrace();
 		} finally {
@@ -446,7 +467,7 @@ public class ArticleLocalizedItemBean extends ContentItemBean implements Seriali
 			try {
 				stream = StringHandler.getStreamFromString(article);
 				String fixedURL = session.getURI(filePath);
-				rootResource.putMethod(fixedURL, stream);
+				success = rootResource.putMethod(fixedURL, stream);
 				rootResource.proppatchMethod(fixedURL, ArticleItemBean.PROPERTY_CONTENT_TYPE,CoreConstants.ARTICLE_FILENAME_SCOPE,true);
 			} catch(Exception e) {
 				e.printStackTrace();
@@ -769,7 +790,8 @@ public class ArticleLocalizedItemBean extends ContentItemBean implements Seriali
 
 		return true;
 	}
-
+	
+	@Transactional
 	private boolean loadArticleFromFeed(XMLElement root) {
 		if (root == null) {
 			return false;
@@ -874,9 +896,26 @@ public class ArticleLocalizedItemBean extends ContentItemBean implements Seriali
 			}
 			setAttachment(attachmentList);
 		}
+		
+		try{
+			ArticleEntity articleEntity = getArticleItem().getArticleEntity();//articleDAO.getArticleEntity(getArticleItem().getResourcePath(), null);//getArticleItem().getArticleEntity();
+			if(articleEntity != null){
+				Set<CategoryEntity> categories = articleEntity.getCategories();
+				if(!ListUtil.isEmpty(categories)){
+					List<String> categoryNames = new ArrayList<String>(categories.size());
+					for(CategoryEntity category : categories){
+						categoryNames.add(category.getCategory());
+					}
+					getArticleItem().setArticleCategories(categoryNames);
+				}
+			}
+		}catch(Exception e){
+			Logger.getLogger(ArticleLocalizedItemBean.class.getName()).log(Level.WARNING, "Failed setting categories to article", e);
+		}
 
 		return true;
 	}
+	
 
 	private String getOnlyBodyContent(String html) {
 		if (StringUtil.isEmpty(html)) {

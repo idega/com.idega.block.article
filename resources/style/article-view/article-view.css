@@ -1,0 +1,54 @@
+@CHARSET "UTF-8";
+
+.editor-item{
+	position:relative;
+	width : 95%;
+	margin:0px auto;
+}
+
+.wysiwyg-textarea{
+	display:none;
+}
+
+.ae-main{
+	background-color: #E0E8D9;
+    border: 1px solid #B9C6AE;
+    padding : 0 0 3em 0;
+}
+
+.input-div-container{
+	position:relative;
+	margin-top:2em;
+	text-align:center;
+	
+}
+.input-div-container label{
+	position:absolute;
+	top:-1em;
+	left:0em;
+	margin:0px auto;
+}
+
+.input-div-container input[type=textarea], .input-div-container input[type=text]{
+	width:100%;
+	font-size:2em;
+	margin:0px auto;
+}
+
+
+/* GroupsFilter */
+.group-filter input[type=text]{
+	width:20em;
+	font-size:medium;
+}
+.group-filter label{
+	position:relative;
+	top:0px;
+	left:auto;
+}
+
+.none-list{
+	padding-left:0px; 
+	list-style : none;
+	overflow : auto;
+}

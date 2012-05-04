@@ -31,7 +31,7 @@ import com.idega.util.StringUtil;
  * You can report about problems to: martynas@idega.com
  * You can expect to find some test cases notice in the end of the file.
  */
-@Repository
+@Repository(CategoryDao.BEAN_NAME)
 @Scope(BeanDefinition.SCOPE_SINGLETON)
 public class CategoryDaoImpl extends GenericDaoImpl implements CategoryDao, ApplicationListener {
 

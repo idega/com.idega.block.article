@@ -25,7 +25,7 @@ import org.hibernate.annotations.Index;
     }
 )
 public class CategoryEntity implements Serializable {
-
+	
     public static final String GET_BY_NAMES = "categoryEntity.getByNames";
     public static final String GET_BY_NAME = "categoryEntity.getByName";
     public static final String GET_ALL = "categoryEntity.getAll";
@@ -41,7 +41,7 @@ public class CategoryEntity implements Serializable {
     @Column(name="CATEGORY", nullable=false)
     private String category;
     
-    private int hashCode;
+    private final int hashCode;
     
     public CategoryEntity() {
         super();
