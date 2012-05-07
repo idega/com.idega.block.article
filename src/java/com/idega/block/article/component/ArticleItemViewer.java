@@ -79,7 +79,7 @@ public class ArticleItemViewer extends ContentItemViewer {
 	 * @return Returns the cacheEnabled.
 	 */
 	public boolean isCacheEnabled() {
-		return false;//this.cacheEnabled;
+		return this.cacheEnabled;
 	}
 
 	/**
