@@ -42,7 +42,6 @@ import com.idega.block.article.business.ArticleUtil;
 import com.idega.block.article.component.ArticleItemViewer;
 import com.idega.block.article.data.ArticleEntity;
 import com.idega.block.article.data.dao.ArticleDao;
-import com.idega.block.article.data.dao.CategoryDao;
 import com.idega.business.IBOLookup;
 import com.idega.content.bean.ContentItem;
 import com.idega.content.bean.ContentItemBean;
@@ -118,11 +117,6 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 		ArticleDao articleDAO = ELUtil.getInstance().getBean(ArticleDao.BEAN_NAME);
 		return articleDAO;
 	}
-	
-	private CategoryDao getCategoryDAO() {
-		CategoryDao categoryDAO = ELUtil.getInstance().getBean(CategoryDao.BEAN_NAME);
-		return categoryDAO;
-	}
 
 	public Boolean isAllowedToEditByCurrentUser() {
 		if(allowedToEditByCurrentUser != null){
@@ -145,12 +139,11 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 	 */
 	public Boolean isAllowedToEditByCurrentUser(IWContext iwc) {
 		IWMainApplicationSettings settings = iwc.getIWMainApplication().getSettings();
-		String uri;
-		if(!"true".equals(settings.getProperty("use_roles_in_article", "false"))){
+		if (!settings.getBoolean(ArticleConstants.USE_ROLES_IN_ARTICLE, Boolean.FALSE)) {
 			allowedToEditByCurrentUser = Boolean.TRUE;
 			return allowedToEditByCurrentUser;
 		}
-		
+
 		if(allowedToEditByCurrentUser != null){
 			return allowedToEditByCurrentUser;
 		}
@@ -169,7 +162,7 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 			return Boolean.FALSE;
 		}
 		User currentUser = iwc.getCurrentUser();
-		
+
 		ArticleEntity articleEntity = getArticleEntity();
 		if(articleEntity == null){
 			//By default there was permitted to edit any article by any user
@@ -182,7 +175,7 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 			allowedToEditByCurrentUser = Boolean.TRUE;
 			return allowedToEditByCurrentUser;
 		}
-		
+
 		Collection <Group> parentGroups;
 		try {
 			UserBusiness userBusiness = IBOLookup.getServiceInstance(iwc, UserBusiness.class);
@@ -209,7 +202,7 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 		return allowedToEditByCurrentUser;
 	}
 
-	
+
 	public void setAllowedToEditByGroup(Group group){
 		List<Integer> groupsIds = Arrays.asList(Integer.valueOf(group.getId()));
 		setAllowedToEditByGroupsIds(groupsIds);
@@ -516,7 +509,7 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 		getLocalizedArticle().setUpdated(b);
 	}
 
-	
+
 	@Override
 	public void store() throws IDOStoreException {
 		try {
@@ -534,7 +527,7 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 		ArticleDao articleDao = getArticleDAO();
 		articleDao.updateArticle(IWTimestamp.getTimestampRightNow(), getResourcePath(), getCategories(), articleEntity.getEditors());
 	}
-	
+
 	/**
 	 * Method to save an article to *.xml file at store/content/files/cms/article server directory
 	 * @throws IDOStoreException
@@ -1323,7 +1316,7 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 	public void setArticleCategories(String articleCategories) {
 		getLocalizedArticle().setArticleCategories(articleCategories);
 	}
-	
+
 	public void setArticleCategories(Collection<String> categories){
 		if(ListUtil.isEmpty(categories)){
 			setArticleCategories(CoreConstants.EMPTY);
