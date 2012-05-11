@@ -741,7 +741,7 @@ public class ArticleLocalizedItemBean extends ContentItemBean implements Seriali
 			String bodyValue = htmlBodyElement.getContentAsString();
 			setBody(bodyValue);
 		} catch(Exception e) {
-			LOGGER.log(Level.WARNING, "Can not load body", e);
+			LOGGER.log(Level.WARNING, "Can not load body for article "+ getHeadline() +" path "+ getResourcePath() , e);
 			setBody(CoreConstants.EMPTY);
 		}
 
