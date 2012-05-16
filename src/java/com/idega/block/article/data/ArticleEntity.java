@@ -70,15 +70,14 @@ public class ArticleEntity implements Serializable {
             joinColumns = @JoinColumn(name = "ARTICLE_FK"),
             inverseJoinColumns = @JoinColumn(name = "CATEGORY_FK"))
     private Set<CategoryEntity> categories;
-    
-    
+
     public static final String receiversProp = "editorsProp";
     @CollectionOfElements(fetch = FetchType.EAGER)
     @JoinTable(name="article_editors_groups", joinColumns=@JoinColumn(name="ARTICLE_ID"))
     @Column(name="EDITORS_GROUPS_IDS", nullable=false)
     private Set<Integer> editors;
-    
-    
+
+    private Integer hashCode = new Random().nextInt();
 
     /**
      * Returns group ids. Users of those groups are allowed to edit article.
@@ -91,20 +90,14 @@ public class ArticleEntity implements Serializable {
 
     /**
      * Sets the ids of groups which users are allowed to edit articles.
-     * 
+     *
      * @param editors The set of ids of groups which users are allowed to edit articles.
      */
 	public void setEditors(Set<Integer> editors) {
 		this.editors = editors;
 	}
 
-	private final int hashCode;
-    
-    public ArticleEntity() {
-    	hashCode = new Random().nextInt();
-    }
-
-    public Long getId(){
+    public Long getId() {
         return id;
     }
 
@@ -121,34 +114,35 @@ public class ArticleEntity implements Serializable {
     }
 
     public void setUri(String uri) {
-    	if (uri.startsWith(CoreConstants.WEBDAV_SERVLET_URI)) {
+    	if (uri.startsWith(CoreConstants.WEBDAV_SERVLET_URI))
     		uri = uri.replaceFirst(CoreConstants.WEBDAV_SERVLET_URI, CoreConstants.EMPTY);
-		}
-
-		if (uri.endsWith(CoreConstants.SLASH)) {
+		if (uri.endsWith(CoreConstants.SLASH))
 			uri = uri.substring(0, uri.lastIndexOf(CoreConstants.SLASH));
-		}
+
         this.uri = uri;
     }
+
     @Transient
     private boolean categoriesLoaded = false;
     public Set<CategoryEntity> getCategories() {
-    	if(categoriesLoaded){
+    	if (categoriesLoaded)
     		return categories;
-    	}
+
     	try {
-			ArticleEntity articleEntity = (ArticleEntity) HibernateUtil.getInstance().loadLazyField(ArticleEntity.class.getMethod("getCategories",Boolean.class), this,Boolean.FALSE);
+			ArticleEntity articleEntity = (ArticleEntity) HibernateUtil.getInstance().loadLazyField(
+					ArticleEntity.class.getMethod("getCategories", Boolean.class), this,Boolean.FALSE);
 			categories = articleEntity.getCategories(false);
 		} catch (Exception e) {
 			Logger.getLogger(ArticleEntity.class.getName()).log(Level.WARNING, "Failed loading article categories", e);
 			return null;
 		}
+
     	categoriesLoaded = true;
     	return categories;
     }
-    
+
     public Set<CategoryEntity> getCategories(Boolean reload){
-    	if(reload){
+    	if (reload) {
     		categoriesLoaded = false;
     		return getCategories();
     	}
@@ -158,7 +152,7 @@ public class ArticleEntity implements Serializable {
     public void setCategories(List<CategoryEntity> categories) {
         this.categories = new HashSet<CategoryEntity>(categories);
     }
-    
+
     public void setCategories(Set<CategoryEntity> categories) {
         this.categories = categories;
     }
@@ -166,24 +160,23 @@ public class ArticleEntity implements Serializable {
     public boolean addCategories(List<CategoryEntity> categories){
         if (ListUtil.isEmpty(categories))
             return Boolean.TRUE;
-		
+
         Set<CategoryEntity> categoriesList = getCategories();
         if (categoriesList == null) {
             setCategories(categoriesList);
             return Boolean.TRUE;
         }
-		
+
         return categoriesList.addAll(categories);
     }
 
     public boolean removeCategories(List<CategoryEntity> categories){
-        if (ListUtil.isEmpty(categories)) {
+        if (ListUtil.isEmpty(categories))
             return Boolean.TRUE;
-        }
-		
+
         if (this.categories == null)
             return Boolean.FALSE;
-		
+
         return this.categories.removeAll(categories);
     }
 
@@ -196,7 +189,7 @@ public class ArticleEntity implements Serializable {
 	public boolean equals(Object obj) {
 		if (!(obj instanceof ArticleEntity))
 			return false;
-		
+
 		ArticleEntity article = (ArticleEntity) obj;
 		try {
 			return getUri().equals(article.getUri()) && getId().longValue() == article.getId().longValue();
@@ -208,7 +201,10 @@ public class ArticleEntity implements Serializable {
 
 	@Override
 	public int hashCode() {
+		if (hashCode == null)
+			hashCode = new Random().nextInt();
+
 		return hashCode;
 	}
-    
+
 }
