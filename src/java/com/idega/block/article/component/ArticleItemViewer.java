@@ -171,6 +171,9 @@ public class ArticleItemViewer extends ContentItemViewer {
 	private void initializePermissionComponents(FacesContext context){
 		IWContext iwc = IWContext.getIWContext(context);
 		ArticleItemBean articleItemBean = (ArticleItemBean) getContentItem();
+		if(articleItemBean == null){
+			return;
+		}
 		if (articleItemBean.isAllowedToEditByCurrentUser(iwc)){
 			initializeToolbar();
 		}else{
