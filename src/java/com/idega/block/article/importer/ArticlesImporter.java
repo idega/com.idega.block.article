@@ -2,7 +2,6 @@ package com.idega.block.article.importer;
 
 import java.io.IOException;
 import java.rmi.RemoteException;
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -84,8 +83,8 @@ public class ArticlesImporter extends DefaultSpringBean implements ApplicationLi
                 if (!cbr.isBadColunmsExist()) {
                 	settings.setProperty(CATEGORIES_BUG_FIXED_PROP, Boolean.TRUE.toString());
                 }
-            } catch (SQLException e) {
-                LOGGER.log(Level.SEVERE, "Failed to check for wrong tables", e);
+            } catch (Exception e) {
+                LOGGER.log(Level.WARNING, "Failed to check for wrong tables", e);
             }
 
             if (!settings.getBoolean(CATEGORIES_BUG_FIXED_PROP)) {
