@@ -1,6 +1,7 @@
 package com.idega.block.article.data;
 
 import java.io.Serializable;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
@@ -125,9 +126,13 @@ public class ArticleEntity implements Serializable {
     @Transient
     private boolean categoriesLoaded = false;
     public Set<CategoryEntity> getCategories() {
-    	if (categoriesLoaded)
+    	if (categoriesLoaded){
     		return categories;
-
+    	}
+    	
+    	if(id == null){
+    		return Collections.emptySet();
+    	}
     	try {
 			ArticleEntity articleEntity = (ArticleEntity) HibernateUtil.getInstance().loadLazyField(
 					ArticleEntity.class.getMethod("getCategories", Boolean.class), this,Boolean.FALSE);

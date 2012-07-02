@@ -512,12 +512,6 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 
 	@Override
 	public void store() throws IDOStoreException {
-		try {
-			storeToSlide();
-		}
-		catch(Exception e){
-			throw new IDOStoreException("Failed storing to slide", e);
-		}
 		ArticleEntity articleEntity = getArticleEntity();
 		if(articleEntity == null){
 			articleEntity = new ArticleEntity();
@@ -526,6 +520,12 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 		articleEntity.setUri(getResourcePath());
 		ArticleDao articleDao = getArticleDAO();
 		articleDao.updateArticle(IWTimestamp.getTimestampRightNow(), getResourcePath(), getCategories(), articleEntity.getEditors());
+		try {
+			storeToSlide();
+		}
+		catch(Exception e){
+			throw new IDOStoreException("Failed storing to slide", e);
+		}
 	}
 
 	/**

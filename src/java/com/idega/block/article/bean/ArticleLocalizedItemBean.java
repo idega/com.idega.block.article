@@ -899,14 +899,27 @@ public class ArticleLocalizedItemBean extends ContentItemBean implements Seriali
 		
 		try{
 			ArticleEntity articleEntity = getArticleItem().getArticleEntity();//articleDAO.getArticleEntity(getArticleItem().getResourcePath(), null);//getArticleItem().getArticleEntity();
-			if(articleEntity != null){
-				Set<CategoryEntity> categories = articleEntity.getCategories();
-				if(!ListUtil.isEmpty(categories)){
-					List<String> categoryNames = new ArrayList<String>(categories.size());
-					for(CategoryEntity category : categories){
-						categoryNames.add(category.getCategory());
+			if(articleEntity.getId() == null){
+				//From XML
+				List<XMLElement> xmlCategories = entry.getChildren("category", atomNamespace);
+				if(!ListUtil.isEmpty(xmlCategories)){
+					ArrayList<String> categories = new ArrayList<String>();
+					for(XMLElement category : xmlCategories){
+						categories.add(category.getValue());
 					}
-					getArticleItem().setArticleCategories(categoryNames);
+					getArticleItem().setArticleCategories(categories);
+				}
+			}else{
+				// From DB
+				if(articleEntity != null){
+					Set<CategoryEntity> categories = articleEntity.getCategories();
+					if(!ListUtil.isEmpty(categories)){
+						List<String> categoryNames = new ArrayList<String>(categories.size());
+						for(CategoryEntity category : categories){
+							categoryNames.add(category.getCategory());
+						}
+						getArticleItem().setArticleCategories(categoryNames);
+					}
 				}
 			}
 		}catch(Exception e){
