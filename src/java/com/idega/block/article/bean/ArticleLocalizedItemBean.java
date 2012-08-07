@@ -41,6 +41,7 @@ import com.idega.content.bean.ContentItemFieldBean;
 import com.idega.content.business.categories.CategoryBean;
 import com.idega.data.IDOStoreException;
 import com.idega.presentation.IWContext;
+import com.idega.repository.bean.RepositoryItem;
 import com.idega.util.CoreConstants;
 import com.idega.util.CoreUtil;
 import com.idega.util.IOUtil;
@@ -550,14 +551,13 @@ public class ArticleLocalizedItemBean extends ContentItemBean implements Seriali
 	 * The beans atributes are then set according to the information in the XML file
 	 */
 	@Override
-	protected boolean load(Node articleXMLFile) throws IOException {
+	protected boolean load(RepositoryItem articleXMLFile) throws IOException {
 		XMLDocument bodyDoc = null;
 		InputStream stream = null;
 		try {
-			Node theArticle = articleXMLFile;
-			if (theArticle != null) {
-				setResourcePath(theArticle.getPath());
-				stream = getRepositoryService().getFileContents(theArticle);
+			if (articleXMLFile != null) {
+				setResourcePath(articleXMLFile.getPath());
+				stream = getRepositoryService().getFileContents(getResourcePath());
 				bodyDoc = new XMLDocument(XmlUtil.getJDOMXMLDocument(stream));
 			} else {
 				bodyDoc = null;

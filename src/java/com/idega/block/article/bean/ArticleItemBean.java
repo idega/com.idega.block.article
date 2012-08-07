@@ -13,6 +13,7 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.rmi.RemoteException;
 import java.sql.Timestamp;
+import java.util.Collection;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -22,14 +23,11 @@ import javax.faces.context.FacesContext;
 import javax.faces.event.AbortProcessingException;
 import javax.faces.event.ValueChangeEvent;
 import javax.faces.event.ValueChangeListener;
-import javax.jcr.Node;
-import javax.jcr.NodeIterator;
 import javax.jcr.RepositoryException;
 
 import com.idega.block.article.ArticleCacher;
 import com.idega.block.article.business.ArticleConstants;
 import com.idega.block.article.business.ArticleUtil;
-import com.idega.builder.bean.AdvancedProperty;
 import com.idega.content.bean.ContentItem;
 import com.idega.content.bean.ContentItemBean;
 import com.idega.content.bean.ContentItemCase;
@@ -42,8 +40,12 @@ import com.idega.data.IDOStoreException;
 import com.idega.idegaweb.IWMainApplication;
 import com.idega.idegaweb.UnavailableIWContext;
 import com.idega.presentation.IWContext;
+import com.idega.repository.RepositoryService;
+import com.idega.repository.bean.Property;
+import com.idega.repository.bean.RepositoryItem;
 import com.idega.util.CoreConstants;
 import com.idega.util.CoreUtil;
+import com.idega.util.ListUtil;
 import com.idega.util.StringHandler;
 import com.idega.util.StringUtil;
 import com.idega.xml.XMLException;
@@ -359,8 +361,7 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 //		node.setProperty(CONTENT_TYPE_WITH_PREFIX, "LocalizedFile");
 //		node.save();
 
-		Node articleFolder = getRepositoryService().getNode(articleFolderPath);
-		getRepositoryService().setProperties(articleFolder, new AdvancedProperty(CONTENT_TYPE_WITH_PREFIX, "LocalizedFile"));
+		getRepositoryService().setProperties(articleFolderPath, new Property(CONTENT_TYPE_WITH_PREFIX, "LocalizedFile"));
 	}
 
 	/* (non-Javadoc)
@@ -710,45 +711,41 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 	 * </p>
 	 */
 	private void makesureStandardFolderisCreated() {
-		/*IWUserContext iwuc = CoreUtil.getIWContext();
-		IWSlideService slideService = getIWSlideService(iwuc);
+		IWContext iwc = CoreUtil.getIWContext();
+		RepositoryService repository = getRepositoryService();
 		String contentFolderPath = ArticleUtil.getContentRootPath();
 		String articlePath = ArticleUtil.getArticleBaseFolderPath();
 
-
 		try {
 			//first make the folder:
-			slideService.createAllFoldersInPathAsRoot(articlePath);
+			repository.createFolderAsRoot(articlePath);
 
-			//was not used? slideService.getWebdavResourceAuthenticatedAsRoot(contentFolderPath);
-			AccessControlList aclList = slideService.getAccessControlList(contentFolderPath);
-			AuthenticationBusiness authBusiness = ((IWSlideServiceBean)slideService).getAuthenticationBusiness();
-
-			String editorRoleUri = authBusiness.getRoleURI(StandardRoles.ROLE_KEY_EDITOR);
-			Ace editorAce = new Ace(editorRoleUri);
-			editorAce.addPrivilege(Privilege.READ);
-			editorAce.addPrivilege(Privilege.WRITE);
-			AccessControlEntry editorEntry = new AccessControlEntry(editorAce,AccessControlEntry.PRINCIPAL_TYPE_ROLE);
-			aclList.add(editorEntry);
-
-			String authorRoleUri = authBusiness.getRoleURI(StandardRoles.ROLE_KEY_AUTHOR);
-			Ace authorAce = new Ace(authorRoleUri);
-			authorAce.addPrivilege(Privilege.READ);
-			authorAce.addPrivilege(Privilege.WRITE);
-			AccessControlEntry authorEntry = new AccessControlEntry(authorAce,AccessControlEntry.PRINCIPAL_TYPE_ROLE);
-			aclList.add(authorEntry);
-
-
-			slideService.storeAccessControlList(aclList);
-
-			//debug:
-			aclList = slideService.getAccessControlList(contentFolderPath);
-
-		}
-		catch (Exception e) {
+			//	TODO
+//			AccessControlList aclList = repository.getAccessControlList(contentFolderPath);
+//			AuthenticationBusiness authBusiness = (AuthenticationBusiness) IBOLookup.getServiceInstance(iwc, AuthenticationBusiness.class);
+//
+//			String editorRoleUri = authBusiness.getRoleURI(StandardRoles.ROLE_KEY_EDITOR);
+//			Ace editorAce = new Ace(editorRoleUri);
+//			editorAce.addPrivilege(Privilege.READ);
+//			editorAce.addPrivilege(Privilege.WRITE);
+//			AccessControlEntry editorEntry = new AccessControlEntry(editorAce,AccessControlEntry.PRINCIPAL_TYPE_ROLE);
+//			aclList.add(editorEntry);
+//
+//			String authorRoleUri = authBusiness.getRoleURI(StandardRoles.ROLE_KEY_AUTHOR);
+//			Ace authorAce = new Ace(authorRoleUri);
+//			authorAce.addPrivilege(Privilege.READ);
+//			authorAce.addPrivilege(Privilege.WRITE);
+//			AccessControlEntry authorEntry = new AccessControlEntry(authorAce,AccessControlEntry.PRINCIPAL_TYPE_ROLE);
+//			aclList.add(authorEntry);
+//
+//
+//			repository.storeAccessControlList(aclList);
+//
+//			//debug:
+//			aclList = slideService.getAccessControlList(contentFolderPath);
+		} catch (Exception e) {
 			e.printStackTrace();
-		}*/
-
+		}
 	}
 
 	/**
@@ -820,29 +817,26 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 	 * @throws RepositoryException
 	 */
 	@Override
-	protected boolean load(Node articleNode) throws IOException, RepositoryException {
-		Node localizedArticleFile = null;
-		//First check if the resource is a folder, as it should be
-		if (articleNode.getPrimaryNodeType().isNodeType(getRepositoryService().getRepositoryConstantFolderType())) {
-			NodeIterator resources = articleNode.getNodes();
+	protected boolean load(RepositoryItem article) throws IOException, RepositoryException {
+		RepositoryItem localizedArticleFile = null;
+		// First check if the resource is a folder, as it should be
+		if (article.isCollection()) {
+			Collection<RepositoryItem> resources = article.getChildResources();
 			String userLanguageArticleResourcePath = getArticleDefaultLocalizedResourcePath();
-			if(containsChildResourceWithPath(resources,userLanguageArticleResourcePath)){ //the language that the user has selected
-				localizedArticleFile = getRepositoryService().getNode(userLanguageArticleResourcePath);//articleNode.getSession().getRootNode().getNode(userLanguageArticleResourcePath);
+			if (containsChildResourceWithPath(resources, userLanguageArticleResourcePath)) { //the language that the user has selected
+				localizedArticleFile = getRepositoryService().getRepositoryItem(userLanguageArticleResourcePath);
 				setAvailableInSelectedLanguage();
-			}
-			else{
+			} else {
 				//selected language not available:
-				if(getAllowFallbackToSystemLanguage()){
+				if (getAllowFallbackToSystemLanguage()) {
 					String systemLanguageArticleResourcePath = getArticleDefaultLocalizedResourcePath(getSystemLanguage());
-					if(containsChildResourceWithPath(resources,systemLanguageArticleResourcePath)){ //the language default in the system.
-						localizedArticleFile = getRepositoryService().getNode(systemLanguageArticleResourcePath);//articleNode.getSession().getRootNode().getNode(systemLanguageArticleResourcePath);
+					if (containsChildResourceWithPath(resources, systemLanguageArticleResourcePath)){ //the language default in the system.
+						localizedArticleFile = getRepositoryService().getRepositoryItem(systemLanguageArticleResourcePath);
 						setAvailableInSelectedLanguage();
-					}
-					else{
+					} else{
 						setNotAvailableInSelectedLanguage();
 					}
-				}
-				else{
+				} else{
 					setNotAvailableInSelectedLanguage();
 				}
 
@@ -851,27 +845,24 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 			String path = getResourcePath();
 			setLanguageFromFilePath(path);
 			String parentFolder;
-			parentFolder = articleNode.getParent().getPath();
+			parentFolder = article.getParentPath();
 			setResourcePath(parentFolder);
 
 			return load(parentFolder);
 		}
-		if(localizedArticleFile!=null){
+		if (localizedArticleFile!=null) {
 			return getLocalizedArticle().load(localizedArticleFile);
 		}
 		return false;
 	}
 
-	protected boolean containsChildResourceWithPath(NodeIterator resources,	String childFullPath) {
-		while (resources.hasNext()) {
-			Node child = resources.nextNode();
-			try {
-				if(child.getPath().equals(childFullPath)){
-					return true;
-				}
-			} catch (RepositoryException e) {
-				e.printStackTrace();
-			}
+	protected boolean containsChildResourceWithPath(Collection<RepositoryItem> resources, String childFullPath) {
+		if (ListUtil.isEmpty(resources))
+			return false;
+
+		for (RepositoryItem child: resources) {
+			if(child.getPath().equals(childFullPath))
+				return true;
 		}
 		return false;
 	}

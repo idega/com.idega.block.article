@@ -11,6 +11,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.jcr.RepositoryException;
+import javax.jcr.observation.Event;
 import javax.jcr.observation.EventIterator;
 import javax.jcr.query.Query;
 import javax.jcr.query.QueryResult;
@@ -120,7 +121,7 @@ public class ArticleRSSProducer extends RSSAbstractProducer implements RSSProduc
 		} else {
 			//	Generate RSS and store and the dispatch to it and add a listener to that directory
 			try {
-				//todo code the 3 different cases (see description)
+				//	TODO: code the 3 different cases (see description)
 				searchForArticles(rssRequest, feedParentFolder, feedFile, categories, articles, extraURI);
 				rssFileURIsCacheList.add(feedFile);
 
@@ -418,8 +419,21 @@ public class ArticleRSSProducer extends RSSAbstractProducer implements RSSProduc
 
 	@Override
 	public void onEvent(EventIterator events) {
-		// TODO Auto-generated method stub
+		for (; events.hasNext();) {
+			Event event = events.nextEvent();
 
+			try {
+				//	On a file change this code checks if RSS file already exists and if so updates it (overwrites) with a new folder list
+				String uri = event.getPath();
+				//	Only do it for articles (whenever something changes in the articles folder)
+				if (!StringUtil.isEmpty(uri) && uri.indexOf("/cms/article/") >-1  ) {
+					// TODO don't remove cache on comments change, just check the URI for comments RSS.
+					getrssFileURIsCacheList().clear();
+				}
+			} catch (RepositoryException e) {
+				LOGGER.log(Level.WARNING, "Error handling event " + event, e);
+			}
+		}
 	}
 
 	RepositoryService getRepositoryService() {
@@ -427,5 +441,15 @@ public class ArticleRSSProducer extends RSSAbstractProducer implements RSSProduc
 			ELUtil.getInstance().autowire(this);
 		}
 		return repository;
+	}
+
+	@Override
+	public String getPath() {
+		return CoreConstants.ARTICLE_CONTENT_PATH;
+	}
+
+	@Override
+	public int getEventTypes() {
+		return Event.NODE_ADDED | Event.NODE_MOVED | Event.NODE_REMOVED;
 	}
 }

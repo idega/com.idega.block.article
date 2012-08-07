@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
 
@@ -29,28 +30,28 @@ import com.idega.util.StringUtil;
 import com.idega.util.expression.ELUtil;
 import com.idega.webface.WFUtil;
 
-@Scope("singleton")
+@Scope(BeanDefinition.SCOPE_SINGLETON)
 @Service(ArticleItemInfoFetcher.SPRING_BEAN_IDENTIFIER)
 public class ArticleItemInfoFetcher {
 
 	public static final String SPRING_BEAN_IDENTIFIER = "articleItemInfoFetcher";
-	
+
 	private static final Logger LOGGER = Logger.getLogger(ArticleItemInfoFetcher.class.getName());
-	
+
 	public ArticleFields getArticleInfo(String resourcePath) {
 		if (StringUtil.isEmpty(resourcePath)) {
 			return null;
 		}
-		
+
 		IWContext iwc = CoreUtil.getIWContext();
 		if (iwc == null) {
 			return null;
 		}
-		
+
 		if (!hasRights(iwc)) {
 			return null;
 		}
-		
+
 		ArticleItemBean articleBean = null;
 		Object o = WFUtil.getBeanInstance(ManagedContentBeans.ARTICLE_ITEM_BEAN_ID);
 		if (o instanceof ArticleItemBean) {
@@ -59,9 +60,9 @@ public class ArticleItemInfoFetcher {
 		else {
 			articleBean = new ArticleItemBean();
 			articleBean.setResourcePath(resourcePath);
-			
+
 		}
-		
+
 		boolean needToLoad = false;
 		String currentResourcePath = articleBean.getResourcePath();
 		if (StringUtil.isEmpty(currentResourcePath) || !resourcePath.equals(currentResourcePath)) {
@@ -76,29 +77,29 @@ public class ArticleItemInfoFetcher {
 				return null;
 			}
 		}
-		
+
 		ArticleFields info = new ArticleFields();
-		
+
 		info.setHeader(articleBean.getHeadline());
-		
+
 		IWTimestamp date = articleBean.getPublishedDate() == null ? null : new IWTimestamp(articleBean.getPublishedDate());
 		info.setDate(date == null ? CoreConstants.EMPTY : date.getLocaleDateAndTime(iwc.getCurrentLocale(), DateFormat.SHORT, DateFormat.SHORT));
-		
+
 		info.setAuthor(articleBean.getAuthor());
 		info.setBody(articleBean.getBody());
 		info.setTeaser(articleBean.getTeaser());
-		
+
 		return info;
 	}
-	
+
 	public List<String> getArticleWasNotDeletedMessage() {
 		String articleWasNotDeleted = "Oops... Article was not deleted - some error occurred...";
-		
+
 		IWContext iwc = CoreUtil.getIWContext();
 		if (iwc == null) {
 			return null;
 		}
-		
+
 		IWResourceBundle iwrb = null;
 		try {
 			iwrb = ArticleUtil.getBundle().getResourceBundle(iwc);
@@ -108,17 +109,17 @@ public class ArticleItemInfoFetcher {
 		if (iwrb == null) {
 			return Arrays.asList(articleWasNotDeleted);
 		}
-		
+
 		List<String> resources = new ArrayList<String>();
 		resources.add(iwrb.getLocalizedString("article_item.article_was_not_deleted", articleWasNotDeleted));
-		
+
 		Web2Business web2 = ELUtil.getInstance().getBean(Web2Business.SPRING_BEAN_IDENTIFIER);
 		resources.add(web2.getBundleUriToHumanizedMessagesStyleSheet());
 		resources.add(web2.getBundleUriToHumanizedMessagesScript());
-		
+
 		return resources;
 	}
-	
+
 	public String getButtons(String resourcePath, String previousAction, boolean fromArticleItemListViewer) {
 		if (StringUtil.isEmpty(resourcePath) || StringUtil.isEmpty(previousAction)) {
 			return null;
@@ -126,7 +127,7 @@ public class ArticleItemInfoFetcher {
 		if (ContentConstants.CONTENT_ITEM_ACTION_EDIT.equals(previousAction)) {
 			return null;
 		}
-		
+
 		IWContext iwc = CoreUtil.getIWContext();
 		if (iwc == null) {
 			return null;
@@ -140,7 +141,7 @@ public class ArticleItemInfoFetcher {
 		toolbar.setToolbarActions(ContentConstants.CONTENT_ITEM_ACTION_CREATE.equals(previousAction) ?
 				new String[] {ContentConstants.CONTENT_ITEM_ACTION_DELETE, ContentConstants.CONTENT_ITEM_ACTION_EDIT} :
 				new String[] {ContentConstants.CONTENT_ITEM_ACTION_CREATE});
-		
+
 		BuilderService builderService = null;
 		try {
 			builderService = BuilderServiceFactory.getBuilderService(iwc);
@@ -150,14 +151,14 @@ public class ArticleItemInfoFetcher {
 		if (builderService == null) {
 			return null;
 		}
-		
+
 		iwc.setSessionAttribute(ContentConstants.RENDERING_COMPONENT_OF_ARTICLE_LIST, Boolean.valueOf(fromArticleItemListViewer));
 		String buttonsHTML = builderService.getRenderedComponent(toolbar, iwc, true);
 		iwc.removeSessionAttribute(ContentConstants.RENDERING_COMPONENT_OF_ARTICLE_LIST);
-		
+
 		return buttonsHTML;
 	}
-	
+
 	private boolean hasRights(IWContext iwc) {
 		if (!iwc.isLoggedOn()) {
 			return false;
@@ -165,8 +166,8 @@ public class ArticleItemInfoFetcher {
 		if (!iwc.hasRole(StandardRoles.ROLE_KEY_AUTHOR) || !iwc.hasRole(StandardRoles.ROLE_KEY_EDITOR)) {
 			return false;
 		}
-		
+
 		return true;
 	}
-	
+
 }

@@ -39,6 +39,7 @@ import com.idega.core.builder.business.BuilderService;
 import com.idega.core.cache.IWCacheManager2;
 import com.idega.core.component.bean.RenderedComponent;
 import com.idega.core.contact.data.Email;
+import com.idega.core.idgenerator.business.UUIDGenerator;
 import com.idega.dwr.reverse.ScriptCaller;
 import com.idega.idegaweb.IWMainApplication;
 import com.idega.idegaweb.IWMainApplicationSettings;
@@ -311,7 +312,7 @@ public class CommentsEngineBean extends IBOSessionBean implements CommentsEngine
 		entry.setAuthors(authors);
 
 		// ID
-		String id = getThemesHelper().getUniqueIdByNumberAndDate(ContentConstants.COMMENT_SCOPE);
+		String id = UUIDGenerator.getInstance().generateUUID();
 		entry.setId(id);
 
 		if (!StringUtil.isEmpty(uri)) {
