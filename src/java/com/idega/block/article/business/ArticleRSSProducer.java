@@ -17,8 +17,6 @@ import javax.jcr.query.Query;
 import javax.jcr.query.QueryResult;
 import javax.servlet.ServletException;
 
-import org.springframework.beans.factory.annotation.Autowired;
-
 import com.idega.block.article.component.ArticleItemViewer;
 import com.idega.block.article.component.ArticleListViewer;
 import com.idega.block.rss.business.RSSAbstractProducer;
@@ -64,9 +62,6 @@ public class ArticleRSSProducer extends RSSAbstractProducer implements RSSProduc
 	public static final String PATH = CoreConstants.WEBDAV_SERVLET_URI + ARTICLE;
 
 	private List<String> rssFileURIsCacheList = new ArrayList<String>();
-
-	@Autowired
-	private RepositoryService repository;
 
 	private int numberOfDaysDisplayed = 0;
 
@@ -437,10 +432,7 @@ public class ArticleRSSProducer extends RSSAbstractProducer implements RSSProduc
 	}
 
 	RepositoryService getRepositoryService() {
-		if (repository == null) {
-			ELUtil.getInstance().autowire(this);
-		}
-		return repository;
+		return ELUtil.getInstance().getBean(RepositoryService.class);
 	}
 
 	@Override
