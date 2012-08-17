@@ -187,7 +187,7 @@ public class ArticleEntity implements Serializable {
 
     @Override
     public String toString(){
-        return this.id + " " + this.uri + ", categories: " + getCategories();
+        return "{ id: " + this.id + ", url: " + this.uri + ", categories: " + getCategories() + ", modificationDate : " + getModificationDate();
     }
 
 	@Override

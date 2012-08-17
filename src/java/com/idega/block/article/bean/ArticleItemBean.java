@@ -15,6 +15,7 @@ import java.rmi.RemoteException;
 import java.sql.Timestamp;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
@@ -233,6 +234,8 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 		}
 		if(articleEntity == null){
 			articleEntity = new ArticleEntity();
+			articleEntity.setUri(getResourcePath());
+			articleEntity.setModificationDate(new Date());
 		}
 		return articleEntity;
 	}
@@ -1347,6 +1350,15 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 	 */
 	public List<String> getCategories() {
 		return getLocalizedArticle().getCategories();
+	}
+	
+	public String getFilesResourcePath(){
+		String resourcesPath = getResourcePath();
+		if(!resourcesPath.endsWith("/")){
+			resourcesPath = resourcesPath + "/";
+		}
+		resourcesPath = resourcesPath + "article-files/";
+		return resourcesPath;
 	}
 
 }

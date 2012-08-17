@@ -96,12 +96,7 @@ public class ArticleViewRequestBean  extends DefaultSpringBean{
 	}
 	
 	public String getArticleResourcesPath() throws IOException{
-		String resourcesPath = getResourcePath();
-		if(!resourcesPath.endsWith("/")){
-			resourcesPath = resourcesPath + "/";
-		}
-		resourcesPath = resourcesPath + "article-files/";
-		return resourcesPath;
+		return getArticleItemBean().getFilesResourcePath();
 	}
 	public String getUriToFileBrowser() throws IOException{
 		BuilderService builderService;
@@ -125,11 +120,7 @@ public class ArticleViewRequestBean  extends DefaultSpringBean{
 	public String getUploadPath() throws IOException{
 		String uploadPath = iwc.getParameter(ArticleFileBrowser.PARAMETER_UPLOAD_PATH);
 		if(uploadPath == null){
-			uploadPath = getArticleItemBean().getResourcePath();
-			if(!uploadPath.endsWith("/")){
-				uploadPath = uploadPath + "/";
-			}
-			uploadPath = uploadPath + "article-files/";
+			uploadPath = getArticleItemBean().getFilesResourcePath();
 		}
 		if(!uploadPath.startsWith(CoreConstants.SLASH)){
 			uploadPath = CoreConstants.SLASH + uploadPath;
