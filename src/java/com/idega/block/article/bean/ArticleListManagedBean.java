@@ -95,9 +95,9 @@ public class ArticleListManagedBean implements ContentListViewerManagedBean {
 	private Boolean showDetailsCommand = null;
 
 	@Autowired
-	private ArticleDao articleDao;
+	private ArticleDao<ArticleEntity> articleDao;
 
-	public ArticleDao getArticleDao(){
+	public ArticleDao<ArticleEntity> getArticleDao(){
 		if (articleDao == null)
 			ELUtil.getInstance().autowire(this);
 		return this.articleDao;
@@ -545,7 +545,7 @@ public class ArticleListManagedBean implements ContentListViewerManagedBean {
 	@Transactional(readOnly = true)
 	private List<ArticleEntity> getArticlesFromDatabase(String folder,List<String> categories, IWContext iwc, int maxResults){
 		String uriFrom = iwc.getParameter(ContentViewer.PARAMETER_CONTENT_RESOURCE);
-		return this.getArticleDao().getArticlesByCategoriesAndAmount(categories, uriFrom, maxResults);
+		return this.getArticleDao().getByCategories(categories, uriFrom, maxResults);
 	}
 
 	public Collection<SearchResult> getArticleSearcResults(String folder, List<String> categories, IWContext iwc) {

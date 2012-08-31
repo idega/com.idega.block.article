@@ -67,7 +67,6 @@ import com.idega.user.data.Group;
 import com.idega.user.data.User;
 import com.idega.util.CoreConstants;
 import com.idega.util.CoreUtil;
-import com.idega.util.IWTimestamp;
 import com.idega.util.ListUtil;
 import com.idega.util.StringHandler;
 import com.idega.util.StringUtil;
@@ -114,8 +113,8 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 		super();
 	}
 
-	private ArticleDao getArticleDAO() {
-		ArticleDao articleDAO = ELUtil.getInstance().getBean(ArticleDao.BEAN_NAME);
+	private ArticleDao<ArticleEntity> getArticleDAO() {
+		ArticleDao<ArticleEntity> articleDAO = ELUtil.getInstance().getBean(ArticleDao.BEAN_NAME);
 		return articleDAO;
 	}
 
@@ -230,7 +229,7 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 
 	public ArticleEntity getArticleEntity() {
 		if (articleEntity == null){
-			articleEntity = getArticleDAO().getArticle(getResourcePath());
+			articleEntity = getArticleDAO().getByUri(getResourcePath());
 		}
 		if(articleEntity == null){
 			articleEntity = new ArticleEntity();
@@ -521,8 +520,8 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 		}
 		articleEntity.setModificationDate(getCreationDate());
 		articleEntity.setUri(getResourcePath());
-		ArticleDao articleDao = getArticleDAO();
-		articleDao.updateArticle(IWTimestamp.getTimestampRightNow(), getResourcePath(), getCategories(), articleEntity.getEditors());
+		articleEntity = articleEntity.merge();
+		setArticleEntity(articleEntity);
 		try {
 			storeToSlide();
 		}

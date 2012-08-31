@@ -23,7 +23,7 @@
 			<p>#{localizedStrings['com.idega.block.article']['permission_denied']}</p>
 		</h:panelGroup>
 		<h:panelGroup layout="block" rendered="#{articleViewRequestBean.allowedToPerformAction}">
-			<form>
+			<form onsubmit="ArticleEditHelper.saveAricle({articleUri : '#{articleViewRequestBean.resourcePath}', headlineId : 'ae-input-headline', bodyId : 'ae-input-body', teaserId : 'ae-input-teaser'}); return false;">
 				<div class="input-div-container">
 					<div class="editor-item">
 						<label for="ae-input-headline">#{localizedStrings['com.idega.block.article']['headline']}</label>
@@ -66,8 +66,7 @@
 				</div>
 				<div class="input-div-container">
 					<div class="editor-item">
-						<input type="button" value="#{localizedStrings['com.idega.block.article']['save']}" 
-								onclick="ArticleEditHelper.saveAricle({articleUri : '#{articleViewRequestBean.resourcePath}', headlineId : 'ae-input-headline', bodyId : 'ae-input-body', teaserId : 'ae-input-teaser'});"/>
+						<input type="submit" value="#{localizedStrings['com.idega.block.article']['save']}" />
 					</div>
 				</div>
 			</form>

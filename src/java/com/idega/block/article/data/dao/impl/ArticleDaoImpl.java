@@ -36,7 +36,7 @@ import com.idega.util.StringUtil;
  */
 @Repository(ArticleDao.BEAN_NAME)
 @Scope(BeanDefinition.SCOPE_SINGLETON)
-public class ArticleDaoImpl extends GenericDaoImpl implements ArticleDao {
+public class ArticleDaoImpl<T extends ArticleEntity> extends GenericDaoImpl implements ArticleDao<T> {
 
 	@Autowired
 	private CategoryDao categoryDao;
@@ -53,10 +53,10 @@ public class ArticleDaoImpl extends GenericDaoImpl implements ArticleDao {
 	}
 
 	/**
-     * @see com.idega.block.article.data.dao.ArticleDao#getArticle(String)
+     * @see com.idega.block.article.data.dao.ArticleDao#getByUri(String)
      */
 	@Override
-	public ArticleEntity getArticle(String uri){
+	public T getByUri(String uri){
 		if (StringUtil.isEmpty(uri)) {
 			LOGGER.warning("Aricle URI is not provided");
 			return null;
@@ -67,7 +67,7 @@ public class ArticleDaoImpl extends GenericDaoImpl implements ArticleDao {
 		if (uri.endsWith(CoreConstants.SLASH))
 			uri = uri.substring(0, uri.lastIndexOf(CoreConstants.SLASH));
 
-		return this.getSingleResult(ArticleEntity.GET_BY_URI, ArticleEntity.class, new Param(ArticleEntity.uriProp, uri));
+		return this.getSingleResult(ArticleEntity.GET_BY_URI, getEntityClass(), new Param(ArticleEntity.uriProp, uri));
 	}
 
 	/**
@@ -75,17 +75,17 @@ public class ArticleDaoImpl extends GenericDaoImpl implements ArticleDao {
      */
 	@Override
 	public Long getArticleIdByURI(String uri){
-		ArticleEntity article = getArticle(uri);
+		ArticleEntity article = getByUri(uri);
 		return article == null ? Long.valueOf(-1) : article.getId();
 	}
 
 	/**
-     * @see com.idega.block.article.data.dao.ArticleDao#deleteArticle(String)
+     * @see com.idega.block.article.data.dao.ArticleDao#delete(String)
      */
 	@Override
 	@Transactional(readOnly=false)
-	public boolean deleteArticle(String uri) {
-		final ArticleEntity article = getArticle(uri);
+	public boolean delete(String uri) {
+		final ArticleEntity article = getByUri(uri);
 		if (article == null)
 			return false;
 
@@ -99,23 +99,43 @@ public class ArticleDaoImpl extends GenericDaoImpl implements ArticleDao {
 		return false;
 	}
 
+	@SuppressWarnings("unchecked")
+	protected Class<T> getEntityClass(){
+		return (Class<T>) ArticleEntity.class;
+	}
 	/**
-     * @see com.idega.block.article.data.dao.ArticleDao#getArticlesByCategoriesAndAmount(List, String, int)
+     * @see com.idega.block.article.data.dao.ArticleDao#getByCategories(List, String, int)
      */
 	@Override
-	public List <ArticleEntity> getArticlesByCategoriesAndAmount(List<String> categories, String uriFrom, int maxResults) {
-		StringBuilder inlineQuery = new StringBuilder("SELECT DISTINCT a").append(" FROM ArticleEntity a");
+	public List <T> getByCategories(List<String> categories, String uriFrom, int maxResults) {
+		Class<T> entityClass = getEntityClass();
+		String entityName = entityClass.getSimpleName();
+		StringBuilder inlineQuery = new StringBuilder("SELECT DISTINCT a").append(" FROM ").append(entityName).append(" a");
+		boolean addedWhere = false;
 		if(!ListUtil.isEmpty(categories)){
 			inlineQuery.append(" JOIN a.").append(ArticleEntity.categoriesProp).append(" c WHERE " +
 					"c.").append(CategoryEntity.categoryProp).append(" IN (:").append(ArticleEntity.categoriesProp).append(")");
+			addedWhere = true;
 		}
 
 		if(!StringUtil.isEmpty(uriFrom)){
-			inlineQuery.append(ListUtil.isEmpty(categories) ? " WHERE " : " AND ");
+			if(addedWhere){
+				inlineQuery.append(" AND ");
+			}else{
+				inlineQuery.append(" WHERE ");
+				addedWhere = true;
+			}
 			inlineQuery.append("a.").append(ArticleEntity.modificationDateProp).append(" <= (SELECT art." + ArticleEntity.modificationDateProp +
 					" FROM ArticleEntity art where art.").append(ArticleEntity.uriProp).append(" = :").append(ArticleEntity.uriProp).append(")");
 		}
 
+		if(addedWhere){
+			inlineQuery.append(" AND ");
+		}else{
+			inlineQuery.append(" WHERE ");
+			addedWhere = true;
+		}
+		inlineQuery.append("(a.class = ").append(entityName).append(")");
 		inlineQuery.append(" ORDER BY a.").append(ArticleEntity.modificationDateProp).append(" DESC");
 
 		Query query = this.getQueryInline(inlineQuery.toString());
@@ -123,19 +143,19 @@ public class ArticleDaoImpl extends GenericDaoImpl implements ArticleDao {
 			query.setMaxResults(maxResults);
 		}
 
-		List <ArticleEntity> entities = null;
+		List <T> entities = null;
 		if(!ListUtil.isEmpty(categories)){
 			if(StringUtil.isEmpty(uriFrom)){
-				entities = query.getResultList(ArticleEntity.class, new Param(ArticleEntity.categoriesProp,categories));
+				entities = query.getResultList(entityClass, new Param(ArticleEntity.categoriesProp,categories));
 			}else{
-				entities = query.getResultList(ArticleEntity.class, new Param(ArticleEntity.categoriesProp,categories),
+				entities = query.getResultList(entityClass, new Param(ArticleEntity.categoriesProp,categories),
 						new Param(ArticleEntity.uriProp, uriFrom));
 			}
 		}else{
 			if(StringUtil.isEmpty(uriFrom)){
-				entities = query.getResultList(ArticleEntity.class);
+				entities = query.getResultList(entityClass);
 			}else{
-				entities = query.getResultList(ArticleEntity.class, new Param(ArticleEntity.uriProp, uriFrom));
+				entities = query.getResultList(entityClass, new Param(ArticleEntity.uriProp, uriFrom));
 			}
 		}
 
@@ -156,7 +176,7 @@ public class ArticleDaoImpl extends GenericDaoImpl implements ArticleDao {
 		    this.categoryDao.addCategories(categories);
 		}
 
-		ArticleEntity articleEntity = this.getArticle(uri);
+		ArticleEntity articleEntity = this.getByUri(uri);
 		if(articleEntity == null){
 			articleEntity = new ArticleEntity();
 		}
@@ -172,11 +192,7 @@ public class ArticleDaoImpl extends GenericDaoImpl implements ArticleDao {
 		}
 			
 		try {
-//			if(merge){
 				merge(articleEntity);
-//			}else{
-//				persist(articleEntity);
-//			}
 		} catch (Exception e) {
 			LOGGER.log(Level.WARNING, "Failed to add article to database: " + articleEntity + " with the categories: " + categoriesForTheArticle, e);
 			return false;

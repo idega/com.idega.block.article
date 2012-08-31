@@ -15,7 +15,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.idega.block.article.bean.ArticleItemBean;
-import com.idega.block.article.business.ArticleConstants;
 import com.idega.block.article.component.article_view.ArticleFileBrowser;
 import com.idega.block.article.data.ArticleEntity;
 import com.idega.block.article.data.dao.ArticleDao;
@@ -29,7 +28,6 @@ import com.idega.core.builder.business.BuilderServiceFactory;
 import com.idega.core.business.DefaultSpringBean;
 import com.idega.idegaweb.IWApplicationContext;
 import com.idega.idegaweb.IWMainApplication;
-import com.idega.idegaweb.IWResourceBundle;
 import com.idega.presentation.IWContext;
 import com.idega.user.data.Group;
 import com.idega.util.CoreConstants;
@@ -45,18 +43,16 @@ public class ArticleViewRequestBean  extends DefaultSpringBean{
 	private ArticleItemBean articleItemBean = null;
 	
 	@Autowired
-	ArticleDao articleDAO;
+	ArticleDao<ArticleEntity> articleDAO;
 	
 	@Autowired
 	ArticleServices articleServices;
 	
 	//request scope, iwc can be saved
 	private IWContext iwc = null;
-	private IWResourceBundle iwrb = null;
 	
 	public ArticleViewRequestBean(){
 		iwc = CoreUtil.getIWContext();
-		iwrb = getBundle(ArticleConstants.IW_BUNDLE_IDENTIFIER).getResourceBundle(iwc);
 	}
 	
 	public boolean isAllowedToPerformAction(){

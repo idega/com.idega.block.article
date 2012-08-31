@@ -23,6 +23,7 @@ import org.springframework.context.ApplicationListener;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
 
+import com.idega.block.article.data.ArticleEntity;
 import com.idega.block.article.data.CategoryBugRemover;
 import com.idega.block.article.data.dao.ArticleDao;
 import com.idega.block.article.data.dao.CategoryDao;
@@ -60,7 +61,7 @@ public class ArticlesImporter extends DefaultSpringBean implements ApplicationLi
     private CategoryDao categoryDao;
 
     @Autowired
-    private ArticleDao articleDao;
+    private ArticleDao<ArticleEntity> articleDao;
 
     private static Logger LOGGER = Logger.getLogger(ArticlesImporter.class.getName());
 

@@ -16,6 +16,8 @@ import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.Inheritance;
+import javax.persistence.InheritanceType;
 import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
@@ -27,9 +29,12 @@ import javax.persistence.Transient;
 import org.hibernate.annotations.CollectionOfElements;
 import org.hibernate.annotations.Index;
 
+import com.google.gson.Gson;
+import com.idega.block.article.data.dao.ArticleDao;
 import com.idega.hibernate.HibernateUtil;
 import com.idega.util.CoreConstants;
 import com.idega.util.ListUtil;
+import com.idega.util.expression.ELUtil;
 
 /**
  * IC_ARTICLE table entity
@@ -44,17 +49,20 @@ import com.idega.util.ListUtil;
 		@NamedQuery(name = ArticleEntity.GET_ID_BY_URI, query = "select id from ArticleEntity s where s.uri = :"+ArticleEntity.uriProp)
 	}
 )
+@Inheritance(strategy=InheritanceType.JOINED)
 public class ArticleEntity implements Serializable {
 
     public static final String GET_BY_URI = "articleEntity.getByURI";
     public static final String GET_ID_BY_URI = "articleEntity.getIDByURI";
-
+    
+    
     private static final long serialVersionUID = -8125483527520853214L;
-
+    
     public static final String idProp = "id";
     @Id @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
-
+    
+    
     public static final String modificationDateProp = "modificationDate";
     @Index(name = "modificationDateIndex")
     @Column(name="MODIFICATION_DATE", nullable=false)
@@ -72,14 +80,32 @@ public class ArticleEntity implements Serializable {
             inverseJoinColumns = @JoinColumn(name = "CATEGORY_FK"))
     private Set<CategoryEntity> categories;
 
-    public static final String receiversProp = "editorsProp";
+    public static final String editorsProp = "editorsProp";
     @CollectionOfElements(fetch = FetchType.EAGER)
     @JoinTable(name="article_editors_groups", joinColumns=@JoinColumn(name="ARTICLE_ID"))
     @Column(name="EDITORS_GROUPS_IDS", nullable=false)
     private Set<Integer> editors;
-
+    
+    
     private Integer hashCode = new Random().nextInt();
 
+    
+    public ArticleEntity(){
+    	super();
+    }
+    
+    public ArticleEntity(ArticleEntity article){
+    	setCategories(article.getCategories());
+    	setEditors(article.getEditors());
+    	setModificationDate(article.getModificationDate());
+    	setUri(article.getUri());
+    	//TODO: test this!!!!!!!!!!!!!
+    	id = article.getId();
+    }
+    
+    protected Logger getLogger(){
+    	return Logger.getLogger(this.getClass().getName());
+    }
     /**
      * Returns group ids. Users of those groups are allowed to edit article.
      * @return Groups ids
@@ -124,7 +150,7 @@ public class ArticleEntity implements Serializable {
     }
 
     @Transient
-    private boolean categoriesLoaded = false;
+    private transient boolean categoriesLoaded = false;
     public Set<CategoryEntity> getCategories() {
     	if (categoriesLoaded){
     		return categories;
@@ -185,11 +211,6 @@ public class ArticleEntity implements Serializable {
         return this.categories.removeAll(categories);
     }
 
-    @Override
-    public String toString(){
-        return "{ id: " + this.id + ", url: " + this.uri + ", categories: " + getCategories() + ", modificationDate : " + getModificationDate();
-    }
-
 	@Override
 	public boolean equals(Object obj) {
 		if (!(obj instanceof ArticleEntity))
@@ -210,6 +231,27 @@ public class ArticleEntity implements Serializable {
 			hashCode = new Random().nextInt();
 
 		return hashCode;
+	}
+	
+	@Override
+	public String toString(){
+		return new Gson().toJson(this);
+	}
+
+	private ArticleDao<ArticleEntity> getArticleDao() {
+		ArticleDao<ArticleEntity> articleDao = ELUtil.getInstance().getBean(ArticleDao.BEAN_NAME);
+		return articleDao;
+	}
+	
+	public ArticleEntity merge(){
+		return getArticleDao().merge(this);
+	}
+	
+	public void remove(){
+		if(this.id == null){
+			return;
+		}
+		getArticleDao().remove(this);
 	}
 
 }

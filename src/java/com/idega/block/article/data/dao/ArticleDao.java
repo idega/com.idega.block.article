@@ -16,7 +16,7 @@ import com.idega.core.persistence.GenericDao;
  * @version 1.0.0 2011.08.24
  * @author martynas
  */
-public interface ArticleDao extends GenericDao {
+public interface ArticleDao<T extends ArticleEntity> extends GenericDao {
 
 	public static final String BEAN_NAME = "articleDAO";
 
@@ -37,7 +37,7 @@ public interface ArticleDao extends GenericDao {
 	 * @param uri Path to article file named *.xml
 	 * @return true, if desired article deleted
 	 */
-	public abstract boolean deleteArticle(String uri);
+	public abstract boolean delete(String uri);
 
 	/**
 	 * Gets List of ArticleEntity by categories, the maximum numbers
@@ -49,14 +49,14 @@ public interface ArticleDao extends GenericDao {
 	 *
 	 * @return the return is always List<ArticleEntity>, it is empty if no results were found
 	 */
-	public abstract List<ArticleEntity> getArticlesByCategoriesAndAmount(List<String> categories, String uriFrom, int maxResults);
+	public abstract List<T> getByCategories(List<String> categories, String uriFrom, int maxResults);
 
 
 	 /** Returns one ArticleEntity from database
 	 * @param uri Path to article file named *.xml
 	 * @return ArticleEntity having passed URI.
 	 */
-	public abstract ArticleEntity getArticle(String uri);
+	public abstract T getByUri(String uri);
 
 	/**
 	 * Returns id of an ArticleEntity from database

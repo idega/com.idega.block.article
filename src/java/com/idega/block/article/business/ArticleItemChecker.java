@@ -6,6 +6,7 @@ import java.util.Locale;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.idega.block.article.bean.ArticleItemBean;
+import com.idega.block.article.data.ArticleEntity;
 import com.idega.block.article.data.dao.ArticleDao;
 import com.idega.content.business.ContentItemChecker;
 import com.idega.core.localisation.business.ICLocaleBusiness;
@@ -14,8 +15,9 @@ import com.idega.util.expression.ELUtil;
 public class ArticleItemChecker implements ContentItemChecker {
 
 	@Autowired
-	private ArticleDao articleDao;
+	private ArticleDao<ArticleEntity> articleDao;
 	
+	@Override
 	public boolean deleteDummyArticles(List<String> paths) {
 		if (paths == null) {
 			return false;
@@ -76,12 +78,13 @@ public class ArticleItemChecker implements ContentItemChecker {
 		return article;
 	}
 
-	private ArticleDao getArticleDAO() {
+	private ArticleDao<ArticleEntity> getArticleDAO() {
 		if (this.articleDao == null)
 			ELUtil.getInstance().autowire(this);
 		return articleDao;
 	}
 	
+	@Override
 	public boolean deleteContentItem(String path, Locale l) {
 		if (path == null || l == null) {
 			return false;
@@ -93,7 +96,7 @@ public class ArticleItemChecker implements ContentItemChecker {
 		}
 		
 		article.delete();
-		return getArticleDAO().deleteArticle(path);
+		return getArticleDAO().delete(path);
 	}
 	
 }
