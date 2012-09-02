@@ -238,8 +238,8 @@ public class ArticleEntity implements Serializable {
 		return new Gson().toJson(this);
 	}
 
-	private ArticleDao<ArticleEntity> getArticleDao() {
-		ArticleDao<ArticleEntity> articleDao = ELUtil.getInstance().getBean(ArticleDao.BEAN_NAME);
+	private ArticleDao getArticleDao() {
+		ArticleDao articleDao = ELUtil.getInstance().getBean(ArticleDao.BEAN_NAME);
 		return articleDao;
 	}
 	

@@ -43,7 +43,7 @@ public class ArticleViewRequestBean  extends DefaultSpringBean{
 	private ArticleItemBean articleItemBean = null;
 	
 	@Autowired
-	ArticleDao<ArticleEntity> articleDAO;
+	ArticleDao articleDAO;
 	
 	@Autowired
 	ArticleServices articleServices;

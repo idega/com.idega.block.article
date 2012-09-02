@@ -113,8 +113,8 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 		super();
 	}
 
-	private ArticleDao<ArticleEntity> getArticleDAO() {
-		ArticleDao<ArticleEntity> articleDAO = ELUtil.getInstance().getBean(ArticleDao.BEAN_NAME);
+	private ArticleDao getArticleDAO() {
+		ArticleDao articleDAO = ELUtil.getInstance().getBean(ArticleDao.BEAN_NAME);
 		return articleDAO;
 	}
 

@@ -95,9 +95,9 @@ public class ArticleListManagedBean implements ContentListViewerManagedBean {
 	private Boolean showDetailsCommand = null;
 
 	@Autowired
-	private ArticleDao<ArticleEntity> articleDao;
+	private ArticleDao articleDao;
 
-	public ArticleDao<ArticleEntity> getArticleDao(){
+	public ArticleDao getArticleDao(){
 		if (articleDao == null)
 			ELUtil.getInstance().autowire(this);
 		return this.articleDao;

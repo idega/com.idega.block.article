@@ -44,7 +44,6 @@ import com.idega.block.article.bean.ArticleItemBean;
 import com.idega.block.article.bean.ArticleStoreException;
 import com.idega.block.article.business.ArticleConstants;
 import com.idega.block.article.business.ArticleUtil;
-import com.idega.block.article.data.ArticleEntity;
 import com.idega.block.article.data.dao.ArticleDao;
 import com.idega.business.IBOLookup;
 import com.idega.content.bean.ManagedContentBeans;
@@ -140,7 +139,7 @@ public class EditArticleView extends IWBaseComponent implements ManagedContentBe
 	private String editorOpener = "window.parent.parent";
 
 	@Autowired
-	ArticleDao<ArticleEntity> articleDAO;
+	ArticleDao articleDAO;
 
 	public EditArticleView() {
 		ELUtil.getInstance().autowire(this);
