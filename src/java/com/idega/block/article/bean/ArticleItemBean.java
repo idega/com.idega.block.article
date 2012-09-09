@@ -518,7 +518,6 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 		if(articleEntity == null){
 			articleEntity = new ArticleEntity();
 		}
-		articleEntity.setModificationDate(getCreationDate());
 		articleEntity.setUri(getResourcePath());
 		articleEntity = articleEntity.merge();
 		setArticleEntity(articleEntity);
