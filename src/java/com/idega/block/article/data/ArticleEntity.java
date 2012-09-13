@@ -54,23 +54,21 @@ public class ArticleEntity implements Serializable {
 
     public static final String GET_BY_URI = "articleEntity.getByURI";
     public static final String GET_ID_BY_URI = "articleEntity.getIDByURI";
-    
-    
+
     private static final long serialVersionUID = -8125483527520853214L;
-    
+
     public static final String idProp = "id";
     @Id @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
-    
-    
+
     public static final String modificationDateProp = "modificationDate";
     @Index(name = "modificationDateIndex")
-    @Column(name="MODIFICATION_DATE", nullable=false)
+    @Column(name = "MODIFICATION_DATE", nullable=false)
     private Date modificationDate;
 
     public static final String uriProp = "uri";
     @Index(name = "uriIndex")
-    @Column(name="URI", nullable=false)
+    @Column(name = "URI", nullable=false)
     private String uri;
 
     public static final String categoriesProp = "categories";
@@ -82,31 +80,44 @@ public class ArticleEntity implements Serializable {
 
     public static final String editorsProp = "editorsProp";
     @CollectionOfElements(fetch = FetchType.EAGER)
-    @JoinTable(name="article_editors_groups", joinColumns=@JoinColumn(name="ARTICLE_ID"))
-    @Column(name="EDITORS_GROUPS_IDS", nullable=false)
+    @JoinTable(name = "article_editors_groups", joinColumns=@JoinColumn(name="ARTICLE_ID"))
+    @Column(name = "EDITORS_GROUPS_IDS", nullable=false)
     private Set<Integer> editors;
-    
-    
+
+    public static final String classColumnName = "class",
+    							classPropertyName = "theClass";
+    @Column(name = classColumnName)
+    @Index(name = "theClassIndex")
+    private String theClass = getClass().getSimpleName();
+
     private Integer hashCode = new Random().nextInt();
 
-    
-    public ArticleEntity(){
+    public ArticleEntity() {
     	super();
     }
-    
-    public ArticleEntity(ArticleEntity article){
-    	setCategories(article.getCategories());
-    	setEditors(article.getEditors());
-    	setModificationDate(article.getModificationDate());
-    	setUri(article.getUri());
+
+    public ArticleEntity(ArticleEntity entity) {
+    	this();
+
+    	setCategories(entity.getCategories());
+    	setEditors(entity.getEditors());
+    	setModificationDate(entity.getModificationDate());
+    	setUri(entity.getUri());
     	//TODO: test this!!!!!!!!!!!!!
-    	id = article.getId();
+    	id = entity.getId();
+
+    	setTheClass(entity.getClass().getSimpleName());
     }
-    
-    protected Logger getLogger(){
-    	return Logger.getLogger(this.getClass().getName());
-    }
-    /**
+
+    public String getTheClass() {
+		return theClass;
+	}
+
+	public void setTheClass(String theClass) {
+		this.theClass = theClass;
+	}
+
+	/**
      * Returns group ids. Users of those groups are allowed to edit article.
      * @return Groups ids
      */
@@ -155,7 +166,7 @@ public class ArticleEntity implements Serializable {
     	if (categoriesLoaded){
     		return categories;
     	}
-    	
+
     	if(id == null){
     		return Collections.emptySet();
     	}
@@ -232,7 +243,7 @@ public class ArticleEntity implements Serializable {
 
 		return hashCode;
 	}
-	
+
 	@Override
 	public String toString(){
 		return new Gson().toJson(this);
@@ -242,12 +253,12 @@ public class ArticleEntity implements Serializable {
 		ArticleDao articleDao = ELUtil.getInstance().getBean(ArticleDao.BEAN_NAME);
 		return articleDao;
 	}
-	
+
 	public ArticleEntity merge(){
 		setModificationDate(new Date());
 		return getArticleDao().merge(this);
 	}
-	
+
 	public void remove(){
 		if(this.id == null){
 			return;

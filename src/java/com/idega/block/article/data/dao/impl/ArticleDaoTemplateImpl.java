@@ -1,5 +1,6 @@
 package com.idega.block.article.data.dao.impl;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashSet;
@@ -28,7 +29,6 @@ public abstract class ArticleDaoTemplateImpl<T extends ArticleEntity> extends Ge
 
 	private static Logger LOGGER = Logger.getLogger(ArticleDaoImpl.class.getName());
 
-	
 	/**
 	 * @see com.idega.block.article.data.dao.ArticleDao#updateArticle(Date, String, List)
 	 */
@@ -94,51 +94,47 @@ public abstract class ArticleDaoTemplateImpl<T extends ArticleEntity> extends Ge
 		String entityName = entityClass.getSimpleName();
 		StringBuilder inlineQuery = new StringBuilder("SELECT DISTINCT a").append(" FROM ").append(entityName).append(" a");
 		boolean addedWhere = false;
-		if(!ListUtil.isEmpty(categories)){
+
+		List<Param> params = new ArrayList<Param>();
+		if (!ListUtil.isEmpty(categories)) {
 			inlineQuery.append(" JOIN a.").append(ArticleEntity.categoriesProp).append(" c WHERE " +
 					"c.").append(CategoryEntity.categoryProp).append(" IN (:").append(ArticleEntity.categoriesProp).append(")");
 			addedWhere = true;
+			params.add(new Param(ArticleEntity.categoriesProp, categories));
 		}
 
-		if(!StringUtil.isEmpty(uriFrom)){
-			if(addedWhere){
+		if (!StringUtil.isEmpty(uriFrom)) {
+			if (addedWhere) {
 				inlineQuery.append(" AND ");
-			}else{
+			}else {
 				inlineQuery.append(" WHERE ");
 				addedWhere = true;
 			}
 			inlineQuery.append("a.").append(ArticleEntity.modificationDateProp).append(" <= (SELECT art." + ArticleEntity.modificationDateProp +
 					" FROM ArticleEntity art where art.").append(ArticleEntity.uriProp).append(" = :").append(ArticleEntity.uriProp).append(")");
+			params.add(new Param(ArticleEntity.uriProp, uriFrom));
 		}
 
-		if(addedWhere){
+		if (addedWhere)
 			inlineQuery.append(" AND ");
-		}else{
+		else {
 			inlineQuery.append(" WHERE ");
 			addedWhere = true;
 		}
-		inlineQuery.append("(a.class = ").append(entityName).append(")");
+		inlineQuery.append("(a." + ArticleEntity.classPropertyName + " = :").append(ArticleEntity.classPropertyName).append(")");
+		params.add(new Param(ArticleEntity.classPropertyName, entityName));
+
 		inlineQuery.append(" ORDER BY a.").append(ArticleEntity.modificationDateProp).append(" DESC");
 
 		Query query = this.getQueryInline(inlineQuery.toString());
-		if(maxResults > 0){
+		if (maxResults > 0)
 			query.setMaxResults(maxResults);
-		}
 
-		List <T> entities = null;
-		if(!ListUtil.isEmpty(categories)){
-			if(StringUtil.isEmpty(uriFrom)){
-				entities = query.getResultList(entityClass, new Param(ArticleEntity.categoriesProp,categories));
-			}else{
-				entities = query.getResultList(entityClass, new Param(ArticleEntity.categoriesProp,categories),
-						new Param(ArticleEntity.uriProp, uriFrom));
-			}
-		}else{
-			if(StringUtil.isEmpty(uriFrom)){
-				entities = query.getResultList(entityClass);
-			}else{
-				entities = query.getResultList(entityClass, new Param(ArticleEntity.uriProp, uriFrom));
-			}
+		List<T> entities = null;
+		try {
+			entities = ListUtil.isEmpty(params) ? query.getResultList(entityClass) : query.getResultList(entityClass, params);
+		} catch (Exception e) {
+			LOGGER.log(Level.WARNING, "Error loading entities of type " + getEntityClass().getName() + " by query " + inlineQuery.toString(), e);
 		}
 
 		return entities;
@@ -166,13 +162,13 @@ public abstract class ArticleDaoTemplateImpl<T extends ArticleEntity> extends Ge
 		if(!ListUtil.isEmpty(categoriesForTheArticle)){
 			articleEntity.setCategories(categoriesForTheArticle);
 		}
-		
+
 		articleEntity.setUri(uri);
 		articleEntity.setModificationDate(timestamp);
 		if(!ListUtil.isEmpty(editors)){
 			articleEntity.setEditors(new HashSet<Integer>(editors));
 		}
-			
+
 		try {
 				merge(articleEntity);
 		} catch (Exception e) {
@@ -184,6 +180,6 @@ public abstract class ArticleDaoTemplateImpl<T extends ArticleEntity> extends Ge
 
 		return result;
 	}
-	
-	
+
+
 }
