@@ -84,12 +84,6 @@ public class ArticleEntity implements Serializable {
     @Column(name = "EDITORS_GROUPS_IDS", nullable=false)
     private Set<Integer> editors;
 
-    public static final String classColumnName = "class",
-    							classPropertyName = "theClass";
-    @Column(name = classColumnName)
-    @Index(name = "theClassIndex")
-    private String theClass = getClass().getSimpleName();
-
     private Integer hashCode = new Random().nextInt();
 
     public ArticleEntity() {
@@ -106,16 +100,8 @@ public class ArticleEntity implements Serializable {
     	//TODO: test this!!!!!!!!!!!!!
     	id = entity.getId();
 
-    	setTheClass(entity.getClass().getSimpleName());
     }
 
-    public String getTheClass() {
-		return theClass;
-	}
-
-	public void setTheClass(String theClass) {
-		this.theClass = theClass;
-	}
 
 	/**
      * Returns group ids. Users of those groups are allowed to edit article.

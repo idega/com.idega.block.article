@@ -10,14 +10,9 @@
 package com.idega.block.article;
 
 import java.rmi.RemoteException;
-import java.util.List;
-
-import org.springframework.beans.factory.annotation.Autowired;
 
 import com.idega.block.article.business.ArticleActionURIHandler;
 import com.idega.block.article.business.ArticleRSSProducer;
-import com.idega.block.article.data.ArticleEntity;
-import com.idega.block.article.data.dao.ArticleDao;
 import com.idega.block.rss.business.RSSProducerRegistry;
 import com.idega.business.IBOLookup;
 import com.idega.business.IBOLookupException;
@@ -30,8 +25,6 @@ import com.idega.idegaweb.IWApplicationContext;
 import com.idega.idegaweb.IWBundle;
 import com.idega.idegaweb.IWBundleStartable;
 import com.idega.slide.business.IWSlideService;
-import com.idega.util.ListUtil;
-import com.idega.util.expression.ELUtil;
 
 
 /**
@@ -45,14 +38,6 @@ public class IWBundleStarter implements IWBundleStartable {
 
 	public static final String BUNDLE_IDENTIFIER = "com.idega.block.article";
 
-	@Autowired
-	private ArticleDao articleDAO;
-
-	private ArticleDao getArticleDao() {
-		if (articleDAO == null)
-			ELUtil.getInstance().autowire(this);
-		return articleDAO;
-	}
 
 	@Override
 	public void start(IWBundle starterBundle) {
@@ -60,23 +45,6 @@ public class IWBundleStarter implements IWBundleStartable {
 		addArticleViews(starterBundle);
 		addRSSProducers(starterBundle);
 
-		doSetArticleClass();
-	}
-
-	private void doSetArticleClass() {
-		try {
-			List<ArticleEntity> articles = getArticleDao().getResultListByInlineQuery("from " + ArticleEntity.class.getName() + " a where a." +
-				ArticleEntity.classPropertyName + " is null", ArticleEntity.class);
-			if (ListUtil.isEmpty(articles))
-				return;
-
-			for (ArticleEntity article: articles) {
-				article.setTheClass(ArticleEntity.class.getSimpleName());
-				getArticleDao().merge(article);
-			}
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
 	}
 
 	private void addArticleIWActionURIHandler() {

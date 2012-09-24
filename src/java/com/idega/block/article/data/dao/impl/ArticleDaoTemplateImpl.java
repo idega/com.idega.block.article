@@ -121,8 +121,7 @@ public abstract class ArticleDaoTemplateImpl<T extends ArticleEntity> extends Ge
 			inlineQuery.append(" WHERE ");
 			addedWhere = true;
 		}
-		inlineQuery.append("(a." + ArticleEntity.classPropertyName + " = :").append(ArticleEntity.classPropertyName).append(")");
-		params.add(new Param(ArticleEntity.classPropertyName, entityName));
+		inlineQuery.append("(a.class = ").append(entityName).append(")");
 
 		inlineQuery.append(" ORDER BY a.").append(ArticleEntity.modificationDateProp).append(" DESC");
 
