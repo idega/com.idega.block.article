@@ -1282,6 +1282,7 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 	 */
 	@Override
 	public void delete() {
+		getArticleEntity().remove();
 		getLocalizedArticle().delete();
 		this.localizedArticle=null;
 		super.delete();

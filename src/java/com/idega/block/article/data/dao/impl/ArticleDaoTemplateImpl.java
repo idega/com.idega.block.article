@@ -70,7 +70,7 @@ public abstract class ArticleDaoTemplateImpl<T extends ArticleEntity> extends Ge
 	@Override
 	@Transactional(readOnly=false)
 	public boolean delete(String uri) {
-		final ArticleEntity article = getByUri(uri);
+		final T article = getByUri(uri);
 		if (article == null)
 			return false;
 
@@ -178,6 +178,37 @@ public abstract class ArticleDaoTemplateImpl<T extends ArticleEntity> extends Ge
 			return articleEntity != null && articleEntity.getId() != null;
 
 		return result;
+	}
+	
+	@Override
+	@Transactional(readOnly = false)
+	public void remove(T articleEntity) {
+		Long id = articleEntity.getId();
+		if(id == null){
+			return;
+		}
+		Class<T> entityClass = getEntityClass();
+		String entityName = entityClass.getSimpleName();
+		StringBuilder inlineQuery = new StringBuilder("SELECT a FROM ").append(entityName).append(" a WHERE id = :").append(ArticleEntity.idProp);
+		Query query = this.getQueryInline(inlineQuery.toString());
+		List<T> entities = query.getResultList(entityClass, new Param(ArticleEntity.idProp, id));
+		if(ListUtil.isEmpty(entities)){
+			return;
+		}
+		for(T entity : entities){
+			super.remove(entity);
+		}
+	}
+
+	@Override
+	public List<CategoryEntity> getCategories(Long articleId) {
+		Class<T> entityClass = getEntityClass();
+		String entityName = entityClass.getSimpleName();
+		StringBuilder inlineQuery =
+				new StringBuilder("SELECT c FROM ").append(entityName).append(" a join a.categories c WHERE a.id = :").append(ArticleEntity.idProp);
+		Query query = this.getQueryInline(inlineQuery.toString());
+		List<CategoryEntity> results =  query.getResultList(CategoryEntity.class,new Param(ArticleEntity.idProp,articleId));
+		return results;
 	}
 
 

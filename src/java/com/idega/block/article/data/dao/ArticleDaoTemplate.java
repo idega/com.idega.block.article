@@ -5,6 +5,7 @@ import java.util.Date;
 import java.util.List;
 
 import com.idega.block.article.data.ArticleEntity;
+import com.idega.block.article.data.CategoryEntity;
 import com.idega.core.persistence.GenericDao;
 
 public interface ArticleDaoTemplate<T extends ArticleEntity> extends GenericDao {
@@ -55,5 +56,9 @@ public interface ArticleDaoTemplate<T extends ArticleEntity> extends GenericDao 
 	 * @return ArticleEntity having passed URI.
 	 */
 	public abstract Long getArticleIdByURI(String uri);
+	
+	public void remove(T articleEntity);
+	
+	public List<CategoryEntity> getCategories(Long id);
 
 }

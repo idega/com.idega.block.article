@@ -7,8 +7,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Random;
 import java.util.Set;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -26,12 +24,12 @@ import javax.persistence.NamedQuery;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 
+import org.hibernate.Hibernate;
 import org.hibernate.annotations.CollectionOfElements;
 import org.hibernate.annotations.Index;
 
 import com.google.gson.Gson;
 import com.idega.block.article.data.dao.ArticleDao;
-import com.idega.hibernate.HibernateUtil;
 import com.idega.util.CoreConstants;
 import com.idega.util.ListUtil;
 import com.idega.util.expression.ELUtil;
@@ -147,33 +145,22 @@ public class ArticleEntity implements Serializable {
     }
 
     @Transient
-    private transient boolean categoriesLoaded = false;
     public Set<CategoryEntity> getCategories() {
-    	if (categoriesLoaded){
+    	if (Hibernate.isInitialized(categories)){
     		return categories;
     	}
 
     	if(id == null){
     		return Collections.emptySet();
     	}
-    	try {
-			ArticleEntity articleEntity = (ArticleEntity) HibernateUtil.getInstance().loadLazyField(
-					ArticleEntity.class.getMethod("getCategories", Boolean.class), this,Boolean.FALSE);
-			categories = articleEntity.getCategories(false);
-		} catch (Exception e) {
-			Logger.getLogger(ArticleEntity.class.getName()).log(Level.WARNING, "Failed loading article categories", e);
-			return null;
-		}
-
-    	categoriesLoaded = true;
-    	return categories;
-    }
-
-    public Set<CategoryEntity> getCategories(Boolean reload){
-    	if (reload) {
-    		categoriesLoaded = false;
-    		return getCategories();
+    	List<CategoryEntity> categoriesList = getArticleDao().getCategories(id);
+    	if(ListUtil.isEmpty(categoriesList)){
+    		// Not empty set because add should be suported
+    		categories = new HashSet<CategoryEntity>();
+    	}else{
+    		categories = new HashSet<CategoryEntity>(categoriesList);
     	}
+    	
     	return categories;
     }
 
@@ -246,10 +233,8 @@ public class ArticleEntity implements Serializable {
 	}
 
 	public void remove(){
-		if(this.id == null){
-			return;
-		}
 		getArticleDao().remove(this);
+//		getArticleDao().delete(getUri());
 	}
 
 }
