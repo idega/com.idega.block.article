@@ -40,7 +40,6 @@ import org.apache.webdav.lib.WebdavResources;
 import com.idega.block.article.ArticleCacher;
 import com.idega.block.article.business.ArticleConstants;
 import com.idega.block.article.business.ArticleUtil;
-import com.idega.block.article.component.ArticleItemViewer;
 import com.idega.block.article.data.ArticleEntity;
 import com.idega.block.article.data.dao.ArticleDao;
 import com.idega.business.IBOLookup;
@@ -86,6 +85,8 @@ import com.idega.xml.XMLException;
 public class ArticleItemBean extends ContentItemBean implements Serializable, ContentItem, ValueChangeListener {
 
 	private static final long serialVersionUID = 4514851565086272678L;
+
+	private static final Logger LOGGER = Logger.getLogger(ArticleItemBean.class.getName());
 
 	private final static String ARTICLE_FILE_SUFFIX = ".xml";
 
@@ -158,7 +159,7 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 				return allowedToEditByCurrentUser;
 			}
 		}catch (Exception e) {
-			Logger.getLogger(ArticleItemViewer.class.getName()).log(Level.WARNING, "Failed to check is admin", e);
+			LOGGER.log(Level.WARNING, "Failed to check is admin", e);
 			return Boolean.FALSE;
 		}
 		User currentUser = iwc.getCurrentUser();
@@ -188,7 +189,7 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 			}
 
 		} catch (Exception e) {
-			Logger.getLogger(ArticleItemBean.class.getName()).log(Level.WARNING, "Failed getting is allowed to edit by current user "
+			LOGGER.log(Level.WARNING, "Failed getting is allowed to edit by current user "
 					+ currentUser.getId() + " article " + getResourcePath(), e);
 			return Boolean.FALSE;
 		}
@@ -983,11 +984,10 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 		int index = resourcePath.indexOf("."+CoreConstants.ARTICLE_FILENAME_SCOPE);
 		if(index>-1){
 			String articlePath = resourcePath.substring(0,index+CoreConstants.ARTICLE_FILENAME_SCOPE.length()+1);
-			System.out.println("Article path returned: "+articlePath);
+			LOGGER.info("Article path returned: "+articlePath);
 			return articlePath;
 		}
-		Logger log = Logger.getLogger(this.getClass().toString());
-		log.warning("Resource path for article '"+resourcePath+"' does not contain article filename scope '."+CoreConstants.ARTICLE_FILENAME_SCOPE+"'.  The resource path is returned unchanged.");
+		LOGGER.warning("Resource path for article '"+resourcePath+"' does not contain article filename scope '."+CoreConstants.ARTICLE_FILENAME_SCOPE+"'.  The resource path is returned unchanged.");
 		return resourcePath;
 	}
 
@@ -1350,7 +1350,7 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 	public List<String> getCategories() {
 		return getLocalizedArticle().getCategories();
 	}
-	
+
 	public String getFilesResourcePath(){
 		String resourcesPath = getResourcePath();
 		if(!resourcesPath.endsWith("/")){
