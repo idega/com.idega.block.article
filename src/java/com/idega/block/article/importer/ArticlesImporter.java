@@ -172,7 +172,7 @@ public class ArticlesImporter extends DefaultSpringBean implements ApplicationLi
      * Method for importing articles and their categories from default /files/cms/article path.
      * @return true, if imported, false if at least one article was not imported.
      */
-    public boolean importArticles() {
+    private boolean importArticles() {
         IWSlideService iWSlideService = getServiceInstance(IWSlideService.class);
         try {
             /*Getting the articles folders*/
@@ -214,12 +214,6 @@ public class ArticlesImporter extends DefaultSpringBean implements ApplicationLi
 
         //	Now will try to look for the articles in the current folder
         try {
-        	boolean folder = resource.getIsCollection();
-        	if (!folder) {
-        		getLogger().info("Resource " + resource + " is not a folder, can not import");
-        		return true;
-        	}
-
         	WebdavResource[] foldersAndFilesResources = resource.listWebdavResources();
             if (ArrayUtil.isEmpty(foldersAndFilesResources)) {
             	getLogger().info("There are no files nor folders inside " + resource.getPath());

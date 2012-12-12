@@ -186,7 +186,10 @@ public abstract class ArticleDaoTemplateImpl<T extends ArticleEntity> extends Ge
 			return false;
 		}
 
-		return articleEntity != null && articleEntity.getId() != null;
+		boolean result = articleEntity != null && articleEntity.getId() != null;
+		getLogger().info("Success " + (editing ? "editing" : "creating") + " article: " + articleEntity + ", ID: " +
+				(articleEntity == null ? "null" : articleEntity.getId()) + " " + result);
+		return result;
 	}
 
 	@Override
