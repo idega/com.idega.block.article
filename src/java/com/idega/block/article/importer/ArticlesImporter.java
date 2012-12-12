@@ -39,6 +39,7 @@ import com.idega.util.ArrayUtil;
 import com.idega.util.CoreConstants;
 import com.idega.util.ListUtil;
 import com.idega.util.StringUtil;
+import com.idega.util.expression.ELUtil;
 
 
 /**
@@ -58,9 +59,6 @@ public class ArticlesImporter extends DefaultSpringBean implements ApplicationLi
 
     @Autowired
     private CategoryDao categoryDao;
-
-    @Autowired
-    private ArticleDao articleDao;
 
     private static Logger LOGGER = Logger.getLogger(ArticlesImporter.class.getName());
 
@@ -280,6 +278,9 @@ public class ArticlesImporter extends DefaultSpringBean implements ApplicationLi
             }
 
             for (String s: arrayOfResourcesInStringRepresentation) {
+            	int index = s.indexOf("?jsessionid");
+            	if (index > 0)
+            		s = s.substring(0, index);
                 if (s.endsWith(CoreConstants.ARTICLE_FILENAME_SCOPE))
                     return Boolean.TRUE;
             }
@@ -367,7 +368,7 @@ public class ArticlesImporter extends DefaultSpringBean implements ApplicationLi
 
 	                    //	Writing to the DB
 	                    getLogger().info("Importing article " + uri);
-	                    if (articleDao.updateArticle(new Date(r.getCreationDate()), uri, articleCategories)) {
+	                    if (getArticleDao().updateArticle(new Date(r.getCreationDate()), uri, articleCategories)) {
 	                    	getLogger().info("Article " + uri + " was SUCCESSFULLY imported");
 	                    } else {
 	                    	getLogger().warning("FAILED to import the article: " + uri);
@@ -402,6 +403,11 @@ public class ArticlesImporter extends DefaultSpringBean implements ApplicationLi
 
         return Boolean.FALSE;
     }
+
+    private ArticleDao getArticleDao() {
+		ArticleDao articleDao = ELUtil.getInstance().getBean(ArticleDao.BEAN_NAME);
+		return articleDao;
+	}
 
     /*
      * Test cases isArticlesFolder(WebdavResource resource):

@@ -56,7 +56,9 @@ public class ArticleEntity implements Serializable {
     private static final long serialVersionUID = -8125483527520853214L;
 
     public static final String idProp = "id";
-    @Id @GeneratedValue(strategy = GenerationType.AUTO)
+    @Id
+    @GeneratedValue(strategy = GenerationType.AUTO)
+    @Column(name = "id")
     private Long id;
 
     public static final String modificationDateProp = "modificationDate";
@@ -97,7 +99,6 @@ public class ArticleEntity implements Serializable {
     	setUri(entity.getUri());
     	//TODO: test this!!!!!!!!!!!!!
     	id = entity.getId();
-
     }
 
 	/**

@@ -21,11 +21,18 @@ import com.idega.core.persistence.impl.GenericDaoImpl;
 import com.idega.util.CoreConstants;
 import com.idega.util.ListUtil;
 import com.idega.util.StringUtil;
+import com.idega.util.expression.ELUtil;
 
 public abstract class ArticleDaoTemplateImpl<T extends ArticleEntity> extends GenericDaoImpl implements ArticleDaoTemplate<T> {
 
 	@Autowired
 	private CategoryDao categoryDao;
+
+	private CategoryDao getCategoryDao() {
+		if (categoryDao == null)
+			ELUtil.getInstance().autowire(this);
+		return categoryDao;
+	}
 
 	private static Logger LOGGER = Logger.getLogger(ArticleDaoImpl.class.getName());
 
@@ -68,7 +75,7 @@ public abstract class ArticleDaoTemplateImpl<T extends ArticleEntity> extends Ge
      * @see com.idega.block.article.data.dao.ArticleDao#delete(String)
      */
 	@Override
-	@Transactional(readOnly=false)
+	@Transactional(readOnly = false)
 	public boolean delete(String uri) {
 		final T article = getByUri(uri);
 		if (article == null)
@@ -90,7 +97,7 @@ public abstract class ArticleDaoTemplateImpl<T extends ArticleEntity> extends Ge
      * @see com.idega.block.article.data.dao.ArticleDao#getByCategories(List, String, int)
      */
 	@Override
-	public List <T> getByCategories(List<String> categories, String uriFrom, int maxResults) {
+	public List<T> getByCategories(List<String> categories, String uriFrom, int maxResults) {
 		Class<T> entityClass = getEntityClass();
 		String entityName = entityClass.getSimpleName();
 		StringBuilder inlineQuery = new StringBuilder("SELECT DISTINCT a").append(" FROM ").append(entityName).append(" a");
@@ -144,13 +151,14 @@ public abstract class ArticleDaoTemplateImpl<T extends ArticleEntity> extends Ge
 	@Transactional(readOnly = false)
 	public boolean updateArticle(Date timestamp, String uri, Collection<String> categories, Collection<Integer> editors) {
 		if (timestamp == null || StringUtil.isEmpty(uri)) {
-			LOGGER.warning("Can not update article because URI (" + uri + ") or modification date (" + timestamp + ") are not provided!");
+			LOGGER.warning("Can not create or update article because URI (" + uri + ") and/or modification date (" + timestamp +
+					") are not provided!");
 			return false;
 		}
 
 		//	Checking if all categories exist in DB
 		if (!ListUtil.isEmpty(categories))
-		    this.categoryDao.addCategories(categories);
+		    getCategoryDao().addCategories(categories);
 
 		//	Editing or creating
 		boolean editing = true;
@@ -161,7 +169,7 @@ public abstract class ArticleDaoTemplateImpl<T extends ArticleEntity> extends Ge
 		}
 
 		//	Setting specific categories for the article
-		List<CategoryEntity> categoriesForTheArticle = this.categoryDao.getCategories(categories);
+		List<CategoryEntity> categoriesForTheArticle = getCategoryDao().getCategories(categories);
 		if (!ListUtil.isEmpty(categoriesForTheArticle))
 			articleEntity.setCategories(categoriesForTheArticle);
 
@@ -188,7 +196,7 @@ public abstract class ArticleDaoTemplateImpl<T extends ArticleEntity> extends Ge
 
 		boolean result = articleEntity != null && articleEntity.getId() != null;
 		getLogger().info("Success " + (editing ? "editing" : "creating") + " article: " + articleEntity + ", ID: " +
-				(articleEntity == null ? "null" : articleEntity.getId()) + " " + result);
+				(articleEntity == null ? "null" : articleEntity.getId()) + ": " + result);
 		return result;
 	}
 
