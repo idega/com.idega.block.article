@@ -52,14 +52,14 @@ public abstract class ArticleDaoTemplateImpl<T extends ArticleEntity> extends Ge
 		if (uri.endsWith(CoreConstants.SLASH))
 			uri = uri.substring(0, uri.lastIndexOf(CoreConstants.SLASH));
 
-		return this.getSingleResult(ArticleEntity.GET_BY_URI, getEntityClass(), new Param(ArticleEntity.uriProp, uri));
+		return getSingleResult(ArticleEntity.GET_BY_URI, getEntityClass(), new Param(ArticleEntity.uriProp, uri));
 	}
 
 	/**
      * @see com.idega.block.article.data.dao.ArticleDao#getArticleIdByURI(String)
      */
 	@Override
-	public Long getArticleIdByURI(String uri){
+	public Long getArticleIdByURI(String uri) {
 		ArticleEntity article = getByUri(uri);
 		return article == null ? Long.valueOf(-1) : article.getId();
 	}
@@ -85,6 +85,7 @@ public abstract class ArticleDaoTemplateImpl<T extends ArticleEntity> extends Ge
 	}
 
 	protected abstract Class<T> getEntityClass();
+
 	/**
      * @see com.idega.block.article.data.dao.ArticleDao#getByCategories(List, String, int)
      */
@@ -106,7 +107,7 @@ public abstract class ArticleDaoTemplateImpl<T extends ArticleEntity> extends Ge
 		if (!StringUtil.isEmpty(uriFrom)) {
 			if (addedWhere) {
 				inlineQuery.append(" AND ");
-			}else {
+			} else {
 				inlineQuery.append(" WHERE ");
 				addedWhere = true;
 			}
@@ -140,64 +141,71 @@ public abstract class ArticleDaoTemplateImpl<T extends ArticleEntity> extends Ge
 	}
 
 	@Override
-	@Transactional
-	public boolean updateArticle(Date timestamp, String uri,
-			Collection<String> categories, Collection<Integer> editors) {
+	@Transactional(readOnly = false)
+	public boolean updateArticle(Date timestamp, String uri, Collection<String> categories, Collection<Integer> editors) {
 		if (timestamp == null || StringUtil.isEmpty(uri)) {
 			LOGGER.warning("Can not update article because URI (" + uri + ") or modification date (" + timestamp + ") are not provided!");
 			return false;
 		}
 
-		boolean result = true;
-		if (!ListUtil.isEmpty(categories)) {
+		//	Checking if all categories exist in DB
+		if (!ListUtil.isEmpty(categories))
 		    this.categoryDao.addCategories(categories);
-		}
 
-		ArticleEntity articleEntity = this.getByUri(uri);
-		if(articleEntity == null){
+		//	Editing or creating
+		boolean editing = true;
+		ArticleEntity articleEntity = getByUri(uri);
+		if (articleEntity == null) {
 			articleEntity = new ArticleEntity();
-		}
-		List<CategoryEntity> categoriesForTheArticle = this.categoryDao.getCategories(categories);
-		if(!ListUtil.isEmpty(categoriesForTheArticle)){
-			articleEntity.setCategories(categoriesForTheArticle);
+			editing = false;
 		}
 
+		//	Setting specific categories for the article
+		List<CategoryEntity> categoriesForTheArticle = this.categoryDao.getCategories(categories);
+		if (!ListUtil.isEmpty(categoriesForTheArticle))
+			articleEntity.setCategories(categoriesForTheArticle);
+
+		//	URI
 		articleEntity.setUri(uri);
+
+		//	Timestamp
 		articleEntity.setModificationDate(timestamp);
-		if(!ListUtil.isEmpty(editors)){
+
+		//	Editors
+		if (!ListUtil.isEmpty(editors))
 			articleEntity.setEditors(new HashSet<Integer>(editors));
-		}
 
 		try {
+			if (editing)
 				merge(articleEntity);
+			else
+				persist(articleEntity);
 		} catch (Exception e) {
-			LOGGER.log(Level.WARNING, "Failed to add article to database: " + articleEntity + " with the categories: " + categoriesForTheArticle, e);
+			LOGGER.log(Level.WARNING, "Failed to " + (editing ? "edit" : "create") + " article '" + articleEntity + "' with the categories: " +
+					categoriesForTheArticle + ", editors: " + editors, e);
 			return false;
 		}
-		if (result)
-			return articleEntity != null && articleEntity.getId() != null;
 
-		return result;
+		return articleEntity != null && articleEntity.getId() != null;
 	}
-	
+
 	@Override
 	@Transactional(readOnly = false)
 	public void remove(T articleEntity) {
 		Long id = articleEntity.getId();
-		if(id == null){
+		if (id == null)
 			return;
-		}
+
 		Class<T> entityClass = getEntityClass();
 		String entityName = entityClass.getSimpleName();
 		StringBuilder inlineQuery = new StringBuilder("SELECT a FROM ").append(entityName).append(" a WHERE id = :").append(ArticleEntity.idProp);
 		Query query = this.getQueryInline(inlineQuery.toString());
 		List<T> entities = query.getResultList(entityClass, new Param(ArticleEntity.idProp, id));
-		if(ListUtil.isEmpty(entities)){
+
+		if (ListUtil.isEmpty(entities))
 			return;
-		}
-		for(T entity : entities){
+		for (T entity : entities)
 			super.remove(entity);
-		}
 	}
 
 	@Override
@@ -210,6 +218,5 @@ public abstract class ArticleDaoTemplateImpl<T extends ArticleEntity> extends Ge
 		List<CategoryEntity> results =  query.getResultList(CategoryEntity.class,new Param(ArticleEntity.idProp,articleId));
 		return results;
 	}
-
 
 }

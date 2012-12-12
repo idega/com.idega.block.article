@@ -100,7 +100,6 @@ public class ArticleEntity implements Serializable {
 
     }
 
-
 	/**
      * Returns group ids. Users of those groups are allowed to edit article.
      * @return Groups ids
@@ -146,21 +145,20 @@ public class ArticleEntity implements Serializable {
 
     @Transient
     public Set<CategoryEntity> getCategories() {
-    	if (Hibernate.isInitialized(categories)){
+    	if (Hibernate.isInitialized(categories))
     		return categories;
-    	}
 
-    	if(id == null){
+    	if (id == null)
     		return Collections.emptySet();
-    	}
+
     	List<CategoryEntity> categoriesList = getArticleDao().getCategories(id);
-    	if(ListUtil.isEmpty(categoriesList)){
-    		// Not empty set because add should be suported
+    	if (ListUtil.isEmpty(categoriesList)) {
+    		// Not empty set because add should be supported
     		categories = new HashSet<CategoryEntity>();
-    	}else{
+    	} else {
     		categories = new HashSet<CategoryEntity>(categoriesList);
     	}
-    	
+
     	return categories;
     }
 
@@ -234,7 +232,6 @@ public class ArticleEntity implements Serializable {
 
 	public void remove(){
 		getArticleDao().remove(this);
-//		getArticleDao().delete(getUri());
 	}
 
 }

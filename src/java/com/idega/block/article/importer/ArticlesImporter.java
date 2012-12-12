@@ -74,15 +74,12 @@ public class ArticlesImporter extends DefaultSpringBean implements ApplicationLi
     @Override
     public void onApplicationEvent(ApplicationEvent event) {
         if (event instanceof IWMainSlideStartedEvent) {
-        	getLogger().info("Starting articles importer...");
-
         	IWMainApplicationSettings settings = getApplication().getSettings();
 
             CategoryBugRemover cbr = new CategoryBugRemover();
             try {
-                if (!cbr.isBadColunmsExist()) {
+                if (!cbr.isBadColunmsExist())
                 	settings.setProperty(CATEGORIES_BUG_FIXED_PROP, Boolean.TRUE.toString());
-                }
             } catch (Exception e) {
                 LOGGER.log(Level.WARNING, "Failed to check for wrong tables", e);
             }
@@ -146,7 +143,7 @@ public class ArticlesImporter extends DefaultSpringBean implements ApplicationLi
             if (ListUtil.isEmpty(categoryList))
                 continue;
 
-            for (ContentCategory category : categoryList){
+            for (ContentCategory category : categoryList) {
                 if (category == null)
                     continue;
 
@@ -179,7 +176,8 @@ public class ArticlesImporter extends DefaultSpringBean implements ApplicationLi
         IWSlideService iWSlideService = getServiceInstance(IWSlideService.class);
         try {
             /*Getting the articles folders*/
-            WebdavResource resource = iWSlideService.getWebdavResourceAuthenticatedAsRoot(CoreConstants.CONTENT_PATH.concat(CoreConstants.ARTICLE_CONTENT_PATH));
+            WebdavResource resource = iWSlideService.getWebdavResourceAuthenticatedAsRoot(CoreConstants.CONTENT_PATH
+            		.concat(CoreConstants.ARTICLE_CONTENT_PATH));
             boolean importResult = importArticleFolders(resource);
             resource.close();
             return importResult;
@@ -198,7 +196,7 @@ public class ArticlesImporter extends DefaultSpringBean implements ApplicationLi
      * @param resource Path where to start looking for articles to import.
      * @return true, if articles found and imported, false if not all articles imported.
      */
-    public boolean importArticleFolders(WebdavResource resource) {
+    private boolean importArticleFolders(WebdavResource resource) {
         if (resource == null) {
         	getLogger().warning("Resource is undefined!");
             return Boolean.FALSE;
@@ -214,8 +212,12 @@ public class ArticlesImporter extends DefaultSpringBean implements ApplicationLi
         //	Importing articles from the current folder
         importArticles(resource);
 
-        //	No will try to look for the articles in the current folder
+        //	Now will try to look for the articles in the current folder
         try {
+        	boolean folder = resource.getIsCollection();
+        	if (!folder)
+        		return true;
+
         	WebdavResource[] foldersAndFilesResources = resource.listWebdavResources();
             if (ArrayUtil.isEmpty(foldersAndFilesResources)) {
             	getLogger().info("There are no files nor folders inside " + resource.getPath());
@@ -255,29 +257,39 @@ public class ArticlesImporter extends DefaultSpringBean implements ApplicationLi
      * @param resource Folder, that might be containing article folders.
      * @return true, if it is folder of articles, false, if not.
      */
-    public boolean isArticlesFolder(WebdavResource resource){
-        if (resource == null || !resource.exists())
-            return Boolean.FALSE;
+    private boolean isArticlesFolder(WebdavResource resource){
+        if (resource == null || !resource.exists()) {
+        	getLogger().warning("Resource " + resource + " does not exist!");
+        	return Boolean.FALSE;
+        }
 
         /*Checking is it folder*/
-        if (!resource.isCollection())
+        if (!resource.isCollection()) {
+        	getLogger().warning("Expected folder ending with '" + CoreConstants.DOT + CoreConstants.ARTICLE_FILENAME_SCOPE + "', got file: " +
+        			resource + ". Can not import");
             return Boolean.FALSE;
+        }
 
         try {
             WebdavResources webdavResources = resource.getChildResources();
-            if (webdavResources == null)
+            if (webdavResources == null) {
+            	getLogger().warning("Folder " + resource + " does not have files");
                 return Boolean.FALSE;
+            }
 
             String[] arrayOfResourcesInStringRepresentation = webdavResources.list();
-            if (arrayOfResourcesInStringRepresentation == null) {
+            if (ArrayUtil.isEmpty(arrayOfResourcesInStringRepresentation)) {
+            	getLogger().warning("Folder " + resource + " does not have files");
                 return Boolean.FALSE;
             }
 
-            for (String s : arrayOfResourcesInStringRepresentation) {
-                if (s.endsWith(CoreConstants.ARTICLE_FILENAME_SCOPE)) {
+            for (String s: arrayOfResourcesInStringRepresentation) {
+                if (s.endsWith(CoreConstants.ARTICLE_FILENAME_SCOPE))
                     return Boolean.TRUE;
-                }
             }
+
+            getLogger().info("Did not find any folders ending with '" + CoreConstants.DOT + CoreConstants.ARTICLE_FILENAME_SCOPE + "' inside " +
+            		resource);
 
             /*Trying to solve out of memory exception*/
             arrayOfResourcesInStringRepresentation = null;
@@ -297,7 +309,7 @@ public class ArticlesImporter extends DefaultSpringBean implements ApplicationLi
      * @param resource Folder of articles folder.
      * @return true, if imported, false if failed or not articles folder.
      */
-    public boolean importArticles(WebdavResource resource){
+    private boolean importArticles(WebdavResource resource){
         if (!isArticlesFolder(resource)) {
         	getLogger().warning("Folder " + resource.getPath() + " is not folder of articles!");
             return Boolean.FALSE;
