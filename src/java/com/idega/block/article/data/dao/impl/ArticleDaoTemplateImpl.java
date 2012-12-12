@@ -93,6 +93,9 @@ public abstract class ArticleDaoTemplateImpl<T extends ArticleEntity> extends Ge
 
 	protected abstract Class<T> getEntityClass();
 
+	protected abstract <E extends ArticleEntity> E mergeEntity(E entity);
+	protected abstract <E extends ArticleEntity> E persistEntity(E entity);
+
 	/**
      * @see com.idega.block.article.data.dao.ArticleDao#getByCategories(List, String, int)
      */
@@ -185,9 +188,9 @@ public abstract class ArticleDaoTemplateImpl<T extends ArticleEntity> extends Ge
 
 		try {
 			if (editing)
-				merge(articleEntity);
+				articleEntity = mergeEntity(articleEntity);
 			else
-				persist(articleEntity);
+				articleEntity = persistEntity(articleEntity);
 		} catch (Exception e) {
 			LOGGER.log(Level.WARNING, "Failed to " + (editing ? "edit" : "create") + " article '" + articleEntity + "' with the categories: " +
 					categoriesForTheArticle + ", editors: " + editors, e);

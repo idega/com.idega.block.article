@@ -27,18 +27,21 @@ public class ArticleDaoImpl extends ArticleDaoTemplateImpl<ArticleEntity> implem
 		return ArticleEntity.class;
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	@Transactional(readOnly = false)
-	public <T> T merge(T product) {
-		getLogger().info("Updating article: " + product);
-		return super.merge(product);
+	protected <A extends ArticleEntity> A mergeEntity(A article) {
+		getLogger().info("Updating article: " + article);
+		ArticleEntity a = super.merge((ArticleEntity) article);
+		return (A) a;
 	}
 
 	@Override
 	@Transactional(readOnly = false)
-	public void persist(Object product) {
-		getLogger().info("Creating article: " + product);
-		super.persist(product);
+	protected <A extends ArticleEntity> A persistEntity(A article) {
+		getLogger().info("Creating article: " + article);
+		super.persist((ArticleEntity) article);
+		return article != null && article.getId() != null ? article : null;
 	}
 
 }
