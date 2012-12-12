@@ -215,8 +215,10 @@ public class ArticlesImporter extends DefaultSpringBean implements ApplicationLi
         //	Now will try to look for the articles in the current folder
         try {
         	boolean folder = resource.getIsCollection();
-        	if (!folder)
+        	if (!folder) {
+        		getLogger().info("Resource " + resource + " is not a folder, can not import");
         		return true;
+        	}
 
         	WebdavResource[] foldersAndFilesResources = resource.listWebdavResources();
             if (ArrayUtil.isEmpty(foldersAndFilesResources)) {
@@ -225,7 +227,7 @@ public class ArticlesImporter extends DefaultSpringBean implements ApplicationLi
             }
 
             boolean result = Boolean.FALSE;
-            for (WebdavResource wr : foldersAndFilesResources) {
+            for (WebdavResource wr: foldersAndFilesResources) {
             	if (wr == null)
             		continue;
 
@@ -331,10 +333,9 @@ public class ArticlesImporter extends DefaultSpringBean implements ApplicationLi
                 return Boolean.FALSE;
             }
 
-            int size = arrayOfResources.length;
             boolean isImportSuccesful = Boolean.TRUE;
             String propertyName = new PropertyName("DAV", "categories").toString();
-            for (WebdavResource r : arrayOfResources) {
+            for (WebdavResource r: arrayOfResources) {
             	uri = null;
             	String name = r.getName();
             	if (StringUtil.isEmpty(name)) {
@@ -343,37 +344,45 @@ public class ArticlesImporter extends DefaultSpringBean implements ApplicationLi
             	}
 
                 if (name.endsWith(CoreConstants.ARTICLE_FILENAME_SCOPE)) {
-                    uri = r.getPath();
+                	try {
+	                    uri = r.getPath();
 
-                    @SuppressWarnings("unchecked")
-                    Enumeration<String> resourceEnumeration = r.propfindMethod(uri, propertyName);
-                    Collection<String> articleCategories = null;
-                    if (resourceEnumeration != null){
-                        while (resourceEnumeration.hasMoreElements()) {
-                            articleCategories = CategoryBean.getCategoriesFromString(resourceEnumeration.nextElement());
-                        }
-                        if (!ListUtil.isEmpty(articleCategories))
-                        	getLogger().info("Found categories for the article (" + uri + "): " + articleCategories);
-                    }
+	                    //	Loading categories
+	                    @SuppressWarnings("unchecked")
+	                    Enumeration<String> resourceEnumeration = r.propfindMethod(uri, propertyName);
+	                    Collection<String> articleCategories = new ArrayList<String>();
+	                    if (resourceEnumeration != null){
+	                        while (resourceEnumeration.hasMoreElements()) {
+	                            Collection<String> tmpCategories = CategoryBean.getCategoriesFromString(resourceEnumeration.nextElement());
+	                            if (!ListUtil.isEmpty(tmpCategories))
+	                            	articleCategories.addAll(tmpCategories);
+	                        }
+	                        if (!ListUtil.isEmpty(articleCategories))
+	                        	getLogger().info("Found categories for the article (" + uri + "): " + articleCategories);
+	                    }
+	                    if (ListUtil.isEmpty(articleCategories))
+	                    	articleCategories = Collections.emptyList();
+	                    else
+	                    	articleCategories = new ArrayList<String>(articleCategories);
 
-                    if (uri.contains(CoreConstants.WEBDAV_SERVLET_URI))
-                        uri = uri.substring(CoreConstants.WEBDAV_SERVLET_URI.length());
-                    if (uri.endsWith(CoreConstants.SLASH))
-                        uri = uri.substring(0, uri.lastIndexOf(CoreConstants.SLASH));
-                    if (ListUtil.isEmpty(articleCategories))
-                    	articleCategories = Collections.emptyList();
-                    else
-                    	articleCategories = new ArrayList<String>(articleCategories);
-                    if (articleDao.updateArticle(new Date(r.getCreationDate()), uri, articleCategories)) {
-                    	getLogger().info("Article " + uri + " was SUCCESSFULLY imported");
-                    } else {
-                    	getLogger().warning("FAILED to import the article: " + uri);
-                        isImportSuccesful = Boolean.FALSE;
-                        break;
-                    }
+	                    //	Fixing URI
+	                    if (uri.contains(CoreConstants.WEBDAV_SERVLET_URI))
+	                        uri = uri.substring(CoreConstants.WEBDAV_SERVLET_URI.length());
+	                    if (uri.endsWith(CoreConstants.SLASH))
+	                        uri = uri.substring(0, uri.lastIndexOf(CoreConstants.SLASH));
 
-                    size = size-1;
-                    r.close();
+	                    //	Writing to the DB
+	                    getLogger().info("Importing article " + uri);
+	                    if (articleDao.updateArticle(new Date(r.getCreationDate()), uri, articleCategories)) {
+	                    	getLogger().info("Article " + uri + " was SUCCESSFULLY imported");
+	                    } else {
+	                    	getLogger().warning("FAILED to import the article: " + uri);
+	                        isImportSuccesful = Boolean.FALSE;
+	                        break;
+	                    }
+                	} finally {
+                		r.close();
+                	}
                 }
             }
 
