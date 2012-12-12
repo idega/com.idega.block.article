@@ -225,13 +225,4 @@ public class ArticleEntity implements Serializable {
 		return articleDao;
 	}
 
-	public ArticleEntity merge() {
-		setModificationDate(new Date());
-		return getArticleDao().merge(this);
-	}
-
-	public void remove(){
-		getArticleDao().remove(this);
-	}
-
 }

@@ -108,8 +108,6 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 	//Request scope so this should work well and fast
 	private Boolean allowedToEditByCurrentUser = null;
 
-	private ArticleEntity articleEntity = null;
-
 	public ArticleItemBean() {
 		super();
 	}
@@ -165,7 +163,7 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 		}
 
 		User currentUser = iwc.getCurrentUser();
-		ArticleEntity articleEntity = getArticleEntity();
+		ArticleEntity articleEntity = getArticleEntity(false);
 		if (articleEntity == null) {
 			//By default there was permitted to edit any article by any user
 			allowedToEditByCurrentUser = Boolean.TRUE;
@@ -222,28 +220,30 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 			return;
 		}
 		allowedToEditByCurrentUser = null;
-		ArticleEntity articleEntity = getArticleEntity();
-		if(groupsIds instanceof Set){
-			articleEntity.setEditors((Set<Integer>) groupsIds);
-		}else{
-			articleEntity.setEditors(new HashSet<Integer>(groupsIds));
+		ArticleEntity articleEntity = getArticleEntity(false);
+		if (articleEntity != null) {
+			if (groupsIds instanceof Set) {
+				articleEntity.setEditors((Set<Integer>) groupsIds);
+			} else {
+				articleEntity.setEditors(new HashSet<Integer>(groupsIds));
+			}
 		}
 	}
 
-	public ArticleEntity getArticleEntity() {
-		if (articleEntity == null) {
-			articleEntity = getArticleDAO().getByUri(getResourcePath());
+	public ArticleEntity getArticleEntity(boolean createIfNotFound) {
+		ArticleEntity article = getArticleDAO().getByUri(getResourcePath());
+		
+		if (createIfNotFound && article == null) {
+			article = new ArticleEntity();
+			article.setUri(getResourcePath());
+			article.setModificationDate(new Date(System.currentTimeMillis()));
 		}
-		if (articleEntity == null) {
-			articleEntity = new ArticleEntity();
-			articleEntity.setUri(getResourcePath());
-			articleEntity.setModificationDate(new Date());
-		}
-		return articleEntity;
+		
+		return article;
 	}
 
 	public void setArticleEntity(ArticleEntity articleEntity) {
-		this.articleEntity = articleEntity;
+//		this.articleEntity = articleEntity;
 	}
 
 	public boolean isPartOfArticleList() {
@@ -514,15 +514,15 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 		getLocalizedArticle().setUpdated(b);
 	}
 
-
 	@Override
 	public void store() throws IDOStoreException {
-		ArticleEntity articleEntity = getArticleEntity();
-		if (articleEntity == null)
-			articleEntity = new ArticleEntity();
-		articleEntity.setUri(getResourcePath());
-		articleEntity = articleEntity.merge();
-		setArticleEntity(articleEntity);
+		ArticleEntity article = getArticleEntity(true);
+		article.setUri(getResourcePath());
+		article = getArticleDAO().updateArticle(article);
+		if (article == null || article.getId() == null)
+			throw new IDOStoreException("Unable to create/edit article at " + getResourcePath());
+		
+		setArticleEntity(article);
 		try {
 			storeToSlide();
 		} catch(Exception e){
@@ -1274,12 +1274,9 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 		return this.availableInRequestedLanguage;
 	}
 
-	/* (non-Javadoc)
-	 * @see com.idega.content.bean.ContentItemBean#delete()
-	 */
 	@Override
 	public void delete() {
-		getArticleEntity().remove();
+		getArticleDAO().remove(getArticleEntity(false));
 		getLocalizedArticle().delete();
 		this.localizedArticle=null;
 		super.delete();

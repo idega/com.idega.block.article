@@ -85,17 +85,15 @@ public class ArticleItemChecker implements ContentItemChecker {
 	
 	@Override
 	public boolean deleteContentItem(String path, Locale l) {
-		if (path == null || l == null) {
+		if (path == null || l == null)
 			return false;
-		}
 		
 		ArticleItemBean article = getLoadedArticleBean(path, l);
-		if (article == null) {
+		if (article == null)
 			return false;
-		}
 		
 		article.delete();
-		return getArticleDAO().delete(path);
+		return getArticleDAO().getByUri(path) == null;
 	}
 	
 }

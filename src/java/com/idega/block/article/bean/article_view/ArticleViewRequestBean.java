@@ -133,13 +133,13 @@ public class ArticleViewRequestBean  extends DefaultSpringBean{
 		
 		Collection<Integer> existingEditors = null;
 		
-		ArticleEntity articleEntity = getArticleItemBean().getArticleEntity();
-		if(articleEntity != null){
+		ArticleEntity articleEntity = getArticleItemBean().getArticleEntity(false);
+		if (articleEntity != null) {
 			existingEditors = articleEntity.getEditors();
 		}
-		if(ListUtil.isEmpty(existingEditors)){
+		if (ListUtil.isEmpty(existingEditors)){
 			editors.addAll(getDefaultEditorsGroups());
-		}else{
+		} else {
 			for(Integer editor : existingEditors){
 				editors.add(String.valueOf(editor));
 			}

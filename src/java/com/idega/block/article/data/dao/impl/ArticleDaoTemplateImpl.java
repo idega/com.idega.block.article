@@ -48,7 +48,7 @@ public abstract class ArticleDaoTemplateImpl<T extends ArticleEntity> extends Ge
      * @see com.idega.block.article.data.dao.ArticleDao#getByUri(String)
      */
 	@Override
-	public T getByUri(String uri){
+	public T getByUri(String uri) {
 		if (StringUtil.isEmpty(uri)) {
 			LOGGER.warning("Aricle URI is not provided");
 			return null;
@@ -92,9 +92,6 @@ public abstract class ArticleDaoTemplateImpl<T extends ArticleEntity> extends Ge
 	}
 
 	protected abstract Class<T> getEntityClass();
-
-	protected abstract <E extends ArticleEntity> E mergeEntity(E entity);
-	protected abstract <E extends ArticleEntity> E persistEntity(E entity);
 
 	/**
      * @see com.idega.block.article.data.dao.ArticleDao#getByCategories(List, String, int)
@@ -151,7 +148,6 @@ public abstract class ArticleDaoTemplateImpl<T extends ArticleEntity> extends Ge
 	}
 
 	@Override
-	@Transactional(readOnly = false)
 	public boolean updateArticle(Date timestamp, String uri, Collection<String> categories, Collection<Integer> editors) {
 		if (timestamp == null || StringUtil.isEmpty(uri)) {
 			LOGGER.warning("Can not create or update article because URI (" + uri + ") and/or modification date (" + timestamp +
@@ -164,12 +160,9 @@ public abstract class ArticleDaoTemplateImpl<T extends ArticleEntity> extends Ge
 		    getCategoryDao().addCategories(categories);
 
 		//	Editing or creating
-		boolean editing = true;
 		ArticleEntity articleEntity = getByUri(uri);
-		if (articleEntity == null) {
+		if (articleEntity == null)
 			articleEntity = new ArticleEntity();
-			editing = false;
-		}
 
 		//	Setting specific categories for the article
 		List<CategoryEntity> categoriesForTheArticle = getCategoryDao().getCategories(categories);
@@ -186,26 +179,35 @@ public abstract class ArticleDaoTemplateImpl<T extends ArticleEntity> extends Ge
 		if (!ListUtil.isEmpty(editors))
 			articleEntity.setEditors(new HashSet<Integer>(editors));
 
-		try {
-			if (editing)
-				articleEntity = mergeEntity(articleEntity);
-			else
-				articleEntity = persistEntity(articleEntity);
-		} catch (Exception e) {
-			LOGGER.log(Level.WARNING, "Failed to " + (editing ? "edit" : "create") + " article '" + articleEntity + "' with the categories: " +
-					categoriesForTheArticle + ", editors: " + editors, e);
-			return false;
-		}
+		articleEntity = updateArticle(articleEntity);
 
-		boolean result = articleEntity != null && articleEntity.getId() != null;
-		getLogger().info("Success " + (editing ? "editing" : "creating") + " article: " + articleEntity + ", ID: " +
-				(articleEntity == null ? "null" : articleEntity.getId()) + ": " + result);
-		return result;
+		return articleEntity != null && articleEntity.getId() != null;
+	}
+	
+	@Transactional
+	public <E extends ArticleEntity> E updateArticle(E article) {
+		if (article == null) {
+			getLogger().warning("Entity is not provided");
+			return null;
+		}
+		
+		boolean editing = article.getId() != null;
+		try {
+			article = merge(article);
+			return article;
+		} catch (Exception e) {
+			LOGGER.log(Level.WARNING, "Failed to " + (editing ? "edit" : "create") + " article " + article, e);
+		}
+		
+		return null;
 	}
 
 	@Override
 	@Transactional(readOnly = false)
 	public void remove(T articleEntity) {
+		if (articleEntity == null)
+			return;
+		
 		Long id = articleEntity.getId();
 		if (id == null)
 			return;

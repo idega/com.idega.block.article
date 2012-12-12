@@ -3,7 +3,6 @@ package com.idega.block.article.data.dao.impl;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Repository;
-import org.springframework.transaction.annotation.Transactional;
 
 import com.idega.block.article.data.ArticleEntity;
 import com.idega.block.article.data.dao.ArticleDao;
@@ -25,23 +24,6 @@ public class ArticleDaoImpl extends ArticleDaoTemplateImpl<ArticleEntity> implem
 	@Override
 	protected Class<ArticleEntity> getEntityClass() {
 		return ArticleEntity.class;
-	}
-
-	@SuppressWarnings("unchecked")
-	@Override
-	@Transactional(readOnly = false)
-	protected <A extends ArticleEntity> A mergeEntity(A article) {
-		getLogger().info("Updating article: " + article);
-		ArticleEntity a = super.merge((ArticleEntity) article);
-		return (A) a;
-	}
-
-	@Override
-	@Transactional(readOnly = false)
-	protected <A extends ArticleEntity> A persistEntity(A article) {
-		getLogger().info("Creating article: " + article);
-		super.persist((ArticleEntity) article);
-		return article != null && article.getId() != null ? article : null;
 	}
 
 }
