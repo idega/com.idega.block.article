@@ -28,7 +28,6 @@ import org.hibernate.Hibernate;
 import org.hibernate.annotations.CollectionOfElements;
 import org.hibernate.annotations.Index;
 
-import com.google.gson.Gson;
 import com.idega.block.article.data.dao.ArticleDao;
 import com.idega.util.CoreConstants;
 import com.idega.util.ListUtil;
@@ -217,8 +216,8 @@ public class ArticleEntity implements Serializable {
 	}
 
 	@Override
-	public String toString(){
-		return new Gson().toJson(this);
+	public String toString() {
+		return "ID: " + getId() + ", URI: " + getUri() + ", modified: " + getModificationDate();
 	}
 
 	private ArticleDao getArticleDao() {
@@ -226,7 +225,7 @@ public class ArticleEntity implements Serializable {
 		return articleDao;
 	}
 
-	public ArticleEntity merge(){
+	public ArticleEntity merge() {
 		setModificationDate(new Date());
 		return getArticleDao().merge(this);
 	}

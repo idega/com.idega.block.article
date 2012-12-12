@@ -286,7 +286,7 @@ public class ArticlesImporter extends DefaultSpringBean implements ApplicationLi
             }
 
             getLogger().info("Did not find any folders ending with '" + CoreConstants.DOT + CoreConstants.ARTICLE_FILENAME_SCOPE + "' inside " +
-            		resource);
+            		resource.getPath());
 
             /*Trying to solve out of memory exception*/
             arrayOfResourcesInStringRepresentation = null;

@@ -138,6 +138,7 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 	 * @param currentUser the current user for which the check will be done
 	 * @return True if it is allowed to edit, false otherwise.
 	 */
+	@SuppressWarnings("unchecked")
 	public Boolean isAllowedToEditByCurrentUser(IWContext iwc) {
 		IWMainApplicationSettings settings = iwc.getIWMainApplication().getSettings();
 		if (!settings.getBoolean(ArticleConstants.USE_ROLES_IN_ARTICLE, Boolean.FALSE)) {
@@ -145,39 +146,40 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 			return allowedToEditByCurrentUser;
 		}
 
-		if(allowedToEditByCurrentUser != null){
+		if (allowedToEditByCurrentUser != null)
 			return allowedToEditByCurrentUser;
-		}
-		if(!iwc.isLoggedOn()){
+		if (!iwc.isLoggedOn()) {
 			allowedToEditByCurrentUser = Boolean.FALSE;
 			return allowedToEditByCurrentUser;
 		}
+
 		AccessController accessController = iwc.getAccessController();
 		try{
-			if(accessController.isAdmin(iwc)){
+			if (accessController.isAdmin(iwc)) {
 				allowedToEditByCurrentUser = Boolean.TRUE;
 				return allowedToEditByCurrentUser;
 			}
-		}catch (Exception e) {
+		} catch (Exception e) {
 			LOGGER.log(Level.WARNING, "Failed to check is admin", e);
 			return Boolean.FALSE;
 		}
+
 		User currentUser = iwc.getCurrentUser();
-
 		ArticleEntity articleEntity = getArticleEntity();
-		if(articleEntity == null){
-			//By default there was permitted to edit any article by any user
-			allowedToEditByCurrentUser = Boolean.TRUE;
-			return allowedToEditByCurrentUser;
-		}
-		Set<Integer> editors = articleEntity.getEditors();
-		if(ListUtil.isEmpty(editors)){
+		if (articleEntity == null) {
 			//By default there was permitted to edit any article by any user
 			allowedToEditByCurrentUser = Boolean.TRUE;
 			return allowedToEditByCurrentUser;
 		}
 
-		Collection <Group> parentGroups;
+		Set<Integer> editors = articleEntity.getEditors();
+		if (ListUtil.isEmpty(editors)) {
+			//By default there was permitted to edit any article by any user
+			allowedToEditByCurrentUser = Boolean.TRUE;
+			return allowedToEditByCurrentUser;
+		}
+
+		Collection<Group> parentGroups;
 		try {
 			UserBusiness userBusiness = IBOLookup.getServiceInstance(iwc, UserBusiness.class);
 			parentGroups = userBusiness.getUserGroups(currentUser);
@@ -229,10 +231,10 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 	}
 
 	public ArticleEntity getArticleEntity() {
-		if (articleEntity == null){
+		if (articleEntity == null) {
 			articleEntity = getArticleDAO().getByUri(getResourcePath());
 		}
-		if(articleEntity == null){
+		if (articleEntity == null) {
 			articleEntity = new ArticleEntity();
 			articleEntity.setUri(getResourcePath());
 			articleEntity.setModificationDate(new Date());
@@ -516,16 +518,14 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 	@Override
 	public void store() throws IDOStoreException {
 		ArticleEntity articleEntity = getArticleEntity();
-		if(articleEntity == null){
+		if (articleEntity == null)
 			articleEntity = new ArticleEntity();
-		}
 		articleEntity.setUri(getResourcePath());
 		articleEntity = articleEntity.merge();
 		setArticleEntity(articleEntity);
 		try {
 			storeToSlide();
-		}
-		catch(Exception e){
+		} catch(Exception e){
 			throw new IDOStoreException("Failed storing to slide", e);
 		}
 	}
@@ -537,29 +537,26 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 	 */
 	public void storeToSlide()  throws IDOStoreException {
 		try {
-			if(isPersistToWebDav()){
+			if (isPersistToWebDav())
 				storeToWebDav();
-			}
-			else if(isPersistToJCR()){
+			else if (isPersistToJCR())
 				storeToJCR();
-			}
 			getLocalizedArticle().store();
 
 			IWMainApplication iwma = IWMainApplication.getDefaultIWMainApplication();
-			if(iwma!=null){
+			if (iwma!=null) {
 				ArticleCacher cacher = ArticleCacher.getInstance(iwma);
 				cacher.getCacheMap().clear();
 
 				ContentUtil.removeCategoriesViewersFromCache();
 			}
-		}
-		catch(ArticleStoreException ase){
+		} catch(ArticleStoreException ase){
 			throw ase;
-		}
-		catch(Exception e){
+		} catch(Exception e){
 			throw new RuntimeException(e);
 		}
-		if(isPersistToJCR()){
+
+		if (isPersistToJCR()) {
 			try {
 				commitJCRStore();
 			} catch (RepositoryException e) {

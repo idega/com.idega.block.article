@@ -65,11 +65,11 @@ import com.idega.util.expression.ELUtil;
  * @version $Revision: 1.28 $
  */
 public class ArticleListManagedBean implements ContentListViewerManagedBean {
-	
+
 	public final static String BEAN_IDENTIFIER="articleItemListBean";
 
 	private static final Logger LOGGER = Logger.getLogger(ArticleListManagedBean.class.getName());
-	
+
 	private List<String> categories = null;
 
 	private final String LOCALIZEDKEY_MORE = "itemviewer.more";
@@ -102,7 +102,7 @@ public class ArticleListManagedBean implements ContentListViewerManagedBean {
 			ELUtil.getInstance().autowire(this);
 		return this.articleDao;
 	}
-	
+
 	public ArticleListManagedBean() {
 		super();
 	}
@@ -140,23 +140,22 @@ public class ArticleListManagedBean implements ContentListViewerManagedBean {
 		IWContext iwc = CoreUtil.getIWContext();
 
 		List <ArticleItemBean> articleList = new ArrayList<ArticleItemBean>();
-		if (iwc.getIWMainApplication().getSettings().getBoolean("load_articles_from_db", Boolean.TRUE)){
+		if (iwc.getIWMainApplication().getSettings().getBoolean("load_articles_from_db", Boolean.TRUE)) {
 			List<ArticleEntity> entities = getArticlesFromDatabase(folder, categories, iwc,getMaxNumberOfDisplayed());
-			User currentUser = iwc.isLoggedOn() ? iwc.getCurrentUser() : null;
-			for(ArticleEntity articleEntity : entities){
+			for(ArticleEntity articleEntity: entities) {
 				ArticleItemBean articleItemBean = loadArticle(articleEntity.getUri(), iwc);
-				if(articleItemBean == null){
+				if (articleItemBean == null)
 					continue;
-				}
+
 				articleItemBean.setArticleEntity(articleEntity);
 				articleItemBean.isAllowedToEditByCurrentUser(iwc);
 				articleList.add(articleItemBean);
 			}
-		}else{
+		} else {
 			Collection<SearchResult> results = getArticleSearcResults(folder, this.categories, iwc);
-			if (results == null) {
+			if (results == null)
 				return Collections.emptyList();
-			}
+
 			//create uri list
 			List<String> uris = new ArrayList<String>(results.size());
 			for (SearchResult result: results) {
@@ -191,21 +190,21 @@ public class ArticleListManagedBean implements ContentListViewerManagedBean {
 
 		return list;
 	}
-	
-	
+
+
 	private ArticleItemBean loadArticle(String uri,IWContext iwc) throws IOException{
-		
+
 		ArticleItemBean article = new ArticleItemBean();
 		article.setResourcePath(uri);
-		
+
 		article.load();
-		
+
 		if (canShowArticle(article, iwc, iwc.getParameter(ContentViewer.PARAMETER_CONTENT_RESOURCE), iwc.getParameter(ContentConstants.CONTENT_ITEM_VIEWER_IDENTIFIER_PARAMETER))) {
 			return article;
 		}
 		return null;
 	}
-	
+
 	private boolean canShowArticle(ArticleItemBean article, IWContext iwc, String resourcePathFromRequest, String identifierFromRequest) {
 		if (!hasUserRightToViewArticle(article, iwc)) {
 			return false;
