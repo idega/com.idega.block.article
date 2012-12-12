@@ -23,6 +23,7 @@ import org.springframework.context.ApplicationListener;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
 
+import com.idega.block.article.data.ArticleEntity;
 import com.idega.block.article.data.CategoryBugRemover;
 import com.idega.block.article.data.dao.ArticleDao;
 import com.idega.block.article.data.dao.CategoryDao;
@@ -365,7 +366,18 @@ public class ArticlesImporter extends DefaultSpringBean implements ApplicationLi
 
 	                    //	Writing to the DB
 	                    getLogger().info("Importing article " + uri);
-	                    if (getArticleDao().updateArticle(new Date(r.getCreationDate()), uri, articleCategories)) {
+	                    ArticleEntity article = getArticleDao().getByUri(uri);
+	                    if (article == null) {
+	                    	article = new ArticleEntity();
+	                    	article.setModificationDate(new Date(r.getCreationDate()));
+	                    	article.setUri(uri);
+	                    }
+	                    if (!ListUtil.isEmpty(articleCategories)) {
+	                    	categoryDao.addCategories(articleCategories);
+	                    	article.setCategories(categoryDao.getCategories(articleCategories));
+	                    }
+	                    article = getArticleDao().updateArticle(article);
+	                    if (article != null && article.getId() != null) {
 	                    	getLogger().info("Article " + uri + " was SUCCESSFULLY imported");
 	                    } else {
 	                    	getLogger().warning("FAILED to import the article: " + uri);

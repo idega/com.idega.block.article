@@ -36,9 +36,6 @@ public abstract class ArticleDaoTemplateImpl<T extends ArticleEntity> extends Ge
 
 	private static Logger LOGGER = Logger.getLogger(ArticleDaoImpl.class.getName());
 
-	/**
-	 * @see com.idega.block.article.data.dao.ArticleDao#updateArticle(Date, String, List)
-	 */
 	@Override
 	public boolean updateArticle(Date timestamp, String uri, Collection<String> categories) {
 		return updateArticle(timestamp, uri, categories, null);
@@ -148,6 +145,7 @@ public abstract class ArticleDaoTemplateImpl<T extends ArticleEntity> extends Ge
 	}
 
 	@Override
+	@Transactional
 	public boolean updateArticle(Date timestamp, String uri, Collection<String> categories, Collection<Integer> editors) {
 		if (timestamp == null || StringUtil.isEmpty(uri)) {
 			LOGGER.warning("Can not create or update article because URI (" + uri + ") and/or modification date (" + timestamp +
@@ -194,6 +192,12 @@ public abstract class ArticleDaoTemplateImpl<T extends ArticleEntity> extends Ge
 		boolean editing = article.getId() != null;
 		try {
 			article = merge(article);
+			boolean failure = article == null || article.getId() == null;
+			if (failure) {
+				getLogger().warning("Unable to " + (editing ? "edit" : "create") + " article: " + article);
+				return null;
+			}
+			
 			return article;
 		} catch (Exception e) {
 			LOGGER.log(Level.WARNING, "Failed to " + (editing ? "edit" : "create") + " article " + article, e);
