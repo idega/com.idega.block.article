@@ -258,11 +258,8 @@ public class ArticlesImporter extends DefaultSpringBean implements ApplicationLi
         }
 
         /*Checking is it folder*/
-        if (!resource.isCollection()) {
-        	getLogger().warning("Expected folder ending with '" + CoreConstants.DOT + CoreConstants.ARTICLE_FILENAME_SCOPE + "', got file: " +
-        			resource + ". Can not import");
+        if (!resource.isCollection())
             return Boolean.FALSE;
-        }
 
         try {
             WebdavResources webdavResources = resource.getChildResources();
