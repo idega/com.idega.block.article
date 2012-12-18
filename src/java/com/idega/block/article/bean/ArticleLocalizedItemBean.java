@@ -12,7 +12,6 @@ package com.idega.block.article.bean;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
 import java.io.Serializable;
 import java.sql.Timestamp;
 import java.util.ArrayList;
@@ -22,7 +21,6 @@ import java.util.Locale;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import javax.jcr.Node;
 import javax.jcr.RepositoryException;
 
 import org.w3c.tidy.Configuration;
@@ -68,8 +66,6 @@ public class ArticleLocalizedItemBean extends ContentItemBean implements Seriali
 
 	private static final long serialVersionUID = -7871069835129148485L;
 
-	private static final Logger LOGGER = Logger.getLogger(ArticleLocalizedItemBean.class.getName());
-
 	private boolean _isUpdated = false;
 
 	private static final String ROOT_ELEMENT_NAME_ARTICLE = "article";
@@ -91,9 +87,6 @@ public class ArticleLocalizedItemBean extends ContentItemBean implements Seriali
 	private final static String[] ATTRIBUTE_ARRAY = new String[] {
 		FIELDNAME_AUTHOR, FIELDNAME_CREATION_DATE, FIELDNAME_HEADLINE, FIELDNAME_TEASER, ContentItemBean.FIELDNAME_BODY
 	};
-	//public final static String FIELDNAME_LANGUAGE_CHANGE = "language_change";
-
-	//private final static String[] ACTION_ARRAY = new String[] {"edit","delete"};
 
 	transient XMLNamespace idegaXMLName = new XMLNamespace("http://xmlns.idega.com/block/article/xml");
 	String xIdegaXMLNameSpace = "http://xmlns.idega.com/block/article/xml";
@@ -137,17 +130,10 @@ public class ArticleLocalizedItemBean extends ContentItemBean implements Seriali
 	public String getComment() { return (String)getValue(FIELDNAME_COMMENT); }
 	public String getLinkToComments() { return (String)getValue(FIELDNAME_LINK_TO_COMMENT); }
 	public List<ContentItemField> getImages() { return getItemFields(FIELDNAME_IMAGES); }
-	//public String getFilename() { return (String)getValue(FIELDNAME_FILENAME); }
 
-
-//	public void setArticleResourcePath(String path) {
-//		if(path!=null){
-//			if(path.indexOf("."+ARTICLE_FILENAME_SCOPE) < 0 || !path.endsWith(ARTICLE_SUFFIX)){
-//				throw new RuntimeException("["+this.getClass().getName()+"]: setArticleResourcePath("+path+") path is not valid article path!");
-//			}
-//		}
-//		setResourcePath(path);
-//	}
+	private Logger getLogger() {
+		return Logger.getLogger(ArticleLocalizedItemBean.class.getName());
+	}
 
 	public String getContentLanguage() {
 		return getLanguage();
@@ -322,25 +308,6 @@ public class ArticleLocalizedItemBean extends ContentItemBean implements Seriali
 	}
 
 	/**
-	 * @deprecated use getAsXML() instead. We have dropped XMLBeans, since it insisted on adding CData
-	 * @return
-	 */
-/*	public String getAsXMLFromXMLBeans() {
-		ArticleDocument articleDoc = ArticleDocument.Factory.newInstance();
-
-	    ArticleDocument.Article article =  articleDoc.addNewArticle();
-
-		article.setHeadline(getHeadline());
-		article.setBody(getBody());
-		article.setTeaser(getTeaser());
-		article.setAuthor(getAuthor());
-		article.setSource(getSource());
-		article.setComment(getComment());
-
-		return articleDoc.toString();
-	}
-*/
-	/**
 	 * Stores this article file.
 	 */
 	@Override
@@ -351,9 +318,8 @@ public class ArticleLocalizedItemBean extends ContentItemBean implements Seriali
 			String filePath = getResourcePath();
 
 			String article = getAsXML();
-			if (article == null) {
+			if (article == null)
 				return;
-			}
 
 			try {
 				storeToJCR(stream, filePath, article);
@@ -363,26 +329,15 @@ public class ArticleLocalizedItemBean extends ContentItemBean implements Seriali
 
 			try {
 				ArticleLocalizedItemBean newBean = new ArticleLocalizedItemBean(getLocale());
-//				try {
-//					if(isPersistToJCR() && this.getSession()!=null){
-//						newBean.setSession(this.getSession());
-//					}
-//				} catch (RepositoryException e) {
-//					// TODO Auto-generated catch block
-//					e.printStackTrace();
-//				}
 				newBean.setArticleItem(this.getArticleItem());
 				newBean.setResourcePath(filePath);
 				newBean.load();
-			}
-			catch (Exception e) {
+			} catch (Exception e) {
 				throw new RuntimeException(e);
 			}
-		}
-		catch (IOException e1) {
+		} catch (IOException e1) {
 			throw new RuntimeException(e1);
-		}
-		catch (XMLException e) {
+		} catch (XMLException e) {
 			throw new RuntimeException(e);
 		}
 
@@ -392,92 +347,19 @@ public class ArticleLocalizedItemBean extends ContentItemBean implements Seriali
 		}
 	}
 
-//	protected void storeToWebDav(InputStream stream, String filePath,
-//			String article) throws HttpException, IOException, RemoteException {
-//		IWContext iwc = CoreUtil.getIWContext();
-//		IWSlideSession session = getIWSlideSession(iwc);
-//		WebdavRootResource rootResource = session.getWebdavRootResource();
-//
-//		boolean success = false;
-//		try {
-//			stream = StringHandler.getStreamFromString(article);
-//
-//			//Conflict fix: uri for creating but path for updating
-//			//Note! This is a patch to what seems to be a bug in WebDav
-//			//Apparently in verion below works in some cases and the other in other cases.
-//			//Seems to be connected to creating files in folders created in same tomcat session or similar
-//			//not quite clear...
-//
-//			success = rootResource.putMethod(filePath, stream);
-//		} catch(Exception e) {
-//			e.printStackTrace();
-//		} finally {
-//			IOUtil.close(stream);
-//		}
-//		if (success) {
-//			rootResource.proppatchMethod(filePath, ArticleItemBean.PROPERTY_CONTENT_TYPE,CoreConstants.ARTICLE_FILENAME_SCOPE,true);
-//		}
-//		else {
-//			try {
-//				stream = StringHandler.getStreamFromString(article);
-//				String fixedURL = session.getURI(filePath);
-//				rootResource.putMethod(fixedURL, stream);
-//				rootResource.proppatchMethod(fixedURL, ArticleItemBean.PROPERTY_CONTENT_TYPE,CoreConstants.ARTICLE_FILENAME_SCOPE,true);
-//			} catch(Exception e) {
-//				e.printStackTrace();
-//			} finally {
-//				IOUtil.close(stream);
-//			}
-//		}
-//
-//		rootResource.close();
-//	}
-
 	protected void storeToJCR(InputStream stream, String filePath, String article) throws RepositoryException, IOException {
-		Node fileNode = null;
 		try {
 			stream = StringHandler.getStreamFromString(article);
-
-			//Conflict fix: uri for creating but path for updating
-			//Note! This is a patch to what seems to be a bug in WebDav
-			//Apparently in verion below works in some cases and the other in other cases.
-			//Seems to be connected to creating files in folders created in same tomcat session or similar
-			//not quite clear...
-			fileNode = getRepositoryService().updateFileContents(filePath, stream);//helper.updateFileContents(session, filePath, stream);
-			fileNode.setProperty(ArticleItemBean.CONTENT_TYPE_WITH_PREFIX, CoreConstants.ARTICLE_FILENAME_SCOPE);
-			//success=true;
-			//success = rootResource.putMethod(stream, stream);
-
-			//rootResource.close();
-			if(fileNode!=null){
-				fileNode.save();
-			}
-
-		} catch(Exception e) {
+			if (getRepositoryService().updateFileContents(filePath, stream) == null)
+				throw new RuntimeException("Error saving article at " + filePath);
+//			fileNode.setProperty(ArticleItemBean.CONTENT_TYPE_WITH_PREFIX, CoreConstants.ARTICLE_FILENAME_SCOPE);	//	TODO
+		} catch (Exception e) {
 			e.printStackTrace();
 		} finally {
 			IOUtil.close(stream);
 		}
-		/*if (success) {
-			rootResource.proppatchMethod(filePath, ArticleItemBean.PROPERTY_CONTENT_TYPE,CoreConstants.ARTICLE_FILENAME_SCOPE,true);
-		}
-		else {
-			try {
-				stream = StringHandler.getStreamFromString(article);
-				String fixedURL = session.getURI(filePath);
-				rootResource.putMethod(fixedURL, stream);
-				rootResource.proppatchMethod(fixedURL, ArticleItemBean.PROPERTY_CONTENT_TYPE,CoreConstants.ARTICLE_FILENAME_SCOPE,true);
-			} catch(Exception e) {
-				e.printStackTrace();
-			} finally {
-				closeInputStream(stream);
-			}
-		}*/
 	}
 
-	/**
-	 *
-	 */
 	protected void prettifyBody() {
 		String s = prettify(getBody());
 		if (s != null) {
@@ -517,7 +399,7 @@ public class ArticleLocalizedItemBean extends ContentItemBean implements Seriali
 			e.printStackTrace();
 		} finally {
 			IOUtil.close(stream);
-			closeOutputStream(baos);
+			IOUtil.close(baos);
 		}
 		if (StringUtil.isEmpty(text)) {
 			return toPrettify;
@@ -525,21 +407,6 @@ public class ArticleLocalizedItemBean extends ContentItemBean implements Seriali
 		text = removeAbsoluteReferences(text);
 
 		return getOnlyBodyContent(text);
-	}
-
-	private boolean closeOutputStream(OutputStream outputStream) {
-		if (outputStream == null) {
-			return false;
-		}
-
-		try {
-			outputStream.close();
-		} catch (IOException e) {
-			e.printStackTrace();
-			return false;
-		}
-
-		return true;
 	}
 
 	private String removeAbsoluteReferences(String text) {
@@ -557,13 +424,13 @@ public class ArticleLocalizedItemBean extends ContentItemBean implements Seriali
 		try {
 			if (articleXMLFile != null) {
 				setResourcePath(articleXMLFile.getPath());
-				stream = getRepositoryService().getFileContents(getResourcePath());
+				stream = getRepositoryService().getInputStreamAsRoot(getResourcePath());
 				bodyDoc = new XMLDocument(XmlUtil.getJDOMXMLDocument(stream));
 			} else {
 				bodyDoc = null;
 			}
 		} catch (Exception e) {
-			LOGGER.log(Level.SEVERE, "Can not load article", e);  //To change body of catch statement use File | Settings | File Templates.
+			getLogger().log(Level.SEVERE, "Can not load article", e);  //To change body of catch statement use File | Settings | File Templates.
 		} finally {
 			IOUtil.close(stream);
 		}
@@ -574,7 +441,7 @@ public class ArticleLocalizedItemBean extends ContentItemBean implements Seriali
 	private boolean parseXMLDocument(XMLDocument bodyDoc) {
 		if (bodyDoc == null || bodyDoc.getDocument() == null) {
 			//	Article not found
-			LOGGER.warning("XML file was not found for aticle: " + getResourcePath());
+			getLogger().warning("XML file was not found for aticle: " + getResourcePath());
 			setRendered(false);
 			return false;
 		}
@@ -610,7 +477,7 @@ public class ArticleLocalizedItemBean extends ContentItemBean implements Seriali
 				setHeadline(headline.getText());
 			}
 		} catch(Exception e) {
-			LOGGER.log(Level.WARNING, "Can not load headline", e);
+			getLogger().log(Level.WARNING, "Can not load headline", e);
 			setHeadline(CoreConstants.EMPTY);
 		}
 
@@ -628,7 +495,7 @@ public class ArticleLocalizedItemBean extends ContentItemBean implements Seriali
 				setTeaser(bodyValue);
 			}
 		} catch(Exception e) {
-			LOGGER.log(Level.WARNING, "Can not load teaser", e);
+			getLogger().log(Level.WARNING, "Can not load teaser", e);
 			setTeaser(CoreConstants.EMPTY);
 		}
 
@@ -641,7 +508,7 @@ public class ArticleLocalizedItemBean extends ContentItemBean implements Seriali
 				setAuthor(author.getText());
 			}
 		} catch(Exception e) {
-			LOGGER.log(Level.WARNING, "Can not load author", e);
+			getLogger().log(Level.WARNING, "Can not load author", e);
 			setAuthor(CoreConstants.EMPTY);
 		}
 
@@ -655,7 +522,7 @@ public class ArticleLocalizedItemBean extends ContentItemBean implements Seriali
 			String bodyValue = htmlBodyElement.getContentAsString();
 			setBody(bodyValue);
 		} catch(Exception e) {
-			LOGGER.log(Level.WARNING, "Can not load body", e);
+			getLogger().log(Level.WARNING, "Can not load body", e);
 			setBody(CoreConstants.EMPTY);
 		}
 
@@ -668,7 +535,7 @@ public class ArticleLocalizedItemBean extends ContentItemBean implements Seriali
 				setSource(source.getText());
 			}
 		} catch(Exception e) {
-			LOGGER.log(Level.WARNING, "Can not load source", e);
+			getLogger().log(Level.WARNING, "Can not load source", e);
 			setSource(CoreConstants.EMPTY);
 		}
 
@@ -681,7 +548,7 @@ public class ArticleLocalizedItemBean extends ContentItemBean implements Seriali
 				setComment(comment.getText());
 			}
 		} catch(Exception e) {
-			LOGGER.log(Level.WARNING, "Can not load comment", e);
+			getLogger().log(Level.WARNING, "Can not load comment", e);
 			setComment(CoreConstants.EMPTY);
 		}
 
@@ -704,7 +571,7 @@ public class ArticleLocalizedItemBean extends ContentItemBean implements Seriali
 			}
 			setAttachment(resolvedAttachmens);
 		} catch(Exception e) {
-			LOGGER.log(Level.WARNING, "Can not load attachments", e);
+			getLogger().log(Level.WARNING, "Can not load attachments", e);
 			setAttachment(resolvedAttachmens);
 		}
 
@@ -841,25 +708,6 @@ public class ArticleLocalizedItemBean extends ContentItemBean implements Seriali
 		return html.substring(startIndex + bodyStartTag.length(), endIndex);
 	}
 
-/*
- * The old XMLBean way of loading data
-	public void loadOld(File file) throws XmlException, IOException{
-		ArticleDocument articleDoc;
-
-		articleDoc = ArticleDocument.Factory.parse(file);
-
-	    ArticleDocument.Article article =  articleDoc.getArticle();
-	    setHeadline(article.getHeadline());
-	    setBody(article.getBody());
-	    setTeaser(article.getTeaser());
-	    setAuthor(article.getAuthor());
-	    setSource(article.getSource());
-	    setComment(article.getComment());
-	}
-*/
-	/* (non-Javadoc)
-	 * @see com.idega.content.bean.ContentItem#getContentItemPrefix()
-	 */
 	@Override
 	public String getContentItemPrefix() {
 		return "article_";
