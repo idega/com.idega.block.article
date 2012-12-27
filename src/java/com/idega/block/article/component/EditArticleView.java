@@ -9,12 +9,9 @@
 package com.idega.block.article.component;
 
 import java.io.IOException;
-import java.sql.Timestamp;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.List;
 import java.util.Locale;
-import java.util.Random;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -45,10 +42,8 @@ import com.idega.block.article.bean.ArticleStoreException;
 import com.idega.block.article.business.ArticleConstants;
 import com.idega.block.article.business.ArticleUtil;
 import com.idega.block.article.data.dao.ArticleDao;
-import com.idega.business.IBOLookup;
 import com.idega.content.bean.ManagedContentBeans;
 import com.idega.content.business.ContentConstants;
-import com.idega.content.business.WebDAVMetadataResource;
 import com.idega.content.data.ContentItemCase;
 import com.idega.content.presentation.ContentItemToolbar;
 import com.idega.content.presentation.ContentViewer;
@@ -701,79 +696,11 @@ public class EditArticleView extends IWBaseComponent implements ManagedContentBe
 	}
 
 	/**
-	 * <p>Test method. Generates random article.</p>
-	 * @param index Number of article created.
-	 * @param iwc Application context, to find in which app it should work.
-	 * @return True if generated, false otherwise.
-	 */
-	private boolean generateRandomArticle(int index, IWContext iwc, List<String> categorylist){
-	    try {
-	        ArticleItemBean article = new ArticleItemBean();
-	        article.setSetPublishedDateByDefault(fromArticleItemListViewer);
-	        article.getLocalizedArticle().setSetPublishedDateByDefault(fromArticleItemListViewer);
-	        article.setBody("There is nothing interesting here.");
-	        article.setName("Article_d" + index);
-	        article.setAuthor("Martynas");
-	        article.setHeadline("Article_d" + index);
-
-	        String passingCat = "";
-	        for (String s : categorylist){
-	            passingCat = passingCat + s + ",";
-	        }
-
-	        Random year = new Random();
-	        Random month = new Random();
-	        Random date = new Random();
-
-	        int randomYear = year.nextInt(30)+1970;
-	        int randomMonth = month.nextInt(11)+1;
-	        int randomDay = date.nextInt(25);
-	        Calendar calendar = Calendar.getInstance();
-	        calendar.set(randomYear, randomMonth, randomDay);
-	        article.setCreationDate(new Timestamp(calendar.getTimeInMillis()));
-	        article.setResourcePath("/files/cms/article/"+randomYear+"/"+randomMonth+"/"+randomYear+randomMonth+randomDay+"-151"+index+".article");
-	        article.store();
-	        WebDAVMetadataResource resource = (WebDAVMetadataResource) IBOLookup.getSessionInstance(iwc, WebDAVMetadataResource.class);
-
-	        resource.setCategories(article.getResourcePath(), passingCat, true);
-
-	        setEditMode(ContentConstants.CONTENT_ITEM_ACTION_EDIT);
-	        System.out.println("Generated article:" + "/files/cms/article/"+randomYear+"/"+randomMonth+"/"+randomYear+randomMonth+randomDay+"-151"+index+".article");
-            System.out.println("With categories: ");
-            System.out.println(passingCat);
-	        setUserMessage("article_saved");
-	        return true;
-	    } catch(Exception e){
-	        LOGGER.log(Level.WARNING, "Error storing article", e);
-	    }
-
-	    return false;
-	}
-
-	/**
 	 * Stores the current article.
 	 * Returns false if save failed
 	 */
 	private boolean storeArticle() {
 		try {
-
-		    /*This is for testing, I mean generating articles in slide without
-		     * saving them to database */
-//		    Random rn = new Random();
-//		    int variable = 0;
-//		    List<String> categoryList = null;
-//		    for (int s=0; s<10; s++) {
-//
-//		        categoryList=new ArrayList<String>();
-//		        variable = rn.nextInt(15);
-//		        for (int k=0; k<variable; k++) {
-//	                categoryList.add("Kategorija_"+k);
-//	            }
-//
-//		        this.generateRandomArticle(s, IWContext.getInstance(), categoryList);
-//		        categoryList.clear();
-//		    }
-
 			ArticleItemBean article = getArticleItemBean();
 			article.setSetPublishedDateByDefault(fromArticleItemListViewer);
 			article.getLocalizedArticle().setSetPublishedDateByDefault(fromArticleItemListViewer);
@@ -793,16 +720,14 @@ public class EditArticleView extends IWBaseComponent implements ManagedContentBe
 			setEditMode(ContentConstants.CONTENT_ITEM_ACTION_EDIT);
 			setUserMessage(result ? "article_saved" : "error_saving_article");
 			return result;
-		}
-		catch(ArticleStoreException ae){
+		} catch(ArticleStoreException ae) {
 			String errorKey = ae.getErrorKey();
 			UIComponent message = getMessageComponent(SAVE_ID);
 			if (message == null) {
 				return false;
 			}
 			WFUtil.addErrorMessageVB(message, ArticleConstants.IW_BUNDLE_IDENTIFIER, errorKey);
-		}
-		catch(Exception e){
+		} catch(Exception e){
 			String errorKey = ArticleStoreException.KEY_ERROR_ON_STORE;
 			UIComponent message = getMessageComponent(SAVE_ID);
 			if (message == null) {
