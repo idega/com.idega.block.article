@@ -65,11 +65,7 @@ import com.idega.xml.XMLException;
 /**
  * <p>
  * This is a JSF managed bean that manages each article instance and delegates
-<<<<<<< HEAD
  * all calls to the correct localized instance. You can find all the articles at http://localhost:8080/workspace/content/article/
-=======
- * all calls to the correct localized instance. You can find article edition forms at http://localhost:8080/workspace/content/article/
->>>>>>> f9ed451cecd64d0cc302ec5227678cda502339e8
  * <p>
  * Last modified: $Date: 2009/01/10 12:24:10 $ by $Author: valdas $
  *
