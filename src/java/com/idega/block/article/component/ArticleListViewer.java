@@ -51,7 +51,7 @@ import com.idega.util.StringUtil;
 public class ArticleListViewer extends ContentItemListViewer {
 
 	//constants:
-	final static String ARTICLE_LIST_BEAN="articleItemListBean";
+	final static String ARTICLE_LIST_BEAN=ArticleListManagedBean.BEAN_IDENTIFIER;
 	final static String DEFAULT_RESOURCE_PATH=ArticleUtil.getArticleBaseFolderPath();
 	//instance variables:
 	boolean headlineAsLink=false;

@@ -47,7 +47,7 @@ import com.idega.webface.convert.WFTimestampConverter;
  * @version $Revision: 1.53 $
  */
 public class ArticleItemViewer extends ContentItemViewer {
-	
+
 	//	Constants:
 	private final static String ATTRIBUTE_AUTHOR = "author";
 	private final static String[] ATTRIBUTE_ARRAY = new String[] {ContentConstants.ATTRIBUTE_HEADLINE, ContentConstants.ATTRIBUTE_CREATION_DATE, ATTRIBUTE_AUTHOR,
@@ -55,7 +55,7 @@ public class ArticleItemViewer extends ContentItemViewer {
 	private final static String facetIdPrefix = "article_";
 	private final static String styleClassPrefix = "article_";
 	private final static String DEFAULT_STYLE_CLASS = "article_item";
-	
+
 	//	Instance variables:
 	private boolean headlineAsLink;
 	private boolean showDate = true;
@@ -67,14 +67,14 @@ public class ArticleItemViewer extends ContentItemViewer {
 	private boolean showTeaser = true;
 	private boolean showBody = true;
 	private boolean addCommentsViewer = false;
-	
+
 	private String datePattern;
-	
+
 	//	Other
 	private boolean canModifyRenderingAttribute = false;
 	private boolean partOfArticlesList = false;
 	private boolean canInitAnyField = true;
-	
+
 	/**
 	 * @return Returns the cacheEnabled.
 	 */
@@ -93,12 +93,12 @@ public class ArticleItemViewer extends ContentItemViewer {
 		super();
 		this.setStyleClass(DEFAULT_STYLE_CLASS);
 	}
-	
+
 	@Override
 	public String[] getViewerFieldNames(){
 		return ATTRIBUTE_ARRAY;
 	}
-	
+
 	/**
 	 * @return Returns the facetIdPrefix.
 	 */
@@ -114,7 +114,7 @@ public class ArticleItemViewer extends ContentItemViewer {
 	protected String getDefaultStyleClassPrefix() {
 		return styleClassPrefix;
 	}
-	
+
 	@Override
 	protected UIComponent createFieldComponent(String attribute){
 		if (ContentConstants.ATTRIBUTE_BODY.equals(attribute)) {
@@ -134,13 +134,13 @@ public class ArticleItemViewer extends ContentItemViewer {
 			return new HtmlOutputText();
 		}
 	}
-	
+
 	@Override
 	protected void initializeComponent(FacesContext context) {
 		if (!canInitAnyField) {
 			return;
 		}
-		
+
 		String attr[] = getViewerFieldNames();
 		if (attr == null) {
 			return;
@@ -150,8 +150,8 @@ public class ArticleItemViewer extends ContentItemViewer {
 				initializeComponent(attr[i]);
 			}
 		}
+		initializePermissionComponents(context);
 		
-		initializeToolbar();
 		initializeComments(context);
 		if (isShowCreationDate()) {
 			UIComponent creationDate = getFieldViewerComponent(ContentConstants.ATTRIBUTE_CREATION_DATE);
@@ -160,6 +160,26 @@ public class ArticleItemViewer extends ContentItemViewer {
 			}
 		}
 		//addFeed(IWContext.getIWContext(context));
+	}
+
+	@Override
+	protected void updateComponent(FacesContext context) {
+		initializePermissionComponents(context);
+		super.updateComponent(context);
+	}
+	
+	private void initializePermissionComponents(FacesContext context){
+		IWContext iwc = IWContext.getIWContext(context);
+		ArticleItemBean articleItemBean = (ArticleItemBean) getContentItem();
+		if(articleItemBean == null){
+			return;
+		}
+		if (articleItemBean.isAllowedToEditByCurrentUser(iwc)){
+			initializeToolbar();
+		}else{
+			ContentItemToolbar toolbar = new ContentItemToolbar(this.getClass().equals(CoreConstants.getArticleItemViewerClass()));
+			this.setToolbar(toolbar);
+		}
 	}
 
 	private boolean canInitField(String attribute) {
@@ -183,24 +203,24 @@ public class ArticleItemViewer extends ContentItemViewer {
 		}
 		return true;
 	}
-	
+
 	private boolean useTeaserInBodyField() {
 		return partOfArticlesList ? (!isShowBody() && isShowTeaser()) : false;
 	}
-	
+
 	/**
 	 * @return Returns the author.
 	 */
 	public String getAuthor() {
 		return (String)getValue(ATTRIBUTE_AUTHOR);
-	}	
+	}
 	/**
 	 * @param author The author to set.
 	 */
 	public void setAuthor(String author) {
 		setFieldLocalValue(ATTRIBUTE_AUTHOR,author);
 	}
-	
+
 	@Override
 	public Object getValue(String fieldName) {
 		if (useTeaserInBodyField()) {
@@ -208,7 +228,7 @@ public class ArticleItemViewer extends ContentItemViewer {
 				fieldName = ContentConstants.ATTRIBUTE_TEASER;
 			}
 		}
-		
+
 		return super.getValue(fieldName);
 	}
 
@@ -263,7 +283,7 @@ public class ArticleItemViewer extends ContentItemViewer {
 	public void setTeaser(String teaser) {
 		setFieldLocalValue(ContentConstants.ATTRIBUTE_TEASER,teaser);
 	}
-	
+
 	@Override
 	public ContentItem loadContentItem(String itemResourcePath) {
 		try {
@@ -278,7 +298,7 @@ public class ArticleItemViewer extends ContentItemViewer {
 		}
 		return null;
 	}
-	
+
 	public void setHeadlineAsLink(boolean asLink) {
 		this.headlineAsLink = asLink;
 	}
@@ -286,7 +306,7 @@ public class ArticleItemViewer extends ContentItemViewer {
 	public boolean getHeadlineAsLink() {
 		return this.headlineAsLink;
 	}
-	
+
 	public void setDatePattern(String pattern) {
 		this.datePattern = pattern;
 	}
@@ -344,9 +364,9 @@ public class ArticleItemViewer extends ContentItemViewer {
 		this.partOfArticlesList = values[6] == null ? false : Boolean.valueOf(values[6].toString());
 		this.canInitAnyField = values[7] == null ? true : Boolean.valueOf(values[7].toString());
 	}
-	
+
 	/**
-	 * 
+	 *
 	 */
 	@Override
 	public void updateToolbar() {
@@ -357,6 +377,8 @@ public class ArticleItemViewer extends ContentItemViewer {
 		super.updateToolbar();
 	}
 	
+	
+
 	/* (non-Javadoc)
 	 * @see com.idega.content.presentation.ContentItemListViewer#getCacher(javax.faces.context.FacesContext)
 	 */
@@ -381,7 +403,7 @@ public class ArticleItemViewer extends ContentItemViewer {
 	public void setShowCreationDate(boolean showCreationDate) {
 		this.showCreationDate = showCreationDate;
 	}
-	
+
 	public boolean isShowHeadline() {
 		return showHeadline;
 	}
@@ -405,16 +427,16 @@ public class ArticleItemViewer extends ContentItemViewer {
 	public void setShowBody(boolean showBody) {
 		this.showBody = showBody;
 	}
-	
+
 	public void setShowDetailsCommand(boolean showDetailsCommand) {
 		setRenderDetailsCommand(showDetailsCommand);
 	}
-	
+
 	@Override
 	protected void initializeComments(FacesContext context) {
 		super.initializeComments(context);
 	}
-	
+
 	@Override
 	protected void updateComments() {
 		if (isAddCommentsViewer()) {
@@ -426,15 +448,15 @@ public class ArticleItemViewer extends ContentItemViewer {
 		}
 		super.updateComments();
 	}
-	
+
 	public String getLinkToComments() {
 		return (String) getValue(ArticleLocalizedItemBean.FIELDNAME_LINK_TO_COMMENT);
 	}
-	
+
 	public void setLinkToComments(String linkToComments) {
 		setValue(ArticleLocalizedItemBean.FIELDNAME_LINK_TO_COMMENT, linkToComments);
 	}
-	
+
 	/*private boolean addFeed(IWContext iwc) {
 		return ArticleUtil.addArticleFeedFacet(iwc, getFacets());
 	}*/
@@ -446,7 +468,7 @@ public class ArticleItemViewer extends ContentItemViewer {
 	protected void setAddCommentsViewer(boolean addCommentsViewer) {
 		this.addCommentsViewer = addCommentsViewer;
 	}
-	
+
 	private void prepareToActAsCustomArticleViewer(String resourcePath, boolean canInitAnyField) {
 		setResourcePath(resourcePath);
 		setShowBody(true);
@@ -454,17 +476,17 @@ public class ArticleItemViewer extends ContentItemViewer {
 		setShowTeaser(false);
 		this.canInitAnyField = canInitAnyField;
 	}
-	
+
 	@Override
 	public void encodeBegin(FacesContext context) throws IOException {
 		IWContext iwc = IWContext.getIWContext(context);
 		PresentationUtil.addStyleSheetToHeader(iwc, ArticleUtil.getBundle().getVirtualPathWithFileNameString("style/article.css"));
-		
+
 		String resourcePathFromRequest = iwc.getParameter(ContentViewer.PARAMETER_CONTENT_RESOURCE);
 		if (getResourcePath() == null && resourcePathFromRequest != null) {
 			setResourcePath(resourcePathFromRequest);
 		}
-		
+
 		String articleItemViewerFilter = getArticleItemViewerFilter();
 		String viewerIdentifierFromRequest = iwc.getParameter(ContentConstants.CONTENT_ITEM_VIEWER_IDENTIFIER_PARAMETER);
 		if (viewerIdentifierFromRequest != null) {
@@ -494,7 +516,7 @@ public class ArticleItemViewer extends ContentItemViewer {
 				}
 			}
 		}
-		
+
 		if (ContentUtil.hasContentEditorRoles(iwc)) {
 			Object renderingArticlesList = iwc.getSessionAttribute(ContentConstants.RENDERING_COMPONENT_OF_ARTICLE_LIST);
 			if (renderingArticlesList == null) {
@@ -509,7 +531,7 @@ public class ArticleItemViewer extends ContentItemViewer {
 			}
 			else {
 				ArticleUtil.removeLazyScript(iwc, this);
-				
+
 				if (renderingArticlesList == null || !((Boolean) renderingArticlesList)) {
 					PresentationUtil.addStyleSheetsToHeader(iwc, ArticleUtil.getCSSFilesForArticle());
 					PresentationUtil.addJavaScriptSourcesLinesToHeader(iwc, ArticleUtil.getJavaScriptFilesForArticle());
@@ -525,20 +547,20 @@ public class ArticleItemViewer extends ContentItemViewer {
 				if (!resourcePath.endsWith(CoreConstants.SLASH)) {
 					resourcePath = new StringBuilder(resourcePath).append(CoreConstants.SLASH).toString();
 				}
-					
+
 				HiddenInput identifier = new HiddenInput(ContentConstants.CONTENT_ITEM_IDENTIFIER_NAME, resourcePath);
 				identifier.setStyleClass(ContentConstants.CONTENT_ITEM_IDENTIFIER_STYLE_CLASS);
 				this.getFacets().put(ContentConstants.CONTENT_ITEM_IDENTIFIER_NAME, identifier);
 			}
 		}
-		
+
 		super.encodeBegin(context);
 	}
-	
+
 	@Override
 	public void encodeEnd(FacesContext context) throws IOException {
 		super.encodeEnd(context);
-	
+
 		IWContext iwc = IWContext.getIWContext(context);
 		if (ContentUtil.hasContentEditorRoles(iwc)) {
 			if (canModifyRenderingAttribute) {

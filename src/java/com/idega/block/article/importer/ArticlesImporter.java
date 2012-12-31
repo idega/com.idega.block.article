@@ -53,8 +53,9 @@ public class ArticlesImporter extends DefaultSpringBean implements ApplicationLi
     @Autowired
     private ArticleDao articleDao;
 
-    private static final String CATEGORIES_IMPORTED_APP_PROP = "is_categories_imported",
-    							ARTICLES_IMPORTED_APP_PROP = "is_articles_imported";
+    public static final String	CATEGORIES_IMPORTED_APP_PROP = "is_categories_imported",
+    							ARTICLES_IMPORTED_APP_PROP = "is_articles_imported",
+    							CATEGORIES_BUG_FIXED_PROP = "categories_bug_fixed";
 
     /**
      * @see org.springframework.context.ApplicationListener#onApplicationEvent(org.springframework.context.ApplicationEvent)

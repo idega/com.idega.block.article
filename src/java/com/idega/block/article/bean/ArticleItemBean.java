@@ -13,10 +13,15 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.rmi.RemoteException;
 import java.sql.Timestamp;
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.faces.context.FacesContext;
@@ -28,30 +33,43 @@ import javax.jcr.RepositoryException;
 import com.idega.block.article.ArticleCacher;
 import com.idega.block.article.business.ArticleConstants;
 import com.idega.block.article.business.ArticleUtil;
+import com.idega.block.article.data.ArticleEntity;
+import com.idega.block.article.data.dao.ArticleDao;
+import com.idega.business.IBOLookup;
 import com.idega.content.bean.ContentItem;
 import com.idega.content.bean.ContentItemBean;
 import com.idega.content.bean.ContentItemCase;
 import com.idega.content.bean.ContentItemField;
 import com.idega.content.business.ContentConstants;
 import com.idega.content.business.ContentUtil;
+import com.idega.core.accesscontrol.business.AccessController;
 import com.idega.core.builder.business.BuilderService;
 import com.idega.core.builder.business.BuilderServiceFactory;
 import com.idega.data.IDOStoreException;
 import com.idega.idegaweb.IWMainApplication;
+import com.idega.idegaweb.IWMainApplicationSettings;
 import com.idega.idegaweb.UnavailableIWContext;
 import com.idega.presentation.IWContext;
 import com.idega.repository.bean.RepositoryItem;
+import com.idega.user.business.UserBusiness;
+import com.idega.user.data.Group;
+import com.idega.user.data.User;
 import com.idega.util.CoreConstants;
 import com.idega.util.CoreUtil;
 import com.idega.util.ListUtil;
 import com.idega.util.StringHandler;
 import com.idega.util.StringUtil;
+import com.idega.util.expression.ELUtil;
 import com.idega.xml.XMLException;
 
 /**
  * <p>
  * This is a JSF managed bean that manages each article instance and delegates
+<<<<<<< HEAD
  * all calls to the correct localized instance. You can find all the articles at http://localhost:8080/workspace/content/article/
+=======
+ * all calls to the correct localized instance. You can find article edition forms at http://localhost:8080/workspace/content/article/
+>>>>>>> f9ed451cecd64d0cc302ec5227678cda502339e8
  * <p>
  * Last modified: $Date: 2009/01/10 12:24:10 $ by $Author: valdas $
  *
@@ -62,11 +80,13 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 
 	private static final long serialVersionUID = 4514851565086272678L;
 
+	private static final Logger LOGGER = Logger.getLogger(ArticleItemBean.class.getName());
+
 	private final static String ARTICLE_FILE_SUFFIX = ".xml";
 
-//	public final static String TYPE_PREFIX = "IW:";
-//	public final static String CONTENT_TYPE = "ContentType";
-//	public final static String CONTENT_TYPE_WITH_PREFIX = TYPE_PREFIX+CONTENT_TYPE;
+	public final static String TYPE_PREFIX = "IW:";
+	public final static String CONTENT_TYPE = "ContentType";
+	public final static String CONTENT_TYPE_WITH_PREFIX = TYPE_PREFIX+CONTENT_TYPE;
 
 	private ArticleLocalizedItemBean localizedArticle;
 	private String baseFolderLocation;
@@ -75,21 +95,161 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 	private String resourcePath;
 	private boolean availableInRequestedLanguage=false;
 
-	private boolean isPartOfArticleList = false;
+	private boolean partOfArticleList = false;
 
-	public boolean isPartOfArticleList() {
-		return isPartOfArticleList;
+	//Request scope so this should work well and fast
+	private Boolean allowedToEditByCurrentUser = null;
+
+	public ArticleItemBean() {
+		super();
 	}
 
-	public void setPartOfArticleList(boolean isPartOfArticleList) {
-		this.isPartOfArticleList = isPartOfArticleList;
+	private ArticleDao getArticleDAO() {
+		ArticleDao articleDAO = ELUtil.getInstance().getBean(ArticleDao.BEAN_NAME);
+		return articleDAO;
+	}
+
+	public Boolean isAllowedToEditByCurrentUser() {
+		if(allowedToEditByCurrentUser != null){
+			return allowedToEditByCurrentUser;
+		}
+
+		//This is expensive operation, it is better to have called isAllowedToEditByCurrentUser(iwc) first
+
+		IWContext iwc = CoreUtil.getIWContext();
+		return isAllowedToEditByCurrentUser(iwc);
+
+	}
+
+	/**
+	 * Sets if this article is allowed to be edited for the current user, this property is
+	 * saved for this instance and later is returned by isAllowedToEditByCurrentUser.
+	 *
+	 * @param currentUser the current user for which the check will be done
+	 * @return True if it is allowed to edit, false otherwise.
+	 */
+	@SuppressWarnings("unchecked")
+	public Boolean isAllowedToEditByCurrentUser(IWContext iwc) {
+		IWMainApplicationSettings settings = iwc.getIWMainApplication().getSettings();
+		if (!settings.getBoolean(ArticleConstants.USE_ROLES_IN_ARTICLE, Boolean.FALSE)) {
+			allowedToEditByCurrentUser = Boolean.TRUE;
+			return allowedToEditByCurrentUser;
+		}
+
+		if (allowedToEditByCurrentUser != null)
+			return allowedToEditByCurrentUser;
+		if (!iwc.isLoggedOn()) {
+			allowedToEditByCurrentUser = Boolean.FALSE;
+			return allowedToEditByCurrentUser;
+		}
+
+		AccessController accessController = iwc.getAccessController();
+		try{
+			if (accessController.isAdmin(iwc)) {
+				allowedToEditByCurrentUser = Boolean.TRUE;
+				return allowedToEditByCurrentUser;
+			}
+		} catch (Exception e) {
+			LOGGER.log(Level.WARNING, "Failed to check is admin", e);
+			return Boolean.FALSE;
+		}
+
+		User currentUser = iwc.getCurrentUser();
+		ArticleEntity articleEntity = getArticleEntity(false);
+		if (articleEntity == null) {
+			//By default there was permitted to edit any article by any user
+			allowedToEditByCurrentUser = Boolean.TRUE;
+			return allowedToEditByCurrentUser;
+		}
+
+		Set<Integer> editors = articleEntity.getEditors();
+		if (ListUtil.isEmpty(editors)) {
+			//By default there was permitted to edit any article by any user
+			allowedToEditByCurrentUser = Boolean.TRUE;
+			return allowedToEditByCurrentUser;
+		}
+
+		Collection<Group> parentGroups;
+		try {
+			UserBusiness userBusiness = IBOLookup.getServiceInstance(iwc, UserBusiness.class);
+			parentGroups = userBusiness.getUserGroups(currentUser);
+
+			//TODO: this probably never happens
+			if(ListUtil.isEmpty(parentGroups)){
+				allowedToEditByCurrentUser = Boolean.FALSE;
+				return allowedToEditByCurrentUser;
+			}
+
+		} catch (Exception e) {
+			LOGGER.log(Level.WARNING, "Failed getting is allowed to edit by current user "
+					+ currentUser.getId() + " article " + getResourcePath(), e);
+			return Boolean.FALSE;
+		}
+		allowedToEditByCurrentUser = Boolean.FALSE;
+		for(Group group : parentGroups){
+			if(editors.contains(group.getPrimaryKey())){
+				allowedToEditByCurrentUser = Boolean.TRUE;
+				break;
+			}
+		}
+		return allowedToEditByCurrentUser;
+	}
+
+
+	public void setAllowedToEditByGroup(Group group){
+		List<Integer> groupsIds = Arrays.asList(Integer.valueOf(group.getId()));
+		setAllowedToEditByGroupsIds(groupsIds);
+	}
+	public void setAllowedToEditByGroups(Collection<Group> groups){
+		Collection<Integer> groupsIds = new HashSet<Integer>(groups.size());
+		for(Group group : groups){
+			groupsIds.add(Integer.valueOf(group.getId()));
+		}
+		setAllowedToEditByGroupsIds(groupsIds);
+	}
+	public void setAllowedToEditByGroupsIds(Collection<Integer> groupsIds){
+		if(ListUtil.isEmpty(groupsIds)){
+			return;
+		}
+		allowedToEditByCurrentUser = null;
+		ArticleEntity articleEntity = getArticleEntity(false);
+		if (articleEntity != null) {
+			if (groupsIds instanceof Set) {
+				articleEntity.setEditors((Set<Integer>) groupsIds);
+			} else {
+				articleEntity.setEditors(new HashSet<Integer>(groupsIds));
+			}
+		}
+	}
+
+	public ArticleEntity getArticleEntity(boolean createIfNotFound) {
+		ArticleEntity article = getArticleDAO().getByUri(getResourcePath());
+
+		if (createIfNotFound && article == null) {
+			article = new ArticleEntity();
+			article.setUri(getResourcePath());
+			article.setModificationDate(new Date(System.currentTimeMillis()));
+		}
+
+		return article;
+	}
+
+	public void setArticleEntity(ArticleEntity articleEntity) {
+//		this.articleEntity = articleEntity;
+	}
+
+	public boolean isPartOfArticleList() {
+		return partOfArticleList;
+	}
+
+	public void setPartOfArticleList(boolean partOfArticleList) {
+		this.partOfArticleList = partOfArticleList;
 	}
 
 	public ArticleLocalizedItemBean getLocalizedArticle(){
 		if (this.localizedArticle == null || getLanguageChange() != null) {
 			this.localizedArticle = new ArticleLocalizedItemBean(getLocale());
 			this.localizedArticle.setArticleItem(this);
-		} else {
 			String thisLanguage = getLanguage();
 			String fileLanguage = this.localizedArticle.getLanguage();
 			if (!thisLanguage.equals(fileLanguage)) {
@@ -283,44 +443,20 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 		getLocalizedArticle().setUpdated(b);
 	}
 
-	/**
-	 * Method to save an article to *.xml file at store/content/files/cms/article server directory
-	 * @throws IDOStoreException
-	 * @see com.idega.block.article.bean.ArticleLocalizedItemBean#store()
-	 */
 	@Override
 	public void store() throws IDOStoreException {
+		ArticleEntity article = getArticleEntity(true);
+		article.setUri(getResourcePath());
+		article = getArticleDAO().updateArticle(article);
+		if (article == null || article.getId() == null)
+			throw new IDOStoreException("Unable to create/edit article at " + getResourcePath());
+
+		setArticleEntity(article);
 		try {
-			storeToJCR();
 			getLocalizedArticle().store();
-
-			IWMainApplication iwma = IWMainApplication.getDefaultIWMainApplication();
-			if (iwma != null) {
-				ArticleCacher cacher = ArticleCacher.getInstance(iwma);
-				cacher.getCacheMap().clear();
-
-				ContentUtil.removeCategoriesViewersFromCache();
-			}
-		} catch(ArticleStoreException ase) {
-			throw ase;
 		} catch(Exception e){
-			throw new RuntimeException(e);
+			throw new IDOStoreException("Failed storing to slide", e);
 		}
-
-		try {
-			commitJCRStore();
-		} catch (RepositoryException e) {
-			throw new IDOStoreException(e.getMessage());
-		}
-	}
-
-	protected void commitJCRStore() throws RepositoryException{
-	}
-
-	private void storeToJCR() throws IOException, RepositoryException {
-		//	Setting the path for creating new file/creating localized version/updating existing file
-//		String articleFolderPath = getResourcePath();
-//		getRepositoryService().setProperties(articleFolderPath, new Property(CONTENT_TYPE_WITH_PREFIX, "LocalizedFile"));	//	TODO
 	}
 
 	protected void tryPublish() {
@@ -513,6 +649,7 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 	}
 
 	/**
+	/*
 	 * This sets the base folder for storing articles,
 	 * something like '/files/cms/article'
 	 **/
@@ -593,18 +730,14 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 	}
 
 	public synchronized String createArticlePath() {
-		Logger log = Logger.getLogger(this.getClass().toString());
-
 		String resourcePath = getGeneratedArticleResourcePath();
 		int index = resourcePath.indexOf(CoreConstants.DOT + CoreConstants.ARTICLE_FILENAME_SCOPE);
 		if (index >- 1) {
 			String articlePath = resourcePath.substring(0,index+CoreConstants.ARTICLE_FILENAME_SCOPE.length()+1);
-			log.info("Article path returned: "+articlePath);
+			LOGGER.info("Article path returned: "+articlePath);
 			return articlePath;
 		}
-
-		log.warning("Resource path for article '" + resourcePath + "' does not contain article filename scope '." + CoreConstants.ARTICLE_FILENAME_SCOPE +
-				"'.  The resource path is returned unchanged.");
+		LOGGER.warning("Resource path for article '"+resourcePath+"' does not contain article filename scope '."+CoreConstants.ARTICLE_FILENAME_SCOPE+"'.  The resource path is returned unchanged.");
 		return resourcePath;
 	}
 
@@ -673,7 +806,6 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 			throw new RuntimeException("filePath: "+filePath+" does not contain expected file ending: "+fileEnding);
 		}
 	}
-
 
 	/**
 	 * Loads the article (folder)
@@ -782,10 +914,13 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 	}
 
 	/**
+<<<<<<< HEAD
 	 * <p>
 	 * Returns true if this article is available for the language of the
 	 * locale set on this article item.
 	 * </p>
+=======
+>>>>>>> f9ed451cecd64d0cc302ec5227678cda502339e8
 	 * @return true if this article is available for the language of the locale set on this article item.
 	 */
 	public boolean getAvailableInRequestedLanguage() {
@@ -794,6 +929,7 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 
 	@Override
 	public void delete() {
+		getArticleDAO().remove(getArticleEntity(false));
 		getLocalizedArticle().delete();
 		this.localizedArticle=null;
 		super.delete();
@@ -826,6 +962,20 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 		getLocalizedArticle().setArticleCategories(articleCategories);
 	}
 
+	public void setArticleCategories(Collection<String> categories){
+		if(ListUtil.isEmpty(categories)){
+			setArticleCategories(CoreConstants.EMPTY);
+		}
+		StringBuilder categoryString = new StringBuilder();
+		for(java.util.Iterator<String> iter = categories.iterator();iter.hasNext(); ){
+			categoryString.append(iter.next());
+			if(iter.hasNext()){
+				categoryString.append(CoreConstants.COMMA);
+			}
+		}
+		setArticleCategories(categoryString.toString());
+	}
+
 	@Override
 	public boolean isSetPublishedDateByDefault() {
 		return super.isSetPublishedDateByDefault();
@@ -843,4 +993,14 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 	public List<String> getCategories() {
 		return getLocalizedArticle().getCategories();
 	}
+
+	public String getFilesResourcePath(){
+		String resourcesPath = getResourcePath();
+		if(!resourcesPath.endsWith("/")){
+			resourcesPath = resourcesPath + "/";
+		}
+		resourcesPath = resourcesPath + "article-files/";
+		return resourcesPath;
+	}
+
 }

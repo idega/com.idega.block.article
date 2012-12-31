@@ -15,55 +15,56 @@ public class ArticleItemChecker implements ContentItemChecker {
 
 	@Autowired
 	private ArticleDao articleDao;
-	
+
+	@Override
 	public boolean deleteDummyArticles(List<String> paths) {
 		if (paths == null) {
 			return false;
 		}
-		
+
 		List<Locale> locales = ICLocaleBusiness.getListOfLocalesJAVA();
 		if (locales == null) {
 			return false;
 		}
-		
+
 		String resourcePath = null;
-		ArticleItemBean dummyArticle = null; 
+		ArticleItemBean dummyArticle = null;
 		for (int i = 0; i < paths.size(); i++) {
 			resourcePath = paths.get(i);
-			
+
 			dummyArticle = findDummyArticle(resourcePath, locales);
 			if (dummyArticle != null) {
 				dummyArticle.delete();
 			}
 		}
-		
+
 		return true;
 	}
-	
+
 	private ArticleItemBean findDummyArticle(String resourcePath, List<Locale> locales) {
 		Locale l = null;
 		ArticleItemBean article = null;
 		for (int i = 0; i < locales.size(); i++) {
 			//	Will check all articles by locales
 			l = locales.get(i);
-			
+
 			article = getLoadedArticleBean(resourcePath, l);
-			
+
 			if (article == null) {
 				return null;
 			}
-			
+
 			if (!article.isDummyContentItem()) {
 				return null;	//	Can not delete article - at least one localized article is not dummy
 			}
 		}
-		
+
 		return article;	//	Can delete article
 	}
-	
+
 	private ArticleItemBean getLoadedArticleBean(String resourcePath, Locale l) {
 		ArticleItemBean article = new ArticleItemBean();
-		
+
 		article.setLocale(l);
 		article.setResourcePath(resourcePath);
 		try {
@@ -72,7 +73,7 @@ public class ArticleItemChecker implements ContentItemChecker {
 			e.printStackTrace();
 			return null;
 		}
-		
+
 		return article;
 	}
 
@@ -81,19 +82,13 @@ public class ArticleItemChecker implements ContentItemChecker {
 			ELUtil.getInstance().autowire(this);
 		return articleDao;
 	}
-	
+
+	@Override
 	public boolean deleteContentItem(String path, Locale l) {
-		if (path == null || l == null) {
+		if (path == null || l == null)
 			return false;
-		}
-		
-		ArticleItemBean article = getLoadedArticleBean(path, l);
-		if (article == null) {
-			return false;
-		}
-		
-		article.delete();
-		return getArticleDAO().deleteArticle(path);
+
+		return getArticleDAO().delete(path);
 	}
-	
+
 }

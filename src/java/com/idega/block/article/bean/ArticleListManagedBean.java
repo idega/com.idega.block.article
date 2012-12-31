@@ -16,6 +16,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
+import java.util.logging.Logger;
 
 import javax.faces.component.html.HtmlOutputLink;
 import javax.jcr.RepositoryException;
@@ -54,9 +55,11 @@ import com.idega.util.expression.ELUtil;
  */
 public class ArticleListManagedBean implements ContentListViewerManagedBean {
 
+	public final static String BEAN_IDENTIFIER="articleItemListBean";
+
 	private List<String> categories = null;
 
-	private String LOCALIZEDKEY_MORE = "itemviewer.more";
+	private final String LOCALIZEDKEY_MORE = "itemviewer.more";
 
 	private String detailsViewerPath = null;
 	private String datePattern = null;
@@ -82,15 +85,13 @@ public class ArticleListManagedBean implements ContentListViewerManagedBean {
 	private ArticleDao articleDao;
 
 	public ArticleDao getArticleDao(){
+		if (articleDao == null)
+			ELUtil.getInstance().autowire(this);
 		return this.articleDao;
 	}
-	/**
-	 *
-	 */
+
 	public ArticleListManagedBean() {
 		super();
-
-		ELUtil.getInstance().autowire(this);
 	}
 
 	/* (non-Javadoc)
@@ -122,7 +123,6 @@ public class ArticleListManagedBean implements ContentListViewerManagedBean {
 	 * @throws IOException
 	 */
 	public List<ArticleItemBean> loadAllArticlesInFolder(String folder) throws XmlException, IOException{
-		List<ArticleItemBean> list = new ArrayList<ArticleItemBean>();
 		IWContext iwc = CoreUtil.getIWContext();
 
 		List<String> uris = new ArrayList<String>();
@@ -138,18 +138,13 @@ public class ArticleListManagedBean implements ContentListViewerManagedBean {
 	//gets articles and loads them
 	public List<ArticleItemBean> getArticlesByURIs(List<String> uris, IWContext iwc) {
 		List<ArticleItemBean> list = new ArrayList<ArticleItemBean>();
-		String resourcePathFromRequest = iwc.getParameter(ContentViewer.PARAMETER_CONTENT_RESOURCE);
-		String identifierFromRequest = iwc.getParameter(ContentConstants.CONTENT_ITEM_VIEWER_IDENTIFIER_PARAMETER);
 
 		int count = 0;
-		ArticleItemBean article = null;
+		int maxNumber = getMaxNumberOfDisplayed();
 		for (String uri: uris) {
 			try {
-				article = new ArticleItemBean();
-				article.setResourcePath(uri);
-				article.load();
-				if (canShowArticle(article, iwc, resourcePathFromRequest, identifierFromRequest)) {
-					int maxNumber = getMaxNumberOfDisplayed();
+				ArticleItemBean article = loadArticle(uri, iwc);
+				if (article != null) {
 					if (maxNumber < 0 || count < maxNumber) {
 						list.add(article);
 						count++;
@@ -164,6 +159,19 @@ public class ArticleListManagedBean implements ContentListViewerManagedBean {
 		}
 
 		return list;
+	}
+
+	private ArticleItemBean loadArticle(String uri,IWContext iwc) throws IOException{
+
+		ArticleItemBean article = new ArticleItemBean();
+		article.setResourcePath(uri);
+
+		article.load();
+
+		if (canShowArticle(article, iwc, iwc.getParameter(ContentViewer.PARAMETER_CONTENT_RESOURCE), iwc.getParameter(ContentConstants.CONTENT_ITEM_VIEWER_IDENTIFIER_PARAMETER))) {
+			return article;
+		}
+		return null;
 	}
 
 	private boolean canShowArticle(ArticleItemBean article, IWContext iwc, String resourcePathFromRequest, String identifierFromRequest) {
@@ -506,7 +514,7 @@ public class ArticleListManagedBean implements ContentListViewerManagedBean {
 	@Transactional(readOnly = true)
 	private List<ArticleEntity> getArticlesFromDatabase(String folder,List<String> categories, IWContext iwc, int maxResults){
 		String uriFrom = iwc.getParameter(ContentViewer.PARAMETER_CONTENT_RESOURCE);
-		return this.getArticleDao().getArticlesByCategoriesAndAmount(categories, uriFrom, maxResults);
+		return this.getArticleDao().getByCategories(categories, uriFrom, maxResults);
 	}
 
 	public Collection<QueryResult> getArticleSearcResults(String folder, List<String> categories, IWContext iwc) {
@@ -527,15 +535,15 @@ public class ArticleListManagedBean implements ContentListViewerManagedBean {
 			oldest.addDays(-this.numberOfDaysDisplayed);
 		}
 
-		String webDavUri = null;	//session.getWebdavServerURI();
-		if (webDavUri != null) {
-			if(folder.startsWith(webDavUri)){
-				folder = folder.substring(webDavUri.length());
-			}
-			if(folder.startsWith("/")){
-				folder = folder.substring(1);
-			}
-		}
+//		String webDavUri = null;	//session.getWebdavServerURI();
+//		if (webDavUri != null) {
+//			if(folder.startsWith(webDavUri)){
+//				folder = folder.substring(webDavUri.length());
+//			}
+//			if(folder.startsWith("/")){
+//				folder = folder.substring(1);
+//			}
+//		}
 		QueryResult articleSearch = null;
 		try {
 			articleSearch = getSearchRequest(folder, iwc.getCurrentLocale(), oldest, categories);
@@ -543,6 +551,7 @@ public class ArticleListManagedBean implements ContentListViewerManagedBean {
 			e.printStackTrace();
 			return null;
 		}
+		Logger.getLogger(getClass().getName()).info("Search: " + articleSearch);
 		ContentSearch searchBusiness = new ContentSearch(iwc.getIWMainApplication());
 		searchBusiness.setToUseRootAccessForSearch(true);
 		searchBusiness.setToUseDescendingOrder(true);

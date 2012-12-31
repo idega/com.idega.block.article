@@ -31,35 +31,24 @@ import com.idega.util.expression.ELUtil;
  * @version $Revision: 1.27 $
  */
 public class IWBundleStarter implements IWBundleStartable {
-	//private static final String STYLE_SHEET_URL = "/style/article.css";
-	public static final String BUNDLE_IDENTIFIER="com.idega.block.article";
 
-	/* (non-Javadoc)
-	 * @see com.idega.idegaweb.IWBundleStartable#start(com.idega.idegaweb.IWBundle)
-	 */
+	public static final String BUNDLE_IDENTIFIER = "com.idega.block.article";
+
+
 	@Override
 	public void start(IWBundle starterBundle) {
 		addArticleIWActionURIHandler();
 		addArticleViews(starterBundle);
 		addRSSProducers(starterBundle);
-		//Add the stylesheet:
-		//GlobalIncludeManager.getInstance().addBundleStyleSheet(BUNDLE_IDENTIFIER,STYLE_SHEET_URL);
 	}
 
-	/**
-	 *
-	 */
 	private void addArticleIWActionURIHandler() {
 		IWActionURIManager manager = IWActionURIManager.getInstance();
 
 		//so it is called before contenthandler
 		manager.registerHandler(0,new ArticleActionURIHandler());
-
 	}
 
-	/* (non-Javadoc)
-	 * @see com.idega.idegaweb.IWBundleStartable#stop(com.idega.idegaweb.IWBundle)
-	 */
 	@Override
 	public void stop(IWBundle starterBundle) {
 		//No action...
@@ -107,6 +96,7 @@ public class IWBundleStarter implements IWBundleStartable {
 		//searchArticlesNode.setVisibleInMenus(false);
 		*/
 	}
+
 	private void addRSSProducers(IWBundle starterBundle) {
 		RSSProducerRegistry registry = RSSProducerRegistry.getInstance();
 

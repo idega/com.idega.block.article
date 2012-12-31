@@ -18,16 +18,20 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
+import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.jcr.RepositoryException;
 
+import org.springframework.transaction.annotation.Transactional;
 import org.w3c.tidy.Configuration;
 import org.w3c.tidy.Tidy;
 
 import com.idega.block.article.business.ArticleConstants;
 import com.idega.block.article.component.ArticleItemViewer;
+import com.idega.block.article.data.ArticleEntity;
+import com.idega.block.article.data.CategoryEntity;
 import com.idega.block.rss.business.EntryData;
 import com.idega.block.rss.business.RSSBusinessBean;
 import com.idega.content.bean.ContentItem;
@@ -66,6 +70,8 @@ public class ArticleLocalizedItemBean extends ContentItemBean implements Seriali
 
 	private static final long serialVersionUID = -7871069835129148485L;
 
+	private static final Logger LOGGER = Logger.getLogger(ArticleLocalizedItemBean.class.getName());
+
 	private boolean _isUpdated = false;
 
 	private static final String ROOT_ELEMENT_NAME_ARTICLE = "article";
@@ -95,10 +101,9 @@ public class ArticleLocalizedItemBean extends ContentItemBean implements Seriali
 	private XMLNamespace atomNamespace = new XMLNamespace("http://www.w3.org/2005/Atom");
 	private XMLNamespace dcNamespace = new XMLNamespace("http://purl.org/dc/elements/1.1/");
 	private XMLNamespace commentNamespace = new XMLNamespace("http://wellformedweb.org/CommentAPI/");
+	private XMLNamespace attachmentNamespace = new XMLNamespace("http://search.yahoo.com/mrss/");
 
 	private String articleCategories = null; // This string should be set in EditArticleView, parsing submitted categories
-
-	private XMLNamespace attachmentNamespace = new XMLNamespace("http://search.yahoo.com/mrss/");
 
 	/**
 	 * Default constructor.
@@ -360,6 +365,10 @@ public class ArticleLocalizedItemBean extends ContentItemBean implements Seriali
 		}
 	}
 
+
+	/**
+	 *
+	 */
 	protected void prettifyBody() {
 		String s = prettify(getBody());
 		if (s != null) {
@@ -519,10 +528,10 @@ public class ArticleLocalizedItemBean extends ContentItemBean implements Seriali
 			XMLElement htmlElement = bodyElement.getChild("html", htmlNamespace);
 			XMLElement htmlBodyElement = htmlElement.getChild("body", htmlNamespace);
 
-			String bodyValue = htmlBodyElement.getContentAsString();
+			String bodyValue = htmlBodyElement == null ? CoreConstants.EMPTY : htmlBodyElement.getContentAsString();
 			setBody(bodyValue);
 		} catch(Exception e) {
-			getLogger().log(Level.WARNING, "Can not load body", e);
+			LOGGER.log(Level.WARNING, "Can not load body for article "+ getHeadline() +" path "+ getResourcePath() , e);
 			setBody(CoreConstants.EMPTY);
 		}
 
@@ -578,6 +587,7 @@ public class ArticleLocalizedItemBean extends ContentItemBean implements Seriali
 		return true;
 	}
 
+	@Transactional
 	private boolean loadArticleFromFeed(XMLElement root) {
 		if (root == null) {
 			return false;
@@ -685,6 +695,31 @@ public class ArticleLocalizedItemBean extends ContentItemBean implements Seriali
 				id++;
 			}
 			setAttachment(attachmentList);
+		}
+
+		try{
+			ArticleEntity articleEntity = getArticleItem().getArticleEntity(false);
+			if (articleEntity == null || articleEntity.getId() == null) {
+				//From XML
+				List<XMLElement> xmlCategories = entry.getChildren("category", atomNamespace);
+				if (!ListUtil.isEmpty(xmlCategories)) {
+					List<String> categories = new ArrayList<String>();
+					for (XMLElement category: xmlCategories)
+						categories.add(category.getValue());
+					getArticleItem().setArticleCategories(categories);
+				}
+			} else {
+				// From DB
+				Set<CategoryEntity> categories = articleEntity.getCategories();
+				if (!ListUtil.isEmpty(categories)) {
+					List<String> categoryNames = new ArrayList<String>(categories.size());
+					for (CategoryEntity category: categories)
+						categoryNames.add(category.getCategory());
+					getArticleItem().setArticleCategories(categoryNames);
+				}
+			}
+		} catch(Exception e){
+			Logger.getLogger(ArticleLocalizedItemBean.class.getName()).log(Level.WARNING, "Failed setting categories to article", e);
 		}
 
 		return true;

@@ -24,23 +24,22 @@ ArticleEditorHelper.registerArticleActions = function() {
 }
 
 ArticleEditorHelper.checkArticleLinkAndRegisterIfItsCorrect = function(link, windowResizeIndex) {
-	if (link == null || link.length == 0) {
+	if (link == null || link.length == 0)
 		return false;
-	}
 	
-	if (jQuery(link).hasClass('articleEditorInitializedForLink')) {
+	if (jQuery(link).hasClass('articleEditorInitializedForLink'))
 		return false;
-	}
 	
-	jQuery(link).addClass('articleEditorInitializedForLink');
-	if (jQuery(link).fancybox) {
+	if (jQuery.fn.fancybox) {
+		jQuery(link).addClass('articleEditorInitializedForLink');
+		jQuery(link).attr('type', 'iframe');
 		jQuery(link).fancybox({
 			autoScale: false,
 			autoDimensions: false,
 			hideOnOverlayClick: false,
 			width: windowinfo.getWindowWidth() * windowResizeIndex,
 			height: windowinfo.getWindowHeight() * windowResizeIndex,
-			onClosed: function() {
+			afterClose: function() {
 				ArticleEditorHelper.addActionAfterArticleIsSavedAndEditorClosed();
 			}
 		});
@@ -57,7 +56,7 @@ ArticleEditorHelper.addActionAfterArticleIsSavedAndEditorClosed = function() {
 ArticleEditorHelper.closeAllObjects = function() {
 	closeAllLoadingMessages();
 	
-	jQuery.fancybox.close();
+	jQuery.fancybox.close(false);
 }
 
 ArticleEditorHelper.deleteSelectedArticle = function(resource, fromArticleList) {

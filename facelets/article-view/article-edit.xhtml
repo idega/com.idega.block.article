@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+   	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:t="http://myfaces.apache.org/tomahawk"
+	xmlns:content="http://xmlns.idega.com/com.idega.content"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:ic="http://xmlns.idega.com/com.idega.core"
+	xmlns:iuser="http://xmlns.idega.com/com.idega.user"
+	xmlns="http://www.w3.org/1999/xhtml" >
+<head>
+
+<script type="text/javascript">
+	jQuery(document).ready(function(){
+		ArticleEditHelper.init("#{articleViewRequestBean.uriToFileBrowser}","group-allowed-to-edit","article-category",#{articleViewRequestBean.articleCategoriesJsArray});
+	});
+</script> 
+</head>
+<body>
+<div class="ae-main">
+		<h:panelGroup layout="block" rendered="#{not articleViewRequestBean.allowedToPerformAction}">
+			<p>#{localizedStrings['com.idega.block.article']['permission_denied']}</p>
+		</h:panelGroup>
+		<h:panelGroup layout="block" rendered="#{articleViewRequestBean.allowedToPerformAction}">
+			<form onsubmit="ArticleEditHelper.saveAricle({articleUri : '#{articleViewRequestBean.resourcePath}', headlineId : 'ae-input-headline', bodyId : 'ae-input-body', teaserId : 'ae-input-teaser'}); return false;">
+				<div class="input-div-container">
+					<div class="editor-item">
+						<label for="ae-input-headline">#{localizedStrings['com.idega.block.article']['headline']}</label>
+						<input type="text" id="ae-input-headline" value="#{articleViewRequestBean.articleItemBean.headline}"></input>
+					</div>
+				</div>
+				<div class="input-div-container">
+					<div class="editor-item">
+						<label for="ae-input-body">#{localizedStrings['com.idega.block.article']['body']}</label>
+						<textarea id="ae-input-body" class="wysiwyg-textarea">#{articleViewRequestBean.articleItemBean.body}</textarea>
+					</div>
+				</div>
+				<div class="input-div-container">
+					<div class="editor-item">
+						<label for="ae-input-teaser">#{localizedStrings['com.idega.block.article']['teaser']}</label>
+						<textarea id="ae-input-teaser" class="wysiwyg-textarea">#{articleViewRequestBean.articleItemBean.teaser}</textarea>
+					</div>
+				</div>
+				<div class="input-div-container">
+					<div class="editor-item">
+						<label for="ae-input-category">#{localizedStrings['com.idega.block.article']['categories']}</label>
+						<div id="ae-input-category" class="div-like-input group-filter">
+								<t:dataList var="item"
+									value="#{categoryDAO.categories}"
+									layout="unorderedList"
+									styleClass = "none-list">
+									<label>#{item.category}</label> 
+									<input type="checkbox" name = "article-category" value="#{item.category}"/>
+								</t:dataList>
+						</div>
+					</div>
+				</div>
+				<div class="input-div-container">
+					<div class="editor-item">
+						<label for="ae-input-access">#{localizedStrings['com.idega.block.article']['select_groups_that_will_have_permission_to_edit_this_article']}</label>
+						<div id="ae-input-access" class="div-like-input group-filter">
+								<iuser:groupsFilter selectedGroups="#{articleViewRequestBean.editors}" selectedGroupsParameterName="group-allowed-to-edit"/>
+						</div>
+					</div>
+				</div>
+				<div class="input-div-container">
+					<div class="editor-item">
+						<input type="submit" value="#{localizedStrings['com.idega.block.article']['save']}" />
+					</div>
+				</div>
+			</form>
+		</h:panelGroup>
+</div>
+</body>
+</html>
+

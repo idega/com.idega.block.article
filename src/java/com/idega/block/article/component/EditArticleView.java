@@ -132,13 +132,19 @@ public class EditArticleView extends IWBaseComponent implements ManagedContentBe
 	private boolean fromArticleItemListViewer = false;
 	private boolean needsForm = false;
 
-	private String editorOpener = "window.parent";
+	private String editorOpener = "window.parent.parent";
 
 	@Autowired
-	ArticleDao articleDAO;
+	private ArticleDao articleDAO;
+
+	private ArticleDao getArticleDao() {
+		if (articleDAO == null)
+			ELUtil.getInstance().autowire(this);
+		return articleDAO;
+	}
 
 	public EditArticleView() {
-		ELUtil.getInstance().autowire(this);
+		super();
 	}
 
 	@Override
@@ -562,10 +568,10 @@ public class EditArticleView extends IWBaseComponent implements ManagedContentBe
 		return findEditArticleComponent(comp.getParent(), classToSearch, id);
 	}
 
-	private UIComponent findEditArticleComponent(List<UIComponent> children, Class<? extends UIComponent> classToSearch, String id, boolean checkChildren) {
-		if (children == null) {
+	private UIComponent findEditArticleComponent(List<UIComponent> children, Class<? extends UIComponent> classToSearch, String id,
+			boolean checkChildren) {
+		if (children == null)
 			return null;
-		}
 
 		UIComponent comp = null;
 		UIComponent founded = null;
@@ -650,11 +656,10 @@ public class EditArticleView extends IWBaseComponent implements ManagedContentBe
 				comp = editArticle.findComponent("articleUpdaterScriptCaller");
 				if (comp == null) {
 					String action = null;
-					if (fromArticleItemListViewer && !StringUtil.isEmpty(containerId)) {
-						action = PresentationUtil.getJavaScriptAction(new StringBuilder(editorOpener).append(".ArticleEditorHelper.reloadArticlesList('")
-								.append(containerId).append("');").toString());
-					}
-					else {
+					if (fromArticleItemListViewer && !StringUtil.isEmpty(containerId) && !String.valueOf(-1).equals(containerId)) {
+						action = PresentationUtil.getJavaScriptAction(new StringBuilder(editorOpener)
+							.append(".ArticleEditorHelper.reloadArticlesList('").append(containerId).append("');").toString());
+					} else {
 						String resourcePath = articleItemBean.getResourcePath();
 						if (!StringUtil.isEmpty(resourcePath)) {
 							if (resourcePath.startsWith(CoreConstants.WEBDAV_SERVLET_URI)) {
@@ -669,15 +674,15 @@ public class EditArticleView extends IWBaseComponent implements ManagedContentBe
 								mode = new StringBuilder("'").append(mode).append("'").toString();
 							}
 
-							action = PresentationUtil.getJavaScriptAction(new StringBuilder(editorOpener).append(".ArticleEditorHelper.reloadArticle('")
-							.append(resourcePath).append("', '").append(ContentConstants.CONTENT_ITEM_IDENTIFIER_STYLE_CLASS).append("', ")
-							.append(StringUtil.isEmpty(mode) ? "null" : mode).append(");").toString());
+							action = PresentationUtil.getJavaScriptAction(new StringBuilder(editorOpener)
+								.append(".ArticleEditorHelper.reloadArticle('").append(resourcePath).append("', '")
+								.append(ContentConstants.CONTENT_ITEM_IDENTIFIER_STYLE_CLASS).append("', ")
+								.append(StringUtil.isEmpty(mode) ? "null" : mode).append(");").toString());
 						}
 					}
-					if (action == null) {
-						action = PresentationUtil.getJavaScriptAction(new StringBuilder(editorOpener).append(".ArticleEditorHelper.needReload = true;")
-																		.toString());
-					}
+					if (action == null)
+						action = PresentationUtil.getJavaScriptAction(new StringBuilder(editorOpener)
+							.append(".ArticleEditorHelper.needReload = true;").toString());
 
 					Layer script = new Layer();
 					script.setId("articleUpdaterScriptCaller");
@@ -686,8 +691,7 @@ public class EditArticleView extends IWBaseComponent implements ManagedContentBe
 				}
 			}
 			this.clearOnInit = false;
-		}
-		else if (id.equals(DELETE_ID)) {
+		} else if (id.equals(DELETE_ID)) {
 			//	We are deleting
 			ArticleItemBean articleItemBean = getArticleItemBean();
 			articleItemBean.delete();
@@ -707,20 +711,17 @@ public class EditArticleView extends IWBaseComponent implements ManagedContentBe
 			article.store();
 
 			String articleURI = article.getResourcePath();
-			if (articleURI.startsWith(CoreConstants.WEBDAV_SERVLET_URI)) {
+			if (articleURI.startsWith(CoreConstants.WEBDAV_SERVLET_URI))
 				articleURI = articleURI.replaceFirst(CoreConstants.WEBDAV_SERVLET_URI, CoreConstants.EMPTY);
-			}
-
-			if (articleURI.endsWith(CoreConstants.SLASH)) {
+			if (articleURI.endsWith(CoreConstants.SLASH))
 				articleURI = articleURI.substring(0, articleURI.lastIndexOf(CoreConstants.SLASH));
-			}
 
 			List<String> categories = article.getCategories();
-			boolean result = this.articleDAO.updateArticle(article.getCreationDate(), articleURI, categories);
+			boolean result = getArticleDao().updateArticle(article.getCreationDate(), articleURI, categories);
 			setEditMode(ContentConstants.CONTENT_ITEM_ACTION_EDIT);
 			setUserMessage(result ? "article_saved" : "error_saving_article");
 			return result;
-		} catch(ArticleStoreException ae) {
+		} catch(ArticleStoreException ae){
 			String errorKey = ae.getErrorKey();
 			UIComponent message = getMessageComponent(SAVE_ID);
 			if (message == null) {
@@ -776,14 +777,13 @@ public class EditArticleView extends IWBaseComponent implements ManagedContentBe
 		findComponent(TASKBAR_ID);
 	}
 
-
 	/**
 	 * Sets the editor view for this article block.
 	 *
 	 */
 	public void setEditView(String s) {
 		WFComponentSelector cs = (WFComponentSelector) findComponent(EDITOR_SELECTOR_ID);
-		if(cs!=null){
+		if (cs != null) {
 			cs.setSelectedId(ARTICLE_EDITOR_ID, s.equals(ARTICLE_EDITOR_ID));
 			cs.setSelectedId(CATEGORY_EDITOR_ID, s.equals(CATEGORY_EDITOR_ID));
 			cs.setSelectedId(RELATED_CONTENT_ITEMS_EDITOR_ID, s.equals(RELATED_CONTENT_ITEMS_EDITOR_ID));
@@ -876,8 +876,7 @@ public class EditArticleView extends IWBaseComponent implements ManagedContentBe
 		String renderingParameter = iwc.getParameter(ContentConstants.RENDERING_COMPONENT_OF_ARTICLE_LIST);
 		if (renderingParameter != null) {
 			fromArticleItemListViewer = Boolean.TRUE.toString().equals(renderingParameter);
-		}
-		else {
+		} else {
 			fromArticleItemListViewer = false;
 		}
 		containerId = iwc.getParameter(ContentConstants.CONTENT_LIST_ITEMS_IDENTIFIER);
@@ -894,8 +893,7 @@ public class EditArticleView extends IWBaseComponent implements ManagedContentBe
 		if (resourcePath != null) {
 			if (resourcePath.equals(CoreConstants.EMPTY)) {
 				resourcePath = article.getResourcePath();
-			}
-			else {
+			} else {
 				article.setResourcePath(resourcePath);
 			}
 		}
@@ -908,8 +906,7 @@ public class EditArticleView extends IWBaseComponent implements ManagedContentBe
 			//	This has to happen before initializeComponent for delete case:
 			try {
 				article.load();
-			}
-			catch (Exception e) {
+			} catch (Exception e) {
 				LOGGER.log(Level.WARNING, "Error loading article", e);
 			}
 		}
@@ -924,14 +921,12 @@ public class EditArticleView extends IWBaseComponent implements ManagedContentBe
 			try {
 				if (languageChange == null) {
 					article.load();
-				}
-				else {
+				} else {
 					article.reload();
 				}
 				//	Update the categoriesUI with the resourcePath given
 				categoriesUI.setResourcePath(resourcePath);
-			}
-			catch (Exception e) {
+			} catch (Exception e) {
 				LOGGER.log(Level.WARNING, "Error loading article", e);
 			}
 		}
@@ -963,20 +958,16 @@ public class EditArticleView extends IWBaseComponent implements ManagedContentBe
 			bean.setLanguageChange(langChange);
 			bean.setLocale(LocaleUtil.getLocale(langChange));
 			LOGGER.info("Changed to other language "+langChange);
-		}
-		else if(event.getComponent().getId().equals(BODY_ID)){
+		} else if(event.getComponent().getId().equals(BODY_ID)){
 			String newBodyValue = event.getNewValue().toString();
 			getArticleItemBean().setBody(newBodyValue);
-		}
-		else if(event.getComponent().getId().equals(HEADLINE_ID)){
+		} else if(event.getComponent().getId().equals(HEADLINE_ID)){
 			String newValue = event.getNewValue().toString();
 			getArticleItemBean().setHeadline(newValue);
-		}
-		else if(event.getComponent().getId().equals(AUTHOR_ID)){
+		} else if(event.getComponent().getId().equals(AUTHOR_ID)){
 			String newValue = event.getNewValue().toString();
 			getArticleItemBean().setAuthor(newValue);
-		}
-		else if(event.getComponent().getId().equals(TEASER_ID)){
+		} else if(event.getComponent().getId().equals(TEASER_ID)){
 			String newValue = event.getNewValue().toString();
 			getArticleItemBean().setTeaser(newValue);
 		}

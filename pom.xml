@@ -14,17 +14,6 @@
   <name>idegaWeb Article</name>
   <inceptionYear>2003</inceptionYear>
   <description>idegaWeb Article Block is a module for content management of articles</description>
-  <scm>
-    
-    <connection>scm:cvs:ext:idegaweb@code.idega.com:/idega/cvs:com.idega.block.platform/com.idega.block.article/</connection>
-    <developerConnection>scm:cvs:ext:idegaweb@code.idega.com:/idega/cvs:com.idega.block.platform/com.idega.block.article/</developerConnection> 
-     
-     <!--
-    <connection>scm:cvs:ext:idegaweb@code.idega.com:/idega/cvs:com.idega.block.platform/com.idega.block.article/</connection>
-    <developerConnection>scm:cvs:ext:idegaweb@code.idega.com:/idega/cvs:com.idega.block.platform/com.idega.block.article/</developerConnection>
-    -->
-    <tag>com_idega_block_platform-4_1_2</tag>
-  </scm>
 
   <developers>
     <developer>
@@ -67,6 +56,19 @@
       <artifactId>com.idega.jackrabbit</artifactId>
     </dependency>
     <dependency>
+      <groupId>com.idega.block.platform</groupId>
+      <artifactId>com.idega.builder</artifactId>
+    </dependency>
+    <dependency>
+    	<groupId>com.idega.block.platform</groupId>
+    	<artifactId>com.idega.hibernate</artifactId>
+    </dependency>
+    <dependency>
+    	<groupId>com.idega.block.platform</groupId>
+    	<artifactId>com.idega.user</artifactId>
+    </dependency>
+    
+    <dependency>
       <groupId>xmlbeans</groupId>
       <artifactId>xbean</artifactId>
     </dependency>
@@ -75,10 +77,6 @@
       <artifactId>jtidy</artifactId>
       <version>4aug2000r7-dev-m1.0</version>
       <type>jar</type>
-    </dependency>
-    <dependency>
-    	<groupId>com.idega.block.platform</groupId>
-    	<artifactId>com.idega.hibernate</artifactId>
     </dependency>
   </dependencies>
 </project>

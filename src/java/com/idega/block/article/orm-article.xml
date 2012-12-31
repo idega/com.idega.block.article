@@ -6,5 +6,6 @@
 
     <entity class="com.idega.block.article.data.ArticleEntity" />
     <entity class="com.idega.block.article.data.CategoryEntity" />
+    <entity class="com.idega.block.article.data.FakeArticleEntity" />
         
 </entity-mappings>

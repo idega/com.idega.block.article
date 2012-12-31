@@ -2,6 +2,7 @@ package com.idega.block.article.data.dao.impl;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -30,7 +31,7 @@ import com.idega.util.StringUtil;
  * You can report about problems to: martynas@idega.com
  * You can expect to find some test cases notice in the end of the file.
  */
-@Repository
+@Repository(CategoryDao.BEAN_NAME)
 @Scope(BeanDefinition.SCOPE_SINGLETON)
 public class CategoryDaoImpl extends GenericDaoImpl implements CategoryDao, ApplicationListener {
 
@@ -54,7 +55,7 @@ public class CategoryDaoImpl extends GenericDaoImpl implements CategoryDao, Appl
             try {
                 this.persist(categoryEntity);
             } catch (Exception e) {
-                LOGGER.log(Level.WARNING, "Failed to add category to database: " 
+                LOGGER.log(Level.WARNING, "Failed to add category to database: "
                         + categoryEntity, e);
             }
 
@@ -68,7 +69,7 @@ public class CategoryDaoImpl extends GenericDaoImpl implements CategoryDao, Appl
      */
     @Override
     @Transactional(readOnly = false)
-    public List<String> addCategories(List<String> categories) {
+    public List<String> addCategories(Collection<String> categories) {
         if (ListUtil.isEmpty(categories))
             return null;
 
@@ -99,7 +100,7 @@ public class CategoryDaoImpl extends GenericDaoImpl implements CategoryDao, Appl
      */
     @Override
     @Transactional(readOnly = false)
-    public boolean deleteCategories(List<String> categories) {
+    public boolean deleteCategories(Collection<String> categories) {
         if (ListUtil.isEmpty(categories))
             return false;
         List<CategoryEntity> categoryEntitiesToDelete = this.getCategories(categories);
@@ -144,7 +145,7 @@ public class CategoryDaoImpl extends GenericDaoImpl implements CategoryDao, Appl
      * @see com.idega.block.article.data.dao.CategoryDao#getCategories(java.util.List)
      */
     @Override
-    public List<CategoryEntity> getCategories(List<String> categories) {
+    public List<CategoryEntity> getCategories(Collection<String> categories) {
         if (ListUtil.isEmpty(categories))
             return null;
 
@@ -191,21 +192,21 @@ public class CategoryDaoImpl extends GenericDaoImpl implements CategoryDao, Appl
 
         List<String> nonExistingCategories = new ArrayList<String>(categories);
         List<CategoryEntity> categoryEntities = this.getCategories();
-		
+
         if (ListUtil.isEmpty(categoryEntities)) {
             return categories;
         }
-		
+
         for (CategoryEntity s : categoryEntities) {
             if (s == null) {
                 continue;
             }
-		    
+
             String category = s.getCategory();
             if (StringUtil.isEmpty(category)) {
                 continue;
             }
-		    
+
             if (categories.contains(category)) {
                 nonExistingCategories.remove(s.getCategory());
             }

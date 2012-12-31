@@ -1,0 +1,21 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html xmlns:ui="http://java.sun.com/jsf/facelets"
+   	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:t="http://myfaces.apache.org/tomahawk"
+	xmlns:content="http://xmlns.idega.com/com.idega.content"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:ic="http://xmlns.idega.com/com.idega.core"
+	xmlns="http://www.w3.org/1999/xhtml" >
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8"></meta>
+<title>#{localizedStrings['com.idega.block.article']['upload']}</title>
+</head>
+<body style="height:auto; text-align:center;">
+	<form id="file=browser-upload-form" style="margin: 2em auto;">
+		<content:fileUploadViewer allowMultipleFiles="false" autoAddFileInput="false" 
+				autoUpload="true" showUploadedFiles="true" formId="file=browser-upload-form"
+				uploadPath="#{articleViewRequestBean.uploadPath}"/>
+		<input type="button" value="#{localizedStrings['com.idega.block.article']['select']}" onclick="ArticleFileBrowserHelper.passFile();" />
+	</form>
+</body>
+</html>
