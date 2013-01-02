@@ -19,9 +19,15 @@ import org.hibernate.annotations.Index;
 
 @NamedQueries(
     { 
-        @NamedQuery(name = CategoryEntity.GET_BY_NAMES, query = "from CategoryEntity s where s.category in (:"+CategoryEntity.categoryProp+")"),
-        @NamedQuery(name = CategoryEntity.GET_ALL, query = "from CategoryEntity s"),
-        @NamedQuery(name = CategoryEntity.GET_BY_NAME, query = "from CategoryEntity s where s.category = :" + CategoryEntity.categoryProp)
+        @NamedQuery(
+        		name = CategoryEntity.GET_BY_NAMES, 
+        		query = "from CategoryEntity s where s.category in (:"+CategoryEntity.categoryProp+")"),
+        @NamedQuery(
+        		name = CategoryEntity.GET_ALL, 
+        		query = "from CategoryEntity s"),
+        @NamedQuery(
+        		name = CategoryEntity.GET_BY_NAME, 
+        		query = "from CategoryEntity s where s.category = :" + CategoryEntity.categoryProp)
     }
 )
 public class CategoryEntity implements Serializable {

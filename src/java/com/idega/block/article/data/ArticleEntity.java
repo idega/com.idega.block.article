@@ -1,6 +1,7 @@
 package com.idega.block.article.data;
 
 import java.io.Serializable;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
@@ -22,7 +23,6 @@ import javax.persistence.ManyToMany;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.Table;
-import javax.persistence.Transient;
 
 import org.hibernate.Hibernate;
 import org.hibernate.annotations.CollectionOfElements;
@@ -42,8 +42,14 @@ import com.idega.util.expression.ELUtil;
 @Table(name = "IC_ARTICLE")
 @NamedQueries(
 	{
-		@NamedQuery(name = ArticleEntity.GET_BY_URI, query = "from ArticleEntity s where s.uri = :"+ArticleEntity.uriProp),
-		@NamedQuery(name = ArticleEntity.GET_ID_BY_URI, query = "select id from ArticleEntity s where s.uri = :"+ArticleEntity.uriProp)
+		@NamedQuery(
+				name = ArticleEntity.GET_BY_URI, 
+				query = "from ArticleEntity s where s.uri = :"+ArticleEntity.uriProp
+				),
+		@NamedQuery(
+				name = ArticleEntity.GET_ID_BY_URI, 
+				query = "select id from ArticleEntity s where s.uri = :"+ArticleEntity.uriProp
+				)
 	}
 )
 @Inheritance(strategy=InheritanceType.JOINED)
@@ -79,7 +85,9 @@ public class ArticleEntity implements Serializable {
 
     public static final String editorsProp = "editorsProp";
     @CollectionOfElements(fetch = FetchType.EAGER)
-    @JoinTable(name = "article_editors_groups", joinColumns=@JoinColumn(name="ARTICLE_ID"))
+    @JoinTable(
+    		name = "article_editors_groups", 
+    		joinColumns=@JoinColumn(name="ARTICLE_ID"))
     @Column(name = "EDITORS_GROUPS_IDS", nullable=false)
     private Set<Integer> editors;
 
@@ -105,7 +113,10 @@ public class ArticleEntity implements Serializable {
      * @return Groups ids
      */
     public Set<Integer> getEditors() {
-    	//TODO: check if can return null and return empty set if so
+    	if (this.editors == null) {
+    		return Collections.emptySet();
+    	}
+    	
 		return editors;
 	}
 
@@ -143,7 +154,7 @@ public class ArticleEntity implements Serializable {
         this.uri = uri;
     }
 
-    @Transient
+//    @Transient
     public Set<CategoryEntity> getCategories() {
     	if (Hibernate.isInitialized(categories))
     		return categories;
@@ -162,7 +173,7 @@ public class ArticleEntity implements Serializable {
     	return categories;
     }
 
-    public void setCategories(List<CategoryEntity> categories) {
+    public void setCategories(Collection<CategoryEntity> categories) {
         this.categories = new HashSet<CategoryEntity>(categories);
     }
 
@@ -170,7 +181,7 @@ public class ArticleEntity implements Serializable {
         this.categories = categories;
     }
 
-    public boolean addCategories(List<CategoryEntity> categories){
+    public boolean addCategories(Collection<CategoryEntity> categories){
         if (ListUtil.isEmpty(categories))
             return Boolean.TRUE;
 
@@ -183,7 +194,7 @@ public class ArticleEntity implements Serializable {
         return categoriesList.addAll(categories);
     }
 
-    public boolean removeCategories(List<CategoryEntity> categories){
+    public boolean removeCategories(Collection<CategoryEntity> categories){
         if (ListUtil.isEmpty(categories))
             return Boolean.TRUE;
 
@@ -221,8 +232,6 @@ public class ArticleEntity implements Serializable {
 	}
 
 	private ArticleDao getArticleDao() {
-		ArticleDao articleDao = ELUtil.getInstance().getBean(ArticleDao.BEAN_NAME);
-		return articleDao;
+		return ELUtil.getInstance().getBean(ArticleDao.BEAN_NAME);
 	}
-
 }

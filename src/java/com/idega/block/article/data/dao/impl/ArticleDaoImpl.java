@@ -3,6 +3,7 @@ package com.idega.block.article.data.dao.impl;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.idega.block.article.data.ArticleEntity;
 import com.idega.block.article.data.dao.ArticleDao;
@@ -19,6 +20,7 @@ import com.idega.block.article.data.dao.ArticleDao;
  */
 @Repository(ArticleDao.BEAN_NAME)
 @Scope(BeanDefinition.SCOPE_SINGLETON)
+@Transactional(readOnly = false)
 public class ArticleDaoImpl extends ArticleDaoTemplateImpl<ArticleEntity> implements ArticleDao {
 
 	@Override

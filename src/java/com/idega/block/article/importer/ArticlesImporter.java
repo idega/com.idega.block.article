@@ -152,7 +152,7 @@ public class ArticlesImporter extends DefaultSpringBean implements ApplicationLi
                 	continue;
                 }
 
-                Boolean isAdded = categoryDao.addCategory(categoryId);
+                Boolean isAdded = categoryDao.addCategory(categoryId) != null;
                 if (isAdded) {
                 	getLogger().info("Category with ID '" + categoryId + "' was imported");
                 	numberOfImportedCategories++;

@@ -23,6 +23,7 @@ import com.idega.util.ListUtil;
 import com.idega.util.StringUtil;
 import com.idega.util.expression.ELUtil;
 
+@Transactional(readOnly = false)
 public abstract class ArticleDaoTemplateImpl<T extends ArticleEntity> extends GenericDaoImpl implements ArticleDaoTemplate<T> {
 
 	@Autowired
@@ -72,7 +73,6 @@ public abstract class ArticleDaoTemplateImpl<T extends ArticleEntity> extends Ge
      * @see com.idega.block.article.data.dao.ArticleDao#delete(String)
      */
 	@Override
-	@Transactional(readOnly = false)
 	public boolean delete(String uri) {
 		final T article = getByUri(uri);
 		if (article == null)
@@ -145,7 +145,6 @@ public abstract class ArticleDaoTemplateImpl<T extends ArticleEntity> extends Ge
 	}
 
 	@Override
-	@Transactional
 	public boolean updateArticle(Date timestamp, String uri, Collection<String> categories, Collection<Integer> editors) {
 		if (timestamp == null || StringUtil.isEmpty(uri)) {
 			LOGGER.warning("Can not create or update article because URI (" + uri + ") and/or modification date (" + timestamp +
@@ -182,7 +181,6 @@ public abstract class ArticleDaoTemplateImpl<T extends ArticleEntity> extends Ge
 		return articleEntity != null && articleEntity.getId() != null;
 	}
 	
-	@Transactional
 	public <E extends ArticleEntity> E updateArticle(E article) {
 		if (article == null) {
 			getLogger().warning("Entity is not provided");
@@ -191,7 +189,12 @@ public abstract class ArticleDaoTemplateImpl<T extends ArticleEntity> extends Ge
 		
 		boolean editing = article.getId() != null;
 		try {
-			article = merge(article);
+			if (editing) {
+				article = merge(article);
+			} else {
+				persist(article);
+			}
+			
 			boolean failure = article == null || article.getId() == null;
 			if (failure) {
 				getLogger().warning("Unable to " + (editing ? "edit" : "create") + " article: " + article);
@@ -207,7 +210,6 @@ public abstract class ArticleDaoTemplateImpl<T extends ArticleEntity> extends Ge
 	}
 
 	@Override
-	@Transactional(readOnly = false)
 	public void remove(T articleEntity) {
 		if (articleEntity == null)
 			return;

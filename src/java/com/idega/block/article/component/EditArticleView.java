@@ -34,14 +34,12 @@ import javax.faces.event.ValueChangeListener;
 import javax.faces.model.SelectItem;
 
 import org.apache.myfaces.custom.stylesheet.Stylesheet;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import com.idega.block.article.IWBundleStarter;
 import com.idega.block.article.bean.ArticleItemBean;
 import com.idega.block.article.bean.ArticleStoreException;
 import com.idega.block.article.business.ArticleConstants;
 import com.idega.block.article.business.ArticleUtil;
-import com.idega.block.article.data.dao.ArticleDao;
 import com.idega.content.bean.ManagedContentBeans;
 import com.idega.content.business.ContentConstants;
 import com.idega.content.data.ContentItemCase;
@@ -50,6 +48,7 @@ import com.idega.content.presentation.ContentViewer;
 import com.idega.content.presentation.WebDAVCategories;
 import com.idega.core.accesscontrol.business.StandardRoles;
 import com.idega.core.localisation.business.ICLocaleBusiness;
+import com.idega.data.IDOStoreException;
 import com.idega.idegaweb.IWBundle;
 import com.idega.idegaweb.IWResourceBundle;
 import com.idega.presentation.IWBaseComponent;
@@ -65,7 +64,6 @@ import com.idega.util.CoreUtil;
 import com.idega.util.LocaleUtil;
 import com.idega.util.PresentationUtil;
 import com.idega.util.StringUtil;
-import com.idega.util.expression.ELUtil;
 import com.idega.webface.WFBlock;
 import com.idega.webface.WFComponentSelector;
 import com.idega.webface.WFContainer;
@@ -133,15 +131,6 @@ public class EditArticleView extends IWBaseComponent implements ManagedContentBe
 
 	private String editorOpener = "window.parent.parent";
 
-	@Autowired
-	private ArticleDao articleDAO;
-
-	private ArticleDao getArticleDao() {
-		if (articleDAO == null)
-			ELUtil.getInstance().autowire(this);
-		return articleDAO;
-	}
-	
 	public EditArticleView() {
 		super();
 	}
@@ -707,16 +696,14 @@ public class EditArticleView extends IWBaseComponent implements ManagedContentBe
 			ArticleItemBean article = getArticleItemBean();
 			article.setSetPublishedDateByDefault(fromArticleItemListViewer);
 			article.getLocalizedArticle().setSetPublishedDateByDefault(fromArticleItemListViewer);
-			article.store();
+			
+			boolean result = true;
+			try {
+				article.store();
+			} catch (IDOStoreException e) {
+				result = false;
+			}
 
-			String articleURI = article.getResourcePath();
-			if (articleURI.startsWith(CoreConstants.WEBDAV_SERVLET_URI))
-				articleURI = articleURI.replaceFirst(CoreConstants.WEBDAV_SERVLET_URI, CoreConstants.EMPTY);
-			if (articleURI.endsWith(CoreConstants.SLASH))
-				articleURI = articleURI.substring(0, articleURI.lastIndexOf(CoreConstants.SLASH));
-
-			List<String> categories = article.getCategories();
-			boolean result = getArticleDao().updateArticle(article.getCreationDate(), articleURI, categories);
 			setEditMode(ContentConstants.CONTENT_ITEM_ACTION_EDIT);
 			setUserMessage(result ? "article_saved" : "error_saving_article");
 			return result;
@@ -929,6 +916,14 @@ public class EditArticleView extends IWBaseComponent implements ManagedContentBe
 				LOGGER.log(Level.WARNING, "Error loading article", e);
 			}
 		}
+	}
+
+	/* (non-Javadoc)
+	 * @see com.idega.presentation.IWBaseComponent#encodeEnd(javax.faces.context.FacesContext)
+	 */
+	@Override
+	public void encodeEnd(FacesContext context) throws IOException {
+		super.encodeEnd(context);
 	}
 
 	/* (non-Javadoc)

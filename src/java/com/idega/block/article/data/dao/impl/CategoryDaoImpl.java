@@ -3,6 +3,7 @@ package com.idega.block.article.data.dao.impl;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -33,60 +34,71 @@ import com.idega.util.StringUtil;
  */
 @Repository(CategoryDao.BEAN_NAME)
 @Scope(BeanDefinition.SCOPE_SINGLETON)
+@Transactional(readOnly = false)
 public class CategoryDaoImpl extends GenericDaoImpl implements CategoryDao, ApplicationListener {
 
     private static Logger LOGGER = Logger.getLogger(CategoryDaoImpl.class.getName());
 
-    /**
+    /*
+     * (non-Javadoc)
      * @see com.idega.block.article.data.dao.CategoryDao#addCategory(java.lang.String)
      */
     @Override
-    @Transactional(readOnly = false)
-    public boolean addCategory(String category) {
+    public CategoryEntity addCategory(String category) {
         if (StringUtil.isEmpty(category)) {
             LOGGER.warning("Category name is not provided!");
-            return false;
+            return null;
         }
 
-        if (!this.isCategoryExists(category)) {
-            CategoryEntity categoryEntity = new CategoryEntity();
+        CategoryEntity categoryEntity = getCategory(category);
+        if (categoryEntity == null) {
+            categoryEntity = new CategoryEntity();
             categoryEntity.setCategory(category);
 
             try {
                 this.persist(categoryEntity);
             } catch (Exception e) {
-                LOGGER.log(Level.WARNING, "Failed to add category to database: " 
+                LOGGER.log(Level.WARNING, 
+                		"Failed to add category to database: " 
                         + categoryEntity, e);
             }
-
-            return categoryEntity.getId() != null;
         }
-        return true;
+        
+    	return categoryEntity;
     }
 
     /**
      * @see com.idega.block.article.data.dao.CategoryDao#addCategories(java.util.List)
      */
     @Override
-    @Transactional(readOnly = false)
-    public List<String> addCategories(Collection<String> categories) {
-        if (ListUtil.isEmpty(categories))
-            return null;
+    public Collection<CategoryEntity> addCategories(Collection<String> categories) {
+    	if (ListUtil.isEmpty(categories)) {
+    		return Collections.emptyList();
+    	}
+    	
+    	/* Getting existing categories */
+    	Collection<CategoryEntity> categoriesInDatabase = getCategories(categories);
+    	if (categoriesInDatabase == null) {
+    		categoriesInDatabase = new ArrayList<CategoryEntity>();
+    	}
+    	
+    	/* Removing existing ones from list to add */
+    	for (CategoryEntity ce: categoriesInDatabase) {
+    		categories.remove(ce.getCategory());
+    	}
 
-        List<String> categoriesNotAdded = new ArrayList<String>();
+    	/* Adding not existing categories */
         for (String s : categories) {
-            if (!this.addCategory(s)) {
-                categoriesNotAdded.add(s);
-            }
+        	categoriesInDatabase.add(addCategory(s));
         }
-        return categoriesNotAdded;
+        
+        return categoriesInDatabase;
     }
 
     /**
      * @see com.idega.block.article.data.dao.CategoryDao#deleteCategory(java.lang.String)
      */
     @Override
-    @Transactional(readOnly = false)
     public boolean deleteCategory(String category) {
         if (StringUtil.isEmpty(category)) {
             return false;
@@ -99,7 +111,6 @@ public class CategoryDaoImpl extends GenericDaoImpl implements CategoryDao, Appl
      * @see com.idega.block.article.data.dao.CategoryDao#deleteCategories(java.util.List)
      */
     @Override
-    @Transactional(readOnly = false)
     public boolean deleteCategories(Collection<String> categories) {
         if (ListUtil.isEmpty(categories))
             return false;
@@ -219,7 +230,6 @@ public class CategoryDaoImpl extends GenericDaoImpl implements CategoryDao, Appl
      * @see com.idega.block.article.data.dao.CategoryDao#onApplicationEvent(org.springframework.context.ApplicationEvent)
      */
     @Override
-    @Transactional(readOnly = false)
     public void onApplicationEvent(ApplicationEvent event) {
 
         if (event instanceof CategoryDeletedEvent) {
