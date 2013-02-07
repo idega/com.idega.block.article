@@ -58,7 +58,7 @@ public class ArticleRepositoryTest extends IdegaBaseTest{
 	
 	public void testArticleCreate() throws RepositoryException, Exception{
 		ArticleItemBean article = new ArticleItemBean();
-		article.setSession(getSession());
+		// article.setSession(getSession());
 		article.setLocale(Locale.ENGLISH);
 		article.setResourcePath(articlePath);
 		//article.load();
@@ -72,7 +72,7 @@ public class ArticleRepositoryTest extends IdegaBaseTest{
 	
 	public void testArticleLoad() throws RepositoryException, Exception{
 		ArticleItemBean article = new ArticleItemBean();
-		article.setSession(getSession());
+		// article.setSession(getSession());
 		article.setLocale(Locale.ENGLISH);
 		article.setResourcePath(articlePath);
 		article.load();
@@ -83,7 +83,7 @@ public class ArticleRepositoryTest extends IdegaBaseTest{
 	
 	public void testArticleUpdate() throws RepositoryException, Exception{
 		ArticleItemBean article = new ArticleItemBean();
-		article.setSession(getSession());
+		// article.setSession(getSession());
 		article.setLocale(Locale.ENGLISH);
 		article.setResourcePath(articlePath);
 		article.load();
@@ -96,7 +96,7 @@ public class ArticleRepositoryTest extends IdegaBaseTest{
 	
 	public void testArticleUpdate2() throws RepositoryException, Exception{
 		ArticleItemBean article = new ArticleItemBean();
-		article.setSession(getSession());
+		// article.setSession(getSession());
 		article.setLocale(Locale.ENGLISH);
 		article.setResourcePath(articlePath);
 		article.load();
