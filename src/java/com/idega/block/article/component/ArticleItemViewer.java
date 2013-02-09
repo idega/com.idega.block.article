@@ -30,6 +30,7 @@ import com.idega.core.cache.UIComponentCacher;
 import com.idega.idegaweb.IWMainApplication;
 import com.idega.presentation.IWContext;
 import com.idega.presentation.Layer;
+import com.idega.presentation.text.Heading1;
 import com.idega.presentation.ui.HiddenInput;
 import com.idega.util.CoreConstants;
 import com.idega.util.CoreUtil;
@@ -120,19 +121,22 @@ public class ArticleItemViewer extends ContentItemViewer {
 		if (ContentConstants.ATTRIBUTE_BODY.equals(attribute)) {
 			WFHtml body = new WFHtml();
 			return body;
-		}
-		else if (ContentConstants.ATTRIBUTE_TEASER.equals(attribute)) {
+		} else if (ContentConstants.ATTRIBUTE_TEASER.equals(attribute)) {
 			return new WFHtml();
+		} else if (attribute.equals(ContentConstants.ATTRIBUTE_HEADLINE)) {
+			if (this.getHeadlineAsLink()) {
+				UIComponent link = getEmptyMoreLink();
+				HtmlOutputText text = new HtmlOutputText();
+				link.getChildren().add(text);
+				return link;
+			} else if (IWMainApplication.getDefaultIWMainApplication().getSettings().getBoolean("article_title_h1", Boolean.FALSE)) {
+				Heading1 heading = new Heading1();
+				heading.setStyleClass(ContentConstants.ARTICLE_ITEM_HEADLINE_STYLE_CLASS);
+				return heading;
+			}
 		}
-		else if (attribute.equals(ContentConstants.ATTRIBUTE_HEADLINE) && this.getHeadlineAsLink()) {
-			UIComponent link = getEmptyMoreLink();
-			HtmlOutputText text = new HtmlOutputText();
-			link.getChildren().add(text);
-			return link;
-		}
-		else {
-			return new HtmlOutputText();
-		}
+
+		return new HtmlOutputText();
 	}
 
 	@Override
@@ -151,7 +155,7 @@ public class ArticleItemViewer extends ContentItemViewer {
 			}
 		}
 		initializePermissionComponents(context);
-		
+
 		initializeComments(context);
 		if (isShowCreationDate()) {
 			UIComponent creationDate = getFieldViewerComponent(ContentConstants.ATTRIBUTE_CREATION_DATE);
@@ -167,7 +171,7 @@ public class ArticleItemViewer extends ContentItemViewer {
 		initializePermissionComponents(context);
 		super.updateComponent(context);
 	}
-	
+
 	private void initializePermissionComponents(FacesContext context){
 		IWContext iwc = IWContext.getIWContext(context);
 		ArticleItemBean articleItemBean = (ArticleItemBean) getContentItem();
@@ -376,8 +380,8 @@ public class ArticleItemViewer extends ContentItemViewer {
 		}
 		super.updateToolbar();
 	}
-	
-	
+
+
 
 	/* (non-Javadoc)
 	 * @see com.idega.content.presentation.ContentItemListViewer#getCacher(javax.faces.context.FacesContext)
