@@ -451,7 +451,7 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 		try {
 			getLocalizedArticle().store();
 		} catch(Exception e){
-			throw new IDOStoreException("Failed storing to slide", e);
+			throw new IDOStoreException("Failed storing to repository", e);
 		}
 	}
 
