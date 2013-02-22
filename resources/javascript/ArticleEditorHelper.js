@@ -32,8 +32,9 @@ ArticleEditorHelper.checkArticleLinkAndRegisterIfItsCorrect = function(link, win
 	
 	if (jQuery.fn.fancybox) {
 		jQuery(link).addClass('articleEditorInitializedForLink');
-		jQuery(link).attr('type', 'iframe');
+		jQuery(link).attr('data-fancybox-type', 'iframe');
 		jQuery(link).fancybox({
+			type: 'iframe',
 			autoScale: false,
 			autoDimensions: false,
 			hideOnOverlayClick: false,
