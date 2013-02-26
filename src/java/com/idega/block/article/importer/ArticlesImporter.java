@@ -111,12 +111,23 @@ public class ArticlesImporter extends DefaultSpringBean implements ApplicationLi
                 continue;
             }
 
+            int numberOfImportedCategories = 0;
             for(ContentCategory category : categoryList){
                 if (category == null || category.getId() == null)
                     continue;
 
-                Boolean isAdded = categoryDao.addCategory(category.getId());
-                if(!isAdded){
+                String categoryId = category.getId();
+                if (StringUtil.isEmpty(categoryId)) {
+                	getLogger().warning("Category " + category + " has no ID, unable to import it!");
+                	continue;
+                }
+
+                Boolean isAdded = categoryDao.addCategory(categoryId) != null;
+                if (isAdded) {
+                	getLogger().info("Category with ID '" + categoryId + "' was imported");
+                	numberOfImportedCategories++;
+                } else {
+                	getLogger().warning("Failed to import the category with ID '" + categoryId + "'. Number of successfully imported categories: " + numberOfImportedCategories);
                     return Boolean.FALSE;
                 }
             }

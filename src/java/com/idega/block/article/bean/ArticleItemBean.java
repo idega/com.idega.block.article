@@ -35,6 +35,7 @@ import com.idega.block.article.business.ArticleConstants;
 import com.idega.block.article.business.ArticleUtil;
 import com.idega.block.article.data.ArticleEntity;
 import com.idega.block.article.data.dao.ArticleDao;
+import com.idega.block.article.data.dao.CategoryDao;
 import com.idega.business.IBOLookup;
 import com.idega.content.bean.ContentItem;
 import com.idega.content.bean.ContentItemBean;
@@ -96,6 +97,10 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 	//Request scope so this should work well and fast
 	private Boolean allowedToEditByCurrentUser = null;
 
+	private CategoryDao getCategoryDao() {
+		return ELUtil.getInstance().getBean(CategoryDao.BEAN_NAME);
+	}
+
 	public ArticleItemBean() {
 		super();
 	}
@@ -124,7 +129,6 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 	 * @param currentUser the current user for which the check will be done
 	 * @return True if it is allowed to edit, false otherwise.
 	 */
-	@SuppressWarnings("unchecked")
 	public Boolean isAllowedToEditByCurrentUser(IWContext iwc) {
 		IWMainApplicationSettings settings = iwc.getIWMainApplication().getSettings();
 		if (!settings.getBoolean(ArticleConstants.USE_ROLES_IN_ARTICLE, Boolean.FALSE)) {
@@ -218,13 +222,40 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 		}
 	}
 
+	/**
+	 *
+	 * <p>Checks for existing {@link ArticleEntity}, creates new if
+	 * not found in database.</p>
+	 * @param createIfNotFound - <code>true</code> if new entity is required,
+	 * when no {@link ArticleEntity} found, <code>false</code> otherwise.
+	 * @return Retrieved, created {@link ArticleEntity}.
+	 * @author <a href="mailto:martynas@idega.com">Martynas Stakė</a>
+	 */
 	public ArticleEntity getArticleEntity(boolean createIfNotFound) {
 		ArticleEntity article = getArticleDAO().getByUri(getResourcePath());
 
 		if (createIfNotFound && article == null) {
 			article = new ArticleEntity();
-			article.setUri(getResourcePath());
 			article.setModificationDate(new Date(System.currentTimeMillis()));
+
+			String articleURI = getResourcePath();
+			if (articleURI.startsWith(CoreConstants.WEBDAV_SERVLET_URI))
+				articleURI = articleURI.replaceFirst(
+						CoreConstants.WEBDAV_SERVLET_URI,
+						CoreConstants.EMPTY);
+			if (articleURI.endsWith(CoreConstants.SLASH))
+				articleURI = articleURI.substring(0,
+						articleURI.lastIndexOf(CoreConstants.SLASH));
+
+			article.setUri(articleURI);
+		}
+
+		if (createIfNotFound && article != null) {
+			article.setCategories(
+					getCategoryDao().addCategories(getCategories())
+					);
+
+			article = getArticleDAO().updateArticle(article);
 		}
 
 		return article;
@@ -442,8 +473,7 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 	@Override
 	public void store() throws IDOStoreException {
 		ArticleEntity article = getArticleEntity(true);
-		article.setUri(getResourcePath());
-		article = getArticleDAO().updateArticle(article);
+
 		if (article == null || article.getId() == null)
 			throw new IDOStoreException("Unable to create/edit article at " + getResourcePath());
 

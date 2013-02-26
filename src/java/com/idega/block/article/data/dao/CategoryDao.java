@@ -1,6 +1,7 @@
 package com.idega.block.article.data.dao;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 
 import com.idega.block.article.data.CategoryEntity;
@@ -19,19 +20,28 @@ import com.idega.core.persistence.GenericDao;
 public interface CategoryDao extends GenericDao {
 
 	public static final String BEAN_NAME = "categoryDAO";
+	
 	/**
-	 * Creates new Category
-	 * @param category New category id
-	 * @return true, if modification successfully completed, else false
+	 * 
+	 * <p>Creates new {@link CategoryEntity}, or returns existing one.</p>
+	 * @param category {@link CategoryEntity#getCategory()}, 
+	 * not <code>null</code>.
+	 * @return {@link CategoryEntity}, existing in database or 
+	 * <code>null</code> on failure.
+	 * @author <a href="mailto:martynas@idega.com">Martynas Stakė</a>
 	 */
-	public abstract boolean addCategory(String category);
+	public CategoryEntity addCategory(String category);
 
 	/**
-	 * Adds new categories, returns not added or existing ones
-	 * @param categories New categories IDs
-	 * @return null, if empty list passed, empty list, if all categories added, list of missing categories, if some categories not added
+	 * 
+	 * <p>Adds {@link CategoryEntity}s, which did not exist.</p>
+	 * @param categories - {@link CategoryEntity}s names to add or get from 
+	 * database.
+	 * @return {@link CategoryEntity}s existing in database, by given names.
+	 * {@link Collections#emptyList()} on failure.
+	 * @author <a href="mailto:martynas@idega.com">Martynas Stakė</a>
 	 */
-	public abstract List<String> addCategories(Collection<String> categories);
+	public Collection<CategoryEntity> addCategories(Collection<String> categories);
 
 	/**
 	 * Deletes category
