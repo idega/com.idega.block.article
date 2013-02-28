@@ -10,6 +10,7 @@ import java.util.Random;
 import java.util.Set;
 
 import javax.persistence.Column;
+import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
@@ -25,7 +26,6 @@ import javax.persistence.NamedQuery;
 import javax.persistence.Table;
 
 import org.hibernate.Hibernate;
-import org.hibernate.annotations.CollectionOfElements;
 import org.hibernate.annotations.Index;
 
 import com.idega.block.article.data.dao.ArticleDao;
@@ -83,7 +83,7 @@ public class ArticleEntity implements Serializable {
     private Set<CategoryEntity> categories;
 
     public static final String editorsProp = "editorsProp";
-    @CollectionOfElements(fetch = FetchType.EAGER)
+    @ElementCollection(fetch = FetchType.EAGER)
     @JoinTable(
     		name = "article_editors_groups",
     		joinColumns=@JoinColumn(name="ARTICLE_ID"))
