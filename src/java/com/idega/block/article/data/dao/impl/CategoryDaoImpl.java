@@ -35,7 +35,7 @@ import com.idega.util.StringUtil;
 @Repository(CategoryDao.BEAN_NAME)
 @Scope(BeanDefinition.SCOPE_SINGLETON)
 @Transactional(readOnly = false)
-public class CategoryDaoImpl extends GenericDaoImpl implements CategoryDao, ApplicationListener {
+public class CategoryDaoImpl extends GenericDaoImpl implements CategoryDao, ApplicationListener<ApplicationEvent> {
 
     private static Logger LOGGER = Logger.getLogger(CategoryDaoImpl.class.getName());
 

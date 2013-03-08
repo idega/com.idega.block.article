@@ -12,7 +12,6 @@ import javax.jcr.RepositoryException;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.BeanDefinition;
-import org.springframework.context.ApplicationEvent;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
@@ -42,7 +41,7 @@ import com.idega.util.StringUtil;
 
 @Service
 @Scope(BeanDefinition.SCOPE_SINGLETON)
-public class ArticlesImporter extends DefaultSpringBean implements ApplicationListener {
+public class ArticlesImporter extends DefaultSpringBean implements ApplicationListener<RepositoryStartedEvent> {
 
 	@Autowired
     private CategoriesEngine categoryEngine;
@@ -57,12 +56,8 @@ public class ArticlesImporter extends DefaultSpringBean implements ApplicationLi
     							ARTICLES_IMPORTED_APP_PROP = "is_articles_imported",
     							CATEGORIES_BUG_FIXED_PROP = "categories_bug_fixed";
 
-    /**
-     * @see org.springframework.context.ApplicationListener#onApplicationEvent(org.springframework.context.ApplicationEvent)
-     */
     @Override
-    public void onApplicationEvent(ApplicationEvent event) {
-        if (event instanceof RepositoryStartedEvent) {
+    public void onApplicationEvent(RepositoryStartedEvent event) {
             Boolean isCategoriesImported = getApplication().getSettings().getBoolean(CATEGORIES_IMPORTED_APP_PROP, Boolean.FALSE);
 
             if (!isCategoriesImported) {
@@ -79,7 +74,6 @@ public class ArticlesImporter extends DefaultSpringBean implements ApplicationLi
                 getApplication().getSettings().setProperty(ARTICLES_IMPORTED_APP_PROP,
                         isArticlesImported.toString());
             }
-        }
     }
 
     /**
