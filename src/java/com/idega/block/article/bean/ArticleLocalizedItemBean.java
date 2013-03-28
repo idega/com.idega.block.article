@@ -564,7 +564,6 @@ public class ArticleLocalizedItemBean extends ContentItemBean implements Seriali
 		//	Attachments
 		List<ContentItemField> resolvedAttachmens = null;
 		try {
-			@SuppressWarnings("unchecked")
 			List<XMLElement> attachments = rootElement.getChildren(FIELDNAME_ARTICLE_COMMENT);
 			if (attachments == null) {
 				resolvedAttachmens = Collections.emptyList();
