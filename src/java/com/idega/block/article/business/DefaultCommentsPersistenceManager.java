@@ -545,7 +545,7 @@ public class DefaultCommentsPersistenceManager extends DefaultSpringBean impleme
 	protected com.idega.user.data.bean.User getCurrentUser() {
 		try {
 			LoginSession loginSession = ELUtil.getInstance().getBean(LoginSession.class);
-			return loginSession.isLoggedIn() ? loginSession.getUser() : null;
+			return loginSession.isLoggedIn() ? loginSession.getUserEntity() : null;
 		} catch (Exception e) {
 			LOGGER.log(Level.WARNING, "Error getting logged in user", e);
 		}
