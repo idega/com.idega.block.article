@@ -83,7 +83,7 @@ public class DefaultCommentsPersistenceManager extends DefaultSpringBean impleme
 			comment.setReplyForCommentId(properties.getReplyForComment());
 			comment.setAnnouncedToPublic(hasFullRightsForComments && !privateComment);
 
-			User author = getOldUser(getCurrentUser());
+			User author = getLegacyUser(getCurrentUser());
 			if (author != null) {
 				comment.setAuthorId(Integer.valueOf(author.getId()));
 			}
@@ -202,7 +202,7 @@ public class DefaultCommentsPersistenceManager extends DefaultSpringBean impleme
 			return false;
 		}
 
-		User reader = getOldUser(getCurrentUser());
+		User reader = getLegacyUser(getCurrentUser());
 		if (reader == null) {
 			return false;
 		}
@@ -243,7 +243,7 @@ public class DefaultCommentsPersistenceManager extends DefaultSpringBean impleme
 			return false;
 		}
 
-		User currentUser = getOldUser(getCurrentUser());
+		User currentUser = getLegacyUser(getCurrentUser());
 		if (currentUser == null) {
 			return false;
 		}
