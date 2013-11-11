@@ -514,11 +514,13 @@ CommentsViewer.initializeAttachmentStatisticsLink = function(container) {
 		var link = jQuery(this);
 		
 		if (!link.hasClass('commentItemAttachmentDownloadInfoLinkInitialized')) {
+			link.addClass('fancybox.ajax');
 			link.fancybox({
+				type: 'ajax',
 				autoScale: false,
 				autoDimensions: false,
-				width:	400,
-				height:	300,
+				minWidth:	400,
+				minHeight:	300,
 				hideOnContentClick: false
 			});
 			link.addClass('commentItemAttachmentDownloadInfoLinkInitialized');

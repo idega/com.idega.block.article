@@ -298,7 +298,7 @@ public class CommentsViewer extends Block {
 							.append("', replyForMessage: '")
 							.append(iwrb.getLocalizedString("comments_viewer.reply_for_message", "Reply for message"))
 							.append("', commentRedBy: '")
-							.append(iwrb.getLocalizedString("comments_viewer.comment_red_by", "Comment was red by"))
+							.append(iwrb.getLocalizedString("comments_viewer.comment_read_by", "Comment was read by"))
 							.append("', commentAttachments: '")
 							.append(iwrb.getLocalizedString("comments_viewer.comment_attachments", "Attachments"))
 							.append("', commentAttachmentDownloadInfo: '")
