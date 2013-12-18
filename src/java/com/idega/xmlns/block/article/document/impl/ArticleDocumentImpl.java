@@ -14,20 +14,24 @@ package com.idega.xmlns.block.article.document.impl;
  */
 public class ArticleDocumentImpl extends org.apache.xmlbeans.impl.values.XmlComplexContentImpl implements com.idega.xmlns.block.article.document.ArticleDocument
 {
-    
-    public ArticleDocumentImpl(org.apache.xmlbeans.SchemaType sType)
+
+	private static final long serialVersionUID = -93158179085399290L;
+
+
+	public ArticleDocumentImpl(org.apache.xmlbeans.SchemaType sType)
     {
         super(sType);
     }
-    
-    private static final javax.xml.namespace.QName ARTICLE$0 = 
+
+    private static final javax.xml.namespace.QName ARTICLE$0 =
         new javax.xml.namespace.QName("http://xmlns.idega.com/block/article/document", "article");
-    
-    
+
+
     /**
      * Gets the "article" element
      */
-    public com.idega.xmlns.block.article.document.ArticleDocument.Article getArticle()
+    @Override
+	public com.idega.xmlns.block.article.document.ArticleDocument.Article getArticle()
     {
         synchronized (monitor())
         {
@@ -41,11 +45,12 @@ public class ArticleDocumentImpl extends org.apache.xmlbeans.impl.values.XmlComp
             return target;
         }
     }
-    
+
     /**
      * Sets the "article" element
      */
-    public void setArticle(com.idega.xmlns.block.article.document.ArticleDocument.Article article)
+    @Override
+	public void setArticle(com.idega.xmlns.block.article.document.ArticleDocument.Article article)
     {
         synchronized (monitor())
         {
@@ -59,11 +64,12 @@ public class ArticleDocumentImpl extends org.apache.xmlbeans.impl.values.XmlComp
             target.set(article);
         }
     }
-    
+
     /**
      * Appends and returns a new empty "article" element
      */
-    public com.idega.xmlns.block.article.document.ArticleDocument.Article addNewArticle()
+    @Override
+	public com.idega.xmlns.block.article.document.ArticleDocument.Article addNewArticle()
     {
         synchronized (monitor())
         {
@@ -80,36 +86,40 @@ public class ArticleDocumentImpl extends org.apache.xmlbeans.impl.values.XmlComp
      */
     public static class ArticleImpl extends org.apache.xmlbeans.impl.values.XmlComplexContentImpl implements com.idega.xmlns.block.article.document.ArticleDocument.Article
     {
-        
-        public ArticleImpl(org.apache.xmlbeans.SchemaType sType)
+
+		private static final long serialVersionUID = -2386940032025715997L;
+
+
+		public ArticleImpl(org.apache.xmlbeans.SchemaType sType)
         {
             super(sType);
         }
-        
-        private static final javax.xml.namespace.QName HEADLINE$0 = 
+
+        private static final javax.xml.namespace.QName HEADLINE$0 =
             new javax.xml.namespace.QName("http://xmlns.idega.com/block/article/document", "headline");
-        private static final javax.xml.namespace.QName TEASER$2 = 
+        private static final javax.xml.namespace.QName TEASER$2 =
             new javax.xml.namespace.QName("http://xmlns.idega.com/block/article/document", "teaser");
-        private static final javax.xml.namespace.QName BODY$4 = 
+        private static final javax.xml.namespace.QName BODY$4 =
             new javax.xml.namespace.QName("http://xmlns.idega.com/block/article/document", "body");
-        private static final javax.xml.namespace.QName AUTHOR$6 = 
+        private static final javax.xml.namespace.QName AUTHOR$6 =
             new javax.xml.namespace.QName("http://xmlns.idega.com/block/article/document", "author");
-        private static final javax.xml.namespace.QName SOURCE$8 = 
+        private static final javax.xml.namespace.QName SOURCE$8 =
             new javax.xml.namespace.QName("http://xmlns.idega.com/block/article/document", "source");
-        private static final javax.xml.namespace.QName COMMENT$10 = 
+        private static final javax.xml.namespace.QName COMMENT$10 =
             new javax.xml.namespace.QName("http://xmlns.idega.com/block/article/document", "comment");
-        private static final javax.xml.namespace.QName IMAGE$12 = 
+        private static final javax.xml.namespace.QName IMAGE$12 =
             new javax.xml.namespace.QName("http://xmlns.idega.com/block/article/document", "image");
-        private static final javax.xml.namespace.QName ATTACHMENT$14 = 
+        private static final javax.xml.namespace.QName ATTACHMENT$14 =
             new javax.xml.namespace.QName("http://xmlns.idega.com/block/article/document", "attachment");
-        private static final javax.xml.namespace.QName RELATEDITEMS$16 = 
+        private static final javax.xml.namespace.QName RELATEDITEMS$16 =
             new javax.xml.namespace.QName("http://xmlns.idega.com/block/article/document", "related_items");
-        
-        
+
+
         /**
          * Gets the "headline" element
          */
-        public java.lang.String getHeadline()
+        @Override
+		public java.lang.String getHeadline()
         {
             synchronized (monitor())
             {
@@ -123,11 +133,12 @@ public class ArticleDocumentImpl extends org.apache.xmlbeans.impl.values.XmlComp
                 return target.getStringValue();
             }
         }
-        
+
         /**
          * Gets (as xml) the "headline" element
          */
-        public org.apache.xmlbeans.XmlString xgetHeadline()
+        @Override
+		public org.apache.xmlbeans.XmlString xgetHeadline()
         {
             synchronized (monitor())
             {
@@ -137,11 +148,12 @@ public class ArticleDocumentImpl extends org.apache.xmlbeans.impl.values.XmlComp
                 return target;
             }
         }
-        
+
         /**
          * Sets the "headline" element
          */
-        public void setHeadline(java.lang.String headline)
+        @Override
+		public void setHeadline(java.lang.String headline)
         {
             synchronized (monitor())
             {
@@ -155,11 +167,12 @@ public class ArticleDocumentImpl extends org.apache.xmlbeans.impl.values.XmlComp
                 target.setStringValue(headline);
             }
         }
-        
+
         /**
          * Sets (as xml) the "headline" element
          */
-        public void xsetHeadline(org.apache.xmlbeans.XmlString headline)
+        @Override
+		public void xsetHeadline(org.apache.xmlbeans.XmlString headline)
         {
             synchronized (monitor())
             {
@@ -173,11 +186,12 @@ public class ArticleDocumentImpl extends org.apache.xmlbeans.impl.values.XmlComp
                 target.set(headline);
             }
         }
-        
+
         /**
          * Gets the "teaser" element
          */
-        public java.lang.String getTeaser()
+        @Override
+		public java.lang.String getTeaser()
         {
             synchronized (monitor())
             {
@@ -191,11 +205,12 @@ public class ArticleDocumentImpl extends org.apache.xmlbeans.impl.values.XmlComp
                 return target.getStringValue();
             }
         }
-        
+
         /**
          * Gets (as xml) the "teaser" element
          */
-        public org.apache.xmlbeans.XmlString xgetTeaser()
+        @Override
+		public org.apache.xmlbeans.XmlString xgetTeaser()
         {
             synchronized (monitor())
             {
@@ -205,11 +220,12 @@ public class ArticleDocumentImpl extends org.apache.xmlbeans.impl.values.XmlComp
                 return target;
             }
         }
-        
+
         /**
          * Sets the "teaser" element
          */
-        public void setTeaser(java.lang.String teaser)
+        @Override
+		public void setTeaser(java.lang.String teaser)
         {
             synchronized (monitor())
             {
@@ -223,11 +239,12 @@ public class ArticleDocumentImpl extends org.apache.xmlbeans.impl.values.XmlComp
                 target.setStringValue(teaser);
             }
         }
-        
+
         /**
          * Sets (as xml) the "teaser" element
          */
-        public void xsetTeaser(org.apache.xmlbeans.XmlString teaser)
+        @Override
+		public void xsetTeaser(org.apache.xmlbeans.XmlString teaser)
         {
             synchronized (monitor())
             {
@@ -241,11 +258,12 @@ public class ArticleDocumentImpl extends org.apache.xmlbeans.impl.values.XmlComp
                 target.set(teaser);
             }
         }
-        
+
         /**
          * Gets the "body" element
          */
-        public java.lang.String getBody()
+        @Override
+		public java.lang.String getBody()
         {
             synchronized (monitor())
             {
@@ -259,11 +277,12 @@ public class ArticleDocumentImpl extends org.apache.xmlbeans.impl.values.XmlComp
                 return target.getStringValue();
             }
         }
-        
+
         /**
          * Gets (as xml) the "body" element
          */
-        public org.apache.xmlbeans.XmlString xgetBody()
+        @Override
+		public org.apache.xmlbeans.XmlString xgetBody()
         {
             synchronized (monitor())
             {
@@ -273,11 +292,12 @@ public class ArticleDocumentImpl extends org.apache.xmlbeans.impl.values.XmlComp
                 return target;
             }
         }
-        
+
         /**
          * Sets the "body" element
          */
-        public void setBody(java.lang.String body)
+        @Override
+		public void setBody(java.lang.String body)
         {
             synchronized (monitor())
             {
@@ -291,11 +311,12 @@ public class ArticleDocumentImpl extends org.apache.xmlbeans.impl.values.XmlComp
                 target.setStringValue(body);
             }
         }
-        
+
         /**
          * Sets (as xml) the "body" element
          */
-        public void xsetBody(org.apache.xmlbeans.XmlString body)
+        @Override
+		public void xsetBody(org.apache.xmlbeans.XmlString body)
         {
             synchronized (monitor())
             {
@@ -309,11 +330,12 @@ public class ArticleDocumentImpl extends org.apache.xmlbeans.impl.values.XmlComp
                 target.set(body);
             }
         }
-        
+
         /**
          * Gets the "author" element
          */
-        public java.lang.String getAuthor()
+        @Override
+		public java.lang.String getAuthor()
         {
             synchronized (monitor())
             {
@@ -327,11 +349,12 @@ public class ArticleDocumentImpl extends org.apache.xmlbeans.impl.values.XmlComp
                 return target.getStringValue();
             }
         }
-        
+
         /**
          * Gets (as xml) the "author" element
          */
-        public org.apache.xmlbeans.XmlString xgetAuthor()
+        @Override
+		public org.apache.xmlbeans.XmlString xgetAuthor()
         {
             synchronized (monitor())
             {
@@ -341,11 +364,12 @@ public class ArticleDocumentImpl extends org.apache.xmlbeans.impl.values.XmlComp
                 return target;
             }
         }
-        
+
         /**
          * Sets the "author" element
          */
-        public void setAuthor(java.lang.String author)
+        @Override
+		public void setAuthor(java.lang.String author)
         {
             synchronized (monitor())
             {
@@ -359,11 +383,12 @@ public class ArticleDocumentImpl extends org.apache.xmlbeans.impl.values.XmlComp
                 target.setStringValue(author);
             }
         }
-        
+
         /**
          * Sets (as xml) the "author" element
          */
-        public void xsetAuthor(org.apache.xmlbeans.XmlString author)
+        @Override
+		public void xsetAuthor(org.apache.xmlbeans.XmlString author)
         {
             synchronized (monitor())
             {
@@ -377,11 +402,12 @@ public class ArticleDocumentImpl extends org.apache.xmlbeans.impl.values.XmlComp
                 target.set(author);
             }
         }
-        
+
         /**
          * Gets the "source" element
          */
-        public java.lang.String getSource()
+        @Override
+		public java.lang.String getSource()
         {
             synchronized (monitor())
             {
@@ -395,11 +421,12 @@ public class ArticleDocumentImpl extends org.apache.xmlbeans.impl.values.XmlComp
                 return target.getStringValue();
             }
         }
-        
+
         /**
          * Gets (as xml) the "source" element
          */
-        public org.apache.xmlbeans.XmlString xgetSource()
+        @Override
+		public org.apache.xmlbeans.XmlString xgetSource()
         {
             synchronized (monitor())
             {
@@ -409,11 +436,12 @@ public class ArticleDocumentImpl extends org.apache.xmlbeans.impl.values.XmlComp
                 return target;
             }
         }
-        
+
         /**
          * Sets the "source" element
          */
-        public void setSource(java.lang.String source)
+        @Override
+		public void setSource(java.lang.String source)
         {
             synchronized (monitor())
             {
@@ -427,11 +455,12 @@ public class ArticleDocumentImpl extends org.apache.xmlbeans.impl.values.XmlComp
                 target.setStringValue(source);
             }
         }
-        
+
         /**
          * Sets (as xml) the "source" element
          */
-        public void xsetSource(org.apache.xmlbeans.XmlString source)
+        @Override
+		public void xsetSource(org.apache.xmlbeans.XmlString source)
         {
             synchronized (monitor())
             {
@@ -445,11 +474,12 @@ public class ArticleDocumentImpl extends org.apache.xmlbeans.impl.values.XmlComp
                 target.set(source);
             }
         }
-        
+
         /**
          * Gets the "comment" element
          */
-        public java.lang.String getComment()
+        @Override
+		public java.lang.String getComment()
         {
             synchronized (monitor())
             {
@@ -463,11 +493,12 @@ public class ArticleDocumentImpl extends org.apache.xmlbeans.impl.values.XmlComp
                 return target.getStringValue();
             }
         }
-        
+
         /**
          * Gets (as xml) the "comment" element
          */
-        public org.apache.xmlbeans.XmlString xgetComment()
+        @Override
+		public org.apache.xmlbeans.XmlString xgetComment()
         {
             synchronized (monitor())
             {
@@ -477,11 +508,12 @@ public class ArticleDocumentImpl extends org.apache.xmlbeans.impl.values.XmlComp
                 return target;
             }
         }
-        
+
         /**
          * Sets the "comment" element
          */
-        public void setComment(java.lang.String comment)
+        @Override
+		public void setComment(java.lang.String comment)
         {
             synchronized (monitor())
             {
@@ -495,11 +527,12 @@ public class ArticleDocumentImpl extends org.apache.xmlbeans.impl.values.XmlComp
                 target.setStringValue(comment);
             }
         }
-        
+
         /**
          * Sets (as xml) the "comment" element
          */
-        public void xsetComment(org.apache.xmlbeans.XmlString comment)
+        @Override
+		public void xsetComment(org.apache.xmlbeans.XmlString comment)
         {
             synchronized (monitor())
             {
@@ -513,11 +546,12 @@ public class ArticleDocumentImpl extends org.apache.xmlbeans.impl.values.XmlComp
                 target.set(comment);
             }
         }
-        
+
         /**
          * Gets the "image" element
          */
-        public java.lang.String getImage()
+        @Override
+		public java.lang.String getImage()
         {
             synchronized (monitor())
             {
@@ -531,11 +565,12 @@ public class ArticleDocumentImpl extends org.apache.xmlbeans.impl.values.XmlComp
                 return target.getStringValue();
             }
         }
-        
+
         /**
          * Gets (as xml) the "image" element
          */
-        public org.apache.xmlbeans.XmlString xgetImage()
+        @Override
+		public org.apache.xmlbeans.XmlString xgetImage()
         {
             synchronized (monitor())
             {
@@ -545,11 +580,12 @@ public class ArticleDocumentImpl extends org.apache.xmlbeans.impl.values.XmlComp
                 return target;
             }
         }
-        
+
         /**
          * Sets the "image" element
          */
-        public void setImage(java.lang.String image)
+        @Override
+		public void setImage(java.lang.String image)
         {
             synchronized (monitor())
             {
@@ -563,11 +599,12 @@ public class ArticleDocumentImpl extends org.apache.xmlbeans.impl.values.XmlComp
                 target.setStringValue(image);
             }
         }
-        
+
         /**
          * Sets (as xml) the "image" element
          */
-        public void xsetImage(org.apache.xmlbeans.XmlString image)
+        @Override
+		public void xsetImage(org.apache.xmlbeans.XmlString image)
         {
             synchronized (monitor())
             {
@@ -581,11 +618,12 @@ public class ArticleDocumentImpl extends org.apache.xmlbeans.impl.values.XmlComp
                 target.set(image);
             }
         }
-        
+
         /**
          * Gets the "attachment" element
          */
-        public java.lang.String getAttachment()
+        @Override
+		public java.lang.String getAttachment()
         {
             synchronized (monitor())
             {
@@ -599,11 +637,12 @@ public class ArticleDocumentImpl extends org.apache.xmlbeans.impl.values.XmlComp
                 return target.getStringValue();
             }
         }
-        
+
         /**
          * Gets (as xml) the "attachment" element
          */
-        public org.apache.xmlbeans.XmlString xgetAttachment()
+        @Override
+		public org.apache.xmlbeans.XmlString xgetAttachment()
         {
             synchronized (monitor())
             {
@@ -613,11 +652,12 @@ public class ArticleDocumentImpl extends org.apache.xmlbeans.impl.values.XmlComp
                 return target;
             }
         }
-        
+
         /**
          * Sets the "attachment" element
          */
-        public void setAttachment(java.lang.String attachment)
+        @Override
+		public void setAttachment(java.lang.String attachment)
         {
             synchronized (monitor())
             {
@@ -631,11 +671,12 @@ public class ArticleDocumentImpl extends org.apache.xmlbeans.impl.values.XmlComp
                 target.setStringValue(attachment);
             }
         }
-        
+
         /**
          * Sets (as xml) the "attachment" element
          */
-        public void xsetAttachment(org.apache.xmlbeans.XmlString attachment)
+        @Override
+		public void xsetAttachment(org.apache.xmlbeans.XmlString attachment)
         {
             synchronized (monitor())
             {
@@ -649,11 +690,12 @@ public class ArticleDocumentImpl extends org.apache.xmlbeans.impl.values.XmlComp
                 target.set(attachment);
             }
         }
-        
+
         /**
          * Gets the "related_items" element
          */
-        public java.lang.String getRelatedItems()
+        @Override
+		public java.lang.String getRelatedItems()
         {
             synchronized (monitor())
             {
@@ -667,11 +709,12 @@ public class ArticleDocumentImpl extends org.apache.xmlbeans.impl.values.XmlComp
                 return target.getStringValue();
             }
         }
-        
+
         /**
          * Gets (as xml) the "related_items" element
          */
-        public org.apache.xmlbeans.XmlString xgetRelatedItems()
+        @Override
+		public org.apache.xmlbeans.XmlString xgetRelatedItems()
         {
             synchronized (monitor())
             {
@@ -681,11 +724,12 @@ public class ArticleDocumentImpl extends org.apache.xmlbeans.impl.values.XmlComp
                 return target;
             }
         }
-        
+
         /**
          * Sets the "related_items" element
          */
-        public void setRelatedItems(java.lang.String relatedItems)
+        @Override
+		public void setRelatedItems(java.lang.String relatedItems)
         {
             synchronized (monitor())
             {
@@ -699,11 +743,12 @@ public class ArticleDocumentImpl extends org.apache.xmlbeans.impl.values.XmlComp
                 target.setStringValue(relatedItems);
             }
         }
-        
+
         /**
          * Sets (as xml) the "related_items" element
          */
-        public void xsetRelatedItems(org.apache.xmlbeans.XmlString relatedItems)
+        @Override
+		public void xsetRelatedItems(org.apache.xmlbeans.XmlString relatedItems)
         {
             synchronized (monitor())
             {

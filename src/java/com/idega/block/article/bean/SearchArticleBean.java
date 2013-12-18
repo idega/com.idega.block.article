@@ -32,10 +32,8 @@ import org.apache.xmlbeans.XmlException;
 
 import com.idega.block.article.business.ArticleUtil;
 import com.idega.content.bean.ContentItemBeanComparator;
-import com.idega.content.business.ContentSearch;
 import com.idega.content.business.categories.CategoryBean;
 import com.idega.content.data.ContentCategory;
-import com.idega.presentation.IWContext;
 import com.idega.webface.WFUtil;
 import com.idega.webface.bean.AbstractWFEditableListManagedBean;
 import com.idega.webface.bean.WFEditableListCellWrapper;
@@ -183,9 +181,9 @@ public class SearchArticleBean extends AbstractWFEditableListManagedBean impleme
 	 */
 	@Override
 	public WFEditableListDataBean[] getData() {
-		List beans = getContentItems();
+		List<ArticleItemBean> beans = getContentItems();
 		if (beans != null) {
-			return (ArticleSearchResultBean[]) beans.toArray(new ArticleSearchResultBean[beans.size()]);
+			return beans.toArray(new ArticleSearchResultBean[beans.size()]);
 		}
 		return new ArticleSearchResultBean[0];
 	}
@@ -242,10 +240,10 @@ public class SearchArticleBean extends AbstractWFEditableListManagedBean impleme
 	 *
 	 * @see com.idega.content.bean.ContentListViewerManagedBean#getContentItems()
 	 */
-	public List getContentItems() {
+	public List<ArticleItemBean> getContentItems() {
 		if (this.searching) {
 			try {
-				List l = listArticles();
+				List<ArticleItemBean> l = listArticles();
 				ContentItemBeanComparator c = new ContentItemBeanComparator();
 				c.setReverseOrder(true);
 				Collections.sort(l, c);
@@ -258,12 +256,12 @@ public class SearchArticleBean extends AbstractWFEditableListManagedBean impleme
 				e.printStackTrace();
 			}
 		}
-		return new ArrayList();
+		return new ArrayList<ArticleItemBean>();
 	}
 
 	public List<ArticleItemBean> listArticles() throws XmlException, IOException {
 		List<ArticleItemBean> list = new ArrayList<ArticleItemBean>();
-		IWContext iwc = IWContext.getInstance();
+//		IWContext iwc = IWContext.getInstance();
 //		try {
 			String scope = ArticleUtil.getArticleBaseFolderPath();
 			if (scope != null) {
@@ -274,7 +272,7 @@ public class SearchArticleBean extends AbstractWFEditableListManagedBean impleme
 //					scope = scope.substring(1);
 //				}
 			}
-			ContentSearch searchBusiness = new ContentSearch(iwc.getIWMainApplication());
+//			ContentSearch searchBusiness = new ContentSearch(iwc.getIWMainApplication());
 //			Search search = searchBusiness.createSearch(getSearchRequest(scope, iwc.getCurrentLocale()));
 //			Collection results = search.getSearchResults();
 //			if (results != null) {

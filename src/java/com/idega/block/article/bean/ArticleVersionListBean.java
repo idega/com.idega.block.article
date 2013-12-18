@@ -24,7 +24,7 @@ import com.idega.webface.bean.WFListBean;
 import com.idega.webface.model.WFDataModel;
 
 /**
- * Bean for article version list rows.   
+ * Bean for article version list rows.
  * <p>
  * Last modified: $Date: 2007/05/30 15:03:03 $ by $Author: gediminas $
  *
@@ -33,9 +33,11 @@ import com.idega.webface.model.WFDataModel;
  */
 
 public class ArticleVersionListBean implements WFListBean, Serializable {
-	
+
+	private static final long serialVersionUID = -4566212763951268183L;
+
 	public final static String ARTICLE_VERSION_ID = "article_version_id";
-	
+
 	private WFDataModel _dataModel = null;
 	private ActionListener _articleLinkListener = null;
 
@@ -45,15 +47,15 @@ public class ArticleVersionListBean implements WFListBean, Serializable {
 	private String _comment = null;
 	private String _author = null;
 	private String _publishedBy = null;
-	
-	private String[] testColumnHeaders = { 
-		"version", 
+
+	private String[] testColumnHeaders = {
+		"version",
 		"created",
 		"comment",
 		"author",
 		"published_by"
-	};				
-	
+	};
+
 	private String[] testRevisions = {
 		"1.4",
 		"1.3",
@@ -61,7 +63,7 @@ public class ArticleVersionListBean implements WFListBean, Serializable {
 		"1.1",
 		"1.0"
 	};
-	
+
 	private Date[] testCreated = {
 		new Date(),
 		new Date(),
@@ -69,7 +71,7 @@ public class ArticleVersionListBean implements WFListBean, Serializable {
 		new Date(),
 		new Date()
 	};
-	
+
 	private String[] testComments = {
 		"Modified link url",
 		"Removed section about...",
@@ -77,7 +79,7 @@ public class ArticleVersionListBean implements WFListBean, Serializable {
 		"Added links",
 		"First version"
 	};
-	
+
 	private String[] testAuthors = {
 		"Anderson",
 		"Anderson",
@@ -85,7 +87,7 @@ public class ArticleVersionListBean implements WFListBean, Serializable {
 		"Anderson",
 		"Anderson"
 	};
-	
+
 	private String[] testPublishedBy = {
 		"Sam",
 		"Sam",
@@ -107,9 +109,9 @@ public class ArticleVersionListBean implements WFListBean, Serializable {
 	public ArticleVersionListBean(ActionListener l) {
 		setArticleLinkListener(l);
 	}
-	
+
 	/**
-	 * Constructs a new article version list bean with the specified parameters. 
+	 * Constructs a new article version list bean with the specified parameters.
 	 */
 	public ArticleVersionListBean(int versionId, String revision, Date created, String comment, String author, String publishedBy) {
 		this._versionId = versionId;
@@ -119,7 +121,7 @@ public class ArticleVersionListBean implements WFListBean, Serializable {
 		this._author = author;
 		this._publishedBy = publishedBy;
 	}
-		
+
 	public int getVersionId() { return this._versionId; }
 	public String getRevision() { return this._revision; }
 	public Date getCreated() { return this._created; }
@@ -133,13 +135,14 @@ public class ArticleVersionListBean implements WFListBean, Serializable {
 	public void setComment(String s) { this._comment = s; }
 	public void setAuthor(String s) { this._author = s; }
 	public void setPublishedBy(String s) { this._publishedBy = s; }
-	
+
 	public ActionListener getArticleLinkListener() { return this._articleLinkListener; }
 	public void setArticleLinkListener(ActionListener l) { this._articleLinkListener = l; }
-	
+
 	/**
-	 * @see com.idega.webface.bean.WFListBean#updateDataModel() 
+	 * @see com.idega.webface.bean.WFListBean#updateDataModel()
 	 */
+	@Override
 	public void updateDataModel(Integer start, Integer rows) {
 		if (this._dataModel == null) {
 			this._dataModel = new WFDataModel();
@@ -159,10 +162,11 @@ public class ArticleVersionListBean implements WFListBean, Serializable {
 		}
 		this._dataModel.setRowCount(availableRows);
 	}
-	
+
 	/**
-	 * @see com.idega.webface.bean.WFListBean#createColumns() 
+	 * @see com.idega.webface.bean.WFListBean#createColumns()
 	 */
+	@Override
 	public UIColumn[] createColumns(String var) {
 		int cols = this.testColumnHeaders.length;
 		UIColumn[] columns = new UIColumn[cols];
@@ -172,7 +176,7 @@ public class ArticleVersionListBean implements WFListBean, Serializable {
 			c.setHeader(WFUtil.getTextVB(IWBundleStarter.BUNDLE_IDENTIFIER, testColumnHeaders[i]));
 			columns[i] = c;
 		}
-		
+
 		HtmlCommandLink l = WFUtil.getListLinkVB(var + ".revision");
 		l.setId(ARTICLE_VERSION_ID);
 		l.addActionListener(this._articleLinkListener);
@@ -185,21 +189,23 @@ public class ArticleVersionListBean implements WFListBean, Serializable {
 		t = WFUtil.getListTextVB(var + ".author");
 		columns[3].getChildren().add(t);
 		t = WFUtil.getListTextVB(var + ".publishedBy");
-		columns[4].getChildren().add(t);		
-		
+		columns[4].getChildren().add(t);
+
 		return columns;
 	}
-	
+
 	/**
-	 * @see com.idega.webface.bean.WFListBean#getDataModel() 
+	 * @see com.idega.webface.bean.WFListBean#getDataModel()
 	 */
+	@Override
 	public DataModel getDataModel() {
 		return this._dataModel;
 	}
-	
+
 	/**
-	 * @see com.idega.webface.bean.WFListBean#setDataModel() 
+	 * @see com.idega.webface.bean.WFListBean#setDataModel()
 	 */
+	@Override
 	public void setDataModel(DataModel dataModel) {
 		this._dataModel = (WFDataModel) dataModel;
 	}
