@@ -82,6 +82,9 @@ public class ArticleViewRequestBean  extends DefaultSpringBean{
 		}
 		String uri = iwc.getParameter(ContentViewer.PARAMETER_CONTENT_RESOURCE);
 		articleItemBean = articleServices.getArticleItemBean(uri);
+		if(articleItemBean == null){
+			articleItemBean = new ArticleItemBean();
+		}
 		return articleItemBean;
 
 	}

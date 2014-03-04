@@ -69,51 +69,58 @@ public class ArticleServices  extends DefaultSpringBean implements DWRAnnotation
 			reply.put("message",iwrb.getLocalizedString("saving_failed", "Saving failed"));
 			return reply;
 		}
-		String uri = saveValues.get("articleUri");
-		ArticleItemBean articleItemBean;
-		if(StringUtil.isEmpty(uri)){
-			articleItemBean = new ArticleItemBean();
-		}else{
-			try {
+		try{
+			String uri = saveValues.get("articleUri");
+			ArticleItemBean articleItemBean;
+			if(StringUtil.isEmpty(uri)){
+				articleItemBean = new ArticleItemBean();
+			}else{
 				articleItemBean = getArticleItemBean(uri);
-			} catch (IOException e) {
-				getLogger().log(Level.WARNING, "Failed saving article", e);
+			}
+			if(!articleItemBean.isAllowedToEditByCurrentUser(iwc)){
 				reply.put("status", "failed");
-				reply.put("message",iwrb.getLocalizedString("saving_failed", "Saving failed"));
+				String message = iwrb.getLocalizedString("saving_failed", "Saving failed")
+						+" : \n"+ iwrb.getLocalizedString("permission_denied", "Permission denied");
+				reply.put("message",message);
 				return reply;
 			}
-		}
-		if(!articleItemBean.isAllowedToEditByCurrentUser(iwc)){
+			articleItemBean.setHeadline(saveValues.get("headline"));
+			articleItemBean.setBody(saveValues.get("body"));
+			articleItemBean.setTeaser(saveValues.get("teaser"));
+			articleItemBean.setAuthor(iwc.getCurrentUser().getDisplayName());
+			articleItemBean.setName(saveValues.get("headline"));
+			articleItemBean.setPublishedDate(IWTimestamp.getTimestampRightNow());
+			articleItemBean.setLocale(iwc.getCurrentLocale());
+	
+			articleItemBean.setArticleCategories(collectionValues.get("articleCategories"));
+	
+			Collection<String> permissionGroups = collectionValues.get("permissionGroups");
+			if(!ListUtil.isEmpty(permissionGroups)){
+				HashSet<Integer> editors = new HashSet<Integer>(permissionGroups.size());
+				for(String id : permissionGroups){
+					editors.add(Integer.valueOf(id));
+				}
+				articleItemBean.setAllowedToEditByGroupsIds(editors);
+			}
+			articleItemBean.store();
+	
+//			RepositoryService repositoryService = ELUtil.getInstance().getBean(RepositoryService.class);
+//			String filesPath = articleItemBean.getFilesResourcePath();
+//			AccessControlList accessControlList = repositoryService.getAccessControlList(filesPath);
+//			AccessControlEntry access = new JackrabbitAccessControlEntry(RepositoryConstants.SUBJECT_URI_AUTHENTICATED);
+//			access.addPrivilege(new RepositoryPrivilege(Privilege.JCR_ALL));
+//			AccessControlEntry[] accesses = {access};
+//			accessControlList.setAces(accesses);
+	
+			reply.put("status", "success");
+			reply.put("message",iwrb.getLocalizedString("article_saved", "Article saved"));
+			return reply;
+		}catch (Exception e) {
+			getLogger().log(Level.WARNING, "Failed saving article", e);
 			reply.put("status", "failed");
-			String message = iwrb.getLocalizedString("saving_failed", "Saving failed")
-					+" : \n"+ iwrb.getLocalizedString("permission_denied", "Permission denied");
-			reply.put("message",message);
+			reply.put("message",iwrb.getLocalizedString("saving_failed", "Saving failed"));
 			return reply;
 		}
-		articleItemBean.setHeadline(saveValues.get("headline"));
-		articleItemBean.setBody(saveValues.get("body"));
-		articleItemBean.setTeaser(saveValues.get("teaser"));
-		articleItemBean.setAuthor(iwc.getCurrentUser().getDisplayName());
-		articleItemBean.setName(saveValues.get("headline"));
-		articleItemBean.setPublishedDate(IWTimestamp.getTimestampRightNow());
-		articleItemBean.setLocale(iwc.getCurrentLocale());
-
-		articleItemBean.setArticleCategories(collectionValues.get("articleCategories"));
-
-		Collection<String> permissionGroups = collectionValues.get("permissionGroups");
-		if(!ListUtil.isEmpty(permissionGroups)){
-			HashSet<Integer> editors = new HashSet<Integer>(permissionGroups.size());
-			for(String id : permissionGroups){
-				editors.add(Integer.valueOf(id));
-			}
-			articleItemBean.setAllowedToEditByGroupsIds(editors);
-		}
-		articleItemBean.store();
-
-
-		reply.put("status", "success");
-		reply.put("message",iwrb.getLocalizedString("article_saved", "Article saved"));
-		return reply;
 	}
 
 

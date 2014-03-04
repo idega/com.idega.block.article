@@ -624,7 +624,7 @@ public class EditArticleView extends IWBaseComponent implements ManagedContentBe
 				if (categoriesUI != null) {
 					try {
 						categoriesUI.setResourcePath(articleItemBean.getLocalizedArticle().getResourcePath());
-						categoriesUI.saveCategoriesSettings();
+//						categoriesUI.saveCategoriesSettings();
 						categoriesUI.getSelectedAndNotSelectedCategories(iwc);
 
 						Object o = comp.findComponent(editArticleCategoriesSelectionBlockId);

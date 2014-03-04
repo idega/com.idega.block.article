@@ -20,7 +20,8 @@ ArticleEditHelper.init = function(uriToFileBrowser,selectedGroupsParameterName,a
 		theme_advanced_statusbar_location : "bottom",
 		width : "100%",
 		height : "400px",
-		file_browser_callback : 'ArticleEditHelper.openFileBrowser'
+		file_browser_callback : 'ArticleEditHelper.openFileBrowser',
+		relative_urls: false
 
 	});
 	ArticleEditHelper.URI_TO_FILE_BROWSER = uriToFileBrowser;
