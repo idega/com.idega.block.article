@@ -22,7 +22,7 @@ public class CommentBMPBean extends GenericEntity implements Comment {
 	private static final long serialVersionUID = 4322088004402422054L;
 
 	private static final String TABLE_NAME = "IC_COMMENT";
-	
+
 	private static final String COLUMN_ANNOUNCED_TO_PUBLIC = "ANNOUNCED_TO_PUBLIC";
 	private static final String COLUMN_AUTHOR = "AUTHOR";
 	private static final String COLUMN_COMMENT_HOLDER = "COMMENT_HOLDER";
@@ -30,10 +30,10 @@ public class CommentBMPBean extends GenericEntity implements Comment {
 	private static final String COLUMN_PRIVATE = "PRIVATE";
 	private static final String COLUMN_REPLY_FOR_COMMENT_ID = "REPLY_FOR_COMMENT";
 	private static final String COLUMN_ENTRY_ID = "ENTRY_ID";
-	
+
 	private static final String COMMENT_READERS = TABLE_NAME + "_READERS";
 	private static final String COMMENT_ATTACHMENTS = TABLE_NAME + "_ATTACHMENTS";
-	
+
 	@Override
 	public String getEntityName() {
 		return TABLE_NAME;
@@ -42,7 +42,7 @@ public class CommentBMPBean extends GenericEntity implements Comment {
 	@Override
 	public void initializeAttributes() {
 		addAttribute(getIDColumnName());
-		
+
 		addAttribute(COLUMN_ANNOUNCED_TO_PUBLIC, "Announced to public", Boolean.class);
 		addAttribute(COLUMN_AUTHOR, "Author", true, true, Integer.class, MANY_TO_ONE, User.class);
 		addAttribute(COLUMN_COMMENT_HOLDER, "Comment holder", String.class);
@@ -50,68 +50,82 @@ public class CommentBMPBean extends GenericEntity implements Comment {
 		addAttribute(COLUMN_PRIVATE, "Private", Boolean.class);
 		addAttribute(COLUMN_REPLY_FOR_COMMENT_ID, "Reply for comment", Integer.class);
 		addAttribute(COLUMN_ENTRY_ID, "Entry ID", String.class);
-		
+
 		addManyToManyRelationShip(User.class, COMMENT_READERS);
 		addManyToManyRelationShip(ICFile.class, COMMENT_ATTACHMENTS);
 	}
 
+	@Override
 	public boolean isAnnouncedToPublic() {
 		return getBooleanColumnValue(COLUMN_ANNOUNCED_TO_PUBLIC);
 	}
 
+	@Override
 	public Integer getAuthorId() {
 		return getIntColumnValue(COLUMN_AUTHOR);
 	}
 
+	@Override
 	public String getCommentHolder() {
 		return getStringColumnValue(COLUMN_COMMENT_HOLDER);
 	}
 
+	@Override
 	public boolean isDeleted() {
 		return getBooleanColumnValue(COLUMN_DELETED);
 	}
 
+	@Override
 	public boolean isPrivateComment() {
 		return getBooleanColumnValue(COLUMN_PRIVATE);
 	}
 
+	@Override
 	public Integer getReplyForCommentId() {
 		return getIntColumnValue(COLUMN_REPLY_FOR_COMMENT_ID);
 	}
 
+	@Override
 	public void setAnnouncedToPublic(Boolean announcedToPublic) {
 		setColumn(COLUMN_ANNOUNCED_TO_PUBLIC, announcedToPublic);
 	}
 
+	@Override
 	public void setAuthorId(Integer authorId) {
 		setColumn(COLUMN_AUTHOR, authorId);
 	}
 
+	@Override
 	public void setCommentHolder(String commentHolder) {
 		setColumn(COLUMN_COMMENT_HOLDER, commentHolder);
 	}
 
+	@Override
 	public void setDeleted(Boolean deleted) {
 		setColumn(COLUMN_DELETED, deleted);
 	}
 
+	@Override
 	public void setPrivateComment(Boolean privateComment) {
 		setColumn(COLUMN_PRIVATE, privateComment);
 	}
 
+	@Override
 	public void setReplyForCommentId(Integer replyForCommentId) {
 		setColumn(COLUMN_REPLY_FOR_COMMENT_ID, replyForCommentId);
 	}
-	
+
+	@Override
 	public void removeReadBy(User reader) throws IDORemoveRelationshipException {
 		this.idoRemoveFrom(reader);
 	}
 
+	@Override
 	public void addReadBy(User reader) throws IDOAddRelationshipException {
 		this.idoAddTo(reader);
 	}
-	
-	@SuppressWarnings("unchecked")
+
+	@Override
 	public Collection<User> getReadBy() {
 		try {
 			return super.idoGetRelatedEntities(User.class);
@@ -121,50 +135,51 @@ public class CommentBMPBean extends GenericEntity implements Comment {
 		return null;
 	}
 
+	@Override
 	public String getEntryId() {
 		return getStringColumnValue(COLUMN_ENTRY_ID);
 	}
 
+	@Override
 	public void setEntryId(String entryId) {
-		setColumn(COLUMN_ENTRY_ID, entryId);		
+		setColumn(COLUMN_ENTRY_ID, entryId);
 	}
-	
-	@SuppressWarnings("unchecked")
+
 	Collection<Object> ejbFindAllCommentsForUser(User author, String commentHolder) throws FinderException {
 		Table table = new Table(this);
 		SelectQuery query = new SelectQuery(table);
 		query.addColumn(new Column(table, getIDColumnName()));
-		
+
 		query.addCriteria(new MatchCriteria(new Column(table, COLUMN_AUTHOR), MatchCriteria.EQUALS, author.getId()));
 		query.addCriteria(new MatchCriteria(new Column(table, COLUMN_COMMENT_HOLDER), MatchCriteria.EQUALS, commentHolder));
 		addNotDeletedCriteria(query, table);
-		
+
 		return this.idoFindPKsByQuery(query);
 	}
-	
-	@SuppressWarnings("unchecked")
+
 	Collection<Object> ejbFindAllCommentsByHolder(String commentHolder) throws FinderException {
 		Table table = new Table(this);
 		SelectQuery query = new SelectQuery(table);
 		query.addColumn(new Column(table, getIDColumnName()));
-		
+
 		query.addCriteria(new MatchCriteria(new Column(table, COLUMN_COMMENT_HOLDER), MatchCriteria.EQUALS, commentHolder));
 		addNotDeletedCriteria(query, table);
-		
+
 		return this.idoFindPKsByQuery(query);
 	}
-	
+
 	private void addNotDeletedCriteria(SelectQuery query, Table table) {
 		Criteria isNull = new MatchCriteria(new Column(table, COLUMN_DELETED), MatchCriteria.IS, MatchCriteria.NULL);
 		Criteria isFalse = new MatchCriteria(new Column(table, COLUMN_DELETED), MatchCriteria.EQUALS, false);
 		query.addCriteria(new OR(isNull, isFalse));
 	}
 
+	@Override
 	public void addAttachment(ICFile attachment) throws IDOAddRelationshipException {
-		this.idoAddTo(attachment);		
+		this.idoAddTo(attachment);
 	}
 
-	@SuppressWarnings("unchecked")
+	@Override
 	public Collection<ICFile> getAllAttachments() {
 		try {
 			return super.idoGetRelatedEntities(ICFile.class);
@@ -174,6 +189,7 @@ public class CommentBMPBean extends GenericEntity implements Comment {
 		return null;
 	}
 
+	@Override
 	public void removeAtttachment(ICFile attachment) throws IDORemoveRelationshipException {
 		this.idoRemoveFrom(attachment);
 	}
