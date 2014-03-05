@@ -27,6 +27,7 @@ CommentsViewer.info = {
 }
 
 CommentsViewer.commentInfo = [];
+CommentsViewer.customCommentsRenderer = null;
 
 CommentsViewer.setLocalization = function(localizations) {
 	if (localizations == null) {
@@ -635,8 +636,18 @@ function getCommentsCallback(comments, id, linkToComments, newestEntriesOnTop, f
 	}
 	
 	removeCommentsList(id, comments.length);
-	for (var i = 0; i < comments.length; i++) {
-		addComment(i, comments[i], id, linkToComments, newestEntriesOnTop, forceToOpen);
+	
+	if (CommentsViewer.customCommentsRenderer == null) {
+		for (var i = 0; i < comments.length; i++) {
+			addComment(i, comments[i], id, linkToComments, newestEntriesOnTop, forceToOpen);
+		}
+	} else {
+		CommentsViewer.customCommentsRenderer(comments, {
+			id: id,
+			linkToComments: linkToComments,
+			newestEntriesOnTop: newestEntriesOnTop,
+			forceToOpen: forceToOpen
+		});
 	}
 }
 
