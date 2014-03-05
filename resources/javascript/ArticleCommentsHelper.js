@@ -73,10 +73,10 @@ var GLOBAL_COMMENTS_MARK_ID = null;
 var ENABLE_REVERSE_AJAX_TIME_OUT_ID = 0;
 
 function addCommentStartInfo(linkToComments, commentsId, showCommentsListOnLoad, newestEntriesOnTop, springBeanIdentifier, identifier,
-	addLoginbyUUIDOnRSSFeedLink, fullCommentsRights) {
+	addLoginbyUUIDOnRSSFeedLink, fullCommentsRights, loadAsSuperAdmin) {
 	
 	var commentsInfo = new SingleCommentInfo(linkToComments, commentsId, springBeanIdentifier, identifier, showCommentsListOnLoad, newestEntriesOnTop,
-		addLoginbyUUIDOnRSSFeedLink, fullCommentsRights);
+		addLoginbyUUIDOnRSSFeedLink, fullCommentsRights, loadAsSuperAdmin);
 	CommentsViewer.commentInfo.push(commentsInfo);
 
 	if (showCommentsListOnLoad) {
@@ -85,7 +85,7 @@ function addCommentStartInfo(linkToComments, commentsId, showCommentsListOnLoad,
 }
 
 function SingleCommentInfo(linkToComments, commentsId, springBeanIdentifier, identifier, showCommentsList, newestEntriesOnTop, addLoginbyUUIDOnRSSFeedLink,
-	fullCommentsRights) {
+	fullCommentsRights, loadAsSuperAdmin) {
 	
 	this.linkToComments = linkToComments;
 	this.commentsId = commentsId;
@@ -99,6 +99,7 @@ function SingleCommentInfo(linkToComments, commentsId, springBeanIdentifier, ide
 	this.commentsListOpened = false;
 	
 	this.fullCommentsRights = fullCommentsRights;
+	this.loadAsSuperAdmin = loadAsSuperAdmin;
 }
 
 function setCommentValues(user, subject, email, body) {
