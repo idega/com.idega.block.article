@@ -12,7 +12,8 @@ CommentsViewer.localizations = {
 	deleting: 'Deleting...',
 	areYouSure: 'Are you sure?',
 	deleteComments: 'Delete comments',
-	deleteComment: 'Delete this comment'
+	deleteComment: 'Delete this comment',
+	ago: 'ago'
 }
 
 CommentsViewer.info = {
@@ -152,7 +153,7 @@ function addCommentPanel(id, linkToComments, lblUser, lblSubject, lblComment, lb
 	var info = getCommentsInfo(linkToComments);
 	var properties = new CommentsViewerProperties(null, CommentsViewer.info.replyFor == null ? '' : CommentsViewer.info.replySubject, null,
 		CommentsViewer.info.replyFor == null ? '' : CommentsViewer.info.replyMessage, linkToComments, commentsId, instanceId, info.springBeanIdentifier,
-		info.identifier, NEED_TO_NOTIFY, info.newestEntriesOnTop, info.addLoginbyUUIDOnRSSFeedLink);
+		info.identifier, NEED_TO_NOTIFY, info.newestEntriesOnTop, info.addLoginbyUUIDOnRSSFeedLink, info.loadAsSuperAdmin);
 	CommentsEngine.getCommentCreator(properties, {
 		callback: function(component) {
 			if (component == null) {
@@ -215,7 +216,7 @@ function closeCommentPanelAndSendComment(userId, subjectId, emailId, bodyId, lin
 	
 	var commentsInfo = getCommentsInfo(linkToComments);
 	var commentProperties = new CommentsViewerProperties(USER, SUBJECT, EMAIL, BODY, linkToComments, commentsId, instanceId, springBeanIdentifier, identifier,
-								NEED_TO_NOTIFY, newestEntriesOnTop, commentsInfo == null ? false : commentsInfo.addLoginbyUUIDOnRSSFeedLink);
+								NEED_TO_NOTIFY, newestEntriesOnTop, commentsInfo == null ? false : commentsInfo.addLoginbyUUIDOnRSSFeedLink, commentsInfo.loadAsSuperAdmin);
 	commentProperties.replyForComment = CommentsViewer.info.replyFor;
 	GLOBAL_COMMENTS_MARK_ID = commentsId;
 	CommentsEngine.addComment(commentProperties, {
@@ -239,8 +240,21 @@ CommentsViewer.doExternalActions = function(properties) {
 	}
 }
 
-function CommentsViewerProperties(user, subject, email, body, uri, id, instanceId, springBeanIdentifier, identifier, notify, newestEntriesOnTop,
-									addLoginbyUUIDOnRSSFeedLink) {
+function CommentsViewerProperties(
+	user,
+	subject,
+	email,
+	body,
+	uri,
+	id,
+	instanceId,
+	springBeanIdentifier,
+	identifier,
+	notify,
+	newestEntriesOnTop,
+	addLoginbyUUIDOnRSSFeedLink,
+	loadAsSuperAdmin
+) {
 	this.user = user || null;
 	this.subject = subject || null;
 	this.email = email || null;
@@ -260,6 +274,8 @@ function CommentsViewerProperties(user, subject, email, body, uri, id, instanceI
 	this.uploadedFiles = CommentsViewer.getAllUploadedFiles();
 	
 	this.commentsPageUrl = window.location.href;
+	
+	this.loadAsSuperAdmin = loadAsSuperAdmin;
 }
 
 CommentsViewer.getAllUploadedFiles = function() {
@@ -376,7 +392,7 @@ function addComment(index, articleComment, commentsId, linkToComments, newestEnt
 				publishImage.addEvent('click', function() {
 					var info = commentInfo;
 					var properties = new CommentsViewerProperties(null, null, null, null, null, articleComment.id, null, info.springBeanIdentifier,
-						info.identifier, true, info.newestEntriesOnTop, info.addLoginbyUUIDOnRSSFeedLink);
+						info.identifier, true, info.newestEntriesOnTop, info.addLoginbyUUIDOnRSSFeedLink, info.loadAsSuperAdmin);
 					properties.primaryKey = articleComment.primaryKey;
 					properties.makePublic = !isPublished;
 					CommentsEngine.setCommentPublished(properties, {
@@ -408,7 +424,7 @@ function addComment(index, articleComment, commentsId, linkToComments, newestEnt
 		readImage.addEvent('click', function() {
 			var info = commentInfo;
 			var properties = new CommentsViewerProperties(null, null, null, null, null, articleComment.id, null, info.springBeanIdentifier,
-				info.identifier, true, info.newestEntriesOnTop, info.addLoginbyUUIDOnRSSFeedLink);
+				info.identifier, true, info.newestEntriesOnTop, info.addLoginbyUUIDOnRSSFeedLink, info.loadAsSuperAdmin);
 			properties.primaryKey = articleComment.primaryKey;
 			CommentsEngine.setReadComment(properties, {
 				callback: function(result) {
@@ -589,7 +605,7 @@ function getAllComments() {
 	for (var i = 0; i < CommentsViewer.commentInfo.length; i++) {
 		properties.push(new CommentsViewerProperties(null, null, null, null, CommentsViewer.commentInfo[i].linkToComments,
 			CommentsViewer.commentInfo[i].commentsId, null, CommentsViewer.commentInfo[i].springBeanIdentifier, CommentsViewer.commentInfo[i].identifier, true,
-			CommentsViewer.commentInfo[i].newestEntriesOnTop, CommentsViewer.commentInfo[i].addLoginbyUUIDOnRSSFeedLink));
+			CommentsViewer.commentInfo[i].newestEntriesOnTop, CommentsViewer.commentInfo[i].addLoginbyUUIDOnRSSFeedLink, CommentsViewer.commentInfo[i].loadAsSuperAdmin));
 	}
 	
 	showLoadingMessage(CommentsViewer.localizations.loadingComments);
@@ -618,7 +634,7 @@ function getComments(linkToComments, commentsId) {
 	showLoadingMessage(CommentsViewer.localizations.loadingComments);
 	var newestEntriesOnTop = commentsInfo.newestEntriesOnTop;
 	CommentsEngine.getComments(new CommentsViewerProperties(null, null, null, null, linkToComments, commentsId, null, commentsInfo.springBeanIdentifier,
-															commentsInfo.identifier, true, newestEntriesOnTop, commentsInfo.addLoginbyUUIDOnRSSFeedLink), {
+															commentsInfo.identifier, true, newestEntriesOnTop, commentsInfo.addLoginbyUUIDOnRSSFeedLink, commentsInfo.loadAsSuperAdmin), {
   		callback:function(comments) {
     		getCommentsCallback(comments, commentsId, linkToComments, newestEntriesOnTop, true);
     		
@@ -871,7 +887,7 @@ function deleteComments(id, commentId, linkToComments, newestEntriesOnTop) {
 	
 	showLoadingMessage(CommentsViewer.localizations.deleting);
 	CommentsEngine.deleteComments(new CommentsViewerProperties(null, null, null, null, linkToComments, commentId, id, commentInfo.springBeanIdentifier,
-									commentInfo.identifier, true, newestEntriesOnTop, commentInfo.addLoginbyUUIDOnRSSFeedLink), {
+									commentInfo.identifier, true, newestEntriesOnTop, commentInfo.addLoginbyUUIDOnRSSFeedLink, commentsInfo.loadAsSuperAdmin), {
 		callback: function(properties) {
 			closeAllLoadingMessages();
 			if (properties == null) {

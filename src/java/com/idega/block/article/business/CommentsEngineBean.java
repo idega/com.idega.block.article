@@ -1,6 +1,5 @@
 package com.idega.block.article.business;
 
-import java.rmi.RemoteException;
 import java.sql.Timestamp;
 import java.text.DateFormat;
 import java.util.ArrayList;
@@ -664,21 +663,36 @@ public class CommentsEngineBean extends IBOSessionBean implements CommentsEngine
 		if (rss == null) {
 			return null;
 		}
+		
 		User currentUser = null;
-		try {
-			currentUser = getOldUser(getCurrentUser());
-		} catch (RemoteException e) {
-			LOGGER.log(Level.WARNING, "Error getting current user", e);
+		if (!properties.isLoadAsSuperAdmin()) {
+			IWContext iwc = CoreUtil.getIWContext();
+			if (iwc == null) {
+				try {
+					currentUser = getOldUser(getCurrentUser());
+				} catch (Exception e) {
+					LOGGER.log(Level.WARNING, "Error getting current user", e);
+				}
+			} else if (iwc.isLoggedOn()) {
+				currentUser = iwc.getCurrentUser();
+			}
+			
+			if (properties.isAddLoginbyUUIDOnRSSFeedLink() && currentUser == null) {
+				LOGGER.log(Level.WARNING, "User must be looged to get comments feed!");
+				return null;
+			}
 		}
-		if (properties.isAddLoginbyUUIDOnRSSFeedLink() && currentUser == null) {
-			LOGGER.log(Level.WARNING, "User must be looged to get comments feed!");
-			return null;
-		}
-
+		
 		String pathToComments = new StringBuilder(getThemesHelper().getFullWebRoot()).append(properties.getUri()).toString();
-		SyndFeed comments = properties.isAddLoginbyUUIDOnRSSFeedLink() ?
-				rss.getFeedAuthenticatedByUser(pathToComments, currentUser) :
-				rss.getFeed(pathToComments);
+		SyndFeed comments = null;
+		if (properties.isLoadAsSuperAdmin()) {
+			comments = rss.getFeedAuthenticatedByAdmin(pathToComments);
+		} else {
+			comments = properties.isAddLoginbyUUIDOnRSSFeedLink() ?
+						rss.getFeedAuthenticatedByUser(pathToComments, currentUser) :
+						rss.getFeed(pathToComments);
+		}
+		
 		if (comments == null) {
 			return null;
 		}

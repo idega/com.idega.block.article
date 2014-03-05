@@ -23,6 +23,7 @@ public class CommentsViewerProperties {
 	private boolean newestEntriesOnTop;
 	private boolean actionSuccess;
 	private boolean addLoginbyUUIDOnRSSFeedLink;
+	private boolean loadAsSuperAdmin;
 	private boolean addNulls;
 	private boolean fetchFully;
 	
@@ -245,6 +246,13 @@ public class CommentsViewerProperties {
 	public void setMakePublic(boolean makePublic) {
 		this.makePublic = makePublic;
 	}
-	
+
+	public boolean isLoadAsSuperAdmin() {
+		return loadAsSuperAdmin;
+	}
+
+	public void setLoadAsSuperAdmin(boolean loadAsSuperAdmin) {
+		this.loadAsSuperAdmin = loadAsSuperAdmin;
+	}
 	
 }

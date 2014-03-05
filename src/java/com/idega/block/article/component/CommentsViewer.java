@@ -71,6 +71,7 @@ public class CommentsViewer extends Block {
 	private boolean showViewController = true;
 	private boolean newestEntriesOnTop = false;
 	private boolean addLoginbyUUIDOnRSSFeedLink = false;
+	private boolean loadAsSuperAdmin = false;
 
 	private String COMMENTS_ENGINE = "/dwr/interface/CommentsEngine.js";
 	private String COMMENTS_HELPER = "javascript/ArticleCommentsHelper.js";
@@ -303,6 +304,8 @@ public class CommentsViewer extends Block {
 							.append(iwrb.getLocalizedString("comments_viewer.comment_attachments", "Attachments"))
 							.append("', commentAttachmentDownloadInfo: '")
 							.append(iwrb.getLocalizedString("comments_viewer.comment_attachment_download_info", "Download statistics"))
+							.append("', ago: '")
+							.append(iwrb.getLocalizedString("comments_viewer.ago", "ago"))
 		.append("'});");
 		PresentationUtil.addJavaScriptActionToBody(iwc, localization.toString());
 
@@ -322,7 +325,7 @@ public class CommentsViewer extends Block {
 		String identifier = getIdentifier() == null ? CoreConstants.EMPTY : getIdentifier();
 		StringBuilder action = new StringBuilder("addCommentStartInfo('").append(linkToComments).append(SEPARATOR).append(moduleId).append("', ")
 		.append(showCommentsList).append(", ").append(isNewestEntriesOnTop()).append(", '").append(springBean).append(SEPARATOR).append(identifier)
-		.append("', ").append(isAddLoginbyUUIDOnRSSFeedLink()).append(", ").append(fullCommentsRights).append(");");
+		.append("', ").append(isAddLoginbyUUIDOnRSSFeedLink()).append(", ").append(fullCommentsRights).append(", ").append(isLoadAsSuperAdmin()).append(");");
 		if (!CoreUtil.isSingleComponentRenderingProcess(iwc)) {
 			action = new StringBuilder("window.addEvent('load', function() {").append(action.toString()).append("});");
 		}
@@ -605,7 +608,7 @@ public class CommentsViewer extends Block {
 
 	@Override
 	public Object saveState(FacesContext context) {
-		Object values[] = new Object[12];
+		Object values[] = new Object[13];
 		values[0] = super.saveState(context);
 		values[1] = linkToComments;
 		values[2] = styleClass;
@@ -618,6 +621,7 @@ public class CommentsViewer extends Block {
 		values[9] = showViewController;
 		values[10] = newestEntriesOnTop;
 		values[11] = addLoginbyUUIDOnRSSFeedLink;
+		values[12] = loadAsSuperAdmin;
 		return values;
 	}
 
@@ -636,6 +640,7 @@ public class CommentsViewer extends Block {
 		showViewController = (Boolean) values[9];
 		newestEntriesOnTop = (Boolean) values[10];
 		addLoginbyUUIDOnRSSFeedLink = (Boolean) values[11];
+		loadAsSuperAdmin = (Boolean) values[12];
 	}
 
 	public boolean isForumPage() {
@@ -806,6 +811,14 @@ public class CommentsViewer extends Block {
 
 	public void setWeb2(Web2Business web2) {
 		this.web2 = web2;
+	}
+
+	public boolean isLoadAsSuperAdmin() {
+		return loadAsSuperAdmin;
+	}
+
+	public void setLoadAsSuperAdmin(boolean loadAsSuperAdmin) {
+		this.loadAsSuperAdmin = loadAsSuperAdmin;
 	}
 
 }
