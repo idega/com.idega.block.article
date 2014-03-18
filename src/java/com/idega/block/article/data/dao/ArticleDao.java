@@ -1,6 +1,10 @@
 package com.idega.block.article.data.dao;
 
+import java.util.List;
+
+import com.idega.block.article.bean.article_view.EditArticlesListDataBean;
 import com.idega.block.article.data.ArticleEntity;
+import com.idega.presentation.IWContext;
 
 /**
  * Class description goes here.
@@ -14,5 +18,10 @@ import com.idega.block.article.data.ArticleEntity;
 public interface ArticleDao extends ArticleDaoTemplate<ArticleEntity> {
 
 	public static final String BEAN_NAME = "articleDAO";
+	
+	public List<ArticleEntity> getAll(int maxResult,int startFrom);
+	
+	public int countArticles();
+	public List<EditArticlesListDataBean> getAllEditArticlesListDataBeans(int maxResult,int startFrom,IWContext iwc);
 
 }

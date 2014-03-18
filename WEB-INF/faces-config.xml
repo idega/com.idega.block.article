@@ -239,4 +239,14 @@ version="1.2">
 		<managed-bean-scope>request</managed-bean-scope>
 	</managed-bean>
 	
+	<component>
+		<component-type>editArticlesList</component-type>
+		<component-class>com.idega.block.article.component.article_view.EditArticlesList</component-class>
+		<property>
+			<display-name>Articles</display-name>
+			<property-name>articles</property-name>
+			<property-class>java.util.List</property-class>
+		</property>
+	</component>
+	
 </faces-config>
