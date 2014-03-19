@@ -6,7 +6,7 @@ import org.directwebremoting.annotations.DataTransferObject;
 import org.directwebremoting.annotations.RemoteProperty;
 
 @DataTransferObject
-public class ArticleSearchResponce extends Responce{
+public class ArticleSearchResponce extends Response{
 	private static final long serialVersionUID = 3716301108565847284L;
 
 	private List<EditArticlesListDataBean> articles;

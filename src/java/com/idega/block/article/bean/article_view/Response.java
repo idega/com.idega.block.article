@@ -6,7 +6,7 @@ import org.directwebremoting.annotations.DataTransferObject;
 import org.directwebremoting.annotations.RemoteProperty;
 
 @DataTransferObject
-public class Responce implements Serializable{
+public class Response implements Serializable{
 	private static final long serialVersionUID = -2878378701373656472L;
 
 	private String status;

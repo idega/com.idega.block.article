@@ -163,8 +163,8 @@ public class ArticleServices  extends DefaultSpringBean implements DWRAnnotation
 	}
 	
 	@RemoteMethod
-	public Responce deleteArticle(Long id){
-		Responce responce = new Responce();
+	public Response deleteArticle(Long id){
+		Response responce = new Response();
 		IWContext iwc = CoreUtil.getIWContext();
 		IWResourceBundle iwrb = getIwrb(iwc);
 		try{
