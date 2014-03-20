@@ -28,6 +28,7 @@
 					showLoadingMessage('');
 				},
 				afterShow:function(){
+					jQuery('.fancybox-iframe').contents().find('.groupsChooserBoxBodyStyle').parents('.input-div-container').first().hide();
 					closeAllLoadingMessages();
 				},
 				width:jQuery(window).width() * 0.8,
@@ -43,8 +44,8 @@
 					arg : {input : input}
 			   });
 			});
-			var opts = jQuery.extend({},fbOptions,{afterClose : function(){
-				search(null,list);
+			var opts = jQuery.extend({},fbOptions,{beforeClose : function(){
+				search(null,list.parents('.search-results').first());
 			}});
 			row.find('.edit-button').fancybox(opts);
 			row.find('.remove, .edit-button').each(function(){
@@ -196,7 +197,7 @@
 			list.find('.item-element').each(function(){
 				addActions(jQuery(this),list);
 			});
-			var fOpts = jQuery.extend({},fbOptions,{afterClose : function(){
+			var fOpts = jQuery.extend({},fbOptions,{beforeClose : function(){
 				search(null,list);
 			}});
 			list.find('.create-article-btn').fancybox(fOpts);
