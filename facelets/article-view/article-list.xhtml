@@ -47,8 +47,8 @@
 	<ui:repeat value="#{editArticlesListBean.articles}" var="article">
 		<div class="item-element clearfix">
 			<div class="logo-right supplier-product-list-controlls">
-				<a class="edit-button" href="#{article.editUri}" title="#{localizedStrings['com.idega.parts.hidden']['edit']}"></a>
-				<a class="remove" href="#" title="#{localizedStrings['com.idega.parts.hidden']['delete']}">
+				<a class="edit-button action-button" href="#{article.editUri}" title="#{localizedStrings['com.idega.parts.hidden']['edit']}"></a>
+				<a class="remove action-button" href="#" title="#{localizedStrings['com.idega.parts.hidden']['delete']}">
 					<input type="hidden" class="id-input" value="#{article.id}"></input>
 				</a>
 			</div>
@@ -63,8 +63,8 @@
 <div class="components-div">
 	<div class="item-element clearfix">
 		<div class="logo-right supplier-product-list-controlls">
-				<a class="edit-button" href="#" title="#{localizedStrings['com.idega.parts.hidden']['edit']}"></a>
-				<a class="remove" href="#" title="#{localizedStrings['com.idega.parts.hidden']['delete']}">
+				<a class="edit-button action-button" href="#" title="#{localizedStrings['com.idega.parts.hidden']['edit']}"></a>
+				<a class="remove action-button" href="#" title="#{localizedStrings['com.idega.parts.hidden']['delete']}">
 				 	<input type="hidden" class="id-input"></input>
 				</a>
 		</div>

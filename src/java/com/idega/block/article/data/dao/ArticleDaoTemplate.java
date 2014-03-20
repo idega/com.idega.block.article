@@ -62,6 +62,4 @@ public interface ArticleDaoTemplate<T extends ArticleEntity> extends GenericDao 
 	
 	public List<CategoryEntity> getCategories(Long id);
 	
-	public boolean deleteArticle(Long id);
-
 }

@@ -23,5 +23,7 @@ public interface ArticleDao extends ArticleDaoTemplate<ArticleEntity> {
 	
 	public int countArticles();
 	public List<EditArticlesListDataBean> getAllEditArticlesListDataBeans(int maxResult,int startFrom,IWContext iwc);
+	
+	public boolean deleteArticle(Long id);
 
 }
