@@ -27,7 +27,6 @@ import com.idega.block.article.data.Comment;
 import com.idega.block.rss.business.RSSBusiness;
 import com.idega.builder.bean.AdvancedProperty;
 import com.idega.builder.business.BuilderLogicWrapper;
-import com.idega.business.IBOLookup;
 import com.idega.business.IBOSessionBean;
 import com.idega.business.file.FileDownloadNotifier;
 import com.idega.content.bean.ContentItemFeedBean;
@@ -416,9 +415,9 @@ public class CommentsEngineBean extends IBOSessionBean implements CommentsEngine
 
 	private RSSBusiness getRSSBusiness() {
 		try {
-			return IBOLookup.getServiceInstance(getIWApplicationContext(), RSSBusiness.class);
+			return getServiceInstance(RSSBusiness.class);
 		} catch (Exception e) {
-			LOGGER.log(Level.SEVERE, "Error getting: " + RSSBusiness.class, e);
+			LOGGER.log(Level.SEVERE, "Error getting: " + RSSBusiness.class.getName(), e);
 		}
 		return null;
 	}
