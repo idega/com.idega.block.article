@@ -108,8 +108,6 @@ public class ArticlesImporter extends DefaultSpringBean implements ApplicationLi
                 getLogger().info("Finished importing articles. The result is successfull: " + isArticlesImported);
                 settings.setProperty(ARTICLES_IMPORTED_APP_PROP, isArticlesImported.toString());
             }
-
-            getLogger().info("Articles importer finished");
         }
     }
 
