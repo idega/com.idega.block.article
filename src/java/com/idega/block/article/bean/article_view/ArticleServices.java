@@ -145,7 +145,7 @@ public class ArticleServices  extends DefaultSpringBean implements DWRAnnotation
 			responce.setStatus(HttpStatus.getStatusText(HttpStatus.SC_OK));
 			responce.setArticles(articles);
 			Integer totalCount = editArticlesListBean.getArticlesCount();
-			List<EditArticleListPage> pages = editArticlesListBean.getProductListPagesPages(totalCount, max);
+			List<EditArticleListPage> pages = editArticlesListBean.getProductListPagesPages(totalCount, max,start);
 			responce.setPages(pages);
 			responce.setTotalCount(totalCount);
 		}catch (Exception e) {

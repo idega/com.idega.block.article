@@ -93,17 +93,55 @@ public class EditArticlesListBean extends DefaultSpringBean {
 		}
 		Integer totalCount = getTotalCount(); 
 		int maxResult = getMaxResult();
-		return getProductListPagesPages(totalCount, maxResult);
+		return getProductListPagesPages(totalCount, maxResult,getStartPosition());
 	}
 	
-	public List<EditArticleListPage> getProductListPagesPages(int totalCount, int maxResult){
+	
+	public List<EditArticleListPage> getProductListPagesPages(int totalCount, int maxResult,int startPosition){
+		int maxToShow = 20;
+		int showWhenMany = 15;
+		
+		
 		int pagenumber = totalCount / maxResult;
 		if((totalCount % maxResult) > 0){
 			pagenumber++;
 		}
 		List<EditArticleListPage> pages = new ArrayList<EditArticleListPage>(pagenumber);
-		int startPos = 0;
-		for(int i = 1;i <= pagenumber;i++){
+		
+		int startPos;
+		int startPage;
+		int lastPage;
+		
+		if(pagenumber > maxToShow){
+			int pagesBack = showWhenMany / 2;
+			startPage = (startPosition / maxResult) - pagesBack;
+			startPos = startPosition - ((pagesBack+1) * maxResult);
+			if(startPage < 1){
+				startPage = 1;
+			}
+			if(startPos < 0){
+				startPos = 0;
+			}
+			lastPage = startPage + showWhenMany;
+			if(lastPage > pagenumber){
+				int difference = lastPage - pagenumber;
+				lastPage = pagenumber;
+				startPage = startPage - difference;
+				startPos = startPos - (difference * maxResult);
+				if(startPage < 1){
+					startPage = 1;
+				}
+				if(startPos < 0){
+					startPos = 0;
+				}
+			}
+			
+		}else{
+			startPage = 1;
+			lastPage = pagenumber;
+			startPos = 0;
+		}
+		for(int i = startPage;i <= lastPage;i++){
 			EditArticleListPage page = new EditArticleListPage();
 			pages.add(page);
 			page.setNumber(i);

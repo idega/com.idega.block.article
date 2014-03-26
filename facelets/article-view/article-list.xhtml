@@ -5,11 +5,11 @@
 	class="search-results"
 	id="#{editArticlesListBean.componentId}"
 >
-<div class="createButton"> <a href="#{editArticlesListBean.createUri}" class="create-article-btn button">#{localizedStrings['com.idega.parts.hidden']['create']}</a></div>
+<div class="createButton"> <a href="#{editArticlesListBean.createUri}" class="create-article-btn button">#{localizedStrings['com.idega.block.article']['create']}</a></div>
 <div class="list-content">
 <div class="paginator clearfix pages-navigation">
 	<a class="prev" href="#">
-		#{localizedStrings['com.idega.parts.hidden']['product_list.previous']}
+		#{localizedStrings['com.idega.block.article']['article_list.previous']}
 	</a>
 	<ui:repeat value="#{editArticlesListBean.pages}" var="page">
 		<a href="#" class="page-select">
@@ -18,18 +18,18 @@
 		</a>
 	</ui:repeat>
 	<a class="next" href="#">
-		#{localizedStrings['com.idega.parts.hidden']['product_list.next']}
+		#{localizedStrings['com.idega.block.article']['article_list.next']}
 	</a>
 </div>
 <div class="list-filter clearfix pages-info">
 	<div class="lefter">
-		#{localizedStrings['com.idega.parts.hidden']['product_list.displaying']}
-		<span class="first-result-number">#{productListBean.firstResultNumber}</span> - <span class="last-result-number">#{editArticlesListBean.lastResultNumber}</span>
+		#{localizedStrings['com.idega.block.article']['article_list.displaying']}
+		<span class="first-result-number">#{editArticlesListBean.firstResultNumber}</span> - <span class="last-result-number">#{editArticlesListBean.lastResultNumber}</span>
 	</div>
     <div class="center">
     </div>
    	<div class="righter">
-   		<label>#{localizedStrings['com.idega.parts.hidden']['product_list.show']}</label>
+   		<label>#{localizedStrings['com.idega.block.article']['article_list.show']}</label>
        	<select name="max-result">
        		<ui:repeat value="#{editArticlesListBean.addsPerPage}" var="num">
        			<ui:fragment rendered="#{num == editArticlesListBean.maxResult}" >
@@ -40,15 +40,15 @@
 				</ui:fragment>
 			</ui:repeat>
         </select>
-        <label>#{localizedStrings['com.idega.parts.hidden']['product_list.ads_per_page']}</label>
+        <label>#{localizedStrings['com.idega.block.article']['article_list.articles_per_page']}</label>
     </div>
 </div>
 <div class="items-list" >
 	<ui:repeat value="#{editArticlesListBean.articles}" var="article">
 		<div class="item-element clearfix">
 			<div class="logo-right supplier-product-list-controlls">
-				<a class="edit-button action-button" href="#{article.editUri}" title="#{localizedStrings['com.idega.parts.hidden']['edit']}"></a>
-				<a class="remove action-button" href="#" title="#{localizedStrings['com.idega.parts.hidden']['delete']}">
+				<a class="edit-button action-button" href="#{article.editUri}" title="#{localizedStrings['com.idega.block.article']['edit']}"></a>
+				<a class="remove action-button" href="#" title="#{localizedStrings['com.idega.block.article']['delete']}">
 					<input type="hidden" class="id-input" value="#{article.id}"></input>
 				</a>
 			</div>
@@ -63,8 +63,8 @@
 <div class="components-div">
 	<div class="item-element clearfix">
 		<div class="logo-right supplier-product-list-controlls">
-				<a class="edit-button action-button" href="#" title="#{localizedStrings['com.idega.parts.hidden']['edit']}"></a>
-				<a class="remove action-button" href="#" title="#{localizedStrings['com.idega.parts.hidden']['delete']}">
+				<a class="edit-button action-button" href="#" title="#{localizedStrings['com.idega.block.article']['edit']}"></a>
+				<a class="remove action-button" href="#" title="#{localizedStrings['com.idega.block.article']['delete']}">
 				 	<input type="hidden" class="id-input"></input>
 				</a>
 		</div>
@@ -82,12 +82,12 @@
 </div>
 <div class="not-found-content" style="display:none">
 	<h1>
-		#{localizedStrings['com.idega.parts.hidden']['product_list.no_products_were_created']}
+		#{localizedStrings['com.idega.block.article']['article_list.no_articles_found']}
 	</h1>
 </div>
 <script>
 	jQuery(document).ready(function(){
-		EditArticleListHelper.messages.loading = "#{localizedStrings['com.idega.parts.hidden']['product_list.searching']}";
+		EditArticleListHelper.messages.loading = "#{localizedStrings['com.idega.block.article']['article_list.searching']}";
 		jQuery('##{editArticlesListBean.componentId}').editArticlesList({
 			main : '##{editArticlesListBean.componentId}'
 			<ui:fragment rendered="#{not empty editArticlesListBean.maxResult}">
