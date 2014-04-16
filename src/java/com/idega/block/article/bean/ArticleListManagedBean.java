@@ -18,7 +18,6 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
-import java.util.logging.Logger;
 
 import javax.faces.component.html.HtmlOutputLink;
 
@@ -67,8 +66,6 @@ import com.idega.util.expression.ELUtil;
 public class ArticleListManagedBean implements ContentListViewerManagedBean {
 
 	public final static String BEAN_IDENTIFIER="articleItemListBean";
-
-	private static final Logger LOGGER = Logger.getLogger(ArticleListManagedBean.class.getName());
 
 	private List<String> categories = null;
 
@@ -568,7 +565,7 @@ public class ArticleListManagedBean implements ContentListViewerManagedBean {
 
 		IWSlideSession session = null;
 		try {
-			session = (IWSlideSession) IBOLookup.getSessionInstance(iwc,IWSlideSession.class);
+			session = IBOLookup.getSessionInstance(iwc,IWSlideSession.class);
 		} catch (IBOLookupException e) {
 			e.printStackTrace();
 			return null;
