@@ -1,0 +1,109 @@
+<div
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	class="search-results"
+	id="#{editArticlesListBean.componentId}"
+>
+<div class="createButton"> <a href="#{editArticlesListBean.createUri}" class="create-article-btn button">#{localizedStrings['com.idega.block.article']['create']}</a></div>
+<div class="list-content">
+<div class="paginator clearfix pages-navigation">
+	<a class="prev" href="#">
+		#{localizedStrings['com.idega.block.article']['article_list.previous']}
+	</a>
+	<ui:repeat value="#{editArticlesListBean.pages}" var="page">
+		<a href="#" class="page-select">
+			<input type="hidden" value="#{page.start}" class="result-start-position"></input>
+			<span class="page-number">#{page.number}</span>
+		</a>
+	</ui:repeat>
+	<a class="next" href="#">
+		#{localizedStrings['com.idega.block.article']['article_list.next']}
+	</a>
+</div>
+<div class="list-filter clearfix pages-info">
+	<div class="lefter">
+		#{localizedStrings['com.idega.block.article']['article_list.displaying']}
+		<span class="first-result-number">#{editArticlesListBean.firstResultNumber}</span> - <span class="last-result-number">#{editArticlesListBean.lastResultNumber}</span>
+	</div>
+    <div class="center">
+    </div>
+   	<div class="righter">
+   		<label>#{localizedStrings['com.idega.block.article']['article_list.show']}</label>
+       	<select name="max-result">
+       		<ui:repeat value="#{editArticlesListBean.addsPerPage}" var="num">
+       			<ui:fragment rendered="#{num == editArticlesListBean.maxResult}" >
+					<option value="#{num}" selected="selected">#{num}</option>
+				</ui:fragment>
+				<ui:fragment rendered="#{num != editArticlesListBean.maxResult}" >
+					<option value="#{num}" >#{num}</option>
+				</ui:fragment>
+			</ui:repeat>
+        </select>
+        <label>#{localizedStrings['com.idega.block.article']['article_list.articles_per_page']}</label>
+    </div>
+</div>
+<div class="items-list" >
+	<ui:repeat value="#{editArticlesListBean.articles}" var="article">
+		<div class="item-element clearfix">
+			<div class="logo-right supplier-product-list-controlls">
+				<a class="edit-button action-button" href="#{article.editUri}" title="#{localizedStrings['com.idega.block.article']['edit']}"></a>
+				<a class="remove action-button" href="#" title="#{localizedStrings['com.idega.block.article']['delete']}">
+					<input type="hidden" class="id-input" value="#{article.id}"></input>
+				</a>
+			</div>
+			<div class="item-details">
+				<h3>
+					<span class="product-title" >#{article.title}</span>
+				</h3>
+			</div>
+		</div>
+	</ui:repeat>
+</div>
+<div class="components-div">
+	<div class="item-element clearfix">
+		<div class="logo-right supplier-product-list-controlls">
+				<a class="edit-button action-button" href="#" title="#{localizedStrings['com.idega.block.article']['edit']}"></a>
+				<a class="remove action-button" href="#" title="#{localizedStrings['com.idega.block.article']['delete']}">
+				 	<input type="hidden" class="id-input"></input>
+				</a>
+		</div>
+		<div class="item-details">
+			<h3>
+				<span class="product-title" ></span>
+			</h3>
+		</div>
+	</div>
+	<a href="#" class="page-select">
+		<input type="hidden" value="0" class="result-start-position"></input>
+		<span class="page-number"></span>
+	</a>
+</div>
+</div>
+<div class="not-found-content" style="display:none">
+	<h1>
+		#{localizedStrings['com.idega.block.article']['article_list.no_articles_found']}
+	</h1>
+</div>
+<script>
+	jQuery(document).ready(function(){
+		EditArticleListHelper.messages.loading = "#{localizedStrings['com.idega.block.article']['article_list.searching']}";
+		jQuery('##{editArticlesListBean.componentId}').editArticlesList({
+			main : '##{editArticlesListBean.componentId}'
+			<ui:fragment rendered="#{not empty editArticlesListBean.maxResult}">
+				,maxResult : #{editArticlesListBean.maxResult}
+			</ui:fragment>
+			<ui:fragment rendered="#{not empty editArticlesListBean.startPosition}">
+				,startPosition : #{editArticlesListBean.startPosition}
+			</ui:fragment>
+			<ui:fragment rendered="#{not empty editArticlesListBean.searchTerm}">
+				,searchTerm : '#{editArticlesListBean.searchTerm}'
+			</ui:fragment>
+			<ui:fragment rendered="#{not empty editArticlesListBean.afterShow}">
+				,afterShow : #{editArticlesListBean.afterShow}
+			</ui:fragment>
+			,totalCount : #{editArticlesListBean.totalCount}
+		});
+	});
+</script>
+</div>

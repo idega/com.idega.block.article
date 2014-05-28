@@ -119,3 +119,11 @@ deleting=Deleting...
 are_you_sure=Are you sure?
 set_category_invisible=Set category invisible for common users
 set_category_visible=Set category visible for common users
+
+article_list.no_articles_found=No articles found
+article_list.previous=Prev
+article_list.next=Next
+article_list.displaying=Displaying:
+article_list.show=Show:
+article_list.articles_per_page=articles/page
+article_list.searching=Loading

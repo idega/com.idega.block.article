@@ -4,20 +4,25 @@ import java.io.IOException;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
 
+import org.apache.commons.httpclient.HttpStatus;
 import org.directwebremoting.annotations.Param;
 import org.directwebremoting.annotations.RemoteMethod;
 import org.directwebremoting.annotations.RemoteProxy;
 import org.directwebremoting.spring.SpringCreator;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
 
 import com.idega.block.article.bean.ArticleItemBean;
 import com.idega.block.article.business.ArticleConstants;
+import com.idega.block.article.business.EditArticlesListBean;
 import com.idega.block.article.component.article_view.ArticleEdit;
+import com.idega.block.article.data.dao.ArticleDao;
 import com.idega.builder.business.BuilderLogic;
 import com.idega.core.business.DefaultSpringBean;
 import com.idega.core.component.bean.RenderedComponent;
@@ -29,6 +34,7 @@ import com.idega.util.CoreUtil;
 import com.idega.util.IWTimestamp;
 import com.idega.util.ListUtil;
 import com.idega.util.StringUtil;
+import com.idega.util.expression.ELUtil;
 
 @Service(ArticleServices.SERVICE)
 @Scope(BeanDefinition.SCOPE_SINGLETON)
@@ -39,7 +45,10 @@ import com.idega.util.StringUtil;
 public class ArticleServices  extends DefaultSpringBean implements DWRAnnotationPersistance {
 	public static final String SERVICE = "articleServices";
 	public static final String DWR_SERVICE = "ArticleServices";
-
+	
+	@Autowired
+	private ArticleDao articleDao;
+	
 	public ArticleItemBean getArticleItemBean(String uri) throws IOException{
 		ArticleItemBean article = new ArticleItemBean();
 		if (StringUtil.isEmpty(uri) || (uri.equals(CoreConstants.SLASH))) {
@@ -122,6 +131,55 @@ public class ArticleServices  extends DefaultSpringBean implements DWRAnnotation
 			return reply;
 		}
 	}
+	
+	@RemoteMethod
+	public ArticleSearchResponce getArticles(Integer maxResult,Integer startPosition){
+		int max = maxResult == null ? -1 : maxResult;
+		int start = startPosition == null ? -1 : startPosition;
+		ArticleSearchResponce responce = new ArticleSearchResponce();
+		EditArticlesListBean editArticlesListBean = ELUtil.getInstance().getBean(EditArticlesListBean.BEAN_NAME);
+		IWContext iwc = editArticlesListBean.getIwc();
+		IWResourceBundle iwrb = getIwrb(iwc);
+		try{
+			List<EditArticlesListDataBean> articles = editArticlesListBean.searchArticles(max, start);
+			responce.setStatus(HttpStatus.getStatusText(HttpStatus.SC_OK));
+			responce.setArticles(articles);
+			Integer totalCount = editArticlesListBean.getArticlesCount();
+			List<EditArticleListPage> pages = editArticlesListBean.getProductListPagesPages(totalCount, max,start);
+			responce.setPages(pages);
+			responce.setTotalCount(totalCount);
+		}catch (Exception e) {
+			responce.setStatus(HttpStatus.getStatusText(HttpStatus.SC_INTERNAL_SERVER_ERROR));
+			responce.setMessage(iwrb.getLocalizedString("failed_getting_articles", "failed getting articles"));
+			getLogger().log(Level.WARNING, "Failed getting articles: ", e);
+		}
+		return responce;
+	}
 
 
+	protected IWResourceBundle getIwrb(IWContext iwc) {
+		IWResourceBundle iwrb = iwc.getIWMainApplication().getBundle(ArticleConstants.IW_BUNDLE_IDENTIFIER).getResourceBundle(iwc);
+		return iwrb;
+	}
+	
+	@RemoteMethod
+	public Response deleteArticle(Long id){
+		Response responce = new Response();
+		IWContext iwc = CoreUtil.getIWContext();
+		IWResourceBundle iwrb = getIwrb(iwc);
+		try{
+			boolean exists = articleDao.deleteArticle(id);
+			responce.setStatus(HttpStatus.getStatusText(HttpStatus.SC_OK));
+			if(!exists){
+				responce.setMessage(iwrb.getLocalizedString("article_does_not_exist", "Article does not exist"));
+			}
+			
+		}catch (Exception e) {
+			responce.setStatus(HttpStatus.getStatusText(HttpStatus.SC_INTERNAL_SERVER_ERROR));
+			responce.setMessage(iwrb.getLocalizedString("failed_getting_articles", "failed getting articles"));
+			getLogger().log(Level.WARNING, "Failed getting articles: ", e);
+		}
+		return responce;
+	}
+	
 }

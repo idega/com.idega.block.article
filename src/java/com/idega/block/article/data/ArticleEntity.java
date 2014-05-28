@@ -48,7 +48,15 @@ import com.idega.util.expression.ELUtil;
 		@NamedQuery(
 				name = ArticleEntity.GET_ID_BY_URI,
 				query = "select id from ArticleEntity s where s.uri = :"+ArticleEntity.uriProp
-				)
+				),
+		@NamedQuery(
+			name = ArticleEntity.QUERY_GET_ALL,
+			query = "from ArticleEntity a ORDER BY a.modificationDate DESC"
+		),
+		@NamedQuery(
+			name = ArticleEntity.QUERY_COUNT_ALL,
+			query = "SELECT COUNT(a) FROM ArticleEntity a"
+		)
 	}
 )
 @Inheritance(strategy=InheritanceType.JOINED)
@@ -56,6 +64,8 @@ public class ArticleEntity implements Serializable {
 
     public static final String GET_BY_URI = "articleEntity.getByURI";
     public static final String GET_ID_BY_URI = "articleEntity.getIDByURI";
+    public static final String QUERY_GET_ALL = "articleEntity.getAll";
+    public static final String QUERY_COUNT_ALL = "articleEntity.countAll";
 
     private static final long serialVersionUID = -8125483527520853214L;
 
