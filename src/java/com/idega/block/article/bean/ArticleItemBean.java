@@ -755,7 +755,7 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 		return sResourcePath;
 	}
 
-	public synchronized String createArticlePath() {
+	public String createArticlePath() {
 		String resourcePath = getGeneratedArticleResourcePath();
 		int index = resourcePath.indexOf(CoreConstants.DOT + CoreConstants.ARTICLE_FILENAME_SCOPE);
 		if (index >- 1) {

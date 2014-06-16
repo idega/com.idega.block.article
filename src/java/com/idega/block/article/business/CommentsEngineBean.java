@@ -634,7 +634,7 @@ public class CommentsEngineBean extends IBOSessionBean implements CommentsEngine
 		return entries == null ? 0 : entries.size();
 	}
 
-	private synchronized Feed getCommentsFeed(CommentsViewerProperties properties) {
+	private Feed getCommentsFeed(CommentsViewerProperties properties) {
 		CommentsPersistenceManager commentsManager = getCommentsManager(properties.getSpringBeanIdentifier());
 		if (commentsManager != null) {
 			return commentsManager.getCommentsFeed(properties.getIdentifier());
@@ -662,7 +662,7 @@ public class CommentsEngineBean extends IBOSessionBean implements CommentsEngine
 		if (rss == null) {
 			return null;
 		}
-		
+
 		User currentUser = null;
 		if (!properties.isLoadAsSuperAdmin()) {
 			IWContext iwc = CoreUtil.getIWContext();
@@ -675,13 +675,13 @@ public class CommentsEngineBean extends IBOSessionBean implements CommentsEngine
 			} else if (iwc.isLoggedOn()) {
 				currentUser = iwc.getCurrentUser();
 			}
-			
+
 			if (properties.isAddLoginbyUUIDOnRSSFeedLink() && currentUser == null) {
 				LOGGER.log(Level.WARNING, "User must be looged to get comments feed!");
 				return null;
 			}
 		}
-		
+
 		String pathToComments = new StringBuilder(getThemesHelper().getFullWebRoot()).append(properties.getUri()).toString();
 		SyndFeed comments = null;
 		if (properties.isLoadAsSuperAdmin()) {
@@ -691,7 +691,7 @@ public class CommentsEngineBean extends IBOSessionBean implements CommentsEngine
 						rss.getFeedAuthenticatedByUser(pathToComments, currentUser) :
 						rss.getFeed(pathToComments);
 		}
-		
+
 		if (comments == null) {
 			return null;
 		}
