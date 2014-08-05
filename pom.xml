@@ -12,7 +12,6 @@
   <name>idegaWeb Article</name>
   <inceptionYear>2003</inceptionYear>
   <description>idegaWeb Article Block is a module for content management of articles</description>
-
   <developers>
     <developer>
       <id>tryggvil</id>
@@ -66,10 +65,6 @@
     	<artifactId>com.idega.user</artifactId>
     </dependency>
     
-    <dependency>
-      <groupId>xmlbeans</groupId>
-      <artifactId>xbean</artifactId>
-    </dependency>
     <dependency>
       <groupId>jtidy</groupId>
       <artifactId>jtidy</artifactId>
