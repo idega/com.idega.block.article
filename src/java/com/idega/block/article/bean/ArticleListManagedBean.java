@@ -168,7 +168,7 @@ public class ArticleListManagedBean implements ContentListViewerManagedBean {
 
 		article.load();
 
-		if (canShowArticle(article, iwc, iwc.getParameter(ContentViewer.PARAMETER_CONTENT_RESOURCE), iwc.getParameter(ContentConstants.CONTENT_ITEM_VIEWER_IDENTIFIER_PARAMETER))) {
+		if (canShowArticle(article, iwc, null, iwc.getParameter(ContentConstants.CONTENT_ITEM_VIEWER_IDENTIFIER_PARAMETER))) {
 			return article;
 		}
 		return null;
@@ -513,7 +513,7 @@ public class ArticleListManagedBean implements ContentListViewerManagedBean {
 
 	@Transactional(readOnly = true)
 	private List<ArticleEntity> getArticlesFromDatabase(String folder,List<String> categories, IWContext iwc, int maxResults){
-		String uriFrom = iwc.getParameter(ContentViewer.PARAMETER_CONTENT_RESOURCE);
+		String uriFrom = iwc.getParameter(ContentViewer.ITEM_FROM_RESOURCE);
 		return this.getArticleDao().getByCategories(categories, uriFrom, maxResults);
 	}
 
