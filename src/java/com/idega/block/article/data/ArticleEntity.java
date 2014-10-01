@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Random;
 import java.util.Set;
 
+import javax.persistence.Cacheable;
 import javax.persistence.Column;
 import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
@@ -60,6 +61,7 @@ import com.idega.util.expression.ELUtil;
 	}
 )
 @Inheritance(strategy=InheritanceType.JOINED)
+@Cacheable
 public class ArticleEntity implements Serializable {
 
     public static final String GET_BY_URI = "articleEntity.getByURI";

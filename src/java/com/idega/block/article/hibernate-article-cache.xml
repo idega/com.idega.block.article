@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ehcache>
+
+    <cache
+        maxElementsInMemory="1000000"
+        name="com.idega.block.article.data.ArticleEntity"
+        timeToIdleSeconds="86400"
+        timeToLiveSeconds="86400"
+    />
+    <cache
+        maxElementsInMemory="1000000"
+        name="com.idega.block.article.data.CategoryEntity"
+        timeToIdleSeconds="86400"
+        timeToLiveSeconds="86400"
+    />
+
+</ehcache>

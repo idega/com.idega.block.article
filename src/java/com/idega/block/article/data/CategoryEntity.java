@@ -3,6 +3,7 @@ package com.idega.block.article.data;
 import java.io.Serializable;
 import java.util.Random;
 
+import javax.persistence.Cacheable;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -30,6 +31,7 @@ import org.hibernate.annotations.Index;
         		query = "from CategoryEntity s where s.category = :" + CategoryEntity.categoryProp)
     }
 )
+@Cacheable
 public class CategoryEntity implements Serializable {
 
     public static final String GET_BY_NAMES = "categoryEntity.getByNames";
