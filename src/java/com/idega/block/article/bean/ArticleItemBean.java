@@ -474,13 +474,15 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 	public void store() throws IDOStoreException {
 		ArticleEntity article = getArticleEntity(true);
 
-		if (article == null || article.getId() == null)
+		if (article == null || article.getId() == null) {
 			throw new IDOStoreException("Unable to create/edit article at " + getResourcePath());
+		}
 
 		setArticleEntity(article);
 		try {
 			getLocalizedArticle().store();
-		} catch(Exception e){
+			ArticleUtil.doClearArticlesCache();
+		} catch(Exception e) {
 			throw new IDOStoreException("Failed storing to repository", e);
 		}
 	}
@@ -940,13 +942,10 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 	}
 
 	/**
-<<<<<<< HEAD
 	 * <p>
 	 * Returns true if this article is available for the language of the
 	 * locale set on this article item.
 	 * </p>
-=======
->>>>>>> f9ed451cecd64d0cc302ec5227678cda502339e8
 	 * @return true if this article is available for the language of the locale set on this article item.
 	 */
 	public boolean getAvailableInRequestedLanguage() {

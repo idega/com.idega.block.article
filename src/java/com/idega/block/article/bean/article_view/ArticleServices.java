@@ -45,10 +45,10 @@ import com.idega.util.expression.ELUtil;
 public class ArticleServices  extends DefaultSpringBean implements DWRAnnotationPersistance {
 	public static final String SERVICE = "articleServices";
 	public static final String DWR_SERVICE = "ArticleServices";
-	
+
 	@Autowired
 	private ArticleDao articleDao;
-	
+
 	public ArticleItemBean getArticleItemBean(String uri) throws IOException{
 		ArticleItemBean article = new ArticleItemBean();
 		if (StringUtil.isEmpty(uri) || (uri.equals(CoreConstants.SLASH))) {
@@ -100,9 +100,9 @@ public class ArticleServices  extends DefaultSpringBean implements DWRAnnotation
 			articleItemBean.setName(saveValues.get("headline"));
 			articleItemBean.setPublishedDate(IWTimestamp.getTimestampRightNow());
 			articleItemBean.setLocale(iwc.getCurrentLocale());
-	
+
 			articleItemBean.setArticleCategories(collectionValues.get("articleCategories"));
-	
+
 			Collection<String> permissionGroups = collectionValues.get("permissionGroups");
 			if(!ListUtil.isEmpty(permissionGroups)){
 				HashSet<Integer> editors = new HashSet<Integer>(permissionGroups.size());
@@ -112,7 +112,7 @@ public class ArticleServices  extends DefaultSpringBean implements DWRAnnotation
 				articleItemBean.setAllowedToEditByGroupsIds(editors);
 			}
 			articleItemBean.store();
-	
+
 //			RepositoryService repositoryService = ELUtil.getInstance().getBean(RepositoryService.class);
 //			String filesPath = articleItemBean.getFilesResourcePath();
 //			AccessControlList accessControlList = repositoryService.getAccessControlList(filesPath);
@@ -120,18 +120,18 @@ public class ArticleServices  extends DefaultSpringBean implements DWRAnnotation
 //			access.addPrivilege(new RepositoryPrivilege(Privilege.JCR_ALL));
 //			AccessControlEntry[] accesses = {access};
 //			accessControlList.setAces(accesses);
-	
+
 			reply.put("status", "success");
 			reply.put("message",iwrb.getLocalizedString("article_saved", "Article saved"));
 			return reply;
-		}catch (Exception e) {
+		} catch (Exception e) {
 			getLogger().log(Level.WARNING, "Failed saving article", e);
 			reply.put("status", "failed");
 			reply.put("message",iwrb.getLocalizedString("saving_failed", "Saving failed"));
 			return reply;
 		}
 	}
-	
+
 	@RemoteMethod
 	public ArticleSearchResponce getArticles(Integer maxResult,Integer startPosition){
 		int max = maxResult == null ? -1 : maxResult;
@@ -161,7 +161,7 @@ public class ArticleServices  extends DefaultSpringBean implements DWRAnnotation
 		IWResourceBundle iwrb = iwc.getIWMainApplication().getBundle(ArticleConstants.IW_BUNDLE_IDENTIFIER).getResourceBundle(iwc);
 		return iwrb;
 	}
-	
+
 	@RemoteMethod
 	public Response deleteArticle(Long id){
 		Response responce = new Response();
@@ -173,7 +173,7 @@ public class ArticleServices  extends DefaultSpringBean implements DWRAnnotation
 			if(!exists){
 				responce.setMessage(iwrb.getLocalizedString("article_does_not_exist", "Article does not exist"));
 			}
-			
+
 		}catch (Exception e) {
 			responce.setStatus(HttpStatus.getStatusText(HttpStatus.SC_INTERNAL_SERVER_ERROR));
 			responce.setMessage(iwrb.getLocalizedString("failed_getting_articles", "failed getting articles"));
@@ -181,5 +181,5 @@ public class ArticleServices  extends DefaultSpringBean implements DWRAnnotation
 		}
 		return responce;
 	}
-	
+
 }
