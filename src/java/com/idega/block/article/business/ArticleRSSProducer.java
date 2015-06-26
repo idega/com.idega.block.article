@@ -405,6 +405,10 @@ public class ArticleRSSProducer extends RSSAbstractProducer implements RSSProduc
 		if (moduleId != null){
 			for (int i = 0; i < moduleId.size(); i++) {
 				String articleURI = bservice.getProperty(pageKey, moduleId.get(i), "resourcePath");
+				if (StringUtil.isEmpty(articleURI)) {
+					continue;
+				}
+
 				articleURI = articleURI.substring(0, articleURI.length());
 				articles.add(CoreConstants.WEBDAV_SERVLET_URI+ articleURI);
 			}
