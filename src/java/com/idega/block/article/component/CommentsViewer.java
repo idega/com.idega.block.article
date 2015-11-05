@@ -393,8 +393,8 @@ public class CommentsViewer extends Block {
 
 	protected List<String> getJavaScriptSources(IWContext iwc) {
 		List<String> sources = new ArrayList<String>();
-		sources.add(COMMENTS_ENGINE);
 		sources.add(CoreConstants.DWR_ENGINE_SCRIPT);
+		sources.add(COMMENTS_ENGINE);
 		sources.add(getBundle(iwc).getVirtualPathWithFileNameString(COMMENTS_HELPER));
 		try {
 			sources.add(getWeb2().getBundleURIToMootoolsLib());

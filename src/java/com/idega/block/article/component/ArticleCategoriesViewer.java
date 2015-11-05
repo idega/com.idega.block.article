@@ -144,8 +144,8 @@ public class ArticleCategoriesViewer extends Block {
 
 	private void addScript(IWContext iwc, Layer container) {
 		List<String> scripts = new ArrayList<String>();
-		scripts.add("/dwr/interface/BuilderService.js");
 		scripts.add(CoreConstants.DWR_ENGINE_SCRIPT);
+		scripts.add("/dwr/interface/BuilderService.js");
 		scripts.add(ArticleUtil.getBundle().getVirtualPathWithFileNameString("javascript/ArticleCategoriesHelper.js"));
 
 		if (CoreUtil.isSingleComponentRenderingProcess(iwc)) {
