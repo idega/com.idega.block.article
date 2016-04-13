@@ -61,7 +61,7 @@ public class CategoryDaoImpl extends GenericDaoImpl implements CategoryDao, Appl
                 LOGGER.log(Level.WARNING, "Failed to add category to database: " + categoryEntity, e);
             }
         }
-
+        
     	return categoryEntity;
     }
 
@@ -74,19 +74,22 @@ public class CategoryDaoImpl extends GenericDaoImpl implements CategoryDao, Appl
     		return Collections.emptyList();
     	}
 
+    	/* Creating copy of list */
+    	Collection<String> categoriesCopy = new ArrayList<String>(categories);
+    	
     	/* Getting existing categories */
-    	Collection<CategoryEntity> categoriesInDatabase = getCategories(categories);
+    	Collection<CategoryEntity> categoriesInDatabase = getCategories(categoriesCopy);
     	if (categoriesInDatabase == null) {
     		categoriesInDatabase = new ArrayList<CategoryEntity>();
     	}
 
     	/* Removing existing ones from list to add */
     	for (CategoryEntity ce: categoriesInDatabase) {
-    		categories.remove(ce.getCategory());
+    		categoriesCopy.remove(ce.getCategory());
     	}
 
     	/* Adding not existing categories */
-        for (String s : categories) {
+        for (String s : categoriesCopy) {
         	categoriesInDatabase.add(addCategory(s));
         }
 
@@ -157,7 +160,7 @@ public class CategoryDaoImpl extends GenericDaoImpl implements CategoryDao, Appl
     public List<CategoryEntity> getCategories(Collection<String> categories) {
         if (ListUtil.isEmpty(categories))
             return null;
-
+        
         return getResultList(CategoryEntity.GET_BY_NAMES, CategoryEntity.class,
                 new Param(CategoryEntity.categoryProp, categories));
     }

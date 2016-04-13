@@ -137,4 +137,9 @@ public class ArticleDaoImpl extends ArticleDaoTemplateImpl<ArticleEntity> implem
 		return true;
 	}
 
+	@Override
+	public ArticleEntity getById(Long id) {
+		return find(ArticleEntity.class, id);
+	}
+
 }

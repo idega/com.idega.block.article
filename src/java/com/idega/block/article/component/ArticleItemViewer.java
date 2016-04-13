@@ -51,7 +51,7 @@ public class ArticleItemViewer extends ContentItemViewer {
 
 	//	Constants:
 	private final static String ATTRIBUTE_AUTHOR = "author";
-	private final static String[] ATTRIBUTE_ARRAY = new String[] {ContentConstants.ATTRIBUTE_HEADLINE, ContentConstants.ATTRIBUTE_CREATION_DATE, ATTRIBUTE_AUTHOR,
+	private final static String[] ATTRIBUTE_ARRAY = new String[] {ContentConstants.ATTRIBUTE_CREATION_DATE, ContentConstants.ATTRIBUTE_HEADLINE, ATTRIBUTE_AUTHOR,
 		ContentConstants.ATTRIBUTE_TEASER, ContentConstants.ATTRIBUTE_BODY};
 	private final static String facetIdPrefix = "article_";
 	private final static String styleClassPrefix = "article_";

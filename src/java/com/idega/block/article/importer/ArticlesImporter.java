@@ -1,5 +1,9 @@
 package com.idega.block.article.importer;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.InputStream;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
@@ -10,6 +14,12 @@ import java.util.logging.Level;
 import javax.jcr.PropertyType;
 import javax.jcr.RepositoryException;
 
+import org.directwebremoting.annotations.Param;
+import org.directwebremoting.annotations.RemoteMethod;
+import org.directwebremoting.annotations.RemoteProxy;
+import org.directwebremoting.spring.SpringCreator;
+import org.jdom2.Document;
+import org.jdom2.Element;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.context.ApplicationListener;
@@ -18,18 +28,25 @@ import org.springframework.stereotype.Service;
 
 import com.idega.block.article.data.dao.ArticleDao;
 import com.idega.block.article.data.dao.CategoryDao;
+import com.idega.builder.bean.AdvancedProperty;
 import com.idega.content.business.categories.CategoriesEngine;
 import com.idega.content.business.categories.CategoryBean;
 import com.idega.content.data.ContentCategory;
 import com.idega.core.business.DefaultSpringBean;
 import com.idega.core.localisation.business.ICLocaleBusiness;
+import com.idega.idegaweb.IWMainApplicationSettings;
 import com.idega.idegaweb.RepositoryStartedEvent;
 import com.idega.idegaweb.UnavailableIWContext;
+import com.idega.presentation.IWContext;
 import com.idega.repository.bean.RepositoryItem;
 import com.idega.repository.jcr.JCRItem;
 import com.idega.util.CoreConstants;
+import com.idega.util.CoreUtil;
+import com.idega.util.IOUtil;
 import com.idega.util.ListUtil;
+import com.idega.util.StringHandler;
 import com.idega.util.StringUtil;
+import com.idega.util.xml.XmlUtil;
 
 /**
  * Imports articles and their categories to database.
@@ -39,9 +56,16 @@ import com.idega.util.StringUtil;
  * You can expect to find some test cases notice in the end of the file.
  */
 
-@Service
+@Service(ArticlesImporter.BEAN_NAME)
 @Scope(BeanDefinition.SCOPE_SINGLETON)
+@RemoteProxy(creator=SpringCreator.class, creatorParams={
+	@Param(name="beanName", value=ArticlesImporter.BEAN_NAME),
+	@Param(name="javascript", value=ArticlesImporter.DWR_OBJECT)
+}, name=ArticlesImporter.DWR_OBJECT)
 public class ArticlesImporter extends DefaultSpringBean implements ApplicationListener<RepositoryStartedEvent> {
+
+	static final String BEAN_NAME = "iwArticlesImporter",
+						DWR_OBJECT = "ArticlesImporter";
 
 	@Autowired
     private CategoriesEngine categoryEngine;
@@ -55,32 +79,49 @@ public class ArticlesImporter extends DefaultSpringBean implements ApplicationLi
     public static final String	CATEGORIES_IMPORTED_APP_PROP = "is_categories_imported",
     							ARTICLES_IMPORTED_APP_PROP = "is_articles_imported",
     							CATEGORIES_BUG_FIXED_PROP = "categories_bug_fixed";
+    
+    private SimpleDateFormat sdf = new SimpleDateFormat("yy-MM-dd'T'HH:mm:ss'Z'");
 
     @Override
     public void onApplicationEvent(RepositoryStartedEvent event) {
-            Boolean isCategoriesImported = getApplication().getSettings().getBoolean(CATEGORIES_IMPORTED_APP_PROP, Boolean.FALSE);
+    	IWMainApplicationSettings settings = getApplication().getSettings();
+    	doImport(settings.getBoolean(CATEGORIES_IMPORTED_APP_PROP, Boolean.FALSE), settings.getBoolean(ARTICLES_IMPORTED_APP_PROP, Boolean.FALSE), null);
+    }
 
-            if (!isCategoriesImported) {
-                isCategoriesImported = importCategories();
-                getApplication().getSettings().setProperty(CATEGORIES_IMPORTED_APP_PROP,
-                        isCategoriesImported.toString());
-            }
+    @RemoteMethod
+    public boolean doImportCategoriesAndArticles(String oldRepo) {
+    	IWContext iwc = CoreUtil.getIWContext();
+    	if (iwc == null) {
+    		return false;
+    	}
 
-            Boolean isArticlesImported = getApplication().getSettings()
-                    .getBoolean(ARTICLES_IMPORTED_APP_PROP, Boolean.FALSE);
+    	boolean superAdmin = iwc.isLoggedOn() && iwc.isSuperAdmin();
+    	if (superAdmin) {
+    		doImport(false, false, oldRepo);
+    		return true;
+    	}
 
-            if (!isArticlesImported && isCategoriesImported) {
-                isArticlesImported = this.importArticles();
-                getApplication().getSettings().setProperty(ARTICLES_IMPORTED_APP_PROP,
-                        isArticlesImported.toString());
-            }
+    	getLogger().warning("Insufficient rights");
+    	return false;
+    }
+
+    private void doImport(Boolean isCategoriesImported,  Boolean isArticlesImported, String oldRepo) {
+    	if (!isCategoriesImported) {
+    		isCategoriesImported = importCategories();
+    		getApplication().getSettings().setProperty(CATEGORIES_IMPORTED_APP_PROP, isCategoriesImported.toString());
+    	}
+
+    	if (!isArticlesImported && isCategoriesImported) {
+    		isArticlesImported = this.importArticles(oldRepo);
+    		getApplication().getSettings().setProperty(ARTICLES_IMPORTED_APP_PROP, isArticlesImported.toString());
+        }
     }
 
     /**
      * Method for importing categories, which are in categories.xml, but not in database
      * @return true, if imported, false, if at least one category was not imported
      */
-    public boolean importCategories(){
+    private boolean importCategories(){
         List<Locale> localeList = ICLocaleBusiness.getListOfLocalesJAVA();
         if (localeList == null) {
             return Boolean.FALSE;
@@ -95,9 +136,7 @@ public class ArticlesImporter extends DefaultSpringBean implements ApplicationLi
             try {
                 categoryList = this.categoryEngine.getCategoriesByLocale(locale.toString());
             } catch (UnavailableIWContext e){
-                getLogger().log(Level.WARNING,
-                        "Failed to import because categories.xml deos not exist",
-                        e);
+                getLogger().log(Level.WARNING,  "Failed to import because categories.xml deos not exist",  e);
                 return Boolean.FALSE;
             }
 
@@ -133,13 +172,13 @@ public class ArticlesImporter extends DefaultSpringBean implements ApplicationLi
      * Method for importing articles and their categories from default /files/cms/article path.
      * @return true, if imported, false if at least one article was not imported.
      */
-    public boolean importArticles(){
+    private boolean importArticles(String oldRepo) {
         try {
             /*Getting the articles folders*/
             RepositoryItem resource = getRepositoryService().getRepositoryItemAsRootUser(CoreConstants.CONTENT_PATH+CoreConstants.ARTICLE_CONTENT_PATH);
-            return this.importArticleFolders(resource);
+            return this.importArticleFolders(resource, oldRepo);
         } catch (RepositoryException e) {
-            getLogger().log(Level.WARNING, "Failed to import articles cause of:", e);
+            getLogger().log(Level.WARNING, "Failed to import articles from " + CoreConstants.CONTENT_PATH+CoreConstants.ARTICLE_CONTENT_PATH, e);
         }
         return Boolean.FALSE;
     }
@@ -149,7 +188,7 @@ public class ArticlesImporter extends DefaultSpringBean implements ApplicationLi
      * @param resource Path where to start looking for articles to import.
      * @return true, if articles found and imported, false if not all articles imported.
      */
-    public boolean importArticleFolders(RepositoryItem resource) {
+    private boolean importArticleFolders(RepositoryItem resource, String oldRepo) {
         if (resource == null) {
             return Boolean.FALSE;
         }
@@ -158,29 +197,26 @@ public class ArticlesImporter extends DefaultSpringBean implements ApplicationLi
             return Boolean.FALSE;
         }
 
-        if (this.importArticles(resource)) {
-            return Boolean.TRUE;
-        } else {
-            try {
-                Collection<RepositoryItem> foldersAndFilesResources = resource.getChildResources();
-                if (ListUtil.isEmpty(foldersAndFilesResources)) {
-                    return Boolean.FALSE;
-                }
+        importArticles(resource, oldRepo);
 
-                boolean result = Boolean.FALSE;
-                for (RepositoryItem wr : foldersAndFilesResources) {
-                    if (this.importArticleFolders(wr))
-                        result = Boolean.TRUE;
-                }
+        try {
+        	Collection<RepositoryItem> foldersAndFilesResources = resource.getChildResources();
+        	if (ListUtil.isEmpty(foldersAndFilesResources)) {
+        		return Boolean.FALSE;
+        	}
 
-                /*Trying to solve out of memory exception*/
-                foldersAndFilesResources = null;
-                resource = null;
+        	boolean result = Boolean.FALSE;
+        	for (RepositoryItem wr: foldersAndFilesResources) {
+                result = importArticleFolders(wr, oldRepo);
+        	}
 
-                return result;
-            } catch (Exception e) {
-                getLogger().log(Level.WARNING, "Failed to import articles from: " + resource.getPath(), e);
-            }
+        	/*Trying to solve out of memory exception*/
+        	foldersAndFilesResources = null;
+        	resource = null;
+
+        	return result;
+        } catch (Exception e) {
+        	getLogger().log(Level.WARNING, "Failed to import articles from: " + resource.getPath(), e);
         }
 
         return Boolean.FALSE;
@@ -191,18 +227,21 @@ public class ArticlesImporter extends DefaultSpringBean implements ApplicationLi
      * @param resource Folder, that might be containing article folders.
      * @return true, if it is folder of articles, false, if not.
      */
-    public boolean isArticlesFolder(RepositoryItem resource){
-        if (resource == null || !resource.exists())
+    private boolean isArticlesFolder(RepositoryItem resource){
+        if (resource == null || !resource.exists()) {
             return Boolean.FALSE;
+        }
 
         /*Checking is it folder*/
-        if (!resource.isCollection())
+        if (!resource.isCollection()) {
             return Boolean.FALSE;
+        }
 
         try {
             Collection<RepositoryItem> webdavResources = resource.getChildResources();
-            if (ListUtil.isEmpty(webdavResources))
+            if (ListUtil.isEmpty(webdavResources)) {
                 return Boolean.FALSE;
+            }
 
             for (RepositoryItem child: webdavResources) {
                 if (child.getPath().endsWith(CoreConstants.ARTICLE_FILENAME_SCOPE)) {
@@ -225,16 +264,18 @@ public class ArticlesImporter extends DefaultSpringBean implements ApplicationLi
      * @param resource Folder of articles folder.
      * @return true, if imported, false if failed or not articles folder.
      */
-    public boolean importArticles(RepositoryItem resource){
-        if (!this.isArticlesFolder(resource))
+    private boolean importArticles(RepositoryItem resource, String oldRepo) {
+    	
+        if (!this.isArticlesFolder(resource)) {
             return Boolean.FALSE;
+        }
 
         try {
             Collection<RepositoryItem> filesAndFolders = resource.getChildResources();
-            if (ListUtil.isEmpty(filesAndFolders))
+            if (ListUtil.isEmpty(filesAndFolders)) {
                 return Boolean.FALSE;
+            }
 
-            int size = filesAndFolders.size();
             boolean isImportSuccesful = Boolean.TRUE;
             String propertyPrefix = "DAV";
             String propertyName = "categories";
@@ -245,7 +286,6 @@ public class ArticlesImporter extends DefaultSpringBean implements ApplicationLi
                     if (uri.contains(CoreConstants.WEBDAV_SERVLET_URI)) {
                         uri = uri.substring(CoreConstants.WEBDAV_SERVLET_URI.length());
                     }
-
                     if (uri.endsWith(CoreConstants.SLASH)) {
                         uri = uri.substring(0, uri.lastIndexOf(CoreConstants.SLASH));
                     }
@@ -253,15 +293,30 @@ public class ArticlesImporter extends DefaultSpringBean implements ApplicationLi
                     JCRItem jcrItem = (JCRItem) item;
                     Collection<String> categories = null;
                     String categoriesProperty = jcrItem.getPropertyValue(propertyPrefix, propertyName, PropertyType.STRING);
-                    if (!StringUtil.isEmpty(categoriesProperty)) {
+
+                    AdvancedProperty properties = null;
+                    String creationDate = null;
+                    if (StringUtil.isEmpty(categoriesProperty) && !StringUtil.isEmpty(oldRepo)) {
+                    	properties = getCategoriesAndCreationDate(jcrItem, oldRepo);
+                    	if (properties != null) {
+                    		categoriesProperty = properties.getId();
+                    		creationDate = properties.getValue();
+                    	}
+                    }
+                    if (!StringUtil.isEmpty(categoriesProperty) && !CoreConstants.COMMA.equals(categoriesProperty.trim())) {
                     	categories = CategoryBean.getCategoriesFromString(categoriesProperty);
+                    	getLogger().info("Found categories: " + categories + " for " + item);
                     }
 
-                    if (!this.articleDao.updateArticle(new Date(item.getCreationDate()), uri, ListUtil.isEmpty(categories) ? null : new ArrayList<String>(categories))) {
+                    if (!this.articleDao.updateArticle(
+                    		StringUtil.isEmpty(creationDate) ? new Date(item.getCreationDate()) : sdf.parse(creationDate),
+                    		uri,
+                    		ListUtil.isEmpty(categories) ? null : new ArrayList<String>(categories))
+                    ) {
+                    	getLogger().warning("Failed to save article in DB: " + uri);
                         isImportSuccesful = Boolean.FALSE;
                         break;
                     }
-                    size = size-1;
                 }
             }
 
@@ -276,6 +331,98 @@ public class ArticlesImporter extends DefaultSpringBean implements ApplicationLi
         return Boolean.FALSE;
     }
 
+    private AdvancedProperty getCategoriesAndCreationDate(JCRItem jcrItem, String oldRepo) {
+    	if (StringUtil.isEmpty(oldRepo) || jcrItem == null) {
+    		return null;
+    	}
+
+    	Collection<RepositoryItem> children = jcrItem.getChildResources();
+    	if (ListUtil.isEmpty(children)) {
+    		return null;
+    	}
+
+    	String path = null;
+    	InputStream stream = null;
+    	String folderPath = oldRepo + jcrItem.getAbsolutePath();
+    	
+    	//	From version 4.x
+    	
+    	try {
+    		path = getFirstFilePathFromFolder(folderPath);
+    		if(path == null) {
+    			return null;
+    		}
+    		stream = new FileInputStream(new File(path));
+    		String content = StringHandler.getContentFromInputStream(stream);
+    		String start = "<category term=\"";
+    		int categoriesIndex = content.indexOf(start);
+    		if (categoriesIndex == -1) {
+    			getLogger().warning("No categories defined in " + content + " for " + jcrItem);
+    		} else {
+    			int end = categoriesIndex + 1;
+    			while (end < content.length() && !CoreConstants.EQ.equals(content.substring(end, end + 1))) {
+    				end++;
+    			}
+    			return new AdvancedProperty(content.substring(categoriesIndex + start.length() + 1, end));
+    		}
+    	} catch (Exception e) {
+    		getLogger().log(Level.WARNING, "Error getting categories from " + path + " for " + jcrItem, e);
+    	} finally {
+    		IOUtil.close(stream);
+    	}
+
+    	//	From version 3.x
+    	try {
+    		folderPath = StringHandler.replace(folderPath, "content", "metadata");
+    		path = getFirstFilePathFromFolder(folderPath);
+    		if(path == null) {
+    			return null;
+    		}
+    		/*
+    		if(files.length != 1) {
+    			getLogger().warning("Folder contains more than one file!");
+    		}
+    		*/
+    		stream = new FileInputStream(new File(path));
+    		Document doc = XmlUtil.getJDOMXMLDocument(stream);
+    		Element rootElement = doc.getRootElement();
+    		List<Element> properties = XmlUtil.getElementsByXPath(rootElement, "property", "DAV");
+    		if (ListUtil.isEmpty(properties)) {
+    			getLogger().warning("There are no properties for " + path);
+    		} else {
+    			String categories = null, creationDate = null;
+    			for (Element property: properties) {
+    				String propertyName = property.getAttributeValue("name");
+    				if ("categories".equals(propertyName)) {
+    					categories = property.getAttributeValue("value");
+    					getLogger().info("Found categories '" + categories + "' at " + path + " for " + jcrItem);
+       				} else if ("modificationdate".equals(propertyName)) {
+    					creationDate = property.getAttributeValue("value");
+       				}
+    			}
+    			return new AdvancedProperty(categories, creationDate);
+    		}
+    	} catch (Exception e) {
+    		getLogger().log(Level.WARNING, "Error getting categories from " + path + " for " + jcrItem, e);
+    	} finally {
+    		IOUtil.close(stream);
+    	}
+
+    	return null;
+    }
+
+    public String getFirstFilePathFromFolder(String folderPath) {
+    	if(StringUtil.isEmpty(folderPath)) {
+    		return null;
+    	}
+		File folder = new File(folderPath);
+		File[] files = folder.listFiles();
+		if(files == null) {
+			return null;
+		}
+    	return files[0].getAbsolutePath();
+    }
+    
     /*
      * Test cases isArticlesFolder(WebdavResource resource):
      * Passed articles folder, returned: true

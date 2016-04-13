@@ -27,6 +27,14 @@
 	margin-top: 3px;
 }
 
+.left .blog-entry-title {
+	font-weight: bold;
+	font-size: 16px;
+	background: rgba(0, 0, 0, 0) url("/content/files/public/style/images/backgrounds/news-headline-tiler.gif") repeat-x scroll center bottom;
+	margin-top: 0;
+	padding-bottom: 6px;
+}
+
 .article_teaser {
 	width: auto;
 	display: none;
@@ -298,6 +306,25 @@
 	left: 18px;
 	top: 0;
 	line-height: 25px;
+}
+
+.blog-entry-date {
+	color: #49453d;
+	display: inline;
+}
+
+.blog-entry-title {
+	font-weight: bold;
+}
+
+.left .blog-entry-date {
+	border-width: 0;
+	color: #49453d;
+	display: block;
+	font-weight: bold;
+	margin: 0;
+	padding: 0;
+	font-size: 10px;
 }
 
 .article .content_list .article_author {

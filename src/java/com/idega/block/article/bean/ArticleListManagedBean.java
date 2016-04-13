@@ -144,6 +144,8 @@ public class ArticleListManagedBean implements ContentListViewerManagedBean {
 		for (String uri: uris) {
 			try {
 				ArticleItemBean article = loadArticle(uri, iwc);
+				Timestamp date = (Timestamp) articleDao.getByUri(uri).getModificationDate();
+				article.setCreationDate(date);
 				if (article != null) {
 					if (maxNumber < 0 || count < maxNumber) {
 						list.add(article);
@@ -161,17 +163,27 @@ public class ArticleListManagedBean implements ContentListViewerManagedBean {
 		return list;
 	}
 
-	private ArticleItemBean loadArticle(String uri,IWContext iwc) throws IOException{
+	public ArticleItemBean loadArticle(String uri,IWContext iwc) throws IOException{
 
 		ArticleItemBean article = new ArticleItemBean();
 		article.setResourcePath(uri);
-
+		
 		article.load();
 
 		if (canShowArticle(article, iwc, null, iwc.getParameter(ContentConstants.CONTENT_ITEM_VIEWER_IDENTIFIER_PARAMETER))) {
 			return article;
 		}
 		return null;
+	}
+	
+	public ArticleItemBean loadArticle(String uri) throws IOException{
+
+		ArticleItemBean article = new ArticleItemBean();
+		article.setResourcePath(uri);
+		
+		article.load();
+
+		return article;
 	}
 
 	private boolean canShowArticle(ArticleItemBean article, IWContext iwc, String resourcePathFromRequest, String identifierFromRequest) {

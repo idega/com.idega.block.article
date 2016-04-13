@@ -19,9 +19,12 @@ public interface ArticleDao extends ArticleDaoTemplate<ArticleEntity> {
 
 	public static final String BEAN_NAME = "articleDAO";
 	
+	public ArticleEntity getById(Long id);
+	
 	public List<ArticleEntity> getAll(int maxResult,int startFrom);
 	
 	public int countArticles();
+	
 	public List<EditArticlesListDataBean> getAllEditArticlesListDataBeans(int maxResult,int startFrom,IWContext iwc);
 	
 	public boolean deleteArticle(Long id);

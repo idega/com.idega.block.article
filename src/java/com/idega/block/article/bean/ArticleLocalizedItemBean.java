@@ -164,10 +164,15 @@ public class ArticleLocalizedItemBean extends ContentItemBean implements Seriali
 	public void setImages(List<ContentItemField> l) { setItemFields(FIELDNAME_IMAGES, l); }
 
 	@Override
-	public void setPublishedDate(Timestamp date) { super.setPublishedDate(date); }
+	public void setPublishedDate(Timestamp date) { 
+		super.setPublishedDate(date); 
+	}
+	
 
 	@Override
-	public Timestamp getPublishedDate() { return super.getPublishedDate(); }
+	public Timestamp getPublishedDate() { 
+		return super.getPublishedDate(); 
+	}
 
 	@Override
 	public void setLanguage(String lang){

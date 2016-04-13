@@ -30,6 +30,9 @@ import javax.faces.event.ValueChangeEvent;
 import javax.faces.event.ValueChangeListener;
 import javax.jcr.RepositoryException;
 
+import org.jdom2.Document;
+import org.jdom2.Element;
+
 import com.idega.block.article.ArticleCacher;
 import com.idega.block.article.business.ArticleConstants;
 import com.idega.block.article.business.ArticleUtil;
@@ -61,6 +64,7 @@ import com.idega.util.ListUtil;
 import com.idega.util.StringHandler;
 import com.idega.util.StringUtil;
 import com.idega.util.expression.ELUtil;
+import com.idega.util.xml.XmlUtil;
 import com.idega.xml.XMLException;
 
 /**
@@ -221,7 +225,7 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 			}
 		}
 	}
-
+	
 	/**
 	 *
 	 * <p>Checks for existing {@link ArticleEntity}, creates new if
@@ -335,7 +339,7 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 	public String getLinkToComments() {
 		return getLocalizedArticle().getLinkToComments();
 	}
-
+	
 	@Override
 	public String[] getContentFieldNames() {
 		return getLocalizedArticle().getContentFieldNames();
@@ -365,6 +369,25 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 		return getLocalizedArticle().getImages();
 	}
 
+	public String getFirstImage() {
+		Document doc = null;
+
+		try {
+			doc = XmlUtil.getJDOMXMLDocument(getBody());
+		} catch (Exception e) {
+			java.util.logging.Logger.getLogger(getClass().getName()).log(Level.WARNING, "", e);
+		}
+		
+		Element rootElement = doc.getRootElement();
+		List<Element> images = XmlUtil.getElementsByXPath(rootElement, "img", "xlmns");
+		if (ListUtil.isEmpty(images)) {
+			return null;
+		} else {
+			return images.get(0).getAttributeValue("src");
+		}
+
+	}
+	
 	public String getSource() {
 		return getLocalizedArticle().getSource();
 	}
