@@ -378,6 +378,10 @@ public class ArticleItemBean extends ContentItemBean implements Serializable, Co
 			java.util.logging.Logger.getLogger(getClass().getName()).log(Level.WARNING, "", e);
 		}
 		
+		if(doc == null) {
+			return null;
+		}
+		
 		Element rootElement = doc.getRootElement();
 		List<Element> images = XmlUtil.getElementsByXPath(rootElement, "img", "xlmns");
 		if (ListUtil.isEmpty(images)) {
