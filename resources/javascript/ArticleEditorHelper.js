@@ -30,20 +30,22 @@ ArticleEditorHelper.checkArticleLinkAndRegisterIfItsCorrect = function(link, win
 	if (jQuery(link).hasClass('articleEditorInitializedForLink'))
 		return false;
 	
-	if (jQuery.fn.fancybox) {
-		jQuery(link).addClass('articleEditorInitializedForLink');
-		jQuery(link).attr('data-fancybox-type', 'iframe');
-		jQuery(link).fancybox({
-			type: 'iframe',
-			autoScale: false,
-			autoDimensions: false,
-			hideOnOverlayClick: false,
-			width: windowinfo.getWindowWidth() * windowResizeIndex,
-			height: windowinfo.getWindowHeight() * windowResizeIndex,
-			afterClose: function() {
-				ArticleEditorHelper.addActionAfterArticleIsSavedAndEditorClosed();
-			}
-		});
+	if (jQuery(link).hasClass('create') || jQuery(link).hasClass('edit') || jQuery(link).hasClass('delete')) {
+		if (jQuery.fn.fancybox) {
+			jQuery(link).addClass('articleEditorInitializedForLink');
+			jQuery(link).attr('data-fancybox-type', 'iframe');
+			jQuery(link).fancybox({
+				type: 'iframe',
+				autoScale: false,
+				autoDimensions: false,
+				hideOnOverlayClick: false,
+				width: windowinfo.getWindowWidth() * windowResizeIndex,
+				height: windowinfo.getWindowHeight() * windowResizeIndex,
+				afterClose: function() {
+					ArticleEditorHelper.addActionAfterArticleIsSavedAndEditorClosed();
+				}
+			});
+		}
 	}
 }
 
