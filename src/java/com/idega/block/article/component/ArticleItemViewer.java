@@ -172,6 +172,20 @@ public class ArticleItemViewer extends ContentItemViewer {
 		super.updateComponent(context);
 	}
 
+	@Override
+	protected String getEditState(IWContext iwc) {
+		boolean edit = isEditState(iwc);
+		boolean allowedCurrentUserToEdit = false;
+
+		ArticleItemBean articleItemBean = (ArticleItemBean) getContentItem();
+		if (articleItemBean != null) {
+			allowedCurrentUserToEdit = articleItemBean.isAllowedToEditByCurrentUser(iwc);
+		} else {
+			getLogger().warning("Unknown article item bean for " + getResourcePath());
+		}
+		return edit && allowedCurrentUserToEdit ? "edit".concat(iwc.isLoggedOn() ? iwc.getCurrentUser().getId() : CoreConstants.EMPTY) : "view";
+	}
+
 	private void initializePermissionComponents(FacesContext context){
 		IWContext iwc = IWContext.getIWContext(context);
 		ArticleItemBean articleItemBean = (ArticleItemBean) getContentItem();
