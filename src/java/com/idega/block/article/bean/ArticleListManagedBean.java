@@ -16,6 +16,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.faces.component.html.HtmlOutputLink;
@@ -57,6 +58,8 @@ public class ArticleListManagedBean implements ContentListViewerManagedBean {
 
 	public final static String BEAN_IDENTIFIER="articleItemListBean";
 
+	private static final Logger LOGGER = Logger.getLogger(ArticleListManagedBean.class.getName());
+
 	private List<String> categories = null;
 
 	private final String LOCALIZEDKEY_MORE = "itemviewer.more";
@@ -85,8 +88,9 @@ public class ArticleListManagedBean implements ContentListViewerManagedBean {
 	private ArticleDao articleDao;
 
 	public ArticleDao getArticleDao(){
-		if (articleDao == null)
+		if (articleDao == null) {
 			ELUtil.getInstance().autowire(this);
+		}
 		return this.articleDao;
 	}
 
@@ -144,19 +148,21 @@ public class ArticleListManagedBean implements ContentListViewerManagedBean {
 		for (String uri: uris) {
 			try {
 				ArticleItemBean article = loadArticle(uri, iwc);
+				if (article == null) {
+					continue;
+				}
+
 				Timestamp date = (Timestamp) articleDao.getByUri(uri).getModificationDate();
 				article.setCreationDate(date);
-				if (article != null) {
-					if (maxNumber < 0 || count < maxNumber) {
-						list.add(article);
-						count++;
-						if (count == maxNumber) {
-							break;
-						}
+				if (maxNumber < 0 || count < maxNumber) {
+					list.add(article);
+					count++;
+					if (count == maxNumber) {
+						break;
 					}
 				}
-			} catch(Exception e) {
-				e.printStackTrace();
+			} catch (Exception e) {
+				LOGGER.log(Level.WARNING, "Error getting article by URI " + uri, e);
 			}
 		}
 
@@ -167,7 +173,7 @@ public class ArticleListManagedBean implements ContentListViewerManagedBean {
 
 		ArticleItemBean article = new ArticleItemBean();
 		article.setResourcePath(uri);
-		
+
 		article.load();
 
 		if (canShowArticle(article, iwc, null, iwc.getParameter(ContentConstants.CONTENT_ITEM_VIEWER_IDENTIFIER_PARAMETER))) {
@@ -175,12 +181,12 @@ public class ArticleListManagedBean implements ContentListViewerManagedBean {
 		}
 		return null;
 	}
-	
+
 	public ArticleItemBean loadArticle(String uri) throws IOException{
 
 		ArticleItemBean article = new ArticleItemBean();
 		article.setResourcePath(uri);
-		
+
 		article.load();
 
 		return article;
