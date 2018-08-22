@@ -30,8 +30,9 @@ public abstract class ArticleDaoTemplateImpl<T extends ArticleEntity> extends Ge
 	private CategoryDao categoryDao;
 
 	private CategoryDao getCategoryDao() {
-		if (categoryDao == null)
+		if (categoryDao == null) {
 			ELUtil.getInstance().autowire(this);
+		}
 		return categoryDao;
 	}
 
@@ -52,12 +53,15 @@ public abstract class ArticleDaoTemplateImpl<T extends ArticleEntity> extends Ge
 			return null;
 		}
 
-		if (uri.startsWith(CoreConstants.WEBDAV_SERVLET_URI))
+		if (uri.startsWith(CoreConstants.WEBDAV_SERVLET_URI)) {
 			uri = uri.substring(CoreConstants.WEBDAV_SERVLET_URI.length());
-		if (uri.endsWith(CoreConstants.SLASH))
+		}
+		if (uri.endsWith(CoreConstants.SLASH)) {
 			uri = uri.substring(0, uri.lastIndexOf(CoreConstants.SLASH));
+		}
 
-		return getSingleResult(ArticleEntity.GET_BY_URI, getEntityClass(), new Param(ArticleEntity.uriProp, uri));
+		List<T> results = getResultList(ArticleEntity.GET_BY_URI, getEntityClass(), new Param(ArticleEntity.uriProp, uri));
+		return ListUtil.isEmpty(results) ? null : results.get(0);
 	}
 
 	/**
@@ -75,8 +79,9 @@ public abstract class ArticleDaoTemplateImpl<T extends ArticleEntity> extends Ge
 	@Override
 	public boolean delete(String uri) {
 		final T article = getByUri(uri);
-		if (article == null)
+		if (article == null) {
 			return false;
+		}
 
 		try {
 			this.remove(article);
@@ -120,9 +125,9 @@ public abstract class ArticleDaoTemplateImpl<T extends ArticleEntity> extends Ge
 			params.add(new Param(ArticleEntity.uriProp, uriFrom));
 		}
 
-		if (addedWhere)
+		if (addedWhere) {
 			inlineQuery.append(" AND ");
-		else {
+		} else {
 			inlineQuery.append(" WHERE ");
 			addedWhere = true;
 		}
@@ -131,8 +136,9 @@ public abstract class ArticleDaoTemplateImpl<T extends ArticleEntity> extends Ge
 		inlineQuery.append(" ORDER BY a.").append(ArticleEntity.modificationDateProp).append(" DESC");
 
 		Query query = this.getQueryInline(inlineQuery.toString());
-		if (maxResults > 0)
+		if (maxResults > 0) {
 			query.setMaxResults(maxResults);
+		}
 
 		List<T> entities = null;
 		try {
@@ -153,18 +159,21 @@ public abstract class ArticleDaoTemplateImpl<T extends ArticleEntity> extends Ge
 		}
 
 		//	Checking if all categories exist in DB
-		if (!ListUtil.isEmpty(categories))
-		    getCategoryDao().addCategories(categories);
+		if (!ListUtil.isEmpty(categories)) {
+			getCategoryDao().addCategories(categories);
+		}
 
 		//	Editing or creating
 		ArticleEntity articleEntity = getByUri(uri);
-		if (articleEntity == null)
+		if (articleEntity == null) {
 			articleEntity = new ArticleEntity();
+		}
 
 		//	Setting specific categories for the article
 		List<CategoryEntity> categoriesForTheArticle = getCategoryDao().getCategories(categories);
-		if (!ListUtil.isEmpty(categoriesForTheArticle))
+		if (!ListUtil.isEmpty(categoriesForTheArticle)) {
 			articleEntity.setCategories(categoriesForTheArticle);
+		}
 
 		//	URI
 		articleEntity.setUri(uri);
@@ -173,20 +182,22 @@ public abstract class ArticleDaoTemplateImpl<T extends ArticleEntity> extends Ge
 		articleEntity.setModificationDate(timestamp);
 
 		//	Editors
-		if (!ListUtil.isEmpty(editors))
+		if (!ListUtil.isEmpty(editors)) {
 			articleEntity.setEditors(new HashSet<Integer>(editors));
+		}
 
 		articleEntity = updateArticle(articleEntity);
 
 		return articleEntity != null && articleEntity.getId() != null;
 	}
-	
+
+	@Override
 	public <E extends ArticleEntity> E updateArticle(E article) {
 		if (article == null) {
 			getLogger().warning("Entity is not provided");
 			return null;
 		}
-		
+
 		boolean editing = article.getId() != null;
 		try {
 			if (editing) {
@@ -194,29 +205,31 @@ public abstract class ArticleDaoTemplateImpl<T extends ArticleEntity> extends Ge
 			} else {
 				persist(article);
 			}
-			
+
 			boolean failure = article == null || article.getId() == null;
 			if (failure) {
 				getLogger().warning("Unable to " + (editing ? "edit" : "create") + " article: " + article);
 				return null;
 			}
-			
+
 			return article;
 		} catch (Exception e) {
 			LOGGER.log(Level.WARNING, "Failed to " + (editing ? "edit" : "create") + " article " + article, e);
 		}
-		
+
 		return null;
 	}
 
 	@Override
 	public void remove(T articleEntity) {
-		if (articleEntity == null)
+		if (articleEntity == null) {
 			return;
-		
+		}
+
 		Long id = articleEntity.getId();
-		if (id == null)
+		if (id == null) {
 			return;
+		}
 
 		Class<T> entityClass = getEntityClass();
 		String entityName = entityClass.getSimpleName();
@@ -224,10 +237,12 @@ public abstract class ArticleDaoTemplateImpl<T extends ArticleEntity> extends Ge
 		Query query = this.getQueryInline(inlineQuery.toString());
 		List<T> entities = query.getResultList(entityClass, new Param(ArticleEntity.idProp, id));
 
-		if (ListUtil.isEmpty(entities))
+		if (ListUtil.isEmpty(entities)) {
 			return;
-		for (T entity : entities)
+		}
+		for (T entity : entities) {
 			super.remove(entity);
+		}
 	}
 
 	@Override
