@@ -152,7 +152,12 @@ public class ArticleListManagedBean implements ContentListViewerManagedBean {
 					continue;
 				}
 
-				Timestamp date = (Timestamp) articleDao.getByUri(uri).getModificationDate();
+				java.util.Date dateTmp = articleDao.getByUri(uri).getModificationDate();
+				Timestamp date = dateTmp instanceof Timestamp ?
+						(Timestamp) dateTmp :
+						dateTmp == null ?
+								null :
+								new Timestamp(dateTmp.getTime());
 				article.setCreationDate(date);
 				if (maxNumber < 0 || count < maxNumber) {
 					list.add(article);
