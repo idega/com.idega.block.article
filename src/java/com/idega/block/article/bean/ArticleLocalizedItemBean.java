@@ -164,14 +164,14 @@ public class ArticleLocalizedItemBean extends ContentItemBean implements Seriali
 	public void setImages(List<ContentItemField> l) { setItemFields(FIELDNAME_IMAGES, l); }
 
 	@Override
-	public void setPublishedDate(Timestamp date) { 
-		super.setPublishedDate(date); 
+	public void setPublishedDate(Timestamp date) {
+		super.setPublishedDate(date);
 	}
-	
+
 
 	@Override
-	public Timestamp getPublishedDate() { 
-		return super.getPublishedDate(); 
+	public Timestamp getPublishedDate() {
+		return super.getPublishedDate();
 	}
 
 	@Override
@@ -306,8 +306,9 @@ public class ArticleLocalizedItemBean extends ContentItemBean implements Seriali
 
 	public List<String> getConvertedAttachments() {
 		List<ContentItemField> attachments = getAttachments();
-		if (ListUtil.isEmpty(attachments))
+		if (ListUtil.isEmpty(attachments)) {
 			return Collections.emptyList();
+		}
 
 
 		List<String> uris = new ArrayList<String>(attachments.size());
@@ -328,8 +329,9 @@ public class ArticleLocalizedItemBean extends ContentItemBean implements Seriali
 			String filePath = getResourcePath();
 
 			String article = getAsXML();
-			if (article == null)
+			if (article == null) {
 				return;
+			}
 
 			try {
 				storeToJCR(stream, filePath, article);
@@ -360,9 +362,9 @@ public class ArticleLocalizedItemBean extends ContentItemBean implements Seriali
 	protected void storeToJCR(InputStream stream, String filePath, String article) throws RepositoryException, IOException {
 		try {
 			stream = StringHandler.getStreamFromString(article);
-			if (getRepositoryService().updateFileContents(filePath, stream) == null)
+			if (getRepositoryService().updateFileContentsAsRoot(filePath, stream, true) == null) {
 				throw new RuntimeException("Error saving article at " + filePath);
-//			fileNode.setProperty(ArticleItemBean.CONTENT_TYPE_WITH_PREFIX, CoreConstants.ARTICLE_FILENAME_SCOPE);	//	TODO
+			}
 		} catch (Exception e) {
 			e.printStackTrace();
 		} finally {
@@ -691,8 +693,9 @@ public class ArticleLocalizedItemBean extends ContentItemBean implements Seriali
 			List<ContentItemField> attachmentList = new ArrayList<ContentItemField>();
 			for (XMLElement attachment : attachments) {
 				String value = attachment.getValue();
-				if (StringUtil.isEmpty(value))
+				if (StringUtil.isEmpty(value)) {
 					continue;
+				}
 
 				ContentItemField attachmentObj = new ContentItemFieldBean(id, id, value, value, id, ContentItemField.FIELD_TYPE_STRING);
 				attachmentList.add(attachmentObj);
@@ -708,8 +711,9 @@ public class ArticleLocalizedItemBean extends ContentItemBean implements Seriali
 				List<XMLElement> xmlCategories = entry.getChildren("category", atomNamespace);
 				if (!ListUtil.isEmpty(xmlCategories)) {
 					List<String> categories = new ArrayList<String>();
-					for (XMLElement category: xmlCategories)
+					for (XMLElement category: xmlCategories) {
 						categories.add(category.getValue());
+					}
 					getArticleItem().setArticleCategories(categories);
 				}
 			} else {
@@ -717,8 +721,9 @@ public class ArticleLocalizedItemBean extends ContentItemBean implements Seriali
 				Set<CategoryEntity> categories = articleEntity.getCategories();
 				if (!ListUtil.isEmpty(categories)) {
 					List<String> categoryNames = new ArrayList<String>(categories.size());
-					for (CategoryEntity category: categories)
+					for (CategoryEntity category: categories) {
 						categoryNames.add(category.getCategory());
+					}
 					getArticleItem().setArticleCategories(categoryNames);
 				}
 			}
