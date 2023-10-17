@@ -32,6 +32,7 @@ import com.idega.core.file.data.ICFile;
 import com.idega.core.file.data.ICFileHome;
 import com.idega.idegaweb.IWApplicationContext;
 import com.idega.idegaweb.IWMainApplication;
+import com.idega.io.DownloadWriter;
 import com.idega.io.MediaWritable;
 import com.idega.presentation.IWContext;
 import com.idega.user.business.NoEmailFoundException;
@@ -115,6 +116,7 @@ public class DefaultCommentsPersistenceManager extends DefaultSpringBean impleme
 
 				file.setName(URLEncoder.encode(uploadedFile.substring(uploadedFile.lastIndexOf(CoreConstants.SLASH) + 1), CoreConstants.ENCODING_UTF8));
 				file.setFileUri(URLEncoder.encode(uploadedFile, CoreConstants.ENCODING_UTF8));
+				file.setPublic(true);
 
 				file.store();
 
@@ -295,7 +297,8 @@ public class DefaultCommentsPersistenceManager extends DefaultSpringBean impleme
 
 		uri.setParameter(MediaWritable.PRM_WRITABLE_CLASS, IWMainApplication.getEncryptedClassName(CommentAttachmentDownloader.class));
 		uri.setParameter(ArticleCommentAttachmentStatisticsViewer.COMMENT_ID_PARAMETER, commentId);
-		uri.setParameter(ArticleCommentAttachmentStatisticsViewer.COMMENT_ATTACHMENT_ID_PARAMETER, attachment.getPrimaryKey().toString());
+		uri.setParameter(ArticleCommentAttachmentStatisticsViewer.COMMENT_ATTACHMENT_ID_PARAMETER, attachment.getUniqueId());
+		uri.setParameter(DownloadWriter.PRM_FILE_TOKEN, attachment.getToken());
 
 		if (user != null) {
 			uri.setParameter(LoginBusinessBean.PARAM_LOGIN_BY_UNIQUE_ID, user.getUniqueId());
@@ -326,7 +329,7 @@ public class DefaultCommentsPersistenceManager extends DefaultSpringBean impleme
 			commentAuthorEmail = CoreConstants.EMPTY;
 		}
 
-		List<String> emails = new ArrayList<String>();
+		List<String> emails = new ArrayList<>();
 		List<Person> authors = null;
 		String email = null;
 		for (Entry entry: entries) {
@@ -401,7 +404,7 @@ public class DefaultCommentsPersistenceManager extends DefaultSpringBean impleme
 			return null;
 		}
 
-		List<String> emails = new ArrayList<String>(users.size());
+		List<String> emails = new ArrayList<>(users.size());
 		for (User user: users) {
 			Email email = getEmail(user);
 			String emailAddress = email == null ? null : email.getEmailAddress();
@@ -431,7 +434,7 @@ public class DefaultCommentsPersistenceManager extends DefaultSpringBean impleme
 			return null;
 		}
 
-		List<User> users = new ArrayList<User>();
+		List<User> users = new ArrayList<>();
 		for (Group group: groupsWithRole) {
 			if (group instanceof User) {
 				User user = (User) group;
@@ -478,7 +481,7 @@ public class DefaultCommentsPersistenceManager extends DefaultSpringBean impleme
 
 	@Override
 	public List<AdvancedProperty> getLinksForRecipients(List<String> recipients, CommentsViewerProperties properties) {
-		List<AdvancedProperty> links = new ArrayList<AdvancedProperty>(recipients.size());
+		List<AdvancedProperty> links = new ArrayList<>(recipients.size());
 		for (String recipient: recipients) {
 			links.add(new AdvancedProperty(recipient, getLinkForRecipient(recipient, properties)));
 		}
@@ -495,7 +498,7 @@ public class DefaultCommentsPersistenceManager extends DefaultSpringBean impleme
 			return null;
 		}
 
-		Map<String, String> uris = new HashMap<String, String>(users.size());
+		Map<String, String> uris = new HashMap<>(users.size());
 		for (User user: users) {
 			uris.put(user.getId(), properties.getUrl());
 		}

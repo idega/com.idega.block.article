@@ -36,9 +36,15 @@ public class CommentAttachmentDownloader extends DownloadWriter implements Media
 	@Override
 	public void init(HttpServletRequest req, IWContext iwc) {
 		String attachmentId = iwc.getParameter(ArticleCommentAttachmentStatisticsViewer.COMMENT_ATTACHMENT_ID_PARAMETER);
+		String token = iwc.getParameter(DownloadWriter.PRM_FILE_TOKEN);
+		ICFile attachment = getAttachment(attachmentId, token);
 
-		ICFile attachment = getAttachment(attachmentId);
-		if (attachment == null) {
+		try {
+			if (!isAvailable(iwc, attachment, attachmentId, token)) {
+				return;
+			}
+		} catch (Exception e) {
+			Logger.getLogger(getClass().getName()).log(Level.WARNING, "Error while checking if " + attachment + " is available", e);
 			return;
 		}
 
@@ -64,7 +70,7 @@ public class CommentAttachmentDownloader extends DownloadWriter implements Media
 	}
 
 	@Override
-	public void writeTo(OutputStream out) throws IOException {
+	public void writeTo(IWContext iwc, OutputStream out) throws IOException {
 		InputStream in = attachedFile.getInputStream();
 
 		FileUtil.streamToOutputStream(in, out);
@@ -76,8 +82,11 @@ public class CommentAttachmentDownloader extends DownloadWriter implements Media
 
 	private boolean setResource(IWContext iwc, ICFile attachment) {
 		try {
-
 			String uri = URLDecoder.decode(attachment.getFileUri(), CoreConstants.ENCODING_UTF8);
+			if (!hasPermission(iwc, uri)) {
+				return false;
+			}
+
 			attachedFile = getRepositoryService().getRepositoryItemAsRootUser(uri);
 			if (attachedFile == null || !attachedFile.exists()) {
 				Logger.getLogger(getClass().getName()).log(Level.WARNING, "Error getting file by uri: " + uri);
@@ -94,14 +103,17 @@ public class CommentAttachmentDownloader extends DownloadWriter implements Media
 		mimeType = MimeTypeUtil.resolveMimeTypeFromFileName(name);
 	}
 
-	private ICFile getAttachment(String attachmentId) {
+	private ICFile getAttachment(String attachmentId, String token) {
 		if (attachmentId == null) {
 			return null;
 		}
 
 		try {
 			ICFileHome fileHome = (ICFileHome) IDOLookup.getHome(ICFile.class);
-			return fileHome.findByPrimaryKey(attachmentId);
+			ICFile file = fileHome.findByUUID(attachmentId);
+			if (token.equals(file.getToken())) {
+				return file;
+			}
 		} catch(Exception e) {
 			e.printStackTrace();
 		}
