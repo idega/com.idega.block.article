@@ -77,5 +77,10 @@
     	<version>1.0</version>
     	<type>jar</type>
     </dependency>
+    <dependency>
+    	<groupId>org.apache.xmlbeans</groupId>
+    	<artifactId>xmlbeans</artifactId>
+    	<version>${org.apache.xmlbeans-xmlbeans-version}</version>
+    </dependency>
   </dependencies>
 </project>
